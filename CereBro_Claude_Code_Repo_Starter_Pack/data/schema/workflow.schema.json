@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workflow",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "trigger_type",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "owner_agent": {
+      "type": "string"
+    },
+    "trigger_type": {
+      "enum": [
+        "manual",
+        "scheduled",
+        "event",
+        "startup",
+        "project_update"
+      ]
+    },
+    "trigger_config": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "paused",
+        "draft"
+      ]
+    },
+    "requires_approval": {
+      "type": "boolean"
+    },
+    "safe_mode": {
+      "type": "boolean"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "last_run_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "last_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}

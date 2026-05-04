@@ -1,0 +1,12 @@
+{
+  "modes": [
+    "quick",
+    "explore",
+    "build",
+    "creative",
+    "automation",
+    "validation",
+    "learning"
+  ],
+  "default_mode": "quick"
+}

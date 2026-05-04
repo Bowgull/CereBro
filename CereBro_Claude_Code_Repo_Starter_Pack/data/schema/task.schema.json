@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "mode",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "quick",
+        "explore",
+        "build",
+        "creative",
+        "automation",
+        "validation",
+        "learning"
+      ]
+    },
+    "status": {
+      "enum": [
+        "inbox",
+        "planning",
+        "waiting_for_context",
+        "waiting_for_approval",
+        "ready",
+        "in_progress",
+        "validating",
+        "needs_revision",
+        "blocked",
+        "complete",
+        "archived"
+      ]
+    },
+    "owner_agent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "priority": {
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ]
+    },
+    "user_goal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "context_pack_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

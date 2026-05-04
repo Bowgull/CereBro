@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "retrieved_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "enum": [
+        "url",
+        "github_repo",
+        "pdf",
+        "video",
+        "youtube",
+        "document",
+        "image",
+        "screenshot",
+        "note",
+        "code",
+        "recording",
+        "manual"
+      ]
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "file_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_or_owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "published_or_updated_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrieved_at": {
+      "type": "string"
+    },
+    "summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "key_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trust_level": {
+      "enum": [
+        "unknown",
+        "low",
+        "medium",
+        "high",
+        "primary",
+        "official"
+      ]
+    },
+    "license_notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

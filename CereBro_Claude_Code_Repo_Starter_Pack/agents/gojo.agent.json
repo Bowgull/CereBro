@@ -1,0 +1,32 @@
+{
+  "id": "gojo",
+  "name": "Gojo",
+  "role": "Creative Studio / UI / UX / Media / Motion",
+  "status": "enabled",
+  "personality_cap": 20,
+  "allowed_modes": [
+    "creative",
+    "build_support",
+    "ui_review",
+    "content",
+    "video_planning"
+  ],
+  "allowed_tools": [
+    "design_system.read",
+    "artifact.create",
+    "source.read"
+  ],
+  "skills": [
+    "frontend-design",
+    "anti-slop-review",
+    "ui-motion",
+    "remotion-video",
+    "video-editing"
+  ],
+  "does_not_own": [
+    "core_architecture",
+    "routing",
+    "memory_writing",
+    "final_validation"
+  ]
+}

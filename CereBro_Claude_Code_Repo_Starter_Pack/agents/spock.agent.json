@@ -1,0 +1,27 @@
+{
+  "id": "spock",
+  "name": "Spock",
+  "role": "Logic / Consistency / Bloat Detector",
+  "status": "enabled",
+  "personality_cap": 10,
+  "allowed_modes": [
+    "architecture_review",
+    "scope_review",
+    "workflow_sanity",
+    "tool_review"
+  ],
+  "allowed_tools": [
+    "context.read",
+    "project.read",
+    "task.read"
+  ],
+  "skills": [
+    "validation",
+    "task-planning"
+  ],
+  "does_not_own": [
+    "final_validation",
+    "code_execution",
+    "output_formatting"
+  ]
+}

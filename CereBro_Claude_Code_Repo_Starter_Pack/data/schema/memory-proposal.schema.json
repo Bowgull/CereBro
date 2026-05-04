@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MemoryProposal",
+  "type": "object",
+  "required": [
+    "id",
+    "proposed_by_agent",
+    "memory_type",
+    "content",
+    "destination",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "proposed_by_agent": {
+      "type": "string"
+    },
+    "memory_type": {
+      "enum": [
+        "user_preference",
+        "project_decision",
+        "architecture_decision",
+        "build_note",
+        "source_summary",
+        "style_preference",
+        "workflow_rule",
+        "agent_rule",
+        "task_summary",
+        "learning_note"
+      ]
+    },
+    "content": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "sqlite",
+          "chroma",
+          "obsidian",
+          "notion",
+          "none"
+        ]
+      }
+    },
+    "sensitivity": {
+      "enum": [
+        "normal",
+        "private",
+        "sensitive",
+        "sealed"
+      ]
+    },
+    "requires_user_approval": {
+      "type": "boolean"
+    },
+    "approval_status": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "not_required"
+      ]
+    },
+    "oak_status": {
+      "enum": [
+        "pending",
+        "pass",
+        "pass_with_notes",
+        "needs_revision",
+        "blocked"
+      ]
+    },
+    "dedupe_candidates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "written_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

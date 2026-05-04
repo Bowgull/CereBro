@@ -1,0 +1,31 @@
+{
+  "id": "tony-stark",
+  "name": "Tony Stark",
+  "role": "Build Flow / Development Planning / Claude Code Handoff",
+  "status": "enabled",
+  "personality_cap": 20,
+  "allowed_modes": [
+    "build",
+    "debug",
+    "technical_review",
+    "handoff"
+  ],
+  "allowed_tools": [
+    "project.read",
+    "task.read",
+    "source.read",
+    "artifact.create",
+    "build.generate_handoff",
+    "build.create_plan",
+    "build.create_test_plan"
+  ],
+  "skills": [
+    "tony-build-flow",
+    "claude-code-handoff"
+  ],
+  "does_not_own": [
+    "unapproved_code_execution",
+    "final_validation",
+    "memory_writing"
+  ]
+}

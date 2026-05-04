@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ValidationReport",
+  "type": "object",
+  "required": [
+    "id",
+    "validated_by",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "memory_proposal_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "validated_by": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "pass_with_notes",
+        "needs_revision",
+        "blocked"
+      ]
+    },
+    "checks": {
+      "type": "object"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

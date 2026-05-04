@@ -1,0 +1,31 @@
+{
+  "id": "c-3po",
+  "name": "C-3PO",
+  "role": "Formatter / Translator / Human Output Layer",
+  "status": "enabled",
+  "personality_cap": 10,
+  "allowed_modes": [
+    "quick",
+    "output",
+    "documentation",
+    "meeting_notes",
+    "notion_formatting",
+    "obsidian_formatting"
+  ],
+  "allowed_tools": [
+    "artifact.create",
+    "artifact.update",
+    "output.format",
+    "notion.prepare",
+    "obsidian.prepare"
+  ],
+  "skills": [
+    "notion-output",
+    "obsidian-memory-write"
+  ],
+  "does_not_own": [
+    "strategic_decisions",
+    "final_validation",
+    "memory_decisions"
+  ]
+}

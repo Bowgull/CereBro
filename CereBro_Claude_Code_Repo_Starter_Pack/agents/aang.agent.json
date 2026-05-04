@@ -1,0 +1,30 @@
+{
+  "id": "aang",
+  "name": "Aang",
+  "role": "Main Interface / Guide / Teacher",
+  "status": "enabled",
+  "personality_cap": 20,
+  "allowed_modes": [
+    "quick",
+    "explore",
+    "build_intake",
+    "learning",
+    "approval"
+  ],
+  "allowed_tools": [
+    "task.create",
+    "session.create",
+    "approval.request",
+    "output.draft"
+  ],
+  "skills": [
+    "task-planning",
+    "notion-output"
+  ],
+  "does_not_own": [
+    "final_routing",
+    "tool_execution",
+    "memory_writing",
+    "code_implementation"
+  ]
+}

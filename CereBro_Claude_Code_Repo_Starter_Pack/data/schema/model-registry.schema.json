@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModelRegistryEntry",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "provider",
+    "location",
+    "status",
+    "model_class"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "location": {
+      "enum": [
+        "local",
+        "cloud",
+        "external_api"
+      ]
+    },
+    "status": {
+      "enum": [
+        "enabled",
+        "disabled",
+        "untested",
+        "failed"
+      ]
+    },
+    "model_class": {
+      "enum": [
+        "lightweight_formatter",
+        "local_summary",
+        "local_code_helper",
+        "local_reasoner",
+        "strong_reasoning_external",
+        "strong_coding_external",
+        "long_context_external",
+        "image_generation",
+        "embedding"
+      ]
+    },
+    "context_window": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "privacy_level": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cost_level": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "best_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "avoid_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hardware_notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "piccolo",
+  "name": "Piccolo",
+  "role": "Automation / Background Worker / Cleanup",
+  "status": "enabled",
+  "personality_cap": 10,
+  "allowed_modes": [
+    "automation",
+    "maintenance",
+    "sync",
+    "export",
+    "cleanup"
+  ],
+  "allowed_tools": [
+    "workflow.run",
+    "cleanup.scan",
+    "backup.check",
+    "file.read",
+    "file.move",
+    "file.delete"
+  ],
+  "skills": [
+    "cleanup-backup"
+  ],
+  "does_not_own": [
+    "core_reasoning",
+    "memory_decisions",
+    "unapproved_destructive_actions"
+  ]
+}

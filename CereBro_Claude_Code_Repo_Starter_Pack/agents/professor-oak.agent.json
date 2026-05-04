@@ -1,0 +1,31 @@
+{
+  "id": "professor-oak",
+  "name": "Professor Oak",
+  "role": "Validator / Hallucination Check / Blueprint Consistency",
+  "status": "enabled",
+  "personality_cap": 10,
+  "allowed_modes": [
+    "validation",
+    "memory_review",
+    "build_review",
+    "research_review",
+    "anti_slop_review",
+    "privacy_review"
+  ],
+  "allowed_tools": [
+    "validation.create",
+    "source.read",
+    "memory.review",
+    "artifact.read",
+    "task.read"
+  ],
+  "skills": [
+    "validation",
+    "anti-slop-review"
+  ],
+  "does_not_own": [
+    "routing",
+    "memory_writing",
+    "implementation"
+  ]
+}

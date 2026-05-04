@@ -1,0 +1,27 @@
+{
+  "id": "batman",
+  "name": "Batman",
+  "role": "Strategy / Reasoning / Risk Thinking",
+  "status": "enabled",
+  "personality_cap": 20,
+  "allowed_modes": [
+    "explore",
+    "build",
+    "architecture_review",
+    "risk_review"
+  ],
+  "allowed_tools": [
+    "context.read",
+    "source.read",
+    "memory.search"
+  ],
+  "skills": [
+    "validation",
+    "task-planning"
+  ],
+  "does_not_own": [
+    "implementation",
+    "final_validation",
+    "ui_polish"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "silver-surfer",
+  "name": "Silver Surfer",
+  "role": "Browser Intelligence / Research / External Discovery",
+  "status": "enabled",
+  "personality_cap": 15,
+  "allowed_modes": [
+    "explore",
+    "research",
+    "source_ingestion",
+    "github_review"
+  ],
+  "allowed_tools": [
+    "browser.open",
+    "browser.extract",
+    "browser.screenshot",
+    "source.create",
+    "source.update",
+    "artifact.create"
+  ],
+  "skills": [
+    "browser-research",
+    "source-ingestion",
+    "web-scraping"
+  ],
+  "does_not_own": [
+    "always_on_browsing",
+    "private_browsing_without_approval",
+    "final_validation"
+  ]
+}

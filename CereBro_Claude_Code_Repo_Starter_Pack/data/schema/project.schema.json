@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "paused",
+        "archived",
+        "deleted"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "archived_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "default_mode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "root_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "obsidian_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notion_page_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

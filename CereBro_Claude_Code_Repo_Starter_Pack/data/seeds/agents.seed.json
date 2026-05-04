@@ -1,0 +1,306 @@
+[
+  {
+    "id": "aang",
+    "name": "Aang",
+    "role": "Main Interface / Guide / Teacher",
+    "status": "enabled",
+    "personality_cap": 20,
+    "allowed_modes": [
+      "quick",
+      "explore",
+      "build_intake",
+      "learning",
+      "approval"
+    ],
+    "allowed_tools": [
+      "task.create",
+      "session.create",
+      "approval.request",
+      "output.draft"
+    ],
+    "skills": [
+      "task-planning",
+      "notion-output"
+    ],
+    "does_not_own": [
+      "final_routing",
+      "tool_execution",
+      "memory_writing",
+      "code_implementation"
+    ]
+  },
+  {
+    "id": "cortana",
+    "name": "Cortana",
+    "role": "Orchestrator / Router / System Authority",
+    "status": "enabled",
+    "personality_cap": 15,
+    "allowed_modes": [
+      "routing",
+      "quick",
+      "explore",
+      "build",
+      "creative",
+      "automation",
+      "validation"
+    ],
+    "allowed_tools": [
+      "task.read",
+      "task.update",
+      "session.read",
+      "agent.route",
+      "permission.check",
+      "context.create"
+    ],
+    "skills": [
+      "task-planning",
+      "validation"
+    ],
+    "does_not_own": [
+      "final_validation",
+      "code_implementation",
+      "creative_direction",
+      "memory_writing"
+    ]
+  },
+  {
+    "id": "batman",
+    "name": "Batman",
+    "role": "Strategy / Reasoning / Risk Thinking",
+    "status": "enabled",
+    "personality_cap": 20,
+    "allowed_modes": [
+      "explore",
+      "build",
+      "architecture_review",
+      "risk_review"
+    ],
+    "allowed_tools": [
+      "context.read",
+      "source.read",
+      "memory.search"
+    ],
+    "skills": [
+      "validation",
+      "task-planning"
+    ],
+    "does_not_own": [
+      "implementation",
+      "final_validation",
+      "ui_polish"
+    ]
+  },
+  {
+    "id": "tony-stark",
+    "name": "Tony Stark",
+    "role": "Build Flow / Development Planning / Claude Code Handoff",
+    "status": "enabled",
+    "personality_cap": 20,
+    "allowed_modes": [
+      "build",
+      "debug",
+      "technical_review",
+      "handoff"
+    ],
+    "allowed_tools": [
+      "project.read",
+      "task.read",
+      "source.read",
+      "artifact.create",
+      "build.generate_handoff",
+      "build.create_plan",
+      "build.create_test_plan"
+    ],
+    "skills": [
+      "tony-build-flow",
+      "claude-code-handoff"
+    ],
+    "does_not_own": [
+      "unapproved_code_execution",
+      "final_validation",
+      "memory_writing"
+    ]
+  },
+  {
+    "id": "gojo",
+    "name": "Gojo",
+    "role": "Creative Studio / UI / UX / Media / Motion",
+    "status": "enabled",
+    "personality_cap": 20,
+    "allowed_modes": [
+      "creative",
+      "build_support",
+      "ui_review",
+      "content",
+      "video_planning"
+    ],
+    "allowed_tools": [
+      "design_system.read",
+      "artifact.create",
+      "source.read"
+    ],
+    "skills": [
+      "frontend-design",
+      "anti-slop-review",
+      "ui-motion",
+      "remotion-video",
+      "video-editing"
+    ],
+    "does_not_own": [
+      "core_architecture",
+      "routing",
+      "memory_writing",
+      "final_validation"
+    ]
+  },
+  {
+    "id": "silver-surfer",
+    "name": "Silver Surfer",
+    "role": "Browser Intelligence / Research / External Discovery",
+    "status": "enabled",
+    "personality_cap": 15,
+    "allowed_modes": [
+      "explore",
+      "research",
+      "source_ingestion",
+      "github_review"
+    ],
+    "allowed_tools": [
+      "browser.open",
+      "browser.extract",
+      "browser.screenshot",
+      "source.create",
+      "source.update",
+      "artifact.create"
+    ],
+    "skills": [
+      "browser-research",
+      "source-ingestion",
+      "web-scraping"
+    ],
+    "does_not_own": [
+      "always_on_browsing",
+      "private_browsing_without_approval",
+      "final_validation"
+    ]
+  },
+  {
+    "id": "c-3po",
+    "name": "C-3PO",
+    "role": "Formatter / Translator / Human Output Layer",
+    "status": "enabled",
+    "personality_cap": 10,
+    "allowed_modes": [
+      "quick",
+      "output",
+      "documentation",
+      "meeting_notes",
+      "notion_formatting",
+      "obsidian_formatting"
+    ],
+    "allowed_tools": [
+      "artifact.create",
+      "artifact.update",
+      "output.format",
+      "notion.prepare",
+      "obsidian.prepare"
+    ],
+    "skills": [
+      "notion-output",
+      "obsidian-memory-write"
+    ],
+    "does_not_own": [
+      "strategic_decisions",
+      "final_validation",
+      "memory_decisions"
+    ]
+  },
+  {
+    "id": "professor-oak",
+    "name": "Professor Oak",
+    "role": "Validator / Hallucination Check / Blueprint Consistency",
+    "status": "enabled",
+    "personality_cap": 10,
+    "allowed_modes": [
+      "validation",
+      "memory_review",
+      "build_review",
+      "research_review",
+      "anti_slop_review",
+      "privacy_review"
+    ],
+    "allowed_tools": [
+      "validation.create",
+      "source.read",
+      "memory.review",
+      "artifact.read",
+      "task.read"
+    ],
+    "skills": [
+      "validation",
+      "anti-slop-review"
+    ],
+    "does_not_own": [
+      "routing",
+      "memory_writing",
+      "implementation"
+    ]
+  },
+  {
+    "id": "piccolo",
+    "name": "Piccolo",
+    "role": "Automation / Background Worker / Cleanup",
+    "status": "enabled",
+    "personality_cap": 10,
+    "allowed_modes": [
+      "automation",
+      "maintenance",
+      "sync",
+      "export",
+      "cleanup"
+    ],
+    "allowed_tools": [
+      "workflow.run",
+      "cleanup.scan",
+      "backup.check",
+      "file.read",
+      "file.move",
+      "file.delete"
+    ],
+    "skills": [
+      "cleanup-backup"
+    ],
+    "does_not_own": [
+      "core_reasoning",
+      "memory_decisions",
+      "unapproved_destructive_actions"
+    ]
+  },
+  {
+    "id": "spock",
+    "name": "Spock",
+    "role": "Logic / Consistency / Bloat Detector",
+    "status": "enabled",
+    "personality_cap": 10,
+    "allowed_modes": [
+      "architecture_review",
+      "scope_review",
+      "workflow_sanity",
+      "tool_review"
+    ],
+    "allowed_tools": [
+      "context.read",
+      "project.read",
+      "task.read"
+    ],
+    "skills": [
+      "validation",
+      "task-planning"
+    ],
+    "does_not_own": [
+      "final_validation",
+      "code_execution",
+      "output_formatting"
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "permission_classes": [
+    "safe",
+    "approval_required",
+    "blocked_unless_enabled"
+  ],
+  "defaults": {
+    "write_file": "approval_required",
+    "delete_file": "approval_required",
+    "external_model_call": "approval_required",
+    "browser_private_session": "approval_required",
+    "destructive_cleanup": "blocked_unless_enabled"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ApprovalEvent",
+  "type": "object",
+  "required": [
+    "id",
+    "action_type",
+    "approved_by_user",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type": {
+      "enum": [
+        "write_file",
+        "delete_file",
+        "move_file",
+        "run_command",
+        "external_model_call",
+        "browser_private_session",
+        "notion_update",
+        "obsidian_update",
+        "memory_write",
+        "automation_enable",
+        "destructive_cleanup",
+        "sealed_module_unlock"
+      ]
+    },
+    "requested_by_agent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_by_user": {
+      "type": "boolean"
+    },
+    "approval_text": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

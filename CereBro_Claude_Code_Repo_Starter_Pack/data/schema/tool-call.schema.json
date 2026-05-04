@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolCall",
+  "type": "object",
+  "required": [
+    "id",
+    "tool_name",
+    "permission_class",
+    "status",
+    "started_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "agent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tool_name": {
+      "type": "string"
+    },
+    "permission_class": {
+      "enum": [
+        "safe",
+        "approval_required",
+        "blocked_unless_enabled"
+      ]
+    },
+    "status": {
+      "enum": [
+        "requested",
+        "approved",
+        "running",
+        "complete",
+        "failed",
+        "blocked",
+        "cancelled"
+      ]
+    },
+    "input_summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "ended_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approval_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "error_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

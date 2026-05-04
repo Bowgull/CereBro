@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artifact",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "title",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "enum": [
+        "guide",
+        "checklist",
+        "plan",
+        "meeting_note",
+        "build_doc",
+        "design_spec",
+        "research_report",
+        "source_summary",
+        "changelog",
+        "video_plan",
+        "image",
+        "rendered_video",
+        "pdf",
+        "markdown",
+        "notion_page",
+        "obsidian_note"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "file_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notion_page_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "obsidian_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_by_agent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "validation_status": {
+      "enum": [
+        "pending",
+        "pass",
+        "pass_with_notes",
+        "needs_revision",
+        "blocked"
+      ]
+    },
+    "approval_status": {
+      "enum": [
+        "not_required",
+        "pending",
+        "approved",
+        "rejected"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

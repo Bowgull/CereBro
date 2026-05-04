@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ErrorRecord",
+  "type": "object",
+  "required": [
+    "id",
+    "category",
+    "severity",
+    "message",
+    "created_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "category": {
+      "enum": [
+        "model_failure",
+        "browser_failure",
+        "source_extraction_failure",
+        "memory_write_failure",
+        "notion_sync_failure",
+        "obsidian_write_failure",
+        "backup_failure",
+        "permission_denied",
+        "validation_blocked",
+        "stale_context",
+        "conflicting_memory",
+        "tool_failure",
+        "file_system_failure",
+        "database_failure",
+        "unknown"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "resolution": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

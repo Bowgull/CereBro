@@ -1,0 +1,34 @@
+{
+  "id": "cortana",
+  "name": "Cortana",
+  "role": "Orchestrator / Router / System Authority",
+  "status": "enabled",
+  "personality_cap": 15,
+  "allowed_modes": [
+    "routing",
+    "quick",
+    "explore",
+    "build",
+    "creative",
+    "automation",
+    "validation"
+  ],
+  "allowed_tools": [
+    "task.read",
+    "task.update",
+    "session.read",
+    "agent.route",
+    "permission.check",
+    "context.create"
+  ],
+  "skills": [
+    "task-planning",
+    "validation"
+  ],
+  "does_not_own": [
+    "final_validation",
+    "code_implementation",
+    "creative_direction",
+    "memory_writing"
+  ]
+}
