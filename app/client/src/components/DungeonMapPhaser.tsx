@@ -14,6 +14,7 @@
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import { HERO_CLASSES, type HeroState } from "../lib/dungeonConfig";
+import { GROUND_CHAMBERS, cerebroColors as C } from "../lib/keepConfig";
 import type { Hero } from "../hooks/useHeroSocket";
 
 // ─── Tile / Scale constants ───────────────────────────────────────────────────
@@ -219,29 +220,29 @@ class DungeonScene extends Phaser.Scene {
     this.createAnimations();
 
     // ── NPC Sprites ─────────────────────────────────────────────────────────
+    // Lord Wizard / Guardian / Witch are off-brand for the Keep. Hide until
+    // Phase 2/3 introduces proper agent sprites for Cortana, Gojo, Surfer, etc.
+    // We still construct them so existing animation code paths don't crash.
     const bossX = (ROOMS.boss.c0 + ROOMS.boss.c1 + 1) / 2 * TS;
     const bossY = (ROOMS.boss.r0 + ROOMS.boss.r1 + 1) / 2 * TS;
     this.bossSprite = this.add.sprite(bossX, bossY, "boss_idle")
       .setScale(5)
-      .play("boss_idle");
+      .play("boss_idle")
+      .setVisible(false);
 
     const guardX = (ROOMS.dungeon.c0 + ROOMS.dungeon.c1 + 1) / 2 * TS;
     const guardY = (ROOMS.dungeon.r0 + ROOMS.dungeon.r1 + 1) / 2 * TS;
     this.guardianSprite = this.add.sprite(guardX, guardY, "guardian_idle")
       .setScale(3.5)
-      .play("guardian_idle");
+      .play("guardian_idle")
+      .setVisible(false);
 
     const witchX = (ROOMS.shop.c0 + ROOMS.shop.c1 + 1) / 2 * TS;
     const witchY = (ROOMS.shop.r0 + ROOMS.shop.r1 + 1) / 2 * TS;
     this.witchSprite = this.add.sprite(witchX, witchY, "witch_idle")
       .setScale(3.5)
-      .play("witch_idle");
-
-    // ── NPC Name Tags ───────────────────────────────────────────────────────
-    this.add.text(bossX, bossY - 80, "LORD WIZARD", {
-      fontSize: "14px", fontFamily: "monospace", color: "#FF4444",
-      backgroundColor: "#000000cc", padding: { x: 6, y: 3 },
-    }).setOrigin(0.5, 1);
+      .play("witch_idle")
+      .setVisible(false);
 
     // ── Torches ─────────────────────────────────────────────────────────────
     this.createTorches();
@@ -341,25 +342,18 @@ class DungeonScene extends Phaser.Scene {
   }
 
   private createRoomLabels() {
-    const labelDefs: Array<{ room: RoomId; text: string; color: string }> = [
-      { room: "spawn",   text: "⛪ HOLY SANCTUARY", color: "#AA88FF" },
-      { room: "dungeon", text: "📜 DUNGEON MAIN",   color: "#88AAFF" },
-      { room: "boss",    text: "⚔ BOSS ARENA",      color: "#FF4444" },
-      { room: "shop",    text: "🔮 WITCH SHOP",      color: "#FFAA44" },
-      { room: "rest",    text: "🍺 TAVERN REST",     color: "#44AA44" },
-    ];
-
-    for (const def of labelDefs) {
+    for (const def of GROUND_CHAMBERS) {
       const r = ROOMS[def.room];
-      const lx = r.c0 * TS + 10;
-      const ly = r.r0 * TS + 10;
-      const label = this.add.text(lx, ly, def.text, {
-        fontSize: "14px",
-        fontFamily: "monospace",
+      const lx = r.c0 * TS + 12;
+      const ly = r.r0 * TS + 12;
+      const text = `${def.chamber.toUpperCase()}  ·  ${def.agent}`;
+      const label = this.add.text(lx, ly, text, {
+        fontSize: "16px",
+        fontFamily: "'IBM Plex Mono', monospace",
         fontStyle: "bold",
-        color: def.color,
-        backgroundColor: "#000000bb",
-        padding: { x: 6, y: 4 },
+        color: def.hue,
+        backgroundColor: "#0E1116dd",
+        padding: { x: 8, y: 5 },
       }).setDepth(100);
       this.roomLabels.push(label);
     }
@@ -402,17 +396,30 @@ class DungeonScene extends Phaser.Scene {
       spawnGfx.fillCircle(bx, by, 90);
     }
 
-    const bossGfx = this.roomGlows[1];
-    if (bossGfx) {
-      bossGfx.clear();
+    // Hub orb: violet user-presence glow inside Cortana's chamber.
+    // Lights when any Claude Code session is active. Pulses harder when sessions
+    // are actually working (fighting/casting state).
+    const hubGfx = this.roomGlows[1];
+    if (hubGfx) {
+      hubGfx.clear();
       const bx = (ROOMS.boss.c0 + ROOMS.boss.c1 + 1) / 2 * TS;
       const by = (ROOMS.boss.r0 + ROOMS.boss.r1 + 1) / 2 * TS;
-      const fighting = this.heroData.some(h => h.state === "fighting" || h.state === "casting");
-      const alpha = fighting
-        ? 0.15 + Math.sin(t * 0.1) * 0.08
-        : 0.06 + Math.sin(t * 0.07) * 0.03;
-      bossGfx.fillStyle(fighting ? 0xff0066 : 0xaa00ff, alpha);
-      bossGfx.fillCircle(bx, by, 200);
+      const present = this.heroData.length > 0;
+      const working = this.heroData.some(h => h.state === "fighting" || h.state === "casting");
+      if (present) {
+        const alpha = working
+          ? 0.28 + Math.sin(t * 0.10) * 0.10
+          : 0.18 + Math.sin(t * 0.05) * 0.06;
+        hubGfx.fillStyle(0xa78bfa, alpha);
+        hubGfx.fillCircle(bx, by, 180);
+        hubGfx.lineStyle(3, 0x8b5cf6, 0.6 + Math.sin(t * 0.08) * 0.2);
+        hubGfx.strokeCircle(bx, by, 90);
+      } else {
+        hubGfx.fillStyle(0x8b5cf6, 0.05);
+        hubGfx.fillCircle(bx, by, 120);
+        hubGfx.lineStyle(2, 0x334155, 0.5);
+        hubGfx.strokeCircle(bx, by, 60);
+      }
     }
 
     const restGfx = this.roomGlows[2];
