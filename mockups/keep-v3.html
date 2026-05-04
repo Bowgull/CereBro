@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CereBro Keep — v3</title>
+<style>
+  :root {
+    --bg: #0E1116;
+    --bg-soft: #131821;
+    --surface: #181F2A;
+    --surface-raised: #202A38;
+    --surface-muted: #151A23;
+    --border: #334155;
+    --border-soft: #253041;
+    --text-primary: #F4EFE3;
+    --text-secondary: #B8C0CC;
+    --text-muted: #7E8898;
+    --accent: #6BA6FF;
+    --accent-soft: #2D5B8F;
+    --accent-violet: #8B5CF6;
+    --glow-violet: #A78BFA;
+    --success: #9FD2B7;
+    --warning: #F6C177;
+    --danger: #EF6F6C;
+    --gold: #D9B56A;
+    --stone: #6B7280;
+
+    /* time-of-day driven, set by JS */
+    --sky-top: #050812;
+    --sky-bottom: #0E1320;
+    --ambient: #1a1f2e;
+    --window-glow: #f6c177;
+    --torch-intensity: 1;
+    --moon-opacity: 1;
+    --sun-opacity: 0;
+    --tod-tint: rgba(20, 24, 40, 0);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    user-select: none;
+    cursor: default;
+  }
+
+  svg, img { image-rendering: pixelated; }
+
+  /* ===== STAGE ===== */
+  #stage {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+    transition: background 4s ease;
+  }
+
+  /* parallax layers */
+  .layer {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  /* ===== SKY LAYER ===== */
+  .stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #e8e6d8 0%, transparent 100%),
+      radial-gradient(1px 1px at 22% 8%, #d9b56a 0%, transparent 100%),
+      radial-gradient(1px 1px at 38% 24%, #b8c0cc 0%, transparent 100%),
+      radial-gradient(1px 1px at 52% 14%, #f4efe3 0%, transparent 100%),
+      radial-gradient(1px 1px at 68% 22%, #b8c0cc 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 8%, #e8e6d8 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 28%, #d9b56a 0%, transparent 100%),
+      radial-gradient(2px 2px at 48% 6%, #f4efe3 0%, transparent 100%),
+      radial-gradient(1px 1px at 8% 32%, #b8c0cc 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 14%, #e8e6d8 0%, transparent 100%);
+    opacity: var(--moon-opacity);
+    transition: opacity 4s ease;
+  }
+
+  .moon {
+    position: absolute;
+    top: 8%;
+    right: 14%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f4efe3 0%, #d9b56a 60%, #6B7280 100%);
+    box-shadow: 0 0 40px rgba(244, 239, 227, 0.3), 0 0 80px rgba(244, 239, 227, 0.15);
+    opacity: var(--moon-opacity);
+    transition: opacity 4s ease;
+  }
+
+  .sun {
+    position: absolute;
+    top: 14%;
+    left: 18%;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #fff5d6 0%, #f6c177 50%, #d9b56a 100%);
+    box-shadow: 0 0 60px rgba(246, 193, 119, 0.6), 0 0 120px rgba(246, 193, 119, 0.3);
+    opacity: var(--sun-opacity);
+    transition: opacity 4s ease;
+  }
+
+  /* ===== MOUNTAIN LAYER ===== */
+  .mountains {
+    position: absolute;
+    bottom: 18%;
+    left: -5%;
+    right: -5%;
+    height: 35%;
+    background:
+      linear-gradient(135deg, transparent 49%, #1a2030 50%, #1a2030 51%, transparent 52%),
+      linear-gradient(225deg, transparent 49%, #1a2030 50%, #1a2030 51%, transparent 52%);
+    clip-path: polygon(
+      0% 100%,
+      8% 60%, 14% 78%, 22% 40%, 30% 65%, 38% 30%, 46% 55%,
+      54% 25%, 62% 60%, 70% 35%, 78% 70%, 86% 45%, 94% 75%,
+      100% 55%, 100% 100%
+    );
+    background: linear-gradient(180deg, #1a2030 0%, #0e1320 100%);
+    opacity: 0.8;
+  }
+
+  .mountains-back {
+    position: absolute;
+    bottom: 22%;
+    left: -10%;
+    right: -10%;
+    height: 30%;
+    clip-path: polygon(
+      0% 100%,
+      6% 70%, 12% 85%, 20% 50%, 28% 75%, 36% 45%, 44% 70%,
+      52% 40%, 60% 75%, 68% 50%, 76% 80%, 84% 60%, 92% 85%,
+      100% 65%, 100% 100%
+    );
+    background: linear-gradient(180deg, #14192a 0%, #0a0d18 100%);
+    opacity: 0.6;
+  }
+
+  /* ===== GROUND ===== */
+  .ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 22%;
+    background:
+      linear-gradient(180deg, #1a1f2e 0%, #0E1116 100%);
+    border-top: 2px solid #253041;
+  }
+
+  .ground::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(2px 1px at 14% 30%, #334155 0%, transparent 100%),
+      radial-gradient(1px 1px at 28% 60%, #334155 0%, transparent 100%),
+      radial-gradient(2px 1px at 42% 80%, #253041 0%, transparent 100%),
+      radial-gradient(1px 1px at 58% 40%, #334155 0%, transparent 100%),
+      radial-gradient(2px 1px at 72% 70%, #253041 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 50%, #334155 0%, transparent 100%);
+  }
+
+  /* ===== CASTLE FRAME ===== */
+  #castle-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .castle {
+    position: relative;
+    width: min(1200px, 90vw);
+    height: min(720px, 80vh);
+    transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.6s ease;
+  }
+
+  /* outer castle silhouette — gives the keep a shape behind the chambers */
+  .castle-shell {
+    position: absolute;
+    inset: -4% -2% -2% -2%;
+    background: linear-gradient(180deg, #1a2030 0%, #0e1320 100%);
+    border: 3px solid #3a4658;
+    border-radius: 6px;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.05),
+      inset 0 -20px 40px rgba(0,0,0,0.5),
+      0 12px 40px rgba(0,0,0,0.6);
+    z-index: 0;
+  }
+
+  /* crenellated top */
+  .castle-shell::before {
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: 0;
+    right: 0;
+    height: 18px;
+    background-image:
+      linear-gradient(90deg,
+        #3a4658 0 28px, transparent 28px 56px,
+        #3a4658 56px 84px, transparent 84px 112px);
+    background-size: 112px 18px;
+    background-repeat: repeat-x;
+  }
+
+  /* corner towers */
+  .castle-shell::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    left: -20px;
+    right: -20px;
+    height: 40px;
+    background:
+      linear-gradient(180deg, #2a3548 0%, #1a2030 100%) 0 0 / 60px 40px no-repeat,
+      linear-gradient(180deg, #2a3548 0%, #1a2030 100%) 100% 0 / 60px 40px no-repeat;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  /* dividers between floors */
+  .floor-divider {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(180deg, #4a5568 0%, #2a3548 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ===== FLOORS ===== */
+  .floor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  .floor.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ===== CHAMBER ===== */
+  .chamber {
+    position: absolute;
+    background:
+      linear-gradient(180deg, #2a3548 0%, #1a2030 60%, #131821 100%);
+    border: 2px solid #4a5568;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.04),
+      inset 0 -8px 24px rgba(0,0,0,0.4),
+      0 4px 12px rgba(0,0,0,0.5);
+  }
+
+  .chamber::before {
+    /* stone texture */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(0,0,0,0.15) 1px, transparent 1px),
+      radial-gradient(ellipse at 30% 40%, rgba(107, 114, 128, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 70%, rgba(51, 65, 85, 0.2) 0%, transparent 60%);
+    background-size: 16px 16px, 16px 16px, 100% 100%, 100% 100%;
+    pointer-events: none;
+  }
+
+  .chamber::after {
+    /* time-of-day overlay */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--tod-tint);
+    pointer-events: none;
+    transition: background 4s ease;
+  }
+
+  .chamber:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px rgba(107, 166, 255, 0.25);
+  }
+
+  .chamber.busy {
+    border-color: var(--accent-violet);
+    box-shadow:
+      0 0 24px rgba(167, 139, 250, 0.35),
+      inset 0 0 40px rgba(167, 139, 250, 0.08);
+  }
+
+  .chamber-label {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    z-index: 5;
+  }
+
+  .chamber-name {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    z-index: 5;
+    font-weight: 500;
+  }
+
+  /* torch */
+  .torch {
+    position: absolute;
+    width: 4px;
+    height: 14px;
+    background: linear-gradient(180deg, #6b4423 0%, #3a2410 100%);
+    border-radius: 1px;
+    z-index: 4;
+  }
+  .torch::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: -3px;
+    width: 10px;
+    height: 12px;
+    background: radial-gradient(ellipse at 50% 80%, #f6c177 0%, #ef6f6c 40%, transparent 70%);
+    border-radius: 50% 50% 30% 30%;
+    animation: torch-flicker 0.18s infinite alternate;
+    opacity: var(--torch-intensity);
+    transition: opacity 4s ease;
+  }
+  .torch::after {
+    content: "";
+    position: absolute;
+    top: -22px;
+    left: -16px;
+    width: 36px;
+    height: 36px;
+    background: radial-gradient(circle, rgba(246, 193, 119, 0.35) 0%, transparent 70%);
+    pointer-events: none;
+    animation: torch-flicker 0.4s infinite alternate;
+    opacity: var(--torch-intensity);
+    transition: opacity 4s ease;
+  }
+
+  @keyframes torch-flicker {
+    0% { transform: scale(1) translateY(0); filter: brightness(1); }
+    100% { transform: scale(1.08) translateY(-1px); filter: brightness(1.15); }
+  }
+
+  /* window light from chambers */
+  .window-glow {
+    position: absolute;
+    width: 24px;
+    height: 18px;
+    background: radial-gradient(ellipse, var(--window-glow) 0%, transparent 65%);
+    opacity: calc(var(--torch-intensity) * 0.7);
+    z-index: 2;
+    animation: window-pulse 3s ease-in-out infinite alternate;
+    transition: opacity 4s ease;
+  }
+
+  @keyframes window-pulse {
+    0% { opacity: calc(var(--torch-intensity) * 0.5); }
+    100% { opacity: calc(var(--torch-intensity) * 0.85); }
+  }
+
+  /* banner */
+  .banner {
+    position: absolute;
+    width: 14px;
+    height: 38px;
+    background: linear-gradient(180deg, #2D5B8F 0%, #1a3a5e 100%);
+    border-bottom: 2px solid #6BA6FF;
+    z-index: 4;
+    transform-origin: top center;
+    animation: banner-wave 4s ease-in-out infinite;
+  }
+
+  .banner::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 4px solid #1a3a5e;
+  }
+
+  .banner.gold { background: linear-gradient(180deg, #D9B56A 0%, #8a7340 100%); border-bottom-color: #f4efe3; }
+  .banner.gold::after { border-top-color: #8a7340; }
+  .banner.violet { background: linear-gradient(180deg, #8B5CF6 0%, #5b3aa8 100%); border-bottom-color: #A78BFA; }
+  .banner.violet::after { border-top-color: #5b3aa8; }
+
+  @keyframes banner-wave {
+    0%, 100% { transform: skewX(-2deg); }
+    50% { transform: skewX(2deg); }
+  }
+
+  /* ===== AGENT SPRITE ===== */
+  .agent {
+    position: absolute;
+    width: 32px;
+    height: 40px;
+    z-index: 6;
+    cursor: pointer;
+    animation: agent-idle 2.4s ease-in-out infinite;
+    transition: filter 0.3s ease;
+  }
+
+  .agent.busy {
+    animation: agent-busy 0.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px var(--glow-violet));
+  }
+
+  @keyframes agent-idle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  @keyframes agent-busy {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-1px) scale(1.02); }
+  }
+
+  .agent-status {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    z-index: 7;
+    box-shadow: 0 0 4px currentColor;
+  }
+  .agent.idle .agent-status { background: var(--text-muted); color: var(--text-muted); }
+  .agent.active .agent-status { background: var(--accent); color: var(--accent); }
+  .agent.busy .agent-status { background: var(--accent-violet); color: var(--accent-violet); }
+  .agent.complete .agent-status { background: var(--success); color: var(--success); }
+
+  /* speech bubble */
+  .bark {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 20;
+  }
+
+  .bark.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px);
+  }
+
+  .bark::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border: 4px solid transparent;
+    border-top-color: var(--border);
+  }
+
+  /* ===== CORTANA ORB ===== */
+  .orb {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #e8f1ff 0%, #6BA6FF 40%, #2D5B8F 80%, transparent 100%);
+    box-shadow:
+      0 0 24px rgba(107, 166, 255, 0.6),
+      0 0 48px rgba(107, 166, 255, 0.3),
+      inset 0 0 12px rgba(255, 255, 255, 0.3);
+    animation: orb-pulse 3s ease-in-out infinite;
+    z-index: 8;
+    cursor: pointer;
+  }
+
+  @keyframes orb-pulse {
+    0%, 100% {
+      box-shadow: 0 0 24px rgba(107, 166, 255, 0.6), 0 0 48px rgba(107, 166, 255, 0.3), inset 0 0 12px rgba(255, 255, 255, 0.3);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 32px rgba(107, 166, 255, 0.8), 0 0 64px rgba(107, 166, 255, 0.4), inset 0 0 16px rgba(255, 255, 255, 0.4);
+      transform: scale(1.04);
+    }
+  }
+
+  .orb.active {
+    animation: orb-active 0.8s ease-in-out infinite;
+  }
+
+  @keyframes orb-active {
+    0%, 100% {
+      box-shadow: 0 0 36px rgba(167, 139, 250, 0.9), 0 0 72px rgba(167, 139, 250, 0.5);
+      transform: scale(1.08);
+    }
+    50% {
+      box-shadow: 0 0 48px rgba(167, 139, 250, 1), 0 0 96px rgba(167, 139, 250, 0.6);
+      transform: scale(1.12);
+    }
+  }
+
+  .orb-ripple {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid rgba(107, 166, 255, 0.5);
+    opacity: 0;
+  }
+
+  .orb.ripple .orb-ripple {
+    animation: orb-ripple 0.8s ease-out;
+  }
+
+  @keyframes orb-ripple {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2.4); }
+  }
+
+  /* forge fire */
+  .forge-fire {
+    position: absolute;
+    width: 32px;
+    height: 20px;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at 50% 100%, #ef6f6c 0%, #f6c177 40%, transparent 70%);
+    border-radius: 50% 50% 20% 20%;
+    animation: forge-flicker 0.3s infinite alternate;
+    z-index: 3;
+  }
+
+  .forge-fire::after {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    background: radial-gradient(circle, rgba(239, 111, 108, 0.3) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  @keyframes forge-flicker {
+    0% { transform: translateX(-50%) scaleY(1); filter: brightness(1); }
+    100% { transform: translateX(-50%) scaleY(1.15); filter: brightness(1.2); }
+  }
+
+  /* dust particles */
+  #particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9;
+  }
+
+  /* ===== UI CHROME ===== */
+  #ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  #ui > * { pointer-events: auto; }
+
+  /* top bar */
+  .top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: linear-gradient(180deg, rgba(14, 17, 22, 0.92) 0%, rgba(14, 17, 22, 0.7) 100%);
+    border-bottom: 1px solid var(--border-soft);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 24px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+
+  .brand-mark {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .top-meta {
+    display: flex;
+    gap: 24px;
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .top-meta .item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .top-meta .item .k {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .top-meta .item .v {
+    font-size: 12px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .top-meta .item .v.good { color: var(--success); }
+  .top-meta .item .v.warn { color: var(--warning); }
+
+  /* floor selector */
+  .floor-selector {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .floor-btn {
+    width: 56px;
+    height: 80px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .floor-btn:hover {
+    border-color: var(--border);
+    color: var(--text-secondary);
+    transform: translateX(2px);
+  }
+
+  .floor-btn.active {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, var(--surface-raised) 0%, var(--surface) 100%);
+    color: var(--text-primary);
+    box-shadow: 0 0 16px rgba(107, 166, 255, 0.2);
+  }
+
+  .floor-btn .icon {
+    font-size: 18px;
+    line-height: 1;
+    color: inherit;
+  }
+
+  .floor-btn .label {
+    font-size: 8px;
+    color: inherit;
+  }
+
+  /* overview button */
+  .overview-btn {
+    position: absolute;
+    right: 16px;
+    top: 64px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .overview-btn:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
+
+  /* right panel — agent roster */
+  .roster {
+    position: absolute;
+    right: 16px;
+    top: 112px;
+    width: 220px;
+    background: rgba(19, 24, 33, 0.85);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+  }
+  .roster-head {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .roster-list {
+    max-height: 380px;
+    overflow-y: auto;
+  }
+  .roster-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(37, 48, 65, 0.4);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .roster-item:hover { background: rgba(107, 166, 255, 0.06); }
+  .roster-item:last-child { border-bottom: none; }
+  .roster-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .roster-dot.idle { background: var(--text-muted); }
+  .roster-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .roster-dot.busy { background: var(--accent-violet); box-shadow: 0 0 6px var(--accent-violet); }
+  .roster-dot.complete { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .roster-name {
+    flex: 1;
+    font-size: 11px;
+    color: var(--text-primary);
+  }
+  .roster-role {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* command bar */
+  .command-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, 70vw);
+    background: rgba(19, 24, 33, 0.92);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .command-bar:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 8px 32px rgba(107, 166, 255, 0.2);
+  }
+  .command-prompt {
+    color: var(--accent);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
+  .command-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .command-input::placeholder { color: var(--text-muted); }
+  .command-hint {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* establishing shot overlay */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+  #intro.gone { opacity: 0; }
+
+  .intro-text {
+    position: absolute;
+    bottom: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-primary);
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: intro-fade 4.5s ease;
+  }
+
+  @keyframes intro-fade {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* tooltip on chambers */
+  .chamber-tooltip {
+    position: fixed;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text-primary);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 200;
+  }
+
+  .chamber-tooltip.show { opacity: 1; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ESTABLISHING SHOT -->
+<div id="intro">
+  <div class="intro-text">CereBro Keep</div>
+</div>
+
+<!-- STAGE -->
+<div id="stage">
+  <!-- sky / parallax bg -->
+  <div class="layer" data-parallax="0.05">
+    <div class="stars"></div>
+    <div class="moon"></div>
+    <div class="sun"></div>
+  </div>
+  <div class="layer" data-parallax="0.15">
+    <div class="mountains-back"></div>
+  </div>
+  <div class="layer" data-parallax="0.3">
+    <div class="mountains"></div>
+  </div>
+
+  <!-- castle -->
+  <div class="layer" data-parallax="0.7">
+    <div id="castle-wrap">
+      <div class="castle" id="castle">
+        <div class="castle-shell"></div>
+
+        <!-- UPPER FLOOR -->
+        <div class="floor" id="floor-upper">
+          <!-- chambers laid out 2x2 -->
+        </div>
+
+        <!-- GROUND FLOOR -->
+        <div class="floor active" id="floor-ground">
+        </div>
+
+        <!-- CRYPTS -->
+        <div class="floor" id="floor-crypts">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- foreground ground -->
+  <div class="layer" data-parallax="1">
+    <div class="ground"></div>
+  </div>
+
+  <!-- particles -->
+  <canvas id="particles"></canvas>
+</div>
+
+<!-- UI CHROME -->
+<div id="ui">
+
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <span>CereBro Keep</span>
+    </div>
+    <div class="top-meta">
+      <div class="item"><span class="k">Floor</span><span class="v" id="floor-name">Ground</span></div>
+      <div class="item"><span class="k">Time</span><span class="v" id="clock">--:--</span></div>
+      <div class="item"><span class="k">Phase</span><span class="v" id="phase">Night</span></div>
+      <div class="item"><span class="k">Agents</span><span class="v good" id="agent-count">10 / 10</span></div>
+      <div class="item"><span class="k">Memory</span><span class="v good">OK</span></div>
+      <div class="item"><span class="k">LLM</span><span class="v" id="llm">Ollama</span></div>
+    </div>
+  </div>
+
+  <div class="floor-selector">
+    <button class="floor-btn" data-floor="upper">
+      <span class="icon">✦</span>
+      <span class="label">Upper</span>
+    </button>
+    <button class="floor-btn active" data-floor="ground">
+      <span class="icon">⛬</span>
+      <span class="label">Ground</span>
+    </button>
+    <button class="floor-btn" data-floor="crypts">
+      <span class="icon">☗</span>
+      <span class="label">Crypts</span>
+    </button>
+  </div>
+
+  <button class="overview-btn" id="overview-btn">Overview</button>
+
+  <div class="roster">
+    <div class="roster-head"><span>Agents</span><span id="roster-count">10</span></div>
+    <div class="roster-list" id="roster-list"></div>
+  </div>
+
+  <div class="command-bar">
+    <span class="command-prompt">›</span>
+    <input class="command-input" id="cmd" placeholder="Speak to Cortana..." autocomplete="off" />
+    <span class="command-hint">↵ to send</span>
+  </div>
+
+  <div class="chamber-tooltip" id="tooltip"></div>
+
+</div>
+
+<script>
+// ============================================================
+// AGENT ROSTER — locked lineup from project memory
+// ============================================================
+const AGENTS = [
+  { id: "aang",     name: "Aang",          role: "Great Hall",        floor: "upper",  pos: { x: 12, y: 30 }, color: "#f6c177", accent: "#ef6f6c", arrow: true },
+  { id: "batman",   name: "Batman",        role: "War Room",          floor: "upper",  pos: { x: 38, y: 30 }, color: "#202A38", accent: "#6B7280" },
+  { id: "oak",      name: "Prof. Oak",     role: "Alchemist's Tower", floor: "upper",  pos: { x: 64, y: 30 }, color: "#9FD2B7", accent: "#D9B56A" },
+  { id: "spock",    name: "Spock",         role: "Observatory",       floor: "upper",  pos: { x: 88, y: 30 }, color: "#6BA6FF", accent: "#D9B56A" },
+
+  { id: "tony",     name: "Tony Stark",    role: "Forge",             floor: "ground", pos: { x: 12, y: 35 }, color: "#EF6F6C", accent: "#D9B56A" },
+  { id: "gojo",     name: "Gojo",          role: "Atelier",           floor: "ground", pos: { x: 32, y: 35 }, color: "#F4EFE3", accent: "#6BA6FF" },
+  { id: "cortana",  name: "Cortana",       role: "Hub",               floor: "ground", pos: { x: 50, y: 38 }, color: "#6BA6FF", accent: "#A78BFA", center: true },
+  { id: "surfer",   name: "Silver Surfer", role: "Cartography Hall",  floor: "ground", pos: { x: 70, y: 35 }, color: "#B8C0CC", accent: "#6BA6FF" },
+  { id: "c3po",     name: "C-3PO",         role: "Scriptorium",       floor: "ground", pos: { x: 88, y: 35 }, color: "#D9B56A", accent: "#F4EFE3" },
+
+  { id: "piccolo",  name: "Piccolo",       role: "Crypts",            floor: "crypts", pos: { x: 50, y: 40 }, color: "#9FD2B7", accent: "#8B5CF6" },
+];
+
+// chamber definitions per floor — laid out as % of castle div
+const CHAMBERS = {
+  upper: [
+    { id: "great-hall",   label: "I",   name: "Great Hall",       agent: "aang",   x: 4,  y: 18, w: 22, h: 56 },
+    { id: "war-room",     label: "II",  name: "War Room",         agent: "batman", x: 28, y: 18, w: 22, h: 56 },
+    { id: "alchemist",    label: "III", name: "Alchemist Tower",  agent: "oak",    x: 52, y: 18, w: 22, h: 56 },
+    { id: "observatory",  label: "IV",  name: "Observatory",      agent: "spock",  x: 76, y: 18, w: 22, h: 56 },
+  ],
+  ground: [
+    { id: "forge",        label: "V",    name: "Forge",          agent: "tony",    x: 2,  y: 22, w: 18, h: 60 },
+    { id: "atelier",      label: "VI",   name: "Atelier",        agent: "gojo",    x: 22, y: 22, w: 18, h: 60 },
+    { id: "hub",          label: "VII",  name: "Cortana Hub",    agent: "cortana", x: 42, y: 14, w: 22, h: 72, center: true },
+    { id: "cartography",  label: "VIII", name: "Cartography",    agent: "surfer",  x: 66, y: 22, w: 16, h: 60 },
+    { id: "scriptorium",  label: "IX",   name: "Scriptorium",    agent: "c3po",    x: 84, y: 22, w: 14, h: 60 },
+  ],
+  crypts: [
+    { id: "crypts",       label: "X",    name: "Piccolo's Crypt", agent: "piccolo", x: 28, y: 24, w: 44, h: 56 },
+  ],
+};
+
+// ============================================================
+// SPRITE GENERATION (CC0 placeholder pixel art)
+// Each agent gets a distinct silhouette + color identity.
+// Phase 2 swap: replace svgFor() with <img src="sprites/{id}.png">.
+// ============================================================
+function svgFor(agent) {
+  const c = agent.color;
+  const a = agent.accent;
+  // 16x20 pixel grid scaled up
+  // Body palette: skin = #f4d2a3, dark = #0e1116, eye = #0e1116
+  const skin = "#e8c89a";
+  const dark = "#0e1116";
+
+  // shared body silhouette differentiated by hat/cape/headgear and color
+  let head = "", body = "", extra = "";
+
+  // cape/cloak in agent color for most
+  body = `
+    <rect x="5" y="11" width="6" height="6" fill="${c}"/>
+    <rect x="4" y="13" width="8" height="4" fill="${c}"/>
+    <rect x="6" y="17" width="2" height="3" fill="${dark}"/>
+    <rect x="8" y="17" width="2" height="3" fill="${dark}"/>
+  `;
+
+  // base head
+  head = `<rect x="6" y="5" width="4" height="5" fill="${skin}"/>`;
+
+  switch (agent.id) {
+    case "aang":
+      // bald head + arrow tattoo, orange/yellow robe
+      head = `
+        <rect x="6" y="5" width="4" height="5" fill="${skin}"/>
+        <rect x="7" y="3" width="2" height="2" fill="${a}"/>
+        <rect x="7" y="5" width="2" height="1" fill="${a}"/>
+      `;
+      break;
+    case "batman":
+      // cowl + cape
+      head = `
+        <rect x="6" y="4" width="4" height="6" fill="${dark}"/>
+        <rect x="6" y="3" width="2" height="2" fill="${dark}"/>
+        <rect x="8" y="3" width="2" height="2" fill="${dark}"/>
+        <rect x="7" y="7" width="1" height="1" fill="${a}"/>
+        <rect x="8" y="7" width="1" height="1" fill="${a}"/>
+      `;
+      body = `
+        <rect x="3" y="11" width="10" height="6" fill="${dark}"/>
+        <rect x="5" y="11" width="6" height="4" fill="${c}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${dark}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${dark}"/>
+      `;
+      break;
+    case "oak":
+      // pokeball-ish color, white hair, lab coat
+      head = `
+        <rect x="6" y="5" width="4" height="5" fill="${skin}"/>
+        <rect x="5" y="4" width="6" height="2" fill="#f4efe3"/>
+      `;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="#f4efe3"/>
+        <rect x="6" y="11" width="4" height="3" fill="${c}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${dark}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${dark}"/>
+      `;
+      break;
+    case "spock":
+      // bowl cut, blue uniform, pointed ears
+      head = `
+        <rect x="5" y="4" width="6" height="3" fill="${dark}"/>
+        <rect x="6" y="6" width="4" height="4" fill="${skin}"/>
+        <rect x="5" y="6" width="1" height="2" fill="${skin}"/>
+        <rect x="10" y="6" width="1" height="2" fill="${skin}"/>
+      `;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="${c}"/>
+        <rect x="6" y="11" width="4" height="2" fill="${a}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${dark}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${dark}"/>
+      `;
+      break;
+    case "tony":
+      // iron man helmet
+      head = `
+        <rect x="6" y="4" width="4" height="6" fill="${c}"/>
+        <rect x="7" y="7" width="2" height="1" fill="${a}"/>
+        <rect x="6" y="6" width="1" height="1" fill="${a}"/>
+        <rect x="9" y="6" width="1" height="1" fill="${a}"/>
+      `;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="${c}"/>
+        <rect x="7" y="12" width="2" height="2" fill="${a}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${a}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${a}"/>
+      `;
+      break;
+    case "gojo":
+      // white hair + blue blindfold
+      head = `
+        <rect x="5" y="3" width="6" height="3" fill="#f4efe3"/>
+        <rect x="6" y="6" width="4" height="4" fill="${skin}"/>
+        <rect x="5" y="6" width="6" height="1" fill="${a}"/>
+      `;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="${dark}"/>
+        <rect x="5" y="11" width="6" height="3" fill="#202A38"/>
+        <rect x="6" y="17" width="2" height="3" fill="${dark}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${dark}"/>
+      `;
+      break;
+    case "cortana":
+      // glowing humanoid silhouette in cyan/blue, see-through
+      head = `<rect x="6" y="4" width="4" height="6" fill="${c}" opacity="0.85"/>`;
+      body = `
+        <rect x="4" y="10" width="8" height="8" fill="${c}" opacity="0.7"/>
+        <rect x="5" y="11" width="6" height="6" fill="${a}" opacity="0.4"/>
+        <rect x="6" y="18" width="2" height="2" fill="${c}" opacity="0.6"/>
+        <rect x="8" y="18" width="2" height="2" fill="${c}" opacity="0.6"/>
+      `;
+      break;
+    case "surfer":
+      // silver / chrome
+      head = `<rect x="6" y="5" width="4" height="5" fill="${c}"/>`;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="${c}"/>
+        <rect x="5" y="12" width="6" height="3" fill="#f4efe3"/>
+        <rect x="6" y="17" width="2" height="3" fill="${c}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${c}"/>
+      `;
+      break;
+    case "c3po":
+      // gold protocol droid
+      head = `
+        <rect x="6" y="4" width="4" height="6" fill="${c}"/>
+        <rect x="7" y="6" width="1" height="1" fill="${dark}"/>
+        <rect x="8" y="6" width="1" height="1" fill="${dark}"/>
+        <rect x="7" y="8" width="2" height="1" fill="${dark}"/>
+      `;
+      body = `
+        <rect x="4" y="11" width="8" height="6" fill="${c}"/>
+        <rect x="6" y="12" width="4" height="3" fill="${a}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${c}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${c}"/>
+      `;
+      break;
+    case "piccolo":
+      // green skin, purple cape, antennae
+      head = `
+        <rect x="6" y="5" width="4" height="5" fill="${c}"/>
+        <rect x="6" y="3" width="1" height="2" fill="${c}"/>
+        <rect x="9" y="3" width="1" height="2" fill="${c}"/>
+        <rect x="7" y="7" width="1" height="1" fill="${dark}"/>
+        <rect x="8" y="7" width="1" height="1" fill="${dark}"/>
+      `;
+      body = `
+        <rect x="3" y="11" width="10" height="6" fill="${a}"/>
+        <rect x="5" y="11" width="6" height="4" fill="${c}"/>
+        <rect x="6" y="17" width="2" height="3" fill="${c}"/>
+        <rect x="8" y="17" width="2" height="3" fill="${c}"/>
+      `;
+      break;
+  }
+
+  return `
+    <svg viewBox="0 0 16 20" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" width="100%" height="100%">
+      ${head}
+      ${body}
+    </svg>
+  `;
+}
+
+// ============================================================
+// BUILD CHAMBERS
+// ============================================================
+function renderFloor(floorId) {
+  const floorEl = document.getElementById(`floor-${floorId}`);
+  const chambers = CHAMBERS[floorId];
+
+  chambers.forEach(ch => {
+    const div = document.createElement("div");
+    div.className = "chamber" + (ch.center ? " center" : "");
+    div.id = `chamber-${ch.id}`;
+    div.style.left = `${ch.x}%`;
+    div.style.top = `${ch.y}%`;
+    div.style.width = `${ch.w}%`;
+    div.style.height = `${ch.h}%`;
+
+    // chamber chrome
+    div.innerHTML = `
+      <div class="chamber-label">${ch.label}</div>
+      <div class="chamber-name">${ch.name}</div>
+    `;
+
+    // torches (left + right)
+    const torchL = document.createElement("div");
+    torchL.className = "torch";
+    torchL.style.left = "12%";
+    torchL.style.top = "20%";
+    div.appendChild(torchL);
+
+    const torchR = document.createElement("div");
+    torchR.className = "torch";
+    torchR.style.right = "12%";
+    torchR.style.top = "20%";
+    div.appendChild(torchR);
+
+    // window glow
+    const win = document.createElement("div");
+    win.className = "window-glow";
+    win.style.left = "50%";
+    win.style.top = "8%";
+    win.style.transform = "translateX(-50%)";
+    div.appendChild(win);
+
+    // banner (Hub gets violet, others alternate)
+    if (ch.id === "hub") {
+      const b1 = document.createElement("div");
+      b1.className = "banner violet";
+      b1.style.left = "20%";
+      b1.style.top = "0";
+      div.appendChild(b1);
+      const b2 = document.createElement("div");
+      b2.className = "banner violet";
+      b2.style.right = "20%";
+      b2.style.top = "0";
+      div.appendChild(b2);
+    } else if (ch.id === "forge") {
+      const fire = document.createElement("div");
+      fire.className = "forge-fire";
+      div.appendChild(fire);
+      const b = document.createElement("div");
+      b.className = "banner gold";
+      b.style.left = "30%";
+      b.style.top = "0";
+      div.appendChild(b);
+    } else {
+      const b = document.createElement("div");
+      b.className = "banner";
+      b.style.left = "30%";
+      b.style.top = "0";
+      div.appendChild(b);
+    }
+
+    // agent
+    const agent = AGENTS.find(a => a.id === ch.agent);
+    if (agent) {
+      if (agent.id === "cortana") {
+        // orb + cortana sprite together
+        const orb = document.createElement("div");
+        orb.className = "orb";
+        orb.id = "orb";
+        orb.title = "User presence";
+        orb.innerHTML = `<div class="orb-ripple"></div>`;
+        orb.style.left = "62%";
+        orb.style.top = "55%";
+        div.appendChild(orb);
+      }
+
+      const a = document.createElement("div");
+      a.className = "agent idle";
+      a.id = `agent-${agent.id}`;
+      a.dataset.agent = agent.id;
+      a.style.left = `calc(50% - 16px)`;
+      a.style.top = `60%`;
+      a.innerHTML = `
+        <div class="agent-status"></div>
+        ${svgFor(agent)}
+        <div class="bark" id="bark-${agent.id}"></div>
+      `;
+      div.appendChild(a);
+    }
+
+    // tooltip
+    div.addEventListener("mousemove", (e) => {
+      const tip = document.getElementById("tooltip");
+      tip.textContent = `${ch.name} — ${agent ? agent.name : "Empty"}`;
+      tip.style.left = e.clientX + 12 + "px";
+      tip.style.top = e.clientY + 12 + "px";
+      tip.classList.add("show");
+    });
+    div.addEventListener("mouseleave", () => {
+      document.getElementById("tooltip").classList.remove("show");
+    });
+
+    div.addEventListener("click", () => {
+      if (agent) bark(agent.id, pickPhrase(agent.id, true));
+    });
+
+    floorEl.appendChild(div);
+  });
+}
+
+renderFloor("upper");
+renderFloor("ground");
+renderFloor("crypts");
+
+// ============================================================
+// ROSTER
+// ============================================================
+function renderRoster() {
+  const list = document.getElementById("roster-list");
+  list.innerHTML = "";
+  AGENTS.forEach(a => {
+    const item = document.createElement("div");
+    item.className = "roster-item";
+    item.innerHTML = `
+      <div class="roster-dot idle" id="dot-${a.id}"></div>
+      <div class="roster-name">${a.name}</div>
+      <div class="roster-role">${a.role}</div>
+    `;
+    item.addEventListener("click", () => {
+      switchFloor(a.floor);
+      setTimeout(() => bark(a.id, pickPhrase(a.id, true)), 600);
+    });
+    list.appendChild(item);
+  });
+}
+renderRoster();
+
+// ============================================================
+// FLOOR SWITCHING
+// ============================================================
+const FLOOR_NAMES = { upper: "Upper", ground: "Ground", crypts: "Crypts" };
+
+function switchFloor(id) {
+  document.querySelectorAll(".floor").forEach(f => f.classList.remove("active"));
+  document.getElementById(`floor-${id}`).classList.add("active");
+  document.querySelectorAll(".floor-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.floor === id);
+  });
+  document.getElementById("floor-name").textContent = FLOOR_NAMES[id];
+}
+
+document.querySelectorAll(".floor-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchFloor(btn.dataset.floor));
+});
+
+// ============================================================
+// OVERVIEW (zoom out)
+// ============================================================
+let overviewActive = false;
+const overviewBtn = document.getElementById("overview-btn");
+const castle = document.getElementById("castle");
+
+overviewBtn.addEventListener("click", () => {
+  overviewActive = !overviewActive;
+  if (overviewActive) {
+    document.querySelectorAll(".floor").forEach(f => f.classList.add("active"));
+    castle.style.transform = "scale(0.55)";
+    overviewBtn.textContent = "Close";
+  } else {
+    document.querySelectorAll(".floor").forEach(f => f.classList.remove("active"));
+    document.getElementById(`floor-ground`).classList.add("active");
+    document.querySelector(".floor-btn[data-floor='ground']").classList.add("active");
+    castle.style.transform = "";
+    overviewBtn.textContent = "Overview";
+  }
+});
+
+// ============================================================
+// TIME OF DAY
+// ============================================================
+function updateTimeOfDay() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+
+  document.getElementById("clock").textContent =
+    String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+
+  let phase, skyTop, skyBottom, torchI, moonO, sunO, tint;
+
+  if (h >= 5 && h < 9) {
+    phase = "Dawn";
+    skyTop = "#3a2a4a";
+    skyBottom = "#f6c177";
+    torchI = 0.6;
+    moonO = 0.3;
+    sunO = 0.6;
+    tint = "rgba(246, 193, 119, 0.06)";
+  } else if (h >= 9 && h < 17) {
+    phase = "Day";
+    skyTop = "#4a78b8";
+    skyBottom = "#a8c8e8";
+    torchI = 0.15;
+    moonO = 0;
+    sunO = 1;
+    tint = "rgba(168, 200, 232, 0.04)";
+  } else if (h >= 17 && h < 20) {
+    phase = "Dusk";
+    skyTop = "#2a1a3a";
+    skyBottom = "#ef6f6c";
+    torchI = 0.7;
+    moonO = 0.5;
+    sunO = 0.4;
+    tint = "rgba(239, 111, 108, 0.05)";
+  } else {
+    phase = "Night";
+    skyTop = "#050812";
+    skyBottom = "#0E1320";
+    torchI = 1;
+    moonO = 1;
+    sunO = 0;
+    tint = "rgba(20, 24, 40, 0)";
+  }
+
+  const root = document.documentElement;
+  root.style.setProperty("--sky-top", skyTop);
+  root.style.setProperty("--sky-bottom", skyBottom);
+  root.style.setProperty("--torch-intensity", torchI);
+  root.style.setProperty("--moon-opacity", moonO);
+  root.style.setProperty("--sun-opacity", sunO);
+  root.style.setProperty("--tod-tint", tint);
+  document.getElementById("phase").textContent = phase;
+}
+updateTimeOfDay();
+setInterval(updateTimeOfDay, 30000);
+
+// ============================================================
+// PARALLAX
+// ============================================================
+let mx = 0, my = 0;
+window.addEventListener("mousemove", (e) => {
+  mx = (e.clientX / window.innerWidth - 0.5) * 2;
+  my = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+function parallaxTick() {
+  document.querySelectorAll(".layer").forEach(l => {
+    const depth = parseFloat(l.dataset.parallax || 0);
+    const x = -mx * depth * 24;
+    const y = -my * depth * 12;
+    l.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  requestAnimationFrame(parallaxTick);
+}
+parallaxTick();
+
+// ============================================================
+// PARTICLES (dust)
+// ============================================================
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+let particles = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+function spawnParticles() {
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.3,
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: -Math.random() * 0.2 - 0.05,
+      life: Math.random() * 200 + 100,
+      maxLife: 300,
+    });
+  }
+}
+spawnParticles();
+
+function tickParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    if (p.life <= 0 || p.y < -10) {
+      p.x = Math.random() * canvas.width;
+      p.y = canvas.height + 10;
+      p.life = p.maxLife;
+    }
+    const alpha = Math.min(p.life / 100, 1) * 0.3;
+    ctx.fillStyle = `rgba(244, 239, 227, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  requestAnimationFrame(tickParticles);
+}
+tickParticles();
+
+// ============================================================
+// AGENT BARKS
+// ============================================================
+const PHRASES = {
+  aang:    ["centering.", "balance holds.", "the path is clear.", "still.", "let it flow."],
+  batman:  ["watching.", "patterns confirmed.", "no movement.", "the city sleeps.", "tracking."],
+  oak:     ["compounds stable.", "running diagnostic.", "interesting...", "noted.", "samples ready."],
+  spock:   ["computing.", "logical.", "fascinating.", "telemetry nominal.", "vector confirmed."],
+  tony:    ["building.", "got it.", "compiling.", "shop's hot.", "shipped."],
+  gojo:    ["thinking.", "infinite.", "reframing.", "see it now.", "redrafted."],
+  cortana: ["listening.", "ready.", "routing.", "I have you.", "say the word."],
+  surfer:  ["surveyed.", "charts updated.", "drift detected.", "currents read.", "vector logged."],
+  c3po:    ["recorded.", "translated.", "filed under archive.", "backed up.", "cross-referenced."],
+  piccolo: ["sealed.", "the deep is quiet.", "warding.", "perimeter cold.", "watching the dark."],
+};
+
+function pickPhrase(id, click=false) {
+  const arr = PHRASES[id] || ["..."];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function bark(agentId, text) {
+  const el = document.getElementById(`bark-${agentId}`);
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 2400);
+}
+
+function setAgentState(id, state) {
+  const a = document.getElementById(`agent-${id}`);
+  const dot = document.getElementById(`dot-${id}`);
+  if (!a) return;
+  a.classList.remove("idle", "active", "busy", "complete");
+  a.classList.add(state);
+  if (dot) {
+    dot.classList.remove("idle", "active", "busy", "complete");
+    dot.classList.add(state);
+  }
+  const ch = a.closest(".chamber");
+  if (ch) ch.classList.toggle("busy", state === "busy");
+}
+
+// random barks + state changes to simulate liveness
+setInterval(() => {
+  const a = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+  bark(a.id, pickPhrase(a.id));
+}, 7000);
+
+setInterval(() => {
+  const a = AGENTS[Math.floor(Math.random() * AGENTS.length)];
+  const states = ["idle", "active", "busy", "complete"];
+  const s = states[Math.floor(Math.random() * states.length)];
+  setAgentState(a.id, s);
+}, 4500);
+
+// initial seeded states
+setAgentState("cortana", "active");
+setAgentState("tony", "busy");
+setAgentState("c3po", "active");
+setAgentState("oak", "complete");
+
+// ============================================================
+// COMMAND BAR — Cortana orb interaction
+// ============================================================
+const cmd = document.getElementById("cmd");
+const orbEl = () => document.getElementById("orb");
+
+cmd.addEventListener("input", () => {
+  const o = orbEl();
+  if (!o) return;
+  o.classList.add("active");
+  clearTimeout(cmd._t);
+  cmd._t = setTimeout(() => o.classList.remove("active"), 600);
+});
+
+cmd.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !cmd.value.trim()) return;
+  const o = orbEl();
+  if (o) {
+    o.classList.add("ripple");
+    setTimeout(() => o.classList.remove("ripple"), 800);
+  }
+  bark("cortana", "routing.");
+  // simulate Cortana dispatching to a random agent
+  setTimeout(() => {
+    const target = AGENTS.filter(a => a.id !== "cortana")[Math.floor(Math.random() * 9)];
+    setAgentState(target.id, "busy");
+    bark(target.id, "on it.");
+    setTimeout(() => {
+      setAgentState(target.id, "complete");
+      bark(target.id, "done.");
+    }, 3500);
+  }, 800);
+  cmd.value = "";
+});
+
+// ============================================================
+// ESTABLISHING SHOT (first launch)
+// ============================================================
+const FIRST_KEY = "cerebro-keep-v3-first-shot";
+const intro = document.getElementById("intro");
+
+// skip dramatic intro for now — show the keep immediately
+intro.style.display = "none";
+
+</script>
+</body>
+</html>

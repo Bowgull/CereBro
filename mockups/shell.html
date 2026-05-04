@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CereBro — The Keep</title>
+<style>
+  :root {
+    --stone-1: #4a4a55;
+    --stone-2: #3a3a44;
+    --stone-3: #2c2c34;
+    --stone-4: #20202a;
+    --mortar: #16161c;
+    --floor-1: #6b5a48;
+    --floor-2: #574838;
+    --floor-3: #3f3326;
+    --rug-r: #7a3030;
+    --rug-r2: #5a2020;
+    --rug-b: #2c5fa0;
+    --rug-b2: #1d4380;
+    --gold: #d6b25a;
+    --gold-d: #8a6f2c;
+    --torch: #ffb24a;
+    --arcane: #5aa9ff;
+    --arcane-d: #2c5fa0;
+    --violet: #9b7bff;
+    --green: #82a577;
+    --red: #d76060;
+    --bone: #ece7dc;
+    --ink: #14141a;
+    --wood-1: #6a4a30;
+    --wood-2: #4a3220;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    --pixel: "Press Start 2P", "VT323", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: #08080c;
+    color: var(--bone);
+    font-family: var(--mono);
+    image-rendering: pixelated;
+    font-size: 12px;
+  }
+  svg { image-rendering: pixelated; shape-rendering: crispEdges; display: block; }
+
+  .stage { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; }
+
+  /* ============ TOP TOOLBAR ============ */
+  .toolbar {
+    background: #08080c;
+    border-bottom: 4px solid var(--gold-d);
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--pixel); font-size: 9px;
+  }
+  .toolbar .title { color: var(--gold); margin-right: auto; letter-spacing: 1.5px; }
+  .toolbar button {
+    font-family: var(--pixel); font-size: 8px;
+    background: var(--stone-3); color: var(--bone);
+    border: 2px solid var(--gold-d);
+    padding: 6px 10px; cursor: pointer;
+  }
+  .toolbar button.active { background: var(--gold); color: var(--ink); }
+  .toolbar .target-info { color: var(--bone); font-size: 8px; }
+  .toolbar .target-info b { color: var(--arcane); }
+
+  /* view switcher */
+  .view { position: relative; height: 100%; }
+  .view.hidden { display: none; }
+
+  /* ============ EXTERIOR ============ */
+  .exterior {
+    background:
+      linear-gradient(180deg, #1a1a2a 0%, #2a2540 35%, #4a3a5a 60%, #2a2c3a 70%, #1a1a22 100%);
+    overflow: hidden;
+  }
+  /* moon */
+  .ext-moon {
+    position: absolute; top: 8%; right: 12%;
+    width: 56px; height: 56px;
+    background: #f0e8c8;
+    box-shadow: 0 0 32px 6px rgba(240,232,200,0.35);
+    border-radius: 0;
+    image-rendering: pixelated;
+  }
+  .ext-moon::before {
+    content: ""; position: absolute; top: 8px; left: 18px;
+    width: 6px; height: 6px; background: #c8c0a0;
+  }
+  .ext-moon::after {
+    content: ""; position: absolute; bottom: 12px; right: 10px;
+    width: 8px; height: 4px; background: #c8c0a0;
+  }
+  /* stars */
+  .ext-stars {
+    position: absolute; top: 0; left: 0; right: 0; height: 60%;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 28% 8%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 44% 22%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 60% 12%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 72% 28%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 88% 16%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 18% 36%, #ece7dc 50%, transparent 50%),
+      radial-gradient(1px 1px at 56% 38%, #ece7dc 50%, transparent 50%);
+  }
+  /* mountains */
+  .ext-mountains {
+    position: absolute; bottom: 22%; left: 0; right: 0; height: 30%;
+    background:
+      linear-gradient(135deg, transparent 50%, #1a1d28 50%) 0 0/120px 120px,
+      linear-gradient(225deg, transparent 50%, #1a1d28 50%) 60px 0/120px 120px,
+      #1a1d28;
+    opacity: 0.9;
+    clip-path: polygon(0 100%, 0 60%, 8% 40%, 14% 55%, 22% 30%, 30% 50%, 40% 25%, 50% 55%, 60% 35%, 70% 50%, 80% 30%, 92% 50%, 100% 38%, 100% 100%);
+  }
+  /* ground */
+  .ext-ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 22%;
+    background:
+      repeating-linear-gradient(0deg, #2a3a2a 0 31px, #1a2218 31px 32px),
+      repeating-linear-gradient(90deg, #344a34 0 31px, #1a2218 31px 32px);
+  }
+  /* castle exterior */
+  .castle {
+    position: absolute; left: 50%; bottom: 18%;
+    transform: translateX(-50%);
+    width: 480px; height: 280px;
+  }
+  .castle .keep-wall {
+    position: absolute; left: 80px; bottom: 0;
+    width: 320px; height: 180px;
+    background:
+      repeating-linear-gradient(0deg, var(--stone-1) 0 23px, var(--mortar) 23px 24px),
+      repeating-linear-gradient(90deg, var(--stone-2) 0 31px, var(--mortar) 31px 32px);
+    background-blend-mode: multiply;
+    border: 2px solid var(--ink);
+  }
+  .castle .keep-wall::before {
+    /* crenellations */
+    content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px;
+    background: repeating-linear-gradient(90deg, var(--stone-1) 0 24px, transparent 24px 48px);
+  }
+  .tower {
+    position: absolute; bottom: 0;
+    width: 80px; height: 240px;
+    background:
+      repeating-linear-gradient(0deg, var(--stone-1) 0 23px, var(--mortar) 23px 24px),
+      repeating-linear-gradient(90deg, var(--stone-2) 0 31px, var(--mortar) 31px 32px);
+    background-blend-mode: multiply;
+    border: 2px solid var(--ink);
+  }
+  .tower.left { left: 0; }
+  .tower.right { right: 0; }
+  .tower::before {
+    content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px;
+    background: repeating-linear-gradient(90deg, var(--stone-1) 0 16px, transparent 16px 32px);
+  }
+  .tower::after {
+    /* roof cone */
+    content: ""; position: absolute; top: -56px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 48px solid transparent;
+    border-right: 48px solid transparent;
+    border-bottom: 56px solid #5a2020;
+  }
+  .tower-flag {
+    position: absolute; top: -76px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 24px; background: var(--ink);
+  }
+  .tower-flag::after {
+    content: ""; position: absolute; top: 2px; left: 4px;
+    width: 18px; height: 12px; background: var(--arcane);
+    clip-path: polygon(0 0, 100% 0, 80% 50%, 100% 100%, 0 100%);
+  }
+  .gatehouse {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 120px; height: 200px;
+    background:
+      repeating-linear-gradient(0deg, var(--stone-1) 0 23px, var(--mortar) 23px 24px),
+      repeating-linear-gradient(90deg, var(--stone-2) 0 31px, var(--mortar) 31px 32px);
+    background-blend-mode: multiply;
+    border: 2px solid var(--ink);
+    z-index: 2;
+  }
+  .gatehouse::before {
+    content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px;
+    background: repeating-linear-gradient(90deg, var(--stone-1) 0 20px, transparent 20px 40px);
+  }
+  .gate-arch {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 60px; height: 90px;
+    background: var(--ink);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+  }
+  .gate-arch::before {
+    /* portcullis grid */
+    content: ""; position: absolute; inset: 8px 8px 0 8px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 12px, #6a6a78 12px 14px),
+      repeating-linear-gradient(90deg, transparent 0 12px, #6a6a78 12px 14px);
+    border-top-left-radius: 22px; border-top-right-radius: 22px;
+  }
+  .drawbridge {
+    position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%);
+    width: 60px; height: 36px;
+    background:
+      repeating-linear-gradient(90deg, var(--wood-1) 0 9px, var(--wood-2) 9px 10px);
+    border: 2px solid var(--ink);
+  }
+  .castle-glow {
+    position: absolute; left: 50%; bottom: 38%; transform: translateX(-50%);
+    width: 28px; height: 28px;
+    background: var(--torch); border-radius: 50%;
+    box-shadow: 0 0 28px 8px rgba(255,178,74,0.5);
+    animation: flicker 1.4s infinite alternate;
+    z-index: 3;
+  }
+  /* castle windows */
+  .window {
+    position: absolute; width: 12px; height: 18px;
+    background: var(--torch);
+    box-shadow: 0 0 10px 2px rgba(255,178,74,0.6);
+    border: 2px solid var(--ink);
+  }
+  .ext-label {
+    position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%);
+    color: var(--gold); font-family: var(--pixel); font-size: 11px;
+    letter-spacing: 3px; text-shadow: 2px 2px 0 var(--ink);
+  }
+  .ext-sub {
+    position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
+    color: var(--bone); font-family: var(--pixel); font-size: 7px;
+    letter-spacing: 2px; opacity: 0.7;
+  }
+  /* floating click hint */
+  .ext-enter {
+    position: absolute; left: 50%; top: 64%; transform: translateX(-50%);
+    color: var(--bone); font-family: var(--pixel); font-size: 8px;
+    background: rgba(8,8,12,0.8); border: 2px solid var(--gold-d);
+    padding: 6px 10px; cursor: pointer;
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0);} 50% { transform: translateX(-50%) translateY(-4px);} }
+
+  /* ============ KEEP MAP ============ */
+  .keep {
+    position: relative;
+    overflow: hidden;
+    background: #0a0a10;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  /* Each room */
+  .room {
+    position: relative;
+    cursor: pointer;
+    background: var(--floor-2);
+    background-image:
+      repeating-linear-gradient(0deg, var(--floor-2) 0 31px, var(--mortar) 31px 32px),
+      repeating-linear-gradient(90deg, var(--floor-1) 0 31px, var(--mortar) 31px 32px);
+    background-blend-mode: multiply;
+    border: 4px solid var(--stone-3);
+    box-shadow:
+      inset 0 0 0 2px var(--mortar),
+      inset 0 0 0 4px var(--stone-1);
+    overflow: hidden;
+  }
+  .room .room-name {
+    position: absolute; top: 8px; left: 10px;
+    font-family: var(--pixel); font-size: 9px;
+    color: var(--gold); text-shadow: 1px 1px 0 var(--ink);
+    letter-spacing: 1px;
+    background: rgba(8,8,12,0.7);
+    padding: 4px 8px;
+    border: 2px solid var(--gold-d);
+    z-index: 5;
+  }
+
+  /* throne room special floor */
+  .room.throne {
+    background-image:
+      repeating-linear-gradient(0deg, #5a4a3a 0 31px, var(--mortar) 31px 32px),
+      repeating-linear-gradient(90deg, #6b5a48 0 31px, var(--mortar) 31px 32px);
+  }
+  .room.archive {
+    background-image:
+      repeating-linear-gradient(0deg, #3a2c20 0 31px, var(--mortar) 31px 32px),
+      repeating-linear-gradient(90deg, #4a3a2c 0 31px, var(--mortar) 31px 32px);
+    filter: brightness(0.85);
+  }
+  .room:hover { box-shadow: inset 0 0 0 2px var(--mortar), inset 0 0 0 4px var(--gold); }
+  .room.targeted { box-shadow: inset 0 0 0 2px var(--mortar), inset 0 0 0 4px var(--arcane); }
+
+  /* handoff scroll prop */
+  .scroll-prop {
+    position: absolute; width: 14px; height: 18px;
+    background: #c8b48a; border: 2px solid var(--ink);
+    z-index: 5; pointer-events: none;
+    box-shadow: inset 0 -4px 0 #a0916a;
+    display: none;
+  }
+  .scroll-prop::before {
+    content: ""; position: absolute; top: 2px; left: 2px; right: 2px; height: 1px;
+    background: var(--ink);
+    box-shadow: 0 3px 0 var(--ink), 0 6px 0 var(--ink);
+  }
+  .scroll-prop.active { display: block; animation: scrollFly 6s linear forwards; }
+  @keyframes scrollFly {
+    0%   { left: 35%; top: 30%; opacity: 1; }
+    20%  { left: 50%; top: 38%; }
+    50%  { left: 50%; top: 70%; }
+    80%  { left: 45%; top: 70%; }
+    100% { left: 40%; top: 70%; opacity: 1; }
+  }
+
+  .room.forge {
+    background-image:
+      repeating-linear-gradient(0deg, #4a3a2c 0 31px, var(--mortar) 31px 32px),
+      repeating-linear-gradient(90deg, #5a4a3a 0 31px, var(--mortar) 31px 32px);
+  }
+
+  /* rugs */
+  .rug {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 60%; height: 55%;
+    border: 6px solid var(--gold-d);
+    box-shadow: inset 0 0 0 3px var(--rug-r2), inset 0 0 0 6px var(--gold);
+  }
+  .rug.red  { background: repeating-linear-gradient(45deg, var(--rug-r2) 0 8px, var(--rug-r) 8px 16px); }
+  .rug.blue { background: repeating-linear-gradient(45deg, var(--rug-b2) 0 8px, var(--rug-b) 8px 16px); }
+  .rug.gold { background: repeating-linear-gradient(45deg, #a88838 0 8px, var(--gold) 8px 16px); }
+
+  /* torches */
+  .torch { position: absolute; width: 12px; height: 36px; background: var(--wood-2); border: 2px solid var(--ink); }
+  .torch::before {
+    content: ""; position: absolute; top: -16px; left: -6px; width: 22px; height: 18px;
+    background: var(--torch);
+    clip-path: polygon(50% 0, 100% 45%, 80% 100%, 50% 80%, 20% 100%, 0 45%);
+    box-shadow: 0 0 18px 4px rgba(255,178,74,0.45);
+    animation: flicker 1.2s infinite alternate;
+  }
+  @keyframes flicker { from { opacity: .8; transform: scaleY(.92);} to { opacity: 1; transform: scaleY(1.05);} }
+
+  /* doors between rooms */
+  .door {
+    position: absolute;
+    width: 32px; height: 8px;
+    background: var(--wood-1);
+    border: 2px solid var(--ink);
+    z-index: 4;
+  }
+  .door.v { width: 8px; height: 32px; }
+
+  /* ============ FURNITURE ============ */
+  .obj { position: absolute; }
+  .obj .label {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    font-family: var(--pixel); font-size: 7px; color: var(--bone);
+    text-shadow: 1px 1px 0 var(--ink); white-space: nowrap;
+  }
+
+  /* ============ AGENT SPRITES ============ */
+  .agent {
+    position: absolute;
+    width: 32px; height: 48px;
+    z-index: 3;
+  }
+  .agent .frames {
+    position: absolute; inset: 0;
+  }
+  .agent .frames svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+  }
+  .agent.walking .frames svg {
+    animation: stepFrames 0.5s steps(1) infinite;
+  }
+  .agent.walking .frames svg:nth-child(1) { animation-delay: 0s; }
+  .agent.walking .frames svg:nth-child(2) { animation-delay: 0.25s; }
+  @keyframes stepFrames {
+    0%, 49.9% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .agent.idle .frames svg:nth-child(1) { opacity: 1; }
+
+  .bubble {
+    position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+    background: var(--bone); color: var(--ink);
+    padding: 3px 6px; border: 2px solid var(--ink);
+    font-family: var(--pixel); font-size: 7px;
+    white-space: nowrap;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .bubble::after {
+    content: ""; position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%) rotate(45deg);
+    width: 6px; height: 6px; background: var(--bone);
+    border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink);
+  }
+  .bubble.warn { background: #ffe7a8; }
+  .bubble.bad  { background: #f3a8a8; }
+  .bubble.live { background: #b6e0a8; }
+
+  .name {
+    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+    color: var(--bone); font-family: var(--pixel); font-size: 7px;
+    text-shadow: 1px 1px 0 var(--ink);
+    white-space: nowrap;
+  }
+
+  /* walking paths */
+  .agent.aang  { animation: aangWalk  9s ease-in-out infinite; }
+  .agent.oak   { animation: oakWalk   8s ease-in-out infinite; }
+  .agent.cc    { animation: ccWalk    7s ease-in-out infinite; }
+  .agent.you   { animation: youWalk  12s ease-in-out infinite; }
+
+  @keyframes aangWalk {
+    0%   { left: 30%; top: 55%; }
+    25%  { left: 60%; top: 55%; }
+    50%  { left: 60%; top: 30%; }
+    75%  { left: 30%; top: 30%; }
+    100% { left: 30%; top: 55%; }
+  }
+  @keyframes oakWalk {
+    0%, 100% { left: 35%; top: 55%; }
+    50%      { left: 65%; top: 55%; }
+  }
+  @keyframes ccWalk {
+    0%   { left: 25%; top: 55%; }
+    33%  { left: 55%; top: 55%; }
+    66%  { left: 55%; top: 30%; }
+    100% { left: 25%; top: 55%; }
+  }
+  @keyframes youWalk {
+    0%, 100% { left: 45%; top: 50%; }
+    50%      { left: 55%; top: 50%; }
+  }
+
+  /* HUD */
+  .hud {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(8,8,12,0.85);
+    border: 2px solid var(--gold-d);
+    padding: 6px 14px;
+    font-family: var(--pixel); font-size: 8px;
+    z-index: 10;
+    display: flex; gap: 16px; align-items: center;
+  }
+  .hud b { color: var(--gold); }
+  .pip { width: 6px; height: 6px; background: var(--green); box-shadow: 0 0 6px var(--green); display: inline-block; margin-right: 4px; }
+
+  /* ============ CHAT ============ */
+  .chat {
+    background: #0b0b10;
+    border-top: 4px solid var(--gold-d);
+    padding: 12px 18px 14px;
+    font-family: var(--mono);
+  }
+  .chat-log {
+    max-height: 96px; overflow: auto;
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 10px;
+  }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg .who { font-family: var(--pixel); font-size: 8px; min-width: 88px; }
+  .msg .who.you   { color: var(--gold); }
+  .msg .who.aang  { color: var(--arcane); }
+  .msg .who.oak   { color: var(--green); }
+  .msg .who.raven { color: var(--violet); }
+  .msg .who.cc    { color: #ffb24a; }
+  .msg .body { color: var(--bone); font-size: 12px; line-height: 1.5; }
+
+  .chat-input {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--stone-4); border: 2px solid var(--gold-d);
+    padding: 6px 8px;
+  }
+  .chat-input .prompt { color: var(--gold); font-family: var(--pixel); font-size: 9px; }
+  .chat-input input {
+    flex: 1; background: transparent; border: 0; outline: 0;
+    color: var(--bone); font-family: var(--mono); font-size: 13px;
+  }
+  .chat-input .target {
+    font-family: var(--pixel); font-size: 8px; color: var(--arcane);
+    border: 2px solid var(--arcane-d); padding: 4px 6px; background: rgba(90,169,255,0.08);
+  }
+  .chat-input .send {
+    font-family: var(--pixel); font-size: 8px; color: var(--ink);
+    background: var(--gold); border: 2px solid var(--gold-d); padding: 5px 10px;
+    cursor: pointer;
+  }
+  .chat-hint {
+    color: #6b6b75; font-family: var(--pixel); font-size: 7px; margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- ============ TOOLBAR ============ -->
+  <div class="toolbar">
+    <span class="title">⚜ CEREBRO</span>
+    <button id="btn-ext">EXTERIOR</button>
+    <button id="btn-int" class="active">INTERIOR</button>
+    <button id="btn-handoff">▶ HANDOFF: AANG → OAK</button>
+    <span class="target-info">TARGET: <b id="target-label">@AANG</b> · click a room to switch</span>
+  </div>
+
+  <!-- ============ EXTERIOR VIEW ============ -->
+  <div class="view exterior hidden" id="view-exterior">
+    <div class="ext-stars"></div>
+    <div class="ext-moon"></div>
+    <div class="ext-mountains"></div>
+    <div class="ext-ground"></div>
+
+    <div class="castle">
+      <div class="tower left">
+        <div class="tower-flag"></div>
+        <div class="window" style="top: 60px; left: 34px;"></div>
+        <div class="window" style="top: 120px; left: 34px;"></div>
+      </div>
+      <div class="tower right">
+        <div class="tower-flag"></div>
+        <div class="window" style="top: 60px; left: 34px;"></div>
+        <div class="window" style="top: 120px; left: 34px;"></div>
+      </div>
+      <div class="keep-wall">
+        <div class="window" style="top: 40px; left: 60px;"></div>
+        <div class="window" style="top: 40px; left: 150px;"></div>
+        <div class="window" style="top: 40px; left: 240px;"></div>
+        <div class="window" style="top: 100px; left: 60px;"></div>
+        <div class="window" style="top: 100px; left: 240px;"></div>
+      </div>
+      <div class="gatehouse">
+        <div class="window" style="top: 30px; left: 14px;"></div>
+        <div class="window" style="top: 30px; right: 14px;"></div>
+        <div class="gate-arch"></div>
+        <div class="drawbridge"></div>
+      </div>
+      <div class="castle-glow"></div>
+    </div>
+
+    <div class="ext-enter" id="ext-enter">▼ ENTER THE KEEP ▼</div>
+    <div class="ext-label">CEREBRO KEEP</div>
+    <div class="ext-sub">DECLYNE WING · NIGHT WATCH</div>
+  </div>
+
+  <!-- ============ INTERIOR VIEW ============ -->
+  <div class="view interior" id="view-interior">
+
+  <!-- ============ KEEP ============ -->
+  <div class="keep">
+
+    <div class="hud">
+      <span><b>CEREBRO KEEP</b></span>
+      <span><span class="pip"></span> 4 AGENTS · 1 SEALED</span>
+      <span>PROJECT: <b>DECLYNE_V1</b></span>
+      <span>MODE: <b>RESEARCH</b></span>
+    </div>
+
+    <!-- ROOM 1: RESEARCH WING -->
+    <div class="room research" data-agent="AANG">
+      <div class="room-name">⌬ RESEARCH WING</div>
+      <div class="torch" style="top: 10%; left: 6%;"></div>
+      <div class="torch" style="top: 10%; right: 6%;"></div>
+      <div class="rug blue"></div>
+
+      <!-- research table -->
+      <div class="obj" style="left: 50%; top: 35%; transform: translateX(-50%);">
+        <svg width="120" height="60" viewBox="0 0 30 15">
+          <rect x="0" y="2" width="30" height="8" fill="#6a4a30"/>
+          <rect x="0" y="2" width="30" height="2" fill="#8a6440"/>
+          <rect x="1" y="10" width="2" height="5" fill="#4a3220"/>
+          <rect x="27" y="10" width="2" height="5" fill="#4a3220"/>
+          <rect x="4" y="4" width="6" height="4" fill="#c8b48a"/>
+          <rect x="13" y="3" width="4" height="5" fill="#5aa9ff"/>
+          <rect x="20" y="4" width="6" height="4" fill="#9b7bff"/>
+          <rect x="11" y="0" width="1" height="3" fill="#ffb24a"/>
+          <rect x="10" y="3" width="3" height="1" fill="#ece7dc"/>
+        </svg>
+      </div>
+
+      <!-- bookshelf -->
+      <div class="obj" style="left: 6%; top: 22%;">
+        <svg width="50" height="80" viewBox="0 0 12 20">
+          <rect x="0" y="0" width="12" height="20" fill="#4a3220"/>
+          <rect x="0" y="6" width="12" height="1" fill="#6a4a30"/>
+          <rect x="0" y="13" width="12" height="1" fill="#6a4a30"/>
+          <rect x="1" y="1" width="2" height="5" fill="#5aa9ff"/>
+          <rect x="4" y="2" width="2" height="4" fill="#9b7bff"/>
+          <rect x="7" y="1" width="2" height="5" fill="#d6b25a"/>
+          <rect x="1" y="7" width="3" height="6" fill="#82a577"/>
+          <rect x="5" y="8" width="3" height="5" fill="#d76060"/>
+          <rect x="9" y="7" width="2" height="6" fill="#5aa9ff"/>
+        </svg>
+      </div>
+
+      <!-- AANG sprite, walks -->
+      <div class="agent aang walking" style="left: 30%; top: 55%;">
+        <div class="bubble live">drafting matrix</div>
+        <div class="frames">
+          <!-- frame A -->
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#5aa9ff"/>
+            <rect x="2" y="9" width="4" height="1" fill="#2c5fa0"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="1" fill="#2c5fa0"/>
+            <rect x="3" y="-1" width="2" height="1" fill="#2c5fa0"/>
+            <rect x="1" y="5" width="1" height="3" fill="#5aa9ff"/>
+            <rect x="6" y="5" width="1" height="3" fill="#5aa9ff"/>
+            <rect x="2" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="7" y="2" width="1" height="9" fill="#6a4a30"/>
+            <rect x="6" y="1" width="3" height="2" fill="#9b7bff"/>
+          </svg>
+          <!-- frame B (legs swapped) -->
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#5aa9ff"/>
+            <rect x="2" y="9" width="4" height="1" fill="#2c5fa0"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="1" fill="#2c5fa0"/>
+            <rect x="3" y="-1" width="2" height="1" fill="#2c5fa0"/>
+            <rect x="0" y="5" width="1" height="3" fill="#5aa9ff"/>
+            <rect x="7" y="5" width="1" height="3" fill="#5aa9ff"/>
+            <rect x="2" y="10" width="2" height="1" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="7" y="3" width="1" height="9" fill="#6a4a30"/>
+            <rect x="6" y="2" width="3" height="2" fill="#9b7bff"/>
+          </svg>
+        </div>
+        <div class="name">AANG</div>
+      </div>
+
+      <!-- doors -->
+      <div class="door v" style="right: -8px; top: 50%;"></div>
+      <div class="door"   style="bottom: -8px; left: 50%; transform: translateX(-50%);"></div>
+    </div>
+
+    <!-- ROOM 2: THRONE ROOM (center top) -->
+    <div class="room throne" data-agent="YOU">
+      <div class="room-name">♛ THRONE ROOM</div>
+      <div class="torch" style="top: 10%; left: 18%;"></div>
+      <div class="torch" style="top: 10%; right: 18%;"></div>
+      <div class="rug red"></div>
+
+      <!-- throne -->
+      <div class="obj" style="left: 50%; top: 18%; transform: translateX(-50%);">
+        <svg width="80" height="100" viewBox="0 0 16 20">
+          <!-- backrest -->
+          <rect x="3" y="0" width="10" height="12" fill="#7a3030"/>
+          <rect x="3" y="0" width="10" height="2" fill="#a04040"/>
+          <rect x="2" y="0" width="1" height="14" fill="#d6b25a"/>
+          <rect x="13" y="0" width="1" height="14" fill="#d6b25a"/>
+          <rect x="4" y="2" width="8" height="8" fill="#5a2020"/>
+          <!-- crest -->
+          <rect x="7" y="2" width="2" height="2" fill="#d6b25a"/>
+          <!-- seat -->
+          <rect x="2" y="12" width="12" height="4" fill="#8a3838"/>
+          <rect x="2" y="16" width="12" height="2" fill="#5a2020"/>
+          <rect x="3" y="18" width="2" height="2" fill="#3a1a1a"/>
+          <rect x="11" y="18" width="2" height="2" fill="#3a1a1a"/>
+        </svg>
+      </div>
+
+      <!-- chest -->
+      <div class="obj" style="left: 12%; bottom: 18%;">
+        <svg width="44" height="40" viewBox="0 0 11 10">
+          <rect x="0" y="2" width="11" height="6" fill="#6a4a30"/>
+          <rect x="0" y="0" width="11" height="3" fill="#8a6440"/>
+          <rect x="0" y="2" width="11" height="1" fill="#4a3220"/>
+          <rect x="5" y="4" width="2" height="2" fill="#d6b25a"/>
+          <rect x="0" y="8" width="11" height="2" fill="#3a2210"/>
+        </svg>
+      </div>
+
+      <!-- map table -->
+      <div class="obj" style="right: 8%; bottom: 22%;">
+        <svg width="60" height="50" viewBox="0 0 15 12">
+          <rect x="0" y="2" width="15" height="6" fill="#6a4a30"/>
+          <rect x="1" y="8" width="2" height="4" fill="#4a3220"/>
+          <rect x="12" y="8" width="2" height="4" fill="#4a3220"/>
+          <rect x="2" y="3" width="11" height="4" fill="#c8b48a"/>
+          <rect x="4" y="4" width="2" height="1" fill="#7a3030"/>
+          <rect x="9" y="5" width="2" height="1" fill="#5aa9ff"/>
+        </svg>
+      </div>
+
+      <!-- YOU sprite -->
+      <div class="agent you walking" style="left: 50%; top: 60%;">
+        <div class="bubble">that's you</div>
+        <div class="frames">
+          <svg viewBox="0 0 8 12">
+            <!-- crown -->
+            <rect x="2" y="-1" width="4" height="1" fill="#d6b25a"/>
+            <rect x="2" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="4" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="6" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <!-- robe purple -->
+            <rect x="2" y="4" width="4" height="6" fill="#7a3030"/>
+            <rect x="2" y="9" width="4" height="1" fill="#5a2020"/>
+            <rect x="3" y="6" width="2" height="2" fill="#d6b25a"/>
+            <rect x="1" y="5" width="1" height="3" fill="#7a3030"/>
+            <rect x="6" y="5" width="1" height="3" fill="#7a3030"/>
+            <rect x="2" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+          </svg>
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="-1" width="4" height="1" fill="#d6b25a"/>
+            <rect x="2" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="4" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="6" y="0" width="1" height="1" fill="#d6b25a"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="4" width="4" height="6" fill="#7a3030"/>
+            <rect x="2" y="9" width="4" height="1" fill="#5a2020"/>
+            <rect x="3" y="6" width="2" height="2" fill="#d6b25a"/>
+            <rect x="0" y="5" width="1" height="3" fill="#7a3030"/>
+            <rect x="7" y="5" width="1" height="3" fill="#7a3030"/>
+            <rect x="2" y="10" width="2" height="1" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+          </svg>
+        </div>
+        <div class="name">YOU</div>
+      </div>
+
+      <div class="door v" style="left: -8px; top: 50%;"></div>
+      <div class="door v" style="right: -8px; top: 50%;"></div>
+      <div class="door"   style="bottom: -8px; left: 50%; transform: translateX(-50%);"></div>
+    </div>
+
+    <!-- ROOM 3: THE FORGE -->
+    <div class="room forge" data-agent="CLAUDE_CODE">
+      <div class="room-name">⚒ THE FORGE</div>
+      <div class="torch" style="top: 10%; left: 6%;"></div>
+      <div class="torch" style="top: 10%; right: 6%;"></div>
+
+      <!-- furnace -->
+      <div class="obj" style="left: 8%; top: 25%;">
+        <svg width="80" height="100" viewBox="0 0 16 20">
+          <rect x="0" y="2" width="16" height="18" fill="#3a2c20"/>
+          <rect x="0" y="0" width="16" height="3" fill="#2c2018"/>
+          <rect x="3" y="6" width="10" height="8" fill="#1a1010"/>
+          <rect x="4" y="8" width="8" height="5" fill="#ffb24a"/>
+          <rect x="5" y="10" width="6" height="3" fill="#ffd28a"/>
+          <rect x="6" y="11" width="4" height="2" fill="#fff0c8"/>
+          <rect x="0" y="18" width="16" height="2" fill="#1a1010"/>
+        </svg>
+      </div>
+
+      <!-- anvil -->
+      <div class="obj" style="left: 50%; top: 45%; transform: translateX(-50%);">
+        <svg width="80" height="60" viewBox="0 0 20 15">
+          <rect x="6" y="6" width="8" height="2" fill="#2c2c34"/>
+          <rect x="4" y="8" width="12" height="2" fill="#2c2c34"/>
+          <rect x="7" y="10" width="6" height="3" fill="#3a3a44"/>
+          <rect x="5" y="13" width="10" height="2" fill="#2c2c34"/>
+          <rect x="9" y="4" width="2" height="2" fill="#ffb24a"/>
+        </svg>
+      </div>
+
+      <!-- weapon rack -->
+      <div class="obj" style="right: 6%; top: 28%;">
+        <svg width="44" height="80" viewBox="0 0 11 20">
+          <rect x="0" y="0" width="11" height="2" fill="#4a3220"/>
+          <rect x="0" y="18" width="11" height="2" fill="#4a3220"/>
+          <rect x="2" y="2" width="1" height="16" fill="#a8a8b8"/>
+          <rect x="1" y="3" width="3" height="2" fill="#a8a8b8"/>
+          <rect x="6" y="2" width="1" height="16" fill="#d6b25a"/>
+          <rect x="5" y="2" width="3" height="2" fill="#d6b25a"/>
+          <rect x="9" y="2" width="1" height="16" fill="#a8a8b8"/>
+        </svg>
+      </div>
+
+      <!-- CLAUDE_CODE sprite -->
+      <div class="agent cc walking" style="left: 25%; top: 55%;">
+        <div class="bubble warn">awaiting approval</div>
+        <div class="frames">
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#d6b25a"/>
+            <rect x="2" y="9" width="4" height="1" fill="#8a6f2c"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="2" fill="#8a6f2c"/>
+            <rect x="1" y="5" width="1" height="3" fill="#d6b25a"/>
+            <rect x="6" y="5" width="1" height="3" fill="#d6b25a"/>
+            <rect x="2" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="7" y="4" width="1" height="3" fill="#6a4a30"/>
+            <rect x="6" y="3" width="3" height="2" fill="#5a5a64"/>
+          </svg>
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#d6b25a"/>
+            <rect x="2" y="9" width="4" height="1" fill="#8a6f2c"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="2" fill="#8a6f2c"/>
+            <rect x="0" y="5" width="1" height="3" fill="#d6b25a"/>
+            <rect x="7" y="5" width="1" height="3" fill="#d6b25a"/>
+            <rect x="2" y="10" width="2" height="1" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="7" y="2" width="1" height="3" fill="#6a4a30"/>
+            <rect x="6" y="1" width="3" height="2" fill="#5a5a64"/>
+          </svg>
+        </div>
+        <div class="name">CLAUDE_CODE</div>
+      </div>
+
+      <div class="door v" style="left: -8px; top: 50%;"></div>
+      <div class="door"   style="bottom: -8px; left: 50%; transform: translateX(-50%);"></div>
+    </div>
+
+    <!-- ROOM 4: ARCHIVES (sealed) -->
+    <div class="room archive" data-agent="RAVEN">
+      <div class="room-name">⌖ ARCHIVES · SEALED</div>
+      <div class="torch" style="top: 10%; left: 6%; opacity: 0.4;"></div>
+      <div class="torch" style="top: 10%; right: 6%; opacity: 0.4;"></div>
+
+      <!-- chained bookshelves -->
+      <div class="obj" style="left: 8%; top: 22%;">
+        <svg width="80" height="120" viewBox="0 0 20 30">
+          <rect x="0" y="0" width="20" height="30" fill="#3a2818"/>
+          <rect x="0" y="6" width="20" height="1" fill="#5a3820"/>
+          <rect x="0" y="14" width="20" height="1" fill="#5a3820"/>
+          <rect x="0" y="22" width="20" height="1" fill="#5a3820"/>
+          <rect x="2" y="1" width="2" height="5" fill="#5aa9ff" opacity="0.5"/>
+          <rect x="5" y="2" width="2" height="4" fill="#9b7bff" opacity="0.5"/>
+          <rect x="8" y="1" width="2" height="5" fill="#d6b25a" opacity="0.5"/>
+          <rect x="11" y="2" width="2" height="4" fill="#82a577" opacity="0.5"/>
+          <rect x="14" y="1" width="2" height="5" fill="#d76060" opacity="0.5"/>
+          <rect x="17" y="2" width="2" height="4" fill="#9b7bff" opacity="0.5"/>
+          <rect x="2" y="8" width="3" height="6" fill="#5aa9ff" opacity="0.5"/>
+          <rect x="6" y="9" width="3" height="5" fill="#d6b25a" opacity="0.5"/>
+          <rect x="11" y="8" width="3" height="6" fill="#82a577" opacity="0.5"/>
+          <rect x="15" y="9" width="3" height="5" fill="#d76060" opacity="0.5"/>
+          <!-- chains -->
+          <rect x="0" y="10" width="20" height="1" fill="#d6b25a"/>
+          <rect x="0" y="12" width="20" height="1" fill="#d6b25a"/>
+          <rect x="0" y="20" width="20" height="1" fill="#d6b25a"/>
+          <rect x="8" y="9" width="4" height="4" fill="#8a6f2c"/>
+          <rect x="9" y="10" width="2" height="2" fill="#3a2818"/>
+        </svg>
+      </div>
+
+      <!-- locked door -->
+      <div class="obj" style="right: 18%; top: 30%;">
+        <svg width="50" height="100" viewBox="0 0 10 20">
+          <rect x="0" y="0" width="10" height="20" fill="#4a3220"/>
+          <rect x="0" y="0" width="10" height="2" fill="#6a4a30"/>
+          <rect x="1" y="3" width="8" height="15" fill="#3a2210"/>
+          <rect x="4" y="9" width="2" height="3" fill="#d6b25a"/>
+          <rect x="3" y="10" width="4" height="1" fill="#d6b25a"/>
+          <!-- big lock -->
+          <rect x="3" y="13" width="4" height="3" fill="#d6b25a"/>
+          <rect x="4" y="14" width="2" height="1" fill="#3a2210"/>
+        </svg>
+      </div>
+
+      <!-- RAVEN sprite, idle/sealed -->
+      <div class="agent raven idle" style="left: 50%; top: 65%;">
+        <div class="bubble bad">sealed · disabled</div>
+        <div class="frames">
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#9b7bff" opacity="0.4"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc" opacity="0.4"/>
+            <rect x="2" y="0" width="4" height="2" fill="#4a3a6a" opacity="0.4"/>
+            <rect x="1" y="5" width="1" height="3" fill="#9b7bff" opacity="0.4"/>
+            <rect x="6" y="5" width="1" height="3" fill="#9b7bff" opacity="0.4"/>
+            <rect x="2" y="10" width="2" height="2" fill="#2c2c34" opacity="0.4"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="name" style="opacity:0.5;">RAVEN</div>
+      </div>
+
+      <div class="door"  style="top: -8px; left: 50%; transform: translateX(-50%);"></div>
+      <div class="door v" style="right: -8px; top: 50%;"></div>
+    </div>
+
+    <!-- ROOM 5: ALCHEMY GARDEN (bottom-center) -->
+    <div class="room garden" data-agent="OAK">
+      <div class="room-name">✿ MEMORY GARDEN</div>
+      <div class="torch" style="top: 10%; left: 18%;"></div>
+      <div class="torch" style="top: 10%; right: 18%;"></div>
+      <div class="rug gold"></div>
+
+      <!-- well of memory -->
+      <div class="obj" style="left: 50%; top: 30%; transform: translateX(-50%);">
+        <svg width="80" height="80" viewBox="0 0 16 16">
+          <rect x="2" y="6" width="12" height="8" fill="#3a3a44"/>
+          <rect x="2" y="6" width="12" height="1" fill="#5a5a64"/>
+          <rect x="3" y="8" width="10" height="5" fill="#2c5fa0"/>
+          <rect x="3" y="8" width="10" height="1" fill="#5aa9ff"/>
+          <rect x="2" y="14" width="12" height="2" fill="#2c2c34"/>
+          <!-- arch -->
+          <rect x="1" y="0" width="2" height="6" fill="#4a3220"/>
+          <rect x="13" y="0" width="2" height="6" fill="#4a3220"/>
+          <rect x="3" y="0" width="10" height="2" fill="#4a3220"/>
+        </svg>
+      </div>
+
+      <!-- plants -->
+      <div class="obj" style="left: 8%; bottom: 18%;">
+        <svg width="40" height="60" viewBox="0 0 10 15">
+          <rect x="2" y="10" width="6" height="5" fill="#6a4a30"/>
+          <rect x="3" y="2" width="4" height="8" fill="#82a577"/>
+          <rect x="4" y="0" width="2" height="3" fill="#82a577"/>
+          <rect x="2" y="4" width="2" height="3" fill="#82a577"/>
+          <rect x="6" y="5" width="2" height="3" fill="#82a577"/>
+          <rect x="4" y="3" width="2" height="2" fill="#9b7bff"/>
+        </svg>
+      </div>
+      <div class="obj" style="right: 8%; bottom: 18%;">
+        <svg width="40" height="60" viewBox="0 0 10 15">
+          <rect x="2" y="10" width="6" height="5" fill="#6a4a30"/>
+          <rect x="3" y="2" width="4" height="8" fill="#82a577"/>
+          <rect x="4" y="0" width="2" height="3" fill="#82a577"/>
+          <rect x="2" y="4" width="2" height="3" fill="#82a577"/>
+          <rect x="6" y="5" width="2" height="3" fill="#82a577"/>
+          <rect x="4" y="3" width="2" height="2" fill="#d6b25a"/>
+        </svg>
+      </div>
+
+      <!-- OAK -->
+      <div class="agent oak walking" style="left: 35%; top: 55%;">
+        <div class="bubble">tending memory</div>
+        <div class="frames">
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#82a577"/>
+            <rect x="2" y="9" width="4" height="1" fill="#4f6a48"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="2" fill="#4f6a48"/>
+            <rect x="3" y="2" width="2" height="1" fill="#4f6a48"/>
+            <rect x="1" y="5" width="1" height="3" fill="#82a577"/>
+            <rect x="6" y="5" width="1" height="3" fill="#82a577"/>
+            <rect x="0" y="6" width="2" height="2" fill="#d6b25a"/>
+            <rect x="2" y="10" width="2" height="2" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+          </svg>
+          <svg viewBox="0 0 8 12">
+            <rect x="2" y="4" width="4" height="6" fill="#82a577"/>
+            <rect x="2" y="9" width="4" height="1" fill="#4f6a48"/>
+            <rect x="3" y="1" width="2" height="3" fill="#ece7dc"/>
+            <rect x="2" y="0" width="4" height="2" fill="#4f6a48"/>
+            <rect x="3" y="2" width="2" height="1" fill="#4f6a48"/>
+            <rect x="0" y="5" width="1" height="3" fill="#82a577"/>
+            <rect x="7" y="5" width="1" height="3" fill="#82a577"/>
+            <rect x="-1" y="6" width="2" height="2" fill="#d6b25a"/>
+            <rect x="2" y="10" width="2" height="1" fill="#2c2c34"/>
+            <rect x="4" y="10" width="2" height="2" fill="#2c2c34"/>
+          </svg>
+        </div>
+        <div class="name">OAK</div>
+      </div>
+
+      <div class="door" style="top: -8px; left: 50%; transform: translateX(-50%);"></div>
+    </div>
+
+    <!-- ROOM 6: GATEHOUSE (bottom-right) — inbox/sources arrive here -->
+    <div class="room gate" data-agent="GATEHOUSE">
+      <div class="room-name">⛩ GATEHOUSE · INBOX</div>
+      <div class="torch" style="top: 10%; left: 10%;"></div>
+      <div class="torch" style="top: 10%; right: 10%;"></div>
+
+      <!-- portcullis -->
+      <div class="obj" style="left: 50%; top: 14%; transform: translateX(-50%);">
+        <svg width="120" height="80" viewBox="0 0 30 20">
+          <rect x="0" y="0" width="30" height="3" fill="#4a3220"/>
+          <rect x="0" y="3" width="30" height="1" fill="#6a4a30"/>
+          <rect x="2" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="6" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="10" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="14" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="18" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="22" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="26" y="4" width="1" height="14" fill="#a8a8b8"/>
+          <rect x="0" y="8" width="30" height="1" fill="#a8a8b8"/>
+          <rect x="0" y="14" width="30" height="1" fill="#a8a8b8"/>
+        </svg>
+      </div>
+
+      <!-- mail crates -->
+      <div class="obj" style="left: 12%; bottom: 22%;">
+        <svg width="50" height="40" viewBox="0 0 12 10">
+          <rect x="0" y="2" width="12" height="8" fill="#6a4a30"/>
+          <rect x="0" y="2" width="12" height="1" fill="#8a6440"/>
+          <rect x="2" y="4" width="3" height="3" fill="#c8b48a"/>
+          <rect x="6" y="4" width="3" height="3" fill="#c8b48a"/>
+        </svg>
+        <div class="label" style="color: var(--gold);">2 NEW</div>
+      </div>
+
+      <div class="obj" style="right: 12%; bottom: 22%;">
+        <svg width="50" height="40" viewBox="0 0 12 10">
+          <rect x="0" y="2" width="12" height="8" fill="#6a4a30"/>
+          <rect x="0" y="2" width="12" height="1" fill="#8a6440"/>
+          <rect x="2" y="4" width="3" height="3" fill="#5aa9ff"/>
+          <rect x="6" y="4" width="3" height="3" fill="#9b7bff"/>
+        </svg>
+      </div>
+
+      <div class="door" style="top: -8px; left: 50%; transform: translateX(-50%);"></div>
+      <div class="door v" style="left: -8px; top: 50%;"></div>
+    </div>
+
+  </div>
+
+    <div class="scroll-prop" id="scroll-prop"></div>
+  </div><!-- /view-interior -->
+
+  <!-- ============ CHAT ============ -->
+  <div class="chat">
+    <div class="chat-log">
+      <div class="msg"><div class="who you">YOU</div>     <div class="body">aang, draft the model routing matrix. local models only.</div></div>
+      <div class="msg"><div class="who aang">AANG</div>   <div class="body">walking to the research table. context pack: 4 sources, 12 memory entries.</div></div>
+      <div class="msg"><div class="who oak">OAK</div>     <div class="body">i'll wait at the well. flag me when there's a draft to validate.</div></div>
+      <div class="msg"><div class="who cc">CLAUDE_CODE</div><div class="body">forge is hot. need approval to write notion before i can ship.</div></div>
+      <div class="msg"><div class="who raven">RAVEN</div> <div class="body">[archives sealed — raven cannot speak]</div></div>
+    </div>
+    <div class="chat-input">
+      <div class="prompt">»</div>
+      <div class="target">@AANG</div>
+      <input placeholder="speak to the keep…" />
+      <button class="send">SEND ⏎</button>
+    </div>
+    <div class="chat-hint">⌘K palette · @oak (garden) · @claude_code (forge) · @raven (sealed) · esc cancel</div>
+  </div>
+
+</div>
+
+<script>
+  const $  = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  // view toggle
+  const vInt = $('#view-interior');
+  const vExt = $('#view-exterior');
+  const bInt = $('#btn-int');
+  const bExt = $('#btn-ext');
+  const showInterior = () => {
+    vInt.classList.remove('hidden'); vExt.classList.add('hidden');
+    bInt.classList.add('active');     bExt.classList.remove('active');
+  };
+  const showExterior = () => {
+    vExt.classList.remove('hidden'); vInt.classList.add('hidden');
+    bExt.classList.add('active');     bInt.classList.remove('active');
+  };
+  bInt.addEventListener('click', showInterior);
+  bExt.addEventListener('click', showExterior);
+  $('#ext-enter').addEventListener('click', showInterior);
+
+  // click room → set chat target
+  const targetLabel = $('#target-label');
+  const targetChip  = $('.chat-input .target');
+  $$('.room').forEach(r => {
+    r.addEventListener('click', () => {
+      $$('.room').forEach(x => x.classList.remove('targeted'));
+      r.classList.add('targeted');
+      const a = r.dataset.agent || 'AANG';
+      targetLabel.textContent = '@' + a;
+      targetChip.textContent  = '@' + a;
+    });
+  });
+
+  // handoff: aang carries scroll from research → garden, oak speaks
+  const handoffBtn = $('#btn-handoff');
+  const scrollProp = $('#scroll-prop');
+  const oakBubble  = document.querySelector('.agent.oak .bubble');
+  const aangBubble = document.querySelector('.agent.aang .bubble');
+  handoffBtn.addEventListener('click', () => {
+    aangBubble.textContent = 'delivering draft';
+    aangBubble.classList.add('warn'); aangBubble.classList.remove('live');
+    scrollProp.classList.remove('active'); void scrollProp.offsetWidth;
+    scrollProp.classList.add('active');
+    setTimeout(() => {
+      oakBubble.textContent = 'reviewing matrix';
+      oakBubble.classList.add('live');
+    }, 3000);
+    setTimeout(() => {
+      scrollProp.classList.remove('active');
+      aangBubble.textContent = 'awaiting verdict';
+      aangBubble.classList.remove('warn');
+    }, 6000);
+  });
+</script>
+
+</body>
+</html>

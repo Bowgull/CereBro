@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CereBro — The Keep</title>
+<style>
+  /* Tokens from cerebro-castle-ui.md */
+  :root {
+    --bg: #0E1116;
+    --bg-soft: #131821;
+    --surface: #181F2A;
+    --surface-raised: #202A38;
+    --surface-muted: #151A23;
+    --border: #334155;
+    --border-soft: #253041;
+    --text: #F4EFE3;
+    --text-2: #B8C0CC;
+    --text-mute: #7E8898;
+    --accent: #6BA6FF;
+    --accent-soft: #2D5B8F;
+    --violet: #8B5CF6;
+    --violet-glow: #A78BFA;
+    --success: #9FD2B7;
+    --warning: #F6C177;
+    --danger: #EF6F6C;
+    --gold: #D9B56A;
+    --gold-d: #8a6f2c;
+    --stone: #6B7280;
+    --torch: #ffb24a;
+
+    --mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    --pixel: "VT323", "Press Start 2P", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+  svg { image-rendering: pixelated; shape-rendering: crispEdges; display: block; }
+
+  .app {
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    height: 100vh;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    background: var(--bg);
+    border-bottom: 2px solid var(--gold-d);
+    padding: 8px 16px;
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--pixel);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .topbar .brand { color: var(--gold); font-size: 16px; }
+  .topbar .project { color: var(--text-2); margin-right: auto; font-size: 12px; }
+  .topbar .project b { color: var(--accent); }
+  .topbar .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: default;
+  }
+  .topbar .pill.warn { color: var(--warning); border-color: var(--warning); }
+  .topbar .pill.gold { color: var(--gold); border-color: var(--gold-d); }
+  .topbar .pill.violet { color: var(--violet-glow); border-color: var(--violet); }
+
+  /* ============ MAIN GRID ============ */
+  .main {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    overflow: hidden;
+  }
+
+  /* ============ LEFT RAIL ============ */
+  .rail {
+    background: var(--bg-soft);
+    border-right: 1px solid var(--border-soft);
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .rail h4 {
+    font-family: var(--pixel);
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin: 12px 16px 8px;
+    font-weight: normal;
+  }
+  .rail .item {
+    padding: 6px 16px;
+    color: var(--text-2);
+    font-size: 12px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .rail .item:hover { background: var(--surface-muted); color: var(--text); }
+  .rail .item.active {
+    background: var(--surface);
+    border-left-color: var(--gold);
+    color: var(--text);
+  }
+  .rail .item small { color: var(--text-mute); display: block; font-size: 10px; }
+  .rail .new {
+    margin: 12px 16px;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-mute);
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .rail .new:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ============ CASTLE STAGE ============ */
+  .stage {
+    position: relative;
+    background:
+      radial-gradient(ellipse at 50% 40%, #1a2030 0%, var(--bg) 70%),
+      var(--bg);
+    overflow: hidden;
+    padding: 16px;
+  }
+  .keep {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    grid-template-rows: 1fr 1.1fr 1fr 0.6fr;
+    gap: 12px;
+  }
+
+  /* room base */
+  .room {
+    position: relative;
+    background:
+      repeating-linear-gradient(45deg, #1a1f2a 0 6px, #181d28 6px 12px);
+    border: 2px solid var(--border-soft);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .room:hover {
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 20px rgba(107,166,255,0.15) inset;
+  }
+  .room.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(217,181,106,0.2) inset;
+  }
+  .room .room-label {
+    position: absolute;
+    top: 8px; left: 10px;
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    z-index: 5;
+  }
+  .room .room-sub {
+    position: absolute;
+    top: 24px; left: 10px;
+    font-size: 10px;
+    color: var(--text-mute);
+    z-index: 5;
+  }
+
+  /* torches */
+  .torch {
+    position: absolute;
+    width: 4px; height: 12px;
+    background: linear-gradient(180deg, var(--torch) 0%, #d68a30 100%);
+    border-radius: 2px;
+    box-shadow: 0 0 12px 4px rgba(255,178,74,0.4);
+    animation: flicker 1.4s infinite ease-in-out;
+  }
+  .torch::before {
+    content: '';
+    position: absolute;
+    top: -6px; left: -2px;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle, var(--torch) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: flicker 1.4s infinite ease-in-out alternate;
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  /* objects (furniture) */
+  .obj {
+    position: absolute;
+    pointer-events: none;
+    image-rendering: pixelated;
+  }
+
+  /* AGENT sprite */
+  .agent {
+    position: absolute;
+    width: 32px; height: 48px;
+    z-index: 10;
+    transition: left 2.4s linear, top 2.4s linear;
+    pointer-events: none;
+  }
+  .agent .frames {
+    position: relative;
+    width: 32px; height: 48px;
+  }
+  .agent .frames svg {
+    position: absolute; top: 0; left: 0;
+    width: 32px; height: 48px;
+  }
+  .agent .frames svg:nth-child(1) { animation: frameA 0.6s steps(1) infinite; }
+  .agent .frames svg:nth-child(2) { animation: frameB 0.6s steps(1) infinite; }
+  @keyframes frameA { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+  @keyframes frameB { 0%,49% { opacity: 0; } 50%,100% { opacity: 1; } }
+
+  .agent.idle .frames svg:nth-child(2) { animation: none; opacity: 0; }
+  .agent.idle .frames svg:nth-child(1) { animation: bob 2s ease-in-out infinite; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-2px); opacity: 1; }
+  }
+
+  .agent .name {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--pixel);
+    font-size: 9px;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-shadow: 0 0 3px var(--bg);
+    white-space: nowrap;
+  }
+
+  /* speech bubble */
+  .bubble {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 3px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 11;
+  }
+  .bubble.live { border-color: var(--accent); color: var(--accent); }
+  .bubble.warn { border-color: var(--warning); color: var(--warning); }
+  .bubble.violet { border-color: var(--violet); color: var(--violet-glow); }
+  .bubble.success { border-color: var(--success); color: var(--success); }
+
+  /* status pip */
+  .pip {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    margin-right: 4px;
+    box-shadow: 0 0 4px currentColor;
+  }
+  .pip.idle { background: var(--text-mute); }
+  .pip.warn { background: var(--warning); }
+  .pip.violet { background: var(--violet-glow); }
+  .pip.danger { background: var(--danger); }
+
+  /* ============ RIGHT PANEL ============ */
+  .panel {
+    background: var(--bg-soft);
+    border-left: 1px solid var(--border-soft);
+    overflow-y: auto;
+    padding: 12px 14px;
+  }
+  .panel h4 {
+    font-family: var(--pixel);
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin: 12px 0 6px;
+    font-weight: normal;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 4px;
+  }
+  .panel h4:first-child { margin-top: 0; }
+  .panel .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  .panel .agent-card .head {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--pixel);
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .panel .agent-card .role {
+    font-size: 10px;
+    color: var(--text-mute);
+    margin-top: 2px;
+  }
+  .panel .agent-card .stat {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--text-2);
+  }
+  .panel .agent-card .stat b { color: var(--text); }
+  .panel .row {
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+    padding: 4px 0;
+    color: var(--text-2);
+    border-bottom: 1px dashed var(--border-soft);
+  }
+  .panel .row:last-child { border-bottom: none; }
+  .panel .row .badge {
+    font-size: 9px;
+    padding: 1px 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+  .panel .row .badge.warn { color: var(--warning); border-color: var(--warning); }
+  .panel .row .badge.violet { color: var(--violet-glow); border-color: var(--violet); }
+  .panel .row .badge.success { color: var(--success); border-color: var(--success); }
+
+  /* ============ INTENT BAR ============ */
+  .intent {
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-soft);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .intent .who {
+    font-family: var(--pixel);
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    background: var(--surface);
+    border: 1px solid var(--gold-d);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .intent input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+  }
+  .intent input:focus { border-color: var(--accent); }
+  .intent button {
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    padding: 8px 18px;
+    font-family: var(--pixel);
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+  }
+  .intent button:hover { background: var(--gold-d); color: var(--text); }
+
+  /* ============ STATUS BAR ============ */
+  .statusbar {
+    background: var(--bg);
+    border-top: 1px solid var(--border-soft);
+    padding: 6px 16px;
+    display: flex; gap: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-mute);
+  }
+  .statusbar span b { color: var(--text); }
+  .statusbar .meter {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .statusbar .meter .bar {
+    width: 80px; height: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .statusbar .meter .bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--gold));
+    transition: width 0.5s;
+  }
+  .statusbar .meter.warn .fill { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+
+  /* layout overrides for grid placement */
+  .pos-watch { grid-column: 1; grid-row: 1; }
+  .pos-observatory { grid-column: 2; grid-row: 1; }
+  .pos-cartography { grid-column: 3; grid-row: 1; }
+  .pos-warroom { grid-column: 1; grid-row: 2; }
+  .pos-greathall { grid-column: 2; grid-row: 2; }
+  .pos-atelier { grid-column: 3; grid-row: 2; }
+  .pos-forge { grid-column: 1; grid-row: 3; }
+  .pos-scriptorium { grid-column: 2; grid-row: 3; }
+  .pos-alchemy { grid-column: 3; grid-row: 3; }
+  .pos-crypts { grid-column: 1 / span 3; grid-row: 4; }
+
+  /* selection ring */
+  .ring {
+    position: absolute;
+    border: 1px dashed var(--gold);
+    border-radius: 50%;
+    width: 40px; height: 14px;
+    bottom: -2px; left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.6;
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin { to { transform: translateX(-50%) rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <span class="brand">⚜ CEREBRO</span>
+    <span class="project">Project: <b>CereBro V1</b> · Mode: <b>Build</b></span>
+    <span class="pill">Inbox <b style="color:var(--accent)">3</b></span>
+    <span class="pill">Outbox <b style="color:var(--success)">2</b></span>
+    <span class="pill warn">Approvals <b>1</b></span>
+    <span class="pill violet">Validations <b>2</b></span>
+    <span class="pill gold">⚙</span>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- LEFT RAIL -->
+    <div class="rail">
+      <h4>PROJECT SPACES</h4>
+      <div class="item active">CereBro V1<small>10 tasks · 3 sources</small></div>
+      <div class="item">Waymark<small>last: 2h ago</small></div>
+      <div class="item">Bridgefour<small>last: yesterday</small></div>
+      <div class="item">sygnalist-brain<small>last: 4d ago</small></div>
+      <div class="new">+ NEW PROJECT</div>
+
+      <h4>RECENT TASKS</h4>
+      <div class="item">Phase 0 scaffolding<small>Tony · in progress</small></div>
+      <div class="item">License audit<small>Oak · validating</small></div>
+      <div class="item">Castle UI mockup<small>Gojo · drafting</small></div>
+      <div class="item">Crawl4AI eval<small>Silver Surfer · idle</small></div>
+
+      <h4>SKILLS</h4>
+      <div class="item">tony-build-flow</div>
+      <div class="item">frontend-design</div>
+      <div class="item">source-ingestion</div>
+      <div class="item">validation</div>
+      <div class="item">notion-output</div>
+    </div>
+
+    <!-- CASTLE STAGE -->
+    <div class="stage">
+      <div class="keep" id="keep">
+
+        <!-- ====== WATCH TOWER · CORTANA ====== -->
+        <div class="room pos-watch" data-agent="cortana">
+          <div class="room-label">⚐ WATCH TOWER</div>
+          <div class="room-sub">routing · oversight</div>
+          <div class="torch" style="top:30px; left:10px;"></div>
+          <div class="torch" style="top:30px; right:10px;"></div>
+          <!-- desk + crystal -->
+          <div class="obj" style="left:30%; top:55%;">
+            <svg width="60" height="44" viewBox="0 0 15 11">
+              <rect x="0" y="6" width="15" height="3" fill="#3a2818"/>
+              <rect x="1" y="9" width="2" height="2" fill="#2a1810"/>
+              <rect x="12" y="9" width="2" height="2" fill="#2a1810"/>
+              <rect x="6" y="2" width="3" height="4" fill="#6BA6FF" opacity="0.7"/>
+              <rect x="7" y="0" width="1" height="2" fill="#A78BFA"/>
+            </svg>
+          </div>
+          <!-- map of routes -->
+          <div class="obj" style="right:8%; top:30%;">
+            <svg width="40" height="50" viewBox="0 0 10 12">
+              <rect x="0" y="0" width="10" height="12" fill="#c8b48a"/>
+              <rect x="2" y="3" width="6" height="1" fill="#7a3030"/>
+              <rect x="2" y="7" width="3" height="1" fill="#2D5B8F"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== OBSERVATORY · SPOCK ====== -->
+        <div class="room pos-observatory" data-agent="spock">
+          <div class="room-label">✦ OBSERVATORY</div>
+          <div class="room-sub">logic · contradiction-check</div>
+          <div class="torch" style="top:30px; left:14px;"></div>
+          <div class="torch" style="top:30px; right:14px;"></div>
+          <!-- telescope -->
+          <div class="obj" style="left:42%; top:32%;">
+            <svg width="50" height="60" viewBox="0 0 12 14">
+              <rect x="5" y="0" width="2" height="6" fill="#3a3a44"/>
+              <rect x="3" y="6" width="6" height="2" fill="#3a3a44"/>
+              <rect x="2" y="8" width="8" height="1" fill="#5a5a64"/>
+              <rect x="4" y="9" width="4" height="5" fill="#2c2c34"/>
+            </svg>
+          </div>
+          <!-- star chart -->
+          <div class="obj" style="left:8%; top:62%;">
+            <svg width="80" height="32" viewBox="0 0 20 8">
+              <rect x="0" y="0" width="20" height="8" fill="#0E1116"/>
+              <rect x="3" y="2" width="1" height="1" fill="#A78BFA"/>
+              <rect x="7" y="4" width="1" height="1" fill="#F4EFE3"/>
+              <rect x="11" y="1" width="1" height="1" fill="#6BA6FF"/>
+              <rect x="15" y="5" width="1" height="1" fill="#D9B56A"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== CARTOGRAPHY HALL · SILVER SURFER ====== -->
+        <div class="room pos-cartography" data-agent="surfer">
+          <div class="room-label">⌖ CARTOGRAPHY HALL</div>
+          <div class="room-sub">research · sources</div>
+          <div class="torch" style="top:30px; left:14px;"></div>
+          <div class="torch" style="top:30px; right:14px;"></div>
+          <!-- big map -->
+          <div class="obj" style="left:50%; top:45%; transform: translateX(-50%);">
+            <svg width="100" height="60" viewBox="0 0 25 15">
+              <rect x="0" y="2" width="25" height="11" fill="#6a4a30"/>
+              <rect x="1" y="3" width="23" height="9" fill="#c8b48a"/>
+              <rect x="3" y="5" width="5" height="2" fill="#2D5B8F"/>
+              <rect x="10" y="6" width="6" height="3" fill="#82a577"/>
+              <rect x="18" y="5" width="4" height="2" fill="#7a3030"/>
+              <rect x="6" y="9" width="3" height="2" fill="#A78BFA"/>
+              <rect x="14" y="10" width="2" height="1" fill="#D9B56A"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== WAR ROOM · BATMAN ====== -->
+        <div class="room pos-warroom" data-agent="batman">
+          <div class="room-label">▼ WAR ROOM</div>
+          <div class="room-sub">analysis · tradeoffs</div>
+          <div class="torch" style="top:30px; left:10px;"></div>
+          <div class="torch" style="top:30px; right:10px;"></div>
+          <!-- round table -->
+          <div class="obj" style="left:50%; top:42%; transform: translateX(-50%);">
+            <svg width="80" height="56" viewBox="0 0 20 14">
+              <ellipse cx="10" cy="9" rx="9" ry="4" fill="#3a2818"/>
+              <ellipse cx="10" cy="8" rx="9" ry="4" fill="#5a3820"/>
+              <ellipse cx="10" cy="7" rx="8" ry="3" fill="#6a4a30"/>
+              <rect x="2" y="6" width="2" height="1" fill="#EF6F6C"/>
+              <rect x="9" y="5" width="2" height="2" fill="#6BA6FF"/>
+              <rect x="15" y="6" width="2" height="1" fill="#D9B56A"/>
+            </svg>
+          </div>
+          <!-- weapon stand -->
+          <div class="obj" style="right:8%; top:30%;">
+            <svg width="20" height="60" viewBox="0 0 5 15">
+              <rect x="2" y="0" width="1" height="15" fill="#5a5a64"/>
+              <rect x="1" y="0" width="3" height="2" fill="#5a5a64"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== GREAT HALL · AANG ====== -->
+        <div class="room pos-greathall" data-agent="aang">
+          <div class="room-label">♔ GREAT HALL</div>
+          <div class="room-sub">intent · entry · meet here</div>
+          <div class="torch" style="top:30px; left:8%;"></div>
+          <div class="torch" style="top:30px; left:30%;"></div>
+          <div class="torch" style="top:30px; right:30%;"></div>
+          <div class="torch" style="top:30px; right:8%;"></div>
+          <!-- long table -->
+          <div class="obj" style="left:50%; top:42%; transform: translateX(-50%);">
+            <svg width="180" height="36" viewBox="0 0 45 9">
+              <rect x="0" y="2" width="45" height="5" fill="#5a3820"/>
+              <rect x="0" y="2" width="45" height="1" fill="#7a5230"/>
+              <rect x="1" y="7" width="2" height="2" fill="#3a2818"/>
+              <rect x="42" y="7" width="2" height="2" fill="#3a2818"/>
+              <rect x="6" y="3" width="3" height="3" fill="#D9B56A"/>
+              <rect x="20" y="3" width="4" height="3" fill="#6BA6FF"/>
+              <rect x="34" y="3" width="3" height="3" fill="#A78BFA"/>
+            </svg>
+          </div>
+          <!-- banner -->
+          <div class="obj" style="left:50%; top:8%; transform: translateX(-50%);">
+            <svg width="40" height="28" viewBox="0 0 10 7">
+              <rect x="0" y="0" width="10" height="6" fill="#2D5B8F"/>
+              <polygon points="0,6 5,4 10,6" fill="#2D5B8F"/>
+              <rect x="4" y="2" width="2" height="2" fill="#D9B56A"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== ATELIER · GOJO ====== -->
+        <div class="room pos-atelier" data-agent="gojo">
+          <div class="room-label">✿ ATELIER</div>
+          <div class="room-sub">design · creative</div>
+          <div class="torch" style="top:30px; left:10px;"></div>
+          <div class="torch" style="top:30px; right:10px;"></div>
+          <!-- easel -->
+          <div class="obj" style="left:55%; top:32%;">
+            <svg width="60" height="80" viewBox="0 0 15 20">
+              <rect x="6" y="2" width="1" height="18" fill="#6a4a30"/>
+              <rect x="3" y="3" width="9" height="9" fill="#c8b48a"/>
+              <rect x="4" y="4" width="3" height="2" fill="#A78BFA"/>
+              <rect x="8" y="6" width="3" height="3" fill="#D9B56A"/>
+              <rect x="4" y="10" width="6" height="1" fill="#2D5B8F"/>
+              <rect x="2" y="19" width="3" height="1" fill="#4a3220"/>
+              <rect x="10" y="19" width="3" height="1" fill="#4a3220"/>
+            </svg>
+          </div>
+          <!-- color jars -->
+          <div class="obj" style="left:8%; top:60%;">
+            <svg width="50" height="20" viewBox="0 0 12 5">
+              <rect x="0" y="1" width="2" height="4" fill="#EF6F6C"/>
+              <rect x="3" y="1" width="2" height="4" fill="#9FD2B7"/>
+              <rect x="6" y="1" width="2" height="4" fill="#6BA6FF"/>
+              <rect x="9" y="1" width="2" height="4" fill="#A78BFA"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== FORGE · TONY STARK ====== -->
+        <div class="room pos-forge" data-agent="tony">
+          <div class="room-label">⚒ THE FORGE</div>
+          <div class="room-sub">build · code · architecture</div>
+          <div class="torch" style="top:30px; left:10px;"></div>
+          <div class="torch" style="top:30px; right:10px;"></div>
+          <!-- furnace glow -->
+          <div class="obj" style="left:8%; top:30%;">
+            <svg width="50" height="56" viewBox="0 0 12 14">
+              <rect x="0" y="2" width="12" height="12" fill="#3a2c20"/>
+              <rect x="2" y="5" width="8" height="6" fill="#1a1010"/>
+              <rect x="3" y="7" width="6" height="3" fill="#ffb24a"/>
+              <rect x="4" y="8" width="4" height="2" fill="#ffd28a"/>
+              <rect x="0" y="13" width="12" height="1" fill="#1a1010"/>
+            </svg>
+          </div>
+          <!-- anvil -->
+          <div class="obj" style="left:50%; top:55%; transform: translateX(-50%);">
+            <svg width="60" height="40" viewBox="0 0 15 10">
+              <rect x="4" y="3" width="7" height="2" fill="#2c2c34"/>
+              <rect x="3" y="5" width="9" height="2" fill="#2c2c34"/>
+              <rect x="6" y="7" width="3" height="2" fill="#3a3a44"/>
+              <rect x="4" y="9" width="7" height="1" fill="#2c2c34"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== SCRIPTORIUM · C-3PO ====== -->
+        <div class="room pos-scriptorium" data-agent="c3po">
+          <div class="room-label">✎ SCRIPTORIUM</div>
+          <div class="room-sub">format · output · copy</div>
+          <div class="torch" style="top:30px; left:14px;"></div>
+          <div class="torch" style="top:30px; right:14px;"></div>
+          <!-- writing desks -->
+          <div class="obj" style="left:15%; top:50%;">
+            <svg width="60" height="40" viewBox="0 0 15 10">
+              <rect x="0" y="4" width="15" height="3" fill="#5a3820"/>
+              <rect x="1" y="7" width="2" height="3" fill="#3a2818"/>
+              <rect x="12" y="7" width="2" height="3" fill="#3a2818"/>
+              <rect x="2" y="2" width="8" height="2" fill="#ece7dc"/>
+            </svg>
+          </div>
+          <div class="obj" style="right:15%; top:50%;">
+            <svg width="60" height="40" viewBox="0 0 15 10">
+              <rect x="0" y="4" width="15" height="3" fill="#5a3820"/>
+              <rect x="1" y="7" width="2" height="3" fill="#3a2818"/>
+              <rect x="12" y="7" width="2" height="3" fill="#3a2818"/>
+              <rect x="3" y="2" width="9" height="2" fill="#ece7dc"/>
+              <rect x="4" y="3" width="2" height="1" fill="#2c2c34"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== ALCHEMIST'S TOWER · OAK ====== -->
+        <div class="room pos-alchemy" data-agent="oak">
+          <div class="room-label">⚗ ALCHEMIST'S TOWER</div>
+          <div class="room-sub">validation · stamp</div>
+          <div class="torch" style="top:30px; left:14px;"></div>
+          <div class="torch" style="top:30px; right:14px;"></div>
+          <!-- alembic -->
+          <div class="obj" style="left:50%; top:38%; transform: translateX(-50%);">
+            <svg width="50" height="64" viewBox="0 0 12 16">
+              <rect x="4" y="0" width="4" height="3" fill="#3a3a44"/>
+              <rect x="5" y="3" width="2" height="4" fill="#3a3a44"/>
+              <rect x="3" y="7" width="6" height="6" fill="#9FD2B7" opacity="0.6"/>
+              <rect x="2" y="13" width="8" height="2" fill="#3a3a44"/>
+              <rect x="0" y="15" width="12" height="1" fill="#1a1010"/>
+            </svg>
+          </div>
+          <!-- shelf of vials -->
+          <div class="obj" style="left:8%; top:62%;">
+            <svg width="60" height="20" viewBox="0 0 15 5">
+              <rect x="0" y="0" width="15" height="1" fill="#5a3820"/>
+              <rect x="1" y="1" width="2" height="4" fill="#A78BFA"/>
+              <rect x="5" y="1" width="2" height="4" fill="#9FD2B7"/>
+              <rect x="9" y="1" width="2" height="4" fill="#F6C177"/>
+              <rect x="12" y="1" width="2" height="4" fill="#6BA6FF"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- ====== CRYPTS · PICCOLO (full width bottom) ====== -->
+        <div class="room pos-crypts" data-agent="piccolo">
+          <div class="room-label">⛧ THE CRYPTS</div>
+          <div class="room-sub">cleanup · backups · scheduled jobs</div>
+          <div class="torch" style="top:30px; left:8%;"></div>
+          <div class="torch" style="top:30px; left:35%;"></div>
+          <div class="torch" style="top:30px; right:35%;"></div>
+          <div class="torch" style="top:30px; right:8%;"></div>
+          <!-- archive shelves -->
+          <div class="obj" style="left:5%; top:45%;">
+            <svg width="80" height="40" viewBox="0 0 20 10">
+              <rect x="0" y="0" width="20" height="10" fill="#2c2018"/>
+              <rect x="0" y="3" width="20" height="1" fill="#3a2818"/>
+              <rect x="0" y="6" width="20" height="1" fill="#3a2818"/>
+              <rect x="1" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="4" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="7" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="1" y="4" width="2" height="2" fill="#5a3820"/>
+              <rect x="11" y="4" width="2" height="2" fill="#5a3820"/>
+              <rect x="1" y="7" width="2" height="2" fill="#5a3820"/>
+              <rect x="14" y="7" width="2" height="2" fill="#5a3820"/>
+            </svg>
+          </div>
+          <div class="obj" style="right:5%; top:45%;">
+            <svg width="80" height="40" viewBox="0 0 20 10">
+              <rect x="0" y="0" width="20" height="10" fill="#2c2018"/>
+              <rect x="0" y="3" width="20" height="1" fill="#3a2818"/>
+              <rect x="0" y="6" width="20" height="1" fill="#3a2818"/>
+              <rect x="3" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="9" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="15" y="1" width="2" height="2" fill="#5a3820"/>
+              <rect x="5" y="4" width="2" height="2" fill="#5a3820"/>
+              <rect x="13" y="4" width="2" height="2" fill="#5a3820"/>
+              <rect x="6" y="7" width="2" height="2" fill="#5a3820"/>
+              <rect x="17" y="7" width="2" height="2" fill="#5a3820"/>
+            </svg>
+          </div>
+          <!-- broom + bucket -->
+          <div class="obj" style="left:48%; top:30%; transform: translateX(-50%);">
+            <svg width="30" height="50" viewBox="0 0 8 12">
+              <rect x="3" y="0" width="1" height="9" fill="#6a4a30"/>
+              <rect x="2" y="9" width="3" height="2" fill="#82a577"/>
+              <rect x="1" y="11" width="5" height="1" fill="#3a2818"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+      <!-- agents are injected by JS into rooms -->
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel">
+      <h4>SELECTED AGENT</h4>
+      <div class="agent-card" id="agentCard">
+        <div class="head"><span class="pip" id="cardPip"></span><span id="cardName">AANG</span></div>
+        <div class="role" id="cardRole">intent capture</div>
+        <div class="stat">station: <b id="cardStation">Great Hall</b></div>
+        <div class="stat">state: <b id="cardState">idle</b></div>
+        <div class="stat">model: <b id="cardModel">local · lightweight</b></div>
+        <div class="stat">last: <b id="cardLast">2 min ago</b></div>
+      </div>
+
+      <h4>TASK QUEUE</h4>
+      <div class="row">Phase 0 scaffolding <span class="badge">tony</span></div>
+      <div class="row">License audit <span class="badge violet">oak</span></div>
+      <div class="row">Castle UI mockup <span class="badge">gojo</span></div>
+      <div class="row">Crawl4AI eval <span class="badge">surfer</span></div>
+
+      <h4>SOURCE LIBRARY</h4>
+      <div class="row">Claude Dungeon repo <span class="badge success">ingested</span></div>
+      <div class="row">Pixel Agents repo <span class="badge success">ingested</span></div>
+      <div class="row">cerebro-castle-ui.md <span class="badge success">parsed</span></div>
+
+      <h4>MEMORY QUEUE</h4>
+      <div class="row">Storage tier decision <span class="badge violet">proposed</span></div>
+      <div class="row">Castle aesthetic locked <span class="badge success">approved</span></div>
+
+      <h4>APPROVALS WAITING</h4>
+      <div class="row">External Claude Code call <span class="badge warn">tony</span></div>
+
+      <h4>RECENT VALIDATIONS</h4>
+      <div class="row">Phase 0 scope <span class="badge success">passed</span></div>
+      <div class="row">Tier 1 GitHub list <span class="badge violet">in-review</span></div>
+    </div>
+
+  </div>
+
+  <!-- ===== INTENT BAR ===== -->
+  <div class="intent">
+    <span class="who">⌬ AANG</span>
+    <input type="text" placeholder="What are we working on?" />
+    <button>SEND</button>
+  </div>
+
+  <!-- ===== STATUS BAR ===== -->
+  <div class="statusbar">
+    <span><b>10</b> agents online</span>
+    <span>· Inbox <b>3</b></span>
+    <span>· Outbox <b>2</b></span>
+    <span>· Approvals <b>1</b></span>
+    <span class="meter">Tokens
+      <span class="bar"><span class="fill" id="tokenFill" style="width:84%;"></span></span>
+      <b id="tokenLabel">84%</b>
+    </span>
+    <span style="margin-left:auto;">Mode: <b>Build</b> · <b style="color:var(--success)">local-first</b> · <b style="color:var(--gold)">no money</b></span>
+  </div>
+
+</div>
+
+<!-- ============ AGENT SPRITES (templates) ============ -->
+<template id="sprite-aang">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="1" fill="#2D5B8F"/>
+    <rect x="2" y="4" width="4" height="6" fill="#6BA6FF"/>
+    <rect x="2" y="9" width="4" height="1" fill="#2D5B8F"/>
+    <rect x="1" y="5" width="1" height="3" fill="#6BA6FF"/>
+    <rect x="6" y="5" width="1" height="3" fill="#6BA6FF"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="2" width="1" height="9" fill="#8a6f2c"/>
+  </svg>
+</template>
+<template id="sprite-aang-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="1" fill="#2D5B8F"/>
+    <rect x="2" y="4" width="4" height="6" fill="#6BA6FF"/>
+    <rect x="2" y="9" width="4" height="1" fill="#2D5B8F"/>
+    <rect x="0" y="5" width="1" height="3" fill="#6BA6FF"/>
+    <rect x="7" y="5" width="1" height="3" fill="#6BA6FF"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="3" width="1" height="9" fill="#8a6f2c"/>
+  </svg>
+</template>
+
+<template id="sprite-cortana">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#A78BFA"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8B5CF6"/>
+    <rect x="2" y="4" width="4" height="6" fill="#2D5B8F"/>
+    <rect x="2" y="4" width="4" height="2" fill="#6BA6FF" opacity="0.8"/>
+    <rect x="1" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="6" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="2" y="6" width="4" height="1" fill="#A78BFA" opacity="0.6"/>
+  </svg>
+</template>
+<template id="sprite-cortana-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#A78BFA"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8B5CF6"/>
+    <rect x="2" y="4" width="4" height="6" fill="#2D5B8F"/>
+    <rect x="2" y="4" width="4" height="2" fill="#6BA6FF" opacity="0.8"/>
+    <rect x="0" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="7" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="2" y="7" width="4" height="1" fill="#A78BFA" opacity="0.6"/>
+  </svg>
+</template>
+
+<template id="sprite-tony">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#D9B56A"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8a6f2c"/>
+    <rect x="2" y="4" width="4" height="6" fill="#EF6F6C"/>
+    <rect x="2" y="4" width="4" height="1" fill="#D9B56A"/>
+    <rect x="3" y="6" width="2" height="1" fill="#D9B56A"/>
+    <rect x="1" y="5" width="1" height="3" fill="#EF6F6C"/>
+    <rect x="6" y="5" width="1" height="3" fill="#EF6F6C"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="6" width="1" height="2" fill="#5a5a64"/>
+  </svg>
+</template>
+<template id="sprite-tony-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#D9B56A"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8a6f2c"/>
+    <rect x="2" y="4" width="4" height="6" fill="#EF6F6C"/>
+    <rect x="2" y="4" width="4" height="1" fill="#D9B56A"/>
+    <rect x="3" y="6" width="2" height="1" fill="#D9B56A"/>
+    <rect x="0" y="5" width="1" height="3" fill="#EF6F6C"/>
+    <rect x="7" y="5" width="1" height="3" fill="#EF6F6C"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="7" width="1" height="2" fill="#5a5a64"/>
+  </svg>
+</template>
+
+<template id="sprite-gojo">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="2" fill="#F4EFE3"/>
+    <rect x="3" y="2" width="2" height="1" fill="#A78BFA"/>
+    <rect x="2" y="4" width="4" height="6" fill="#F4EFE3"/>
+    <rect x="2" y="4" width="4" height="1" fill="#8B5CF6"/>
+    <rect x="1" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="6" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+<template id="sprite-gojo-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="2" fill="#F4EFE3"/>
+    <rect x="3" y="2" width="2" height="1" fill="#A78BFA"/>
+    <rect x="2" y="4" width="4" height="6" fill="#F4EFE3"/>
+    <rect x="2" y="4" width="4" height="1" fill="#8B5CF6"/>
+    <rect x="0" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="7" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+
+<template id="sprite-batman">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#7E8898"/>
+    <rect x="2" y="0" width="4" height="2" fill="#1a1a22"/>
+    <rect x="2" y="1" width="1" height="1" fill="#1a1a22"/>
+    <rect x="5" y="1" width="1" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#1a1a22"/>
+    <rect x="3" y="6" width="2" height="1" fill="#D9B56A"/>
+    <rect x="1" y="5" width="1" height="4" fill="#202A38"/>
+    <rect x="6" y="5" width="1" height="4" fill="#202A38"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+<template id="sprite-batman-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#7E8898"/>
+    <rect x="2" y="0" width="4" height="2" fill="#1a1a22"/>
+    <rect x="2" y="1" width="1" height="1" fill="#1a1a22"/>
+    <rect x="5" y="1" width="1" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#1a1a22"/>
+    <rect x="3" y="6" width="2" height="1" fill="#D9B56A"/>
+    <rect x="0" y="5" width="1" height="4" fill="#202A38"/>
+    <rect x="7" y="5" width="1" height="4" fill="#202A38"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+
+<template id="sprite-surfer">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#B8C0CC"/>
+    <rect x="3" y="0" width="2" height="1" fill="#7E8898"/>
+    <rect x="2" y="4" width="4" height="6" fill="#B8C0CC"/>
+    <rect x="2" y="4" width="4" height="1" fill="#7E8898"/>
+    <rect x="2" y="6" width="4" height="1" fill="#6BA6FF"/>
+    <rect x="1" y="5" width="1" height="3" fill="#B8C0CC"/>
+    <rect x="6" y="5" width="1" height="3" fill="#B8C0CC"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="3" width="1" height="6" fill="#6BA6FF"/>
+  </svg>
+</template>
+<template id="sprite-surfer-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#B8C0CC"/>
+    <rect x="3" y="0" width="2" height="1" fill="#7E8898"/>
+    <rect x="2" y="4" width="4" height="6" fill="#B8C0CC"/>
+    <rect x="2" y="4" width="4" height="1" fill="#7E8898"/>
+    <rect x="2" y="6" width="4" height="1" fill="#6BA6FF"/>
+    <rect x="0" y="5" width="1" height="3" fill="#B8C0CC"/>
+    <rect x="7" y="5" width="1" height="3" fill="#B8C0CC"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="2" width="1" height="6" fill="#6BA6FF"/>
+  </svg>
+</template>
+
+<template id="sprite-c3po">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#D9B56A"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8a6f2c"/>
+    <rect x="3" y="2" width="1" height="1" fill="#1a1a22"/>
+    <rect x="4" y="2" width="1" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#D9B56A"/>
+    <rect x="2" y="4" width="4" height="1" fill="#8a6f2c"/>
+    <rect x="1" y="5" width="1" height="3" fill="#D9B56A"/>
+    <rect x="6" y="5" width="1" height="3" fill="#D9B56A"/>
+    <rect x="2" y="10" width="2" height="2" fill="#8a6f2c"/>
+    <rect x="4" y="10" width="2" height="2" fill="#8a6f2c"/>
+  </svg>
+</template>
+<template id="sprite-c3po-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#D9B56A"/>
+    <rect x="3" y="0" width="2" height="1" fill="#8a6f2c"/>
+    <rect x="3" y="2" width="1" height="1" fill="#1a1a22"/>
+    <rect x="4" y="2" width="1" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#D9B56A"/>
+    <rect x="2" y="4" width="4" height="1" fill="#8a6f2c"/>
+    <rect x="0" y="5" width="1" height="3" fill="#D9B56A"/>
+    <rect x="7" y="5" width="1" height="3" fill="#D9B56A"/>
+    <rect x="2" y="10" width="2" height="1" fill="#8a6f2c"/>
+    <rect x="4" y="10" width="2" height="2" fill="#8a6f2c"/>
+  </svg>
+</template>
+
+<template id="sprite-oak">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="2" fill="#B8C0CC"/>
+    <rect x="3" y="2" width="2" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#F4EFE3"/>
+    <rect x="2" y="4" width="4" height="1" fill="#9FD2B7"/>
+    <rect x="1" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="6" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="5" width="1" height="3" fill="#A78BFA"/>
+  </svg>
+</template>
+<template id="sprite-oak-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="2" fill="#B8C0CC"/>
+    <rect x="3" y="2" width="2" height="1" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#F4EFE3"/>
+    <rect x="2" y="4" width="4" height="1" fill="#9FD2B7"/>
+    <rect x="0" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="7" y="5" width="1" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="7" y="6" width="1" height="3" fill="#A78BFA"/>
+  </svg>
+</template>
+
+<template id="sprite-piccolo">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#9FD2B7"/>
+    <rect x="2" y="0" width="4" height="2" fill="#82a577"/>
+    <rect x="2" y="4" width="4" height="6" fill="#82a577"/>
+    <rect x="2" y="4" width="4" height="1" fill="#A78BFA"/>
+    <rect x="1" y="5" width="1" height="3" fill="#82a577"/>
+    <rect x="6" y="5" width="1" height="3" fill="#82a577"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="0" y="3" width="2" height="1" fill="#A78BFA"/>
+    <rect x="6" y="3" width="2" height="1" fill="#A78BFA"/>
+  </svg>
+</template>
+<template id="sprite-piccolo-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#9FD2B7"/>
+    <rect x="2" y="0" width="4" height="2" fill="#82a577"/>
+    <rect x="2" y="4" width="4" height="6" fill="#82a577"/>
+    <rect x="2" y="4" width="4" height="1" fill="#A78BFA"/>
+    <rect x="0" y="5" width="1" height="3" fill="#82a577"/>
+    <rect x="7" y="5" width="1" height="3" fill="#82a577"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="0" y="2" width="2" height="1" fill="#A78BFA"/>
+    <rect x="6" y="2" width="2" height="1" fill="#A78BFA"/>
+  </svg>
+</template>
+
+<template id="sprite-spock">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="1" fill="#1a1a22"/>
+    <rect x="2" y="1" width="1" height="2" fill="#1a1a22"/>
+    <rect x="5" y="1" width="1" height="2" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#2D5B8F"/>
+    <rect x="3" y="4" width="2" height="1" fill="#D9B56A"/>
+    <rect x="1" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="6" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="2" y="10" width="2" height="2" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+<template id="sprite-spock-b">
+  <svg viewBox="0 0 8 12" preserveAspectRatio="none">
+    <rect x="3" y="1" width="2" height="3" fill="#F4EFE3"/>
+    <rect x="2" y="0" width="4" height="1" fill="#1a1a22"/>
+    <rect x="2" y="1" width="1" height="2" fill="#1a1a22"/>
+    <rect x="5" y="1" width="1" height="2" fill="#1a1a22"/>
+    <rect x="2" y="4" width="4" height="6" fill="#2D5B8F"/>
+    <rect x="3" y="4" width="2" height="1" fill="#D9B56A"/>
+    <rect x="0" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="7" y="5" width="1" height="3" fill="#2D5B8F"/>
+    <rect x="2" y="10" width="2" height="1" fill="#1a1a22"/>
+    <rect x="4" y="10" width="2" height="2" fill="#1a1a22"/>
+  </svg>
+</template>
+
+<script>
+  // Agent registry
+  const AGENTS = {
+    aang:    { name: 'AANG',          role: 'intent capture',           station: 'Great Hall',       state: 'active',    bubble: 'meet here',         bubbleClass: 'live',    pip: '',         model: 'local · lightweight' },
+    cortana: { name: 'CORTANA',       role: 'routing · oversight',      station: 'Watch Tower',      state: 'active',    bubble: 'routing task',      bubbleClass: 'violet',  pip: 'violet',   model: 'local · reasoner' },
+    spock:   { name: 'SPOCK',         role: 'logic · contradiction',    station: 'Observatory',      state: 'idle',      bubble: '',                  bubbleClass: '',        pip: 'idle',     model: 'local · reasoner' },
+    surfer:  { name: 'SILVER SURFER', role: 'research · sources',       station: 'Cartography Hall', state: 'active',    bubble: 'reading 3 docs',    bubbleClass: 'live',    pip: '',         model: 'local · summary' },
+    batman:  { name: 'BATMAN',        role: 'analysis · tradeoffs',     station: 'War Room',         state: 'idle',      bubble: '',                  bubbleClass: '',        pip: 'idle',     model: 'local · reasoner' },
+    gojo:    { name: 'GOJO',          role: 'design · creative',        station: 'Atelier',          state: 'active',    bubble: 'drafting castle UI',bubbleClass: 'live',    pip: '',         model: 'local · reasoner' },
+    tony:    { name: 'TONY STARK',    role: 'build · code',             station: 'The Forge',        state: 'waiting',   bubble: 'awaiting approval', bubbleClass: 'warn',    pip: 'warn',     model: 'external · pending' },
+    c3po:    { name: 'C-3PO',         role: 'format · output',          station: 'Scriptorium',      state: 'idle',      bubble: '',                  bubbleClass: '',        pip: 'idle',     model: 'local · formatter' },
+    oak:     { name: 'PROFESSOR OAK', role: 'validation · stamp',       station: "Alchemist's Tower",state: 'validating',bubble: 'validating Phase 0',bubbleClass: 'violet',  pip: 'violet',   model: 'local · reasoner' },
+    piccolo: { name: 'PICCOLO',       role: 'cleanup · backups',        station: 'The Crypts',       state: 'active',    bubble: 'pruning logs',      bubbleClass: 'success', pip: '',         model: 'rule-based' },
+  };
+
+  // Inject sprite into each room
+  function makeSprite(id) {
+    const a = document.createElement('div');
+    a.className = 'agent walking';
+    a.dataset.id = id;
+
+    // random initial position within room
+    const x = 25 + Math.random() * 50;
+    const y = 45 + Math.random() * 25;
+    a.style.left = x + '%';
+    a.style.top = y + '%';
+
+    const cfg = AGENTS[id];
+
+    // bubble
+    if (cfg.bubble) {
+      const b = document.createElement('div');
+      b.className = 'bubble ' + (cfg.bubbleClass || '');
+      b.textContent = cfg.bubble;
+      a.appendChild(b);
+    }
+
+    // frames
+    const f = document.createElement('div');
+    f.className = 'frames';
+    const tA = document.getElementById('sprite-' + id);
+    const tB = document.getElementById('sprite-' + id + '-b');
+    f.appendChild(tA.content.cloneNode(true));
+    f.appendChild(tB.content.cloneNode(true));
+    a.appendChild(f);
+
+    // name
+    const n = document.createElement('div');
+    n.className = 'name';
+    n.textContent = cfg.name;
+    a.appendChild(n);
+
+    // idle state means no walk animation
+    if (cfg.state === 'idle') a.classList.add('idle');
+
+    return a;
+  }
+
+  // Place sprites in rooms
+  document.querySelectorAll('.room').forEach(room => {
+    const id = room.dataset.agent;
+    if (id && AGENTS[id]) {
+      room.appendChild(makeSprite(id));
+    }
+  });
+
+  // Wander animation: every few seconds, pick a new spot in the room
+  function wander() {
+    document.querySelectorAll('.agent').forEach(a => {
+      if (a.classList.contains('idle')) return;
+      const room = a.parentElement;
+      const w = room.clientWidth;
+      const h = room.clientHeight;
+      // keep agent inside, away from room label
+      const minX = 15, maxX = 78;
+      const minY = 38, maxY = 72;
+      const newX = minX + Math.random() * (maxX - minX);
+      const newY = minY + Math.random() * (maxY - minY);
+      a.style.left = newX + '%';
+      a.style.top = newY + '%';
+    });
+  }
+  setInterval(wander, 2800);
+  setTimeout(wander, 200);
+
+  // Click room → select + populate panel
+  function selectRoom(roomEl) {
+    document.querySelectorAll('.room').forEach(r => r.classList.remove('selected'));
+    roomEl.classList.add('selected');
+    const id = roomEl.dataset.agent;
+    if (!id || !AGENTS[id]) return;
+    const cfg = AGENTS[id];
+    document.getElementById('cardName').textContent = cfg.name;
+    document.getElementById('cardRole').textContent = cfg.role;
+    document.getElementById('cardStation').textContent = cfg.station;
+    document.getElementById('cardState').textContent = cfg.state;
+    document.getElementById('cardModel').textContent = cfg.model;
+    document.getElementById('cardLast').textContent = cfg.state === 'idle' ? 'idle' : 'just now';
+    const pip = document.getElementById('cardPip');
+    pip.className = 'pip ' + (cfg.pip || '');
+  }
+  document.querySelectorAll('.room').forEach(r => {
+    r.addEventListener('click', () => selectRoom(r));
+  });
+
+  // Default selection: Aang
+  selectRoom(document.querySelector('.room[data-agent="aang"]'));
+
+  // Token meter slow flicker
+  let token = 84;
+  setInterval(() => {
+    token = Math.max(60, Math.min(95, token + (Math.random() - 0.5) * 2));
+    const t = Math.round(token);
+    document.getElementById('tokenFill').style.width = t + '%';
+    document.getElementById('tokenLabel').textContent = t + '%';
+  }, 4000);
+
+  // Bubble cycling - simulate agents talking
+  const BUBBLES = {
+    aang: ['meet here', 'ready for input', 'capturing intent'],
+    cortana: ['routing task', 'querying registry', 'permission check'],
+    surfer: ['reading 3 docs', 'summarizing', 'fetching crawl4ai'],
+    gojo: ['drafting castle UI', 'palette check', 'sprite review'],
+    tony: ['awaiting approval', 'spec ready', 'handoff queued'],
+    oak: ['validating Phase 0', 'cross-checking sources', 'stamping'],
+    piccolo: ['pruning logs', 'backup ok', 'crypt clean'],
+  };
+  setInterval(() => {
+    document.querySelectorAll('.agent').forEach(a => {
+      const id = a.dataset.id;
+      const list = BUBBLES[id];
+      if (!list) return;
+      const b = a.querySelector('.bubble');
+      if (b) b.textContent = list[Math.floor(Math.random() * list.length)];
+    });
+  }, 5000);
+</script>
+
+</body>
+</html>
