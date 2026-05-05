@@ -3,7 +3,7 @@
 // Three floors: Upper Spires, Ground Hall, Crypts. Each chamber has:
 // - Unique idle motion signature per agent (bob amp/speed/rotation/sway)
 // - Active state: faster motion + accent tint + patrol walk within chamber
-// - Chamber lighting reacts to state (torch alpha, floor glow, banner speed)
+// - Chamber lighting reacts to state (torch alpha, floor glow)
 // - Cortana's orb drifts toward whichever chamber is active
 //
 // State machine wired via setAgentStates() called from the React wrapper
@@ -33,8 +33,8 @@ const GROUND_ORDER = ["tony", "gojo", "cortana", "surfer", "c3po"];
 const CRYPTS_ORDER = ["piccolo"];
 
 // ── Castle tileset (PixelLab — 32×32) ──────────────────────────────────────
-// One 32×32 tile occupies the same on-screen space as a 2×2 block of 16×16
-// 0x72 tiles, so we walk in steps of 2 and place one castle tile per pair.
+// One 32×32 tile occupies a 2×2 block of the 16×16 source grid (96 screen
+// px on each side at SCALE=3), so we walk in steps of 2 columns/rows.
 // Two batches:
 //   tileset/    — original wall + decoration tiles (loaded as castle_0..15)
 //   tileset/arch/ — second batch architecture/floor tiles (loaded as arch_0..15)
@@ -60,31 +60,6 @@ const STAIRS: Stair[] = [
   { col: 6,  row: 12, variant: 1, flipX: false }, // left-side, ascending right
   { col: 36, row: 12, variant: 3, flipX: true  }, // right-side, ascending left
 ];
-
-// ── Atlas frames ─────────────────────────────────────────────────────────────
-const ATLAS_KEY = "d2_atlas";
-const ATLAS_FRAMES: Record<string, [number, number, number, number]> = {
-  floor_1: [16, 64, 16, 16], floor_2: [32, 64, 16, 16],
-  floor_3: [48, 64, 16, 16], floor_4: [16, 80, 16, 16],
-  floor_5: [32, 80, 16, 16],
-  wall_mid: [32, 16, 16, 16], wall_top_mid: [32, 0, 16, 16],
-  banner_blue: [32, 32, 16, 16], banner_red: [16, 32, 16, 16],
-  banner_green: [16, 48, 16, 16], banner_yellow: [32, 48, 16, 16],
-  fountain_top: [80, 0, 16, 16], fountain_mid: [80, 48, 16, 16],
-  fountain_basin: [80, 64, 16, 16],
-};
-
-const AGENT_BANNER: Record<string, "blue" | "red" | "green" | "yellow"> = {
-  cortana: "blue", tony: "red", gojo: "blue", surfer: "blue",
-  c3po: "yellow", batman: "yellow", aang: "green", oak: "blue",
-  spock: "blue", piccolo: "green",
-};
-
-const AGENT_FLOOR: Record<string, string> = {
-  cortana: "floor_3", tony: "floor_2", gojo: "floor_4", surfer: "floor_1",
-  c3po: "floor_5", batman: "floor_2", aang: "floor_3", oak: "floor_4",
-  spock: "floor_5", piccolo: "floor_2",
-};
 
 // ── Per-agent motion config ──────────────────────────────────────────────────
 interface TweenCfg {
@@ -155,9 +130,6 @@ const MOTION: Record<string, AgentMotion> = {
 };
 
 // ── Chamber props ─────────────────────────────────────────────────────────────
-// 0x72 props removed during the prop pass — chambers will get PixelLab-native
-// 32×32 hero props placed via CHAMBER_PIXELLAB_PROPS once that batch lands.
-const ITEM_BASE = "/sprites/cc0/0x72_16x16DungeonTileset.v5/items"; // torches still come from here
 type Prop = { key: string; col: number; row: number; depth?: number };
 
 // Per-chamber PixelLab props — 32×32 hero pieces and supporting decor.
@@ -243,7 +215,6 @@ class KeepScene extends Phaser.Scene {
   // Chamber structural refs (for state-driven changes)
   private chamberBounds: Map<string, { xLeft: number; xRight: number; yFloor: number }> = new Map();
   private chamberTorches: Map<string, Phaser.GameObjects.Image[]> = new Map();
-  private chamberBanners: Map<string, Phaser.GameObjects.Image[]> = new Map();
   private chamberGlows: Map<string, Phaser.GameObjects.Graphics> = new Map();
 
   // Torch flicker
@@ -259,7 +230,6 @@ class KeepScene extends Phaser.Scene {
   constructor() { super({ key: "KeepScene" }); }
 
   preload() {
-    this.load.image(ATLAS_KEY, "/sprites/cc0/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7.png");
     for (const c of CHAMBERS) {
       this.load.image(`agent_${c.agentId}`, c.spritePath);
     }
@@ -282,10 +252,6 @@ class KeepScene extends Phaser.Scene {
   }
 
   create() {
-    const tex = this.textures.get(ATLAS_KEY);
-    for (const [name, [x, y, w, h]] of Object.entries(ATLAS_FRAMES)) {
-      tex.add(name, 0, x, y, w, h);
-    }
     this.cameras.main.setBackgroundColor(C.background);
 
     this.buildFloor("upper",  UPPER_ORDER,  UPPER_WIDTHS,  0);
@@ -382,15 +348,6 @@ class KeepScene extends Phaser.Scene {
       const yFloorPx = (yWallBase + 1) * TS;
       this.chamberBounds.set(agentId, { xLeft: xLeftPx, xRight: xRightPx, yFloor: yFloorPx });
 
-      // Banner with sway tween
-      const bannerX = (cx + Math.floor(w / 2) - 1) * TS + TS / 2;
-      const bannerY = (yTop + 1) * TS + TS / 2;
-      const banner = this.add.image(bannerX, bannerY, ATLAS_KEY, `banner_${AGENT_BANNER[agentId]}`)
-        .setScale(SCALE).setDepth(2).setOrigin(0.5, 0);
-      this.tweens.add({ targets: banner, angle: 1.8, duration: 2600, yoyo: true, repeat: -1, ease: "Sine.easeInOut", delay: i * 140 });
-      if (!this.chamberBanners.has(agentId)) this.chamberBanners.set(agentId, []);
-      this.chamberBanners.get(agentId)!.push(banner);
-
       // Two torches per chamber
       const t1 = this.spawnTorch(cx + Math.floor(w / 4), yTop + 2, i * 2);
       const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, i * 2 + 3);
@@ -424,14 +381,6 @@ class KeepScene extends Phaser.Scene {
         this.orbRef = orb;
         this.tweens.add({ targets: orb, alpha: 0.55, duration: 1400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
         this.tweens.add({ targets: orb, y: orb.y - TS * 0.25, duration: 1900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
-      }
-
-      // Piccolo fountain
-      if (agentId === "piccolo") {
-        const pc = cx + Math.floor(w / 2) - 4;
-        this.placeTile(pc, yWallBase - 1, "fountain_top");
-        this.placeTile(pc, yWallBase,     "fountain_mid");
-        this.placeTile(pc, yFloor,        "fountain_basin");
       }
 
       // PixelLab chamber props — 32×32, anchored to floor row, scaled 3×.
@@ -667,16 +616,9 @@ class KeepScene extends Phaser.Scene {
     }
   }
 
-  private placeTile(col: number, row: number, frame: string, alpha = 1) {
-    const img = this.add.image(col * TS + TS / 2, row * TS + TS / 2, ATLAS_KEY, frame);
-    img.setScale(SCALE).setDepth(0);
-    if (alpha < 1) img.setAlpha(alpha);
-    return img;
-  }
-
-  // 32×32 PixelLab castle tile — occupies a 2×2 block of 16×16 grid slots.
-  // Origin top-left so (col, row) addresses the same upper-left corner as
-  // placeTile, but the tile spans columns [col..col+1] and rows [row..row+1].
+  // 32×32 PixelLab castle tile — occupies a 2×2 block of the 16×16 grid.
+  // Origin top-left so (col, row) addresses the upper-left corner; the tile
+  // spans columns [col..col+1] and rows [row..row+1].
   private placeCastleTile(col: number, row: number, key: string, alpha = 1) {
     const img = this.add.image(col * TS, row * TS, key);
     img.setOrigin(0, 0).setScale(SCALE).setDepth(0);
