@@ -20,6 +20,10 @@ export const integrationsRouter = router({
       z.object({
         title: z.string().min(1).max(280),
         body: z.string().min(1).max(20000),
+        type: z.enum(["Guide", "Summary", "Brief", "Report", "Note"]).optional(),
+        tags: z.array(z.string().max(40)).max(20).optional(),
+        project: z.string().max(120).optional(),
+        sessionRef: z.string().max(120).optional(),
         sessionId: z.number().int().optional(),
       }),
     )

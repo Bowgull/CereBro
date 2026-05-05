@@ -185,31 +185,57 @@ export async function pollInbox(): Promise<{
   }
 }
 
+export type OutboxType = "Guide" | "Summary" | "Brief" | "Report" | "Note";
+
 export async function publishToOutbox(payload: {
   title: string;
   body: string;
+  type?: OutboxType;
+  tags?: string[];
+  project?: string;
+  sessionRef?: string;
   sessionId?: number;
-}): Promise<{ ok: boolean; pageId?: string; reason?: string }> {
+}): Promise<{ ok: boolean; pageId?: string; url?: string; reason?: string }> {
   const dbId = process.env.NOTION_OUTBOX_DATABASE_ID;
   if (!process.env.NOTION_TOKEN) return { ok: false, reason: "NOTION_TOKEN not set" };
   if (!dbId) return { ok: false, reason: "NOTION_OUTBOX_DATABASE_ID not set" };
   try {
     const titleProp = await findTitlePropertyName(dbId);
+    const today = new Date().toISOString().slice(0, 10);
+    const properties: Record<string, unknown> = {
+      [titleProp]: {
+        title: [
+          { type: "text", text: { content: payload.title.slice(0, 1900) } },
+        ],
+      },
+      Type: { select: { name: payload.type ?? "Note" } },
+      Status: { select: { name: "Published" } },
+      "Published At": { date: { start: today } },
+    };
+    if (payload.tags?.length) {
+      properties.Tags = {
+        multi_select: payload.tags.slice(0, 20).map((t) => ({ name: t })),
+      };
+    }
+    if (payload.project) {
+      properties.Project = {
+        rich_text: [{ type: "text", text: { content: payload.project } }],
+      };
+    }
+    if (payload.sessionRef) {
+      properties.Session = {
+        rich_text: [{ type: "text", text: { content: payload.sessionRef } }],
+      };
+    }
     const page = (await notion("/pages", {
       method: "POST",
       body: {
         parent: { database_id: dbId },
-        properties: {
-          [titleProp]: {
-            title: [
-              { type: "text", text: { content: payload.title.slice(0, 1900) } },
-            ],
-          },
-        },
+        properties,
         children: chunkBodyToBlocks(payload.body),
       },
-    })) as { id: string };
-    return { ok: true, pageId: page.id };
+    })) as { id: string; url?: string };
+    return { ok: true, pageId: page.id, url: page.url };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     _lastError = msg;
