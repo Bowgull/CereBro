@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "73c161e2-d247-4601-bb71-c9cf04033e94",
+    "name": "chibi pixel art Professor Oak from Pokemon, older Pokemon scientist, grey hair brushed back, clean-shaven, white knee-length lab coat, RED shirt visible underneath, brown pants, kind older friendly face, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Professor Oak from Pokemon, older Pokemon scientist, grey hair brushed back, clean-shaven, white knee-length lab coat, RED shirt visible underneath, brown pants, kind older friendly face, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:53:42.859884+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:16:55.564945"
+}

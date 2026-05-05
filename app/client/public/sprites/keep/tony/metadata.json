@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "ec284a07-2bed-42cc-9b06-02fc2e43ed90",
+    "name": "chibi pixel art Tony Stark, NO HELMET, exposed face with brown hair and short goatee beard, wearing red and gold Iron Man armor body suit, glowing cyan arc reactor in center of chest, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Tony Stark, NO HELMET, exposed face with brown hair and short goatee beard, wearing red and gold Iron Man armor body suit, glowing cyan arc reactor in center of chest, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:02:04.900132+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:12.572606"
+}

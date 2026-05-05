@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "475df34d-1d19-4a75-a866-fa46399751f5",
+    "name": "chibi pixel art Piccolo from Dragon Ball Z, green-skinned Namekian warrior, plain WHITE turban with no decoration, pointed elf-like ears, dark purple martial arts gi with wide blue waist sash, white cape with tall stand-up collar over shoulders, brown boots, serious expression, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Piccolo from Dragon Ball Z, green-skinned Namekian warrior, plain WHITE turban with no decoration, pointed elf-like ears, dark purple martial arts gi with wide blue waist sash, white cape with tall stand-up collar over shoulders, brown boots, serious expression, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:55:25.364098+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:16:54.472681"
+}

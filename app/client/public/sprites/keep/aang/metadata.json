@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "a419319c-6c70-40c7-8eb1-c2559b21cef2",
+    "name": "chibi pixel art Aang from Avatar The Last Airbender, bald child monk, blue arrow tattoo running from forehead up over top of bald head, saffron orange and yellow monk robes with darker red-brown lower portion, big expressive eyes, friendly smile, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Aang from Avatar The Last Airbender, bald child monk, blue arrow tattoo running from forehead up over top of bald head, saffron orange and yellow monk robes with darker red-brown lower portion, big expressive eyes, friendly smile, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:11:16.720023+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:08.005272"
+}

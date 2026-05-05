@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "0fbe4f1b-3c39-4a7c-8389-b42e7743faec",
+    "name": "chibi pixel art Silver Surfer Marvel character, silver chrome humanoid hero, polished metallic silver body, subtle facial features (eyes, brow), no surfboard, no horse, no tail, standing upright on two legs, front-facing, transparent background",
+    "prompt": "chibi pixel art Silver Surfer Marvel character, silver chrome humanoid hero, polished metallic silver body, subtle facial features (eyes, brow), no surfboard, no horse, no tail, standing upright on two legs, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:05:50.65005+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:15.610998"
+}

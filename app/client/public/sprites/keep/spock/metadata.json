@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "8d4123a8-510d-4aa3-bec0-56ce25426608",
+    "name": "chibi pixel art Spock from Star Trek, Vulcan with black bowl-cut hair and slanted eyebrows, POINTY pointed elf ears, cream pale skin, blue Starfleet command tunic with gold delta insignia on chest, black pants, calm logical expression, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Spock from Star Trek, Vulcan with black bowl-cut hair and slanted eyebrows, POINTY pointed elf ears, cream pale skin, blue Starfleet command tunic with gold delta insignia on chest, black pants, calm logical expression, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:56:57.823711+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:16:53.261053"
+}

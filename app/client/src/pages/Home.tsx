@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import DungeonMap from "@/components/DungeonMapPhaser";
+import KeepScene from "@/components/KeepScene";
 import EstablishingShot from "@/components/EstablishingShot";
 import HeroPanel from "@/components/HeroPanel";
 import SkillsManager from "@/components/SkillsManager";
@@ -258,19 +258,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Center - Keep Map */}
+        {/* Center - Keep (all 3 floors at once, side-cutaway) */}
         <div className="flex-1 relative overflow-auto" style={{ minHeight: 0, background: C.background }}>
-          {floor === "ground" ? (
-            <DungeonMap
-              heroes={heroes}
-              selectedHeroId={selectedHeroId}
-              onHeroClick={(id) => setSelectedHeroId(selectedHeroId === id ? null : id)}
-            />
-          ) : (
-            <FloorPending floor={floor} />
-          )}
+          <KeepScene agentStates={{}} />
 
-          {floor === "ground" && heroes.length === 0 && (
+          {heroes.length === 0 && (
             <div className="absolute bottom-4 right-4 pointer-events-none">
               <div
                 className="px-4 py-3 rounded"

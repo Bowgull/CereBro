@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "ad2a2511-d680-4348-8c73-10469e6bbf3d",
+    "name": "chibi pixel art C-3PO Star Wars protocol droid, full gold polished metallic body, large rounded gold head, glowing yellow circular eyes, exposed wire details at joints, thin gold limbs, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art C-3PO Star Wars protocol droid, full gold polished metallic body, large rounded gold head, glowing yellow circular eyes, exposed wire details at joints, thin gold limbs, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:09:43.29722+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:09.399867"
+}

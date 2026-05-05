@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "7a5015a0-2260-4c9f-8d8f-2610282ea34c",
+    "name": "chibi pixel art Batman DC comics, black bat cowl with two POINTY upright bat ears, exposed lower face with serious frown, grey body suit, yellow oval bat emblem on chest, yellow utility belt at waist, short flowing black cape, standing pose, front-facing, transparent background",
+    "prompt": "chibi pixel art Batman DC comics, black bat cowl with two POINTY upright bat ears, exposed lower face with serious frown, grey body suit, yellow oval bat emblem on chest, yellow utility belt at waist, short flowing black cape, standing pose, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "low top-down",
+    "created_at": "2026-05-05T13:13:16.896431+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:06.511925"
+}

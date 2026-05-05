@@ -1,0 +1,26 @@
+{
+  "character": {
+    "id": "389c0b4b-e606-40d5-933c-d55d0a38b041",
+    "name": "chibi pixel art Cortana from Halo, translucent cyan-blue holographic AI woman, short bobbed haircut, glowing data lines down body, slim feminine silhouette, front-facing, transparent background",
+    "prompt": "chibi pixel art Cortana from Halo, translucent cyan-blue holographic AI woman, short bobbed haircut, glowing data lines down body, slim feminine silhouette, front-facing, transparent background",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "template_id": "mannequin",
+    "directions": 4,
+    "view": "side",
+    "created_at": "2026-05-05T12:40:11.916941+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "west": "rotations/west.png",
+      "east": "rotations/east.png",
+      "north": "rotations/north.png"
+    },
+    "animations": {}
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-05T14:17:12.172926"
+}

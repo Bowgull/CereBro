@@ -235,6 +235,12 @@
     text-shadow: 0 0 10px #FF00FF, 0 0 20px #FF00FF;
   }
 
+  /* Keep — pulsing glow for chamber state lights and the user-orb */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.55; transform: scale(0.85); }
+  }
+
   @media (min-width: 640px) {
     .container {
       padding-left: 1.5rem; /* 24px - tablet padding */
