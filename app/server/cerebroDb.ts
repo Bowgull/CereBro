@@ -51,9 +51,83 @@ async function ensureSchema(client: Client): Promise<void> {
        )`,
       `CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project_id)`,
       `CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS memory_entries (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         kind TEXT NOT NULL DEFAULT 'note',
+         body TEXT NOT NULL,
+         tags TEXT,
+         source TEXT,
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         session_id INTEGER REFERENCES sessions(id) ON DELETE SET NULL,
+         embedding BLOB,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_memory_kind ON memory_entries(kind)`,
+      `CREATE INDEX IF NOT EXISTS idx_memory_created ON memory_entries(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS outputs (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         session_id INTEGER REFERENCES sessions(id) ON DELETE SET NULL,
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         kind TEXT NOT NULL DEFAULT 'text',
+         title TEXT,
+         body TEXT NOT NULL,
+         tool_name TEXT,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_outputs_session ON outputs(session_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_outputs_created ON outputs(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS sources (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         kind TEXT NOT NULL DEFAULT 'url',
+         uri TEXT NOT NULL,
+         title TEXT,
+         summary TEXT,
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         fetched_at INTEGER,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_sources_uri ON sources(uri)`,
     ],
     "write",
   );
+}
+
+export type MemoryKind = "fact" | "note" | "reference" | "feedback";
+export interface MemoryRow {
+  id: number;
+  kind: MemoryKind;
+  body: string;
+  tags: string | null;
+  source: string | null;
+  projectId: number | null;
+  sessionId: number | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type OutputKind = "text" | "code" | "file" | "diff" | "tool_result";
+export interface OutputRow {
+  id: number;
+  sessionId: number | null;
+  projectId: number | null;
+  kind: OutputKind;
+  title: string | null;
+  body: string;
+  toolName: string | null;
+  createdAt: number;
+}
+
+export type SourceKind = "url" | "doc" | "file" | "note";
+export interface SourceRow {
+  id: number;
+  kind: SourceKind;
+  uri: string;
+  title: string | null;
+  summary: string | null;
+  projectId: number | null;
+  fetchedAt: number | null;
+  createdAt: number;
 }
 
 export interface SessionRow {

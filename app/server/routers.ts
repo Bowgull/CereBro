@@ -5,6 +5,9 @@ import { publicProcedure, router } from "./_core/trpc";
 import { agentsRouter } from "./routers/agents";
 import { tasksRouter } from "./routers/tasks";
 import { sessionsRouter } from "./routers/sessions";
+import { memoryRouter } from "./routers/memory";
+import { outputsRouter } from "./routers/outputs";
+import { integrationsRouter } from "./routers/integrations";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -12,6 +15,9 @@ export const appRouter = router({
   agents: agentsRouter,
   tasks: tasksRouter,
   sessions: sessionsRouter,
+  memory: memoryRouter,
+  outputs: outputsRouter,
+  integrations: integrationsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

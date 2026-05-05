@@ -6,6 +6,7 @@ import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
 import SessionsPanel from "@/components/SessionsPanel";
+import MemoryPanel from "@/components/MemoryPanel";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { HERO_CLASSES, STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { FLOORS, cerebroColors as C, type FloorId } from "@/lib/keepConfig";
@@ -20,6 +21,7 @@ export default function Home() {
   const [showConfig, setShowConfig] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showSessions, setShowSessions] = useState(false);
+  const [showMemory, setShowMemory] = useState(false);
   const [floor, setFloor] = useState<FloorId>("ground");
 
   const selectedHero = useMemo(
@@ -152,12 +154,13 @@ export default function Home() {
           </div>
 
           {[
-            { label: "Tasks", on: () => { setShowTasks(!showTasks); setShowSessions(false); setShowLog(false); }, active: showTasks },
-            { label: "Ledger", on: () => { setShowSessions(!showSessions); setShowTasks(false); setShowLog(false); }, active: showSessions },
+            { label: "Tasks", on: () => { setShowTasks(!showTasks); setShowSessions(false); setShowMemory(false); setShowLog(false); }, active: showTasks },
+            { label: "Memory", on: () => { setShowMemory(!showMemory); setShowTasks(false); setShowSessions(false); setShowLog(false); }, active: showMemory },
+            { label: "Ledger", on: () => { setShowSessions(!showSessions); setShowTasks(false); setShowMemory(false); setShowLog(false); }, active: showSessions },
             { label: "Config", on: () => setShowConfig(true) },
             { label: "Skills", on: () => setShowSkillsManager(true) },
             { label: "Clear", on: clearHeroes },
-            { label: "Log", on: () => { setShowLog(!showLog); setShowTasks(false); setShowSessions(false); }, active: showLog },
+            { label: "Log", on: () => { setShowLog(!showLog); setShowTasks(false); setShowSessions(false); setShowMemory(false); }, active: showLog },
           ].map((b) => (
             <button
               key={b.label}
@@ -292,6 +295,7 @@ export default function Home() {
 
           {showTasks && <TasksPanel onClose={() => setShowTasks(false)} />}
           {showSessions && <SessionsPanel onClose={() => setShowSessions(false)} />}
+          {showMemory && <MemoryPanel onClose={() => setShowMemory(false)} />}
 
           {showLog && (
             <div
