@@ -7,7 +7,10 @@ CereBro V1 is a local-first, harness-first personal AI operating layer with a pi
 - `app/` — the running client+server. Forked from `thousandsky2024/claude-pixel-agent-web` (MIT, "Claude Dungeon"). React 19 + Tailwind 4 + Phaser 3 + Express + tRPC + Drizzle + WebSocket.
   - `app/client/src/lib/keepConfig.ts` — palette tokens, FLOORS, GROUND_CHAMBERS.
   - `app/client/src/components/DungeonMapPhaser.tsx` — Phaser scene; pixel art preserved, room labels reskinned, Hub orb replaces boss-pentagram glow.
-  - `app/client/src/pages/Home.tsx` — header, sidebar, floor selector, `FloorPending` panel for floors without art.
+  - `app/client/src/pages/Home.tsx` — header (wraps at narrow widths), sidebar, floor selector, `FloorPending` panel for floors without art.
+  - `app/scripts/palette-swap.mjs` — recolor any PNG to the castle palette (sharp, MIT). Two modes: `--mode=nearest` (RGB nearest) and `--mode=luma` (preserves source brightness, default). Validated on `dungeon_bg_v2.png`.
+  - `app/client/public/sprites/cc0/` — staged third-party CC0 source art (Kenney tiny-dungeon). Tile sprites, not scenes; needs a compose pass before wiring.
+- `.claude/launch.json` — preview-tool config for `pnpm dev` on port 3002.
 - `mockups/` — early HTML mockups. `keep-v2.html` and `keep-v3.html` are reference only; the live app supersedes them. `mockups/shell.html` predates the project and has scope violations (Declyne/Raven references) — do not use as reference.
 - `CereBro_V1_*` and `CereBro_Final_Implementation_Pack/` (root) — locked planning docs. `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md` is the canonical visual spec.
 - `.nvmrc` pins Node 22 LTS.
