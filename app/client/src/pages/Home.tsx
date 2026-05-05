@@ -1,74 +1,100 @@
 import { useState, useMemo } from "react";
 import KeepScene from "@/components/KeepScene";
 import EstablishingShot from "@/components/EstablishingShot";
-import HeroPanel from "@/components/HeroPanel";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
 import SessionsPanel from "@/components/SessionsPanel";
 import MemoryPanel from "@/components/MemoryPanel";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
-import { HERO_CLASSES, STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
+import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { FLOORS, cerebroColors as C, type FloorId } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
 
+// ── Canonical shell nav ─────────────────────────────────────────────────────
+// Per CEREBRO_TRUTH_RECONCILIATION §9: castle is a creative LAYER, the
+// canonical UI shell is left-rail nav + center workspace + right context
+// panel + bottom "Ask Aang…" command bar. The shell wraps everything; the
+// castle lives inside the Home view of the center workspace.
+
+type NavId =
+  | "home"
+  | "projects"
+  | "inbox"
+  | "tasks"
+  | "sources"
+  | "outputs"
+  | "memory"
+  | "automation"
+  | "settings";
+
+interface NavItem {
+  id: NavId;
+  label: string;
+  glyph: string;       // simple monospace symbol; pixel-art icons later
+  ready: boolean;      // shows live content vs Phase-X stub
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { id: "home",       label: "Home",           glyph: "◆", ready: true },
+  { id: "projects",   label: "Project Spaces", glyph: "▣", ready: false },
+  { id: "inbox",      label: "Inbox",          glyph: "✉", ready: false },
+  { id: "tasks",      label: "Tasks",          glyph: "✓", ready: true },
+  { id: "sources",    label: "Sources",        glyph: "⌘", ready: false },
+  { id: "outputs",    label: "Outputs",        glyph: "✦", ready: false },
+  { id: "memory",     label: "Memory",         glyph: "◈", ready: true },
+  { id: "automation", label: "Automation",     glyph: "⟳", ready: false },
+  { id: "settings",   label: "Settings",       glyph: "⚙", ready: true },
+];
+
+type Mode = "quick" | "explore" | "build";
+
 export default function Home() {
-  const { heroes, setHeroes, mode, connected, log, startDemo, startLive, clearHeroes } =
+  const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
-  const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
+
+  const [nav, setNav] = useState<NavId>("home");
+  const [floor, setFloor] = useState<FloorId>("ground");
+  const [mode, setMode] = useState<Mode>("quick");
+  const [askInput, setAskInput] = useState("");
   const [showSkillsManager, setShowSkillsManager] = useState(false);
   const [showLog, setShowLog] = useState(false);
-  const [showConfig, setShowConfig] = useState(false);
-  const [showTasks, setShowTasks] = useState(false);
-  const [showSessions, setShowSessions] = useState(false);
-  const [showMemory, setShowMemory] = useState(false);
-  const [floor, setFloor] = useState<FloorId>("ground");
+  const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
 
   const selectedHero = useMemo(
     () => heroes.find((h) => h.id === selectedHeroId) || null,
     [heroes, selectedHeroId]
   );
 
-  const refetchHeroes = trpc.agents.list.useQuery(undefined, { enabled: false });
   const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, { refetchInterval: 5000 });
+  const { data: agentRoster } = trpc.keep.agents.useQuery();
 
-  const stats = useMemo(() => {
-    const active = heroes.filter(
-      (h) => h.state === "fighting" || h.state === "casting"
-    ).length;
-    const resting = heroes.filter((h) => h.state === "resting").length;
-    const planning = heroes.filter((h) => h.state === "shopping").length;
-    return { total: heroes.length, active, resting, planning };
-  }, [heroes]);
+  // Active agent for the right rail. Default Cortana (orchestrator).
+  // Phase 6 wires this to the harness-resolved owner agent for the active
+  // task. For now, picking the agent named on the selected hero, or Cortana.
+  const activeAgentId = useMemo(() => {
+    if (selectedHero) {
+      const map: Record<string, string> = { warrior: "tony", mage: "gojo", cleric: "aang" };
+      return map[selectedHero.heroClass] ?? "cortana";
+    }
+    return "cortana";
+  }, [selectedHero]);
 
+  const activeAgent = useMemo(
+    () => agentRoster?.find((a) => a.id === activeAgentId),
+    [agentRoster, activeAgentId]
+  );
+
+  // Castle agent-state hand-off (legacy fork-state mapping until Phase 6).
   const agentStates = useMemo(() => {
     const states: Record<string, "fighting" | "casting" | "shopping" | "resting" | "idle"> = {};
     if (heroes.length === 0) return states;
-
     states.cortana = "fighting";
-
-    const classToAgent: Record<string, string> = {
-      warrior: "tony",
-      mage: "gojo",
-      cleric: "aang",
-    };
-
-    let hasActive = false;
-    let hasResting = false;
-    let hasPlanning = false;
-
+    const classToAgent: Record<string, string> = { warrior: "tony", mage: "gojo", cleric: "aang" };
     for (const h of heroes) {
-      const agent = classToAgent[h.heroClass];
-      if (agent) states[agent] = h.state;
-      if (h.state === "fighting" || h.state === "casting") hasActive = true;
-      if (h.state === "resting") hasResting = true;
-      if (h.state === "shopping") hasPlanning = true;
+      const a = classToAgent[h.heroClass];
+      if (a) states[a] = h.state;
     }
-
-    if (hasActive) states.surfer = "fighting";
-    if (hasPlanning) states.batman = "shopping";
-    if (hasResting) states.piccolo = "resting";
-
     return states;
   }, [heroes]);
 
@@ -78,9 +104,10 @@ export default function Home() {
       style={{ background: C.background, color: C.textPrimary, fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
       <EstablishingShot />
-      {/* ── Header ── */}
+
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
-        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 shrink-0"
+        className="flex items-center justify-between gap-3 px-4 py-2 shrink-0"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
         <div className="flex items-center gap-3 shrink-0">
@@ -100,56 +127,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floor selector */}
-        <div className="flex items-center gap-1 shrink-0">
-          {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
-            const f = FLOORS[id];
-            const isActive = id === floor;
-            return (
-              <button
-                key={id}
-                onClick={() => setFloor(id)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors relative whitespace-nowrap"
-                style={{
-                  background: isActive ? C.surfaceRaised : "transparent",
-                  color: isActive ? C.textPrimary : C.textMuted,
-                  border: `1px solid ${isActive ? C.accentSoft : C.borderSoft}`,
-                }}
-                title={f.blurb}
-              >
-                {f.name}
-                {!f.ready && (
-                  <span
-                    className="ml-2 text-[10px] px-1 rounded"
-                    style={{ background: C.warning + "22", color: C.warning }}
-                  >
-                    pending
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Stats */}
-        <div className="hidden md:flex items-center gap-1">
-          {[
-            { label: "Sessions", value: stats.total, color: C.accent },
-            { label: "Active", value: stats.active, color: C.danger },
-            { label: "Resting", value: stats.resting, color: C.success },
-            { label: "Planning", value: stats.planning, color: C.warning },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded"
-              style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
-            >
-              <div className="text-xs font-bold" style={{ color: s.color }}>{s.value}</div>
-              <div className="text-xs uppercase" style={{ color: C.textMuted }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
         <div className="flex items-center gap-1.5">
           <div
             className="flex items-center gap-1.5 text-xs px-2 py-1 rounded"
@@ -165,160 +142,109 @@ export default function Home() {
             <button
               onClick={startDemo}
               className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
-              style={{
-                background: mode === "demo" ? C.accentSoft : "transparent",
-                color: mode === "demo" ? C.textPrimary : C.textMuted,
-              }}
+              style={{ background: connMode === "demo" ? C.accentSoft : "transparent", color: connMode === "demo" ? C.textPrimary : C.textMuted }}
             >
               Demo
             </button>
             <button
               onClick={startLive}
               className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
-              style={{
-                background: mode === "live" ? C.danger : "transparent",
-                color: mode === "live" ? C.background : C.textMuted,
-              }}
+              style={{ background: connMode === "live" ? C.danger : "transparent", color: connMode === "live" ? C.background : C.textMuted }}
             >
               Live
             </button>
           </div>
 
-          {[
-            { label: "Tasks", on: () => { setShowTasks(!showTasks); setShowSessions(false); setShowMemory(false); setShowLog(false); }, active: showTasks },
-            { label: "Memory", on: () => { setShowMemory(!showMemory); setShowTasks(false); setShowSessions(false); setShowLog(false); }, active: showMemory },
-            { label: "Ledger", on: () => { setShowSessions(!showSessions); setShowTasks(false); setShowMemory(false); setShowLog(false); }, active: showSessions },
-            { label: "Config", on: () => setShowConfig(true) },
-            { label: "Skills", on: () => setShowSkillsManager(true) },
-            { label: "Clear", on: clearHeroes },
-            { label: "Log", on: () => { setShowLog(!showLog); setShowTasks(false); setShowSessions(false); setShowMemory(false); }, active: showLog },
-          ].map((b) => (
-            <button
-              key={b.label}
-              onClick={b.on}
-              className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded transition-colors"
-              style={{
-                border: `1px solid ${b.active ? C.accent : C.borderSoft}`,
-                color: b.active ? C.accent : C.textSecondary,
-                background: b.active ? `${C.accent}11` : "transparent",
-              }}
-            >
-              {b.label}
-            </button>
-          ))}
+          <button
+            onClick={() => setShowSkillsManager(true)}
+            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+          >
+            Skills
+          </button>
+          <button
+            onClick={clearHeroes}
+            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+          >
+            Clear
+          </button>
+          <button
+            onClick={() => setShowLog((v) => !v)}
+            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            style={{
+              border: `1px solid ${showLog ? C.accent : C.borderSoft}`,
+              color: showLog ? C.accent : C.textSecondary,
+              background: showLog ? `${C.accent}11` : "transparent",
+            }}
+          >
+            Log
+          </button>
         </div>
       </header>
 
-      {/* ── Main Layout ── */}
+      {/* ── Main: left rail + center + right context panel ─────────────── */}
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-        {/* Left Sidebar */}
-        <div
-          className="w-56 flex flex-col shrink-0 overflow-hidden"
+        {/* Left rail — canonical 9 sections */}
+        <nav
+          className="w-48 flex flex-col shrink-0 overflow-hidden"
           style={{ background: C.backgroundSoft, borderRight: `1px solid ${C.borderSoft}` }}
         >
-          <div
-            className="px-3 py-2"
-            style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-                Sessions
-              </span>
-              <span
-                className="text-xs font-semibold px-1.5 py-0.5 rounded"
-                style={{
-                  background: heroes.length > 0 ? `${C.accent}22` : C.surfaceMuted,
-                  color: heroes.length > 0 ? C.accent : C.textMuted,
-                  border: `1px solid ${C.borderSoft}`,
-                }}
-              >
-                {heroes.length}
-              </span>
-            </div>
+          <div className="flex-1 overflow-y-auto py-2">
+            {NAV_ITEMS.map((item) => {
+              const isActive = nav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setNav(item.id)}
+                  className="w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors"
+                  style={{
+                    background: isActive ? C.surfaceRaised : "transparent",
+                    borderLeft: isActive ? `2px solid ${C.accent}` : "2px solid transparent",
+                    color: isActive ? C.textPrimary : C.textSecondary,
+                  }}
+                >
+                  <span className="text-sm" style={{ color: isActive ? C.accent : C.textMuted }}>{item.glyph}</span>
+                  <span className="text-xs uppercase tracking-widest font-semibold flex-1">{item.label}</span>
+                  {!item.ready && (
+                    <span
+                      className="text-[9px] px-1 rounded"
+                      style={{ background: `${C.warning}22`, color: C.warning }}
+                    >
+                      stub
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {heroes.length === 0 ? (
-              <div className="p-4 text-xs leading-relaxed" style={{ color: C.textMuted }}>
-                {mode === "demo"
-                  ? "Press Demo to spawn simulated sessions."
-                  : "No active Claude Code sessions. Start one in any project; it will appear here."}
-              </div>
-            ) : (
-              heroes.map((hero) => {
-                const cls = HERO_CLASSES[hero.heroClass];
-                const stateColor = STATE_COLORS[hero.state];
-                const stateLabel = STATE_LABELS[hero.state];
-                const isSelected = hero.id === selectedHeroId;
-                return (
-                  <button
-                    key={hero.id}
-                    onClick={() => setSelectedHeroId(isSelected ? null : hero.id)}
-                    className="w-full text-left px-3 py-2.5 transition-colors"
-                    style={{
-                      background: isSelected ? C.surfaceRaised : "transparent",
-                      borderBottom: `1px solid ${C.borderSoft}`,
-                      borderLeft: isSelected ? `2px solid ${C.accent}` : "2px solid transparent",
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }}>
-                        {hero.name}
-                      </div>
-                      <div
-                        className="text-xs px-1.5 rounded"
-                        style={{ color: cls?.color ?? C.textMuted, background: `${cls?.color ?? C.textMuted}22` }}
-                      >
-                        Lv{hero.level}
-                      </div>
-                    </div>
-                    <div className="text-xs uppercase tracking-wider" style={{ color: stateColor }}>
-                      {stateLabel}
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
-
           <div
-            className="p-2.5 text-xs"
+            className="px-3 py-2 text-xs"
             style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface, color: C.textMuted }}
           >
-            {mode === "live" ? "Live — watching ~/.claude/" : "Demo — simulated sessions"}
+            {connMode === "live" ? "Live — watching ~/.claude/" : "Demo — simulated sessions"}
           </div>
-        </div>
+        </nav>
 
-        {/* Center - Keep (all 3 floors at once, side-cutaway) */}
-        <div className="flex-1 relative overflow-auto" style={{ minHeight: 0, background: C.background }}>
-          <KeepScene agentStates={agentStates} />
-
-          {heroes.length === 0 && (
-            <div className="absolute bottom-4 right-4 pointer-events-none">
-              <div
-                className="px-4 py-3 rounded"
-                style={{
-                  background: `${C.background}f0`,
-                  border: `1px solid ${C.borderSoft}`,
-                  backdropFilter: "blur(4px)",
-                  maxWidth: 240,
-                }}
-              >
-                <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-                  The Hub waits
-                </div>
-                <div className="text-xs mt-1 leading-relaxed" style={{ color: C.textSecondary }}>
-                  {mode === "demo"
-                    ? "Press Demo to spawn simulated sessions."
-                    : "Start a Claude Code session in any project. The Hub orb will light when you arrive."}
-                </div>
-              </div>
-            </div>
+        {/* Center workspace */}
+        <main className="flex-1 relative overflow-hidden" style={{ minHeight: 0, background: C.background }}>
+          {nav === "home" && (
+            <HomeView
+              floor={floor}
+              setFloor={setFloor}
+              agentStates={agentStates}
+              heroesCount={heroes.length}
+              connMode={connMode}
+            />
           )}
-
-          {showTasks && <TasksPanel onClose={() => setShowTasks(false)} />}
-          {showSessions && <SessionsPanel onClose={() => setShowSessions(false)} />}
-          {showMemory && <MemoryPanel onClose={() => setShowMemory(false)} />}
+          {nav === "tasks" && <PanelHost><TasksPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "memory" && <PanelHost><MemoryPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
+          {nav === "projects" && <StubView title="Project Spaces" phase="Phase 6 — harness wiring" />}
+          {nav === "inbox" && <StubView title="Inbox" phase="Phase 9 — Notion bridge full" />}
+          {nav === "sources" && <StubView title="Sources" phase="Phase 8 — Surfer browser adapter" />}
+          {nav === "outputs" && <StubView title="Output Library" phase="Phase 6 — harness wiring" />}
+          {nav === "automation" && <StubView title="Automation" phase="Phase 6 — Piccolo workflow registry" />}
 
           {showLog && (
             <div
@@ -348,41 +274,116 @@ export default function Home() {
               )}
             </div>
           )}
-        </div>
+        </main>
 
-        {/* Right Panel - Hero Details */}
-        {selectedHero && (
-          <div className="w-64 shrink-0 overflow-hidden">
-            <HeroPanel
-              hero={selectedHero}
-              onClose={() => setSelectedHeroId(null)}
-              onSkillsUpdated={() => {}}
-            />
-          </div>
-        )}
+        {/* Right context panel — active agent + state + sessions + Oak + perms */}
+        <aside
+          className="w-72 shrink-0 flex flex-col overflow-hidden"
+          style={{ background: C.backgroundSoft, borderLeft: `1px solid ${C.borderSoft}` }}
+        >
+          <ContextPanel
+            agent={activeAgent}
+            mode={mode}
+            heroes={heroes}
+            selectedHeroId={selectedHeroId}
+            onSelectHero={setSelectedHeroId}
+            connMode={connMode}
+          />
+        </aside>
       </div>
 
-      {/* Skills Manager Modal */}
+      {/* ── Bottom command bar — "Ask Aang…" ──────────────────────────── */}
+      <CommandBar
+        value={askInput}
+        onChange={setAskInput}
+        mode={mode}
+        onModeChange={setMode}
+      />
+
+      {/* Skills Manager modal (kept as-is) */}
       {showSkillsManager && (
         <SkillsManager
           onClose={() => setShowSkillsManager(false)}
           projects={trackedProjects ?? []}
         />
       )}
-
-      {/* Config Panel Modal */}
-      {showConfig && (
-        <ConfigPanel onClose={() => setShowConfig(false)} />
-      )}
     </div>
   );
 }
 
-function FloorPending({ floor }: { floor: FloorId }) {
-  const f = FLOORS[floor];
-  const planned = floor === "upper"
-    ? ["War Room — Batman", "Great Hall — Aang", "Alchemist's Tower — Professor Oak", "Observatory — Spock"]
-    : ["Crypt of Hours — Piccolo"];
+// ── Home view: castle scene ──────────────────────────────────────────────────
+function HomeView({
+  floor, setFloor, agentStates, heroesCount, connMode,
+}: {
+  floor: FloorId;
+  setFloor: (id: FloorId) => void;
+  agentStates: Record<string, "fighting" | "casting" | "shopping" | "resting" | "idle">;
+  heroesCount: number;
+  connMode: "demo" | "live";
+}) {
+  return (
+    <div className="h-full flex flex-col">
+      <div
+        className="flex items-center justify-between gap-3 px-4 py-2 shrink-0"
+        style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+      >
+        <div className="flex items-center gap-1">
+          {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
+            const f = FLOORS[id];
+            const isActive = id === floor;
+            return (
+              <button
+                key={id}
+                onClick={() => setFloor(id)}
+                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors whitespace-nowrap"
+                style={{
+                  background: isActive ? C.surfaceRaised : "transparent",
+                  color: isActive ? C.textPrimary : C.textMuted,
+                  border: `1px solid ${isActive ? C.accentSoft : C.borderSoft}`,
+                }}
+                title={f.blurb}
+              >
+                {f.name}
+              </button>
+            );
+          })}
+        </div>
+        <div className="text-xs uppercase tracking-widest" style={{ color: C.textMuted }}>
+          The Keep
+        </div>
+      </div>
+
+      <div className="flex-1 relative overflow-auto" style={{ minHeight: 0, background: C.background }}>
+        <KeepScene agentStates={agentStates} />
+
+        {heroesCount === 0 && (
+          <div className="absolute bottom-4 right-4 pointer-events-none">
+            <div
+              className="px-4 py-3 rounded"
+              style={{
+                background: `${C.background}f0`,
+                border: `1px solid ${C.borderSoft}`,
+                maxWidth: 240,
+              }}
+            >
+              <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                The Hub waits
+              </div>
+              <div className="text-xs mt-1 leading-relaxed" style={{ color: C.textSecondary }}>
+                {connMode === "demo"
+                  ? "Press Demo to spawn simulated sessions."
+                  : "Start a Claude Code session in any project. The Hub orb will light when you arrive."}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Stub view for not-yet-built nav sections ────────────────────────────────
+function StubView({ title, phase }: { title: string; phase: string }) {
   return (
     <div className="h-full w-full flex items-center justify-center p-8">
       <div
@@ -390,31 +391,256 @@ function FloorPending({ floor }: { floor: FloorId }) {
         style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
       >
         <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.warning }}>
-          Pending art pass
+          Stub
         </div>
         <div className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>
-          {f.name}
+          {title}
         </div>
-        <div className="text-sm mb-4 leading-relaxed" style={{ color: C.textSecondary }}>
-          {f.blurb}. The pixel-art background for this floor isn't authored yet.
-          The dungeon ships with a single hand-painted Ground Hall image.
-          Upper Spires and Crypts wait on the asset pipeline session.
+        <div className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+          This canonical section is in the spec but not yet wired. Slated for {phase}.
         </div>
-        <div className="text-xs uppercase tracking-widest mb-2" style={{ color: C.textMuted }}>
-          Chambers planned for this floor
-        </div>
-        <ul className="space-y-1.5">
-          {planned.map((c) => (
-            <li
-              key={c}
-              className="text-sm px-3 py-1.5 rounded"
-              style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}
-            >
-              {c}
-            </li>
-          ))}
-        </ul>
       </div>
+    </div>
+  );
+}
+
+// ── Panel host: hosts existing TasksPanel/MemoryPanel which were authored as
+//    bottom drawers. The host gives them a relative container so the absolute
+//    children render in the workspace area instead of overlaying the castle.
+function PanelHost({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="h-full w-full relative overflow-hidden" style={{ background: C.background }}>
+      {children}
+    </div>
+  );
+}
+
+// ── Right context panel ─────────────────────────────────────────────────────
+function ContextPanel({
+  agent, mode, heroes, selectedHeroId, onSelectHero, connMode,
+}: {
+  agent: { id: string; name: string; chamber: string; role: string; floor: string; defaultModelClass: string; escalationModelClass?: string; skills: string[]; toolScope: string[] } | undefined;
+  mode: Mode;
+  heroes: Array<{ id: number; name: string; level: number; state: string; heroClass: string }>;
+  selectedHeroId: number | null;
+  onSelectHero: (id: number | null) => void;
+  connMode: "demo" | "live";
+}) {
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Active Agent */}
+      <div
+        className="px-3 py-2.5 shrink-0"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+      >
+        <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
+          Active Agent
+        </div>
+        {agent ? (
+          <>
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-sm font-semibold" style={{ color: C.textPrimary }}>
+                {agent.name}
+              </div>
+              <div
+                className="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded"
+                style={{ background: `${C.accent}22`, color: C.accent }}
+              >
+                {agent.chamber}
+              </div>
+            </div>
+            <div className="text-xs leading-snug" style={{ color: C.textSecondary }}>
+              {agent.role.split(". ")[0]}.
+            </div>
+          </>
+        ) : (
+          <div className="text-xs" style={{ color: C.textMuted }}>Loading…</div>
+        )}
+      </div>
+
+      {/* Mode + Model Class */}
+      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Mode</div>
+            <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{mode.toUpperCase()}</div>
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Model</div>
+            <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={agent?.defaultModelClass}>
+              {agent?.defaultModelClass ?? "—"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tool Permissions */}
+      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
+          Tool Scope
+        </div>
+        {agent?.toolScope?.length ? (
+          <div className="flex flex-wrap gap-1">
+            {agent.toolScope.slice(0, 6).map((t) => (
+              <span
+                key={t}
+                className="text-[10px] px-1.5 py-0.5 rounded"
+                style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}
+              >
+                {t}
+              </span>
+            ))}
+            {agent.toolScope.length > 6 && (
+              <span className="text-[10px]" style={{ color: C.textMuted }}>
+                +{agent.toolScope.length - 6}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs" style={{ color: C.textMuted }}>—</div>
+        )}
+      </div>
+
+      {/* Oak Validation */}
+      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Oak Validation
+          </div>
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Not wired
+          </div>
+        </div>
+      </div>
+
+      {/* Sessions list (moved from left rail) */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div
+          className="px-3 py-2 flex items-center justify-between shrink-0"
+          style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Sessions
+          </span>
+          <span
+            className="text-xs font-semibold px-1.5 py-0.5 rounded"
+            style={{
+              background: heroes.length > 0 ? `${C.accent}22` : C.surfaceMuted,
+              color: heroes.length > 0 ? C.accent : C.textMuted,
+              border: `1px solid ${C.borderSoft}`,
+            }}
+          >
+            {heroes.length}
+          </span>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {heroes.length === 0 ? (
+            <div className="p-3 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+              {connMode === "demo"
+                ? "Press Demo to spawn simulated sessions."
+                : "No active Claude Code sessions. Start one in any project."}
+            </div>
+          ) : (
+            heroes.map((hero) => {
+              const stateColor = STATE_COLORS[hero.state as keyof typeof STATE_COLORS];
+              const stateLabel = STATE_LABELS[hero.state as keyof typeof STATE_LABELS];
+              const isSelected = hero.id === selectedHeroId;
+              return (
+                <button
+                  key={hero.id}
+                  onClick={() => onSelectHero(isSelected ? null : hero.id)}
+                  className="w-full text-left px-3 py-2 transition-colors"
+                  style={{
+                    background: isSelected ? C.surfaceRaised : "transparent",
+                    borderBottom: `1px solid ${C.borderSoft}`,
+                    borderLeft: isSelected ? `2px solid ${C.accent}` : "2px solid transparent",
+                  }}
+                >
+                  <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }}>
+                    {hero.name}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: stateColor }}>
+                    {stateLabel}
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Next Actions */}
+      <div className="px-3 py-2 shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
+        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
+          Next Actions
+        </div>
+        <div className="text-xs" style={{ color: C.textMuted }}>
+          Wired in Phase 6.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bottom command bar ──────────────────────────────────────────────────────
+function CommandBar({
+  value, onChange, mode, onModeChange,
+}: {
+  value: string;
+  onChange: (s: string) => void;
+  mode: Mode;
+  onModeChange: (m: Mode) => void;
+}) {
+  return (
+    <div
+      className="flex items-center gap-2 px-3 py-2 shrink-0"
+      style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}
+    >
+      <div className="flex rounded overflow-hidden shrink-0" style={{ border: `1px solid ${C.borderSoft}` }}>
+        {(["quick", "explore", "build"] as Mode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => onModeChange(m)}
+            className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
+            style={{
+              background: mode === m ? C.accentSoft : "transparent",
+              color: mode === m ? C.textPrimary : C.textMuted,
+            }}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
+
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Ask Aang…"
+        className="flex-1 px-3 py-1.5 text-sm rounded outline-none"
+        style={{
+          background: C.surface,
+          border: `1px solid ${C.borderSoft}`,
+          color: C.textPrimary,
+        }}
+      />
+
+      <button
+        disabled
+        className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
+        title="Phase 6"
+      >
+        Attach
+      </button>
+      <button
+        disabled
+        className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
+        title="Phase 6"
+      >
+        Create Task
+      </button>
     </div>
   );
 }
