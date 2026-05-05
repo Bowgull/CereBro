@@ -1,151 +1,302 @@
 // KeepScene — side-cutaway castle Phaser scene.
 //
-// Three floors stacked top-to-bottom (Upper Spires, Ground Hall, Crypts) with
-// chambers laid out left-to-right. Each chamber is a tiled stone room from the
-// 0x72 DungeonTilesetII atlas, with the agent's sprite centered on the floor
-// row. Cortana's Hub is a wider centerpiece on the Ground Hall.
+// Three floors: Upper Spires, Ground Hall, Crypts. Each chamber has:
+// - Unique idle motion signature per agent (bob amp/speed/rotation/sway)
+// - Active state: faster motion + accent tint + patrol walk within chamber
+// - Chamber lighting reacts to state (torch alpha, floor glow, banner speed)
+// - Cortana's orb drifts toward whichever chamber is active
 //
-// V1 scope: static layout, single agent (Cortana) gets a vertical bob tween as
-// proof-of-motion. Other agents are placed but static. Active/dormant state,
-// idle anims for the rest, ambient effects (torch flicker, fountain ripple)
-// land in the next pass.
-//
-// Data: useHeroSocket-driven agent state will pipe in via props later. For now
-// the scene draws the room frame and places everyone.
+// State machine wired via setAgentStates() called from the React wrapper
+// whenever tRPC keep.agents reports a change.
 
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import { CHAMBERS, cerebroColors as C, type AgentState } from "../lib/keepConfig";
 
 // ── Geometry ────────────────────────────────────────────────────────────────
-const TILE = 16;            // source tile size in atlas
-const SCALE = 3;            // render upscale
-const TS = TILE * SCALE;    // 48px on screen per tile
+const TILE = 16;
+const SCALE = 3;
+const TS = TILE * SCALE;
 
-// Each floor is 7 tiles tall (1 top wall, 5 interior, 1 floor edge).
 const FLOOR_TILES_TALL = 7;
-const FLOOR_TILES_WIDE = 44; // every floor pads to 44 tiles wide
+const FLOOR_TILES_WIDE = 44;
 
-// Per-floor chamber widths (sum must = FLOOR_TILES_WIDE)
-const UPPER_WIDTHS  = [11, 11, 11, 11];        // batman, aang, oak, spock
-const GROUND_WIDTHS = [8, 8, 12, 8, 8];        // tony, gojo, cortana, surfer, c3po
-const CRYPTS_WIDTHS = [44];                     // piccolo wide alone
+const UPPER_WIDTHS  = [11, 11, 11, 11];
+const GROUND_WIDTHS = [8, 8, 12, 8, 8];
+const CRYPTS_WIDTHS = [44];
 
-const CANVAS_W = FLOOR_TILES_WIDE * TS;                 // 2112
-const CANVAS_H = (FLOOR_TILES_TALL * 3 + 1) * TS;       // 22 tiles tall, 1056
+const CANVAS_W = FLOOR_TILES_WIDE * TS;
+const CANVAS_H = (FLOOR_TILES_TALL * 3 + 1) * TS;
 
-// Order on screen, top to bottom
 const UPPER_ORDER  = ["batman", "aang", "oak", "spock"];
 const GROUND_ORDER = ["tony", "gojo", "cortana", "surfer", "c3po"];
 const CRYPTS_ORDER = ["piccolo"];
 
-// ── Atlas frame definitions (0x72 DungeonTilesetII v1.7) ────────────────────
-// Each entry: name → [x, y, w, h] in source PNG.
+// ── Castle tileset (PixelLab — 32×32) ──────────────────────────────────────
+// One 32×32 tile occupies the same on-screen space as a 2×2 block of 16×16
+// 0x72 tiles, so we walk in steps of 2 and place one castle tile per pair.
+// Two batches:
+//   tileset/    — original wall + decoration tiles (loaded as castle_0..15)
+//   tileset/arch/ — second batch architecture/floor tiles (loaded as arch_0..15)
+const CASTLE_TILE_BASE = "/sprites/cerebro/tileset";
+const CASTLE_WALL_POOL = [0, 1];  // tileset/tile_0,1 — main wall body
+const CASTLE_FLOOR_POOL = [8, 9]; // tileset/tile_8,9 — interior floor (horizontal stone slabs)
+const ARCH_PASSAGE = 7;           // arch/tile_7 — open archway passage
+const ARCH_DOOR = 6;              // arch/tile_6 — closed wooden door
+const ARCH_TRAPDOOR = 8;          // arch/tile_8 — trapdoor in floor
+const ARCH_LADDER = 9;            // arch/tile_9 — ladder against wall
+const ARCH_RUNE = 15;             // arch/tile_15 — magic circle (under Cortana)
+
+// Staircase placements — connect floors at chamber boundaries.
+// `variant` picks one of stairs/tile_0..3 (all right-going). flipX mirrors for left-going.
+// Position is the top-left grid cell where the 32×32 tile is anchored.
+type Stair = { col: number; row: number; variant: number; flipX: boolean };
+const STAIRS: Stair[] = [
+  // Upper Spires ↔ Ground Hall (transition rows 5..8)
+  { col: 10, row: 5, variant: 0, flipX: false }, // left-side, ascending right (into Aang's chamber)
+  { col: 32, row: 5, variant: 2, flipX: true  }, // right-side, ascending left (into Oak's chamber)
+  // Ground Hall ↔ Crypts (transition rows 12..15)
+  { col: 6,  row: 12, variant: 1, flipX: false }, // left-side, ascending right
+  { col: 36, row: 12, variant: 3, flipX: true  }, // right-side, ascending left
+];
+
+// ── Atlas frames ─────────────────────────────────────────────────────────────
 const ATLAS_KEY = "d2_atlas";
 const ATLAS_FRAMES: Record<string, [number, number, number, number]> = {
-  floor_1:        [16, 64, 16, 16],
-  floor_2:        [32, 64, 16, 16],
-  floor_3:        [48, 64, 16, 16],
-  wall_mid:       [32, 16, 16, 16],
-  wall_top_mid:   [32,  0, 16, 16],
-  wall_left:      [16, 16, 16, 16],
-  wall_right:     [48, 16, 16, 16],
-  wall_top_left:  [16,  0, 16, 16],
-  wall_top_right: [48,  0, 16, 16],
-  column:         [80, 80, 16, 48],
-  column_wall:    [96, 80, 16, 48],
-  banner_blue:    [32, 32, 16, 16],
-  banner_red:     [16, 32, 16, 16],
-  banner_green:   [16, 48, 16, 16],
-  banner_yellow:  [32, 48, 16, 16],
-  fountain_top:   [80,  0, 16, 16],
-  fountain_mid:   [80, 48, 16, 16],
+  floor_1: [16, 64, 16, 16], floor_2: [32, 64, 16, 16],
+  floor_3: [48, 64, 16, 16], floor_4: [16, 80, 16, 16],
+  floor_5: [32, 80, 16, 16],
+  wall_mid: [32, 16, 16, 16], wall_top_mid: [32, 0, 16, 16],
+  banner_blue: [32, 32, 16, 16], banner_red: [16, 32, 16, 16],
+  banner_green: [16, 48, 16, 16], banner_yellow: [32, 48, 16, 16],
+  fountain_top: [80, 0, 16, 16], fountain_mid: [80, 48, 16, 16],
   fountain_basin: [80, 64, 16, 16],
 };
 
-// Per-agent banner color
 const AGENT_BANNER: Record<string, "blue" | "red" | "green" | "yellow"> = {
-  cortana: "blue",
-  tony:    "red",
-  gojo:    "blue",
-  surfer:  "blue",
-  c3po:    "yellow",
-  batman:  "yellow",
-  aang:    "green",
-  oak:     "blue",
-  spock:   "blue",
-  piccolo: "green",
+  cortana: "blue", tony: "red", gojo: "blue", surfer: "blue",
+  c3po: "yellow", batman: "yellow", aang: "green", oak: "blue",
+  spock: "blue", piccolo: "green",
 };
 
-// ── Scene ───────────────────────────────────────────────────────────────────
+const AGENT_FLOOR: Record<string, string> = {
+  cortana: "floor_3", tony: "floor_2", gojo: "floor_4", surfer: "floor_1",
+  c3po: "floor_5", batman: "floor_2", aang: "floor_3", oak: "floor_4",
+  spock: "floor_5", piccolo: "floor_2",
+};
+
+// ── Per-agent motion config ──────────────────────────────────────────────────
+interface TweenCfg {
+  bobAmp: number; bobDur: number;
+  xAmp: number;   xDur: number;
+  rotAmp: number; rotDur: number;
+  ease: string;   alpha: number;
+}
+
+interface AgentMotion {
+  idle: TweenCfg;
+  active: TweenCfg;
+  tint: number;
+  patrol: boolean;
+}
+
+const MOTION: Record<string, AgentMotion> = {
+  cortana: {
+    idle:   { bobAmp: 6, bobDur: 1400, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 9, bobDur: 900,  xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0xa78bfa, patrol: false,
+  },
+  tony: {
+    idle:   { bobAmp: 3, bobDur: 1400, xAmp: 0, xDur: 0,   rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 2, bobDur: 180,  xAmp: 3, xDur: 70,  rotAmp: 0, rotDur: 0, ease: "Linear",         alpha: 1 },
+    tint: 0xf97316, patrol: true,
+  },
+  gojo: {
+    idle:   { bobAmp: 2, bobDur: 2200, xAmp: 0, xDur: 0,    rotAmp: 1.5,  rotDur: 3200, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 3, bobDur: 1100, xAmp: 0, xDur: 0,    rotAmp: -3.5, rotDur: 1200, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0x60a5fa, patrol: true,
+  },
+  batman: {
+    idle:   { bobAmp: 2, bobDur: 3800, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 4, bobDur: 1600, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Bounce.easeOut",  alpha: 1 },
+    tint: 0xfbbf24, patrol: true,
+  },
+  aang: {
+    idle:   { bobAmp: 5, bobDur: 950,  xAmp: 4, xDur: 1500, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 9, bobDur: 580,  xAmp: 0, xDur: 0,    rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0x34d399, patrol: true,
+  },
+  oak: {
+    idle:   { bobAmp: 2, bobDur: 2600, xAmp: 6, xDur: 3000, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 2, bobDur: 1800, xAmp: 0, xDur: 0,    rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0x6ee7b7, patrol: true,
+  },
+  spock: {
+    idle:   { bobAmp: 2, bobDur: 2400, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 2, bobDur: 1600, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0x67e8f9, patrol: true,
+  },
+  surfer: {
+    idle:   { bobAmp: 4, bobDur: 1700, xAmp: 7,  xDur: 2400, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 7, bobDur: 900,  xAmp: 0,  xDur: 0,    rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0xe2e8f0, patrol: true,
+  },
+  c3po: {
+    idle:   { bobAmp: 2, bobDur: 1900, xAmp: 0, xDur: 0,  rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 4, bobDur: 110,  xAmp: 2, xDur: 55, rotAmp: 0, rotDur: 0, ease: "Linear",         alpha: 1 },
+    tint: 0xfde68a, patrol: false,
+  },
+  piccolo: {
+    idle:   { bobAmp: 4, bobDur: 3400, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 5, bobDur: 2200, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0x059669, patrol: true,
+  },
+};
+
+// ── Chamber decor ─────────────────────────────────────────────────────────────
+const ITEM_BASE = "/sprites/cc0/0x72_16x16DungeonTileset.v5/items";
+type Prop = { key: string; col: number; row: number; depth?: number };
+
+const CHAMBER_PROPS: Record<string, Prop[]> = {
+  tony:    [{ key: "boxes_stacked", col: 1, row: 0 }, { key: "chest_open_full", col: 6, row: 0 }, { key: "flask_big_red", col: 4, row: 0 }],
+  gojo:    [{ key: "flask_big_blue", col: 1, row: 0 }, { key: "skull", col: 5, row: 0 }, { key: "box", col: 6, row: 0 }],
+  cortana: [{ key: "column", col: 1, row: -2 }, { key: "column", col: 10, row: -2 }, { key: "chest_golden_closed", col: 2, row: 0 }, { key: "chest_golden_closed", col: 9, row: 0 }],
+  surfer:  [{ key: "chest_golden_open_full", col: 1, row: 0 }, { key: "boxes_stacked", col: 5, row: 0 }],
+  c3po:    [{ key: "boxes_stacked", col: 1, row: 0 }, { key: "chest_open_full", col: 4, row: 0 }, { key: "flask_big_yellow", col: 6, row: 0 }],
+  batman:  [{ key: "column", col: 1, row: -2 }, { key: "chest_closed", col: 4, row: 0 }, { key: "skull", col: 8, row: 0 }],
+  aang:    [{ key: "chest_open_full", col: 2, row: 0 }, { key: "flask_big_green", col: 5, row: 0 }, { key: "box", col: 8, row: 0 }],
+  oak:     [{ key: "flask_big_blue", col: 1, row: 0 }, { key: "flask_big_green", col: 3, row: 0 }, { key: "flask_big_red", col: 6, row: 0 }, { key: "flask_big_yellow", col: 8, row: 0 }],
+  spock:   [{ key: "gargoyle_top_1", col: 1, row: -3 }, { key: "flask_big_blue", col: 5, row: 0 }, { key: "column", col: 8, row: -2 }],
+  piccolo: [{ key: "skull", col: 4, row: 0 }, { key: "skull", col: 8, row: 0 }, { key: "skull", col: 36, row: 0 }, { key: "skull", col: 40, row: 0 }, { key: "gargoyle_top_1", col: 14, row: -3 }, { key: "gargoyle_top_2", col: 28, row: -3 }],
+};
+
+const PROP_KEYS = Array.from(new Set(Object.values(CHAMBER_PROPS).flat().map((p) => p.key)));
+
+// ── Scene ─────────────────────────────────────────────────────────────────────
 class KeepScene extends Phaser.Scene {
+  // Sprite refs
   private agentSprites: Map<string, Phaser.GameObjects.Image> = new Map();
+  private agentBaseX: Map<string, number> = new Map();
+  private agentBaseY: Map<string, number> = new Map();
+
+  // Chamber structural refs (for state-driven changes)
+  private chamberBounds: Map<string, { xLeft: number; xRight: number; yFloor: number }> = new Map();
+  private chamberTorches: Map<string, Phaser.GameObjects.Image[]> = new Map();
+  private chamberBanners: Map<string, Phaser.GameObjects.Image[]> = new Map();
+  private chamberGlows: Map<string, Phaser.GameObjects.Graphics> = new Map();
+
+  // Torch flicker
+  private allTorches: Phaser.GameObjects.Image[] = [];
+
+  // Cortana specials
+  private orbRef: Phaser.GameObjects.Graphics | null = null;
+  private cortanaCenterX: number = 0;
+
+  // State tracking
+  private currentStates: Partial<Record<string, AgentState>> = {};
 
   constructor() { super({ key: "KeepScene" }); }
 
   preload() {
-    // 0x72 atlas — single image, frames defined manually in create()
     this.load.image(ATLAS_KEY, "/sprites/cc0/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7.png");
-    // Torch (single static frame from 0x72 v5 for now; animation deferred)
-    this.load.image("torch", "/sprites/cc0/0x72_16x16DungeonTileset.v5/items/torch_1.png");
-
-    // Agent sprites — each chamber's character portrait
+    for (let i = 1; i <= 8; i++) {
+      this.load.image(`torch_${i}`, `${ITEM_BASE}/torch_${i}.png`);
+    }
+    for (const key of PROP_KEYS) {
+      this.load.image(key, `${ITEM_BASE}/${key}.png`);
+    }
     for (const c of CHAMBERS) {
       this.load.image(`agent_${c.agentId}`, c.spritePath);
+    }
+    // Custom castle tiles (32×32 PixelLab) — first batch (walls/decor)
+    for (let i = 0; i < 16; i++) {
+      this.load.image(`castle_${i}`, `${CASTLE_TILE_BASE}/tile_${i}.png`);
+    }
+    // Custom castle tiles — second batch (architecture: floors, doors, ladders)
+    for (let i = 0; i < 16; i++) {
+      this.load.image(`arch_${i}`, `${CASTLE_TILE_BASE}/arch/tile_${i}.png`);
+    }
+    // Staircase batch — only need first 4 right-going variants (we flip for left)
+    for (let i = 0; i < 4; i++) {
+      this.load.image(`stair_${i}`, `${CASTLE_TILE_BASE}/stairs/tile_${i}.png`);
     }
   }
 
   create() {
-    // Register atlas frames so we can address them by name.
     const tex = this.textures.get(ATLAS_KEY);
     for (const [name, [x, y, w, h]] of Object.entries(ATLAS_FRAMES)) {
       tex.add(name, 0, x, y, w, h);
     }
-
-    // Backdrop
     this.cameras.main.setBackgroundColor(C.background);
 
-    // Build all three floors
     this.buildFloor("upper",  UPPER_ORDER,  UPPER_WIDTHS,  0);
     this.buildFloor("ground", GROUND_ORDER, GROUND_WIDTHS, FLOOR_TILES_TALL);
     this.buildFloor("crypts", CRYPTS_ORDER, CRYPTS_WIDTHS, FLOOR_TILES_TALL * 2);
-
-    // Crenellation row on top
     this.drawCrenellations();
+    this.placeStairs();
 
-    // Cortana idle bob — proof of motion.
-    const cortana = this.agentSprites.get("cortana");
-    if (cortana) {
-      this.tweens.add({
-        targets: cortana,
-        y: cortana.y - 4,
-        duration: 1200,
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.easeInOut",
+    // Global torch flicker
+    let torchFrame = 1;
+    this.time.addEvent({
+      delay: 110, loop: true,
+      callback: () => {
+        torchFrame = (torchFrame % 8) + 1;
+        for (const t of this.allTorches) {
+          const offset = (t.getData("phase") as number) ?? 0;
+          const f = ((torchFrame - 1 + offset) % 8) + 1;
+          t.setTexture(`torch_${f}`);
+        }
+      },
+    });
+
+    // Spock head-tilt twitch — periodic x-scale snap
+    const spock = this.agentSprites.get("spock");
+    if (spock) {
+      this.time.addEvent({
+        delay: 4200, loop: true,
+        callback: () => {
+          this.tweens.add({ targets: spock, scaleX: -1.6, duration: 60, yoyo: true, ease: "Linear", onComplete: () => spock.setScaleX(1.6) });
+        },
       });
+    }
+
+    // Ambient dust motes
+    this.spawnDustMotes(0, FLOOR_TILES_TALL, 12);
+    this.spawnDustMotes(FLOOR_TILES_TALL, FLOOR_TILES_TALL * 2, 12);
+    this.spawnDustMotes(FLOOR_TILES_TALL * 2, FLOOR_TILES_TALL * 3, 8);
+
+    // Start everyone in idle
+    for (const [agentId] of this.agentSprites) {
+      this.applyIdleMotion(agentId);
     }
   }
 
-  /** Draw one horizontal floor: walls, floor row, chambers, props, agent. */
-  private buildFloor(floorId: "upper" | "ground" | "crypts", order: string[], widths: number[], rowOffset: number) {
-    const yTop = rowOffset;                                // tile row of top wall
-    const yWallBase = rowOffset + FLOOR_TILES_TALL - 2;    // tile row of bottom wall (the "floor surface line")
-    const yFloor = rowOffset + FLOOR_TILES_TALL - 1;       // tile row of floor edge
+  private buildFloor(
+    _floorId: "upper" | "ground" | "crypts",
+    order: string[],
+    widths: number[],
+    rowOffset: number
+  ) {
+    const yTop = rowOffset;
+    const yWallBase = rowOffset + FLOOR_TILES_TALL - 2;
+    const yFloor = rowOffset + FLOOR_TILES_TALL - 1;
 
-    // Floor surface (all tiles across this floor)
-    for (let c = 0; c < FLOOR_TILES_WIDE; c++) {
-      this.placeTile(c, yWallBase, "floor_1");
-      this.placeTile(c, yFloor,    "floor_2");
+    // Floor tiles — custom castle stone. One 32×32 tile spans 2×2 grid cells,
+    // so we step by 2 across yWallBase row and the tile naturally covers
+    // both yWallBase and yFloor rows.
+    for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
+      const tileIdx = CASTLE_FLOOR_POOL[variant % CASTLE_FLOOR_POOL.length];
+      this.placeCastleTile(c, yWallBase, `castle_${tileIdx}`);
     }
 
-    // Top wall row (back wall behind chambers)
-    for (let c = 0; c < FLOOR_TILES_WIDE; c++) {
-      this.placeTile(c, yTop,     "wall_top_mid");
-      this.placeTile(c, yTop + 1, "wall_mid");
+    // Top wall — custom 32×32 PixelLab castle tiles. One tile spans 2 cols × 2 rows.
+    for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
+      const tileIdx = CASTLE_WALL_POOL[variant % CASTLE_WALL_POOL.length];
+      this.placeCastleTile(c, yTop, `castle_${tileIdx}`);
     }
 
-    // Per-chamber dressing
     let cx = 0;
     for (let i = 0; i < order.length; i++) {
       const agentId = order[i];
@@ -153,95 +304,340 @@ class KeepScene extends Phaser.Scene {
       const chamber = CHAMBERS.find((c) => c.agentId === agentId);
       if (!chamber) { cx += w; continue; }
 
-      // Banner + torch on the back wall, roughly centered in the chamber
-      const bannerCol = cx + Math.floor(w / 2) - 1;
-      const torchCol  = cx + Math.floor(w / 2) + 1;
-      const banner = `banner_${AGENT_BANNER[agentId]}`;
-      this.placeTile(bannerCol, yTop + 1, banner);
-      // torch as image (16x16) on top of wall
-      this.add.image(
-        torchCol * TS + TS / 2,
-        (yTop + 1) * TS + TS / 2,
-        "torch"
-      ).setScale(SCALE).setDepth(2);
+      const xLeftPx  = cx * TS;
+      const xRightPx = (cx + w) * TS;
+      const yFloorPx = (yWallBase + 1) * TS;
+      this.chamberBounds.set(agentId, { xLeft: xLeftPx, xRight: xRightPx, yFloor: yFloorPx });
 
-      // Dividing column between chambers (skip leftmost edge)
+      // Banner with sway tween
+      const bannerX = (cx + Math.floor(w / 2) - 1) * TS + TS / 2;
+      const bannerY = (yTop + 1) * TS + TS / 2;
+      const banner = this.add.image(bannerX, bannerY, ATLAS_KEY, `banner_${AGENT_BANNER[agentId]}`)
+        .setScale(SCALE).setDepth(2).setOrigin(0.5, 0);
+      this.tweens.add({ targets: banner, angle: 1.8, duration: 2600, yoyo: true, repeat: -1, ease: "Sine.easeInOut", delay: i * 140 });
+      if (!this.chamberBanners.has(agentId)) this.chamberBanners.set(agentId, []);
+      this.chamberBanners.get(agentId)!.push(banner);
+
+      // Two torches per chamber
+      const t1 = this.spawnTorch(cx + Math.floor(w / 4), yTop + 2, i * 2);
+      const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, i * 2 + 3);
+      this.chamberTorches.set(agentId, [t1, t2]);
+
+      // Floor glow — hidden until agent is active
+      const glowCx = (cx + w / 2) * TS;
+      const glowCy = yFloorPx;
+      const glow = this.add.graphics();
+      glow.fillStyle(MOTION[agentId]?.tint ?? 0xffffff, 0.12);
+      glow.fillRect(xLeftPx, yFloorPx - TS / 2, xRightPx - xLeftPx, TS);
+      glow.setDepth(1).setAlpha(0);
+      this.chamberGlows.set(agentId, glow);
+
+      // Cortana hub
+      if (agentId === "cortana") {
+        this.cortanaCenterX = glowCx;
+
+        // Magic rune circle on the floor under the dais
+        const runeCol = cx + Math.floor(w / 2) - 1;
+        this.placeCastleTile(runeCol, yWallBase, `arch_${ARCH_RUNE}`);
+
+        const dais = this.add.graphics();
+        dais.fillStyle(0xa78bfa, 0.22);
+        dais.fillCircle(glowCx, glowCy, TS * 1.6);
+        dais.setDepth(3);
+        this.tweens.add({ targets: dais, alpha: 0.55, duration: 1800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+
+        const orb = this.add.graphics();
+        orb.fillStyle(0xa78bfa, 0.95);
+        orb.fillCircle(0, 0, 7);
+        orb.x = glowCx + TS * 1.5;
+        orb.y = glowCy - TS * 0.4;
+        orb.setDepth(6);
+        this.orbRef = orb;
+        this.tweens.add({ targets: orb, alpha: 0.55, duration: 1400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+        this.tweens.add({ targets: orb, y: orb.y - TS * 0.25, duration: 1900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+      }
+
+      // Piccolo fountain
+      if (agentId === "piccolo") {
+        const pc = cx + Math.floor(w / 2) - 4;
+        this.placeTile(pc, yWallBase - 1, "fountain_top");
+        this.placeTile(pc, yWallBase,     "fountain_mid");
+        this.placeTile(pc, yFloor,        "fountain_basin");
+      }
+
+      // Divider columns
       if (i > 0) {
-        const colTile = cx;
         for (let r = 0; r < FLOOR_TILES_TALL - 1; r++) {
-          this.placeTile(colTile, yTop + r, "wall_mid", 0.6);
+          this.placeTile(cx, yTop + r, "wall_mid", 0.55);
         }
       }
 
-      // Hub gets a glowing dais under Cortana
-      if (agentId === "cortana") {
-        const cxPx = (cx + w / 2) * TS;
-        const cyPx = (yWallBase + 1) * TS;
-        const dais = this.add.graphics();
-        dais.fillStyle(0xa78bfa, 0.18);
-        dais.fillCircle(cxPx, cyPx, TS * 1.4);
-        dais.setDepth(3);
-        // Floating user-orb
-        const orb = this.add.graphics();
-        orb.fillStyle(0xa78bfa, 0.9);
-        orb.fillCircle(cxPx + TS * 1.5, cyPx - TS * 0.2, 6);
-        orb.setDepth(6);
-        this.tweens.add({
-          targets: orb,
-          alpha: 0.55,
-          duration: 1400,
-          yoyo: true,
-          repeat: -1,
-          ease: "Sine.easeInOut",
-        });
+      // Decor props
+      const props = CHAMBER_PROPS[agentId] ?? [];
+      for (const p of props) {
+        const px = (cx + p.col) * TS + TS / 2;
+        const py = (yWallBase + 1 + p.row) * TS;
+        this.add.image(px, py, p.key).setScale(SCALE).setOrigin(0.5, 1).setDepth(p.depth ?? 4);
       }
 
-      // Piccolo gets a scrying pool (animated fountain frame, static for now)
-      if (agentId === "piccolo") {
-        const poolCol = cx + Math.floor(w / 2) - 4;
-        this.placeTile(poolCol,     yWallBase - 1, "fountain_top");
-        this.placeTile(poolCol,     yWallBase,     "fountain_mid");
-        this.placeTile(poolCol,     yFloor,        "fountain_basin");
-      }
-
-      // Agent sprite — placed centered, feet on the floor surface
+      // Agent sprite
       const sxPx = (cx + w / 2) * TS;
       const syPx = (yWallBase + 0.4) * TS;
       const sprite = this.add.image(sxPx, syPx, `agent_${agentId}`)
-        .setOrigin(0.5, 1)
-        .setScale(1.6)
-        .setDepth(5);
+        .setOrigin(0.5, 1).setScale(1.6).setDepth(5);
       this.agentSprites.set(agentId, sprite);
+      this.agentBaseX.set(agentId, sxPx);
+      this.agentBaseY.set(agentId, syPx);
 
       cx += w;
     }
   }
 
-  private placeTile(col: number, row: number, frame: string, alpha = 1) {
-    const img = this.add.image(col * TS + TS / 2, row * TS + TS / 2, ATLAS_KEY, frame);
-    img.setScale(SCALE);
-    img.setDepth(0);
-    if (alpha < 1) img.setAlpha(alpha);
-    return img;
+  // ── Motion helpers ──────────────────────────────────────────────────────────
+
+  private applyIdleMotion(agentId: string) {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite) return;
+    const m = MOTION[agentId];
+    if (!m) return;
+    const cfg = m.idle;
+    const baseX = this.agentBaseX.get(agentId)!;
+    const baseY = this.agentBaseY.get(agentId)!;
+
+    this.tweens.killTweensOf(sprite);
+    sprite.setTint(0xffffff).setAlpha(cfg.alpha);
+
+    // Reset to base position
+    sprite.x = baseX;
+    sprite.y = baseY;
+
+    // Bob
+    this.tweens.add({ targets: sprite, y: baseY - cfg.bobAmp, duration: cfg.bobDur, yoyo: true, repeat: -1, ease: cfg.ease });
+
+    // X sway (idle only — active uses patrol)
+    if (cfg.xAmp > 0) {
+      this.tweens.add({ targets: sprite, x: baseX + cfg.xAmp, duration: cfg.xDur, yoyo: true, repeat: -1, ease: cfg.ease });
+    }
+
+    // Rotation
+    if (cfg.rotAmp !== 0) {
+      this.tweens.add({ targets: sprite, angle: cfg.rotAmp, duration: cfg.rotDur, yoyo: true, repeat: -1, ease: cfg.ease });
+    }
   }
 
-  private drawCrenellations() {
-    // top of canvas: alternating block crenellation strip
-    const y = -TS / 2;
-    for (let c = 0; c < FLOOR_TILES_WIDE; c++) {
-      if (c % 2 === 0) {
-        const block = this.add.rectangle(c * TS + TS / 2, y + TS / 2, TS, TS, 0x252c3b);
-        block.setDepth(1);
+  private applyActiveMotion(agentId: string) {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite) return;
+    const m = MOTION[agentId];
+    if (!m) return;
+    const cfg = m.active;
+    const baseX = this.agentBaseX.get(agentId)!;
+    const baseY = this.agentBaseY.get(agentId)!;
+    const bounds = this.chamberBounds.get(agentId);
+
+    this.tweens.killTweensOf(sprite);
+    sprite.setTint(m.tint).setAlpha(cfg.alpha);
+
+    sprite.x = baseX;
+    sprite.y = baseY;
+
+    // Bob
+    this.tweens.add({ targets: sprite, y: baseY - cfg.bobAmp, duration: cfg.bobDur, yoyo: true, repeat: -1, ease: cfg.ease });
+
+    // Active x-shake (tony, c3po)
+    if (cfg.xAmp > 0 && !m.patrol) {
+      this.tweens.add({ targets: sprite, x: baseX + cfg.xAmp, duration: cfg.xDur, yoyo: true, repeat: -1, ease: cfg.ease });
+    }
+
+    // Rotation (gojo reversal)
+    if (cfg.rotAmp !== 0) {
+      this.tweens.add({ targets: sprite, angle: cfg.rotAmp, duration: cfg.rotDur, yoyo: true, repeat: -1, ease: cfg.ease });
+    }
+
+    // Patrol walk within chamber bounds
+    if (m.patrol && bounds) {
+      const margin = TS * 1.5;
+      const left  = bounds.xLeft  + margin;
+      const right = bounds.xRight - margin;
+      const range = right - left;
+      const dur = Math.max(1800, range * 3.5);
+      sprite.x = left + range / 2;
+      this.tweens.add({ targets: sprite, x: right, duration: dur, yoyo: true, repeat: -1, ease: "Sine.easeInOut",
+        onYoyo: () => sprite.setFlipX(true),
+        onRepeat: () => sprite.setFlipX(false),
+      });
+    }
+  }
+
+  private applyDormantMotion(agentId: string) {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite) return;
+    const baseY = this.agentBaseY.get(agentId)!;
+    const baseX = this.agentBaseX.get(agentId)!;
+
+    this.tweens.killTweensOf(sprite);
+    sprite.clearTint().setAlpha(0.45).setAngle(0).setFlipX(false);
+    sprite.x = baseX;
+    sprite.y = baseY;
+
+    // Very slow shallow bob
+    this.tweens.add({ targets: sprite, y: baseY - 1.5, duration: 3800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  }
+
+  private applyChamberLighting(agentId: string, state: "idle" | "active" | "dormant") {
+    const torches = this.chamberTorches.get(agentId) ?? [];
+    const glow = this.chamberGlows.get(agentId);
+
+    if (state === "active") {
+      for (const t of torches) {
+        this.tweens.killTweensOf(t);
+        this.tweens.add({ targets: t, alpha: 1.0, duration: 400, ease: "Sine.easeOut" });
+        this.tweens.add({ targets: t, scaleX: SCALE * 1.1, scaleY: SCALE * 1.1, duration: 600, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+      }
+      if (glow) {
+        this.tweens.killTweensOf(glow);
+        this.tweens.add({ targets: glow, alpha: 1, duration: 600, ease: "Sine.easeOut" });
+        this.tweens.add({ targets: glow, alpha: 0.6, duration: 1200, yoyo: true, repeat: -1, ease: "Sine.easeInOut", delay: 600 });
+      }
+    } else if (state === "idle") {
+      for (const t of torches) {
+        this.tweens.killTweensOf(t);
+        this.tweens.add({ targets: t, alpha: 0.85, scaleX: SCALE, scaleY: SCALE, duration: 400 });
+      }
+      if (glow) {
+        this.tweens.killTweensOf(glow);
+        this.tweens.add({ targets: glow, alpha: 0, duration: 600 });
+      }
+    } else {
+      for (const t of torches) {
+        this.tweens.killTweensOf(t);
+        this.tweens.add({ targets: t, alpha: 0.35, scaleX: SCALE, scaleY: SCALE, duration: 600 });
+      }
+      if (glow) {
+        this.tweens.killTweensOf(glow);
+        this.tweens.add({ targets: glow, alpha: 0, duration: 400 });
       }
     }
   }
 
-  setAgentStates(_states: Partial<Record<string, AgentState>>) {
-    // wired next session — will tint chambers / brighten torches per state
+  private updateOrbTarget(activeChamber: string | null) {
+    if (!this.orbRef) return;
+    const bounds = activeChamber ? this.chamberBounds.get(activeChamber) : null;
+    const targetX = bounds
+      ? bounds.xLeft + (bounds.xRight - bounds.xLeft) / 2
+      : this.cortanaCenterX + TS * 1.5;
+
+    this.tweens.killTweensOf(this.orbRef);
+    this.tweens.add({ targets: this.orbRef, x: targetX, duration: 2200, ease: "Sine.easeInOut" });
+
+    // Cortana flips to face the active chamber
+    const cortana = this.agentSprites.get("cortana");
+    if (cortana && bounds) {
+      const facingRight = targetX > this.cortanaCenterX;
+      cortana.setFlipX(!facingRight);
+    }
+  }
+
+  setAgentStates(states: Partial<Record<string, AgentState>>) {
+    this.currentStates = states;
+
+    // Map CereBro socket states to our 3-tier
+    const mapState = (s?: AgentState): "active" | "idle" | "dormant" => {
+      if (!s) return "dormant";
+      if (s === "fighting" || s === "casting" || s === "shopping") return "active";
+      if (s === "resting") return "idle";
+      return "dormant";
+    };
+
+    let firstActiveNonCortana: string | null = null;
+
+    for (const [agentId, sprite] of this.agentSprites) {
+      if (!sprite) continue;
+      const tier = mapState(states[agentId]);
+
+      if (tier === "active") {
+        this.applyActiveMotion(agentId);
+        this.applyChamberLighting(agentId, "active");
+        if (agentId !== "cortana" && !firstActiveNonCortana) firstActiveNonCortana = agentId;
+      } else if (tier === "idle") {
+        this.applyIdleMotion(agentId);
+        this.applyChamberLighting(agentId, "idle");
+      } else {
+        this.applyDormantMotion(agentId);
+        this.applyChamberLighting(agentId, "dormant");
+      }
+    }
+
+    this.updateOrbTarget(firstActiveNonCortana);
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  private spawnTorch(col: number, row: number, phase: number): Phaser.GameObjects.Image {
+    const t = this.add.image(col * TS + TS / 2, row * TS + TS / 2, "torch_1");
+    t.setScale(SCALE).setDepth(3).setData("phase", phase);
+    this.allTorches.push(t);
+    return t;
+  }
+
+  private spawnDustMotes(rowStart: number, rowEnd: number, count: number) {
+    const yMin = rowStart * TS + TS;
+    const yMax = (rowEnd - 1) * TS - TS;
+    for (let i = 0; i < count; i++) {
+      const m = this.add.graphics();
+      m.fillStyle(0xfff6c8, 0.22);
+      m.fillCircle(0, 0, 1.2);
+      m.x = Math.random() * CANVAS_W;
+      m.y = yMin + Math.random() * (yMax - yMin);
+      m.setDepth(7);
+      const dur = 9000 + Math.random() * 6000;
+      this.tweens.add({
+        targets: m,
+        x: m.x + (Math.random() < 0.5 ? -1 : 1) * (140 + Math.random() * 200),
+        y: m.y + (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 60),
+        alpha: 0.04, duration: dur, yoyo: true, repeat: -1, ease: "Sine.easeInOut",
+        delay: Math.random() * 4000,
+      });
+    }
+  }
+
+  private placeTile(col: number, row: number, frame: string, alpha = 1) {
+    const img = this.add.image(col * TS + TS / 2, row * TS + TS / 2, ATLAS_KEY, frame);
+    img.setScale(SCALE).setDepth(0);
+    if (alpha < 1) img.setAlpha(alpha);
+    return img;
+  }
+
+  // 32×32 PixelLab castle tile — occupies a 2×2 block of 16×16 grid slots.
+  // Origin top-left so (col, row) addresses the same upper-left corner as
+  // placeTile, but the tile spans columns [col..col+1] and rows [row..row+1].
+  private placeCastleTile(col: number, row: number, key: string, alpha = 1) {
+    const img = this.add.image(col * TS, row * TS, key);
+    img.setOrigin(0, 0).setScale(SCALE).setDepth(0);
+    if (alpha < 1) img.setAlpha(alpha);
+    return img;
+  }
+
+  private placeStairs() {
+    // Stairs render above floor (depth 0) and above wall tiles, below props/agents.
+    // They span the floor↔wall transition zone (a 32×32 tile = 2 grid rows).
+    for (const s of STAIRS) {
+      const img = this.add.image(s.col * TS, s.row * TS, `stair_${s.variant}`);
+      img.setOrigin(0, 0).setScale(SCALE).setDepth(2);
+      if (s.flipX) img.setFlipX(true);
+    }
+  }
+
+  private drawCrenellations() {
+    for (let c = 0; c < FLOOR_TILES_WIDE; c++) {
+      if (c % 2 === 0) {
+        this.add.rectangle(c * TS + TS / 2, -TS / 4, TS, TS, 0x252c3b).setDepth(1);
+      }
+    }
   }
 }
 
-// ── React wrapper ───────────────────────────────────────────────────────────
+// ── React wrapper ─────────────────────────────────────────────────────────────
 interface Props {
   agentStates?: Partial<Record<string, AgentState>>;
 }
@@ -254,20 +650,16 @@ export default function KeepSceneView({ agentStates }: Props) {
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
-    const config: Phaser.Types.Core.GameConfig = {
+    const game = new Phaser.Game({
       type: Phaser.AUTO,
-      width: CANVAS_W,
-      height: CANVAS_H,
+      width: CANVAS_W, height: CANVAS_H,
       backgroundColor: C.background,
       parent: containerRef.current,
-      pixelArt: true,
-      antialias: false,
-      roundPixels: true,
+      pixelArt: true, antialias: false, roundPixels: true,
       scale: { mode: Phaser.Scale.NONE, width: CANVAS_W, height: CANVAS_H },
       scene: [KeepScene],
-    };
+    });
 
-    const game = new Phaser.Game(config);
     gameRef.current = game;
     game.events.on("ready", () => {
       sceneRef.current = game.scene.getScene("KeepScene") as KeepScene;
@@ -278,7 +670,6 @@ export default function KeepSceneView({ agentStates }: Props) {
       if (canvas) {
         canvas.style.width = "100%";
         canvas.style.height = "auto";
-        canvas.style.maxWidth = `${CANVAS_W * 0.6}px`;
         canvas.style.imageRendering = "pixelated";
         canvas.style.display = "block";
       }
@@ -287,11 +678,9 @@ export default function KeepSceneView({ agentStates }: Props) {
     const t2 = setTimeout(applyStyle, 800);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
+      clearTimeout(t1); clearTimeout(t2);
       game.destroy(true);
-      gameRef.current = null;
-      sceneRef.current = null;
+      gameRef.current = null; sceneRef.current = null;
     };
   }, []);
 
@@ -303,16 +692,10 @@ export default function KeepSceneView({ agentStates }: Props) {
     <div
       ref={containerRef}
       style={{
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
-        backgroundColor: C.background,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        padding: "1rem",
-        lineHeight: 0,
-        fontSize: 0,
+        width: "100%", height: "100%", overflow: "auto",
+        backgroundColor: C.background, display: "flex",
+        justifyContent: "center", alignItems: "flex-start",
+        padding: "0.5rem", lineHeight: 0, fontSize: 0,
       }}
     />
   );

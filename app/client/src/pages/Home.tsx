@@ -41,6 +41,37 @@ export default function Home() {
     return { total: heroes.length, active, resting, planning };
   }, [heroes]);
 
+  const agentStates = useMemo(() => {
+    const states: Record<string, "fighting" | "casting" | "shopping" | "resting" | "idle"> = {};
+    if (heroes.length === 0) return states;
+
+    states.cortana = "fighting";
+
+    const classToAgent: Record<string, string> = {
+      warrior: "tony",
+      mage: "gojo",
+      cleric: "aang",
+    };
+
+    let hasActive = false;
+    let hasResting = false;
+    let hasPlanning = false;
+
+    for (const h of heroes) {
+      const agent = classToAgent[h.heroClass];
+      if (agent) states[agent] = h.state;
+      if (h.state === "fighting" || h.state === "casting") hasActive = true;
+      if (h.state === "resting") hasResting = true;
+      if (h.state === "shopping") hasPlanning = true;
+    }
+
+    if (hasActive) states.surfer = "fighting";
+    if (hasPlanning) states.batman = "shopping";
+    if (hasResting) states.piccolo = "resting";
+
+    return states;
+  }, [heroes]);
+
   return (
     <div
       className="h-screen flex flex-col overflow-hidden"
@@ -260,7 +291,7 @@ export default function Home() {
 
         {/* Center - Keep (all 3 floors at once, side-cutaway) */}
         <div className="flex-1 relative overflow-auto" style={{ minHeight: 0, background: C.background }}>
-          <KeepScene agentStates={{}} />
+          <KeepScene agentStates={agentStates} />
 
           {heroes.length === 0 && (
             <div className="absolute bottom-4 right-4 pointer-events-none">
