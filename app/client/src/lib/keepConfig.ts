@@ -45,8 +45,8 @@ export interface FloorMeta {
 }
 
 export const FLOORS: Record<FloorId, FloorMeta> = {
-  upper:  { id: "upper",  name: "Upper Spires", blurb: "Strategy, doctrine, observation, knowledge", ready: true },
-  ground: { id: "ground", name: "Ground Hall",  blurb: "The Hub. Where Cortana speaks to you.",       ready: true },
+  upper:  { id: "upper",  name: "Upper Spires", blurb: "Strategy, validation, logic, intent",         ready: true },
+  ground: { id: "ground", name: "Ground Hall",  blurb: "The Hub. Cortana routes; council gathers.",   ready: true },
   crypts: { id: "crypts", name: "Crypts",       blurb: "Sealed and quiet",                            ready: true },
 };
 
@@ -95,7 +95,7 @@ export const CHAMBERS: Chamber[] = [
     spritePath: "/sprites/keep/cortana/rotations/south.png",
     hue: cerebroColors.glowViolet, hueGlow: "rgba(167,139,250,0.22)",
     props: ["◯", "✦", "◇", "✦", "◯"],
-    blurb: "Where Cortana speaks to you.",
+    blurb: "Route. Mode. Permissions. Council host.",
     span: 1, isHub: true,
   },
   {
@@ -103,7 +103,7 @@ export const CHAMBERS: Chamber[] = [
     spritePath: "/sprites/keep/surfer-mounted/rotations/south.png",
     hue: cerebroColors.accent, hueGlow: "rgba(107,166,255,0.18)",
     props: ["🌌", "✦", "✺"],
-    blurb: "Source. Scrape. Surface.",
+    blurb: "Source. Scrape. Surface. Locked until enabled.",
     span: 1,
   },
   {
@@ -129,7 +129,7 @@ export const CHAMBERS: Chamber[] = [
     spritePath: "/sprites/keep/aang/rotations/south.png",
     hue: cerebroColors.success, hueGlow: "rgba(159,210,183,0.16)",
     props: ["☯", "≋", "✿"],
-    blurb: "Convene. Mediate. Retrospect.",
+    blurb: "Intent. Convene. Mediate. Teach.",
     span: 1,
   },
   {
@@ -137,7 +137,7 @@ export const CHAMBERS: Chamber[] = [
     spritePath: "/sprites/keep/oak/rotations/south.png",
     hue: "#8FB4D9", hueGlow: "rgba(143,180,217,0.16)",
     props: ["⚗", "📚", "⌬"],
-    blurb: "Curate. Distill. File.",
+    blurb: "Validate. Dedup. Privacy. Block.",
     span: 1,
   },
   {
@@ -145,7 +145,7 @@ export const CHAMBERS: Chamber[] = [
     spritePath: "/sprites/keep/spock/rotations/south.png",
     hue: "#5BA3D9", hueGlow: "rgba(91,163,217,0.16)",
     props: ["✦", "▲", "✓"],
-    blurb: "Validate. Sanity-check. Logic.",
+    blurb: "Logic. Contradiction. Bloat.",
     span: 1,
   },
 
