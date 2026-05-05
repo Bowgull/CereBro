@@ -24,7 +24,14 @@ pnpm install # only on first run
 pnpm dev     # → http://localhost:3002 (auto-bumps from 3000 if busy)
 ```
 
-Database is optional for boot. Drizzle is wired but `getDb()` is lazy; no `DATABASE_URL` means no DB, dev still runs.
+Harness DB is libSQL via `@libsql/client`. Default `file:./cerebro.db`. Set `CEREBRO_DB_URL=libsql://…` + `CEREBRO_DB_AUTH_TOKEN=…` to switch to Turso, no code change. Schema applied idempotently in `app/server/cerebroDb.ts` on first connect (projects, tasks, sessions, memory_entries, outputs, sources). Upstream MySQL `users` table from the fork is unused.
+
+## Env vars (app/.env, gitignored)
+
+- `CEREBRO_DB_URL`, `CEREBRO_DB_AUTH_TOKEN` — harness DB; defaults to local SQLite
+- `NOTION_TOKEN`, `NOTION_INBOX_DATABASE_ID`, `NOTION_OUTBOX_DATABASE_ID` — Notion adapter; auto-poll runs every `NOTION_POLL_INTERVAL_SEC` (default 300)
+- `CEREBRO_VAULT_DIR` — absolute path to vault root; usually a Drive synced folder
+- `CEREBRO_MODEL_<AGENT_ID>` — per-agent model override, honored by `resolveModelForAgent`
 
 ## Locked decisions (do not change without explicit approval)
 
@@ -58,8 +65,18 @@ Pixel art is load-bearing. Don't sacrifice it for engineering convenience. (Sess
 ## Phase plan (where we are)
 
 - Phase 0 ✅ doc scaffolding
-- Phase 1 ⏳ fork Claude Dungeon → restyle to castle → run locally. Ground Hall live; Upper Spires + Crypts pending art pass.
-- Phase 2: harness backend (tasks, sessions, projects, validation, memory, output library, source library) + Notion inbox/outbox + Turso + Drive vault.
-- Phase 3: complete agent loop, all 10 agents with model router and skill files.
+- Phase 1 ✅ fork Claude Dungeon → restyle to castle → run locally. Ground Hall has real art; Upper Spires + Crypts are honest placeholders awaiting art pass. Establishing exterior shot wired (Castle in the Dark, CC0).
+- Phase 2 ✅ harness backend live. libSQL + drizzle-less idempotent schema. Tables: projects, tasks, sessions, memory_entries, outputs, sources. tRPC routers: tasks, sessions, memory, outputs, integrations, keep. UI panels: Tasks, Memory, Sessions ledger. Notion inbox poller (auto every 5min) + outbox publisher with rich properties. Drive vault writes via `outputs.writeToVault`. Transcript watcher captures assistant text into the outputs library tied to live sessions. Model router scaffold (`server/agentRouter.ts`) maps all 10 agents to floor/chamber/role/model.
+- Phase 3 ⏳ runtime agent loop — wire `resolveModelForAgent` into actual dispatch, build the 10 agent skill files, validation pass, multi-agent ceremonies, output kind expansion (code/diff/file). This is where `keep.agents` becomes load-bearing instead of metadata.
 - Phase 4: full browser automation, OpenClaw input adapter, advanced UI polish.
 - Phase 5 (LAST): walkthrough guide.
+
+## Phase 2 surface map (current)
+
+- `app/server/cerebroDb.ts` — schema + helpers (recordSessionStart/End, recordOutput, getOrCreateProjectByPath)
+- `app/server/agentRouter.ts` — 10-agent routing config
+- `app/server/integrations/notion.ts` — raw fetch against Notion API; pollInbox dedupes via `memory_entries.source = notion:<page_id>`; publishToOutbox sets full property set; auto-poll on boot
+- `app/server/integrations/vault.ts` — filesystem writer; reads `CEREBRO_VAULT_DIR`
+- `app/server/websocket.ts` — additive hooks at hero-new (recordSessionStart), removeHero (recordSessionEnd), processLine assistant text (recordOutput)
+- `app/server/routers/{tasks,sessions,memory,outputs,integrations,keep}.ts` — tRPC surface
+- `app/client/src/components/{TasksPanel,MemoryPanel,SessionsPanel}.tsx` — bottom drawers, mutually exclusive with Log
