@@ -11,7 +11,7 @@
 
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
-import { CHAMBERS, cerebroColors as C, type AgentState } from "../lib/keepConfig";
+import { CHAMBERS, cerebroColors as C, agentStateTier, type AgentState } from "../lib/keepConfig";
 
 // ── Geometry ────────────────────────────────────────────────────────────────
 const TILE = 16;
@@ -48,17 +48,18 @@ const ARCH_TRAPDOOR = 8;          // arch/tile_8 — trapdoor in floor
 const ARCH_LADDER = 9;            // arch/tile_9 — ladder against wall
 const ARCH_RUNE = 15;             // arch/tile_15 — magic circle (under Cortana)
 
-// Staircase placements — connect floors at chamber boundaries.
-// `variant` picks one of stairs/tile_0..3 (all right-going). flipX mirrors for left-going.
-// Position is the top-left grid cell where the 32×32 tile is anchored.
-type Stair = { col: number; row: number; variant: number; flipX: boolean };
-const STAIRS: Stair[] = [
-  // Upper Spires ↔ Ground Hall (transition rows 5..8)
-  { col: 10, row: 5, variant: 0, flipX: false }, // left-side, ascending right (into Aang's chamber)
-  { col: 32, row: 5, variant: 2, flipX: true  }, // right-side, ascending left (into Oak's chamber)
-  // Ground Hall ↔ Crypts (transition rows 12..15)
-  { col: 6,  row: 12, variant: 1, flipX: false }, // left-side, ascending right
-  { col: 36, row: 12, variant: 3, flipX: true  }, // right-side, ascending left
+// Inter-floor passages — arched stone doorways with stairs visible descending
+// inside. Placed in the top-wall band of the LOWER floor at each transition
+// point, so reading from the lower floor you see stairs going up into the
+// floor above. arch/tile_7 is a 32×32 archway (2×2 grid cells).
+type Passage = { col: number; row: number };
+const PASSAGES: Passage[] = [
+  // Upper ↔ Ground — drawn in Ground's top-wall band (row 7).
+  { col: 10, row: 7 },  // left passage (under Aang)
+  { col: 32, row: 7 },  // right passage (under Oak)
+  // Ground ↔ Crypts — drawn in Crypts' top-wall band (row 14).
+  { col: 6,  row: 14 }, // left passage
+  { col: 36, row: 14 }, // right passage
 ];
 
 // ── Per-agent motion config ──────────────────────────────────────────────────
@@ -158,7 +159,9 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
   ],
   cortana: [
     { key: "stained_glass",  col: 5,  row: -3, depth: 1 },
-    { key: "candelabra",     col: 1,  row: 0 },
+    { key: "crystal_pillar", col: 4,  row: 0 },
+    { key: "crystal_pillar", col: 7,  row: 0 },
+    { key: "candelabra",     col: 0,  row: 0 },
     { key: "candelabra",     col: 10, row: 0 },
   ],
   surfer: [
@@ -243,12 +246,6 @@ class KeepScene extends Phaser.Scene {
     for (let i = 0; i < 16; i++) {
       this.load.image(`arch_${i}`, `${CASTLE_TILE_BASE}/arch/tile_${i}.png`);
     }
-    // Staircase batch — first 4 right-going variants (we flip for left)
-    for (let i = 0; i < 4; i++) {
-      this.load.image(`stair_${i}`, `${CASTLE_TILE_BASE}/stairs/tile_${i}.png`);
-    }
-    // Bonus tiles from the stairs batch — portcullis gate (decorative)
-    this.load.image("portcullis", `${CASTLE_TILE_BASE}/stairs/tile_13.png`);
     // PixelLab chamber props (32×32, named)
     for (const key of PROP_KEYS) {
       this.load.image(`prop_${key}`, `${PROP_PATH}/${key}.png`);
@@ -264,7 +261,7 @@ class KeepScene extends Phaser.Scene {
     this.buildFloor("ground", GROUND_ORDER, GROUND_WIDTHS, FLOOR_TILES_TALL);
     this.buildFloor("crypts", CRYPTS_ORDER, CRYPTS_WIDTHS, FLOOR_TILES_TALL * 2);
     this.drawCrenellations();
-    this.placeStairs();
+    this.placePassages();
 
     // Torch flicker — alpha + scale pulse on the static custom torch tile.
     for (const t of this.allTorches) {
@@ -281,7 +278,7 @@ class KeepScene extends Phaser.Scene {
       this.time.addEvent({
         delay: 4200, loop: true,
         callback: () => {
-          this.tweens.add({ targets: spock, scaleX: -1.6, duration: 60, yoyo: true, ease: "Linear", onComplete: () => spock.setScaleX(1.6) });
+          this.tweens.add({ targets: spock, scaleX: -1.6, duration: 60, yoyo: true, ease: "Linear", onComplete: () => spock.setScale(1.6, spock.scaleY) });
         },
       });
     }
@@ -373,11 +370,24 @@ class KeepScene extends Phaser.Scene {
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
 
+        // Flanking stone columns — castle_6 mounted in the back wall band,
+        // symmetric around Cortana's center (canvas col 22). Even cols snap
+        // to the 2×2 back-wall tile grid.
+        this.placeCastleTile(cx + 2, yTop + 3, "castle_6");
+        this.placeCastleTile(cx + 8, yTop + 3, "castle_6");
+
+        // Layered violet dais — outer halo + inner core.
+        const daisOuter = this.add.graphics();
+        daisOuter.fillStyle(0xa78bfa, 0.12);
+        daisOuter.fillCircle(glowCx, glowCy, TS * 2.4);
+        daisOuter.setDepth(2);
+        this.tweens.add({ targets: daisOuter, alpha: 0.32, duration: 2400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+
         const dais = this.add.graphics();
-        dais.fillStyle(0xa78bfa, 0.22);
+        dais.fillStyle(0xa78bfa, 0.28);
         dais.fillCircle(glowCx, glowCy, TS * 1.6);
         dais.setDepth(3);
-        this.tweens.add({ targets: dais, alpha: 0.55, duration: 1800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+        this.tweens.add({ targets: dais, alpha: 0.6, duration: 1800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
 
         const orb = this.add.graphics();
         orb.fillStyle(0xa78bfa, 0.95);
@@ -561,19 +571,13 @@ class KeepScene extends Phaser.Scene {
   setAgentStates(states: Partial<Record<string, AgentState>>) {
     this.currentStates = states;
 
-    // Map CereBro socket states to our 3-tier. Unmapped agents default to
-    // idle (full opacity) — they're present, just not currently doing anything.
-    // "dormant" is reserved for explicit disconnect/unavailable states.
-    const mapState = (s?: AgentState): "active" | "idle" | "dormant" => {
-      if (s === "fighting" || s === "casting" || s === "shopping") return "active";
-      return "idle";
-    };
-
+    // Map the 12-state machine to render tier (active / idle / dormant).
+    // Truth doc §8 lists the full vocabulary; agentStateTier collapses it.
     let firstActiveNonCortana: string | null = null;
 
     for (const [agentId, sprite] of this.agentSprites) {
       if (!sprite) continue;
-      const tier = mapState(states[agentId]);
+      const tier = agentStateTier(states[agentId]);
 
       if (tier === "active") {
         this.applyActiveMotion(agentId);
@@ -594,10 +598,13 @@ class KeepScene extends Phaser.Scene {
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private spawnTorch(col: number, row: number, phase: number): Phaser.GameObjects.Image {
-    // Custom castle torch — tileset/tile_11 (lit torch sconce). Renders at
-    // 1.5× source so it matches the visual scale of the old 16×16 torches.
-    const t = this.add.image(col * TS + TS / 2, row * TS + TS / 2, "castle_11");
-    t.setScale(SCALE / 2).setDepth(3).setData("phase", phase);
+    // Custom castle torch sconce — castle_11 is a 32×32 tile with the wall
+    // section baked in. Snap col to even so it aligns with the 2×2 back-wall
+    // tile grid; renders at full SCALE so the wall portion of the sprite
+    // matches surrounding back-wall tiles.
+    const evenCol = col - (col % 2);
+    const t = this.add.image(evenCol * TS, row * TS, "castle_11");
+    t.setOrigin(0, 0).setScale(SCALE).setDepth(3).setData("phase", phase);
     this.allTorches.push(t);
     return t;
   }
@@ -633,13 +640,13 @@ class KeepScene extends Phaser.Scene {
     return img;
   }
 
-  private placeStairs() {
-    // Stairs render above floor (depth 0) and above wall tiles, below props/agents.
-    // They span the floor↔wall transition zone (a 32×32 tile = 2 grid rows).
-    for (const s of STAIRS) {
-      const img = this.add.image(s.col * TS, s.row * TS, `stair_${s.variant}`);
+  private placePassages() {
+    // Archway passages render above wall tiles, below props/agents. arch/tile_7
+    // is a stone arch with stairs descending inside — placed in the lower
+    // floor's top-wall band, it reads as an opening leading up to the floor above.
+    for (const p of PASSAGES) {
+      const img = this.add.image(p.col * TS, p.row * TS, "arch_7");
       img.setOrigin(0, 0).setScale(SCALE).setDepth(2);
-      if (s.flipX) img.setFlipX(true);
     }
   }
 

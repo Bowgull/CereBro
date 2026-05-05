@@ -165,24 +165,66 @@ export function chambersForFloor(floor: FloorId): Chamber[] {
   return CHAMBERS.filter(c => c.floor === floor);
 }
 
-// Agent state for the chamber light. Maps from session/agent activity.
-export type AgentState = "idle" | "working" | "approval" | "blocked" | "dormant";
+// Agent state — canonical 12-state machine per CEREBRO_TRUTH_RECONCILIATION §8.
+// These map to real harness events (task lifecycle, validation, approval),
+// not vibes. The Phase 6 harness wiring drives these directly.
+export type AgentState =
+  | "idle"
+  | "loading-context"
+  | "working-local"
+  | "escalation-pending"
+  | "working-external"
+  | "output-pending-validation"
+  | "validation-failed"
+  | "awaiting-user-approval"
+  | "walking-to-ceremony"
+  | "council-seated"
+  | "receiving-call"
+  | "dormant"
+  | "complete";
 
 export const AGENT_STATE_COLOR: Record<AgentState, string> = {
-  idle:     cerebroColors.accent,
-  working:  cerebroColors.warning,
-  approval: "#F97316",   // amber-orange — needs YOU
-  blocked:  cerebroColors.danger,
-  dormant:  cerebroColors.textMuted,
+  idle:                       cerebroColors.accent,
+  "loading-context":          cerebroColors.accent,
+  "working-local":            cerebroColors.warning,
+  "escalation-pending":       "#F97316",                     // amber-orange — approval gate
+  "working-external":         cerebroColors.accentViolet,
+  "output-pending-validation":cerebroColors.accentViolet,
+  "validation-failed":        cerebroColors.danger,
+  "awaiting-user-approval":   "#F97316",
+  "walking-to-ceremony":      cerebroColors.accent,
+  "council-seated":           cerebroColors.glowViolet,
+  "receiving-call":           cerebroColors.accent,
+  dormant:                    cerebroColors.textMuted,
+  complete:                   cerebroColors.success,
 };
 
 export const AGENT_STATE_LABEL: Record<AgentState, string> = {
-  idle:     "IDLE",
-  working:  "WORKING",
-  approval: "AWAITS YOU",
-  blocked:  "BLOCKED",
-  dormant:  "DORMANT",
+  idle:                       "IDLE",
+  "loading-context":          "LOADING",
+  "working-local":            "WORKING",
+  "escalation-pending":       "APPROVE TO ESCALATE",
+  "working-external":         "WORKING (EXT)",
+  "output-pending-validation":"AWAITING OAK",
+  "validation-failed":        "REWORKING",
+  "awaiting-user-approval":   "AWAITS YOU",
+  "walking-to-ceremony":      "WALKING",
+  "council-seated":           "IN COUNCIL",
+  "receiving-call":           "ATTENTIVE",
+  dormant:                    "DORMANT",
+  complete:                   "COMPLETE",
 };
+
+// Render tier for the chamber lighting + motion logic. Many of the 12 states
+// collapse to the same tier from a visual-motion standpoint.
+export type AgentStateTier = "active" | "idle" | "dormant";
+
+export function agentStateTier(s: AgentState | undefined): AgentStateTier {
+  if (!s) return "idle";
+  if (s === "dormant") return "dormant";
+  if (s === "idle" || s === "complete") return "idle";
+  return "active";
+}
 
 // Legacy export — Phaser scene still imports this name. Map of ground chambers.
 // Kept for backward compatibility while DungeonMapPhaser is being phased out.

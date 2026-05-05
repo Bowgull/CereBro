@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import KeepScene from "@/components/KeepScene";
 import EstablishingShot from "@/components/EstablishingShot";
+import Onboarding, { isOnboardingComplete } from "@/components/Onboarding";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
@@ -8,7 +9,7 @@ import SessionsPanel from "@/components/SessionsPanel";
 import MemoryPanel from "@/components/MemoryPanel";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
-import { FLOORS, cerebroColors as C, type FloorId } from "@/lib/keepConfig";
+import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
 
+  const [showOnboarding, setShowOnboarding] = useState(() => !isOnboardingComplete());
   const [nav, setNav] = useState<NavId>("home");
   const [floor, setFloor] = useState<FloorId>("ground");
   const [mode, setMode] = useState<Mode>("quick");
@@ -85,15 +87,26 @@ export default function Home() {
     [agentRoster, activeAgentId]
   );
 
-  // Castle agent-state hand-off (legacy fork-state mapping until Phase 6).
-  const agentStates = useMemo(() => {
-    const states: Record<string, "fighting" | "casting" | "shopping" | "resting" | "idle"> = {};
+  // Map fork hero states (fighting/casting/shopping/resting) to canonical
+  // AgentState (truth doc §8). Real harness wiring lands in Phase 6; this
+  // stub keeps the castle reactive to live Claude Code sessions.
+  const agentStates = useMemo<Record<string, AgentState>>(() => {
+    const states: Record<string, AgentState> = {};
     if (heroes.length === 0) return states;
-    states.cortana = "fighting";
+    states.cortana = "working-local";
     const classToAgent: Record<string, string> = { warrior: "tony", mage: "gojo", cleric: "aang" };
+    const heroToAgent: Record<string, AgentState> = {
+      idle: "idle",
+      walking: "walking-to-ceremony",
+      fighting: "working-local",
+      casting: "working-local",
+      resting: "complete",
+      shopping: "loading-context",
+      hurt: "validation-failed",
+    };
     for (const h of heroes) {
       const a = classToAgent[h.heroClass];
-      if (a) states[a] = h.state;
+      if (a) states[a] = heroToAgent[h.state] ?? "idle";
     }
     return states;
   }, [heroes]);
@@ -307,6 +320,10 @@ export default function Home() {
           projects={trackedProjects ?? []}
         />
       )}
+
+      {showOnboarding && (
+        <Onboarding onComplete={() => setShowOnboarding(false)} />
+      )}
     </div>
   );
 }
@@ -317,7 +334,7 @@ function HomeView({
 }: {
   floor: FloorId;
   setFloor: (id: FloorId) => void;
-  agentStates: Record<string, "fighting" | "casting" | "shopping" | "resting" | "idle">;
+  agentStates: Record<string, AgentState>;
   heroesCount: number;
   connMode: "demo" | "live";
 }) {
