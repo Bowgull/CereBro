@@ -39,8 +39,9 @@ const CRYPTS_ORDER = ["piccolo"];
 //   tileset/    — original wall + decoration tiles (loaded as castle_0..15)
 //   tileset/arch/ — second batch architecture/floor tiles (loaded as arch_0..15)
 const CASTLE_TILE_BASE = "/sprites/cerebro/tileset";
-const CASTLE_WALL_POOL = [0, 1];  // tileset/tile_0,1 — main wall body
-const CASTLE_FLOOR_POOL = [8, 9]; // tileset/tile_8,9 — interior floor (horizontal stone slabs)
+const CASTLE_WALL_POOL = [0, 1];      // tileset/tile_0,1 — main wall body (top band)
+const CASTLE_BACKWALL_POOL = [2, 3];  // tileset/tile_2,3 — darker stone (chamber interior back wall)
+const CASTLE_FLOOR_POOL = [8, 9];     // tileset/tile_8,9 — interior floor (horizontal stone slabs)
 const ARCH_PASSAGE = 7;           // arch/tile_7 — open archway passage
 const ARCH_DOOR = 6;              // arch/tile_6 — closed wooden door
 const ARCH_TRAPDOOR = 8;          // arch/tile_8 — trapdoor in floor
@@ -172,23 +173,63 @@ const PROP_KEYS = [
 
 const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
   // Ground Hall (chambers 8 wide; cortana 12 wide)
-  tony:    [{ key: "anvil",              col: 3, row: 0 }, { key: "wooden_chest", col: 6, row: 0 }],
-  gojo:    [{ key: "drafting_table",     col: 3, row: 0 }, { key: "candelabra",   col: 6, row: 0 }],
-  cortana: [{ key: "stained_glass",      col: 5, row: -3, depth: 1 }],
-  surfer:  [{ key: "hitching_post",      col: 3, row: 0 }, { key: "barrel",       col: 6, row: 0 }],
-  c3po:    [{ key: "gold_lectern",       col: 3, row: 0 }, { key: "wooden_chest", col: 6, row: 0 }],
+  tony: [
+    { key: "anvil",         col: 1, row: 0 },
+    { key: "wooden_chest",  col: 4, row: 0 },
+    { key: "barrel",        col: 6, row: 0 },
+  ],
+  gojo: [
+    { key: "drafting_table", col: 1, row: 0 },
+    { key: "candelabra",     col: 4, row: 0 },
+    { key: "bookshelf",      col: 6, row: 0 },
+  ],
+  cortana: [
+    { key: "stained_glass",  col: 5,  row: -3, depth: 1 },
+    { key: "candelabra",     col: 1,  row: 0 },
+    { key: "candelabra",     col: 10, row: 0 },
+  ],
+  surfer: [
+    { key: "hitching_post",  col: 1, row: 0 },
+    { key: "barrel",         col: 4, row: 0 },
+    { key: "candelabra",     col: 6, row: 0 },
+  ],
+  c3po: [
+    { key: "gold_lectern",   col: 1, row: 0 },
+    { key: "wooden_chest",   col: 4, row: 0 },
+    { key: "candelabra",     col: 6, row: 0 },
+  ],
   // Upper Spires (chambers 11 wide)
-  batman:  [{ key: "war_table",          col: 4, row: 0 }, { key: "candelabra",   col: 8, row: 0 }],
-  aang:    [{ key: "meditation_cushion", col: 4, row: 0 }, { key: "bonsai",       col: 8, row: 0 }],
-  oak:     [{ key: "spell_lectern",      col: 3, row: 0 }, { key: "bookshelf",    col: 7, row: 0 }],
-  spock:   [{ key: "astrolabe",          col: 3, row: 0 }, { key: "telescope",    col: 7, row: 0 }],
-  // Crypts (44 wide — Piccolo alone)
+  batman: [
+    { key: "war_table",      col: 4, row: 0 },
+    { key: "candelabra",     col: 1, row: 0 },
+    { key: "wooden_chest",   col: 8, row: 0 },
+  ],
+  aang: [
+    { key: "meditation_cushion", col: 4, row: 0 },
+    { key: "bonsai",             col: 1, row: 0 },
+    { key: "bonsai",             col: 8, row: 0 },
+  ],
+  oak: [
+    { key: "spell_lectern",  col: 1, row: 0 },
+    { key: "bookshelf",      col: 4, row: 0 },
+    { key: "bookshelf",      col: 8, row: 0 },
+  ],
+  spock: [
+    { key: "astrolabe",      col: 1, row: 0 },
+    { key: "telescope",      col: 4, row: 0 },
+    { key: "bookshelf",      col: 8, row: 0 },
+  ],
+  // Crypts (44 wide — Piccolo alone, lots of room to fill)
   piccolo: [
     { key: "crystal_pillar", col: 21, row: 0 },
-    { key: "candelabra",     col: 8,  row: 0 },
-    { key: "candelabra",     col: 36, row: 0 },
-    { key: "wooden_chest",   col: 14, row: 0 },
-    { key: "barrel",         col: 28, row: 0 },
+    { key: "candelabra",     col: 4,  row: 0 },
+    { key: "candelabra",     col: 14, row: 0 },
+    { key: "wooden_chest",   col: 8,  row: 0 },
+    { key: "barrel",         col: 17, row: 0 },
+    { key: "candelabra",     col: 30, row: 0 },
+    { key: "candelabra",     col: 40, row: 0 },
+    { key: "wooden_chest",   col: 36, row: 0 },
+    { key: "barrel",         col: 26, row: 0 },
   ],
 };
 
@@ -219,9 +260,6 @@ class KeepScene extends Phaser.Scene {
 
   preload() {
     this.load.image(ATLAS_KEY, "/sprites/cc0/0x72_DungeonTilesetII_v1.7/0x72_DungeonTilesetII_v1.7.png");
-    for (let i = 1; i <= 8; i++) {
-      this.load.image(`torch_${i}`, `${ITEM_BASE}/torch_${i}.png`);
-    }
     for (const c of CHAMBERS) {
       this.load.image(`agent_${c.agentId}`, c.spritePath);
     }
@@ -256,19 +294,14 @@ class KeepScene extends Phaser.Scene {
     this.drawCrenellations();
     this.placeStairs();
 
-    // Global torch flicker
-    let torchFrame = 1;
-    this.time.addEvent({
-      delay: 110, loop: true,
-      callback: () => {
-        torchFrame = (torchFrame % 8) + 1;
-        for (const t of this.allTorches) {
-          const offset = (t.getData("phase") as number) ?? 0;
-          const f = ((torchFrame - 1 + offset) % 8) + 1;
-          t.setTexture(`torch_${f}`);
-        }
-      },
-    });
+    // Torch flicker — alpha + scale pulse on the static custom torch tile.
+    for (const t of this.allTorches) {
+      const phase = (t.getData("phase") as number) ?? 0;
+      this.tweens.add({
+        targets: t, alpha: 0.7, duration: 180 + phase * 30, yoyo: true,
+        repeat: -1, ease: "Sine.easeInOut", delay: phase * 60,
+      });
+    }
 
     // Spock head-tilt twitch — periodic x-scale snap
     const spock = this.agentSprites.get("spock");
@@ -302,6 +335,17 @@ class KeepScene extends Phaser.Scene {
     const yWallBase = rowOffset + FLOOR_TILES_TALL - 2;
     const yFloor = rowOffset + FLOOR_TILES_TALL - 1;
 
+    // Back wall — darker stone fills the chamber interior (rows yTop+2 .. yTop+4).
+    // Two staggered passes of 32×32 tiles cover 4 grid rows; the floor draws
+    // afterward and covers the bottom-half overlap.
+    for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
+      const a = CASTLE_BACKWALL_POOL[variant % CASTLE_BACKWALL_POOL.length];
+      const b = CASTLE_BACKWALL_POOL[(variant + 1) % CASTLE_BACKWALL_POOL.length];
+      this.placeCastleTile(c, yTop + 2, `castle_${a}`);
+      this.placeCastleTile(c, yTop + 3, `castle_${b}`);
+    }
+
     // Floor tiles — custom castle stone. One 32×32 tile spans 2×2 grid cells,
     // so we step by 2 across yWallBase row and the tile naturally covers
     // both yWallBase and yFloor rows.
@@ -312,10 +356,18 @@ class KeepScene extends Phaser.Scene {
     }
 
     // Top wall — custom 32×32 PixelLab castle tiles. One tile spans 2 cols × 2 rows.
+    // Periodically swap in atmospheric variants (arrow slits, alcoves) for variety.
+    const wallSpecials = [
+      { every: 7, key: "arch_11" }, // arrow slit window (every 7th wall position)
+      { every: 5, key: "castle_12" }, // arched alcove
+    ];
     for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
-      const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
-      const tileIdx = CASTLE_WALL_POOL[variant % CASTLE_WALL_POOL.length];
-      this.placeCastleTile(c, yTop, `castle_${tileIdx}`);
+      const slot = Math.floor(c / 2) + Math.floor(rowOffset / 2);
+      let key = `castle_${CASTLE_WALL_POOL[slot % CASTLE_WALL_POOL.length]}`;
+      for (const sp of wallSpecials) {
+        if (slot > 0 && slot % sp.every === 0) { key = sp.key; break; }
+      }
+      this.placeCastleTile(c, yTop, key);
     }
 
     let cx = 0;
@@ -356,11 +408,6 @@ class KeepScene extends Phaser.Scene {
       // Cortana hub
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
-
-        // Magic rune circle on the floor under the dais — toned down so Cortana
-        // remains the visual anchor.
-        const runeCol = cx + Math.floor(w / 2) - 1;
-        this.placeCastleTile(runeCol, yWallBase, `arch_${ARCH_RUNE}`, 0.45);
 
         const dais = this.add.graphics();
         dais.fillStyle(0xa78bfa, 0.22);
@@ -453,7 +500,7 @@ class KeepScene extends Phaser.Scene {
     const bounds = this.chamberBounds.get(agentId);
 
     this.tweens.killTweensOf(sprite);
-    sprite.setTint(m.tint).setAlpha(cfg.alpha);
+    sprite.clearTint().setAlpha(cfg.alpha);
 
     sprite.x = baseX;
     sprite.y = baseY;
@@ -558,12 +605,12 @@ class KeepScene extends Phaser.Scene {
   setAgentStates(states: Partial<Record<string, AgentState>>) {
     this.currentStates = states;
 
-    // Map CereBro socket states to our 3-tier
+    // Map CereBro socket states to our 3-tier. Unmapped agents default to
+    // idle (full opacity) — they're present, just not currently doing anything.
+    // "dormant" is reserved for explicit disconnect/unavailable states.
     const mapState = (s?: AgentState): "active" | "idle" | "dormant" => {
-      if (!s) return "dormant";
       if (s === "fighting" || s === "casting" || s === "shopping") return "active";
-      if (s === "resting") return "idle";
-      return "dormant";
+      return "idle";
     };
 
     let firstActiveNonCortana: string | null = null;
@@ -591,8 +638,10 @@ class KeepScene extends Phaser.Scene {
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private spawnTorch(col: number, row: number, phase: number): Phaser.GameObjects.Image {
-    const t = this.add.image(col * TS + TS / 2, row * TS + TS / 2, "torch_1");
-    t.setScale(SCALE).setDepth(3).setData("phase", phase);
+    // Custom castle torch — tileset/tile_11 (lit torch sconce). Renders at
+    // 1.5× source so it matches the visual scale of the old 16×16 torches.
+    const t = this.add.image(col * TS + TS / 2, row * TS + TS / 2, "castle_11");
+    t.setScale(SCALE / 2).setDepth(3).setData("phase", phase);
     this.allTorches.push(t);
     return t;
   }
