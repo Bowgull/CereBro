@@ -21,6 +21,11 @@ import {
   ROOM_POSITIONS,
   detectHeroClass,
 } from "./routers/agents";
+import { recordSessionStart, recordSessionEnd } from "./cerebroDb";
+
+function sessionIdFromFile(filePath: string): string {
+  return path.basename(filePath, ".jsonl");
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -231,7 +236,10 @@ function removeHero(heroId: number) {
   if (poll) { clearInterval(poll); pollTimers.delete(heroId); }
 
   // Remove from maps
-  if (hero.sessionFile) fileToHeroId.delete(hero.sessionFile);
+  if (hero.sessionFile) {
+    fileToHeroId.delete(hero.sessionFile);
+    void recordSessionEnd(sessionIdFromFile(hero.sessionFile));
+  }
   fileOffsets.delete(heroId);
   fileLastActivity.delete(heroId);
   heroes.delete(heroId);
@@ -466,6 +474,12 @@ function handleNewTranscriptFile(filePath: string, projectRealPath: string) {
     fileToHeroId.set(filePath, heroId);
     broadcast({ type: "hero-new", payload: hero });
     console.log(`[File Monitor] New hero: ${hero.name} | project: ${projectRealPath}`);
+    void recordSessionStart({
+      claudeSessionId: sessionIdFromFile(filePath),
+      projectName: projectNameFromPath(projectRealPath),
+      projectPath: projectRealPath,
+      heroClass: hero.heroClass,
+    });
   }
 
   refreshExpiryTimer(heroId);
