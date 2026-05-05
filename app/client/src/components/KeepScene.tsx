@@ -153,24 +153,44 @@ const MOTION: Record<string, AgentMotion> = {
   },
 };
 
-// ── Chamber decor ─────────────────────────────────────────────────────────────
-const ITEM_BASE = "/sprites/cc0/0x72_16x16DungeonTileset.v5/items";
+// ── Chamber props ─────────────────────────────────────────────────────────────
+// 0x72 props removed during the prop pass — chambers will get PixelLab-native
+// 32×32 hero props placed via CHAMBER_PIXELLAB_PROPS once that batch lands.
+const ITEM_BASE = "/sprites/cc0/0x72_16x16DungeonTileset.v5/items"; // torches still come from here
 type Prop = { key: string; col: number; row: number; depth?: number };
 
-const CHAMBER_PROPS: Record<string, Prop[]> = {
-  tony:    [{ key: "boxes_stacked", col: 1, row: 0 }, { key: "chest_open_full", col: 6, row: 0 }, { key: "flask_big_red", col: 4, row: 0 }],
-  gojo:    [{ key: "flask_big_blue", col: 1, row: 0 }, { key: "skull", col: 5, row: 0 }, { key: "box", col: 6, row: 0 }],
-  cortana: [{ key: "column", col: 1, row: -2 }, { key: "column", col: 10, row: -2 }, { key: "chest_golden_closed", col: 2, row: 0 }, { key: "chest_golden_closed", col: 9, row: 0 }],
-  surfer:  [{ key: "chest_golden_open_full", col: 1, row: 0 }, { key: "boxes_stacked", col: 5, row: 0 }],
-  c3po:    [{ key: "boxes_stacked", col: 1, row: 0 }, { key: "chest_open_full", col: 4, row: 0 }, { key: "flask_big_yellow", col: 6, row: 0 }],
-  batman:  [{ key: "column", col: 1, row: -2 }, { key: "chest_closed", col: 4, row: 0 }, { key: "skull", col: 8, row: 0 }],
-  aang:    [{ key: "chest_open_full", col: 2, row: 0 }, { key: "flask_big_green", col: 5, row: 0 }, { key: "box", col: 8, row: 0 }],
-  oak:     [{ key: "flask_big_blue", col: 1, row: 0 }, { key: "flask_big_green", col: 3, row: 0 }, { key: "flask_big_red", col: 6, row: 0 }, { key: "flask_big_yellow", col: 8, row: 0 }],
-  spock:   [{ key: "gargoyle_top_1", col: 1, row: -3 }, { key: "flask_big_blue", col: 5, row: 0 }, { key: "column", col: 8, row: -2 }],
-  piccolo: [{ key: "skull", col: 4, row: 0 }, { key: "skull", col: 8, row: 0 }, { key: "skull", col: 36, row: 0 }, { key: "skull", col: 40, row: 0 }, { key: "gargoyle_top_1", col: 14, row: -3 }, { key: "gargoyle_top_2", col: 28, row: -3 }],
-};
+// Per-chamber PixelLab props — 32×32 hero pieces and supporting decor.
+// `key` is a loaded texture, `col` is grid cells from chamber's left edge,
+// `row` is grid rows from the floor surface (0 = on floor, negative = up wall).
+const PROP_PATH = "/sprites/cerebro/props";
+const PROP_KEYS = [
+  "anvil", "drafting_table", "hitching_post", "gold_lectern",
+  "meditation_cushion", "war_table", "spell_lectern", "astrolabe",
+  "crystal_pillar", "stained_glass", "bonsai", "bookshelf",
+  "telescope", "candelabra", "wooden_chest", "barrel",
+] as const;
 
-const PROP_KEYS = Array.from(new Set(Object.values(CHAMBER_PROPS).flat().map((p) => p.key)));
+const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
+  // Ground Hall (chambers 8 wide; cortana 12 wide)
+  tony:    [{ key: "anvil",              col: 3, row: 0 }, { key: "wooden_chest", col: 6, row: 0 }],
+  gojo:    [{ key: "drafting_table",     col: 3, row: 0 }, { key: "candelabra",   col: 6, row: 0 }],
+  cortana: [{ key: "stained_glass",      col: 5, row: -3, depth: 1 }],
+  surfer:  [{ key: "hitching_post",      col: 3, row: 0 }, { key: "barrel",       col: 6, row: 0 }],
+  c3po:    [{ key: "gold_lectern",       col: 3, row: 0 }, { key: "wooden_chest", col: 6, row: 0 }],
+  // Upper Spires (chambers 11 wide)
+  batman:  [{ key: "war_table",          col: 4, row: 0 }, { key: "candelabra",   col: 8, row: 0 }],
+  aang:    [{ key: "meditation_cushion", col: 4, row: 0 }, { key: "bonsai",       col: 8, row: 0 }],
+  oak:     [{ key: "spell_lectern",      col: 3, row: 0 }, { key: "bookshelf",    col: 7, row: 0 }],
+  spock:   [{ key: "astrolabe",          col: 3, row: 0 }, { key: "telescope",    col: 7, row: 0 }],
+  // Crypts (44 wide — Piccolo alone)
+  piccolo: [
+    { key: "crystal_pillar", col: 21, row: 0 },
+    { key: "candelabra",     col: 8,  row: 0 },
+    { key: "candelabra",     col: 36, row: 0 },
+    { key: "wooden_chest",   col: 14, row: 0 },
+    { key: "barrel",         col: 28, row: 0 },
+  ],
+};
 
 // ── Scene ─────────────────────────────────────────────────────────────────────
 class KeepScene extends Phaser.Scene {
@@ -202,9 +222,6 @@ class KeepScene extends Phaser.Scene {
     for (let i = 1; i <= 8; i++) {
       this.load.image(`torch_${i}`, `${ITEM_BASE}/torch_${i}.png`);
     }
-    for (const key of PROP_KEYS) {
-      this.load.image(key, `${ITEM_BASE}/${key}.png`);
-    }
     for (const c of CHAMBERS) {
       this.load.image(`agent_${c.agentId}`, c.spritePath);
     }
@@ -219,6 +236,10 @@ class KeepScene extends Phaser.Scene {
     // Staircase batch — only need first 4 right-going variants (we flip for left)
     for (let i = 0; i < 4; i++) {
       this.load.image(`stair_${i}`, `${CASTLE_TILE_BASE}/stairs/tile_${i}.png`);
+    }
+    // PixelLab chamber props (32×32, named)
+    for (const key of PROP_KEYS) {
+      this.load.image(`prop_${key}`, `${PROP_PATH}/${key}.png`);
     }
   }
 
@@ -336,9 +357,10 @@ class KeepScene extends Phaser.Scene {
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
 
-        // Magic rune circle on the floor under the dais
+        // Magic rune circle on the floor under the dais — toned down so Cortana
+        // remains the visual anchor.
         const runeCol = cx + Math.floor(w / 2) - 1;
-        this.placeCastleTile(runeCol, yWallBase, `arch_${ARCH_RUNE}`);
+        this.placeCastleTile(runeCol, yWallBase, `arch_${ARCH_RUNE}`, 0.45);
 
         const dais = this.add.graphics();
         dais.fillStyle(0xa78bfa, 0.22);
@@ -365,19 +387,14 @@ class KeepScene extends Phaser.Scene {
         this.placeTile(pc, yFloor,        "fountain_basin");
       }
 
-      // Divider columns
-      if (i > 0) {
-        for (let r = 0; r < FLOOR_TILES_TALL - 1; r++) {
-          this.placeTile(cx, yTop + r, "wall_mid", 0.55);
-        }
-      }
-
-      // Decor props
-      const props = CHAMBER_PROPS[agentId] ?? [];
+      // PixelLab chamber props — 32×32, anchored to floor row, scaled 3×.
+      // `row` is grid rows from the floor surface (0 = on floor, negative = up wall).
+      const props = CHAMBER_PIXELLAB_PROPS[agentId] ?? [];
       for (const p of props) {
-        const px = (cx + p.col) * TS + TS / 2;
-        const py = (yWallBase + 1 + p.row) * TS;
-        this.add.image(px, py, p.key).setScale(SCALE).setOrigin(0.5, 1).setDepth(p.depth ?? 4);
+        const px = (cx + p.col) * TS;
+        const py = (yWallBase + p.row) * TS;
+        this.add.image(px, py, `prop_${p.key}`)
+          .setOrigin(0, 0).setScale(SCALE).setDepth(p.depth ?? 4);
       }
 
       // Agent sprite
