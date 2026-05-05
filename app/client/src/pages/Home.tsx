@@ -41,10 +41,10 @@ export default function Home() {
     >
       {/* ── Header ── */}
       <header
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 shrink-0"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <div
             className="w-8 h-8 flex items-center justify-center rounded"
             style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.gold }}
@@ -62,7 +62,7 @@ export default function Home() {
         </div>
 
         {/* Floor selector */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
             const f = FLOORS[id];
             const isActive = id === floor;
@@ -70,7 +70,7 @@ export default function Home() {
               <button
                 key={id}
                 onClick={() => setFloor(id)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors relative"
+                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors relative whitespace-nowrap"
                 style={{
                   background: isActive ? C.surfaceRaised : "transparent",
                   color: isActive ? C.textPrimary : C.textMuted,

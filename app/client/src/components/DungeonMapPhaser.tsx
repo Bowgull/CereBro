@@ -360,17 +360,14 @@ class DungeonScene extends Phaser.Scene {
   }
 
   private createAmbientGlows() {
-    // Spawn portal glow
-    const spawnGfx = this.add.graphics().setDepth(5);
-    this.roomGlows.push(spawnGfx);
+    // Slot 0: reserved (was upstream spawn portal — Forge has no portal in CereBro)
+    this.roomGlows.push(this.add.graphics().setDepth(5));
 
-    // Boss pentagram glow
-    const bossGfx = this.add.graphics().setDepth(5);
-    this.roomGlows.push(bossGfx);
+    // Slot 1: Hub orb (Cortana's chamber, user-presence)
+    this.roomGlows.push(this.add.graphics().setDepth(5));
 
-    // Rest area glow
-    const restGfx = this.add.graphics().setDepth(5);
-    this.roomGlows.push(restGfx);
+    // Slot 2: Rest area glow
+    this.roomGlows.push(this.add.graphics().setDepth(5));
   }
 
   // Called from React to update hero data
@@ -385,16 +382,11 @@ class DungeonScene extends Phaser.Scene {
     const t = this.tick;
 
     // ── Animate ambient glows ────────────────────────────────────────────────
-    const spawnGfx = this.roomGlows[0];
-    if (spawnGfx) {
-      spawnGfx.clear();
-      const r = ROOMS.spawn;
-      const bx = (r.c0 + r.c1 + 1) / 2 * TS;
-      const by = (r.r0 + r.r1 + 1) / 2 * TS * 0.84;
-      const alpha = 0.25 + Math.sin(t * 0.06) * 0.1;
-      spawnGfx.fillStyle(0x4488ff, alpha);
-      spawnGfx.fillCircle(bx, by, 90);
-    }
+    // Slot 0: reserved. The upstream spawn-portal glow was removed because
+    // The Forge (Tony Stark) has no portal in CereBro. Cleared each tick so
+    // any stale draw goes away on hot reload.
+    const reservedGfx = this.roomGlows[0];
+    if (reservedGfx) reservedGfx.clear();
 
     // Hub orb: violet user-presence glow inside Cortana's chamber.
     // Lights when any Claude Code session is active. Pulses harder when sessions
