@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import DungeonMap from "@/components/DungeonMapPhaser";
+import EstablishingShot from "@/components/EstablishingShot";
 import HeroPanel from "@/components/HeroPanel";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
@@ -39,6 +40,7 @@ export default function Home() {
       className="h-screen flex flex-col overflow-hidden"
       style={{ background: C.background, color: C.textPrimary, fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
     >
+      <EstablishingShot />
       {/* ── Header ── */}
       <header
         className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 shrink-0"
