@@ -146,9 +146,10 @@ const PROP_KEYS = [
 const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
   // Ground Hall (chambers 8 wide; cortana 12 wide)
   tony: [
-    { key: "anvil",         col: 1, row: 0 },
-    { key: "wooden_chest",  col: 4, row: 0 },
-    { key: "barrel",        col: 6, row: 0 },
+    // Stair at chamber cols 6-7 (Ground→Crypts left), so props live at cols 0-5.
+    { key: "anvil",         col: 0, row: 0 },
+    { key: "wooden_chest",  col: 2, row: 0 },
+    { key: "barrel",        col: 4, row: 0 },
   ],
   gojo: [
     { key: "drafting_table", col: 1, row: 0 },
@@ -156,9 +157,7 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
     { key: "bookshelf",      col: 6, row: 0 },
   ],
   cortana: [
-    { key: "stained_glass",  col: 5,  row: -3, depth: 1 },
-    { key: "candelabra",     col: 1,  row: 0 },
-    { key: "candelabra",     col: 10, row: 0 },
+    // Hub backdrop already has stained glass + lanterns; keep chamber clean.
   ],
   surfer: [
     { key: "hitching_post",  col: 1, row: 0 },
@@ -166,7 +165,8 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
     { key: "candelabra",     col: 6, row: 0 },
   ],
   c3po: [
-    { key: "gold_lectern",   col: 1, row: 0 },
+    // Stair at chamber cols 0-1 (Ground→Crypts right), so props live at cols 2-7.
+    { key: "gold_lectern",   col: 2, row: 0 },
     { key: "wooden_chest",   col: 4, row: 0 },
     { key: "candelabra",     col: 6, row: 0 },
   ],
@@ -241,14 +241,18 @@ class KeepScene extends Phaser.Scene {
     for (let i = 0; i < 16; i++) {
       this.load.image(`arch_${i}`, `${CASTLE_TILE_BASE}/arch/tile_${i}.png`);
     }
-    // Staircase batch — only need first 4 right-going variants (we flip for left)
+    // Staircase batch — first 4 right-going variants (we flip for left)
     for (let i = 0; i < 4; i++) {
       this.load.image(`stair_${i}`, `${CASTLE_TILE_BASE}/stairs/tile_${i}.png`);
     }
+    // Bonus tiles from the stairs batch — portcullis gate (decorative)
+    this.load.image("portcullis", `${CASTLE_TILE_BASE}/stairs/tile_13.png`);
     // PixelLab chamber props (32×32, named)
     for (const key of PROP_KEYS) {
       this.load.image(`prop_${key}`, `${PROP_PATH}/${key}.png`);
     }
+    // Cortana hub backdrop — 320×200 hand-pixeled throne room
+    this.load.image("cortana_hub", "/sprites/cerebro/hub/v1.png");
   }
 
   create() {
@@ -365,6 +369,13 @@ class KeepScene extends Phaser.Scene {
       // Cortana hub
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
+
+        // Hand-pixeled hub backdrop (320×200) fills her chamber's interior.
+        // Anchored to the chamber center, sized to the chamber width.
+        const hubW = w * TS;
+        const hubH = (FLOOR_TILES_TALL - 1) * TS;
+        const hub = this.add.image(cx * TS, yTop * TS, "cortana_hub");
+        hub.setOrigin(0, 0).setDisplaySize(hubW, hubH).setDepth(0.5);
 
         const dais = this.add.graphics();
         dais.fillStyle(0xa78bfa, 0.22);
