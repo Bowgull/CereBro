@@ -4,6 +4,7 @@ import EstablishingShot from "@/components/EstablishingShot";
 import HeroPanel from "@/components/HeroPanel";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
+import TasksPanel from "@/components/TasksPanel";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { HERO_CLASSES, STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { FLOORS, cerebroColors as C, type FloorId } from "@/lib/keepConfig";
@@ -16,6 +17,7 @@ export default function Home() {
   const [showSkillsManager, setShowSkillsManager] = useState(false);
   const [showLog, setShowLog] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [showTasks, setShowTasks] = useState(false);
   const [floor, setFloor] = useState<FloorId>("ground");
 
   const selectedHero = useMemo(
@@ -148,6 +150,7 @@ export default function Home() {
           </div>
 
           {[
+            { label: "Tasks", on: () => setShowTasks(!showTasks), active: showTasks },
             { label: "Config", on: () => setShowConfig(true) },
             { label: "Skills", on: () => setShowSkillsManager(true) },
             { label: "Clear", on: clearHeroes },
@@ -283,6 +286,8 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {showTasks && <TasksPanel onClose={() => setShowTasks(false)} />}
 
           {showLog && (
             <div
