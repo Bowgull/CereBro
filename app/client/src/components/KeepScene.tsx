@@ -157,7 +157,9 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
     { key: "bookshelf",      col: 6, row: 0 },
   ],
   cortana: [
-    // Hub backdrop already has stained glass + lanterns; keep chamber clean.
+    { key: "stained_glass",  col: 5,  row: -3, depth: 1 },
+    { key: "candelabra",     col: 1,  row: 0 },
+    { key: "candelabra",     col: 10, row: 0 },
   ],
   surfer: [
     { key: "hitching_post",  col: 1, row: 0 },
@@ -326,10 +328,11 @@ class KeepScene extends Phaser.Scene {
     }
 
     // Top wall — custom 32×32 PixelLab castle tiles. One tile spans 2 cols × 2 rows.
-    // Periodically swap in atmospheric variants (arrow slits, alcoves) for variety.
+    // Periodically swap in atmospheric variants (arrow slits, alcoves, beams) for variety.
     const wallSpecials = [
-      { every: 7, key: "arch_11" }, // arrow slit window (every 7th wall position)
-      { every: 5, key: "castle_12" }, // arched alcove
+      { every: 7, key: "arch_11" },    // arrow slit window
+      { every: 5, key: "castle_12" },  // arched alcove
+      { every: 11, key: "castle_13" }, // framed wall panel
     ];
     for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
       const slot = Math.floor(c / 2) + Math.floor(rowOffset / 2);
@@ -369,13 +372,6 @@ class KeepScene extends Phaser.Scene {
       // Cortana hub
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
-
-        // Hand-pixeled hub backdrop (320×200) fills her chamber's interior.
-        // Anchored to the chamber center, sized to the chamber width.
-        const hubW = w * TS;
-        const hubH = (FLOOR_TILES_TALL - 1) * TS;
-        const hub = this.add.image(cx * TS, yTop * TS, "cortana_hub");
-        hub.setOrigin(0, 0).setDisplaySize(hubW, hubH).setDepth(0.5);
 
         const dais = this.add.graphics();
         dais.fillStyle(0xa78bfa, 0.22);
