@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb, type OutputKind, type OutputRow } from "../cerebroDb";
+import { writeOutput as vaultWriteOutput } from "../integrations/vault";
 
 const KINDS = ["text", "code", "file", "diff", "tool_result"] as const;
 
@@ -53,5 +55,41 @@ export const outputsRouter = router({
         args,
       });
       return result.rows.map(rowToOutput);
+    }),
+
+  writeToVault: publicProcedure
+    .input(
+      z.object({
+        id: z.number().int(),
+        ext: z.string().max(8).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT o.id, o.title, o.body, o.kind, s.claude_session_id
+          FROM outputs o
+          LEFT JOIN sessions s ON s.id = o.session_id
+          WHERE o.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      const row = result.rows[0];
+      if (!row) {
+        throw new TRPCError({ code: "NOT_FOUND", message: `No output ${input.id}` });
+      }
+      const kind = String(row.kind);
+      const ext =
+        input.ext ??
+        (kind === "code" ? "txt" : kind === "diff" ? "diff" : kind === "file" ? "txt" : "md");
+      return vaultWriteOutput({
+        outputId: Number(row.id),
+        sessionClaudeId: row.claude_session_id == null ? null : String(row.claude_session_id),
+        title: row.title == null ? null : String(row.title),
+        body: String(row.body),
+        ext,
+      });
     }),
 });

@@ -21,7 +21,7 @@ import {
   ROOM_POSITIONS,
   detectHeroClass,
 } from "./routers/agents";
-import { recordSessionStart, recordSessionEnd } from "./cerebroDb";
+import { recordSessionStart, recordSessionEnd, recordOutput } from "./cerebroDb";
 
 function sessionIdFromFile(filePath: string): string {
   return path.basename(filePath, ".jsonl");
@@ -347,6 +347,24 @@ function processLine(heroId: number, line: string) {
 
       persistHeroes();
       broadcast({ type: "hero-update", payload: hero });
+    }
+
+    // ── Capture assistant text blocks as outputs ──────────────────────────
+    const textBlocks = (blocks as Record<string, unknown>[]).filter(
+      (b) => b.type === "text" && typeof b.text === "string",
+    );
+    if (textBlocks.length > 0 && hero.sessionFile) {
+      const body = textBlocks.map((b) => String(b.text)).join("\n").trim();
+      if (body.length >= 40) {
+        const title = body.split(/\r?\n/)[0].slice(0, 120);
+        void recordOutput({
+          claudeSessionId: sessionIdFromFile(hero.sessionFile),
+          kind: "text",
+          title,
+          body: body.slice(0, 8000),
+          toolName: null,
+        });
+      }
     }
   }
 

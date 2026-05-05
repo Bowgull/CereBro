@@ -209,6 +209,40 @@ export async function recordSessionEnd(claudeSessionId: string): Promise<void> {
   }
 }
 
+export async function recordOutput(input: {
+  claudeSessionId: string | null;
+  kind: OutputKind;
+  title: string | null;
+  body: string;
+  toolName: string | null;
+}): Promise<void> {
+  try {
+    const db = await getCerebroDb();
+    let sessionId: number | null = null;
+    let projectId: number | null = null;
+    if (input.claudeSessionId) {
+      const r = await db.execute({
+        sql: `SELECT id, project_id FROM sessions WHERE claude_session_id = ? LIMIT 1`,
+        args: [input.claudeSessionId],
+      });
+      const row = r.rows[0];
+      if (row) {
+        sessionId = Number(row.id);
+        projectId = row.project_id == null ? null : Number(row.project_id);
+      }
+    }
+    await db.execute({
+      sql: `
+        INSERT INTO outputs (session_id, project_id, kind, title, body, tool_name)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      args: [sessionId, projectId, input.kind, input.title, input.body, input.toolName],
+    });
+  } catch (err) {
+    console.error("[CerebroDB] recordOutput failed:", err);
+  }
+}
+
 export async function touchSession(claudeSessionId: string): Promise<void> {
   try {
     const db = await getCerebroDb();

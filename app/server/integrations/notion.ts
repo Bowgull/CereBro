@@ -56,6 +56,36 @@ async function notion(
   return data;
 }
 
+let _pollTimer: NodeJS.Timeout | null = null;
+
+export function startInboxAutoPoll(): void {
+  if (_pollTimer) return;
+  if (!process.env.NOTION_TOKEN || !process.env.NOTION_INBOX_DATABASE_ID) {
+    console.log("[Notion] auto-poll disabled (missing token or inbox id)");
+    return;
+  }
+  const intervalSec = Math.max(
+    30,
+    parseInt(process.env.NOTION_POLL_INTERVAL_SEC ?? "300", 10),
+  );
+  console.log(`[Notion] auto-poll every ${intervalSec}s`);
+  const tick = async () => {
+    const r = await pollInbox();
+    if (r.error) {
+      console.warn("[Notion] poll error:", r.error);
+    } else if (r.ingested > 0) {
+      console.log(
+        `[Notion] poll: +${r.ingested} ingested, ${r.skipped} skipped`,
+      );
+    }
+  };
+  void tick();
+  _pollTimer = setInterval(tick, intervalSec * 1000);
+  if ((_pollTimer as { unref?: () => void }).unref) {
+    (_pollTimer as { unref: () => void }).unref();
+  }
+}
+
 async function refreshIdentity(): Promise<void> {
   if (!process.env.NOTION_TOKEN) return;
   if (Date.now() - _verifiedAt < 60_000) return;

@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeWebSocket, getBroadcastCallbacks } from "../websocket";
 import { createBridgeRouter } from "../bridge";
+import { startInboxAutoPoll } from "../integrations/notion";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -68,6 +69,7 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     console.log(`WebSocket server available at ws://localhost:${port}/api/ws/agents`);
+    startInboxAutoPoll();
   });
 }
 
