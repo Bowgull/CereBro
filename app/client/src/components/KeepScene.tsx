@@ -18,19 +18,58 @@ const TILE = 16;
 const SCALE = 3;
 const TS = TILE * SCALE;
 
-const FLOOR_TILES_TALL = 7;
-const FLOOR_TILES_WIDE = 44;
-
-const UPPER_WIDTHS  = [11, 11, 11, 11];
-const GROUND_WIDTHS = [8, 8, 12, 8, 8];
-const CRYPTS_WIDTHS = [44];
+// Phase 4A: chambers got 43% more interior height (7 → 10 rows) so props,
+// back-wall features, and agents have room to breathe. Width bumped to 50
+// to make room for chamber dividers + the Cortana cathedral nave.
+const FLOOR_TILES_TALL = 10;
+const FLOOR_TILES_WIDE = 50;
 
 const CANVAS_W = FLOOR_TILES_WIDE * TS;
 const CANVAS_H = (FLOOR_TILES_TALL * 3 + 1) * TS;
 
-const UPPER_ORDER  = ["batman", "aang", "oak", "spock"];
-const GROUND_ORDER = ["tony", "gojo", "cortana", "surfer", "c3po"];
-const CRYPTS_ORDER = ["piccolo"];
+// Floor segments — chambers, dividers, and the cathedral opening on Upper.
+// Order = left-to-right placement. Widths sum to FLOOR_TILES_WIDE (50).
+//
+// Cortana's chamber on Ground occupies cols 18-31 (14 wide). The Upper floor
+// opening occupies the same column range, leaving a vertical cathedral
+// nave: Cortana's back wall continues up uninterrupted into Upper Spires.
+type FloorSegment =
+  | { kind: "chamber"; agentId: string; width: number }
+  | { kind: "divider"; width: number }
+  | { kind: "opening"; width: number };
+
+const DIVIDER_W = 1;
+
+// Upper Spires: Batman, Aang, [cathedral nave above Cortana], Oak, Spock.
+const UPPER_SEGMENTS: FloorSegment[] = [
+  { kind: "chamber", agentId: "batman", width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "aang",   width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "opening",                    width: 14 }, // cathedral nave
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "oak",    width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "spock",  width: 8 },
+];
+
+// Ground Hall: Tony, Gojo, Cortana (cathedral, 14 wide), Surfer, C-3PO.
+const GROUND_SEGMENTS: FloorSegment[] = [
+  { kind: "chamber", agentId: "tony",    width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "gojo",    width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "cortana", width: 14 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "surfer",  width: 8 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "c3po",    width: 8 },
+];
+
+// Crypts: Piccolo alone, full width.
+const CRYPTS_SEGMENTS: FloorSegment[] = [
+  { kind: "chamber", agentId: "piccolo", width: 50 },
+];
 
 // ── Castle tileset (PixelLab — 32×32) ──────────────────────────────────────
 // One 32×32 tile occupies a 2×2 block of the 16×16 source grid (96 screen
@@ -52,14 +91,18 @@ const ARCH_RUNE = 15;             // arch/tile_15 — magic circle (under Cortan
 // inside. Placed in the top-wall band of the LOWER floor at each transition
 // point, so reading from the lower floor you see stairs going up into the
 // floor above. arch/tile_7 is a 32×32 archway (2×2 grid cells).
+//
+// Coords assume FLOOR_TILES_TALL=10: Upper rowOffset=0, Ground rowOffset=10,
+// Crypts rowOffset=20. The cathedral opening occupies cols 18-31 on Upper.
 type Passage = { col: number; row: number };
 const PASSAGES: Passage[] = [
-  // Upper ↔ Ground — drawn in Ground's top-wall band (row 7).
-  { col: 10, row: 7 },  // left passage (under Aang)
-  { col: 32, row: 7 },  // right passage (under Oak)
-  // Ground ↔ Crypts — drawn in Crypts' top-wall band (row 14).
-  { col: 6,  row: 14 }, // left passage
-  { col: 36, row: 14 }, // right passage
+  // Upper ↔ Ground — drawn in Ground's top-wall band (row 10).
+  // Place on Aang and Oak chamber edges adjacent to the cathedral opening.
+  { col: 14, row: 10 }, // Aang's right edge → opening
+  { col: 34, row: 10 }, // Oak's left edge → opening
+  // Ground ↔ Crypts — drawn in Crypts' top-wall band (row 20).
+  { col: 6,  row: 20 }, // left passage (under Tony)
+  { col: 42, row: 20 }, // right passage (under C-3PO)
 ];
 
 // ── Per-agent motion config ──────────────────────────────────────────────────
@@ -144,13 +187,15 @@ const PROP_KEYS = [
   "telescope", "candelabra", "wooden_chest", "barrel",
 ] as const;
 
+// Per-chamber prop placements. Cols are chamber-local (0 = chamber's left
+// edge). After Phase 4A geometry: Ground/Upper non-Cortana chambers are 8
+// wide, Cortana 14 wide, Crypts 50 wide. All anchored to row 0 (floor).
 const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
-  // Ground Hall (chambers 8 wide; cortana 12 wide)
+  // Ground Hall — chambers 8 wide except Cortana (14)
   tony: [
-    // Stair at chamber cols 6-7 (Ground→Crypts left), so props live at cols 0-5.
-    { key: "anvil",         col: 0, row: 0 },
-    { key: "wooden_chest",  col: 2, row: 0 },
-    { key: "barrel",        col: 4, row: 0 },
+    { key: "anvil",         col: 1, row: 0 },
+    { key: "wooden_chest",  col: 3, row: 0 },
+    { key: "barrel",        col: 5, row: 0 },
   ],
   gojo: [
     { key: "drafting_table", col: 1, row: 0 },
@@ -158,11 +203,12 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
     { key: "bookshelf",      col: 6, row: 0 },
   ],
   cortana: [
-    { key: "stained_glass",  col: 5,  row: -3, depth: 1 },
-    { key: "crystal_pillar", col: 4,  row: 0 },
-    { key: "crystal_pillar", col: 7,  row: 0 },
-    { key: "candelabra",     col: 0,  row: 0 },
-    { key: "candelabra",     col: 10, row: 0 },
+    // 14-wide cathedral chamber. Cortana sits at center (col 7).
+    { key: "stained_glass",  col: 6,  row: -3, depth: 1 },
+    { key: "crystal_pillar", col: 5,  row: 0 },
+    { key: "crystal_pillar", col: 8,  row: 0 },
+    { key: "candelabra",     col: 1,  row: 0 },
+    { key: "candelabra",     col: 12, row: 0 },
   ],
   surfer: [
     { key: "hitching_post",  col: 1, row: 0 },
@@ -170,44 +216,166 @@ const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
     { key: "candelabra",     col: 6, row: 0 },
   ],
   c3po: [
-    // Stair at chamber cols 0-1 (Ground→Crypts right), so props live at cols 2-7.
-    { key: "gold_lectern",   col: 2, row: 0 },
-    { key: "wooden_chest",   col: 4, row: 0 },
+    { key: "gold_lectern",   col: 1, row: 0 },
+    { key: "wooden_chest",   col: 3, row: 0 },
     { key: "candelabra",     col: 6, row: 0 },
   ],
-  // Upper Spires (chambers 11 wide)
+  // Upper Spires — chambers 8 wide
   batman: [
-    { key: "war_table",      col: 4, row: 0 },
+    { key: "war_table",      col: 3, row: 0 },
     { key: "candelabra",     col: 1, row: 0 },
-    { key: "wooden_chest",   col: 8, row: 0 },
+    { key: "wooden_chest",   col: 6, row: 0 },
   ],
   aang: [
-    { key: "meditation_cushion", col: 4, row: 0 },
+    { key: "meditation_cushion", col: 3, row: 0 },
     { key: "bonsai",             col: 1, row: 0 },
-    { key: "bonsai",             col: 8, row: 0 },
+    { key: "bookshelf",          col: 6, row: 0 },
   ],
   oak: [
     { key: "spell_lectern",  col: 1, row: 0 },
-    { key: "bookshelf",      col: 4, row: 0 },
-    { key: "bookshelf",      col: 8, row: 0 },
+    { key: "bookshelf",      col: 3, row: 0 },
+    { key: "candelabra",     col: 6, row: 0 },
   ],
   spock: [
     { key: "astrolabe",      col: 1, row: 0 },
-    { key: "telescope",      col: 4, row: 0 },
-    { key: "bookshelf",      col: 8, row: 0 },
+    { key: "telescope",      col: 3, row: 0 },
+    { key: "bookshelf",      col: 6, row: 0 },
   ],
-  // Crypts (44 wide — Piccolo alone, lots of room to fill)
+  // Crypts — Piccolo alone, 50 wide
   piccolo: [
-    { key: "crystal_pillar", col: 21, row: 0 },
+    { key: "crystal_pillar", col: 24, row: 0 },
     { key: "candelabra",     col: 4,  row: 0 },
     { key: "candelabra",     col: 14, row: 0 },
     { key: "wooden_chest",   col: 8,  row: 0 },
-    { key: "barrel",         col: 17, row: 0 },
-    { key: "candelabra",     col: 30, row: 0 },
-    { key: "candelabra",     col: 40, row: 0 },
-    { key: "wooden_chest",   col: 36, row: 0 },
-    { key: "barrel",         col: 26, row: 0 },
+    { key: "barrel",         col: 19, row: 0 },
+    { key: "candelabra",     col: 33, row: 0 },
+    { key: "candelabra",     col: 45, row: 0 },
+    { key: "wooden_chest",   col: 41, row: 0 },
+    { key: "barrel",         col: 29, row: 0 },
   ],
+};
+
+// ── Use-spots & path graph ──────────────────────────────────────────────────
+// Phase 4A: data only. The runtime A* + animation pass land in Phase 4B/5.
+// Coords are chamber-local; the runtime adds chamber offsets at lookup time.
+//
+// hero  = where the agent stands when actively working at their hero prop
+// idle  = neutral standing position when nothing is happening
+// council = position in Cortana's hub during a multi-agent ceremony
+//
+// Cortana's council ring is two-tier per the locked Z option: 6 use-spots in
+// front (closer to camera, full size) and 4 in back (further, slightly higher
+// y, partially behind the dais). Aang gets the marked seat closest to Cortana
+// to read as the convener.
+
+interface UseSpot {
+  type: "hero" | "idle";
+  col: number;   // chamber-local col
+  row: number;   // grid rows above floor surface (0 = on floor, negative = up)
+  facing: "south" | "east" | "north" | "west";
+}
+
+interface CouncilSpot {
+  agentId: string;
+  col: number;
+  row: number;
+  facing: "south" | "east" | "north" | "west";
+  tier: "front" | "back";
+  marked?: boolean;  // Aang's convener seat
+}
+
+const CHAMBER_USE_SPOTS: Record<string, { hero: UseSpot; idle: UseSpot }> = {
+  tony:    { hero: { type: "hero", col: 1, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  gojo:    { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  cortana: { hero: { type: "hero", col: 7, row: 0, facing: "south" }, idle: { type: "idle", col: 7, row: 0, facing: "south" } },
+  surfer:  { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  c3po:    { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  batman:  { hero: { type: "hero", col: 4, row: 0, facing: "south" }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  aang:    { hero: { type: "hero", col: 4, row: 0, facing: "south" }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  oak:     { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  spock:   { hero: { type: "hero", col: 4, row: 0, facing: "south" }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
+  piccolo: { hero: { type: "hero", col: 24, row: 0, facing: "south" }, idle: { type: "idle", col: 24, row: 0, facing: "south" } },
+};
+
+// Cortana's hub is 14 wide. Cortana stands at chamber col 7 (center).
+const CORTANA_COUNCIL_SPOTS: CouncilSpot[] = [
+  // Aang — convener, marked seat closest to Cortana
+  { agentId: "aang",    col: 6,  row: 1, facing: "east",  tier: "front", marked: true },
+  // Front row (6 total including Aang) — closer to camera
+  { agentId: "tony",    col: 2,  row: 0, facing: "east",  tier: "front" },
+  { agentId: "gojo",    col: 4,  row: 0, facing: "east",  tier: "front" },
+  { agentId: "surfer",  col: 9,  row: 0, facing: "west",  tier: "front" },
+  { agentId: "c3po",    col: 11, row: 0, facing: "west",  tier: "front" },
+  { agentId: "batman",  col: 1,  row: 0, facing: "east",  tier: "front" },
+  // Back row (4) — further from camera, slightly raised, may be partly
+  // occluded by the dais. Render scale is reduced in Phase 5.
+  { agentId: "oak",     col: 4,  row: -1, facing: "south", tier: "back" },
+  { agentId: "spock",   col: 10, row: -1, facing: "south", tier: "back" },
+  { agentId: "piccolo", col: 6,  row: -1, facing: "south", tier: "back" },
+  { agentId: "batman",  col: 8,  row: -1, facing: "south", tier: "back" },  // overflow / paired call
+];
+
+// Path graph — static nodes + edges for inter-chamber walking. The runtime
+// A* pass uses this in Phase 5. Coords are canvas grid (col, row).
+interface PathNode { id: string; col: number; row: number }
+interface PathEdge { from: string; to: string }
+
+const PATH_NODES: PathNode[] = [
+  // Chamber centers (canvas coords reflect new geometry)
+  { id: "chamber:batman",  col: 4,  row: 8  },
+  { id: "chamber:aang",    col: 13, row: 8  },
+  { id: "chamber:oak",     col: 37, row: 8  },
+  { id: "chamber:spock",   col: 46, row: 8  },
+  { id: "chamber:tony",    col: 4,  row: 18 },
+  { id: "chamber:gojo",    col: 13, row: 18 },
+  { id: "chamber:cortana", col: 25, row: 18 },
+  { id: "chamber:surfer",  col: 37, row: 18 },
+  { id: "chamber:c3po",    col: 46, row: 18 },
+  { id: "chamber:piccolo", col: 25, row: 28 },
+  // Passages (entry points on each side)
+  { id: "passage:upper-aang-down",    col: 14, row: 10 },
+  { id: "passage:upper-oak-down",     col: 34, row: 10 },
+  { id: "passage:ground-tony-down",   col: 6,  row: 20 },
+  { id: "passage:ground-c3po-down",   col: 42, row: 20 },
+];
+
+const PATH_EDGES: PathEdge[] = [
+  // Upper corridor
+  { from: "chamber:batman", to: "chamber:aang" },
+  { from: "chamber:aang",   to: "passage:upper-aang-down" },
+  { from: "chamber:oak",    to: "passage:upper-oak-down" },
+  { from: "chamber:oak",    to: "chamber:spock" },
+  // Ground corridor
+  { from: "chamber:tony",    to: "chamber:gojo" },
+  { from: "chamber:gojo",    to: "chamber:cortana" },
+  { from: "chamber:cortana", to: "chamber:surfer" },
+  { from: "chamber:surfer",  to: "chamber:c3po" },
+  // Floor transitions
+  { from: "passage:upper-aang-down", to: "chamber:cortana" },
+  { from: "passage:upper-oak-down",  to: "chamber:cortana" },
+  { from: "chamber:tony",  to: "passage:ground-tony-down" },
+  { from: "chamber:c3po",  to: "passage:ground-c3po-down" },
+  { from: "passage:ground-tony-down", to: "chamber:piccolo" },
+  { from: "passage:ground-c3po-down", to: "chamber:piccolo" },
+];
+
+// ── State icon emote glyphs ─────────────────────────────────────────────────
+// Floating glyph above sprite, mapped from the 12-state machine. Phase 5
+// replaces the Unicode glyphs with PixelLab pixel-art icons.
+const STATE_GLYPH: Record<string, string> = {
+  idle:                       "",
+  "loading-context":          "⚙",
+  "working-local":            "⚙",
+  "escalation-pending":       "!",
+  "working-external":         "⚙",
+  "output-pending-validation":"?",
+  "validation-failed":        "!",
+  "awaiting-user-approval":   "?",
+  "walking-to-ceremony":      "→",
+  "council-seated":           "",
+  "receiving-call":           "",
+  dormant:                    "z",
+  complete:                   "✓",
 };
 
 // ── Scene ─────────────────────────────────────────────────────────────────────
@@ -229,8 +397,9 @@ class KeepScene extends Phaser.Scene {
   private orbRef: Phaser.GameObjects.Graphics | null = null;
   private cortanaCenterX: number = 0;
 
-  // State tracking
+  // State tracking + floating state-icon emote per agent
   private currentStates: Partial<Record<string, AgentState>> = {};
+  private agentEmotes: Map<string, Phaser.GameObjects.Text> = new Map();
 
   constructor() { super({ key: "KeepScene" }); }
 
@@ -257,9 +426,9 @@ class KeepScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor(C.background);
 
-    this.buildFloor("upper",  UPPER_ORDER,  UPPER_WIDTHS,  0);
-    this.buildFloor("ground", GROUND_ORDER, GROUND_WIDTHS, FLOOR_TILES_TALL);
-    this.buildFloor("crypts", CRYPTS_ORDER, CRYPTS_WIDTHS, FLOOR_TILES_TALL * 2);
+    this.buildFloor("upper",  UPPER_SEGMENTS,  0);
+    this.buildFloor("ground", GROUND_SEGMENTS, FLOOR_TILES_TALL);
+    this.buildFloor("crypts", CRYPTS_SEGMENTS, FLOOR_TILES_TALL * 2);
     this.drawCrenellations();
     this.placePassages();
 
@@ -296,54 +465,78 @@ class KeepScene extends Phaser.Scene {
 
   private buildFloor(
     _floorId: "upper" | "ground" | "crypts",
-    order: string[],
-    widths: number[],
+    segments: FloorSegment[],
     rowOffset: number
   ) {
     const yTop = rowOffset;
     const yWallBase = rowOffset + FLOOR_TILES_TALL - 2;
     const yFloor = rowOffset + FLOOR_TILES_TALL - 1;
 
-    // Back wall — darker stone fills the chamber interior (rows yTop+2 .. yTop+4).
-    // Two staggered passes of 32×32 tiles cover 4 grid rows; the floor draws
-    // afterward and covers the bottom-half overlap.
-    for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
-      const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
-      const a = CASTLE_BACKWALL_POOL[variant % CASTLE_BACKWALL_POOL.length];
-      const b = CASTLE_BACKWALL_POOL[(variant + 1) % CASTLE_BACKWALL_POOL.length];
-      this.placeCastleTile(c, yTop + 2, `castle_${a}`);
-      this.placeCastleTile(c, yTop + 3, `castle_${b}`);
+    // Walk segments once to map every column to its segment kind. Opening
+    // columns skip top wall + back wall + floor (cathedral nave reaches up).
+    const colKind: Array<"chamber" | "divider" | "opening"> = [];
+    {
+      let cx = 0;
+      for (const seg of segments) {
+        for (let k = 0; k < seg.width; k++) colKind.push(seg.kind);
+        cx += seg.width;
+      }
+      while (colKind.length < FLOOR_TILES_WIDE) colKind.push("opening");
+    }
+    const isOpen = (c: number) => colKind[c] === "opening";
+
+    // Back wall — three layers of 32×32 tiles fill rows 2..7 between the top
+    // wall (rows 0-1) and the floor (rows 8-9). Each tile spans 2 grid rows.
+    // Skip opening columns so Cortana's back wall extends up uninterrupted.
+    for (const rowBase of [yTop + 2, yTop + 4, yTop + 6]) {
+      for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+        if (isOpen(c) || isOpen(c + 1)) continue;
+        const variant = Math.floor(c / 2) + Math.floor(rowBase / 2);
+        const idx = CASTLE_BACKWALL_POOL[variant % CASTLE_BACKWALL_POOL.length];
+        this.placeCastleTile(c, rowBase, `castle_${idx}`);
+      }
     }
 
-    // Floor tiles — custom castle stone. One 32×32 tile spans 2×2 grid cells,
-    // so we step by 2 across yWallBase row and the tile naturally covers
-    // both yWallBase and yFloor rows.
+    // Floor tiles — skip opening columns so the cathedral has no ceiling cap.
     for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      if (isOpen(c) || isOpen(c + 1)) continue;
       const variant = Math.floor(c / 2) + Math.floor(rowOffset / 2);
       const tileIdx = CASTLE_FLOOR_POOL[variant % CASTLE_FLOOR_POOL.length];
       this.placeCastleTile(c, yWallBase, `castle_${tileIdx}`);
     }
 
-    // Top wall — custom 32×32 PixelLab castle tiles. One tile spans 2 cols × 2 rows.
-    // Periodically swap in atmospheric variants (arrow slits, alcoves, beams) for variety.
-    const wallSpecials = [
-      { every: 7, key: "arch_11" },    // arrow slit window
-      { every: 5, key: "castle_12" },  // arched alcove
-      { every: 11, key: "castle_13" }, // framed wall panel
-    ];
+    // Top wall — skip opening columns. Phase 4A removes the every-N atmospheric
+    // tile rotation since it created visual noise; back to plain stone with
+    // accents reserved for per-chamber theming in Phase 4B.
     for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      if (isOpen(c) || isOpen(c + 1)) continue;
       const slot = Math.floor(c / 2) + Math.floor(rowOffset / 2);
-      let key = `castle_${CASTLE_WALL_POOL[slot % CASTLE_WALL_POOL.length]}`;
-      for (const sp of wallSpecials) {
-        if (slot > 0 && slot % sp.every === 0) { key = sp.key; break; }
-      }
+      const key = `castle_${CASTLE_WALL_POOL[slot % CASTLE_WALL_POOL.length]}`;
       this.placeCastleTile(c, yTop, key);
     }
 
+    // Chamber dividers — stack of stone column tiles spanning the back-wall
+    // band so the divider reads as a full-height pillar between adjacent
+    // chambers. Reuses castle_6 (column with capital + base).
+    {
+      let cx = 0;
+      for (const seg of segments) {
+        if (seg.kind === "divider") {
+          const dc = cx - (cx % 2);
+          this.placeCastleTile(dc, yTop + 2, "castle_6");
+          this.placeCastleTile(dc, yTop + 4, "castle_6");
+          this.placeCastleTile(dc, yTop + 6, "castle_6");
+        }
+        cx += seg.width;
+      }
+    }
+
+    // Iterate chambers (skipping dividers and openings) for props/agents.
     let cx = 0;
-    for (let i = 0; i < order.length; i++) {
-      const agentId = order[i];
-      const w = widths[i];
+    for (const seg of segments) {
+      if (seg.kind !== "chamber") { cx += seg.width; continue; }
+      const agentId = seg.agentId;
+      const w = seg.width;
       const chamber = CHAMBERS.find((c) => c.agentId === agentId);
       if (!chamber) { cx += w; continue; }
 
@@ -352,9 +545,12 @@ class KeepScene extends Phaser.Scene {
       const yFloorPx = (yWallBase + 1) * TS;
       this.chamberBounds.set(agentId, { xLeft: xLeftPx, xRight: xRightPx, yFloor: yFloorPx });
 
-      // Two torches per chamber
-      const t1 = this.spawnTorch(cx + Math.floor(w / 4), yTop + 2, i * 2);
-      const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, i * 2 + 3);
+      // Two torches per chamber, snapped to even col so they align with the
+      // 2×2 back-wall grid. Phase indexed by agent name length to keep the
+      // alpha flicker phases varied across the keep without segment-index math.
+      const torchPhase = agentId.length;
+      const t1 = this.spawnTorch(cx + Math.floor(w / 4), yTop + 2, torchPhase * 2);
+      const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, torchPhase * 2 + 3);
       this.chamberTorches.set(agentId, [t1, t2]);
 
       // Floor glow — hidden until agent is active
@@ -371,10 +567,14 @@ class KeepScene extends Phaser.Scene {
         this.cortanaCenterX = glowCx;
 
         // Flanking stone columns — castle_6 mounted in the back wall band,
-        // symmetric around Cortana's center (canvas col 22). Even cols snap
-        // to the 2×2 back-wall tile grid.
-        this.placeCastleTile(cx + 2, yTop + 3, "castle_6");
-        this.placeCastleTile(cx + 8, yTop + 3, "castle_6");
+        // symmetric around Cortana's center. Chamber is 14 wide; columns at
+        // chamber cols 2 and 10 (even-snapped). Three stacked tiles per
+        // column for the cathedral-tall back wall (rows 2-7).
+        for (const cc of [cx + 2, cx + 10]) {
+          this.placeCastleTile(cc, yTop + 2, "castle_6");
+          this.placeCastleTile(cc, yTop + 4, "castle_6");
+          this.placeCastleTile(cc, yTop + 6, "castle_6");
+        }
 
         // Layered violet dais — outer halo + inner core.
         const daisOuter = this.add.graphics();
@@ -418,6 +618,17 @@ class KeepScene extends Phaser.Scene {
       this.agentSprites.set(agentId, sprite);
       this.agentBaseX.set(agentId, sxPx);
       this.agentBaseY.set(agentId, syPx);
+
+      // State-icon emote — Unicode glyph hovering above the sprite. Pixel-art
+      // icons replace these in Phase 5. Empty when state is idle/seated/
+      // receiving (no surfaced signal needed).
+      const emote = this.add.text(sxPx, syPx - sprite.displayHeight - 10, "", {
+        fontFamily: "monospace",
+        fontSize: "20px",
+        color: "#F4EFE3",
+        fontStyle: "bold",
+      }).setOrigin(0.5, 0.5).setDepth(8);
+      this.agentEmotes.set(agentId, emote);
 
       cx += w;
     }
@@ -577,7 +788,8 @@ class KeepScene extends Phaser.Scene {
 
     for (const [agentId, sprite] of this.agentSprites) {
       if (!sprite) continue;
-      const tier = agentStateTier(states[agentId]);
+      const state = states[agentId];
+      const tier = agentStateTier(state);
 
       if (tier === "active") {
         this.applyActiveMotion(agentId);
@@ -590,6 +802,16 @@ class KeepScene extends Phaser.Scene {
         this.applyDormantMotion(agentId);
         this.applyChamberLighting(agentId, "dormant");
       }
+
+      // State-icon emote — surface state visibly above the sprite. Empty
+      // glyph for states where no signal is needed (idle, council-seated,
+      // receiving-call). Cortana is excluded from emotes since her signaling
+      // happens via the dais halo + orb.
+      const emote = this.agentEmotes.get(agentId);
+      if (emote && agentId !== "cortana") {
+        const glyph = STATE_GLYPH[state ?? "idle"] ?? "";
+        emote.setText(glyph);
+      }
     }
 
     this.updateOrbTarget(firstActiveNonCortana);
@@ -598,13 +820,14 @@ class KeepScene extends Phaser.Scene {
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private spawnTorch(col: number, row: number, phase: number): Phaser.GameObjects.Image {
-    // Custom castle torch sconce — castle_11 is a 32×32 tile with the wall
-    // section baked in. Snap col to even so it aligns with the 2×2 back-wall
-    // tile grid; renders at full SCALE so the wall portion of the sprite
-    // matches surrounding back-wall tiles.
+    // Castle torch sconce — castle_11 is a 32×32 tile with the wall section
+    // baked in. Origin (0.5, 0.5) so the active-state scale tween grows the
+    // sprite outward symmetrically rather than down-and-right (which read as
+    // sliding instead of pulsing). Position is the center of the 2×2 grid
+    // block the torch occupies, so the visual still aligns with the back wall.
     const evenCol = col - (col % 2);
-    const t = this.add.image(evenCol * TS, row * TS, "castle_11");
-    t.setOrigin(0, 0).setScale(SCALE).setDepth(3).setData("phase", phase);
+    const t = this.add.image(evenCol * TS + TS, row * TS + TS, "castle_11");
+    t.setOrigin(0.5, 0.5).setScale(SCALE).setDepth(3).setData("phase", phase);
     this.allTorches.push(t);
     return t;
   }
