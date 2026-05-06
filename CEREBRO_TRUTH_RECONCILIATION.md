@@ -303,14 +303,14 @@ Anti-slop: no SaaS blue defaults, no glassmorphism, no gradient blobs without pu
 
 1. **Phase 1 — Truth doc.** This file. Done when committed.
 2. **Phase 2 — Code fix `agentRouter.ts`.** Apply role corrections, swap to model classes, add `skills` and `toolScope` fields. No behavior wired yet, just corrected metadata.
-3. **Phase 3 — Canonical shell rebuild.** Add left rail (9 sections), right context panel (agent + mode + task + perms + Oak + next actions), bottom command bar with "Ask Aang…". Castle scene shrinks to center workspace area. First-run onboarding 12-step flow.
+3. **Phase 3 — Canonical shell rebuild.** Add left rail (9 sections), right context panel (agent + mode + task + perms + Oak + next actions), bottom command bar with "Ask Aang…". Castle scene shrinks to center workspace area. First-run onboarding wizard authored but pinned (see §16).
 4. **Phase 4 — Castle re-skin.** Bigger chambers, dividers, Cortana cathedral nave, per-chamber theming reflecting real role nuance, A* pathing, council use-spots, state icons above sprites, visible storage destination chambers.
 5. **Phase 5 — Animation pass.** PixelLab `animate_character` per agent: idle, walk×4, cast at hero prop, council-seated, receiving-call, "needs input" pose. Roughly 80 generations.
-6. **Phase 6 — Harness wiring.** Real intent capture, real router, skill loader, tool adapters with permission classes, model class router, memory pipeline with Oak validation and approval gates.
+6. **Phase 6 — Harness wiring.** Real intent capture, real router, skill loader, tool adapters with permission classes, model class router, memory pipeline with Oak validation and approval gates. Backend setup happens here: Claude configures storage root, Obsidian vault, Ollama detection, Notion bridge, browser policy, and approval strictness from this doc and the planning files. The onboarding wizard from §16 is the user-visible polish at the very end, not the build path.
 7. **Phase 7 — Aang teaching mode.** Artifact pipeline for guides, quizzes, flashcards, LearningPaths.
 8. **Phase 8 — Surfer browser adapter.** Disabled-by-default, ladder fallback, session logging.
 9. **Phase 9 — Notion bridge full.** Outbox + optional inbox.
-10. **Phase 10 — V1 hardening.** Tests, acceptance criteria pass, walkthrough guide.
+10. **Phase 10 — V1 hardening.** Tests, acceptance criteria pass, walkthrough guide. Wire the pinned onboarding wizard into first-mount detection here, after the backend it depends on actually exists.
 
 ---
 
@@ -349,3 +349,13 @@ From `OPEN_QUESTIONS.md` and active build:
 - External Claude Code: confirms each call individually, eats existing session quota.
 - Walkthrough guide is the LAST phase.
 - Castle is a creative layer on top of the canonical UI shell. Castle does not replace the shell.
+
+---
+
+## 16. Onboarding wizard pinned
+
+The 12-step first-run wizard at `app/client/src/components/Onboarding.tsx` is authored and committed (Phase 3B) but **not rendered**. The import and the `showOnboarding` gate in `app/client/src/pages/Home.tsx` are commented out.
+
+Reason: backend setup (storage root, Obsidian vault, Ollama, Notion, browser policy, approval strictness) happens in Phase 6, where Claude configures CereBro directly from this truth doc and the planning files. The user does not fill in a setup wizard during the build. The wizard is the polish path for end-users who install CereBro fresh after V1 ships.
+
+To re-enable, restore the import line and the `{showOnboarding && <Onboarding … />}` block in Home.tsx, and let Phase 6 backend back the choices with real settings persistence + system health checks.

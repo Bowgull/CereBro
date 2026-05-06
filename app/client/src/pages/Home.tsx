@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
 import KeepScene from "@/components/KeepScene";
 import EstablishingShot from "@/components/EstablishingShot";
-import Onboarding, { isOnboardingComplete } from "@/components/Onboarding";
+// Onboarding wizard pinned for now — Claude will configure CereBro from the
+// planning files when backend phases land. Re-enable by importing from
+// "@/components/Onboarding" and restoring the showOnboarding gate below.
+// import Onboarding, { isOnboardingComplete } from "@/components/Onboarding";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
@@ -54,7 +57,6 @@ export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
 
-  const [showOnboarding, setShowOnboarding] = useState(() => !isOnboardingComplete());
   const [nav, setNav] = useState<NavId>("home");
   const [floor, setFloor] = useState<FloorId>("ground");
   const [mode, setMode] = useState<Mode>("quick");
@@ -321,9 +323,6 @@ export default function Home() {
         />
       )}
 
-      {showOnboarding && (
-        <Onboarding onComplete={() => setShowOnboarding(false)} />
-      )}
     </div>
   );
 }
