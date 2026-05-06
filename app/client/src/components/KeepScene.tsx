@@ -15,7 +15,7 @@ import { CHAMBERS, cerebroColors as C, agentStateTier, type AgentState } from ".
 
 // ── Geometry ────────────────────────────────────────────────────────────────
 const TILE = 16;
-const SCALE = 3;
+const SCALE = 4;
 const TS = TILE * SCALE;
 
 // Phase 4A: chambers got 43% more interior height (7 → 10 rows) so props,
@@ -181,10 +181,11 @@ type Prop = { key: string; col: number; row: number; depth?: number };
 // `row` is grid rows from the floor surface (0 = on floor, negative = up wall).
 const PROP_PATH = "/sprites/cerebro/props";
 const PROP_KEYS = [
-  "anvil", "drafting_table", "hitching_post", "gold_lectern",
-  "meditation_cushion", "war_table", "spell_lectern", "astrolabe",
-  "crystal_pillar", "stained_glass", "bonsai", "bookshelf",
-  "telescope", "candelabra", "wooden_chest", "barrel",
+  "anvil", "forge_bellows", "drafting_table", "mannequin",
+  "hitching_post", "saddlebag", "gold_lectern",
+  "war_table", "weapon_rack", "wind_chimes",
+  "herb_shelf", "magnifying_glass", "astrolabe", "telescope",
+  "crystal_ball",
 ] as const;
 
 // Per-chamber prop placements. Cols are chamber-local (0 = chamber's left
@@ -193,65 +194,40 @@ const PROP_KEYS = [
 const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
   // Ground Hall — chambers 8 wide except Cortana (14)
   tony: [
-    { key: "anvil",         col: 1, row: 0 },
-    { key: "wooden_chest",  col: 3, row: 0 },
-    { key: "barrel",        col: 5, row: 0 },
+    { key: "anvil",          col: 2, row: 0 },
+    { key: "forge_bellows",  col: 5, row: 0 },
   ],
   gojo: [
-    { key: "drafting_table", col: 1, row: 0 },
-    { key: "candelabra",     col: 4, row: 0 },
-    { key: "bookshelf",      col: 6, row: 0 },
+    { key: "drafting_table", col: 2, row: 0 },
+    { key: "mannequin",      col: 5, row: 0 },
   ],
-  cortana: [
-    // 14-wide cathedral chamber. Cortana sits at center (col 7).
-    { key: "stained_glass",  col: 6,  row: -3, depth: 1 },
-    { key: "crystal_pillar", col: 5,  row: 0 },
-    { key: "crystal_pillar", col: 8,  row: 0 },
-    { key: "candelabra",     col: 1,  row: 0 },
-    { key: "candelabra",     col: 12, row: 0 },
-  ],
+  cortana: [],
   surfer: [
-    { key: "hitching_post",  col: 1, row: 0 },
-    { key: "barrel",         col: 4, row: 0 },
-    { key: "candelabra",     col: 6, row: 0 },
+    { key: "hitching_post",  col: 2, row: 0 },
+    { key: "saddlebag",      col: 5, row: 0 },
   ],
   c3po: [
-    { key: "gold_lectern",   col: 1, row: 0 },
-    { key: "wooden_chest",   col: 3, row: 0 },
-    { key: "candelabra",     col: 6, row: 0 },
+    { key: "gold_lectern",   col: 2, row: 0 },
   ],
   // Upper Spires — chambers 8 wide
   batman: [
-    { key: "war_table",      col: 3, row: 0 },
-    { key: "candelabra",     col: 1, row: 0 },
-    { key: "wooden_chest",   col: 6, row: 0 },
+    { key: "war_table",      col: 2, row: 0 },
+    { key: "weapon_rack",    col: 5, row: -1 },
   ],
   aang: [
-    { key: "meditation_cushion", col: 3, row: 0 },
-    { key: "bonsai",             col: 1, row: 0 },
-    { key: "bookshelf",          col: 6, row: 0 },
+    { key: "wind_chimes",    col: 3, row: -2 },
   ],
   oak: [
-    { key: "spell_lectern",  col: 1, row: 0 },
-    { key: "bookshelf",      col: 3, row: 0 },
-    { key: "candelabra",     col: 6, row: 0 },
+    { key: "herb_shelf",        col: 2, row: -1 },
+    { key: "magnifying_glass",  col: 5, row: 0 },
   ],
   spock: [
-    { key: "astrolabe",      col: 1, row: 0 },
-    { key: "telescope",      col: 3, row: 0 },
-    { key: "bookshelf",      col: 6, row: 0 },
+    { key: "astrolabe",      col: 2, row: 0 },
+    { key: "telescope",      col: 5, row: 0 },
   ],
   // Crypts — Piccolo alone, 50 wide
   piccolo: [
-    { key: "crystal_pillar", col: 24, row: 0 },
-    { key: "candelabra",     col: 4,  row: 0 },
-    { key: "candelabra",     col: 14, row: 0 },
-    { key: "wooden_chest",   col: 8,  row: 0 },
-    { key: "barrel",         col: 19, row: 0 },
-    { key: "candelabra",     col: 33, row: 0 },
-    { key: "candelabra",     col: 45, row: 0 },
-    { key: "wooden_chest",   col: 41, row: 0 },
-    { key: "barrel",         col: 29, row: 0 },
+    { key: "crystal_ball",   col: 24, row: 0 },
   ],
 };
 
@@ -474,7 +450,7 @@ class KeepScene extends Phaser.Scene {
       this.time.addEvent({
         delay: 4200, loop: true,
         callback: () => {
-          this.tweens.add({ targets: spock, scaleX: -1.6, duration: 60, yoyo: true, ease: "Linear", onComplete: () => spock.setScale(1.6, spock.scaleY) });
+          this.tweens.add({ targets: spock, scaleX: -3.0, duration: 60, yoyo: true, ease: "Linear", onComplete: () => spock.setScale(3.0, spock.scaleY) });
         },
       });
     }
@@ -542,17 +518,14 @@ class KeepScene extends Phaser.Scene {
       this.placeCastleTile(c, yTop, key);
     }
 
-    // Chamber dividers — stack of stone column tiles spanning the back-wall
-    // band so the divider reads as a full-height pillar between adjacent
-    // chambers. Reuses castle_6 (column with capital + base).
+    // Chamber dividers — single stone column tile in the middle band so the
+    // divider reads as architectural punctuation, not a wall.
     {
       let cx = 0;
       for (const seg of segments) {
         if (seg.kind === "divider") {
           const dc = cx - (cx % 2);
-          this.placeCastleTile(dc, yTop + 2, "castle_6");
           this.placeCastleTile(dc, yTop + 4, "castle_6");
-          this.placeCastleTile(dc, yTop + 6, "castle_6");
         }
         cx += seg.width;
       }
@@ -576,8 +549,8 @@ class KeepScene extends Phaser.Scene {
       // 2×2 back-wall grid. Phase indexed by agent name length to keep the
       // alpha flicker phases varied across the keep without segment-index math.
       const torchPhase = agentId.length;
-      const t1 = this.spawnTorch(cx + Math.floor(w / 4), yTop + 2, torchPhase * 2);
-      const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, torchPhase * 2 + 3);
+      const t1 = this.spawnTorch(cx, yTop + 2, torchPhase * 2);
+      const t2 = this.spawnTorch(cx + w - 2, yTop + 2, torchPhase * 2 + 3);
       this.chamberTorches.set(agentId, [t1, t2]);
 
       // Phase 4B: per-chamber themed floor overlay. Replaces the generic
@@ -593,17 +566,8 @@ class KeepScene extends Phaser.Scene {
         }
       }
 
-      // Phase 4B: per-chamber back-wall feature. One signature backdrop
-      // centered on the chamber's back wall (forge furnace for Tony,
-      // alembic for Oak, etc.). Sits above the back wall at depth 1 so
-      // props at depth 4 still cover it appropriately.
-      const featureKey = `feature_${agentId}`;
-      if (this.textures.exists(featureKey)) {
-        const fcx = cx + Math.floor(w / 2) - 1;
-        const evenC = fcx - (fcx % 2);
-        this.add.image(evenC * TS, (yTop + 4) * TS, featureKey)
-          .setOrigin(0, 0).setScale(SCALE).setDepth(1);
-      }
+      // Phase 4B back-wall features disabled — opaque backgrounds clash.
+      // Will regen with transparent BGs in a future pass.
 
       // Floor glow — hidden until agent is active
       const glowCx = (cx + w / 2) * TS;
@@ -651,20 +615,6 @@ class KeepScene extends Phaser.Scene {
         this.tweens.add({ targets: orb, alpha: 0.55, duration: 1400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
         this.tweens.add({ targets: orb, y: orb.y - TS * 0.25, duration: 1900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
 
-        // Cathedral-specific extras: tall arcane energy column behind dais,
-        // holo-dome ceiling tile up where the cathedral nave opens through.
-        const colCx = (cx + Math.floor(w / 2) - 1);
-        const colEven = colCx - (colCx % 2);
-        if (this.textures.exists("feature_cortana_column")) {
-          this.add.image(colEven * TS, (yTop + 6) * TS, "feature_cortana_column")
-            .setOrigin(0, 0).setScale(SCALE).setDepth(0.8);
-        }
-        if (this.textures.exists("feature_cortana_dome")) {
-          // Dome anchored just below the Upper-floor opening's bottom edge,
-          // so it reads as the cathedral's hanging chandelier-ceiling piece.
-          this.add.image(colEven * TS, (yTop - 2) * TS, "feature_cortana_dome")
-            .setOrigin(0, 0).setScale(SCALE).setDepth(0.8);
-        }
       }
 
       // PixelLab chamber props — 32×32, anchored to floor row, scaled 3×.
@@ -681,7 +631,7 @@ class KeepScene extends Phaser.Scene {
       const sxPx = (cx + w / 2) * TS;
       const syPx = (yWallBase + 0.4) * TS;
       const sprite = this.add.image(sxPx, syPx, `agent_${agentId}`)
-        .setOrigin(0.5, 1).setScale(1.6).setDepth(5);
+        .setOrigin(0.5, 1).setScale(3.0).setDepth(5);
       this.agentSprites.set(agentId, sprite);
       this.agentBaseX.set(agentId, sxPx);
       this.agentBaseY.set(agentId, syPx);
@@ -892,7 +842,7 @@ class KeepScene extends Phaser.Scene {
     // block the torch occupies, so the visual still aligns with the back wall.
     const evenCol = col - (col % 2);
     const t = this.add.image(evenCol * TS + TS, row * TS + TS, "castle_11");
-    t.setOrigin(0.5, 0.5).setScale(SCALE).setDepth(3).setData("phase", phase);
+    t.setOrigin(0.5, 0.5).setScale(SCALE).setDepth(6).setData("phase", phase);
     this.allTorches.push(t);
     return t;
   }
@@ -966,7 +916,12 @@ export default function KeepSceneView({ agentStates }: Props) {
       backgroundColor: C.background,
       parent: containerRef.current,
       pixelArt: true, antialias: false, roundPixels: true,
-      scale: { mode: Phaser.Scale.NONE, width: CANVAS_W, height: CANVAS_H },
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: CANVAS_W,
+        height: CANVAS_H,
+      },
       scene: [KeepScene],
     });
 
