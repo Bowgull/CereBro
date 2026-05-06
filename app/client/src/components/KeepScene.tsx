@@ -360,22 +360,23 @@ const PATH_EDGES: PathEdge[] = [
 ];
 
 // ── State icon emote glyphs ─────────────────────────────────────────────────
-// Floating glyph above sprite, mapped from the 12-state machine. Phase 5
-// replaces the Unicode glyphs with PixelLab pixel-art icons.
-const STATE_GLYPH: Record<string, string> = {
+// Floating pixel-art icon above sprite, mapped from the 12-state machine.
+// Phase 4B uses 16×16 PixelLab icons. States with no icon ("") render
+// nothing — the chamber lighting + agent motion carries the signal.
+const STATE_ICON_KEY: Record<string, string> = {
   idle:                       "",
-  "loading-context":          "⚙",
-  "working-local":            "⚙",
-  "escalation-pending":       "!",
-  "working-external":         "⚙",
-  "output-pending-validation":"?",
-  "validation-failed":        "!",
-  "awaiting-user-approval":   "?",
-  "walking-to-ceremony":      "→",
+  "loading-context":          "icon_working",
+  "working-local":            "icon_working",
+  "escalation-pending":       "icon_alert",
+  "working-external":         "icon_working",
+  "output-pending-validation":"icon_needs_input",
+  "validation-failed":        "icon_alert",
+  "awaiting-user-approval":   "icon_needs_input",
+  "walking-to-ceremony":      "icon_working",
   "council-seated":           "",
-  "receiving-call":           "",
-  dormant:                    "z",
-  complete:                   "✓",
+  "receiving-call":           "icon_speaking",
+  dormant:                    "icon_paused",
+  complete:                   "",
 };
 
 // ── Scene ─────────────────────────────────────────────────────────────────────
@@ -399,7 +400,7 @@ class KeepScene extends Phaser.Scene {
 
   // State tracking + floating state-icon emote per agent
   private currentStates: Partial<Record<string, AgentState>> = {};
-  private agentEmotes: Map<string, Phaser.GameObjects.Text> = new Map();
+  private agentEmotes: Map<string, Phaser.GameObjects.Image> = new Map();
 
   constructor() { super({ key: "KeepScene" }); }
 
@@ -421,6 +422,32 @@ class KeepScene extends Phaser.Scene {
     }
     // Cortana hub backdrop — 320×200 hand-pixeled throne room
     this.load.image("cortana_hub", "/sprites/cerebro/hub/v1.png");
+
+    // Phase 4B: per-chamber themed tiles. floor_<id> = chamber-specific floor
+    // overlay (forge brick for Tony, marble for Cortana, dirt for Piccolo,
+    // etc.). feature_<id> = signature back-wall feature (forge furnace,
+    // holographic dome, telescope chart, etc.). Plus Cortana cathedral
+    // specials and state-icon glyphs.
+    const themedAgents = ["tony", "gojo", "cortana", "surfer", "c3po",
+      "batman", "aang", "oak", "spock", "piccolo"];
+    for (const id of themedAgents) {
+      this.load.image(`floor_${id}`,   `${CASTLE_TILE_BASE}/floors/${id}.png`);
+      this.load.image(`feature_${id}`, `${CASTLE_TILE_BASE}/features/${id}.png`);
+    }
+    this.load.image("feature_cortana_column", `${CASTLE_TILE_BASE}/features/cortana_column.png`);
+    this.load.image("feature_cortana_dome",   `${CASTLE_TILE_BASE}/features/cortana_dome.png`);
+
+    // State icon emote glyphs (16×16). Phase 4B replaces the Phaser.Text
+    // Unicode placeholders with these pixel-art icons.
+    const icons = ["alert", "needs_input", "paused", "working", "speaking"];
+    for (const k of icons) {
+      this.load.image(`icon_${k}`, `/sprites/cerebro/icons/${k}.png`);
+    }
+
+    // Storage destination signage (placed in Phase 4C / harness wiring).
+    this.load.image("storage_vault",   "/sprites/cerebro/storage/vault.png");
+    this.load.image("storage_gallery", "/sprites/cerebro/storage/gallery.png");
+    this.load.image("storage_notion",  "/sprites/cerebro/storage/notion_portal.png");
   }
 
   create() {
@@ -553,6 +580,31 @@ class KeepScene extends Phaser.Scene {
       const t2 = this.spawnTorch(cx + Math.ceil(w * 3 / 4) - 1, yTop + 2, torchPhase * 2 + 3);
       this.chamberTorches.set(agentId, [t1, t2]);
 
+      // Phase 4B: per-chamber themed floor overlay. Replaces the generic
+      // stone slab in this chamber's column range. 32×32 tiles tile across
+      // the chamber width every 2 grid cols. Drawn at depth 0.5 so it
+      // overlays the base floor but sits below props.
+      const floorKey = `floor_${agentId}`;
+      if (this.textures.exists(floorKey)) {
+        for (let dc = 0; dc < w; dc += 2) {
+          if (cx + dc + 1 >= FLOOR_TILES_WIDE) break;
+          const img = this.add.image((cx + dc) * TS, yWallBase * TS, floorKey);
+          img.setOrigin(0, 0).setScale(SCALE).setDepth(0.5);
+        }
+      }
+
+      // Phase 4B: per-chamber back-wall feature. One signature backdrop
+      // centered on the chamber's back wall (forge furnace for Tony,
+      // alembic for Oak, etc.). Sits above the back wall at depth 1 so
+      // props at depth 4 still cover it appropriately.
+      const featureKey = `feature_${agentId}`;
+      if (this.textures.exists(featureKey)) {
+        const fcx = cx + Math.floor(w / 2) - 1;
+        const evenC = fcx - (fcx % 2);
+        this.add.image(evenC * TS, (yTop + 4) * TS, featureKey)
+          .setOrigin(0, 0).setScale(SCALE).setDepth(1);
+      }
+
       // Floor glow — hidden until agent is active
       const glowCx = (cx + w / 2) * TS;
       const glowCy = yFloorPx;
@@ -598,6 +650,21 @@ class KeepScene extends Phaser.Scene {
         this.orbRef = orb;
         this.tweens.add({ targets: orb, alpha: 0.55, duration: 1400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
         this.tweens.add({ targets: orb, y: orb.y - TS * 0.25, duration: 1900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+
+        // Cathedral-specific extras: tall arcane energy column behind dais,
+        // holo-dome ceiling tile up where the cathedral nave opens through.
+        const colCx = (cx + Math.floor(w / 2) - 1);
+        const colEven = colCx - (colCx % 2);
+        if (this.textures.exists("feature_cortana_column")) {
+          this.add.image(colEven * TS, (yTop + 6) * TS, "feature_cortana_column")
+            .setOrigin(0, 0).setScale(SCALE).setDepth(0.8);
+        }
+        if (this.textures.exists("feature_cortana_dome")) {
+          // Dome anchored just below the Upper-floor opening's bottom edge,
+          // so it reads as the cathedral's hanging chandelier-ceiling piece.
+          this.add.image(colEven * TS, (yTop - 2) * TS, "feature_cortana_dome")
+            .setOrigin(0, 0).setScale(SCALE).setDepth(0.8);
+        }
       }
 
       // PixelLab chamber props — 32×32, anchored to floor row, scaled 3×.
@@ -619,15 +686,11 @@ class KeepScene extends Phaser.Scene {
       this.agentBaseX.set(agentId, sxPx);
       this.agentBaseY.set(agentId, syPx);
 
-      // State-icon emote — Unicode glyph hovering above the sprite. Pixel-art
-      // icons replace these in Phase 5. Empty when state is idle/seated/
-      // receiving (no surfaced signal needed).
-      const emote = this.add.text(sxPx, syPx - sprite.displayHeight - 10, "", {
-        fontFamily: "monospace",
-        fontSize: "20px",
-        color: "#F4EFE3",
-        fontStyle: "bold",
-      }).setOrigin(0.5, 0.5).setDepth(8);
+      // State-icon emote — pixel-art icon hovering above the sprite. Texture
+      // swap on state change in setAgentStates(). Cortana is excluded; her
+      // dais halo + orb carry the signal.
+      const emote = this.add.image(sxPx, syPx - sprite.displayHeight - 14, "icon_alert")
+        .setOrigin(0.5, 0.5).setScale(SCALE * 0.9).setDepth(8).setVisible(false);
       this.agentEmotes.set(agentId, emote);
 
       cx += w;
@@ -803,14 +866,16 @@ class KeepScene extends Phaser.Scene {
         this.applyChamberLighting(agentId, "dormant");
       }
 
-      // State-icon emote — surface state visibly above the sprite. Empty
-      // glyph for states where no signal is needed (idle, council-seated,
-      // receiving-call). Cortana is excluded from emotes since her signaling
-      // happens via the dais halo + orb.
+      // State-icon emote — swap texture or hide. Cortana excluded; her dais
+      // halo + orb carry the signal.
       const emote = this.agentEmotes.get(agentId);
       if (emote && agentId !== "cortana") {
-        const glyph = STATE_GLYPH[state ?? "idle"] ?? "";
-        emote.setText(glyph);
+        const key = STATE_ICON_KEY[state ?? "idle"] ?? "";
+        if (key && this.textures.exists(key)) {
+          emote.setTexture(key).setVisible(true);
+        } else {
+          emote.setVisible(false);
+        }
       }
     }
 
