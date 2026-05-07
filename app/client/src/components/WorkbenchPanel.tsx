@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 
@@ -81,6 +82,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   const [artifactId, setArtifactId] = useState<number | "none">("none");
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
+  const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
   const data = plan.data;
   const projectOptions = useMemo(
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
@@ -98,6 +100,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
     if (temporaryMedia) URL.revokeObjectURL(temporaryMedia.url);
     setTemporaryMedia(null);
     setMediaFrameTimeSec("");
+    setAnnotationMarker(null);
   }
 
   function stageTemporaryMedia(file: File | null) {
@@ -127,6 +130,40 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
       mediaKind === "video" ? "Use the frame-time field to record the frame being reviewed." : "Image review records visible notes only.",
       "The media bytes are only previewed in this browser session. Saving evidence stores metadata and notes only.",
     ].join("\n"));
+  }
+
+  function markTemporaryMedia(event: React.PointerEvent<HTMLDivElement>) {
+    if (!temporaryMedia) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const xPct = clamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100);
+    const yPct = clamp(((event.clientY - rect.top) / rect.height) * 100, 0, 100);
+    const video = event.currentTarget.querySelector("video");
+    const frameTime = temporaryMedia.kind === "video" && video && Number.isFinite(video.currentTime)
+      ? video.currentTime
+      : null;
+    const framePart = frameTime == null ? "" : ` frameSec=${frameTime.toFixed(2)}`;
+    const nextCoordinates = [
+      `xPct=${xPct.toFixed(2)}`,
+      `yPct=${yPct.toFixed(2)}`,
+      `target=temporary-${temporaryMedia.kind}:${temporaryMedia.name}`,
+      framePart.trim(),
+    ].filter(Boolean).join(" ");
+    setAnnotationMarker({ xPct, yPct });
+    setCoordinates(nextCoordinates);
+    setKind("annotation");
+    setPermissionClass("annotation");
+    setRouteAgent("gojo");
+    if (frameTime != null) setMediaFrameTimeSec(frameTime.toFixed(2));
+    setAnnotationText((current) => current.trim() || `Review point at ${xPct.toFixed(2)}%, ${yPct.toFixed(2)}%.`);
+    setSummary((current) => {
+      if (current.trim()) return current;
+      return [
+        `Temporary ${temporaryMedia.kind} annotation for ${temporaryMedia.name}.`,
+        `Coordinates: ${nextCoordinates}.`,
+        "Media bytes remain browser-local. Saving records metadata and notes only.",
+      ].join("\n");
+    });
   }
 
   function submitEvidence() {
@@ -174,6 +211,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
           setSourceId("none");
           setCommandObservationId("none");
           setArtifactId("none");
+          setAnnotationMarker(null);
           clearTemporaryMedia();
         },
       },
@@ -471,7 +509,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               </div>
               <div
                 className="mt-3 rounded p-3"
-                aria-label="Temporary image intake"
+                aria-label="Temporary media intake"
                 onDragOver={(event) => {
                   event.preventDefault();
                 }}
@@ -484,7 +522,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                      Temporary Image
+                      Temporary Media
                     </h4>
                     <p className="text-xs mt-1 leading-relaxed" style={{ color: C.textMuted }}>
                       Browser-memory preview. No upload. No vault save. No vision model.
@@ -509,7 +547,25 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 </div>
                 {temporaryMedia ? (
                   <div className="mt-3 grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
-                    <div className="overflow-hidden rounded" style={{ border: `1px solid ${C.borderSoft}`, background: C.background }}>
+                    <div
+                      className="relative overflow-hidden rounded"
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Mark annotation coordinates on temporary media"
+                      onPointerDown={markTemporaryMedia}
+                      onKeyDown={(event) => {
+                        if (event.key !== "Enter" && event.key !== " ") return;
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        const fakeEvent = {
+                          ...event,
+                          clientX: rect.left + rect.width / 2,
+                          clientY: rect.top + rect.height / 2,
+                          currentTarget: event.currentTarget,
+                        } as unknown as React.PointerEvent<HTMLDivElement>;
+                        markTemporaryMedia(fakeEvent);
+                      }}
+                      style={{ border: `1px solid ${C.borderSoft}`, background: C.background, cursor: "crosshair" }}
+                    >
                       {temporaryMedia.kind === "image" ? (
                         <img
                           src={temporaryMedia.url}
@@ -528,6 +584,19 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                               ...current,
                               durationSec: Number.isFinite(duration) ? duration : null,
                             } : current);
+                          }}
+                        />
+                      )}
+                      {annotationMarker && (
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute h-4 w-4 rounded-full"
+                          style={{
+                            left: `${annotationMarker.xPct}%`,
+                            top: `${annotationMarker.yPct}%`,
+                            transform: "translate(-50%, -50%)",
+                            border: `2px solid ${C.warning}`,
+                            boxShadow: `0 0 0 2px ${C.background}, 0 0 12px ${C.warning}`,
                           }}
                         />
                       )}
@@ -555,7 +624,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                         />
                       )}
                       <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
-                        Saving the evidence row records title, notes, frame timing, and target metadata. It does not save the media bytes.
+                        Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
                       </div>
                       <button
                         type="button"
@@ -1310,6 +1379,10 @@ function EvidenceDetailPanel({
 function formatTimestamp(value: number) {
   if (!Number.isFinite(value)) return "unknown time";
   return new Date(value * 1000).toLocaleString();
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function formatBytes(value: number) {

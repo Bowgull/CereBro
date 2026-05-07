@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-07 07:18 EDT
+Last updated: 2026-05-07 07:24 EDT
 
 ## Current North Star
 
@@ -108,8 +108,66 @@ Begin Session 4 after user clarification:
   shows candidate metadata, and keeps gates visible. It does not open linked
   targets, fetch sources, execute commands, capture media, save files, or write
   externally.
+- 2026-05-07 07:24 EDT slice: Workbench temporary media previews now support
+  metadata-only annotation coordinate capture. Clicking a temporary image or
+  video preview records normalized `xPct`/`yPct` coordinates, target metadata,
+  and current video frame time when available, switches the draft into
+  annotation mode, and displays a local marker. This does not capture
+  screenshots, save media bytes, inspect linked files, call a vision model, or
+  write externally.
 
 ## Latest Closeout
+
+### 2026-05-07 07:24 EDT - Workbench Annotation Coordinates
+
+Files changed:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+
+What changed:
+
+- Added click-to-mark annotation coordinates on temporary image/video previews.
+- Coordinates are stored as normalized percentages plus temporary media target
+  metadata.
+- Video annotations also record the current preview frame time when available.
+- Annotation clicks switch the local evidence draft to `annotation`, route it
+  to Gojo, and keep the visible marker in the preview.
+- Renamed the temporary intake label from image-only to media.
+
+Checks run:
+
+- `pnpm test -- server/cerebro-foundations.test.ts` from `app/` passed. Vitest
+  also ran the colocated server suites selected by the project config:
+  4 files, 36 tests.
+- `pnpm check` from `app/` passed.
+
+Gates preserved:
+
+- No Notion or Slack writes.
+- No browser/search/fetch.
+- No external model/tool calls.
+- No media capture and no durable media save.
+- No desktop overlay process.
+- No external repo edits.
+- No moving/deleting/archiving files.
+- No secrets, installs, payments, deployment, account setup, destructive git,
+  or GitHub push.
+
+Known risks:
+
+- Coordinates are relative to the rendered preview box. Object-fit letterboxing
+  means a later polish slice should translate from preview-box coordinates to
+  intrinsic media coordinates.
+- Keyboard marking currently records the preview center. Fine-grained keyboard
+  adjustment can wait.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md` and
+`CEREBRO_SESSION_HANDOFF.md` first. Pick the next safe Workbench slice:
+annotation coordinate polish for intrinsic media bounds, or server-side
+pagination for the local evidence picker. Preserve all gates. Run checks,
+update handoff plus Obsidian snapshot/index, and commit locally.
 
 ### 2026-05-07 07:18 EDT - Workbench Evidence Picker
 
