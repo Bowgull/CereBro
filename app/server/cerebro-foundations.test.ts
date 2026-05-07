@@ -113,6 +113,10 @@ describe("CereBro proposal-only shell plans", () => {
       targetUri: "temporary-image:settings-screen.png",
       ownerAgent: "gojo",
       routeAgent: "oak",
+      mediaName: "settings-screen.png",
+      mediaMimeType: "image/png",
+      mediaByteSize: 24000,
+      mediaTemporary: true,
       permissionClass: "media_review",
     });
     expect(imageEvidence.ok).toBe(true);
@@ -120,6 +124,10 @@ describe("CereBro proposal-only shell plans", () => {
     expect(imageEvidence.capturesMedia).toBe(false);
     expect(imageEvidence.evidence.kind).toBe("image_review");
     expect(imageEvidence.evidence.permissionClass).toBe("media_review");
+    expect(imageEvidence.evidence.mediaName).toBe("settings-screen.png");
+    expect(imageEvidence.evidence.mediaMimeType).toBe("image/png");
+    expect(imageEvidence.evidence.mediaByteSize).toBe(24000);
+    expect(imageEvidence.evidence.mediaTemporary).toBe(true);
     expect(imageEvidence.evidence.permissionPreflightId).toBeGreaterThan(0);
 
     const records = await caller.workbench.evidence({

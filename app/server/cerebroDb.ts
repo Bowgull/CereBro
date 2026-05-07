@@ -283,6 +283,10 @@ async function ensureSchema(client: Client): Promise<void> {
          viewport TEXT,
          coordinates TEXT,
          annotation_text TEXT,
+         media_name TEXT,
+         media_mime_type TEXT,
+         media_byte_size INTEGER,
+         media_temporary_flag INTEGER NOT NULL DEFAULT 0,
          validation_status TEXT NOT NULL DEFAULT 'unvalidated',
          permission_class TEXT NOT NULL DEFAULT 'manual_note',
          permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL,
@@ -575,8 +579,17 @@ async function ensureHedwigProposalMetadataColumns(client: Client): Promise<void
 async function ensureWorkbenchEvidenceColumns(client: Client): Promise<void> {
   const table = await client.execute(`PRAGMA table_info(workbench_evidence_records)`);
   const existing = new Set(table.rows.map((row) => String(row.name)));
-  if (!existing.has("permission_preflight_id")) {
-    await client.execute(`ALTER TABLE workbench_evidence_records ADD COLUMN permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL`);
+  const additions: Array<{ name: string; sql: string }> = [
+    { name: "media_name", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_name TEXT` },
+    { name: "media_mime_type", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_mime_type TEXT` },
+    { name: "media_byte_size", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_byte_size INTEGER` },
+    { name: "media_temporary_flag", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_temporary_flag INTEGER NOT NULL DEFAULT 0` },
+    { name: "permission_preflight_id", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL` },
+  ];
+  for (const column of additions) {
+    if (!existing.has(column.name)) {
+      await client.execute(column.sql);
+    }
   }
 }
 

@@ -1323,6 +1323,43 @@ Do not record serial numbers or hardware UUIDs in repo docs.
   gateway install, provider SDK/API key/account setup, model download,
   external repo edit, push, pull, cleanup, UI command execution, file
   move/delete, or destructive action was performed.
+- Continued in the same Workbench image lane with structured temporary media
+  metadata:
+  - `workbench_evidence_records` now has idempotent local DB columns for
+    `media_name`, `media_mime_type`, `media_byte_size`, and
+    `media_temporary_flag`.
+  - `workbench.createEvidence`, `workbench.evidence`,
+    `workbench.evidenceGroups`, and `workbench.evidenceDetail` now carry these
+    media metadata fields.
+  - Workbench evidence search now also matches media name and MIME type.
+  - Temporary image intake now sends structured metadata when creating an
+    `image_review` evidence row.
+  - The recent evidence list marks rows with media metadata and temporary-media
+    status.
+  - The evidence detail inspector now shows media name, media type, media size,
+    and whether the record represents temporary browser preview only.
+  - Foundation tests now cover persisted temporary image metadata on
+    `image_review` evidence rows.
+- This is local metadata only. It does not save image bytes, write to the
+  vault, upload externally, call a vision model, run OCR, browse/search/fetch,
+  capture screenshots, open a media tool, or approve any future durable-save
+  action.
+- Verification after structured temporary media metadata:
+  `pnpm check` passed, `pnpm exec vitest run
+  server/cerebro-foundations.test.ts` passed 18 tests, and `pnpm build` passed.
+  Vite still warns about unset analytics env placeholders and large JS chunks;
+  those warnings predate this slice.
+- Files changed in this slice:
+  - `app/server/cerebroDb.ts`
+  - `app/server/routers/workbench.ts`
+  - `app/client/src/components/WorkbenchPanel.tsx`
+  - `app/server/cerebro-foundations.test.ts`
+  - `CEREBRO_SESSION_HANDOFF.md`
+- No Notion, Slack, browser/search, source fetch, durable media save, media
+  capture, desktop overlay process, external model/tool call, vision/OCR call,
+  gateway install, provider SDK/API key/account setup, model download,
+  external repo edit, push, pull, cleanup, UI command execution, file
+  move/delete, or destructive action was performed.
 
 ### Model Router Snapshot
 

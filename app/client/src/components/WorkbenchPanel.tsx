@@ -129,6 +129,10 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
         viewport: viewport.trim() || null,
         coordinates: coordinates.trim() || null,
         annotationText: annotationText.trim() || null,
+        mediaName: temporaryImage?.name ?? null,
+        mediaMimeType: temporaryImage?.type ?? null,
+        mediaByteSize: temporaryImage?.size ?? null,
+        mediaTemporary: Boolean(temporaryImage),
         permissionClass,
         sensitive,
       },
@@ -146,6 +150,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
           setSourceId("none");
           setCommandObservationId("none");
           setArtifactId("none");
+          clearTemporaryImage();
         },
       },
     );
@@ -711,6 +716,8 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                         <Chip label={item.validationStatus.replace(/_/g, " ")} tone={C.warning} />
                         {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                         {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
+                        {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
+                        {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
                         {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                       </div>
                       <div className="mt-2 text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</div>
@@ -795,6 +802,10 @@ function EvidenceDetailPanel({
           permissionClass: string;
           validationStatus: string;
           sensitive: boolean;
+          mediaName: string | null;
+          mediaMimeType: string | null;
+          mediaByteSize: number | null;
+          mediaTemporary: boolean;
         };
         permissionPreflight: {
           id: number;
@@ -867,6 +878,10 @@ function EvidenceDetailPanel({
         <Meta label="Viewport" value={item.viewport ?? "none"} />
         <Meta label="Coordinates" value={item.coordinates ?? "none"} />
         <Meta label="Annotation" value={item.annotationText ?? "none"} />
+        <Meta label="Media Name" value={item.mediaName ?? "none"} />
+        <Meta label="Media Type" value={item.mediaMimeType ?? "none"} />
+        <Meta label="Media Size" value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
+        <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
       </div>
       <div className="mt-3 rounded p-3" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>

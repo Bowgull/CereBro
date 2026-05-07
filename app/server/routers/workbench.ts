@@ -39,6 +39,10 @@ function rowToEvidence(row: Record<string, unknown>) {
     viewport: row.viewport == null ? null : String(row.viewport),
     coordinates: row.coordinates == null ? null : String(row.coordinates),
     annotationText: row.annotation_text == null ? null : String(row.annotation_text),
+    mediaName: row.media_name == null ? null : String(row.media_name),
+    mediaMimeType: row.media_mime_type == null ? null : String(row.media_mime_type),
+    mediaByteSize: row.media_byte_size == null ? null : Number(row.media_byte_size),
+    mediaTemporary: Boolean(row.media_temporary_flag),
     validationStatus: String(row.validation_status),
     permissionClass: String(row.permission_class),
     permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
@@ -124,6 +128,8 @@ function evidenceWhere(input?: {
         wer.title LIKE ?
         OR wer.summary LIKE ?
         OR COALESCE(wer.target_uri, '') LIKE ?
+        OR COALESCE(wer.media_name, '') LIKE ?
+        OR COALESCE(wer.media_mime_type, '') LIKE ?
         OR COALESCE(wer.validation_status, '') LIKE ?
         OR COALESCE(p.name, '') LIKE ?
         OR COALESCE(t.title, '') LIKE ?
@@ -136,7 +142,7 @@ function evidenceWhere(input?: {
       )
     `);
     const like = `%${query}%`;
-    args.push(like, like, like, like, like, like, like, like, like, like, like, like);
+    args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like);
   }
   return { where, args };
 }
@@ -717,6 +723,10 @@ export const workbenchRouter = router({
         viewport: z.string().max(200).nullable().optional(),
         coordinates: z.string().max(500).nullable().optional(),
         annotationText: z.string().max(1200).nullable().optional(),
+        mediaName: z.string().max(255).nullable().optional(),
+        mediaMimeType: z.string().max(120).nullable().optional(),
+        mediaByteSize: z.number().int().min(0).nullable().optional(),
+        mediaTemporary: z.boolean().default(false),
         permissionClass: z.enum(permissionClasses).default("manual_note"),
         sensitive: z.boolean().default(false),
       }),
@@ -735,10 +745,11 @@ export const workbenchRouter = router({
             kind, title, summary, target_uri, project_id, task_id, session_id,
             source_id, command_observation_id, artifact_id, owner_agent,
             route_agent, viewport, coordinates, annotation_text,
+            media_name, media_mime_type, media_byte_size, media_temporary_flag,
             validation_status, permission_class, permission_preflight_id,
             sensitive_data_flag
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
           RETURNING *
         `,
         args: [
@@ -757,6 +768,10 @@ export const workbenchRouter = router({
           input.viewport ?? null,
           input.coordinates ?? null,
           input.annotationText ?? null,
+          input.mediaName ?? null,
+          input.mediaMimeType ?? null,
+          input.mediaByteSize ?? null,
+          input.mediaTemporary ? 1 : 0,
           input.permissionClass,
           permissionPreflightId,
           input.sensitive ? 1 : 0,
