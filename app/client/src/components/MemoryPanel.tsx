@@ -32,8 +32,9 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
     kind: filter === "all" ? undefined : filter,
     search: search.trim() || undefined,
   });
-  const create = trpc.memory.create.useMutation({
-    onSuccess: () => utils.memory.list.invalidate(),
+  const proposalsQuery = trpc.memory.proposals.useQuery({ limit: 100 });
+  const propose = trpc.memory.propose.useMutation({
+    onSuccess: () => utils.memory.proposals.invalidate(),
   });
   const del = trpc.memory.delete.useMutation({
     onSuccess: () => utils.memory.list.invalidate(),
@@ -43,16 +44,18 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     const trimmed = body.trim();
     if (!trimmed) return;
-    create.mutate({
+    propose.mutate({
       body: trimmed,
       kind,
       tags: tags.trim() || undefined,
+      proposedByAgent: "aang",
     });
     setBody("");
     setTags("");
   }
 
   const entries = list.data ?? [];
+  const proposals = proposalsQuery.data ?? [];
 
   return (
     <div
@@ -66,6 +69,9 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
           Memory
           <span className="ml-2" style={{ color: C.textSecondary }}>{entries.length}</span>
+          {proposals.length > 0 && (
+            <span className="ml-2" style={{ color: C.warning }}>{proposals.length} proposed</span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           {(["all", ...KINDS] as const).map((k) => {
@@ -121,7 +127,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         <input
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="New entry. Enter to save."
+          placeholder="New memory proposal. Enter to stage."
           className="flex-1 px-2 py-1.5 text-xs rounded outline-none"
           style={{
             background: C.surfaceMuted,
@@ -143,7 +149,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         />
         <button
           type="submit"
-          disabled={!body.trim() || create.isPending}
+          disabled={!body.trim() || propose.isPending}
           className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
           style={{
             background: body.trim() ? C.accentSoft : C.surfaceMuted,
@@ -151,11 +157,33 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
             border: `1px solid ${C.borderSoft}`,
           }}
         >
-          Save
+          Propose
         </button>
       </form>
 
       <div className="flex-1 overflow-y-auto">
+        {proposals.length > 0 && (
+          <div style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+            <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-widest" style={{ color: C.warning, background: C.surface }}>
+              Proposed
+            </div>
+            {proposals.map((p) => (
+              <div key={p.id} className="px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs px-1.5 py-0.5 rounded uppercase tracking-wider" style={{ color: C.warning, background: `${C.warning}22`, border: `1px solid ${C.warning}55` }}>
+                    {p.status}
+                  </span>
+                  <span className="text-xs" style={{ color: C.textMuted }}>
+                    Oak: {p.oakStatus}
+                  </span>
+                </div>
+                <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                  {p.body}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {list.isLoading ? (
           <div className="px-3 py-3 text-xs" style={{ color: C.textMuted }}>Loading.</div>
         ) : entries.length === 0 ? (
@@ -187,7 +215,11 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   <span className="text-xs" style={{ color: C.textMuted }}>· {m.tags}</span>
                 )}
                 <button
-                  onClick={() => del.mutate({ id: m.id })}
+                  onClick={() => {
+                    if (confirm("Delete this saved memory entry?")) {
+                      del.mutate({ id: m.id, approved: true });
+                    }
+                  }}
                   className="ml-auto text-xs uppercase tracking-wider"
                   style={{ color: C.textMuted }}
                   title="Delete"

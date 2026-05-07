@@ -25,15 +25,26 @@ const NEXT_STATUS: Record<string, "open" | "in_progress" | "done" | "cancelled">
 
 export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
-  const list = trpc.tasks.list.useQuery();
+  const [projectFilter, setProjectFilter] = useState<number | "all">("all");
+  const list = trpc.tasks.list.useQuery(projectFilter === "all" ? undefined : { projectId: projectFilter });
+  const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
   const create = trpc.tasks.create.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    onSuccess: () => {
+      utils.tasks.list.invalidate();
+      utils.tasks.projects.invalidate();
+    },
   });
   const setStatus = trpc.tasks.setStatus.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    onSuccess: () => {
+      utils.tasks.list.invalidate();
+      utils.tasks.projects.invalidate();
+    },
   });
   const del = trpc.tasks.delete.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    onSuccess: () => {
+      utils.tasks.list.invalidate();
+      utils.tasks.projects.invalidate();
+    },
   });
   const [title, setTitle] = useState("");
 
@@ -46,6 +57,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   }
 
   const tasks = list.data ?? [];
+  const projectOptions = projects.data ?? [];
 
   return (
     <div
@@ -93,6 +105,25 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         </button>
       </form>
 
+      <div className="flex items-center gap-1 px-3 py-2 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <FilterButton
+          label="All"
+          active={projectFilter === "all"}
+          count={projectOptions.reduce((sum, project) => sum + project.taskCount, 0)}
+          onClick={() => setProjectFilter("all")}
+        />
+        {projectOptions.map((project) => (
+          <FilterButton
+            key={project.id}
+            label={project.name}
+            active={projectFilter === project.id}
+            count={project.openCount + project.inProgressCount}
+            title={project.path ?? undefined}
+            onClick={() => setProjectFilter(project.id)}
+          />
+        ))}
+      </div>
+
       <div className="flex-1 overflow-y-auto">
         {list.isLoading ? (
           <div className="px-3 py-3 text-xs" style={{ color: C.textMuted }}>Loading.</div>
@@ -127,7 +158,16 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                   textDecoration: t.status === "done" ? "line-through" : "none",
                 }}
               >
-                {t.title}
+                <div>{t.title}</div>
+                {t.projectId != null && (
+                  <div
+                    className="text-[10px] uppercase tracking-wider mt-0.5 truncate"
+                    style={{ color: C.textMuted }}
+                    title={t.projectPath ?? undefined}
+                  >
+                    {t.projectName ?? `Project #${t.projectId}`}
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => del.mutate({ id: t.id })}
@@ -142,5 +182,37 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         )}
       </div>
     </div>
+  );
+}
+
+function FilterButton({
+  label,
+  active,
+  count,
+  title,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  count: number;
+  title?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-2 py-1 text-[10px] uppercase tracking-wider rounded shrink-0"
+      style={{
+        color: active ? C.textPrimary : C.textMuted,
+        background: active ? C.surfaceRaised : "transparent",
+        border: `1px solid ${active ? C.accentSoft : C.borderSoft}`,
+      }}
+      title={title}
+    >
+      {label}
+      <span className="ml-1" style={{ color: active ? C.accent : C.textMuted }}>
+        {count}
+      </span>
+    </button>
   );
 }

@@ -1,6 +1,6 @@
 // CereBro Keep — castle layout, chambers, agent identity.
 //
-// All 10 agents on 3 floors. The Hub (Cortana) is the centerpiece on the
+// All 11 agents on 3 floors. The Hub (Cortana) is the centerpiece on the
 // Ground Hall — large, central, Power-Rangers-command-center vibe with the
 // user-orb on the dais. Every other chamber is character-coded with its own
 // vibe, accent color, and themed objects.
@@ -53,7 +53,7 @@ export const FLOORS: Record<FloorId, FloorMeta> = {
 export type AgentId =
   | "cortana" | "tony" | "gojo" | "surfer" | "c3po"
   | "batman" | "aang" | "oak" | "spock"
-  | "piccolo";
+  | "piccolo" | "hedwig";
 
 // Chamber definition — visual identity per agent
 export interface Chamber {
@@ -100,10 +100,10 @@ export const CHAMBERS: Chamber[] = [
   },
   {
     agentId: "surfer", agentName: "Silver Surfer", chamberName: "Cartography Hall", floor: "ground",
-    spritePath: "/sprites/keep/surfer-mounted/rotations/south.png",
+    spritePath: "/sprites/keep/surfer/rotations/south.png",
     hue: cerebroColors.accent, hueGlow: "rgba(107,166,255,0.18)",
-    props: ["🌌", "✦", "✺"],
-    blurb: "Source. Scrape. Surface. Locked until enabled.",
+    props: ["◯", "✦", "▧"],
+    blurb: "Source. Scrape. Portal. Locked until enabled.",
     span: 1,
   },
   {
@@ -156,6 +156,14 @@ export const CHAMBERS: Chamber[] = [
     hue: "#4ADE80", hueGlow: "rgba(74,222,128,0.16)",
     props: ["☾", "✦", "☾"],
     blurb: "Watch. Wait. Long-running jobs.",
+    span: 1,
+  },
+  {
+    agentId: "hedwig", agentName: "Hedwig", chamberName: "Messenger Roost", floor: "crypts",
+    spritePath: "/sprites/keep/hedwig/rotations/south.png",
+    hue: "#E9D5FF", hueGlow: "rgba(233,213,255,0.16)",
+    props: ["✉", "◌", "☾"],
+    blurb: "Capture. Remind. Message. Route to Notion.",
     span: 1,
   },
 ];
@@ -244,6 +252,6 @@ export const GROUND_CHAMBERS: ChamberLabel[] = [
   { room: "boss",    chamber: "The Hub",          agent: "Cortana",       hue: cerebroColors.glowViolet,   spriteKey: "agent_cortana", spritePath: "/sprites/keep/cortana/rotations/south.png", spriteScale: 2.5 },
   { room: "spawn",   chamber: "The Forge",        agent: "Tony Stark",    hue: cerebroColors.danger,       spriteKey: "agent_tony",    spritePath: "/sprites/keep/tony/rotations/south.png",    spriteScale: 2.5 },
   { room: "dungeon", chamber: "Atelier",          agent: "Gojo",          hue: cerebroColors.accentViolet, spriteKey: "agent_gojo",    spritePath: "/sprites/keep/gojo/rotations/south.png",    spriteScale: 2.5 },
-  { room: "shop",    chamber: "Cartography Hall", agent: "Silver Surfer", hue: cerebroColors.accent,       spriteKey: "agent_surfer",  spritePath: "/sprites/keep/surfer-mounted/rotations/south.png", spriteScale: 2.0 },
+  { room: "shop",    chamber: "Cartography Hall", agent: "Silver Surfer", hue: cerebroColors.accent,       spriteKey: "agent_surfer",  spritePath: "/sprites/keep/surfer/rotations/south.png", spriteScale: 2.5 },
   { room: "rest",    chamber: "Scriptorium",      agent: "C-3PO",         hue: cerebroColors.gold,         spriteKey: "agent_c3po",    spritePath: "/sprites/keep/c3po/rotations/south.png",    spriteScale: 2.5 },
 ];

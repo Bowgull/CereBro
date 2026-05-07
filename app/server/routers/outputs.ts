@@ -1,10 +1,23 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
-import { getCerebroDb, type OutputKind, type OutputRow } from "../cerebroDb";
+import {
+  getCerebroDb,
+  recordArtifact,
+  type OutputKind,
+  type OutputRow,
+} from "../cerebroDb";
 import { writeOutput as vaultWriteOutput } from "../integrations/vault";
 
 const KINDS = ["text", "code", "file", "diff", "tool_result"] as const;
+
+function artifactKindForOutput(kind: string, ext: string): string {
+  if (kind === "code") return "output_code";
+  if (kind === "diff") return "output_diff";
+  if (kind === "file") return "output_file";
+  if (ext === "md") return "output_markdown";
+  return "output_text";
+}
 
 function rowToOutput(r: Record<string, unknown>): OutputRow {
   return {
@@ -62,13 +75,21 @@ export const outputsRouter = router({
       z.object({
         id: z.number().int(),
         ext: z.string().max(8).optional(),
+        approved: z.literal(true),
       }),
     )
     .mutation(async ({ input }) => {
       const db = await getCerebroDb();
       const result = await db.execute({
         sql: `
-          SELECT o.id, o.title, o.body, o.kind, s.claude_session_id
+          SELECT
+            o.id,
+            o.session_id,
+            o.project_id,
+            o.title,
+            o.body,
+            o.kind,
+            s.claude_session_id
           FROM outputs o
           LEFT JOIN sessions s ON s.id = o.session_id
           WHERE o.id = ?
@@ -84,12 +105,29 @@ export const outputsRouter = router({
       const ext =
         input.ext ??
         (kind === "code" ? "txt" : kind === "diff" ? "diff" : kind === "file" ? "txt" : "md");
-      return vaultWriteOutput({
+      const written = await vaultWriteOutput({
         outputId: Number(row.id),
         sessionClaudeId: row.claude_session_id == null ? null : String(row.claude_session_id),
         title: row.title == null ? null : String(row.title),
         body: String(row.body),
         ext,
       });
+      if (!written.ok || !written.relativePath) return written;
+
+      const artifactId = await recordArtifact({
+        kind: artifactKindForOutput(kind, ext),
+        lifecycleState: "active",
+        title: row.title == null ? null : String(row.title),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        sessionId: row.session_id == null ? null : Number(row.session_id),
+        ownerAgent: "c3po",
+        storageProvider: "vault",
+        storagePath: written.relativePath,
+        byteSize: Buffer.byteLength(String(row.body), "utf8"),
+        mimeType: ext === "md" ? "text/markdown" : "text/plain",
+        retentionRule: "keep_until_project_archive",
+      });
+
+      return { ...written, artifactId };
     }),
 });

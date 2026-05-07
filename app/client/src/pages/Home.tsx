@@ -10,6 +10,17 @@ import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
 import SessionsPanel from "@/components/SessionsPanel";
 import MemoryPanel from "@/components/MemoryPanel";
+import ArtifactsPanel from "@/components/ArtifactsPanel";
+import PiccoloPanel from "@/components/PiccoloPanel";
+import ProjectLabPanel from "@/components/ProjectLabPanel";
+import SurferSourcesPanel from "@/components/SurferSourcesPanel";
+import HedwigInboxPanel from "@/components/HedwigInboxPanel";
+import TerminalLabPanel from "@/components/TerminalLabPanel";
+import ApprovalDashboardPanel from "@/components/ApprovalDashboardPanel";
+import WorkbenchPanel from "@/components/WorkbenchPanel";
+import AangCompanionPanel from "@/components/AangCompanionPanel";
+import ModelToolsPanel from "@/components/ModelToolsPanel";
+import PermissionModeControl from "@/components/PermissionModeControl";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
@@ -27,6 +38,11 @@ type NavId =
   | "inbox"
   | "tasks"
   | "sources"
+  | "terminal"
+  | "approvals"
+  | "workbench"
+  | "companion"
+  | "model_tools"
   | "outputs"
   | "memory"
   | "automation"
@@ -41,13 +57,18 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home",       label: "Home",           glyph: "◆", ready: true },
-  { id: "projects",   label: "Project Spaces", glyph: "▣", ready: false },
-  { id: "inbox",      label: "Inbox",          glyph: "✉", ready: false },
+  { id: "projects",   label: "Project Lab",    glyph: "▣", ready: true },
+  { id: "inbox",      label: "Inbox",          glyph: "✉", ready: true },
   { id: "tasks",      label: "Tasks",          glyph: "✓", ready: true },
-  { id: "sources",    label: "Sources",        glyph: "⌘", ready: false },
-  { id: "outputs",    label: "Outputs",        glyph: "✦", ready: false },
+  { id: "sources",    label: "Sources",        glyph: "⌘", ready: true },
+  { id: "terminal",   label: "Terminal Lab",   glyph: ">_", ready: true },
+  { id: "approvals",  label: "Approvals",      glyph: "◇", ready: true },
+  { id: "workbench",  label: "Workbench",      glyph: "▤", ready: true },
+  { id: "companion",  label: "Aang",           glyph: "○", ready: true },
+  { id: "model_tools", label: "Model Tools",   glyph: "△", ready: true },
+  { id: "outputs",    label: "Outputs",        glyph: "✦", ready: true },
   { id: "memory",     label: "Memory",         glyph: "◈", ready: true },
-  { id: "automation", label: "Automation",     glyph: "⟳", ready: false },
+  { id: "automation", label: "Automation",     glyph: "⟳", ready: true },
   { id: "settings",   label: "Settings",       glyph: "⚙", ready: true },
 ];
 
@@ -63,6 +84,7 @@ export default function Home() {
   const [askInput, setAskInput] = useState("");
   const [showSkillsManager, setShowSkillsManager] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
 
   const selectedHero = useMemo(
@@ -72,6 +94,11 @@ export default function Home() {
 
   const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, { refetchInterval: 5000 });
   const { data: agentRoster } = trpc.keep.agents.useQuery();
+  const commandIntake = trpc.commandIntake.preview.useMutation();
+  const utils = trpc.useUtils();
+  const createTask = trpc.tasks.create.useMutation({
+    onSuccess: () => utils.tasks.list.invalidate(),
+  });
 
   // Active agent for the right rail. Default Cortana (orchestrator).
   // Phase 6 wires this to the harness-resolved owner agent for the active
@@ -93,7 +120,11 @@ export default function Home() {
   // AgentState (truth doc §8). Real harness wiring lands in Phase 6; this
   // stub keeps the castle reactive to live Claude Code sessions.
   const agentStates = useMemo<Record<string, AgentState>>(() => {
-    const states: Record<string, AgentState> = {};
+    const states: Record<string, AgentState> = {
+      // Browser/source work is disabled by default per the V1 plan. Until the
+      // browser policy is wired in Settings, Surfer should read as locked.
+      surfer: "dormant",
+    };
     if (heroes.length === 0) return states;
     states.cortana = "working-local";
     const classToAgent: Record<string, string> = { warrior: "tony", mage: "gojo", cleric: "aang" };
@@ -123,6 +154,7 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
         className="flex items-center justify-between gap-3 px-4 py-2 shrink-0"
+        aria-label="Keep header"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
         <div className="flex items-center gap-3 shrink-0">
@@ -142,28 +174,38 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto min-w-0">
+          <PermissionModeControl />
+
           <div
-            className="flex items-center gap-1.5 text-xs px-2 py-1 rounded"
+            className="flex items-center gap-1.5 text-xs px-2 py-1 rounded shrink-0"
+            role="status"
+            aria-label={`Connection status: ${connected ? "Online" : "Offline"}`}
             style={{ border: `1px solid ${C.borderSoft}`, background: C.surface }}
           >
             <span className="w-2 h-2 rounded-full" style={{ background: connected ? C.success : C.danger }} />
-            <span className="text-xs font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
+            <span className="hidden sm:inline text-xs font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
               {connected ? "Online" : "Offline"}
             </span>
           </div>
 
           <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${C.borderSoft}` }}>
             <button
+              type="button"
               onClick={startDemo}
-              className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
+              aria-pressed={connMode === "demo"}
+              aria-label="Start demo sessions"
+              className="px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors shrink-0"
               style={{ background: connMode === "demo" ? C.accentSoft : "transparent", color: connMode === "demo" ? C.textPrimary : C.textMuted }}
             >
               Demo
             </button>
             <button
+              type="button"
               onClick={startLive}
-              className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
+              aria-pressed={connMode === "live"}
+              aria-label="Start live session watch"
+              className="px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors shrink-0"
               style={{ background: connMode === "live" ? C.danger : "transparent", color: connMode === "live" ? C.background : C.textMuted }}
             >
               Live
@@ -171,22 +213,30 @@ export default function Home() {
           </div>
 
           <button
+            type="button"
             onClick={() => setShowSkillsManager(true)}
-            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            aria-label="Open skills manager"
+            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
             style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
           >
             Skills
           </button>
           <button
+            type="button"
             onClick={clearHeroes}
-            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            aria-label="Clear visible sessions"
+            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
             style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
           >
             Clear
           </button>
           <button
+            type="button"
             onClick={() => setShowLog((v) => !v)}
-            className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded"
+            aria-pressed={showLog}
+            aria-expanded={showLog}
+            aria-label={showLog ? "Hide activity log" : "Show activity log"}
+            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
             style={{
               border: `1px solid ${showLog ? C.accent : C.borderSoft}`,
               color: showLog ? C.accent : C.textSecondary,
@@ -195,6 +245,22 @@ export default function Home() {
           >
             Log
           </button>
+          <button
+            type="button"
+            onClick={() => setIsContextPanelOpen((v) => !v)}
+            aria-pressed={isContextPanelOpen}
+            aria-expanded={isContextPanelOpen}
+            aria-label={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
+            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+            style={{
+              border: `1px solid ${isContextPanelOpen ? C.accent : C.borderSoft}`,
+              color: isContextPanelOpen ? C.accent : C.textSecondary,
+              background: isContextPanelOpen ? `${C.accent}11` : "transparent",
+            }}
+            title={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
+          >
+            Context
+          </button>
         </div>
       </header>
 
@@ -202,7 +268,8 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
         {/* Left rail — canonical 9 sections */}
         <nav
-          className="w-48 flex flex-col shrink-0 overflow-hidden"
+          className="w-14 lg:w-48 flex flex-col shrink-0 overflow-hidden"
+          aria-label="Keep sections"
           style={{ background: C.backgroundSoft, borderRight: `1px solid ${C.borderSoft}` }}
         >
           <div className="flex-1 overflow-y-auto py-2">
@@ -211,7 +278,10 @@ export default function Home() {
               return (
                 <button
                   key={item.id}
+                  type="button"
                   onClick={() => setNav(item.id)}
+                  aria-label={`Open ${item.label}`}
+                  aria-current={isActive ? "page" : undefined}
                   className="w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors"
                   style={{
                     background: isActive ? C.surfaceRaised : "transparent",
@@ -219,11 +289,11 @@ export default function Home() {
                     color: isActive ? C.textPrimary : C.textSecondary,
                   }}
                 >
-                  <span className="text-sm" style={{ color: isActive ? C.accent : C.textMuted }}>{item.glyph}</span>
-                  <span className="text-xs uppercase tracking-widest font-semibold flex-1">{item.label}</span>
+                  <span className="text-sm shrink-0" style={{ color: isActive ? C.accent : C.textMuted }}>{item.glyph}</span>
+                  <span className="hidden lg:block text-xs uppercase tracking-widest font-semibold flex-1">{item.label}</span>
                   {!item.ready && (
                     <span
-                      className="text-[9px] px-1 rounded"
+                      className="hidden lg:inline text-[9px] px-1 rounded"
                       style={{ background: `${C.warning}22`, color: C.warning }}
                     >
                       stub
@@ -234,7 +304,7 @@ export default function Home() {
             })}
           </div>
           <div
-            className="px-3 py-2 text-xs"
+            className="px-3 py-2 text-xs hidden lg:block"
             style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface, color: C.textMuted }}
           >
             {connMode === "live" ? "Live — watching ~/.claude/" : "Demo — simulated sessions"}
@@ -242,7 +312,7 @@ export default function Home() {
         </nav>
 
         {/* Center workspace */}
-        <main className="flex-1 relative overflow-hidden" style={{ minHeight: 0, background: C.background }}>
+        <main className="flex-1 relative overflow-hidden" aria-label="Keep workspace" style={{ minHeight: 0, background: C.background }}>
           {nav === "home" && (
             <HomeView
               floor={floor}
@@ -255,11 +325,16 @@ export default function Home() {
           {nav === "tasks" && <PanelHost><TasksPanel onClose={() => setNav("home")} /></PanelHost>}
           {nav === "memory" && <PanelHost><MemoryPanel onClose={() => setNav("home")} /></PanelHost>}
           {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
-          {nav === "projects" && <StubView title="Project Spaces" phase="Phase 6 — harness wiring" />}
-          {nav === "inbox" && <StubView title="Inbox" phase="Phase 9 — Notion bridge full" />}
-          {nav === "sources" && <StubView title="Sources" phase="Phase 8 — Surfer browser adapter" />}
-          {nav === "outputs" && <StubView title="Output Library" phase="Phase 6 — harness wiring" />}
-          {nav === "automation" && <StubView title="Automation" phase="Phase 6 — Piccolo workflow registry" />}
+          {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
+          {nav === "model_tools" && <PanelHost><ModelToolsPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "outputs" && <PanelHost><ArtifactsPanel onClose={() => setNav("home")} /></PanelHost>}
+          {nav === "automation" && <PanelHost><PiccoloPanel onClose={() => setNav("home")} /></PanelHost>}
 
           {showLog && (
             <div
@@ -270,7 +345,7 @@ export default function Home() {
                 <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                   Activity
                 </div>
-                <button onClick={() => setShowLog(false)} className="text-xs" style={{ color: C.textMuted }}>
+                <button type="button" onClick={() => setShowLog(false)} aria-label="Close activity log" className="text-xs" style={{ color: C.textMuted }}>
                   Close
                 </button>
               </div>
@@ -292,27 +367,62 @@ export default function Home() {
         </main>
 
         {/* Right context panel — active agent + state + sessions + Oak + perms */}
-        <aside
-          className="w-72 shrink-0 flex flex-col overflow-hidden"
-          style={{ background: C.backgroundSoft, borderLeft: `1px solid ${C.borderSoft}` }}
-        >
-          <ContextPanel
-            agent={activeAgent}
-            mode={mode}
-            heroes={heroes}
-            selectedHeroId={selectedHeroId}
-            onSelectHero={setSelectedHeroId}
-            connMode={connMode}
-          />
-        </aside>
+        {isContextPanelOpen && (
+          <aside
+            className="w-72 shrink-0 flex flex-col overflow-hidden"
+            aria-label="Context panel"
+            style={{ background: C.backgroundSoft, borderLeft: `1px solid ${C.borderSoft}` }}
+          >
+            <ContextPanel
+              agent={activeAgent}
+              mode={mode}
+              heroes={heroes}
+              selectedHeroId={selectedHeroId}
+              onSelectHero={setSelectedHeroId}
+              connMode={connMode}
+            />
+          </aside>
+        )}
       </div>
 
       {/* ── Bottom command bar — "Ask Aang…" ──────────────────────────── */}
+      {commandIntake.data && (
+        <IntakePreview
+          result={commandIntake.data}
+          onDismiss={() => commandIntake.reset()}
+          isCreatingTask={createTask.isPending}
+          taskCreated={Boolean(createTask.data)}
+          onCreateTask={() => {
+            const draft = commandIntake.data?.taskDraft;
+            if (!draft || createTask.isPending) return;
+            createTask.mutate(
+              {
+                title: draft.title,
+                agent: draft.agent,
+                projectName: draft.projectName ?? undefined,
+                projectPath: draft.projectPath ?? undefined,
+              },
+              {
+                onSuccess: () => {
+                  setAskInput("");
+                  setNav("tasks");
+                },
+              },
+            );
+          }}
+        />
+      )}
       <CommandBar
         value={askInput}
         onChange={setAskInput}
         mode={mode}
         onModeChange={setMode}
+        isClassifying={commandIntake.isPending}
+        onSubmit={() => {
+          const text = askInput.trim();
+          if (!text || commandIntake.isPending) return;
+          commandIntake.mutate({ text, mode });
+        }}
       />
 
       {/* Skills Manager modal (kept as-is) */}
@@ -350,7 +460,10 @@ function HomeView({
             return (
               <button
                 key={id}
+                type="button"
                 onClick={() => setFloor(id)}
+                aria-pressed={isActive}
+                aria-label={`Show ${f.name}`}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors whitespace-nowrap"
                 style={{
                   background: isActive ? C.surfaceRaised : "transparent",
@@ -369,7 +482,7 @@ function HomeView({
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-auto" style={{ minHeight: 0, background: C.background }}>
+      <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0, background: C.background }}>
         <KeepScene agentStates={agentStates} />
 
         {heroesCount === 0 && (
@@ -428,6 +541,137 @@ function PanelHost({ children }: { children: React.ReactNode }) {
     <div className="h-full w-full relative overflow-hidden" style={{ background: C.background }}>
       {children}
     </div>
+  );
+}
+
+function IntakePreview({
+  result,
+  onDismiss,
+  onCreateTask,
+  isCreatingTask,
+  taskCreated,
+}: {
+  result: {
+    mode: string;
+    originalText: string;
+    category: string;
+    projectMode: string | null;
+    project: { slug: string; label: string; localPath: string } | null;
+    agents: string[];
+    promptHandoffSuggestions: Array<{
+      artifactId: number;
+      title: string;
+      kind: string;
+      storagePath: string;
+      sourceUri: string | null;
+      promptPreview: string | null;
+      why: string;
+      requiredDisclosure: string;
+    }>;
+    permissionGates: string[];
+    nextStep: string;
+    taskDraft: { title: string; agent: string; projectName: string | null; projectPath: string | null };
+  };
+  onDismiss: () => void;
+  onCreateTask: () => void;
+  isCreatingTask: boolean;
+  taskCreated: boolean;
+}) {
+  return (
+    <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.7fr)_auto] gap-2 rounded p-2"
+        style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+      >
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+            <PreviewChip label={result.mode.replace(/_/g, " ")} tone={C.textSecondary} />
+            <PreviewChip label={result.category.replace(/_/g, " ")} tone={C.accent} />
+            {result.project && <PreviewChip label={result.project.label} tone={C.gold} />}
+            {result.projectMode && <PreviewChip label={result.projectMode} tone={C.success} />}
+          </div>
+          <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+            {result.nextStep}
+          </div>
+          {result.promptHandoffSuggestions.length > 0 && (
+            <div className="mt-2 space-y-1">
+              <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                Reusable Memory
+              </div>
+              {result.promptHandoffSuggestions.map((suggestion) => (
+                <div
+                  key={suggestion.artifactId}
+                  className="rounded px-2 py-1"
+                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                >
+                  <div className="flex flex-wrap items-center gap-1">
+                    <PreviewChip label={suggestion.kind.replace(/_/g, " ")} tone={C.gold} />
+                    <span className="text-[11px] font-semibold truncate" style={{ color: C.textPrimary }}>
+                      {suggestion.title}
+                    </span>
+                  </div>
+                  <div className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
+                    {suggestion.why}
+                  </div>
+                  <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
+                    {suggestion.requiredDisclosure}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
+            Agents
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {result.agents.map((agent) => (
+              <PreviewChip key={agent} label={agent} tone={agent === "batman" ? C.warning : C.textSecondary} />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-start justify-between gap-2">
+          <div className="hidden xl:block max-w-sm">
+            <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
+              Gates
+            </div>
+            <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+              {result.permissionGates[0]}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={onCreateTask}
+              disabled={isCreatingTask}
+              aria-label={taskCreated ? "Task saved" : isCreatingTask ? "Saving task" : `Create task: ${result.taskDraft.title}`}
+              className="text-xs uppercase tracking-wider"
+              style={{ color: taskCreated ? C.success : isCreatingTask ? C.textMuted : C.accent }}
+              title={result.taskDraft.title}
+            >
+              {taskCreated ? "Task Saved" : isCreatingTask ? "Saving" : "Create Task"}
+            </button>
+            <button type="button" onClick={onDismiss} aria-label="Dismiss intake preview" className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreviewChip({ label, tone }: { label: string; tone: string }) {
+  return (
+    <span
+      className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"
+      style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -564,7 +808,10 @@ function ContextPanel({
               return (
                 <button
                   key={hero.id}
+                  type="button"
                   onClick={() => onSelectHero(isSelected ? null : hero.id)}
+                  aria-pressed={isSelected}
+                  aria-label={`${isSelected ? "Deselect" : "Select"} session ${hero.name}`}
                   className="w-full text-left px-3 py-2 transition-colors"
                   style={{
                     background: isSelected ? C.surfaceRaised : "transparent",
@@ -600,23 +847,33 @@ function ContextPanel({
 
 // ── Bottom command bar ──────────────────────────────────────────────────────
 function CommandBar({
-  value, onChange, mode, onModeChange,
+  value, onChange, mode, onModeChange, onSubmit, isClassifying,
 }: {
   value: string;
   onChange: (s: string) => void;
   mode: Mode;
   onModeChange: (m: Mode) => void;
+  onSubmit: () => void;
+  isClassifying: boolean;
 }) {
   return (
-    <div
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
       className="flex items-center gap-2 px-3 py-2 shrink-0"
+      aria-label="Ask Aang command bar"
       style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}
     >
-      <div className="flex rounded overflow-hidden shrink-0" style={{ border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex rounded overflow-hidden shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${C.borderSoft}` }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
           <button
             key={m}
+            type="button"
             onClick={() => onModeChange(m)}
+            aria-pressed={mode === m}
+            aria-label={`Set command mode to ${m}`}
             className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
             style={{
               background: mode === m ? C.accentSoft : "transparent",
@@ -630,6 +887,7 @@ function CommandBar({
 
       <input
         type="text"
+        aria-label="Ask Aang command input"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Ask Aang…"
@@ -642,21 +900,30 @@ function CommandBar({
       />
 
       <button
+        type="button"
         disabled
-        className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        aria-label="Attach artifact unavailable until Phase 6"
+        className="hidden sm:block px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
         style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
         title="Phase 6"
       >
         Attach
       </button>
       <button
-        disabled
-        className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
-        style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
-        title="Phase 6"
+        type="submit"
+        disabled={!value.trim() || isClassifying}
+        aria-label={isClassifying ? "Reading command intent" : "Preview command routing"}
+        className="hidden md:block px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        style={{
+          border: `1px solid ${C.borderSoft}`,
+          color: value.trim() && !isClassifying ? C.textPrimary : C.textMuted,
+          background: value.trim() && !isClassifying ? C.accentSoft : "transparent",
+          opacity: value.trim() && !isClassifying ? 1 : 0.6,
+        }}
+        title="Preview routing"
       >
-        Create Task
+        {isClassifying ? "Reading" : "Preview"}
       </button>
-    </div>
+    </form>
   );
 }

@@ -22,10 +22,12 @@ const TS = TILE * SCALE;
 // back-wall features, and agents have room to breathe. Width bumped to 50
 // to make room for chamber dividers + the Cortana cathedral nave.
 const FLOOR_TILES_TALL = 10;
-const FLOOR_TILES_WIDE = 50;
+const CRYPTS_TILES_TALL = 5;
+const FLOOR_TILES_WIDE = 62;
+const BORDER_H = 2; // 1 castle tile = 2 grid rows
 
 const CANVAS_W = FLOOR_TILES_WIDE * TS;
-const CANVAS_H = (FLOOR_TILES_TALL * 3 + 1) * TS;
+const CANVAS_H = (FLOOR_TILES_TALL * 2 + BORDER_H * 2 + CRYPTS_TILES_TALL) * TS;
 
 // Floor segments — chambers, dividers, and the cathedral opening on Upper.
 // Order = left-to-right placement. Widths sum to FLOOR_TILES_WIDE (50).
@@ -42,34 +44,48 @@ const DIVIDER_W = 1;
 
 // Upper Spires: Batman, Aang, [cathedral nave above Cortana], Oak, Spock.
 const UPPER_SEGMENTS: FloorSegment[] = [
-  { kind: "chamber", agentId: "batman", width: 8 },
+  { kind: "chamber", agentId: "batman", width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "aang",   width: 8 },
+  { kind: "chamber", agentId: "aang",   width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "opening",                    width: 14 }, // cathedral nave
+  { kind: "opening",                    width: 18 }, // cathedral nave
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "oak",    width: 8 },
+  { kind: "chamber", agentId: "oak",    width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "spock",  width: 8 },
+  { kind: "chamber", agentId: "spock",  width: 10 },
 ];
 
-// Ground Hall: Tony, Gojo, Cortana (cathedral, 14 wide), Surfer, C-3PO.
+// Ground Hall: Tony, Gojo, Cortana (cathedral, 18 wide), Surfer, C-3PO.
 const GROUND_SEGMENTS: FloorSegment[] = [
-  { kind: "chamber", agentId: "tony",    width: 8 },
+  { kind: "chamber", agentId: "tony",    width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "gojo",    width: 8 },
+  { kind: "chamber", agentId: "gojo",    width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "cortana", width: 14 },
+  { kind: "chamber", agentId: "cortana", width: 18 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "surfer",  width: 8 },
+  { kind: "chamber", agentId: "surfer",  width: 10 },
   { kind: "divider", width: DIVIDER_W },
-  { kind: "chamber", agentId: "c3po",    width: 8 },
+  { kind: "chamber", agentId: "c3po",    width: 10 },
 ];
 
-// Crypts: Piccolo alone, full width.
+// Crypts: operations layer — Piccolo hygiene + Hedwig capture.
 const CRYPTS_SEGMENTS: FloorSegment[] = [
-  { kind: "chamber", agentId: "piccolo", width: 50 },
+  { kind: "chamber", agentId: "piccolo", width: 30 },
+  { kind: "divider", width: DIVIDER_W },
+  { kind: "chamber", agentId: "hedwig", width: 31 },
 ];
+
+const FLOOR_DIVIDER_KEY: Record<"upper" | "ground" | "crypts", string> = {
+  upper: "v2_divider_upper",
+  ground: "v2_divider_ground",
+  crypts: "v2_divider_crypts",
+};
+
+const FLOOR_BANNER_KEY: Record<"upper" | "ground" | "crypts", string> = {
+  upper: "v2_banner_upper",
+  ground: "v2_banner_ground",
+  crypts: "v2_banner_crypts",
+};
 
 // ── Castle tileset (PixelLab — 32×32) ──────────────────────────────────────
 // One 32×32 tile occupies a 2×2 block of the 16×16 source grid (96 screen
@@ -92,17 +108,17 @@ const ARCH_RUNE = 15;             // arch/tile_15 — magic circle (under Cortan
 // point, so reading from the lower floor you see stairs going up into the
 // floor above. arch/tile_7 is a 32×32 archway (2×2 grid cells).
 //
-// Coords assume FLOOR_TILES_TALL=10: Upper rowOffset=0, Ground rowOffset=10,
-// Crypts rowOffset=20. The cathedral opening occupies cols 18-31 on Upper.
+// Passage row offsets derived from floor geometry.
+const GROUND_START = FLOOR_TILES_TALL + BORDER_H;
+const CRYPTS_START = GROUND_START + FLOOR_TILES_TALL + BORDER_H;
 type Passage = { col: number; row: number };
 const PASSAGES: Passage[] = [
-  // Upper ↔ Ground — drawn in Ground's top-wall band (row 10).
-  // Place on Aang and Oak chamber edges adjacent to the cathedral opening.
-  { col: 14, row: 10 }, // Aang's right edge → opening
-  { col: 34, row: 10 }, // Oak's left edge → opening
-  // Ground ↔ Crypts — drawn in Crypts' top-wall band (row 20).
-  { col: 6,  row: 20 }, // left passage (under Tony)
-  { col: 42, row: 20 }, // right passage (under C-3PO)
+  // Upper ↔ Ground — drawn in Ground's top-wall band.
+  { col: 14, row: GROUND_START },     // Aang's right edge → opening
+  { col: 34, row: GROUND_START },     // Oak's left edge → opening
+  // Ground ↔ Crypts — drawn in Crypts' top-wall band.
+  { col: 6,  row: CRYPTS_START },     // left passage (under Tony)
+  { col: 42, row: CRYPTS_START },     // right passage (under C-3PO)
 ];
 
 // ── Per-agent motion config ──────────────────────────────────────────────────
@@ -171,21 +187,58 @@ const MOTION: Record<string, AgentMotion> = {
     active: { bobAmp: 5, bobDur: 2200, xAmp: 0, xDur: 0, rotAmp: 0, rotDur: 0, ease: "Sine.easeInOut", alpha: 1 },
     tint: 0x059669, patrol: true,
   },
+  hedwig: {
+    idle:   { bobAmp: 6, bobDur: 1300, xAmp: 3, xDur: 1800, rotAmp: 2, rotDur: 1200, ease: "Sine.easeInOut", alpha: 1 },
+    active: { bobAmp: 9, bobDur: 520,  xAmp: 5, xDur: 900,  rotAmp: 4, rotDur: 480,  ease: "Sine.easeInOut", alpha: 1 },
+    tint: 0xe9d5ff, patrol: true,
+  },
 };
 
 // ── Chamber props ─────────────────────────────────────────────────────────────
-type Prop = { key: string; col: number; row: number; depth?: number };
+type Prop = {
+  key: string;
+  col: number;
+  row: number;
+  depth?: number;
+  scale?: number;
+  originX?: number;
+  originY?: number;
+  alpha?: number;
+};
 
 // Per-chamber PixelLab props — 32×32 hero pieces and supporting decor.
 // `key` is a loaded texture, `col` is grid cells from chamber's left edge,
 // `row` is grid rows from the floor surface (0 = on floor, negative = up wall).
 const PROP_PATH = "/sprites/cerebro/props";
 const PROP_KEYS = [
-  "anvil", "forge_bellows", "drafting_table", "mannequin",
-  "hitching_post", "saddlebag", "gold_lectern",
-  "war_table", "weapon_rack", "wind_chimes",
-  "herb_shelf", "magnifying_glass", "astrolabe", "telescope",
-  "crystal_ball",
+  "anvil", "forge_bellows", "forge_furnace", "hammer",
+  "drafting_table", "mannequin", "gojo_fabric_wall", "paint_palette",
+  "hitching_post", "saddlebag", "stable_door", "water_trough",
+  "gold_lectern",
+  "war_table", "weapon_rack", "tactical_map", "wall_shield",
+  "wind_chimes", "wind_banner", "meditation_cushion",
+  "herb_shelf", "magnifying_glass", "specimen_shelf",
+  "astrolabe", "telescope",
+  "crystal_ball", "sarcophagus", "treasure_pile", "dungeon_chains",
+  "cathedral_arch", "stained_glass", "candelabra", "spell_lectern",
+  "wooden_chest", "bookshelf", "barrel", "crystal_pillar", "tony_forge",
+] as const;
+
+const V2_ASSET_PATH = "/sprites/cerebro/pixellab-v2";
+const V2_ASSETS = [
+  "quiet_divider",
+  "divider_upper",
+  "divider_ground",
+  "divider_crypts",
+  "banner_upper",
+  "banner_ground",
+  "banner_crypts",
+  "cortana_hub_backdrop",
+  "surfer_portal_sealed",
+  "surfer_portal_framed",
+  "surfer_board",
+  "aang_teaching_board",
+  "chamber_sigils",
 ] as const;
 
 // Per-chamber prop placements. Cols are chamber-local (0 = chamber's left
@@ -194,45 +247,70 @@ const PROP_KEYS = [
 const CHAMBER_PIXELLAB_PROPS: Record<string, Prop[]> = {
   // Ground Hall — chambers 8 wide except Cortana (14)
   tony: [
-    { key: "anvil",          col: 2, row: 0 },
-    { key: "forge_bellows",  col: 5, row: 0 },
+    { key: "tony_forge",     col: 3, row: -4, depth: 1 },
+    { key: "anvil",          col: 0, row: 0 },
+    { key: "hammer",         col: 6, row: 0 },
   ],
   gojo: [
-    { key: "drafting_table", col: 2, row: 0 },
-    { key: "mannequin",      col: 5, row: 0 },
+    { key: "gojo_fabric_wall", col: 3, row: -3, depth: 1 },
+    { key: "drafting_table", col: 0, row: 0 },
+    { key: "paint_palette",  col: 6, row: 0 },
   ],
-  cortana: [],
+  cortana: [
+    { key: "v2_cortana_hub_backdrop", col: 9, row: -5.7, depth: 2, scale: 1.65, originX: 0.5, originY: 0 },
+    { key: "candelabra",     col: 1, row: 0 },
+    { key: "candelabra",     col: 15, row: 0 },
+  ],
   surfer: [
-    { key: "hitching_post",  col: 2, row: 0 },
-    { key: "saddlebag",      col: 5, row: 0 },
+    { key: "v2_surfer_portal_framed", col: 2, row: -3.15, depth: 2, scale: 1.45, originX: 0.5, originY: 0 },
+    { key: "v2_surfer_board", col: 6, row: 0.35, depth: 4, scale: 1.15, originX: 0.5, originY: 1 },
+    { key: "tactical_map",   col: 7, row: 0 },
   ],
   c3po: [
-    { key: "gold_lectern",   col: 2, row: 0 },
+    { key: "gold_lectern",   col: 3, row: 0 },
+    { key: "bookshelf",      col: 6, row: -3, depth: 1 },
   ],
   // Upper Spires — chambers 8 wide
   batman: [
-    { key: "war_table",      col: 2, row: 0 },
-    { key: "weapon_rack",    col: 5, row: -1 },
+    { key: "tactical_map",   col: 3, row: -3, depth: 1 },
+    { key: "war_table",      col: 0, row: 0 },
+    { key: "weapon_rack",    col: 6, row: 0 },
   ],
   aang: [
-    { key: "wind_chimes",    col: 3, row: -2 },
+    { key: "v2_aang_teaching_board", col: 5, row: -3.3, depth: 2, scale: 1.35, originX: 0.5, originY: 0 },
+    { key: "meditation_cushion", col: 1, row: 0 },
+    { key: "spell_lectern",     col: 6, row: 0 },
   ],
   oak: [
-    { key: "herb_shelf",        col: 2, row: -1 },
-    { key: "magnifying_glass",  col: 5, row: 0 },
+    { key: "specimen_shelf", col: 3, row: -3, depth: 1 },
+    { key: "magnifying_glass", col: 0, row: 0 },
+    { key: "wooden_chest",   col: 6, row: 0 },
   ],
   spock: [
-    { key: "astrolabe",      col: 2, row: 0 },
-    { key: "telescope",      col: 5, row: 0 },
+    { key: "astrolabe",      col: 0, row: 0 },
+    { key: "telescope",      col: 6, row: 0 },
+    { key: "crystal_pillar", col: 3, row: -3, depth: 1 },
   ],
-  // Crypts — Piccolo alone, 50 wide
+  // Crypts — operations layer
   piccolo: [
-    { key: "crystal_ball",   col: 24, row: 0 },
+    { key: "dungeon_chains", col: 5, row: -1, depth: 1 },
+    { key: "barrel",         col: 9, row: 0 },
+    { key: "crystal_ball",   col: 14, row: 0 },
+    { key: "wooden_chest",   col: 20, row: 0 },
+    { key: "dungeon_chains", col: 24, row: -1, depth: 1 },
+  ],
+  hedwig: [
+    { key: "bookshelf",      col: 5,  row: -3, depth: 1 },
+    { key: "gold_lectern",   col: 10, row: 0 },
+    { key: "wind_chimes",    col: 15, row: -3, depth: 1 },
+    { key: "wooden_chest",   col: 21, row: 0 },
+    { key: "barrel",         col: 25, row: 0 },
   ],
 };
 
 // ── Use-spots & path graph ──────────────────────────────────────────────────
-// Phase 4A: data only. The runtime A* + animation pass land in Phase 4B/5.
+// First runtime pass: graph nodes drive council walking; room-local use-spots
+// still drive idle/work positions.
 // Coords are chamber-local; the runtime adds chamber offsets at lookup time.
 //
 // hero  = where the agent stands when actively working at their hero prop
@@ -260,6 +338,8 @@ interface CouncilSpot {
   marked?: boolean;  // Aang's convener seat
 }
 
+type Facing = UseSpot["facing"];
+
 const CHAMBER_USE_SPOTS: Record<string, { hero: UseSpot; idle: UseSpot }> = {
   tony:    { hero: { type: "hero", col: 1, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
   gojo:    { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
@@ -270,10 +350,11 @@ const CHAMBER_USE_SPOTS: Record<string, { hero: UseSpot; idle: UseSpot }> = {
   aang:    { hero: { type: "hero", col: 4, row: 0, facing: "south" }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
   oak:     { hero: { type: "hero", col: 2, row: 0, facing: "east"  }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
   spock:   { hero: { type: "hero", col: 4, row: 0, facing: "south" }, idle: { type: "idle", col: 4, row: 0, facing: "south" } },
-  piccolo: { hero: { type: "hero", col: 24, row: 0, facing: "south" }, idle: { type: "idle", col: 24, row: 0, facing: "south" } },
+  piccolo: { hero: { type: "hero", col: 14, row: 0, facing: "south" }, idle: { type: "idle", col: 14, row: 0, facing: "south" } },
+  hedwig:  { hero: { type: "hero", col: 10, row: 0, facing: "east"  }, idle: { type: "idle", col: 15, row: 0, facing: "south" } },
 };
 
-// Cortana's hub is 14 wide. Cortana stands at chamber col 7 (center).
+// Cortana's hub is 18 wide. Cortana stands near chamber col 9 (center).
 const CORTANA_COUNCIL_SPOTS: CouncilSpot[] = [
   // Aang — convener, marked seat closest to Cortana
   { agentId: "aang",    col: 6,  row: 1, facing: "east",  tier: "front", marked: true },
@@ -288,31 +369,32 @@ const CORTANA_COUNCIL_SPOTS: CouncilSpot[] = [
   { agentId: "oak",     col: 4,  row: -1, facing: "south", tier: "back" },
   { agentId: "spock",   col: 10, row: -1, facing: "south", tier: "back" },
   { agentId: "piccolo", col: 6,  row: -1, facing: "south", tier: "back" },
-  { agentId: "batman",  col: 8,  row: -1, facing: "south", tier: "back" },  // overflow / paired call
+  { agentId: "hedwig",  col: 8,  row: -1, facing: "south", tier: "back" },
 ];
 
-// Path graph — static nodes + edges for inter-chamber walking. The runtime
-// A* pass uses this in Phase 5. Coords are canvas grid (col, row).
+// Path graph — static nodes + edges for inter-chamber walking. Coords are
+// canvas grid (col, row), updated for the current 62-column side cutaway.
 interface PathNode { id: string; col: number; row: number }
 interface PathEdge { from: string; to: string }
 
 const PATH_NODES: PathNode[] = [
-  // Chamber centers (canvas coords reflect new geometry)
-  { id: "chamber:batman",  col: 4,  row: 8  },
-  { id: "chamber:aang",    col: 13, row: 8  },
-  { id: "chamber:oak",     col: 37, row: 8  },
-  { id: "chamber:spock",   col: 46, row: 8  },
-  { id: "chamber:tony",    col: 4,  row: 18 },
-  { id: "chamber:gojo",    col: 13, row: 18 },
-  { id: "chamber:cortana", col: 25, row: 18 },
-  { id: "chamber:surfer",  col: 37, row: 18 },
-  { id: "chamber:c3po",    col: 46, row: 18 },
-  { id: "chamber:piccolo", col: 25, row: 28 },
-  // Passages (entry points on each side)
-  { id: "passage:upper-aang-down",    col: 14, row: 10 },
-  { id: "passage:upper-oak-down",     col: 34, row: 10 },
-  { id: "passage:ground-tony-down",   col: 6,  row: 20 },
-  { id: "passage:ground-c3po-down",   col: 42, row: 20 },
+  // Chamber centers (derived from floor geometry)
+  { id: "chamber:batman",  col: 5,  row: 8 },
+  { id: "chamber:aang",    col: 16, row: 8 },
+  { id: "chamber:oak",     col: 46, row: 8 },
+  { id: "chamber:spock",   col: 57, row: 8 },
+  { id: "chamber:tony",    col: 5,  row: GROUND_START + 8 },
+  { id: "chamber:gojo",    col: 16, row: GROUND_START + 8 },
+  { id: "chamber:cortana", col: 31, row: GROUND_START + 8 },
+  { id: "chamber:surfer",  col: 46, row: GROUND_START + 8 },
+  { id: "chamber:c3po",    col: 57, row: GROUND_START + 8 },
+  { id: "chamber:piccolo", col: 14, row: CRYPTS_START + 3 },
+  { id: "chamber:hedwig",  col: 46, row: CRYPTS_START + 3 },
+  // Passages
+  { id: "passage:upper-aang-down",    col: 14, row: GROUND_START },
+  { id: "passage:upper-oak-down",     col: 34, row: GROUND_START },
+  { id: "passage:ground-tony-down",   col: 6,  row: CRYPTS_START },
+  { id: "passage:ground-c3po-down",   col: 42, row: CRYPTS_START },
 ];
 
 const PATH_EDGES: PathEdge[] = [
@@ -332,7 +414,8 @@ const PATH_EDGES: PathEdge[] = [
   { from: "chamber:tony",  to: "passage:ground-tony-down" },
   { from: "chamber:c3po",  to: "passage:ground-c3po-down" },
   { from: "passage:ground-tony-down", to: "chamber:piccolo" },
-  { from: "passage:ground-c3po-down", to: "chamber:piccolo" },
+  { from: "chamber:piccolo", to: "chamber:hedwig" },
+  { from: "passage:ground-c3po-down", to: "chamber:hedwig" },
 ];
 
 // ── State icon emote glyphs ─────────────────────────────────────────────────
@@ -361,6 +444,7 @@ class KeepScene extends Phaser.Scene {
   private agentSprites: Map<string, Phaser.GameObjects.Image> = new Map();
   private agentBaseX: Map<string, number> = new Map();
   private agentBaseY: Map<string, number> = new Map();
+  private chamberGridOrigins: Map<string, { col: number; yWallBase: number }> = new Map();
 
   // Chamber structural refs (for state-driven changes)
   private chamberBounds: Map<string, { xLeft: number; xRight: number; yFloor: number }> = new Map();
@@ -376,6 +460,7 @@ class KeepScene extends Phaser.Scene {
 
   // State tracking + floating state-icon emote per agent
   private currentStates: Partial<Record<string, AgentState>> = {};
+  private hasAppliedStates = false;
   private agentEmotes: Map<string, Phaser.GameObjects.Image> = new Map();
 
   constructor() { super({ key: "KeepScene" }); }
@@ -383,6 +468,10 @@ class KeepScene extends Phaser.Scene {
   preload() {
     for (const c of CHAMBERS) {
       this.load.image(`agent_${c.agentId}`, c.spritePath);
+      const ext = c.spritePath.endsWith(".svg") ? "svg" : "png";
+      for (const facing of ["south", "east", "west", "north"] as const) {
+        this.load.image(`agent_${c.agentId}_${facing}`, `/sprites/keep/${c.agentId}/rotations/${facing}.${ext}`);
+      }
     }
     // Custom castle tiles (32×32 PixelLab) — first batch (walls/decor)
     for (let i = 0; i < 16; i++) {
@@ -396,22 +485,23 @@ class KeepScene extends Phaser.Scene {
     for (const key of PROP_KEYS) {
       this.load.image(`prop_${key}`, `${PROP_PATH}/${key}.png`);
     }
+    for (const key of V2_ASSETS) {
+      this.load.image(`v2_${key}`, `${V2_ASSET_PATH}/${key}.png`);
+    }
     // Cortana hub backdrop — 320×200 hand-pixeled throne room
     this.load.image("cortana_hub", "/sprites/cerebro/hub/v1.png");
+    // Transparent-BG pillar (available for future use)
+    this.load.image("pillar", `/sprites/cerebro/props/pillar.png`);
 
-    // Phase 4B: per-chamber themed tiles. floor_<id> = chamber-specific floor
-    // overlay (forge brick for Tony, marble for Cortana, dirt for Piccolo,
-    // etc.). feature_<id> = signature back-wall feature (forge furnace,
-    // holographic dome, telescope chart, etc.). Plus Cortana cathedral
-    // specials and state-icon glyphs.
+    // Per-chamber themed floor + wall tiles (32×32, transparent BG).
+    // Floor tiles overlay the base stone floor; wall tiles overlay the
+    // middle back-wall row. Both at depth 0.5.
     const themedAgents = ["tony", "gojo", "cortana", "surfer", "c3po",
       "batman", "aang", "oak", "spock", "piccolo"];
     for (const id of themedAgents) {
-      this.load.image(`floor_${id}`,   `${CASTLE_TILE_BASE}/floors/${id}.png`);
-      this.load.image(`feature_${id}`, `${CASTLE_TILE_BASE}/features/${id}.png`);
+      this.load.image(`floor_${id}`, `/sprites/cerebro/floors/${id}.png`);
+      this.load.image(`wall_${id}`,  `/sprites/cerebro/walls/${id}.png`);
     }
-    this.load.image("feature_cortana_column", `${CASTLE_TILE_BASE}/features/cortana_column.png`);
-    this.load.image("feature_cortana_dome",   `${CASTLE_TILE_BASE}/features/cortana_dome.png`);
 
     // State icon emote glyphs (16×16). Phase 4B replaces the Phaser.Text
     // Unicode placeholders with these pixel-art icons.
@@ -419,6 +509,10 @@ class KeepScene extends Phaser.Scene {
     for (const k of icons) {
       this.load.image(`icon_${k}`, `/sprites/cerebro/icons/${k}.png`);
     }
+
+    // Torch sprites — tile_11 with wall background stripped to transparent
+    this.load.image("torch",        `${CASTLE_TILE_BASE}/tile_11_transparent.png`);
+    this.load.image("torch_purple", `${CASTLE_TILE_BASE}/tile_11_purple.png`);
 
     // Storage destination signage (placed in Phase 4C / harness wiring).
     this.load.image("storage_vault",   "/sprites/cerebro/storage/vault.png");
@@ -430,19 +524,15 @@ class KeepScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(C.background);
 
     this.buildFloor("upper",  UPPER_SEGMENTS,  0);
-    this.buildFloor("ground", GROUND_SEGMENTS, FLOOR_TILES_TALL);
-    this.buildFloor("crypts", CRYPTS_SEGMENTS, FLOOR_TILES_TALL * 2);
+    this.drawHorizontalBorder(FLOOR_TILES_TALL);
+    this.buildFloor("ground", GROUND_SEGMENTS, GROUND_START);
+    this.drawHorizontalBorder(GROUND_START + FLOOR_TILES_TALL);
+    this.buildFloor("crypts", CRYPTS_SEGMENTS, CRYPTS_START, CRYPTS_TILES_TALL);
     this.drawCrenellations();
     this.placePassages();
 
-    // Torch flicker — alpha + scale pulse on the static custom torch tile.
-    for (const t of this.allTorches) {
-      const phase = (t.getData("phase") as number) ?? 0;
-      this.tweens.add({
-        targets: t, alpha: 0.7, duration: 180 + phase * 30, yoyo: true,
-        repeat: -1, ease: "Sine.easeInOut", delay: phase * 60,
-      });
-    }
+    // Torches are static — no alpha pulse. The old flicker made the entire
+    // 32×32 tile (wall stone + torch) blink, which read as a glitching square.
 
     // Spock head-tilt twitch — periodic x-scale snap
     const spock = this.agentSprites.get("spock");
@@ -457,8 +547,8 @@ class KeepScene extends Phaser.Scene {
 
     // Ambient dust motes
     this.spawnDustMotes(0, FLOOR_TILES_TALL, 12);
-    this.spawnDustMotes(FLOOR_TILES_TALL, FLOOR_TILES_TALL * 2, 12);
-    this.spawnDustMotes(FLOOR_TILES_TALL * 2, FLOOR_TILES_TALL * 3, 8);
+    this.spawnDustMotes(GROUND_START, GROUND_START + FLOOR_TILES_TALL, 12);
+    this.spawnDustMotes(CRYPTS_START, CRYPTS_START + CRYPTS_TILES_TALL, 4);
 
     // Start everyone in idle
     for (const [agentId] of this.agentSprites) {
@@ -467,13 +557,14 @@ class KeepScene extends Phaser.Scene {
   }
 
   private buildFloor(
-    _floorId: "upper" | "ground" | "crypts",
+    floorId: "upper" | "ground" | "crypts",
     segments: FloorSegment[],
-    rowOffset: number
+    rowOffset: number,
+    height = FLOOR_TILES_TALL
   ) {
     const yTop = rowOffset;
-    const yWallBase = rowOffset + FLOOR_TILES_TALL - 2;
-    const yFloor = rowOffset + FLOOR_TILES_TALL - 1;
+    const yWallBase = rowOffset + height - 2;
+    const yFloor = rowOffset + height - 1;
 
     // Walk segments once to map every column to its segment kind. Opening
     // columns skip top wall + back wall + floor (cathedral nave reaches up).
@@ -488,10 +579,9 @@ class KeepScene extends Phaser.Scene {
     }
     const isOpen = (c: number) => colKind[c] === "opening";
 
-    // Back wall — three layers of 32×32 tiles fill rows 2..7 between the top
-    // wall (rows 0-1) and the floor (rows 8-9). Each tile spans 2 grid rows.
-    // Skip opening columns so Cortana's back wall extends up uninterrupted.
-    for (const rowBase of [yTop + 2, yTop + 4, yTop + 6]) {
+    // Back wall — 32×32 tiles fill rows between top wall and floor.
+    // Dynamic: only render rows that fit within the floor height.
+    for (let rowBase = yTop + 2; rowBase < yWallBase; rowBase += 2) {
       for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
         if (isOpen(c) || isOpen(c + 1)) continue;
         const variant = Math.floor(c / 2) + Math.floor(rowBase / 2);
@@ -518,14 +608,22 @@ class KeepScene extends Phaser.Scene {
       this.placeCastleTile(c, yTop, key);
     }
 
-    // Chamber dividers — single stone column tile in the middle band so the
-    // divider reads as architectural punctuation, not a wall.
+    // Chamber dividers — castle_6 stone column stacked full-height at depth 1.
     {
       let cx = 0;
       for (const seg of segments) {
         if (seg.kind === "divider") {
           const dc = cx - (cx % 2);
-          this.placeCastleTile(dc, yTop + 4, "castle_6");
+          const dividerKey = FLOOR_DIVIDER_KEY[floorId];
+          if (this.textures.exists(dividerKey)) {
+            this.placeCastleTile(dc, yTop, dividerKey, 2);
+          } else if (this.textures.exists("v2_quiet_divider")) {
+            this.placeCastleTile(dc, yTop, "v2_quiet_divider", 2);
+          } else {
+            for (let dr = yTop; dr <= yWallBase; dr += 2) {
+              this.placeCastleTile(dc, dr, "castle_6", 1);
+            }
+          }
         }
         cx += seg.width;
       }
@@ -544,6 +642,7 @@ class KeepScene extends Phaser.Scene {
       const xRightPx = (cx + w) * TS;
       const yFloorPx = (yWallBase + 1) * TS;
       this.chamberBounds.set(agentId, { xLeft: xLeftPx, xRight: xRightPx, yFloor: yFloorPx });
+      this.chamberGridOrigins.set(agentId, { col: cx, yWallBase });
 
       // Two torches per chamber, snapped to even col so they align with the
       // 2×2 back-wall grid. Phase indexed by agent name length to keep the
@@ -553,21 +652,46 @@ class KeepScene extends Phaser.Scene {
       const t2 = this.spawnTorch(cx + w - 2, yTop + 2, torchPhase * 2 + 3);
       this.chamberTorches.set(agentId, [t1, t2]);
 
-      // Phase 4B: per-chamber themed floor overlay. Replaces the generic
-      // stone slab in this chamber's column range. 32×32 tiles tile across
-      // the chamber width every 2 grid cols. Drawn at depth 0.5 so it
-      // overlays the base floor but sits below props.
+      const bannerKey = FLOOR_BANNER_KEY[floorId];
+      if (this.textures.exists(bannerKey)) {
+        const bannerX = (cx + Math.max(1.2, w / 2 - 0.5)) * TS;
+        const bannerY = (yTop + 2.15) * TS;
+        this.add.image(bannerX, bannerY, bannerKey)
+          .setOrigin(0.5, 0).setScale(1.25).setDepth(3).setAlpha(0.82);
+      }
+
+      // Per-chamber floor overlay — accent tiles only. A full repeat made the
+      // rooms read like noisy swatch boards instead of usable chambers.
       const floorKey = `floor_${agentId}`;
       if (this.textures.exists(floorKey)) {
-        for (let dc = 0; dc < w; dc += 2) {
-          if (cx + dc + 1 >= FLOOR_TILES_WIDE) break;
-          const img = this.add.image((cx + dc) * TS, yWallBase * TS, floorKey);
-          img.setOrigin(0, 0).setScale(SCALE).setDepth(0.5);
+        const accentCols = agentId === "cortana"
+          ? [cx + 4, cx + 6, cx + 8, cx + 10, cx + 12]
+          : [cx + 2, cx + w - 4];
+        for (const fc of accentCols) {
+          if (fc >= cx && fc < cx + w) {
+            this.placeCastleTile(fc, yWallBase, floorKey, 0.5).setAlpha(0.62);
+          }
         }
       }
 
-      // Phase 4B back-wall features disabled — opaque backgrounds clash.
-      // Will regen with transparent BGs in a future pass.
+      // Per-chamber back-wall overlay — a restrained feature band. The base
+      // castle stone stays dominant; the role theming becomes a readable cue.
+      const wallKey = `wall_${agentId}`;
+      if (this.textures.exists(wallKey)) {
+        const featureRows = agentId === "cortana"
+          ? [yTop + 2, yTop + 4]
+          : [yTop + 4];
+        const featureCols = agentId === "cortana"
+          ? [cx + 4, cx + 6, cx + 8, cx + 10, cx + 12]
+          : [cx + 2, cx + w - 4];
+        for (const wr of featureRows) {
+          for (const wc of featureCols) {
+            if (wc >= cx && wc < cx + w && wr < yWallBase) {
+              this.placeCastleTile(wc, wr, wallKey, 0.5).setAlpha(0.5);
+            }
+          }
+        }
+      }
 
       // Floor glow — hidden until agent is active
       const glowCx = (cx + w / 2) * TS;
@@ -582,15 +706,8 @@ class KeepScene extends Phaser.Scene {
       if (agentId === "cortana") {
         this.cortanaCenterX = glowCx;
 
-        // Flanking stone columns — castle_6 mounted in the back wall band,
-        // symmetric around Cortana's center. Chamber is 14 wide; columns at
-        // chamber cols 2 and 10 (even-snapped). Three stacked tiles per
-        // column for the cathedral-tall back wall (rows 2-7).
-        for (const cc of [cx + 2, cx + 10]) {
-          this.placeCastleTile(cc, yTop + 2, "castle_6");
-          this.placeCastleTile(cc, yTop + 4, "castle_6");
-          this.placeCastleTile(cc, yTop + 6, "castle_6");
-        }
+        // The new Hub backdrop carries Cortana's architecture. Avoid extra
+        // repeated columns here; they fight the council-room focal point.
 
         // Layered violet dais — outer halo + inner core.
         const daisOuter = this.add.graphics();
@@ -623,8 +740,12 @@ class KeepScene extends Phaser.Scene {
       for (const p of props) {
         const px = (cx + p.col) * TS;
         const py = (yWallBase + p.row) * TS;
-        this.add.image(px, py, `prop_${p.key}`)
-          .setOrigin(0, 0).setScale(SCALE).setDepth(p.depth ?? 4);
+        const textureKey = p.key.startsWith("storage_") || p.key.startsWith("v2_") ? p.key : `prop_${p.key}`;
+        this.add.image(px, py, textureKey)
+          .setOrigin(p.originX ?? 0, p.originY ?? 0)
+          .setScale(p.scale ?? SCALE)
+          .setDepth(p.depth ?? 4)
+          .setAlpha(p.alpha ?? 1);
       }
 
       // Agent sprite
@@ -649,17 +770,134 @@ class KeepScene extends Phaser.Scene {
 
   // ── Motion helpers ──────────────────────────────────────────────────────────
 
+  private setAgentFacing(agentId: string, facing: Facing) {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite) return;
+    const key = `agent_${agentId}_${facing}`;
+    if (this.textures.exists(key)) {
+      sprite.setTexture(key).setFlipX(false);
+      return;
+    }
+    sprite.setTexture(`agent_${agentId}`).setFlipX(facing === "west");
+  }
+
+  private pointForUseSpot(agentId: string, spot: UseSpot): { x: number; y: number } | null {
+    const origin = this.chamberGridOrigins.get(agentId);
+    if (!origin) return null;
+    return {
+      x: (origin.col + spot.col) * TS,
+      y: (origin.yWallBase + spot.row + 0.4) * TS,
+    };
+  }
+
+  private pointForCouncilSpot(agentId: string): { x: number; y: number; facing: Facing; tier: CouncilSpot["tier"] } | null {
+    const origin = this.chamberGridOrigins.get("cortana");
+    const spot = CORTANA_COUNCIL_SPOTS.find((s) => s.agentId === agentId);
+    if (!origin || !spot) return null;
+    return {
+      x: (origin.col + spot.col) * TS,
+      y: (origin.yWallBase + spot.row + 0.45) * TS,
+      facing: spot.facing,
+      tier: spot.tier,
+    };
+  }
+
+  private pointForPathNode(nodeId: string): { x: number; y: number } | null {
+    const node = PATH_NODES.find((n) => n.id === nodeId);
+    if (!node) return null;
+    return {
+      x: node.col * TS,
+      y: (node.row + 0.4) * TS,
+    };
+  }
+
+  private facingBetween(from: { x: number; y: number }, to: { x: number; y: number }, fallback: Facing): Facing {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      if (dx > 4) return "east";
+      if (dx < -4) return "west";
+    }
+    if (dy > 4) return "south";
+    if (dy < -4) return "north";
+    return fallback;
+  }
+
+  private pathBetween(startId: string, endId: string): string[] {
+    if (startId === endId) return [startId];
+
+    const neighbors = new Map<string, string[]>();
+    const addNeighbor = (from: string, to: string) => {
+      const list = neighbors.get(from) ?? [];
+      list.push(to);
+      neighbors.set(from, list);
+    };
+
+    for (const edge of PATH_EDGES) {
+      addNeighbor(edge.from, edge.to);
+      addNeighbor(edge.to, edge.from);
+    }
+
+    const queue: string[][] = [[startId]];
+    const visited = new Set<string>([startId]);
+
+    while (queue.length > 0) {
+      const path = queue.shift()!;
+      const last = path[path.length - 1];
+      for (const next of neighbors.get(last) ?? []) {
+        if (visited.has(next)) continue;
+        const nextPath = [...path, next];
+        if (next === endId) return nextPath;
+        visited.add(next);
+        queue.push(nextPath);
+      }
+    }
+
+    return [];
+  }
+
+  private walkAgentRoute(
+    agentId: string,
+    route: Array<{ x: number; y: number }>,
+    finalFacing: Facing,
+    onComplete: () => void
+  ) {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite || route.length === 0) {
+      onComplete();
+      return;
+    }
+
+    const [next, ...rest] = route;
+    const facing = this.facingBetween(sprite, next, finalFacing);
+    this.setAgentFacing(agentId, facing);
+
+    const distance = Phaser.Math.Distance.Between(sprite.x, sprite.y, next.x, next.y);
+    const duration = Phaser.Math.Clamp(distance * 2.4, 240, 950);
+    this.tweens.add({
+      targets: sprite,
+      x: next.x,
+      y: next.y,
+      duration,
+      ease: "Sine.easeInOut",
+      onComplete: () => this.walkAgentRoute(agentId, rest, finalFacing, onComplete),
+    });
+  }
+
   private applyIdleMotion(agentId: string) {
     const sprite = this.agentSprites.get(agentId);
     if (!sprite) return;
     const m = MOTION[agentId];
     if (!m) return;
     const cfg = m.idle;
-    const baseX = this.agentBaseX.get(agentId)!;
-    const baseY = this.agentBaseY.get(agentId)!;
+    const idleSpot = CHAMBER_USE_SPOTS[agentId]?.idle;
+    const point = idleSpot ? this.pointForUseSpot(agentId, idleSpot) : null;
+    const baseX = point?.x ?? this.agentBaseX.get(agentId)!;
+    const baseY = point?.y ?? this.agentBaseY.get(agentId)!;
 
     this.tweens.killTweensOf(sprite);
-    sprite.setTint(0xffffff).setAlpha(cfg.alpha);
+    sprite.setTint(0xffffff).setAlpha(cfg.alpha).setAngle(0).setDepth(5);
+    this.setAgentFacing(agentId, idleSpot?.facing ?? "south");
 
     // Reset to base position
     sprite.x = baseX;
@@ -685,12 +923,15 @@ class KeepScene extends Phaser.Scene {
     const m = MOTION[agentId];
     if (!m) return;
     const cfg = m.active;
-    const baseX = this.agentBaseX.get(agentId)!;
-    const baseY = this.agentBaseY.get(agentId)!;
+    const heroSpot = CHAMBER_USE_SPOTS[agentId]?.hero;
+    const point = heroSpot ? this.pointForUseSpot(agentId, heroSpot) : null;
+    const baseX = point?.x ?? this.agentBaseX.get(agentId)!;
+    const baseY = point?.y ?? this.agentBaseY.get(agentId)!;
     const bounds = this.chamberBounds.get(agentId);
 
     this.tweens.killTweensOf(sprite);
-    sprite.clearTint().setAlpha(cfg.alpha);
+    sprite.clearTint().setAlpha(cfg.alpha).setAngle(0).setDepth(5);
+    this.setAgentFacing(agentId, heroSpot?.facing ?? "south");
 
     sprite.x = baseX;
     sprite.y = baseY;
@@ -717,10 +958,55 @@ class KeepScene extends Phaser.Scene {
       const dur = Math.max(1800, range * 3.5);
       sprite.x = left + range / 2;
       this.tweens.add({ targets: sprite, x: right, duration: dur, yoyo: true, repeat: -1, ease: "Sine.easeInOut",
-        onYoyo: () => sprite.setFlipX(true),
-        onRepeat: () => sprite.setFlipX(false),
+        onYoyo: () => this.setAgentFacing(agentId, "west"),
+        onRepeat: () => this.setAgentFacing(agentId, "east"),
       });
     }
+  }
+
+  private applyCouncilMotion(agentId: string, walking: boolean) {
+    const sprite = this.agentSprites.get(agentId);
+    const target = this.pointForCouncilSpot(agentId);
+    if (!sprite || !target) {
+      this.applyActiveMotion(agentId);
+      return;
+    }
+
+    const m = MOTION[agentId];
+    const cfg = m?.active;
+    this.tweens.killTweensOf(sprite);
+    sprite.clearTint().setAlpha(cfg?.alpha ?? 1).setAngle(0).setDepth(target.tier === "back" ? 4.8 : 6.2);
+
+    const settle = () => {
+      this.setAgentFacing(agentId, target.facing);
+      this.tweens.add({
+        targets: sprite,
+        y: target.y - (cfg?.bobAmp ?? 3),
+        duration: cfg?.bobDur ?? 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: cfg?.ease ?? "Sine.easeInOut",
+      });
+    };
+
+    if (walking) {
+      const graphRoute = this.pathBetween(`chamber:${agentId}`, "chamber:cortana")
+        .map((nodeId) => this.pointForPathNode(nodeId))
+        .filter((point): point is { x: number; y: number } => Boolean(point));
+      const route = [...graphRoute, { x: target.x, y: target.y }];
+      this.walkAgentRoute(agentId, route, target.facing, settle);
+      return;
+    }
+
+    this.setAgentFacing(agentId, this.facingBetween(sprite, target, target.facing));
+    this.tweens.add({
+      targets: sprite,
+      x: target.x,
+      y: target.y,
+      duration: 420,
+      ease: "Sine.easeInOut",
+      onComplete: settle,
+    });
   }
 
   private applyDormantMotion(agentId: string) {
@@ -731,6 +1017,7 @@ class KeepScene extends Phaser.Scene {
 
     this.tweens.killTweensOf(sprite);
     sprite.clearTint().setAlpha(0.45).setAngle(0).setFlipX(false);
+    this.setAgentFacing(agentId, "south");
     sprite.x = baseX;
     sprite.y = baseY;
 
@@ -745,8 +1032,8 @@ class KeepScene extends Phaser.Scene {
     if (state === "active") {
       for (const t of torches) {
         this.tweens.killTweensOf(t);
-        this.tweens.add({ targets: t, alpha: 1.0, duration: 400, ease: "Sine.easeOut" });
-        this.tweens.add({ targets: t, scaleX: SCALE * 1.1, scaleY: SCALE * 1.1, duration: 600, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+        t.setTexture("torch_purple");
+        this.tweens.add({ targets: t, alpha: 0.7, duration: 800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
       }
       if (glow) {
         this.tweens.killTweensOf(glow);
@@ -756,7 +1043,8 @@ class KeepScene extends Phaser.Scene {
     } else if (state === "idle") {
       for (const t of torches) {
         this.tweens.killTweensOf(t);
-        this.tweens.add({ targets: t, alpha: 0.85, scaleX: SCALE, scaleY: SCALE, duration: 400 });
+        t.setTexture("torch");
+        t.setAlpha(1);
       }
       if (glow) {
         this.tweens.killTweensOf(glow);
@@ -765,7 +1053,8 @@ class KeepScene extends Phaser.Scene {
     } else {
       for (const t of torches) {
         this.tweens.killTweensOf(t);
-        this.tweens.add({ targets: t, alpha: 0.35, scaleX: SCALE, scaleY: SCALE, duration: 600 });
+        t.setTexture("torch");
+        t.setAlpha(0.5);
       }
       if (glow) {
         this.tweens.killTweensOf(glow);
@@ -793,7 +1082,7 @@ class KeepScene extends Phaser.Scene {
   }
 
   setAgentStates(states: Partial<Record<string, AgentState>>) {
-    this.currentStates = states;
+    const previousStates = this.currentStates;
 
     // Map the 12-state machine to render tier (active / idle / dormant).
     // Truth doc §8 lists the full vocabulary; agentStateTier collapses it.
@@ -803,17 +1092,27 @@ class KeepScene extends Phaser.Scene {
       if (!sprite) continue;
       const state = states[agentId];
       const tier = agentStateTier(state);
+      const shouldApplyMotion = !this.hasAppliedStates || previousStates[agentId] !== state;
 
-      if (tier === "active") {
-        this.applyActiveMotion(agentId);
-        this.applyChamberLighting(agentId, "active");
-        if (agentId !== "cortana" && !firstActiveNonCortana) firstActiveNonCortana = agentId;
-      } else if (tier === "idle") {
-        this.applyIdleMotion(agentId);
-        this.applyChamberLighting(agentId, "idle");
-      } else {
-        this.applyDormantMotion(agentId);
-        this.applyChamberLighting(agentId, "dormant");
+      if (shouldApplyMotion) {
+        if (state === "walking-to-ceremony" || state === "council-seated") {
+          this.applyCouncilMotion(agentId, state === "walking-to-ceremony");
+          this.applyChamberLighting(agentId, "active");
+        } else if (tier === "active") {
+          this.applyActiveMotion(agentId);
+          this.applyChamberLighting(agentId, "active");
+        } else if (tier === "idle") {
+          this.applyIdleMotion(agentId);
+          this.applyChamberLighting(agentId, "idle");
+        } else {
+          this.applyDormantMotion(agentId);
+          this.applyChamberLighting(agentId, "dormant");
+        }
+      }
+      if (state === "walking-to-ceremony" || state === "council-seated") {
+        if (agentId !== "cortana" && !firstActiveNonCortana) firstActiveNonCortana = "cortana";
+      } else if (tier === "active" && agentId !== "cortana" && !firstActiveNonCortana) {
+        firstActiveNonCortana = agentId;
       }
 
       // State-icon emote — swap texture or hide. Cortana excluded; her dais
@@ -830,18 +1129,24 @@ class KeepScene extends Phaser.Scene {
     }
 
     this.updateOrbTarget(firstActiveNonCortana);
+    this.currentStates = states;
+    this.hasAppliedStates = true;
+  }
+
+  update() {
+    for (const [agentId, emote] of this.agentEmotes) {
+      const sprite = this.agentSprites.get(agentId);
+      if (!sprite || !emote.visible) continue;
+      emote.x = sprite.x;
+      emote.y = sprite.y - sprite.displayHeight - 14;
+    }
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   private spawnTorch(col: number, row: number, phase: number): Phaser.GameObjects.Image {
-    // Castle torch sconce — castle_11 is a 32×32 tile with the wall section
-    // baked in. Origin (0.5, 0.5) so the active-state scale tween grows the
-    // sprite outward symmetrically rather than down-and-right (which read as
-    // sliding instead of pulsing). Position is the center of the 2×2 grid
-    // block the torch occupies, so the visual still aligns with the back wall.
     const evenCol = col - (col % 2);
-    const t = this.add.image(evenCol * TS + TS, row * TS + TS, "castle_11");
+    const t = this.add.image(evenCol * TS + TS, row * TS + TS, "torch");
     t.setOrigin(0.5, 0.5).setScale(SCALE).setDepth(6).setData("phase", phase);
     this.allTorches.push(t);
     return t;
@@ -871,11 +1176,18 @@ class KeepScene extends Phaser.Scene {
   // 32×32 PixelLab castle tile — occupies a 2×2 block of the 16×16 grid.
   // Origin top-left so (col, row) addresses the upper-left corner; the tile
   // spans columns [col..col+1] and rows [row..row+1].
-  private placeCastleTile(col: number, row: number, key: string, alpha = 1) {
+  private placeCastleTile(col: number, row: number, key: string, depth = 0) {
     const img = this.add.image(col * TS, row * TS, key);
-    img.setOrigin(0, 0).setScale(SCALE).setDepth(0);
-    if (alpha < 1) img.setAlpha(alpha);
+    img.setOrigin(0, 0).setScale(SCALE).setDepth(depth);
     return img;
+  }
+
+  private drawHorizontalBorder(row: number) {
+    for (let c = 0; c < FLOOR_TILES_WIDE; c += 2) {
+      const slot = Math.floor(c / 2) + Math.floor(row / 2);
+      const key = `castle_${CASTLE_WALL_POOL[slot % CASTLE_WALL_POOL.length]}`;
+      this.placeCastleTile(c, row, key, 1);
+    }
   }
 
   private placePassages() {
@@ -917,8 +1229,7 @@ export default function KeepSceneView({ agentStates }: Props) {
       parent: containerRef.current,
       pixelArt: true, antialias: false, roundPixels: true,
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        mode: Phaser.Scale.NONE,
         width: CANVAS_W,
         height: CANVAS_H,
       },
@@ -931,19 +1242,28 @@ export default function KeepSceneView({ agentStates }: Props) {
     });
 
     const applyStyle = () => {
+      const container = containerRef.current;
       const canvas = containerRef.current?.querySelector("canvas");
-      if (canvas) {
-        canvas.style.width = "100%";
-        canvas.style.height = "auto";
-        canvas.style.imageRendering = "pixelated";
-        canvas.style.display = "block";
-      }
+      if (!container || !canvas) return;
+
+      const pad = 16;
+      const availableW = Math.max(container.clientWidth - pad, 1);
+      const availableH = Math.max(container.clientHeight - pad, 1);
+      const fitScale = Math.min(availableW / CANVAS_W, availableH / CANVAS_H, 1);
+
+      canvas.style.width = `${Math.floor(CANVAS_W * fitScale)}px`;
+      canvas.style.height = `${Math.floor(CANVAS_H * fitScale)}px`;
+      canvas.style.imageRendering = "pixelated";
+      canvas.style.display = "block";
     };
     const t1 = setTimeout(applyStyle, 200);
     const t2 = setTimeout(applyStyle, 800);
+    const resizeObserver = new ResizeObserver(applyStyle);
+    resizeObserver.observe(containerRef.current);
 
     return () => {
       clearTimeout(t1); clearTimeout(t2);
+      resizeObserver.disconnect();
       game.destroy(true);
       gameRef.current = null; sceneRef.current = null;
     };
@@ -957,9 +1277,10 @@ export default function KeepSceneView({ agentStates }: Props) {
     <div
       ref={containerRef}
       style={{
-        width: "100%", height: "100%", overflow: "auto",
+        position: "absolute", inset: 0,
+        width: "100%", height: "100%", overflow: "hidden",
         backgroundColor: C.background, display: "flex",
-        justifyContent: "center", alignItems: "flex-start",
+        justifyContent: "center", alignItems: "center",
         padding: "0.5rem", lineHeight: 0, fontSize: 0,
       }}
     />

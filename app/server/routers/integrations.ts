@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import {
@@ -5,12 +6,16 @@ import {
   pollInbox,
   publishToOutbox,
 } from "../integrations/notion";
-import { getVaultStatus } from "../integrations/vault";
+import { getObsidianStatus, getVaultLayout, getVaultStatus } from "../integrations/vault";
 
 export const integrationsRouter = router({
   status: publicProcedure.query(async () => {
-    const [notion, vault] = await Promise.all([getNotionStatus(), getVaultStatus()]);
-    return { notion, vault };
+    const [notion, vault, obsidian] = await Promise.all([
+      getNotionStatus(),
+      getVaultStatus(),
+      getObsidianStatus(),
+    ]);
+    return { notion, vault, obsidian, vaultLayout: getVaultLayout() };
   }),
   notionPollInbox: publicProcedure.mutation(async () => {
     return pollInbox();
@@ -25,9 +30,16 @@ export const integrationsRouter = router({
         project: z.string().max(120).optional(),
         sessionRef: z.string().max(120).optional(),
         sessionId: z.number().int().optional(),
+        approved: z.literal(true),
       }),
     )
     .mutation(async ({ input }) => {
+      if (input.approved !== true) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Notion publishes require explicit approval.",
+        });
+      }
       return publishToOutbox(input);
     }),
 });

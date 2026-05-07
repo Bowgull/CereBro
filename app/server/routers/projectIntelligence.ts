@@ -1,0 +1,1180 @@
+import { execFile } from "child_process";
+import fs from "fs/promises";
+import { promisify } from "util";
+import { z } from "zod";
+import { getCerebroDb } from "../cerebroDb";
+import { publicProcedure, router } from "../_core/trpc";
+
+const execFileAsync = promisify(execFile);
+
+const intakeCategories = [
+  "quick_answer",
+  "everyday_note",
+  "decision",
+  "reminder",
+  "message",
+  "learning",
+  "self_improvement",
+  "system_improvement",
+  "research",
+  "creative",
+  "file_hygiene",
+  "project_build",
+  "project_design",
+  "project_qa",
+  "project_ship",
+  "project_package",
+  "portfolio",
+  "freelance",
+  "source_capture",
+  "prompt_reuse",
+  "artifact_write",
+] as const;
+
+const projectModes = ["Build", "Design", "QA", "Ship", "Package", "Pitch", "Learn", "Hygiene"] as const;
+const draftActionKeys = ["plan_next_slice", "inspect_dirty_state", "package_proof", "validation_pass"] as const;
+
+const projectProfiles = [
+  {
+    slug: "declyne",
+    name: "Declyne",
+    localPath: "/Users/lindsaybell/Developer/Declyne",
+    githubRepo: "Bowgull/Declyne",
+    priorityClass: "market_candidate",
+    currentMode: "Build",
+    status: "Active build. High-trust finance app, not App Store-ready yet.",
+    stack: ["React", "Vite", "Capacitor", "Hono", "Cloudflare D1", "Drizzle", "pnpm"],
+    riskFlags: ["dirty_worktree", "finance_logic", "privacy_security", "app_store", "plaid_track"],
+    nextAction: "Plan the Plaid/bank-connect track and inspect current dirty UI changes before any code work.",
+    ownerAgent: "tony",
+    supportAgents: ["batman", "gojo", "oak", "spock", "cortana"],
+  },
+  {
+    slug: "waymark",
+    name: "Waymark",
+    localPath: "/Users/lindsaybell/Developer/Waymark",
+    githubRepo: "Bowgull/Waymark",
+    priorityClass: "active_build",
+    currentMode: "Build",
+    status: "Personal training and AI coach. Strong portfolio proof.",
+    stack: ["React", "Vite", "Capacitor", "Cloudflare", "D1", "Hono", "Drizzle", "Strava"],
+    riskFlags: ["ios_native", "ai_coaching", "portfolio_proof"],
+    nextAction: "Keep active build work safe and package the strongest proof into Bridgefour.",
+    ownerAgent: "tony",
+    supportAgents: ["batman", "gojo", "aang", "c3po"],
+  },
+  {
+    slug: "sygnalist",
+    name: "Sygnalist",
+    localPath: "/Users/lindsaybell/Developer/sygnalist-brain",
+    githubRepo: "Bowgull/sygnalist-brain",
+    priorityClass: "portfolio_proof",
+    currentMode: "Package",
+    status: "Job-search radar product and freelance/client proof.",
+    stack: ["Apps Script", "Next.js", "Supabase", "Vercel", "OpenAI", "Claude"],
+    riskFlags: ["modified_gitignore", "multi_source_ingestion", "client_visible"],
+    nextAction: "Understand legacy and rebuilt surfaces, then preserve the manual-explicit-visible law.",
+    ownerAgent: "tony",
+    supportAgents: ["batman", "gojo", "c3po", "spock"],
+  },
+  {
+    slug: "bridgefour",
+    name: "Bridgefour",
+    localPath: "/Users/lindsaybell/Developer/bridgefour",
+    githubRepo: "Bowgull/Bridgefour",
+    priorityClass: "portfolio",
+    currentMode: "Package",
+    status: "Living portfolio website. Always evolving.",
+    stack: ["Next.js", "React", "Tailwind", "Framer Motion", "Vercel"],
+    riskFlags: ["untracked_resume_asset", "public_portfolio"],
+    nextAction: "Keep case studies current and add Declyne when the product story is ready.",
+    ownerAgent: "gojo",
+    supportAgents: ["batman", "c3po", "tony"],
+  },
+  {
+    slug: "cerebro",
+    name: "CereBro",
+    localPath: "/Users/lindsaybell/Desktop/CereBro",
+    githubRepo: "Bowgull/CereBro",
+    priorityClass: "infrastructure",
+    currentMode: "Build",
+    status: "Personal command center and agent operating layer.",
+    stack: ["React", "Tailwind", "Phaser", "Express", "tRPC", "libSQL", "WebSocket"],
+    riskFlags: ["dirty_worktree", "agent_runtime", "vault_lifecycle"],
+    nextAction: "Build the first Project Intelligence surface and keep the file lifecycle gates intact.",
+    ownerAgent: "cortana",
+    supportAgents: ["batman", "tony", "gojo", "piccolo", "oak"],
+  },
+] as const;
+
+async function pathExists(target: string): Promise<boolean> {
+  try {
+    await fs.access(target);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function gitOutput(cwd: string, args: string[]): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync("git", args, { cwd, timeout: 5000, maxBuffer: 200_000 });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+function parseStatus(status: string | null) {
+  if (!status) {
+    return {
+      branch: null,
+      upstream: null,
+      dirty: false,
+      dirtyCount: 0,
+      changes: [] as string[],
+      statusText: "unavailable",
+    };
+  }
+
+  const lines = status.split("\n").filter(Boolean);
+  const header = lines[0] ?? "";
+  const changes = lines.slice(1);
+  const branchMatch = header.match(/^##\s+([^.\s]+)(?:\.\.\.([^\s]+))?/);
+
+  return {
+    branch: branchMatch?.[1] ?? (header.replace(/^##\s*/, "") || null),
+    upstream: branchMatch?.[2] ?? null,
+    dirty: changes.length > 0,
+    dirtyCount: changes.length,
+    changes: changes.slice(0, 10),
+    statusText: changes.length > 0 ? "dirty" : "clean",
+  };
+}
+
+function rowToTaskSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    title: String(r.title),
+    status: String(r.status),
+    agent: r.agent == null ? null : String(r.agent),
+    updatedAt: Number(r.updated_at),
+  };
+}
+
+async function taskRollupForPath(pathValue: string) {
+  const db = await getCerebroDb();
+  const project = await db.execute({
+    sql: `SELECT id FROM projects WHERE path = ? LIMIT 1`,
+    args: [pathValue],
+  });
+  const projectId = project.rows[0]?.id == null ? null : Number(project.rows[0].id);
+  if (projectId == null) {
+    return {
+      projectId: null,
+      open: 0,
+      inProgress: 0,
+      done: 0,
+      total: 0,
+      recent: [] as ReturnType<typeof rowToTaskSummary>[],
+    };
+  }
+
+  const [counts, recent] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT status, COUNT(*) AS count
+        FROM tasks
+        WHERE project_id = ?
+        GROUP BY status
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, title, status, agent, updated_at
+        FROM tasks
+        WHERE project_id = ?
+        ORDER BY
+          CASE status
+            WHEN 'in_progress' THEN 0
+            WHEN 'open' THEN 1
+            WHEN 'done' THEN 2
+            WHEN 'cancelled' THEN 3
+          END,
+          updated_at DESC
+        LIMIT 5
+      `,
+      args: [projectId],
+    }),
+  ]);
+
+  const countMap = new Map(counts.rows.map((row) => [String(row.status), Number(row.count)]));
+  const open = countMap.get("open") ?? 0;
+  const inProgress = countMap.get("in_progress") ?? 0;
+  const done = countMap.get("done") ?? 0;
+  const cancelled = countMap.get("cancelled") ?? 0;
+
+  return {
+    projectId,
+    open,
+    inProgress,
+    done,
+    total: open + inProgress + done + cancelled,
+    recent: recent.rows.map(rowToTaskSummary),
+  };
+}
+
+function rowToCommandSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    command: String(r.command),
+    risk: String(r.risk),
+    suggestedAgent: r.suggested_agent == null ? null : String(r.suggested_agent),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowToCaptureSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    title: String(r.title),
+    captureType: String(r.capture_type),
+    status: String(r.status),
+    sensitive: Boolean(r.sensitive_data_flag),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowToApprovalSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    actionType: String(r.action_type),
+    targetType: r.target_type == null ? null : String(r.target_type),
+    requestedByAgent: r.requested_by_agent == null ? null : String(r.requested_by_agent),
+    sensitive: Boolean(r.sensitive_data_flag),
+    costRisk: r.cost_risk == null ? null : String(r.cost_risk),
+    reason: r.reason == null ? null : String(r.reason),
+    contextSummary: r.context_summary == null ? null : String(r.context_summary),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowToReminderSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    title: String(r.title),
+    status: String(r.status),
+    reviewPriority: r.review_priority == null ? "normal" : String(r.review_priority),
+    timingHint: r.timing_hint == null ? null : String(r.timing_hint),
+    approvalScope: r.approval_scope == null ? null : String(r.approval_scope),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowToMessageSummary(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    title: String(r.title),
+    status: String(r.status),
+    reviewPriority: r.review_priority == null ? "normal" : String(r.review_priority),
+    recipientHint: r.recipient_hint == null ? null : String(r.recipient_hint),
+    approvalScope: r.approval_scope == null ? null : String(r.approval_scope),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowToActionDraftNote(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    draftId: r.draft_id == null ? null : Number(r.draft_id),
+    projectId: r.project_id == null ? null : Number(r.project_id),
+    projectSlug: String(r.project_slug),
+    note: String(r.note),
+    authorAgent: String(r.author_agent),
+    status: String(r.status),
+    createdAt: Number(r.created_at),
+  };
+}
+
+function rowsToCountMap(rows: Record<string, unknown>[], keyName: string) {
+  return Object.fromEntries(rows.map((row) => [String(row[keyName]), Number(row.count)]));
+}
+
+function pendingApprovalWhereForProject(projectId: number) {
+  return {
+    sql: `
+      a.status = 'pending'
+      AND (
+        t.project_id = ?
+        OR co.project_id = ?
+        OR cap.project_id = ?
+        OR rp.project_id = ?
+        OR mp.project_id = ?
+        OR se.project_id = ?
+      )
+    `,
+    args: [projectId, projectId, projectId, projectId, projectId, projectId],
+  };
+}
+
+const approvalProjectBaseFrom = `
+  FROM approvals a
+  LEFT JOIN tasks t ON t.id = a.task_id
+  LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
+  LEFT JOIN capture_observations cap ON a.target_type = 'capture_observation' AND cap.id = a.target_id
+  LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
+  LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
+  LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+`;
+
+async function approvalRollupForProject(projectId: number | null) {
+  if (projectId == null) {
+    return {
+      pending: 0,
+      sensitive: 0,
+      byActionType: {} as Record<string, number>,
+      recent: [] as ReturnType<typeof rowToApprovalSummary>[],
+    };
+  }
+
+  const db = await getCerebroDb();
+  const where = pendingApprovalWhereForProject(projectId);
+  const [counts, byActionType, recent] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(DISTINCT a.id) AS pending,
+          SUM(CASE WHEN a.sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive
+        ${approvalProjectBaseFrom}
+        WHERE ${where.sql}
+      `,
+      args: where.args,
+    }),
+    db.execute({
+      sql: `
+        SELECT a.action_type, COUNT(DISTINCT a.id) AS count
+        ${approvalProjectBaseFrom}
+        WHERE ${where.sql}
+        GROUP BY a.action_type
+      `,
+      args: where.args,
+    }),
+    db.execute({
+      sql: `
+        SELECT DISTINCT a.id, a.action_type, a.target_type, a.requested_by_agent,
+                        a.sensitive_data_flag, a.cost_risk, a.reason,
+                        a.context_summary, a.created_at
+        ${approvalProjectBaseFrom}
+        WHERE ${where.sql}
+        ORDER BY a.created_at DESC, a.id DESC
+        LIMIT 3
+      `,
+      args: where.args,
+    }),
+  ]);
+
+  return {
+    pending: Number(counts.rows[0]?.pending ?? 0),
+    sensitive: Number(counts.rows[0]?.sensitive ?? 0),
+    byActionType: rowsToCountMap(byActionType.rows, "action_type"),
+    recent: recent.rows.map(rowToApprovalSummary),
+  };
+}
+
+async function hedwigRollupForProject(projectId: number | null) {
+  if (projectId == null) {
+    return {
+      pendingCaptures: 0,
+      sourceProposals: 0,
+      reminderProposals: 0,
+      messageDrafts: 0,
+      needsReview: 0,
+      sensitive: 0,
+      byCaptureType: {} as Record<string, number>,
+      byStatus: {} as Record<string, number>,
+    };
+  }
+
+  const db = await getCerebroDb();
+  const openProposalStatuses = ["proposed", "reviewing", "ready_for_approval"];
+  const sourceCaptureTypes = ["link", "article", "video", "reddit"];
+  const [captureCounts, captureTypes, captureStatuses, reminders, messages] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS pending_captures,
+          SUM(CASE WHEN needs_review = 1 THEN 1 ELSE 0 END) AS needs_review,
+          SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+          SUM(CASE WHEN capture_type IN (${sourceCaptureTypes.map(() => "?").join(",")})
+                    AND status IN ('inbox', 'triaged', 'sourced')
+                   THEN 1 ELSE 0 END) AS source_proposals
+        FROM capture_observations
+        WHERE project_id = ? AND status != 'archived'
+      `,
+      args: [...sourceCaptureTypes, projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT capture_type, COUNT(*) AS count
+        FROM capture_observations
+        WHERE project_id = ? AND status != 'archived'
+        GROUP BY capture_type
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT status, COUNT(*) AS count
+        FROM capture_observations
+        WHERE project_id = ? AND status != 'archived'
+        GROUP BY status
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT COUNT(*) AS count
+        FROM reminder_proposals
+        WHERE project_id = ? AND status IN (${openProposalStatuses.map(() => "?").join(",")})
+      `,
+      args: [projectId, ...openProposalStatuses],
+    }),
+    db.execute({
+      sql: `
+        SELECT COUNT(*) AS count
+        FROM message_draft_proposals
+        WHERE project_id = ? AND status IN (${openProposalStatuses.map(() => "?").join(",")})
+      `,
+      args: [projectId, ...openProposalStatuses],
+    }),
+  ]);
+
+  return {
+    pendingCaptures: Number(captureCounts.rows[0]?.pending_captures ?? 0),
+    sourceProposals: Number(captureCounts.rows[0]?.source_proposals ?? 0),
+    reminderProposals: Number(reminders.rows[0]?.count ?? 0),
+    messageDrafts: Number(messages.rows[0]?.count ?? 0),
+    needsReview: Number(captureCounts.rows[0]?.needs_review ?? 0),
+    sensitive: Number(captureCounts.rows[0]?.sensitive ?? 0),
+    byCaptureType: rowsToCountMap(captureTypes.rows, "capture_type"),
+    byStatus: rowsToCountMap(captureStatuses.rows, "status"),
+  };
+}
+
+async function terminalStatusRollupForProject(projectId: number | null) {
+  if (projectId == null) {
+    return {
+      total: 0,
+      blocked: 0,
+      reviewing: 0,
+      byStatus: {} as Record<string, number>,
+      byRisk: {} as Record<string, number>,
+    };
+  }
+
+  const db = await getCerebroDb();
+  const [statusCounts, riskCounts] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT status, COUNT(*) AS count
+        FROM command_observations
+        WHERE project_id = ?
+        GROUP BY status
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT risk, COUNT(*) AS count
+        FROM command_observations
+        WHERE project_id = ?
+        GROUP BY risk
+      `,
+      args: [projectId],
+    }),
+  ]);
+  const byStatus = rowsToCountMap(statusCounts.rows, "status");
+  const byRisk = rowsToCountMap(riskCounts.rows, "risk");
+
+  return {
+    total: Object.values(byStatus).reduce((sum, count) => sum + count, 0),
+    blocked: byStatus.blocked ?? 0,
+    reviewing: byStatus.reviewing ?? 0,
+    byStatus,
+    byRisk,
+  };
+}
+
+async function sourceEventRollupForProject(projectId: number | null) {
+  if (projectId == null) {
+    return {
+      total: 0,
+      sensitive: 0,
+      byEventType: {} as Record<string, number>,
+      byTrustLevel: {} as Record<string, number>,
+      recent: [] as Array<{
+        id: number;
+        eventType: string;
+        title: string | null;
+        trustLevel: string | null;
+        sensitive: boolean;
+        createdAt: number;
+      }>,
+    };
+  }
+
+  const db = await getCerebroDb();
+  const [counts, eventTypes, trustLevels, recent] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT COUNT(*) AS total, SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive
+        FROM source_events
+        WHERE project_id = ?
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT event_type, COUNT(*) AS count
+        FROM source_events
+        WHERE project_id = ?
+        GROUP BY event_type
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT COALESCE(trust_level, 'unknown') AS trust_level, COUNT(*) AS count
+        FROM source_events
+        WHERE project_id = ?
+        GROUP BY COALESCE(trust_level, 'unknown')
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, event_type, title, trust_level, sensitive_data_flag, created_at
+        FROM source_events
+        WHERE project_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 3
+      `,
+      args: [projectId],
+    }),
+  ]);
+
+  return {
+    total: Number(counts.rows[0]?.total ?? 0),
+    sensitive: Number(counts.rows[0]?.sensitive ?? 0),
+    byEventType: rowsToCountMap(eventTypes.rows, "event_type"),
+    byTrustLevel: rowsToCountMap(trustLevels.rows, "trust_level"),
+    recent: recent.rows.map((row) => ({
+      id: Number(row.id),
+      eventType: String(row.event_type),
+      title: row.title == null ? null : String(row.title),
+      trustLevel: row.trust_level == null ? null : String(row.trust_level),
+      sensitive: Boolean(row.sensitive_data_flag),
+      createdAt: Number(row.created_at),
+    })),
+  };
+}
+
+async function actionDraftRollupForProject(projectId: number | null, projectSlug: string) {
+  const db = await getCerebroDb();
+  const whereSql = projectId == null ? `project_slug = ?` : `(project_id = ? OR project_slug = ?)`;
+  const args = projectId == null ? [projectSlug] : [projectId, projectSlug];
+  const [counts, byActionKey] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT COUNT(*) AS total
+        FROM project_action_drafts
+        WHERE ${whereSql}
+      `,
+      args,
+    }),
+    db.execute({
+      sql: `
+        SELECT action_key, COUNT(*) AS count
+        FROM project_action_drafts
+        WHERE ${whereSql}
+        GROUP BY action_key
+      `,
+      args,
+    }),
+  ]);
+
+  return {
+    total: Number(counts.rows[0]?.total ?? 0),
+    byActionKey: rowsToCountMap(byActionKey.rows, "action_key"),
+  };
+}
+
+async function activityRollupForProject(projectId: number | null, projectSlug: string) {
+  if (projectId == null) {
+    return {
+      terminalObservations: 0,
+      captureObservations: 0,
+      recentCommands: [] as ReturnType<typeof rowToCommandSummary>[],
+      recentCaptures: [] as ReturnType<typeof rowToCaptureSummary>[],
+      approvals: await approvalRollupForProject(null),
+      hedwig: await hedwigRollupForProject(null),
+      terminalStatus: await terminalStatusRollupForProject(null),
+      sourceEvents: await sourceEventRollupForProject(null),
+      actionDrafts: await actionDraftRollupForProject(null, projectSlug),
+    };
+  }
+
+  const db = await getCerebroDb();
+  const [
+    commandCount,
+    captureCount,
+    recentCommands,
+    recentCaptures,
+    approvals,
+    hedwig,
+    terminalStatus,
+    sourceEvents,
+    actionDrafts,
+  ] = await Promise.all([
+    db.execute({
+      sql: `SELECT COUNT(*) AS count FROM command_observations WHERE project_id = ?`,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `SELECT COUNT(*) AS count FROM capture_observations WHERE project_id = ?`,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, command, risk, suggested_agent, created_at
+        FROM command_observations
+        WHERE project_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 3
+      `,
+      args: [projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, title, capture_type, status, sensitive_data_flag, created_at
+        FROM capture_observations
+        WHERE project_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 3
+      `,
+      args: [projectId],
+    }),
+    approvalRollupForProject(projectId),
+    hedwigRollupForProject(projectId),
+    terminalStatusRollupForProject(projectId),
+    sourceEventRollupForProject(projectId),
+    actionDraftRollupForProject(projectId, projectSlug),
+  ]);
+
+  return {
+    terminalObservations: Number(commandCount.rows[0]?.count ?? 0),
+    captureObservations: Number(captureCount.rows[0]?.count ?? 0),
+    recentCommands: recentCommands.rows.map(rowToCommandSummary),
+    recentCaptures: recentCaptures.rows.map(rowToCaptureSummary),
+    approvals,
+    hedwig,
+    terminalStatus,
+    sourceEvents,
+    actionDrafts,
+  };
+}
+
+type ProjectOverviewItem = (typeof projectProfiles)[number] & {
+  localExists: boolean;
+  tasks: Awaited<ReturnType<typeof taskRollupForPath>>;
+  activity: Awaited<ReturnType<typeof activityRollupForProject>>;
+  git: ReturnType<typeof parseStatus> & { remote: string | null };
+};
+
+function nextSafeActionForProject(project: ProjectOverviewItem) {
+  const { activity, tasks, git } = project;
+  if (activity.approvals.pending > 0) {
+    return `Review ${activity.approvals.pending} local pending approval${activity.approvals.pending === 1 ? "" : "s"} before any external or command action.`;
+  }
+  if (activity.terminalStatus.blocked > 0 || activity.terminalStatus.reviewing > 0) {
+    return "Resolve Terminal Lab blocked/reviewing observations using read-only diagnostics only.";
+  }
+  if (activity.hedwig.needsReview > 0) {
+    return `Triage ${activity.hedwig.needsReview} Hedwig capture${activity.hedwig.needsReview === 1 ? "" : "s"}; keep Notion/Slack writes approval-gated.`;
+  }
+  if (activity.sourceEvents.sensitive > 0) {
+    return "Review sensitive-looking source events before any reuse, enrichment, or durable write.";
+  }
+  if (tasks.inProgress > 0) {
+    return "Continue the active linked task and keep changes scoped to the current project.";
+  }
+  if (tasks.open > 0) {
+    return "Pick the oldest open linked task and convert it into a narrow proposal or build step.";
+  }
+  if (git.dirty) {
+    return "Inspect the dirty worktree carefully before proposing code changes or git operations.";
+  }
+  return project.nextAction;
+}
+
+function draftActionForProject(project: (typeof projectProfiles)[number], actionKey: (typeof draftActionKeys)[number]) {
+  if (actionKey === "inspect_dirty_state") {
+    return {
+      title: `Inspect ${project.name} local state`,
+      summary: [
+        `Goal: make a read-only inspection plan for ${project.name}.`,
+        `Read local status, known risks, and current linked signals before any edit.`,
+        "Output: a short inspection checklist and questions for approval.",
+      ].join("\n"),
+      proposedByAgent: "spock",
+      ownerAgent: "tony",
+    };
+  }
+  if (actionKey === "package_proof") {
+    return {
+      title: `Package ${project.name} proof`,
+      summary: [
+        `Goal: draft a portfolio/package plan for ${project.name}.`,
+        "Identify the strongest proof, missing screenshots/assets, risks, and audience.",
+        "Output: a draft packaging outline only. No files are written.",
+      ].join("\n"),
+      proposedByAgent: "c3po",
+      ownerAgent: "gojo",
+    };
+  }
+  if (actionKey === "validation_pass") {
+    return {
+      title: `Validate ${project.name} readiness`,
+      summary: [
+        `Goal: draft a validation plan for ${project.name}.`,
+        "List claims, checks, high-risk areas, and what evidence is needed.",
+        "Output: Oak/Spock validation checklist only.",
+      ].join("\n"),
+      proposedByAgent: "oak",
+      ownerAgent: "spock",
+    };
+  }
+  return {
+    title: `Plan next ${project.name} slice`,
+    summary: [
+      `Goal: draft the safest next implementation or planning slice for ${project.name}.`,
+      `Use current mode: ${project.currentMode}. Respect risks: ${project.riskFlags.join(", ")}.`,
+      "Output: a proposal only. No task is created and no repo is edited.",
+    ].join("\n"),
+    proposedByAgent: "batman",
+    ownerAgent: project.ownerAgent,
+  };
+}
+
+async function actionDraftRowsForProject(projectId: number | null, projectSlug: string) {
+  const db = await getCerebroDb();
+  const whereSql = projectId == null ? `project_slug = ?` : `(project_id = ? OR project_slug = ?)`;
+  const args = projectId == null ? [projectSlug] : [projectId, projectSlug];
+  const [actionDrafts, actionDraftNotes] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT id, action_key, title, summary, proposed_by_agent, owner_agent, status, created_at
+        FROM project_action_drafts
+        WHERE ${whereSql}
+        ORDER BY created_at DESC, id DESC
+        LIMIT 12
+      `,
+      args,
+    }),
+    db.execute({
+      sql: `
+        SELECT id, draft_id, project_id, project_slug, note, author_agent, status, created_at
+        FROM project_action_draft_notes
+        WHERE ${whereSql}
+        ORDER BY created_at DESC, id DESC
+        LIMIT 40
+      `,
+      args,
+    }),
+  ]);
+  const notesByDraftId = new Map<number, ReturnType<typeof rowToActionDraftNote>[]>();
+  for (const note of actionDraftNotes.rows.map(rowToActionDraftNote)) {
+    if (note.draftId == null) continue;
+    const notes = notesByDraftId.get(note.draftId) ?? [];
+    if (notes.length < 5) notes.push(note);
+    notesByDraftId.set(note.draftId, notes);
+  }
+
+  return actionDrafts.rows.map((row) => ({
+    id: Number(row.id),
+    actionKey: String(row.action_key),
+    title: String(row.title),
+    summary: String(row.summary),
+    proposedByAgent: String(row.proposed_by_agent),
+    ownerAgent: row.owner_agent == null ? null : String(row.owner_agent),
+    status: String(row.status),
+    createdAt: Number(row.created_at),
+    notes: notesByDraftId.get(Number(row.id)) ?? [],
+  }));
+}
+
+function emptyProjectDetail(slug: string, reason: string) {
+  return {
+    found: false as const,
+    mode: "read_only" as const,
+    slug,
+    reason,
+    gates: [
+      "Project Lab detail is local metadata only.",
+      "It does not approve records, execute commands, browse/search, write to Notion/Slack, or edit external repositories.",
+    ],
+    approvals: [] as ReturnType<typeof rowToApprovalSummary>[],
+    terminalObservations: [] as Array<ReturnType<typeof rowToCommandSummary> & { status: string; outputSummary: string | null }>,
+    hedwigCaptures: [] as ReturnType<typeof rowToCaptureSummary>[],
+    reminderProposals: [] as ReturnType<typeof rowToReminderSummary>[],
+    messageDrafts: [] as ReturnType<typeof rowToMessageSummary>[],
+    sourceEvents: [] as Awaited<ReturnType<typeof sourceEventRollupForProject>>["recent"],
+    actionDrafts: [] as Array<{
+      id: number;
+      actionKey: string;
+      title: string;
+      summary: string;
+      proposedByAgent: string;
+      ownerAgent: string | null;
+      status: string;
+      createdAt: number;
+      notes: ReturnType<typeof rowToActionDraftNote>[];
+    }>,
+    git: null as (ReturnType<typeof parseStatus> & {
+      remote: string | null;
+      localExists: boolean;
+      localPath: string;
+      githubRepo: string;
+    }) | null,
+  };
+}
+
+async function projectDetailForSlug(slug: string) {
+  const profile = projectProfiles.find((candidate) => candidate.slug === slug);
+  if (!profile) return emptyProjectDetail(slug, "Unknown Project Lab profile.");
+
+  const exists = await pathExists(profile.localPath);
+  const [status, remote] = exists
+    ? await Promise.all([
+        gitOutput(profile.localPath, ["status", "--short", "--branch"]),
+        gitOutput(profile.localPath, ["remote", "get-url", "origin"]),
+      ])
+    : [null, null];
+  const git = {
+    ...parseStatus(status),
+    remote,
+    localExists: exists,
+    localPath: profile.localPath,
+    githubRepo: profile.githubRepo,
+  };
+
+  const tasks = await taskRollupForPath(profile.localPath);
+  if (tasks.projectId == null) {
+    return {
+      ...emptyProjectDetail(slug, "No linked harness project row exists yet."),
+      found: true as const,
+      project: profile,
+      projectId: null,
+      git,
+      actionDrafts: await actionDraftRowsForProject(null, slug),
+    };
+  }
+
+  const db = await getCerebroDb();
+  const approvalWhere = pendingApprovalWhereForProject(tasks.projectId);
+  const [approvals, terminal, captures, reminders, messages, sources, actionDrafts] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT DISTINCT a.id, a.action_type, a.target_type, a.requested_by_agent,
+                        a.sensitive_data_flag, a.cost_risk, a.reason,
+                        a.context_summary, a.created_at
+        ${approvalProjectBaseFrom}
+        WHERE ${approvalWhere.sql}
+        ORDER BY a.created_at DESC, a.id DESC
+        LIMIT 12
+      `,
+      args: approvalWhere.args,
+    }),
+    db.execute({
+      sql: `
+        SELECT id, command, risk, suggested_agent, status, output_summary, created_at
+        FROM command_observations
+        WHERE project_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 12
+      `,
+      args: [tasks.projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, title, capture_type, status, sensitive_data_flag, created_at
+        FROM capture_observations
+        WHERE project_id = ? AND status != 'archived'
+        ORDER BY created_at DESC, id DESC
+        LIMIT 12
+      `,
+      args: [tasks.projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, title, timing_hint, status, review_priority, approval_scope, created_at
+        FROM reminder_proposals
+        WHERE project_id = ? AND status != 'archived'
+        ORDER BY created_at DESC, id DESC
+        LIMIT 8
+      `,
+      args: [tasks.projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, title, recipient_hint, status, review_priority, approval_scope, created_at
+        FROM message_draft_proposals
+        WHERE project_id = ? AND status != 'archived'
+        ORDER BY created_at DESC, id DESC
+        LIMIT 8
+      `,
+      args: [tasks.projectId],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, event_type, title, trust_level, sensitive_data_flag, created_at
+        FROM source_events
+        WHERE project_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 12
+      `,
+      args: [tasks.projectId],
+    }),
+    actionDraftRowsForProject(tasks.projectId, slug),
+  ]);
+
+  return {
+    found: true as const,
+    mode: "read_only" as const,
+    project: profile,
+    projectId: tasks.projectId,
+    git,
+    gates: [
+      "Project Lab detail is local metadata only.",
+      "Approval rows shown here are pending local previews, not approved actions.",
+      "Commands still run only through Codex's normal command path.",
+      "Notion, Slack, browser/search, source fetches, and external repo edits are not available from this view.",
+    ],
+    approvals: approvals.rows.map(rowToApprovalSummary),
+    terminalObservations: terminal.rows.map((row) => ({
+      ...rowToCommandSummary(row),
+      status: String(row.status),
+      outputSummary: row.output_summary == null ? null : String(row.output_summary),
+    })),
+    hedwigCaptures: captures.rows.map(rowToCaptureSummary),
+    reminderProposals: reminders.rows.map(rowToReminderSummary),
+    messageDrafts: messages.rows.map(rowToMessageSummary),
+    sourceEvents: sources.rows.map((row) => ({
+      id: Number(row.id),
+      eventType: String(row.event_type),
+      title: row.title == null ? null : String(row.title),
+      trustLevel: row.trust_level == null ? null : String(row.trust_level),
+      sensitive: Boolean(row.sensitive_data_flag),
+      createdAt: Number(row.created_at),
+    })),
+    actionDrafts,
+  };
+}
+
+export const projectIntelligenceRouter = router({
+  overview: publicProcedure.query(async () => {
+    const projects = await Promise.all(
+      projectProfiles.map(async (profile) => {
+        const exists = await pathExists(profile.localPath);
+        const [status, remote] = exists
+          ? await Promise.all([
+              gitOutput(profile.localPath, ["status", "--short", "--branch"]),
+              gitOutput(profile.localPath, ["remote", "get-url", "origin"]),
+            ])
+          : [null, null];
+
+        const tasks = await taskRollupForPath(profile.localPath);
+        const activity = await activityRollupForProject(tasks.projectId, profile.slug);
+
+        const project = {
+          ...profile,
+          localExists: exists,
+          tasks,
+          activity,
+          git: {
+            ...parseStatus(status),
+            remote,
+          },
+        };
+
+        return {
+          ...project,
+          nextSafeAction: nextSafeActionForProject(project),
+        };
+      }),
+    );
+
+    return {
+      mode: "read_only",
+      scannedAt: Math.floor(Date.now() / 1000),
+      intakeCategories,
+      projectModes,
+      projects,
+      summary: {
+        total: projects.length,
+        local: projects.filter((p) => p.localExists).length,
+        dirty: projects.filter((p) => p.git.dirty).length,
+        missing: projects.filter((p) => !p.localExists).length,
+        pendingApprovals: projects.reduce((sum, p) => sum + p.activity.approvals.pending, 0),
+        hedwigProposals: projects.reduce(
+          (sum, p) => sum + p.activity.hedwig.pendingCaptures + p.activity.hedwig.reminderProposals + p.activity.hedwig.messageDrafts,
+          0,
+        ),
+        terminalObservations: projects.reduce((sum, p) => sum + p.activity.terminalStatus.total, 0),
+        sourceEvents: projects.reduce((sum, p) => sum + p.activity.sourceEvents.total, 0),
+        actionDrafts: projects.reduce((sum, p) => sum + p.activity.actionDrafts.total, 0),
+      },
+    };
+  }),
+
+  detail: publicProcedure
+    .input(z.object({ slug: z.string().min(1).max(80) }))
+    .query(async ({ input }) => projectDetailForSlug(input.slug)),
+
+  createActionDraft: publicProcedure
+    .input(
+      z.object({
+        slug: z.string().min(1).max(80),
+        actionKey: z.enum(draftActionKeys),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const profile = projectProfiles.find((candidate) => candidate.slug === input.slug);
+      if (!profile) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          editsRepo: false,
+          createsTask: false,
+          reason: "Unknown Project Lab profile.",
+        };
+      }
+      const db = await getCerebroDb();
+      const project = await db.execute({
+        sql: `SELECT id FROM projects WHERE path = ? LIMIT 1`,
+        args: [profile.localPath],
+      });
+      const projectId = project.rows[0]?.id == null ? null : Number(project.rows[0].id);
+      const draft = draftActionForProject(profile, input.actionKey);
+      const gates = [
+        "Project Lab action drafts are proposal-only.",
+        "This does not create a task, edit a repo, run a command, browse/search, fetch sources, or write to Notion/Slack.",
+        "Any later execution requires a separate explicit approval.",
+      ];
+      const result = await db.execute({
+        sql: `
+          INSERT INTO project_action_drafts (
+            project_id, project_slug, action_key, title, summary,
+            proposed_by_agent, owner_agent, gates
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING id, project_id, project_slug, action_key, title, summary,
+                    proposed_by_agent, owner_agent, gates, status, created_at
+        `,
+        args: [
+          projectId,
+          profile.slug,
+          input.actionKey,
+          draft.title,
+          draft.summary,
+          draft.proposedByAgent,
+          draft.ownerAgent,
+          gates.join("\n"),
+        ],
+      });
+      const row = result.rows[0]!;
+      return {
+        ok: true as const,
+        mode: "local_draft" as const,
+        appendOnly: true,
+        writesExternal: false,
+        editsRepo: false,
+        createsTask: false,
+        draft: {
+          id: Number(row.id),
+          projectId: row.project_id == null ? null : Number(row.project_id),
+          projectSlug: String(row.project_slug),
+          actionKey: String(row.action_key),
+          title: String(row.title),
+          summary: String(row.summary),
+          proposedByAgent: String(row.proposed_by_agent),
+          ownerAgent: row.owner_agent == null ? null : String(row.owner_agent),
+          status: String(row.status),
+          createdAt: Number(row.created_at),
+        },
+        gates,
+      };
+    }),
+
+  appendActionDraftNote: publicProcedure
+    .input(
+      z.object({
+        draftId: z.number().int(),
+        note: z.string().min(1).max(1200),
+        authorAgent: z.string().min(1).max(80).default("cortana"),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const draft = await db.execute({
+        sql: `
+          SELECT id, project_id, project_slug
+          FROM project_action_drafts
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.draftId],
+      });
+      const row = draft.rows[0];
+      if (!row) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          editsRepo: false,
+          createsTask: false,
+          reason: "No Project Lab action draft exists for this id.",
+        };
+      }
+
+      const result = await db.execute({
+        sql: `
+          INSERT INTO project_action_draft_notes (
+            draft_id, project_id, project_slug, note, author_agent
+          )
+          VALUES (?, ?, ?, ?, ?)
+          RETURNING id, draft_id, project_id, project_slug, note, author_agent, status, created_at
+        `,
+        args: [
+          input.draftId,
+          row.project_id ?? null,
+          String(row.project_slug),
+          input.note.trim(),
+          input.authorAgent,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        editsRepo: false,
+        createsTask: false,
+        note: rowToActionDraftNote(result.rows[0]!),
+        gates: [
+          "Created one local append-only Project Lab draft note.",
+          "This did not create a task, edit a repo, run a command, browse/search, fetch sources, or write to Notion/Slack.",
+        ],
+      };
+    }),
+});

@@ -1,0 +1,816 @@
+import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { cerebroColors as C } from "@/lib/keepConfig";
+
+export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
+  const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
+  const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [selectedSessionId, setSelectedSessionId] = useState("");
+  const [observationScope, setObservationScope] = useState<"all" | "selectedTask" | "selectedSession">("all");
+  const [outputText, setOutputText] = useState("");
+  const [exitCode, setExitCode] = useState("0");
+  const [copiedDraftKey, setCopiedDraftKey] = useState<string | null>(null);
+  const plan = trpc.terminalLab.plan.useQuery();
+  const observationFilter =
+    observationScope === "selectedTask" && selectedTaskId
+      ? { limit: 12, taskId: Number(selectedTaskId) }
+      : observationScope === "selectedSession" && selectedSessionId
+        ? { limit: 12, sessionId: Number(selectedSessionId) }
+        : { limit: 12 };
+  const observations = trpc.terminalLab.observations.useQuery(observationFilter);
+  const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
+  const preview = trpc.terminalLab.previewCommand.useMutation();
+  const observeOutput = trpc.terminalLab.observeOutput.useMutation();
+  const linkObservation = trpc.terminalLab.linkObservation.useMutation();
+  const previewDiagnosticDraft = trpc.terminalLab.previewDiagnosticDraft.useMutation();
+  const updateObservationStatus = trpc.terminalLab.updateObservationStatus.useMutation();
+  const createApprovalPreview = trpc.terminalLab.createApprovalPreviewFromObservation.useMutation();
+  const terminalApprovalPreviews = trpc.terminalLab.approvalPreviews.useQuery(
+    selectedObservationId == null ? { limit: 5 } : { observationId: selectedObservationId, limit: 5 },
+  );
+  const createTaskFromObservation = trpc.terminalLab.createTaskFromObservation.useMutation();
+  const createLearningProposal = trpc.terminalLab.createLearningProposalFromObservation.useMutation();
+  const utils = trpc.useUtils();
+  const data = plan.data;
+  const selectedTask = tasks.data?.find((task) => String(task.id) === selectedTaskId);
+  const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = command.trim();
+    if (!trimmed || preview.isPending) return;
+    preview.mutate(
+      {
+        command: trimmed,
+        cwd: "/Users/lindsaybell/Desktop/CereBro",
+        taskId: selectedTaskId ? Number(selectedTaskId) : undefined,
+        sessionId: selectedSessionId ? Number(selectedSessionId) : undefined,
+      },
+      { onSuccess: () => utils.terminalLab.observations.invalidate() },
+    );
+  }
+
+  function submitOutput(event: React.FormEvent) {
+    event.preventDefault();
+    if (selectedObservationId == null || !outputText.trim() || observeOutput.isPending) return;
+    const parsedExitCode = Number(exitCode);
+    observeOutput.mutate(
+      {
+        observationId: selectedObservationId,
+        output: outputText.trim(),
+        exitCode: Number.isInteger(parsedExitCode) && parsedExitCode >= 0 ? parsedExitCode : undefined,
+      },
+      {
+        onSuccess: () => {
+          setOutputText("");
+          utils.terminalLab.observations.invalidate();
+        },
+      },
+    );
+  }
+
+  function attachSelectedLinks(observationId: number) {
+    if (linkObservation.isPending) return;
+    linkObservation.mutate(
+      {
+        observationId,
+        taskId: selectedTaskId ? Number(selectedTaskId) : null,
+        sessionId: selectedSessionId ? Number(selectedSessionId) : null,
+      },
+      { onSuccess: () => utils.terminalLab.observations.invalidate() },
+    );
+  }
+
+  function createFollowUpTask(observationId: number) {
+    if (createTaskFromObservation.isPending) return;
+    createTaskFromObservation.mutate(
+      { observationId },
+      {
+        onSuccess: () => {
+          utils.terminalLab.observations.invalidate();
+          utils.tasks.list.invalidate();
+          utils.tasks.projects.invalidate();
+        },
+      },
+    );
+  }
+
+  function createLearningNote(observationId: number) {
+    if (createLearningProposal.isPending) return;
+    createLearningProposal.mutate(
+      { observationId },
+      {
+        onSuccess: () => {
+          utils.memory.proposals.invalidate();
+        },
+      },
+    );
+  }
+
+  function previewTonyDraft(observationId: number, draftCommand: string) {
+    if (previewDiagnosticDraft.isPending) return;
+    setCommand(draftCommand);
+    previewDiagnosticDraft.mutate(
+      { observationId, command: draftCommand },
+      {
+        onSuccess: () => {
+          utils.terminalLab.observations.invalidate();
+        },
+      },
+    );
+  }
+
+  function setObservationStatus(observationId: number, status: "reviewing" | "blocked" | "archived") {
+    if (updateObservationStatus.isPending) return;
+    updateObservationStatus.mutate(
+      { id: observationId, status },
+      { onSuccess: () => utils.terminalLab.observations.invalidate() },
+    );
+  }
+
+  function stageCommandApprovalPreview(observationId: number) {
+    if (createApprovalPreview.isPending) return;
+    createApprovalPreview.mutate(
+      {
+        observationId,
+        reason: "Terminal Lab approval preview only. User still must explicitly approve any actual command run through Codex.",
+      },
+      {
+        onSuccess: () => {
+          setSelectedObservationId(observationId);
+          utils.terminalLab.approvalPreviews.invalidate();
+        },
+      },
+    );
+  }
+
+  async function copyTonyDraft(key: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedDraftKey(key);
+      window.setTimeout(() => setCopiedDraftKey((current) => (current === key ? null : current)), 1800);
+    } catch {
+      setCommand(value);
+      setCopiedDraftKey(`${key}:fallback`);
+      window.setTimeout(() => setCopiedDraftKey((current) => (current === `${key}:fallback` ? null : current)), 2200);
+    }
+  }
+
+  function approvalPromptForTonyDraft(input: {
+    observationId: number;
+    title: string;
+    command: string;
+    reason: string;
+    approvalGate: string;
+  }) {
+    return [
+      `Tony diagnostic draft from Terminal Lab observation #${input.observationId}`,
+      "",
+      `Command: ${input.command}`,
+      `Purpose: ${input.reason}`,
+      `Gate: ${input.approvalGate}`,
+      "",
+      "Please review this command and, if appropriate, run it through the normal Codex approval-gated command path. Do not execute it from Terminal Lab.",
+    ].join("\n");
+  }
+
+  return (
+    <div className="h-full flex flex-col" style={{ background: C.background }}>
+      <div
+        className="flex items-center justify-between px-4 py-2 shrink-0"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+      >
+        <div className="min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Terminal Lab
+          </div>
+          <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>
+            Proposal-only command explanation and approval gates. No shell execution.
+          </div>
+        </div>
+        <button onClick={onClose} className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+          Close
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
+        <StatusBlock label="Owner" value={data?.ownerAgent ?? "tony"} tone={C.accent} />
+        <StatusBlock label="Support" value={(data?.supportAgents ?? ["aang"]).join(", ")} tone={C.gold} />
+        <StatusBlock label="Execution" value="disabled" tone={C.warning} />
+      </div>
+
+      <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <input
+            value={command}
+            onChange={(event) => setCommand(event.target.value)}
+            placeholder="Paste a command to explain before running it elsewhere."
+            className="px-2 py-1.5 text-xs rounded outline-none"
+            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+          />
+          <button
+            type="submit"
+            disabled={!command.trim() || preview.isPending}
+            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
+            style={{
+              background: command.trim() && !preview.isPending ? C.accentSoft : C.surfaceMuted,
+              color: command.trim() && !preview.isPending ? C.textPrimary : C.textMuted,
+              border: `1px solid ${C.borderSoft}`,
+            }}
+          >
+            {preview.isPending ? "Reading" : "Preview"}
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <label className="min-w-0">
+            <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Task Link</div>
+            <select
+              value={selectedTaskId}
+              onChange={(event) => setSelectedTaskId(event.target.value)}
+              className="w-full px-2 py-1.5 text-xs rounded outline-none"
+              style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+            >
+              <option value="">No task link</option>
+              {(tasks.data ?? []).map((task) => (
+                <option key={task.id} value={task.id}>
+                  #{task.id} {task.projectName ? `${task.projectName}: ` : ""}{task.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="min-w-0">
+            <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Session Link</div>
+            <select
+              value={selectedSessionId}
+              onChange={(event) => setSelectedSessionId(event.target.value)}
+              className="w-full px-2 py-1.5 text-xs rounded outline-none"
+              style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+            >
+              <option value="">No session link</option>
+              {(sessions.data ?? []).map((session) => (
+                <option key={session.id} value={session.id}>
+                  #{session.id} {session.projectName ?? "Unknown"} {session.endedAt == null ? "active" : "ended"}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+          This panel classifies intent only. Commands still run through Codex with the normal approval path.
+          {(selectedTask || selectedSession) && (
+            <span> New previews will attach to {selectedTask ? `task #${selectedTask.id}` : ""}{selectedTask && selectedSession ? " and " : ""}{selectedSession ? `session #${selectedSession.id}` : ""}.</span>
+          )}
+        </div>
+      </form>
+
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-3 p-4">
+          <div className="space-y-3 min-w-0">
+            {preview.data && (
+              <section className="space-y-2">
+                <SectionTitle title="Command Preview" detail={preview.data.risk.replace(/_/g, " ")} />
+                <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex flex-wrap gap-1">
+                    <Chip label={preview.data.risk.replace(/_/g, " ")} tone={toneForRisk(preview.data.risk)} />
+                    <Chip label={`agent ${preview.data.suggestedAgent}`} tone={C.gold} />
+                    <Chip label={preview.data.approvalRequiredToRun ? "approval required" : "no approval"} tone={C.warning} />
+                    <Chip label={preview.data.wouldExecute ? "would execute" : "no execution"} tone={C.success} />
+                    <Chip label={`saved #${preview.data.observationId}`} tone={C.textSecondary} />
+                  </div>
+                  <div
+                    className="text-xs rounded px-2 py-1.5 overflow-x-auto"
+                    style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                  >
+                    <code>{preview.data.command}</code>
+                  </div>
+                  <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                    {preview.data.explanation}
+                  </div>
+                </div>
+
+                <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <SectionTitle title="Gates" detail="before run" />
+                  <div className="mt-2 space-y-1">
+                    {preview.data.gates.map((gate) => (
+                      <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {gate}</div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {previewDiagnosticDraft.data && "handoffNote" in previewDiagnosticDraft.data &&
+              (() => {
+                const draftPreview = previewDiagnosticDraft.data;
+                return (
+                  <section className="space-y-2">
+                    <SectionTitle title="Tony Draft Preview" detail={draftPreview.risk.replace(/_/g, " ")} />
+                    <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="flex flex-wrap gap-1">
+                        <Chip label={`from #${draftPreview.parentObservationId}`} tone={C.textMuted} />
+                        <Chip label={`saved #${draftPreview.observationId}`} tone={C.textSecondary} />
+                        <Chip label={draftPreview.risk.replace(/_/g, " ")} tone={toneForRisk(draftPreview.risk)} />
+                        <Chip label="no execution" tone={C.success} />
+                      </div>
+                      <div
+                        className="text-xs rounded px-2 py-1.5 overflow-x-auto"
+                        style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                      >
+                        <code>{draftPreview.command}</code>
+                      </div>
+                      <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                        {draftPreview.handoffNote}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <CopyButton
+                          label="Copy Command"
+                          active={copiedDraftKey === `preview-command:${draftPreview.observationId}`}
+                          fallback={copiedDraftKey === `preview-command:${draftPreview.observationId}:fallback`}
+                          onClick={() => copyTonyDraft(`preview-command:${draftPreview.observationId}`, draftPreview.command)}
+                        />
+                        <CopyButton
+                          label="Copy Approval Note"
+                          active={copiedDraftKey === `preview-note:${draftPreview.observationId}`}
+                          fallback={copiedDraftKey === `preview-note:${draftPreview.observationId}:fallback`}
+                          onClick={() =>
+                            copyTonyDraft(
+                              `preview-note:${draftPreview.observationId}`,
+                              [
+                                `Tony diagnostic preview #${draftPreview.observationId}`,
+                                `Parent observation: #${draftPreview.parentObservationId}`,
+                                `Command: ${draftPreview.command}`,
+                                draftPreview.handoffNote,
+                              ].join("\n"),
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </section>
+                );
+              })()}
+            {previewDiagnosticDraft.data && !previewDiagnosticDraft.data.ok && (
+              <section className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.warning }}>
+                {previewDiagnosticDraft.data.reason}
+              </section>
+            )}
+
+            <section className="space-y-2">
+              <SectionTitle title="Surfaces" detail="Terminal Lab V1" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {(data?.surfaces ?? []).map((surface) => (
+                  <div key={surface.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{surface.label}</div>
+                      <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "live_preview" ? C.success : C.textMuted} />
+                    </div>
+                    <div className="text-[11px] leading-relaxed mt-1" style={{ color: C.textMuted }}>
+                      {surface.notes}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <SectionTitle title="Recent Observations" detail={observationScope === "all" ? "local DB" : "filtered"} />
+                <div className="flex flex-wrap gap-1 justify-end">
+                  <ScopeButton active={observationScope === "all"} label="All" onClick={() => setObservationScope("all")} />
+                  <ScopeButton
+                    active={observationScope === "selectedTask"}
+                    disabled={!selectedTaskId}
+                    label="Task"
+                    onClick={() => setObservationScope("selectedTask")}
+                  />
+                  <ScopeButton
+                    active={observationScope === "selectedSession"}
+                    disabled={!selectedSessionId}
+                    label="Session"
+                    onClick={() => setObservationScope("selectedSession")}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                {(observations.data ?? []).length === 0 ? (
+                  <div className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    {observationScope === "all" ? "No command previews recorded yet." : "No command previews match the selected link."}
+                  </div>
+                ) : (
+                  observations.data?.map((item) => (
+                    <div key={item.id} className="rounded p-2 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="flex flex-wrap gap-1">
+                        <Chip label={`#${item.id}`} tone={C.textMuted} />
+                        <Chip label={item.risk.replace(/_/g, " ")} tone={toneForRisk(item.risk)} />
+                        <Chip label={item.suggestedAgent ?? "cortana"} tone={C.gold} />
+                        <Chip label={item.status} tone={C.textSecondary} />
+                        {item.diagnosticStatus && <Chip label={item.diagnosticStatus.replace(/_/g, " ")} tone={C.warning} />}
+                        {item.diagnosticParentId != null && <Chip label={`from #${item.diagnosticParentId}`} tone={C.gold} />}
+                        {item.diagnosticRootId != null && <Chip label={`root #${item.diagnosticRootId}`} tone={C.textSecondary} />}
+                        {item.diagnosticDepth != null && <Chip label={`depth ${item.diagnosticDepth}`} tone={C.textMuted} />}
+                        {item.taskId != null && <Chip label={`task #${item.taskId}`} tone={C.accent} />}
+                        {item.sessionId != null && <Chip label={`session #${item.sessionId}`} tone={C.accent} />}
+                        {item.exitCode != null && <Chip label={`exit ${item.exitCode}`} tone={item.exitCode === 0 ? C.success : C.warning} />}
+                      </div>
+                      <div
+                        className="text-[11px] rounded px-2 py-1 overflow-x-auto"
+                        style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                      >
+                        <code>{item.command}</code>
+                      </div>
+                      {item.cwd && (
+                        <div className="text-[10px] truncate" style={{ color: C.textMuted }} title={item.cwd}>
+                          {item.cwd}
+                        </div>
+                      )}
+                      {item.diagnosticParentId != null && (
+                        <div className="text-[10px] leading-snug" style={{ color: C.gold }}>
+                          Tony diagnostic preview copied from observation #{item.diagnosticParentId}
+                          {item.diagnosticRootId != null ? ` in chain root #${item.diagnosticRootId}` : ""}
+                          {item.diagnosticDepth != null ? ` at depth ${item.diagnosticDepth}` : ""}. Still proposal-only; run only through Codex approval.
+                        </div>
+                      )}
+                      {item.outputSummary && (
+                        <div className="text-[11px] leading-snug line-clamp-2" style={{ color: C.textMuted }} title={item.outputSummary}>
+                          {item.outputSummary}
+                        </div>
+                      )}
+                      {item.followUps.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                          {item.followUps.map((followUp) => (
+                            <div key={`${item.id}-${followUp.agent}-${followUp.title}`} className="rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: followUp.agent === "tony" ? C.gold : C.success }}>
+                                  {followUp.agent}: {followUp.title}
+                                </div>
+                              </div>
+                              <div className="text-[10px] leading-snug mt-0.5" style={{ color: C.textMuted }}>{followUp.reason}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {item.diagnosticDrafts.length > 0 && (
+                        <div className="space-y-1">
+                          {item.diagnosticDrafts.map((draft) => (
+                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
+                                  Tony: {draft.title}
+                                </div>
+                                <Chip label="suggested only" tone={C.warning} />
+                              </div>
+                              <div className="text-[11px] rounded px-2 py-1 mt-1 overflow-x-auto" style={{ background: C.background, color: C.textPrimary }}>
+                                <code>{draft.command}</code>
+                              </div>
+                              <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>{draft.reason}</div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-1">
+                                <DiagnosticNote label="Evidence" value={draft.evidence} />
+                                <DiagnosticNote label="Expected" value={draft.expectedSignal} />
+                              </div>
+                              <div className="text-[10px] leading-snug mt-1" style={{ color: C.warning }}>{draft.approvalGate}</div>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => previewTonyDraft(item.id, draft.command)}
+                                  disabled={previewDiagnosticDraft.isPending}
+                                  className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                                  style={{
+                                    background: previewDiagnosticDraft.isPending ? C.background : C.surface,
+                                    color: previewDiagnosticDraft.isPending ? C.textMuted : C.gold,
+                                    border: `1px solid ${C.borderSoft}`,
+                                  }}
+                                >
+                                  {previewDiagnosticDraft.isPending ? "Previewing" : "Preview Via Approval Path"}
+                                </button>
+                                <CopyButton
+                                  label="Copy"
+                                  active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
+                                  fallback={copiedDraftKey === `draft-command:${item.id}:${draft.command}:fallback`}
+                                  onClick={() => copyTonyDraft(`draft-command:${item.id}:${draft.command}`, draft.command)}
+                                />
+                                <CopyButton
+                                  label="Copy Approval"
+                                  active={copiedDraftKey === `draft-approval:${item.id}:${draft.command}`}
+                                  fallback={copiedDraftKey === `draft-approval:${item.id}:${draft.command}:fallback`}
+                                  onClick={() =>
+                                    copyTonyDraft(
+                                      `draft-approval:${item.id}:${draft.command}`,
+                                      approvalPromptForTonyDraft({
+                                        observationId: item.id,
+                                        title: draft.title,
+                                        command: draft.command,
+                                        reason: draft.reason,
+                                        approvalGate: draft.approvalGate,
+                                      }),
+                                    )
+                                  }
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedObservationId(item.id)}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: selectedObservationId === item.id ? C.accentSoft : C.surfaceMuted,
+                            color: selectedObservationId === item.id ? C.textPrimary : C.textMuted,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Attach Output
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setObservationStatus(item.id, "reviewing")}
+                          disabled={updateObservationStatus.isPending || item.status === "reviewing"}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: item.status === "reviewing" ? C.accentSoft : C.surfaceMuted,
+                            color: item.status === "reviewing" ? C.textMuted : C.textSecondary,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Review
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setObservationStatus(item.id, "blocked")}
+                          disabled={updateObservationStatus.isPending || item.status === "blocked"}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: item.status === "blocked" ? C.accentSoft : C.surfaceMuted,
+                            color: item.status === "blocked" ? C.textMuted : C.warning,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Block
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => stageCommandApprovalPreview(item.id)}
+                          disabled={createApprovalPreview.isPending}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: C.surfaceMuted,
+                            color: C.gold,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Approval Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => attachSelectedLinks(item.id)}
+                          disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: selectedTaskId || selectedSessionId ? C.surfaceMuted : C.background,
+                            color: selectedTaskId || selectedSessionId ? C.textSecondary : C.textMuted,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Link Selected
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => createFollowUpTask(item.id)}
+                          disabled={createTaskFromObservation.isPending || item.taskId != null}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: item.taskId == null ? C.surfaceMuted : C.background,
+                            color: item.taskId == null ? C.gold : C.textMuted,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Create Task
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => createLearningNote(item.id)}
+                          disabled={createLearningProposal.isPending}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: C.surfaceMuted,
+                            color: C.success,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Stage Learning Note
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setObservationStatus(item.id, "archived")}
+                          disabled={updateObservationStatus.isPending || item.status === "archived"}
+                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+                          style={{
+                            background: item.status === "archived" ? C.background : C.surfaceMuted,
+                            color: item.status === "archived" ? C.textMuted : C.textSecondary,
+                            border: `1px solid ${C.borderSoft}`,
+                          }}
+                        >
+                          Archive
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+
+          <aside className="space-y-3 min-w-0">
+            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <SectionTitle title="Policy" detail="locked" />
+              <div className="mt-2 space-y-1">
+                {(data?.policies ?? []).map((policy) => (
+                  <div key={policy} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {policy}</div>
+                ))}
+              </div>
+            </section>
+
+            <form onSubmit={submitOutput} className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <SectionTitle title="Observed Output" detail={selectedObservationId == null ? "select row" : `#${selectedObservationId}`} />
+              <textarea
+                value={outputText}
+                onChange={(event) => setOutputText(event.target.value)}
+                placeholder="Paste output from a command that was run through the normal approved path."
+                rows={5}
+                className="w-full px-2 py-1.5 text-xs rounded outline-none resize-none"
+                style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+              />
+              <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-2">
+                <input
+                  value={exitCode}
+                  onChange={(event) => setExitCode(event.target.value)}
+                  placeholder="0"
+                  className="px-2 py-1.5 text-xs rounded outline-none"
+                  style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+                />
+                <button
+                  type="submit"
+                  disabled={selectedObservationId == null || !outputText.trim() || observeOutput.isPending}
+                  className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
+                  style={{
+                    background: selectedObservationId != null && outputText.trim() && !observeOutput.isPending ? C.accentSoft : C.surfaceMuted,
+                    color: selectedObservationId != null && outputText.trim() && !observeOutput.isPending ? C.textPrimary : C.textMuted,
+                    border: `1px solid ${C.borderSoft}`,
+                  }}
+                >
+                  {observeOutput.isPending ? "Saving" : "Save Summary"}
+                </button>
+              </div>
+              <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                This saves a redacted local summary only. It does not execute commands or write outside the harness DB.
+              </div>
+            </form>
+
+            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <SectionTitle title="Live Links" detail="local only" />
+              <div className="mt-2 space-y-1">
+                {[
+                  "New previews can attach to selected tasks and sessions.",
+                  "Existing observations can be relinked with Link Selected.",
+                  "Observed output now surfaces Aang and Tony follow-up suggestions.",
+                  "Keep execution approval-gated through Codex, not autonomous UI buttons.",
+                ].map((item) => (
+                  <div key={item} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {item}</div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
+              <div className="mt-2 space-y-2">
+                {(terminalApprovalPreviews.data ?? []).length === 0 ? (
+                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                    No local command approval previews yet.
+                  </div>
+                ) : (
+                  terminalApprovalPreviews.data?.map((approval) => (
+                    <div key={approval.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="flex flex-wrap gap-1">
+                        <Chip label={`approval #${approval.id}`} tone={C.textMuted} />
+                        <Chip label={approval.status} tone={C.warning} />
+                        <Chip label={approval.actionType.replace(/_/g, " ")} tone={C.gold} />
+                      </div>
+                      <div className="text-[11px] leading-snug mt-1 line-clamp-3" style={{ color: C.textMuted }} title={approval.reason ?? ""}>
+                        {approval.reason}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded p-2 min-w-0" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
+      <div className="text-xs font-semibold truncate mt-0.5" style={{ color: tone }} title={value}>{value}</div>
+    </div>
+  );
+}
+
+function SectionTitle({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
+      <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>{detail}</div>
+    </div>
+  );
+}
+
+function Chip({ label, tone }: { label: string; tone: string }) {
+  return (
+    <span
+      className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"
+      style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function CopyButton({
+  label,
+  active,
+  fallback,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  fallback: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
+      style={{
+        background: active || fallback ? C.accentSoft : C.surface,
+        color: active ? C.success : fallback ? C.warning : C.textSecondary,
+        border: `1px solid ${C.borderSoft}`,
+      }}
+    >
+      {active ? "Copied" : fallback ? "Loaded" : label}
+    </button>
+  );
+}
+
+function DiagnosticNote({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded px-2 py-1" style={{ background: C.background, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
+      <div className="text-[10px] leading-snug mt-0.5" style={{ color: C.textSecondary }}>{value}</div>
+    </div>
+  );
+}
+
+function ScopeButton({
+  active,
+  disabled,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider"
+      style={{
+        color: disabled ? C.textMuted : active ? C.textPrimary : C.textSecondary,
+        background: active ? C.accentSoft : C.surfaceMuted,
+        border: `1px solid ${C.borderSoft}`,
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function toneForRisk(risk: string) {
+  if (risk === "destructive") return C.danger;
+  if (risk === "mutating_or_external") return C.warning;
+  if (risk === "read_only") return C.success;
+  return C.textMuted;
+}

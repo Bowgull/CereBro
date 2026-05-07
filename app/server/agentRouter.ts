@@ -1,7 +1,7 @@
 /**
  * Agent → role + model class + skills + tool scope routing for CereBro V1.
  *
- * Maps each of the 10 agents in the Keep to its corrected canonical role,
+ * Maps each of the 11 agents in the Keep to its corrected canonical role,
  * the model CLASS it requests by default (not a hardcoded model name), the
  * .skill.md modules it loads, and the tool categories it is allowed to
  * request through the Tool Adapter Layer.
@@ -47,6 +47,8 @@ export type ToolCategory =
   | "write_file"         // Approval Required. Write to filesystem / vault / artifacts.
   | "write_obsidian"     // Approval Required. Memory write into Obsidian vault.
   | "write_notion"       // Approval Required. Push to Notion outbox.
+  | "read_slack_capture" // Approval Required. Read approved Hedwig DM/channel only.
+  | "write_slack"        // Approval Required. Post/reply/remind in Slack.
   | "browser"            // Approval Required + feature toggle. Disabled by default.
   | "terminal"           // Approval Required. Shell commands.
   | "claude_code_handoff" // Approval Required per call. Tony's handoff path.
@@ -140,7 +142,7 @@ export const AGENT_ROUTING: AgentRouting[] = [
       "alone, or unapproved coding.",
     defaultModelClass: "local_code_helper",
     escalationModelClass: "strong_coding_external",
-    skills: ["claude-code-handoff"],
+    skills: ["tony-build-flow", "claude-code-handoff"],
     toolScope: [
       "read_metadata", "search_memory", "format_output", "create_draft",
       "write_file", "claude_code_handoff",
@@ -199,7 +201,7 @@ export const AGENT_ROUTING: AgentRouting[] = [
       "C-3PO formats; the Memory Writer writes. Does not own strategic " +
       "decisions, validation, or memory writing.",
     defaultModelClass: "lightweight_formatter",
-    skills: [],
+    skills: ["validation", "anti-slop-review"],
     toolScope: [
       "read_metadata", "search_memory", "format_output", "create_draft",
       "write_file",
@@ -211,10 +213,11 @@ export const AGENT_ROUTING: AgentRouting[] = [
     floor: "upper",
     chamber: "War Room",
     role:
-      "Strategy and risk. Tradeoff analysis, architecture options, " +
-      "build-vs-buy, scope risk, what-could-go-wrong reviews. Escalates to " +
+      "Strategic review and risk sequencing. Tradeoff analysis, architecture " +
+      "options, build-vs-package-vs-ship decisions, market/readiness calls, " +
+      "scope risk, and what-could-go-wrong reviews. Escalates to " +
       "strong_reasoning_external for major decisions. Does not own " +
-      "implementation, validation, or UI.",
+      "implementation, validation, routing, or UI.",
     defaultModelClass: "local_reasoner",
     escalationModelClass: "strong_reasoning_external",
     skills: [],
@@ -279,6 +282,29 @@ export const AGENT_ROUTING: AgentRouting[] = [
     notes:
       "destructive_cleanup is Blocked Unless Enabled — even with the scope " +
       "listed, individual destructive actions still require user approval.",
+  },
+  {
+    id: "hedwig",
+    name: "Hedwig",
+    floor: "crypts",
+    chamber: "Messenger Roost",
+    role:
+      "Messenger and capture agent. Owns quick-capture intake, reminders, " +
+      "message drafts, Slack DM/capture-channel intake, and routing raw " +
+      "captures into the approved Notion capture database. Keeps message " +
+      "drafts, follow-ups, captures, and archives attached to the right " +
+      "project/context. Does not browse, validate facts, write durable " +
+      "knowledge, or read arbitrary Slack surfaces.",
+    defaultModelClass: "lightweight_formatter",
+    escalationModelClass: "local_reasoner",
+    skills: [],
+    toolScope: [
+      "read_metadata", "format_output", "create_draft", "write_file",
+      "write_notion", "read_slack_capture", "write_slack",
+    ],
+    notes:
+      "Slack read/write and Notion capture writes require explicit approval " +
+      "and exact approved surfaces/scopes. iMessage is a later OpenClaw track.",
   },
 ];
 

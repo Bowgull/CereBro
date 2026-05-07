@@ -26,6 +26,7 @@ Located in `/skills`:
 - `remotion-video.skill.md`
 - `video-editing.skill.md`
 - `ui-motion.skill.md`
+- `aang-learning.skill.md`
 
 ## Skill Format
 
