@@ -290,6 +290,9 @@ async function ensureSchema(client: Client): Promise<void> {
          media_frame_time_sec REAL,
          media_duration_sec REAL,
          media_temporary_flag INTEGER NOT NULL DEFAULT 0,
+         before_evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL,
+         after_evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL,
+         comparison_result TEXT,
          validation_status TEXT NOT NULL DEFAULT 'unvalidated',
          permission_class TEXT NOT NULL DEFAULT 'manual_note',
          permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL,
@@ -590,6 +593,9 @@ async function ensureWorkbenchEvidenceColumns(client: Client): Promise<void> {
     { name: "media_frame_time_sec", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_frame_time_sec REAL` },
     { name: "media_duration_sec", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_duration_sec REAL` },
     { name: "media_temporary_flag", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN media_temporary_flag INTEGER NOT NULL DEFAULT 0` },
+    { name: "before_evidence_id", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN before_evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL` },
+    { name: "after_evidence_id", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN after_evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL` },
+    { name: "comparison_result", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN comparison_result TEXT` },
     { name: "permission_preflight_id", sql: `ALTER TABLE workbench_evidence_records ADD COLUMN permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL` },
   ];
   for (const column of additions) {

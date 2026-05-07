@@ -78,6 +78,8 @@ describe("CereBro proposal-only shell plans", () => {
     expect(plan.capturesMedia).toBe(false);
     expect(plan.surfaces.map((surface) => surface.id)).toContain("annotation_canvas");
     expect(plan.surfaces.map((surface) => surface.id)).toContain("localhost_preview");
+    const comparisonSurface = plan.surfaces.find((surface) => surface.id === "before_after");
+    expect(comparisonSurface?.status).toBe("partially_live");
     const imageSurface = plan.surfaces.find((surface) => surface.id === "image_video_review");
     expect(imageSurface?.status).toBe("partially_live");
     expect(imageSurface?.permission).toContain("Temporary image/video previews");
@@ -158,6 +160,28 @@ describe("CereBro proposal-only shell plans", () => {
     expect(videoFrameEvidence.evidence.mediaTemporary).toBe(true);
     expect(videoFrameEvidence.gates.join(" ")).toContain("did not capture a screenshot");
 
+    const comparison = await caller.workbench.createBeforeAfterComparison({
+      beforeEvidenceId: imageEvidence.evidence.id,
+      afterEvidenceId: videoFrameEvidence.evidence.id,
+      title: "Media review before/after",
+      summary: "Compare the image review note with the video-frame note without opening either target.",
+      result: "Needs Spock review before reuse.",
+      routeAgent: "spock",
+    });
+    expect(comparison.ok).toBe(true);
+    expect(comparison.writesExternal).toBe(false);
+    expect(comparison.opensBrowser).toBe(false);
+    expect(comparison.capturesMedia).toBe(false);
+    if (comparison.ok) {
+      expect(comparison.evidence.kind).toBe("before_after");
+      expect(comparison.evidence.beforeEvidenceId).toBe(imageEvidence.evidence.id);
+      expect(comparison.evidence.afterEvidenceId).toBe(videoFrameEvidence.evidence.id);
+      expect(comparison.evidence.comparisonResult).toContain("Spock review");
+      expect(comparison.evidence.targetUri).toBe(`before:${imageEvidence.evidence.id};after:${videoFrameEvidence.evidence.id}`);
+      expect(comparison.evidence.permissionPreflightId).toBeGreaterThan(0);
+      expect(comparison.gates.join(" ")).toContain("compared evidence records were not overwritten");
+    }
+
     const records = await caller.workbench.evidence({
       query: "visible issue",
       limit: 10,
@@ -237,6 +261,14 @@ describe("CereBro proposal-only shell plans", () => {
       expect(detailWithHistory.validationHistory.map((item) => item.id)).toContain(validationNote.ok ? validationNote.evidence.id : -1);
       expect(detailWithHistory.validationHistory[0]?.targetUri).toBe(`evidence:${evidence.evidence.id}`);
       expect(detailWithHistory.validationHistory[0]?.permissionPreflightId).toBe(validationNote.ok ? validationNote.evidence.permissionPreflightId : -1);
+    }
+
+    const comparisonDetail = await caller.workbench.evidenceDetail({ id: imageEvidence.evidence.id });
+    expect(comparisonDetail.found).toBe(true);
+    if (comparisonDetail.found) {
+      expect(comparisonDetail.comparisonHistory.map((item) => item.id)).toContain(comparison.ok ? comparison.evidence.id : -1);
+      expect(comparisonDetail.comparisonHistory[0]?.beforeEvidenceId).toBe(imageEvidence.evidence.id);
+      expect(comparisonDetail.comparisonHistory[0]?.afterEvidenceId).toBe(videoFrameEvidence.evidence.id);
     }
   });
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-07 07:09 EDT
+Last updated: 2026-05-07 07:14 EDT
 
 ## Current North Star
 
@@ -94,8 +94,76 @@ Begin Session 4 after user clarification:
   evidence, store media kind plus frame-time/duration fields, and display those
   fields in evidence detail. This does not save media bytes, capture
   screenshots, open browsers, call vision models, or write externally.
+- 2026-05-07 07:14 EDT slice: Workbench before/after comparison records are
+  now partially live. Spock can append a local comparison evidence row linking
+  two existing Workbench evidence records, with before/after ids, result text,
+  inherited project/task/session/source/command/artifact links where available,
+  a permission preflight audit row, and comparison history in evidence detail.
+  This does not open linked targets, capture media, fetch sources, run
+  commands, save files, or write externally.
 
 ## Latest Closeout
+
+### 2026-05-07 07:14 EDT - Workbench Before/After Comparison
+
+Files changed:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/cerebro-foundations.test.ts`
+
+What changed:
+
+- Added local append-only `before_after` comparison records for Workbench
+  evidence.
+- Added `before_evidence_id`, `after_evidence_id`, and `comparison_result` to
+  the idempotent local DB schema and migration guard.
+- Added `workbench.createBeforeAfterComparison`, including existence checks,
+  sensitive-flag carryover, inherited local links, and permission preflight
+  audit logging.
+- Added comparison history to `workbench.evidenceDetail`.
+- Added a Workbench detail-panel comparison form that compares the selected
+  evidence row with another visible local evidence row and appends a new
+  comparison record.
+- Expanded the foundation test to cover comparison creation and comparison
+  history.
+
+Checks run:
+
+- `pnpm test -- server/cerebro-foundations.test.ts` from `app/` passed. Vitest
+  also ran the colocated server suites selected by the project config:
+  4 files, 36 tests.
+- `pnpm check` from `app/` passed.
+
+Gates preserved:
+
+- No Notion or Slack writes.
+- No browser/search/fetch.
+- No external model/tool calls.
+- No media capture and no durable media save.
+- No desktop overlay process.
+- No external repo edits.
+- No moving/deleting/archiving files.
+- No secrets, installs, payments, deployment, account setup, destructive git,
+  or GitHub push.
+
+Known risks:
+
+- Comparison options currently come from the visible evidence list in the
+  Workbench panel. A later slice should add a dedicated local evidence picker
+  so older records outside the current list can be selected.
+- Comparisons are notes over existing evidence. They do not inspect linked
+  files, replay video frames, or validate visual correctness by themselves.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md` and
+`CEREBRO_SESSION_HANDOFF.md` first. Pick the next safe Workbench slice:
+annotation-coordinate capture tied to temporary image/video previews, or a
+dedicated local evidence picker for before/after comparisons. Preserve all
+gates. Run checks, update handoff plus Obsidian snapshot/index, and commit
+locally.
 
 ### 2026-05-07 07:09 EDT - Workbench Video Frame Metadata
 

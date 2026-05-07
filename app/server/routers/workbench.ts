@@ -47,6 +47,9 @@ function rowToEvidence(row: Record<string, unknown>) {
     mediaFrameTimeSec: row.media_frame_time_sec == null ? null : Number(row.media_frame_time_sec),
     mediaDurationSec: row.media_duration_sec == null ? null : Number(row.media_duration_sec),
     mediaTemporary: Boolean(row.media_temporary_flag),
+    beforeEvidenceId: row.before_evidence_id == null ? null : Number(row.before_evidence_id),
+    afterEvidenceId: row.after_evidence_id == null ? null : Number(row.after_evidence_id),
+    comparisonResult: row.comparison_result == null ? null : String(row.comparison_result),
     validationStatus: String(row.validation_status),
     permissionClass: String(row.permission_class),
     permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
@@ -222,9 +225,9 @@ export const workbenchRouter = router({
         id: "before_after",
         label: "Before and after comparison",
         ownerAgent: "spock",
-        status: "planned",
-        permission: "Compare approved local evidence records. No hidden capture.",
-        records: ["before_artifact_id", "after_artifact_id", "comparison_notes", "result"],
+        status: "partially_live",
+        permission: "Compare local evidence records. No hidden capture.",
+        records: ["before_evidence_id", "after_evidence_id", "comparison_notes", "result"],
       },
     ],
     permissionModel: [
@@ -468,16 +471,29 @@ export const workbenchRouter = router({
           gates: ["No Workbench evidence record exists for this id."],
         };
       }
-      const validationHistory = await db.execute({
-        sql: `
-          SELECT wer.*, p.name AS project_name
-          FROM workbench_evidence_records wer
-          LEFT JOIN projects p ON p.id = wer.project_id
-          WHERE wer.kind = 'validation_note' AND wer.target_uri = ?
-          ORDER BY wer.created_at ASC, wer.id ASC
-        `,
-        args: [`evidence:${input.id}`],
-      });
+      const [validationHistory, comparisonHistory] = await Promise.all([
+        db.execute({
+          sql: `
+            SELECT wer.*, p.name AS project_name
+            FROM workbench_evidence_records wer
+            LEFT JOIN projects p ON p.id = wer.project_id
+            WHERE wer.kind = 'validation_note' AND wer.target_uri = ?
+            ORDER BY wer.created_at ASC, wer.id ASC
+          `,
+          args: [`evidence:${input.id}`],
+        }),
+        db.execute({
+          sql: `
+            SELECT wer.*, p.name AS project_name
+            FROM workbench_evidence_records wer
+            LEFT JOIN projects p ON p.id = wer.project_id
+            WHERE wer.kind = 'before_after'
+              AND (wer.before_evidence_id = ? OR wer.after_evidence_id = ?)
+            ORDER BY wer.created_at ASC, wer.id ASC
+          `,
+          args: [input.id, input.id],
+        }),
+      ]);
 
       return {
         found: true as const,
@@ -493,6 +509,7 @@ export const workbenchRouter = router({
           reasons: row.preflight_reasons == null ? [] : String(row.preflight_reasons).split("\n").filter(Boolean),
         },
         validationHistory: validationHistory.rows.map(rowToEvidence),
+        comparisonHistory: comparisonHistory.rows.map(rowToEvidence),
         gates: [
           "This detail view reads local append-only evidence only.",
           "It does not open linked targets, execute commands, fetch sources, capture media, or write externally.",
@@ -733,6 +750,9 @@ export const workbenchRouter = router({
         mediaKind: z.enum(mediaKinds).nullable().optional(),
         mediaFrameTimeSec: z.number().min(0).nullable().optional(),
         mediaDurationSec: z.number().min(0).nullable().optional(),
+        beforeEvidenceId: z.number().int().nullable().optional(),
+        afterEvidenceId: z.number().int().nullable().optional(),
+        comparisonResult: z.string().max(800).nullable().optional(),
         mediaTemporary: z.boolean().default(false),
         permissionClass: z.enum(permissionClasses).default("manual_note"),
         sensitive: z.boolean().default(false),
@@ -754,10 +774,11 @@ export const workbenchRouter = router({
             route_agent, viewport, coordinates, annotation_text,
             media_name, media_mime_type, media_byte_size, media_kind,
             media_frame_time_sec, media_duration_sec, media_temporary_flag,
+            before_evidence_id, after_evidence_id, comparison_result,
             validation_status, permission_class, permission_preflight_id,
             sensitive_data_flag
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
           RETURNING *
         `,
         args: [
@@ -783,6 +804,9 @@ export const workbenchRouter = router({
           input.mediaFrameTimeSec ?? null,
           input.mediaDurationSec ?? null,
           input.mediaTemporary ? 1 : 0,
+          input.beforeEvidenceId ?? null,
+          input.afterEvidenceId ?? null,
+          input.comparisonResult ?? null,
           input.permissionClass,
           permissionPreflightId,
           input.sensitive ? 1 : 0,
@@ -800,6 +824,115 @@ export const workbenchRouter = router({
           "Created one local Workbench evidence record.",
           "Recorded one local permission preflight audit row for this evidence record.",
           "This did not capture a screenshot, open a browser, run a command, save a file, or write externally.",
+        ],
+      };
+    }),
+
+  createBeforeAfterComparison: publicProcedure
+    .input(
+      z.object({
+        beforeEvidenceId: z.number().int(),
+        afterEvidenceId: z.number().int(),
+        title: z.string().min(1).max(160),
+        summary: z.string().min(1).max(2000),
+        result: z.string().min(1).max(800),
+        routeAgent: z.string().max(80).nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      if (input.beforeEvidenceId === input.afterEvidenceId) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          reason: "Before and after evidence must be different records.",
+        };
+      }
+
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT id, project_id, task_id, session_id, source_id,
+                 command_observation_id, artifact_id, sensitive_data_flag
+          FROM workbench_evidence_records
+          WHERE id IN (?, ?)
+          ORDER BY id ASC
+        `,
+        args: [input.beforeEvidenceId, input.afterEvidenceId],
+      });
+      if (existing.rows.length !== 2) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          reason: "Both local evidence records must exist before a comparison can be appended.",
+        };
+      }
+
+      const beforeRow = existing.rows.find((row) => Number(row.id) === input.beforeEvidenceId)!;
+      const afterRow = existing.rows.find((row) => Number(row.id) === input.afterEvidenceId)!;
+      const sensitive = Boolean(beforeRow.sensitive_data_flag) || Boolean(afterRow.sensitive_data_flag);
+      const permissionPreflightId = await recordEvidencePreflight({
+        permissionClass: "validation",
+        sensitive,
+        requestedByAgent: input.routeAgent ?? "spock",
+        targetSummary: `before_after: evidence #${input.beforeEvidenceId} -> #${input.afterEvidenceId}`,
+      });
+
+      const projectId = afterRow.project_id ?? beforeRow.project_id ?? null;
+      const taskId = afterRow.task_id ?? beforeRow.task_id ?? null;
+      const sessionId = afterRow.session_id ?? beforeRow.session_id ?? null;
+      const sourceId = afterRow.source_id ?? beforeRow.source_id ?? null;
+      const commandObservationId = afterRow.command_observation_id ?? beforeRow.command_observation_id ?? null;
+      const artifactId = afterRow.artifact_id ?? beforeRow.artifact_id ?? null;
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, project_id, task_id, session_id,
+            source_id, command_observation_id, artifact_id, owner_agent,
+            route_agent, annotation_text, before_evidence_id, after_evidence_id,
+            comparison_result, validation_status, permission_class,
+            permission_preflight_id, sensitive_data_flag
+          )
+          VALUES (
+            'before_after', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'spock', ?, ?, ?, ?, ?, 'needs_review', 'validation', ?, ?
+          )
+          RETURNING *
+        `,
+        args: [
+          input.title,
+          input.summary,
+          `before:${input.beforeEvidenceId};after:${input.afterEvidenceId}`,
+          projectId,
+          taskId,
+          sessionId,
+          sourceId,
+          commandObservationId,
+          artifactId,
+          input.routeAgent ?? "spock",
+          input.result,
+          input.beforeEvidenceId,
+          input.afterEvidenceId,
+          input.result,
+          permissionPreflightId,
+          sensitive ? 1 : 0,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created one local before/after comparison record.",
+          "The compared evidence records were not overwritten.",
+          "This did not open targets, capture media, run commands, fetch sources, save files, or write externally.",
         ],
       };
     }),

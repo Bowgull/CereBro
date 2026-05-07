@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 
-type EvidenceKind = "all" | "manual_note" | "image_review" | "video_frame" | "annotation" | "validation_note" | "terminal_output";
+type EvidenceKind = "all" | "manual_note" | "image_review" | "video_frame" | "annotation" | "validation_note" | "terminal_output" | "before_after";
 type PermissionClass = "manual_note" | "media_review" | "annotation" | "validation";
 type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
@@ -44,6 +44,13 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   const createValidationNote = trpc.workbench.createValidationNote.useMutation({
     onSuccess: () => {
       utils.workbench.evidence.invalidate();
+      if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
+    },
+  });
+  const createBeforeAfterComparison = trpc.workbench.createBeforeAfterComparison.useMutation({
+    onSuccess: () => {
+      utils.workbench.evidence.invalidate();
+      utils.workbench.evidenceGroups.invalidate();
       if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
     },
   });
@@ -290,6 +297,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   <option value="annotation">Annotation note</option>
                   <option value="validation_note">Validation note</option>
                   <option value="terminal_output">Terminal output note</option>
+                  <option value="before_after">Before/after note</option>
                 </select>
                 <input
                   value={title}
@@ -625,6 +633,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   <option value="annotation">Annotation</option>
                   <option value="validation_note">Validation</option>
                   <option value="terminal_output">Terminal</option>
+                  <option value="before_after">Before/after</option>
                 </select>
                 <select
                   value={filterProjectId}
@@ -786,6 +795,16 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     }}
                     isCreatingValidationNote={createValidationNote.isPending}
                     validationSavedId={createValidationNote.data?.ok ? createValidationNote.data.evidence.id : null}
+                    evidenceOptions={(evidence.data?.items ?? []).map((item) => ({
+                      id: item.id,
+                      title: item.title,
+                      kind: item.kind,
+                    }))}
+                    onCreateComparison={(input) => {
+                      createBeforeAfterComparison.mutate(input);
+                    }}
+                    isCreatingComparison={createBeforeAfterComparison.isPending}
+                    comparisonSavedId={createBeforeAfterComparison.data?.ok ? createBeforeAfterComparison.data.evidence.id : null}
                   />
                 </div>
               )}
@@ -811,6 +830,10 @@ function EvidenceDetailPanel({
   onCreateValidationNote,
   isCreatingValidationNote,
   validationSavedId,
+  evidenceOptions,
+  onCreateComparison,
+  isCreatingComparison,
+  comparisonSavedId,
 }: {
   detail:
     | {
@@ -854,6 +877,9 @@ function EvidenceDetailPanel({
           mediaFrameTimeSec: number | null;
           mediaDurationSec: number | null;
           mediaTemporary: boolean;
+          beforeEvidenceId: number | null;
+          afterEvidenceId: number | null;
+          comparisonResult: string | null;
         };
         permissionPreflight: {
           id: number;
@@ -871,16 +897,35 @@ function EvidenceDetailPanel({
           permissionPreflightId: number | null;
           createdAt: number;
         }>;
+        comparisonHistory: Array<{
+          id: number;
+          title: string;
+          summary: string;
+          beforeEvidenceId: number | null;
+          afterEvidenceId: number | null;
+          comparisonResult: string | null;
+          validationStatus: string;
+          permissionPreflightId: number | null;
+          createdAt: number;
+        }>;
       }
     | undefined;
   loading: boolean;
   onCreateValidationNote?: (input: { evidenceId: number; validatorAgent: ValidatorAgent; status: ValidationNoteStatus; note: string }) => void;
   isCreatingValidationNote?: boolean;
   validationSavedId?: number | null;
+  evidenceOptions?: Array<{ id: number; title: string; kind: string }>;
+  onCreateComparison?: (input: { beforeEvidenceId: number; afterEvidenceId: number; title: string; summary: string; result: string; routeAgent?: string | null }) => void;
+  isCreatingComparison?: boolean;
+  comparisonSavedId?: number | null;
 }) {
   const [validatorAgent, setValidatorAgent] = useState<ValidatorAgent>("oak");
   const [validationStatus, setValidationStatus] = useState<ValidationNoteStatus>("needs_review");
   const [validationNote, setValidationNote] = useState("");
+  const [compareWithId, setCompareWithId] = useState<number | "none">("none");
+  const [comparisonTitle, setComparisonTitle] = useState("");
+  const [comparisonSummary, setComparisonSummary] = useState("");
+  const [comparisonResult, setComparisonResult] = useState("");
   if (loading) {
     return (
       <aside className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -933,6 +978,9 @@ function EvidenceDetailPanel({
         <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
         <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
         <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
+        <Meta label="Before Evidence" value={item.beforeEvidenceId == null ? "none" : `Evidence #${item.beforeEvidenceId}`} />
+        <Meta label="After Evidence" value={item.afterEvidenceId == null ? "none" : `Evidence #${item.afterEvidenceId}`} />
+        <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
       </div>
       <div className="mt-3 rounded p-3" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
@@ -997,6 +1045,114 @@ function EvidenceDetailPanel({
             ))}
           </div>
         )}
+      </div>
+      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+          Comparison History
+        </h4>
+        {detail.comparisonHistory.length === 0 ? (
+          <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+            No appended before/after comparisons include this evidence yet.
+          </div>
+        ) : (
+          <div className="grid gap-2">
+            {detail.comparisonHistory.map((entry) => (
+              <article key={entry.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="flex flex-wrap gap-1">
+                  <Chip label={`#${entry.id}`} tone={C.textMuted} />
+                  <Chip label={`before #${entry.beforeEvidenceId ?? "none"}`} tone={C.accent} />
+                  <Chip label={`after #${entry.afterEvidenceId ?? "none"}`} tone={C.accent} />
+                  <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
+                  {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
+                  <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
+                </div>
+                <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>{entry.summary}</p>
+                {entry.comparisonResult && (
+                  <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textSecondary }}>{entry.comparisonResult}</p>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+          Append Before/After
+        </h4>
+        <div className="grid gap-2">
+          <select
+            value={compareWithId}
+            onChange={(event) => setCompareWithId(event.target.value === "none" ? "none" : Number(event.target.value))}
+            aria-label="Compare selected evidence with another evidence record"
+            className="px-2 py-1.5 rounded text-xs outline-none"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+          >
+            <option value="none">Compare with evidence</option>
+            {(evidenceOptions ?? [])
+              .filter((option) => option.id !== item.id)
+              .map((option) => (
+                <option key={option.id} value={option.id}>
+                  #{option.id} {option.kind.replace(/_/g, " ")} {option.title}
+                </option>
+              ))}
+          </select>
+          <input
+            value={comparisonTitle}
+            onChange={(event) => setComparisonTitle(event.target.value)}
+            aria-label="Before/after comparison title"
+            placeholder="Comparison title."
+            className="px-2 py-1.5 rounded text-xs outline-none"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+          />
+          <textarea
+            value={comparisonSummary}
+            onChange={(event) => setComparisonSummary(event.target.value)}
+            aria-label="Before/after comparison summary"
+            placeholder="What changed between these evidence records."
+            className="min-h-20 px-2 py-1.5 rounded text-xs outline-none resize-y"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+          />
+          <textarea
+            value={comparisonResult}
+            onChange={(event) => setComparisonResult(event.target.value)}
+            aria-label="Before/after comparison result"
+            placeholder="Result or next local review status."
+            className="min-h-16 px-2 py-1.5 rounded text-xs outline-none resize-y"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+          />
+          <div className="flex items-center justify-between gap-2">
+            <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
+              {comparisonSavedId ? `Saved comparison #${comparisonSavedId}.` : "Creates a new local comparison record."}
+            </div>
+            <button
+              type="button"
+              disabled={compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim() || isCreatingComparison}
+              onClick={() => {
+                if (compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim()) return;
+                onCreateComparison?.({
+                  beforeEvidenceId: item.id,
+                  afterEvidenceId: compareWithId,
+                  title: comparisonTitle.trim(),
+                  summary: comparisonSummary.trim(),
+                  result: comparisonResult.trim(),
+                  routeAgent: "spock",
+                });
+                setComparisonTitle("");
+                setComparisonSummary("");
+                setComparisonResult("");
+              }}
+              aria-label="Append local before/after comparison"
+              className="px-2 py-1.5 rounded text-xs font-semibold uppercase tracking-wider"
+              style={{
+                background: compareWithId !== "none" && comparisonTitle.trim() && comparisonSummary.trim() && comparisonResult.trim() && !isCreatingComparison ? C.accentSoft : C.surfaceMuted,
+                border: `1px solid ${C.borderSoft}`,
+                color: compareWithId !== "none" && comparisonTitle.trim() && comparisonSummary.trim() && comparisonResult.trim() && !isCreatingComparison ? C.textPrimary : C.textMuted,
+              }}
+            >
+              {isCreatingComparison ? "Saving" : "Append"}
+            </button>
+          </div>
+        </div>
       </div>
       <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
