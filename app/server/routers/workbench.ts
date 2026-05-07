@@ -19,6 +19,7 @@ const evidenceKinds = [
 const permissionClasses = ["manual_note", "local_preview", "public_browser", "media_review", "annotation", "validation"] as const;
 const validationAgents = ["oak", "spock"] as const;
 const evidenceGroupBys = ["project", "task", "session", "kind", "source", "command", "artifact", "validation_status"] as const;
+const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
 
 function rowToEvidence(row: Record<string, unknown>) {
   return {
@@ -42,6 +43,9 @@ function rowToEvidence(row: Record<string, unknown>) {
     mediaName: row.media_name == null ? null : String(row.media_name),
     mediaMimeType: row.media_mime_type == null ? null : String(row.media_mime_type),
     mediaByteSize: row.media_byte_size == null ? null : Number(row.media_byte_size),
+    mediaKind: row.media_kind == null ? null : String(row.media_kind),
+    mediaFrameTimeSec: row.media_frame_time_sec == null ? null : Number(row.media_frame_time_sec),
+    mediaDurationSec: row.media_duration_sec == null ? null : Number(row.media_duration_sec),
     mediaTemporary: Boolean(row.media_temporary_flag),
     validationStatus: String(row.validation_status),
     permissionClass: String(row.permission_class),
@@ -187,7 +191,7 @@ export const workbenchRouter = router({
         label: "Image and video review",
         ownerAgent: "gojo",
         status: "partially_live",
-        permission: "Local/uploaded/generated assets only. Temporary image previews stay browser-local. Durable saves use vault artifact rules.",
+        permission: "Local/uploaded/generated assets only. Temporary image/video previews stay browser-local. Durable saves use vault artifact rules.",
         records: ["file_name", "mime_type", "byte_size", "artifact_id", "frame_time", "media_kind", "notes"],
       },
       {
@@ -726,6 +730,9 @@ export const workbenchRouter = router({
         mediaName: z.string().max(255).nullable().optional(),
         mediaMimeType: z.string().max(120).nullable().optional(),
         mediaByteSize: z.number().int().min(0).nullable().optional(),
+        mediaKind: z.enum(mediaKinds).nullable().optional(),
+        mediaFrameTimeSec: z.number().min(0).nullable().optional(),
+        mediaDurationSec: z.number().min(0).nullable().optional(),
         mediaTemporary: z.boolean().default(false),
         permissionClass: z.enum(permissionClasses).default("manual_note"),
         sensitive: z.boolean().default(false),
@@ -745,11 +752,12 @@ export const workbenchRouter = router({
             kind, title, summary, target_uri, project_id, task_id, session_id,
             source_id, command_observation_id, artifact_id, owner_agent,
             route_agent, viewport, coordinates, annotation_text,
-            media_name, media_mime_type, media_byte_size, media_temporary_flag,
+            media_name, media_mime_type, media_byte_size, media_kind,
+            media_frame_time_sec, media_duration_sec, media_temporary_flag,
             validation_status, permission_class, permission_preflight_id,
             sensitive_data_flag
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
           RETURNING *
         `,
         args: [
@@ -771,6 +779,9 @@ export const workbenchRouter = router({
           input.mediaName ?? null,
           input.mediaMimeType ?? null,
           input.mediaByteSize ?? null,
+          input.mediaKind ?? null,
+          input.mediaFrameTimeSec ?? null,
+          input.mediaDurationSec ?? null,
           input.mediaTemporary ? 1 : 0,
           input.permissionClass,
           permissionPreflightId,

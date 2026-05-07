@@ -2,17 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 
-type EvidenceKind = "all" | "manual_note" | "image_review" | "annotation" | "validation_note" | "terminal_output";
+type EvidenceKind = "all" | "manual_note" | "image_review" | "video_frame" | "annotation" | "validation_note" | "terminal_output";
 type PermissionClass = "manual_note" | "media_review" | "annotation" | "validation";
 type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
 type EvidenceGroupBy = "project" | "task" | "session" | "kind" | "source" | "command" | "artifact" | "validation_status";
 
-type TemporaryImagePreview = {
+type TemporaryMediaPreview = {
   name: string;
   type: string;
   size: number;
+  kind: "image" | "video";
   url: string;
+  durationSec: number | null;
 };
 
 export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
@@ -66,7 +68,8 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
-  const [temporaryImage, setTemporaryImage] = useState<TemporaryImagePreview | null>(null);
+  const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
+  const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const data = plan.data;
   const projectOptions = useMemo(
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
@@ -74,37 +77,44 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   );
 
   useEffect(() => {
+    const url = temporaryMedia?.url;
     return () => {
-      if (temporaryImage) URL.revokeObjectURL(temporaryImage.url);
+      if (url) URL.revokeObjectURL(url);
     };
-  }, [temporaryImage]);
+  }, [temporaryMedia?.url]);
 
-  function clearTemporaryImage() {
-    if (temporaryImage) URL.revokeObjectURL(temporaryImage.url);
-    setTemporaryImage(null);
+  function clearTemporaryMedia() {
+    if (temporaryMedia) URL.revokeObjectURL(temporaryMedia.url);
+    setTemporaryMedia(null);
+    setMediaFrameTimeSec("");
   }
 
-  function stageTemporaryImage(file: File | null) {
+  function stageTemporaryMedia(file: File | null) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return;
-    clearTemporaryImage();
+    const mediaKind: TemporaryMediaPreview["kind"] | null =
+      file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : null;
+    if (!mediaKind) return;
+    clearTemporaryMedia();
     const preview = {
       name: file.name,
       type: file.type || "image/unknown",
       size: file.size,
+      kind: mediaKind,
       url: URL.createObjectURL(file),
+      durationSec: null,
     };
-    setTemporaryImage(preview);
-    setKind("image_review");
+    setTemporaryMedia(preview);
+    setKind(mediaKind === "video" ? "video_frame" : "image_review");
     setPermissionClass("media_review");
     setRouteAgent("gojo");
-    setTargetUri(`temporary-image:${file.name}`);
-    setTitle((current) => current.trim() || `Image review: ${file.name}`);
+    setTargetUri(`temporary-${mediaKind}:${file.name}`);
+    setTitle((current) => current.trim() || `${mediaKind === "video" ? "Video frame" : "Image"} review: ${file.name}`);
     setSummary((current) => current.trim() || [
-      `Temporary local image selected: ${file.name}.`,
+      `Temporary local ${mediaKind} selected: ${file.name}.`,
       `Type: ${preview.type}.`,
       `Size: ${formatBytes(preview.size)}.`,
-      "The image bytes are only previewed in this browser session. Saving evidence stores metadata and notes only.",
+      mediaKind === "video" ? "Use the frame-time field to record the frame being reviewed." : "Image review records visible notes only.",
+      "The media bytes are only previewed in this browser session. Saving evidence stores metadata and notes only.",
     ].join("\n"));
   }
 
@@ -129,10 +139,13 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
         viewport: viewport.trim() || null,
         coordinates: coordinates.trim() || null,
         annotationText: annotationText.trim() || null,
-        mediaName: temporaryImage?.name ?? null,
-        mediaMimeType: temporaryImage?.type ?? null,
-        mediaByteSize: temporaryImage?.size ?? null,
-        mediaTemporary: Boolean(temporaryImage),
+        mediaName: temporaryMedia?.name ?? null,
+        mediaMimeType: temporaryMedia?.type ?? null,
+        mediaByteSize: temporaryMedia?.size ?? null,
+        mediaKind: temporaryMedia?.kind === "video" ? "video_frame" : temporaryMedia?.kind ?? null,
+        mediaFrameTimeSec: mediaFrameTimeSec.trim() && Number.isFinite(Number(mediaFrameTimeSec)) ? Number(mediaFrameTimeSec) : null,
+        mediaDurationSec: temporaryMedia?.durationSec ?? null,
+        mediaTemporary: Boolean(temporaryMedia),
         permissionClass,
         sensitive,
       },
@@ -150,7 +163,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
           setSourceId("none");
           setCommandObservationId("none");
           setArtifactId("none");
-          clearTemporaryImage();
+          clearTemporaryMedia();
         },
       },
     );
@@ -263,7 +276,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   onChange={(event) => {
                     const nextKind = event.target.value as EvidenceKind;
                     setKind(nextKind);
-                    if (nextKind === "image_review") setPermissionClass("media_review");
+                    if (nextKind === "image_review" || nextKind === "video_frame") setPermissionClass("media_review");
                     if (nextKind === "annotation") setPermissionClass("annotation");
                     if (nextKind === "validation_note") setPermissionClass("validation");
                   }}
@@ -273,6 +286,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 >
                   <option value="manual_note">Manual note</option>
                   <option value="image_review">Image review note</option>
+                  <option value="video_frame">Video frame note</option>
                   <option value="annotation">Annotation note</option>
                   <option value="validation_note">Validation note</option>
                   <option value="terminal_output">Terminal output note</option>
@@ -451,7 +465,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 }}
                 onDrop={(event) => {
                   event.preventDefault();
-                  stageTemporaryImage(event.dataTransfer.files.item(0));
+                  stageTemporaryMedia(event.dataTransfer.files.item(0));
                 }}
                 style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
               >
@@ -468,44 +482,73 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     className="inline-flex cursor-pointer items-center rounded px-3 py-2 text-xs font-semibold uppercase tracking-wider"
                     style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
-                    Choose Image
+                    Choose Media
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/*"
                       className="sr-only"
-                      aria-label="Choose temporary Workbench image"
+                      aria-label="Choose temporary Workbench media"
                       onChange={(event) => {
-                        stageTemporaryImage(event.target.files?.item(0) ?? null);
+                        stageTemporaryMedia(event.target.files?.item(0) ?? null);
                         event.currentTarget.value = "";
                       }}
                     />
                   </label>
                 </div>
-                {temporaryImage ? (
+                {temporaryMedia ? (
                   <div className="mt-3 grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
                     <div className="overflow-hidden rounded" style={{ border: `1px solid ${C.borderSoft}`, background: C.background }}>
-                      <img
-                        src={temporaryImage.url}
-                        alt=""
-                        className="block h-40 w-full object-contain"
-                      />
+                      {temporaryMedia.kind === "image" ? (
+                        <img
+                          src={temporaryMedia.url}
+                          alt=""
+                          className="block h-40 w-full object-contain"
+                        />
+                      ) : (
+                        <video
+                          src={temporaryMedia.url}
+                          controls
+                          preload="metadata"
+                          className="block h-40 w-full object-contain"
+                          onLoadedMetadata={(event) => {
+                            const duration = event.currentTarget.duration;
+                            setTemporaryMedia((current) => current ? {
+                              ...current,
+                              durationSec: Number.isFinite(duration) ? duration : null,
+                            } : current);
+                          }}
+                        />
+                      )}
                     </div>
                     <div className="grid content-start gap-2">
                       <div className="flex flex-wrap gap-1">
-                        <Chip label={temporaryImage.type} tone={C.accent} />
-                        <Chip label={formatBytes(temporaryImage.size)} tone={C.textMuted} />
+                        <Chip label={temporaryMedia.kind} tone={C.accent} />
+                        <Chip label={temporaryMedia.type} tone={C.accent} />
+                        <Chip label={formatBytes(temporaryMedia.size)} tone={C.textMuted} />
+                        {temporaryMedia.durationSec != null && <Chip label={`${formatSeconds(temporaryMedia.durationSec)} duration`} tone={C.textMuted} />}
                         <Chip label="temporary" tone={C.warning} />
                       </div>
                       <div className="text-xs leading-relaxed break-words" style={{ color: C.textSecondary }}>
-                        {temporaryImage.name}
+                        {temporaryMedia.name}
                       </div>
+                      {temporaryMedia.kind === "video" && (
+                        <input
+                          value={mediaFrameTimeSec}
+                          onChange={(event) => setMediaFrameTimeSec(event.target.value)}
+                          inputMode="decimal"
+                          placeholder="Frame time in seconds."
+                          aria-label="Video frame time in seconds"
+                          className="px-2 py-1.5 rounded text-xs outline-none"
+                          style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                        />
+                      )}
                       <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
-                        Saving the evidence row records title, notes, and `temporary-image:` target metadata. It does not save the image bytes.
+                        Saving the evidence row records title, notes, frame timing, and target metadata. It does not save the media bytes.
                       </div>
                       <button
                         type="button"
-                        onClick={clearTemporaryImage}
-                        aria-label="Clear temporary Workbench image"
+                        onClick={clearTemporaryMedia}
+                        aria-label="Clear temporary Workbench media"
                         className="w-fit rounded px-2 py-1.5 text-xs font-semibold uppercase tracking-wider"
                         style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
                       >
@@ -515,7 +558,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   </div>
                 ) : (
                   <div className="mt-3 rounded px-3 py-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                    Drop an image here or choose one. The selected file stays temporary until a later approved durable-save flow exists.
+                    Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.
                   </div>
                 )}
               </div>
@@ -578,6 +621,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   <option value="all">All kinds</option>
                   <option value="manual_note">Manual note</option>
                   <option value="image_review">Image review</option>
+                  <option value="video_frame">Video frame</option>
                   <option value="annotation">Annotation</option>
                   <option value="validation_note">Validation</option>
                   <option value="terminal_output">Terminal</option>
@@ -717,6 +761,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                         {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                         {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
                         {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
+                        {item.mediaKind && <Chip label={item.mediaKind.replace(/_/g, " ")} tone={C.accent} />}
                         {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
                         {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                       </div>
@@ -805,6 +850,9 @@ function EvidenceDetailPanel({
           mediaName: string | null;
           mediaMimeType: string | null;
           mediaByteSize: number | null;
+          mediaKind: string | null;
+          mediaFrameTimeSec: number | null;
+          mediaDurationSec: number | null;
           mediaTemporary: boolean;
         };
         permissionPreflight: {
@@ -879,8 +927,11 @@ function EvidenceDetailPanel({
         <Meta label="Coordinates" value={item.coordinates ?? "none"} />
         <Meta label="Annotation" value={item.annotationText ?? "none"} />
         <Meta label="Media Name" value={item.mediaName ?? "none"} />
+        <Meta label="Media Kind" value={item.mediaKind == null ? "none" : item.mediaKind.replace(/_/g, " ")} />
         <Meta label="Media Type" value={item.mediaMimeType ?? "none"} />
         <Meta label="Media Size" value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
+        <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
+        <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
         <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
       </div>
       <div className="mt-3 rounded p-3" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1032,6 +1083,14 @@ function formatBytes(value: number) {
     unitIndex += 1;
   }
   return `${size.toFixed(size >= 10 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function formatSeconds(value: number) {
+  if (!Number.isFinite(value) || value < 0) return "unknown time";
+  if (value < 60) return `${value.toFixed(value >= 10 ? 1 : 2)}s`;
+  const minutes = Math.floor(value / 60);
+  const seconds = value % 60;
+  return `${minutes}m ${seconds.toFixed(1)}s`;
 }
 
 function Meta({ label, value }: { label: string; value: string }) {

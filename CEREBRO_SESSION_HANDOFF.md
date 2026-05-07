@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-07
+Last updated: 2026-05-07 07:09 EDT
 
 ## Current North Star
 
@@ -88,6 +88,71 @@ Begin Session 4 after user clarification:
   Obsidian snapshot, commit, and summary. Stop only when a gate is required,
   checks fail, product direction changes, the diff gets broad, context is
   getting heavy, or the block is complete.
+- 2026-05-07 07:09 EDT slice: Workbench temporary media metadata now covers
+  video-frame notes as well as image-review notes. The Workbench can stage a
+  temporary local image or video in browser memory, record metadata-only
+  evidence, store media kind plus frame-time/duration fields, and display those
+  fields in evidence detail. This does not save media bytes, capture
+  screenshots, open browsers, call vision models, or write externally.
+
+## Latest Closeout
+
+### 2026-05-07 07:09 EDT - Workbench Video Frame Metadata
+
+Files changed:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/cerebro-foundations.test.ts`
+
+What changed:
+
+- Added Workbench support for local temporary video evidence records under
+  `video_frame`.
+- Added metadata fields for `media_kind`, `media_frame_time_sec`, and
+  `media_duration_sec` to the idempotent local DB schema and migration guard.
+- Updated Workbench create/read/detail flows to preserve image/video metadata
+  without saving media bytes.
+- Updated the Workbench panel to stage image or video files with object URLs,
+  collect optional video frame time, and display media metadata in evidence
+  lists and detail.
+- Expanded the foundation test to cover metadata-only video-frame evidence.
+
+Checks run:
+
+- `pnpm test -- server/cerebro-foundations.test.ts` from `app/` passed. Vitest
+  also ran the colocated server suites selected by the project config:
+  4 files, 36 tests.
+- `pnpm check` from `app/` passed.
+
+Gates preserved:
+
+- No Notion or Slack writes.
+- No browser/search/fetch.
+- No external model/tool calls.
+- No media capture and no durable media save.
+- No desktop overlay process.
+- No external repo edits.
+- No moving/deleting/archiving files.
+- No secrets, installs, payments, deployment, account setup, destructive git,
+  or GitHub push.
+
+Known risks:
+
+- This is metadata-only. The Workbench does not yet extract video frames,
+  annotate directly on video, or run a vision model.
+- The temporary media preview exists only in the browser session. Evidence rows
+  intentionally store the file name, MIME type, byte size, media kind, and
+  timing metadata, not the bytes.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md` and
+`CEREBRO_SESSION_HANDOFF.md` first. Pick the next safe Workbench slice:
+annotation-coordinate capture tied to temporary image/video previews, or a
+proposal-only before/after comparison record. Preserve all gates. Run checks,
+update handoff plus Obsidian snapshot/index, and commit locally.
 
 ## Audit Snapshot
 

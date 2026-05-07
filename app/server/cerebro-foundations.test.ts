@@ -80,7 +80,7 @@ describe("CereBro proposal-only shell plans", () => {
     expect(plan.surfaces.map((surface) => surface.id)).toContain("localhost_preview");
     const imageSurface = plan.surfaces.find((surface) => surface.id === "image_video_review");
     expect(imageSurface?.status).toBe("partially_live");
-    expect(imageSurface?.permission).toContain("Temporary image previews");
+    expect(imageSurface?.permission).toContain("Temporary image/video previews");
     expect(plan.evidenceRecordShape.appendOnly).toBe(true);
     expect(plan.gates.join(" ")).toContain("does not open a browser");
 
@@ -116,6 +116,7 @@ describe("CereBro proposal-only shell plans", () => {
       mediaName: "settings-screen.png",
       mediaMimeType: "image/png",
       mediaByteSize: 24000,
+      mediaKind: "image",
       mediaTemporary: true,
       permissionClass: "media_review",
     });
@@ -127,8 +128,35 @@ describe("CereBro proposal-only shell plans", () => {
     expect(imageEvidence.evidence.mediaName).toBe("settings-screen.png");
     expect(imageEvidence.evidence.mediaMimeType).toBe("image/png");
     expect(imageEvidence.evidence.mediaByteSize).toBe(24000);
+    expect(imageEvidence.evidence.mediaKind).toBe("image");
     expect(imageEvidence.evidence.mediaTemporary).toBe(true);
     expect(imageEvidence.evidence.permissionPreflightId).toBeGreaterThan(0);
+
+    const videoFrameEvidence = await caller.workbench.createEvidence({
+      kind: "video_frame",
+      title: "Temporary video frame review",
+      summary: "Metadata-only note for a temporary video frame. Video bytes were not saved.",
+      targetUri: "temporary-video:flow-recording.mov",
+      ownerAgent: "gojo",
+      routeAgent: "spock",
+      mediaName: "flow-recording.mov",
+      mediaMimeType: "video/quicktime",
+      mediaByteSize: 54000,
+      mediaKind: "video_frame",
+      mediaFrameTimeSec: 12.5,
+      mediaDurationSec: 43.25,
+      mediaTemporary: true,
+      permissionClass: "media_review",
+    });
+    expect(videoFrameEvidence.ok).toBe(true);
+    expect(videoFrameEvidence.writesExternal).toBe(false);
+    expect(videoFrameEvidence.capturesMedia).toBe(false);
+    expect(videoFrameEvidence.evidence.kind).toBe("video_frame");
+    expect(videoFrameEvidence.evidence.mediaKind).toBe("video_frame");
+    expect(videoFrameEvidence.evidence.mediaFrameTimeSec).toBe(12.5);
+    expect(videoFrameEvidence.evidence.mediaDurationSec).toBe(43.25);
+    expect(videoFrameEvidence.evidence.mediaTemporary).toBe(true);
+    expect(videoFrameEvidence.gates.join(" ")).toContain("did not capture a screenshot");
 
     const records = await caller.workbench.evidence({
       query: "visible issue",
