@@ -1,12 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 
-type EvidenceKind = "all" | "manual_note" | "annotation" | "validation_note" | "terminal_output";
-type PermissionClass = "manual_note" | "annotation" | "validation";
+type EvidenceKind = "all" | "manual_note" | "image_review" | "annotation" | "validation_note" | "terminal_output";
+type PermissionClass = "manual_note" | "media_review" | "annotation" | "validation";
 type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
 type EvidenceGroupBy = "project" | "task" | "session" | "kind" | "source" | "command" | "artifact" | "validation_status";
+
+type TemporaryImagePreview = {
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+};
 
 export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   const plan = trpc.workbench.plan.useQuery();
@@ -59,11 +66,47 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
+  const [temporaryImage, setTemporaryImage] = useState<TemporaryImagePreview | null>(null);
   const data = plan.data;
   const projectOptions = useMemo(
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
   );
+
+  useEffect(() => {
+    return () => {
+      if (temporaryImage) URL.revokeObjectURL(temporaryImage.url);
+    };
+  }, [temporaryImage]);
+
+  function clearTemporaryImage() {
+    if (temporaryImage) URL.revokeObjectURL(temporaryImage.url);
+    setTemporaryImage(null);
+  }
+
+  function stageTemporaryImage(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    clearTemporaryImage();
+    const preview = {
+      name: file.name,
+      type: file.type || "image/unknown",
+      size: file.size,
+      url: URL.createObjectURL(file),
+    };
+    setTemporaryImage(preview);
+    setKind("image_review");
+    setPermissionClass("media_review");
+    setRouteAgent("gojo");
+    setTargetUri(`temporary-image:${file.name}`);
+    setTitle((current) => current.trim() || `Image review: ${file.name}`);
+    setSummary((current) => current.trim() || [
+      `Temporary local image selected: ${file.name}.`,
+      `Type: ${preview.type}.`,
+      `Size: ${formatBytes(preview.size)}.`,
+      "The image bytes are only previewed in this browser session. Saving evidence stores metadata and notes only.",
+    ].join("\n"));
+  }
 
   function submitEvidence() {
     const cleanTitle = title.trim();
@@ -215,6 +258,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   onChange={(event) => {
                     const nextKind = event.target.value as EvidenceKind;
                     setKind(nextKind);
+                    if (nextKind === "image_review") setPermissionClass("media_review");
                     if (nextKind === "annotation") setPermissionClass("annotation");
                     if (nextKind === "validation_note") setPermissionClass("validation");
                   }}
@@ -223,6 +267,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 >
                   <option value="manual_note">Manual note</option>
+                  <option value="image_review">Image review note</option>
                   <option value="annotation">Annotation note</option>
                   <option value="validation_note">Validation note</option>
                   <option value="terminal_output">Terminal output note</option>
@@ -356,6 +401,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 >
                   <option value="manual_note">Manual note</option>
+                  <option value="media_review">Media review</option>
                   <option value="annotation">Annotation</option>
                   <option value="validation">Validation</option>
                 </select>
@@ -391,6 +437,82 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   className="md:col-span-2 min-h-24 px-3 py-2 rounded text-xs outline-none resize-y"
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
+              </div>
+              <div
+                className="mt-3 rounded p-3"
+                aria-label="Temporary image intake"
+                onDragOver={(event) => {
+                  event.preventDefault();
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  stageTemporaryImage(event.dataTransfer.files.item(0));
+                }}
+                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                      Temporary Image
+                    </h4>
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: C.textMuted }}>
+                      Browser-memory preview. No upload. No vault save. No vision model.
+                    </p>
+                  </div>
+                  <label
+                    className="inline-flex cursor-pointer items-center rounded px-3 py-2 text-xs font-semibold uppercase tracking-wider"
+                    style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+                  >
+                    Choose Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      aria-label="Choose temporary Workbench image"
+                      onChange={(event) => {
+                        stageTemporaryImage(event.target.files?.item(0) ?? null);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+                {temporaryImage ? (
+                  <div className="mt-3 grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
+                    <div className="overflow-hidden rounded" style={{ border: `1px solid ${C.borderSoft}`, background: C.background }}>
+                      <img
+                        src={temporaryImage.url}
+                        alt=""
+                        className="block h-40 w-full object-contain"
+                      />
+                    </div>
+                    <div className="grid content-start gap-2">
+                      <div className="flex flex-wrap gap-1">
+                        <Chip label={temporaryImage.type} tone={C.accent} />
+                        <Chip label={formatBytes(temporaryImage.size)} tone={C.textMuted} />
+                        <Chip label="temporary" tone={C.warning} />
+                      </div>
+                      <div className="text-xs leading-relaxed break-words" style={{ color: C.textSecondary }}>
+                        {temporaryImage.name}
+                      </div>
+                      <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+                        Saving the evidence row records title, notes, and `temporary-image:` target metadata. It does not save the image bytes.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearTemporaryImage}
+                        aria-label="Clear temporary Workbench image"
+                        className="w-fit rounded px-2 py-1.5 text-xs font-semibold uppercase tracking-wider"
+                        style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded px-3 py-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    Drop an image here or choose one. The selected file stays temporary until a later approved durable-save flow exists.
+                  </div>
+                )}
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs" style={{ color: C.textMuted }}>
@@ -450,6 +572,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 >
                   <option value="all">All kinds</option>
                   <option value="manual_note">Manual note</option>
+                  <option value="image_review">Image review</option>
                   <option value="annotation">Annotation</option>
                   <option value="validation_note">Validation</option>
                   <option value="terminal_output">Terminal</option>
@@ -881,6 +1004,19 @@ function EvidenceDetailPanel({
 function formatTimestamp(value: number) {
   if (!Number.isFinite(value)) return "unknown time";
   return new Date(value * 1000).toLocaleString();
+}
+
+function formatBytes(value: number) {
+  if (!Number.isFinite(value) || value < 0) return "unknown size";
+  if (value < 1024) return `${value} B`;
+  const units = ["KB", "MB", "GB"];
+  let size = value / 1024;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  return `${size.toFixed(size >= 10 ? 0 : 1)} ${units[unitIndex]}`;
 }
 
 function Meta({ label, value }: { label: string; value: string }) {

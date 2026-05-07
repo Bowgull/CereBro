@@ -78,6 +78,9 @@ describe("CereBro proposal-only shell plans", () => {
     expect(plan.capturesMedia).toBe(false);
     expect(plan.surfaces.map((surface) => surface.id)).toContain("annotation_canvas");
     expect(plan.surfaces.map((surface) => surface.id)).toContain("localhost_preview");
+    const imageSurface = plan.surfaces.find((surface) => surface.id === "image_video_review");
+    expect(imageSurface?.status).toBe("partially_live");
+    expect(imageSurface?.permission).toContain("Temporary image previews");
     expect(plan.evidenceRecordShape.appendOnly).toBe(true);
     expect(plan.gates.join(" ")).toContain("does not open a browser");
 
@@ -102,6 +105,22 @@ describe("CereBro proposal-only shell plans", () => {
     expect(evidence.evidence.coordinates).toContain("x=120");
     expect(evidence.evidence.permissionPreflightId).toBeGreaterThan(0);
     expect(evidence.permissionPreflightId).toBe(evidence.evidence.permissionPreflightId);
+
+    const imageEvidence = await caller.workbench.createEvidence({
+      kind: "image_review",
+      title: "Temporary screenshot review",
+      summary: "Metadata-only note for a temporary image preview. Image bytes were not saved.",
+      targetUri: "temporary-image:settings-screen.png",
+      ownerAgent: "gojo",
+      routeAgent: "oak",
+      permissionClass: "media_review",
+    });
+    expect(imageEvidence.ok).toBe(true);
+    expect(imageEvidence.writesExternal).toBe(false);
+    expect(imageEvidence.capturesMedia).toBe(false);
+    expect(imageEvidence.evidence.kind).toBe("image_review");
+    expect(imageEvidence.evidence.permissionClass).toBe("media_review");
+    expect(imageEvidence.evidence.permissionPreflightId).toBeGreaterThan(0);
 
     const records = await caller.workbench.evidence({
       query: "visible issue",

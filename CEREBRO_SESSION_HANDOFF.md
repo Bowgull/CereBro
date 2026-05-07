@@ -1291,6 +1291,38 @@ Do not record serial numbers or hardware UUIDs in repo docs.
   overlay process, external model/tool call, gateway install, provider SDK/API
   key/account setup, model download, external repo edit, push, pull, cleanup,
   UI command execution, file move/delete, or destructive action was performed.
+- Continued from the clean checkpoint branch with a temporary image-intake
+  Workbench slice:
+  - `WorkbenchPanel` now exposes `image_review` evidence and `media_review`
+    permission class in the Add Evidence and evidence-filter controls.
+  - The panel has a `Temporary Image` intake area with drag/drop and file picker
+    for local images.
+  - Selected images are previewed with a browser-memory object URL only. The
+    preview shows filename, MIME type, byte size, and temporary status.
+  - Choosing an image fills an image-review evidence draft with a
+    `temporary-image:<filename>` target and metadata summary.
+  - Saving still creates only a local append-only evidence metadata row. It
+    does not save image bytes, write to the vault, upload externally, call a
+    vision model, browse, fetch, capture screenshots, or open a media tool.
+  - `workbench.plan` now marks image/video review as `partially_live` and
+    records temporary image metadata fields.
+  - Foundation tests now cover the temporary image-review evidence path and
+    media-review permission class.
+- Verification after temporary image-intake slice:
+  `pnpm check` passed, `pnpm exec vitest run
+  server/cerebro-foundations.test.ts` passed 18 tests, and `pnpm build` passed.
+  Vite still warns about unset analytics env placeholders and large JS chunks;
+  those warnings predate this slice.
+- Files changed in this slice:
+  - `app/client/src/components/WorkbenchPanel.tsx`
+  - `app/server/routers/workbench.ts`
+  - `app/server/cerebro-foundations.test.ts`
+  - `CEREBRO_SESSION_HANDOFF.md`
+- No Notion, Slack, browser/search, source fetch, durable media save, media
+  capture, desktop overlay process, external model/tool call, vision call,
+  gateway install, provider SDK/API key/account setup, model download,
+  external repo edit, push, pull, cleanup, UI command execution, file
+  move/delete, or destructive action was performed.
 
 ### Model Router Snapshot
 

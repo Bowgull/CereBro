@@ -180,9 +180,9 @@ export const workbenchRouter = router({
         id: "image_video_review",
         label: "Image and video review",
         ownerAgent: "gojo",
-        status: "planned",
-        permission: "Local/uploaded/generated assets only. Durable saves use vault artifact rules.",
-        records: ["artifact_id", "frame_time", "media_kind", "notes"],
+        status: "partially_live",
+        permission: "Local/uploaded/generated assets only. Temporary image previews stay browser-local. Durable saves use vault artifact rules.",
+        records: ["file_name", "mime_type", "byte_size", "artifact_id", "frame_time", "media_kind", "notes"],
       },
       {
         id: "annotation_canvas",
