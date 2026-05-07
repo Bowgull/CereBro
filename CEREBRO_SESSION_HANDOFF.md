@@ -1253,6 +1253,44 @@ Do not record serial numbers or hardware UUIDs in repo docs.
   key/account setup, model download, external repo edit, git operation,
   cleanup, UI command execution, file move/delete, or destructive action was
   performed.
+- Continued with a stabilization and checkpoint pass after the user asked
+  whether the large dirty worktree meant CereBro was in danger:
+  - Read-only inventory found the repo on `main...origin/main` ahead by 8
+    commits with many uncommitted modified/untracked files from prior CereBro
+    build sessions.
+  - Disk audit showed the repo at 882M, with `app/node_modules` accounting for
+    751M. The tracked app/public sprite assets were not the storage problem.
+  - A local untracked `.codex/` config folder was visible to Git and contained
+    local connector configuration. `.gitignore` now ignores `.codex/` so local
+    Codex config cannot be staged accidentally. The folder was not moved,
+    deleted, or committed.
+  - Staged secret scan after `.codex/` ignore found no staged bearer tokens,
+    private keys, GitHub tokens, Slack tokens, or OpenAI-style API keys.
+  - Created local checkpoint branch
+    `codex/cerebro-stabilization-checkpoint` from the current working state.
+  - Committed the current safe repo state as
+    `f24c9b1 Checkpoint CereBro stabilization state`.
+  - The checkpoint commit captured the intentional CereBro app/docs/assets
+    state so future build waves have a recoverable baseline instead of a large
+    uncommitted pile.
+- Verification before the checkpoint:
+  `pnpm check` passed, `pnpm exec vitest run
+  server/cerebro-foundations.test.ts` passed 18 tests, and `pnpm build` passed.
+  Vite still warns about unset analytics env placeholders and large JS chunks;
+  those warnings predate this slice.
+  `git diff --cached --check` flagged whitespace in third-party CC0 asset pack
+  metadata files. Those vendor files were left unnormalized to preserve source
+  pack provenance.
+- Files changed in this slice:
+  - `.gitignore`
+  - `CEREBRO_SESSION_HANDOFF.md`
+- Git actions in this slice:
+  - Created branch `codex/cerebro-stabilization-checkpoint`.
+  - Created commit `f24c9b1 Checkpoint CereBro stabilization state`.
+- No Notion, Slack, browser/search, source fetch, media capture, desktop
+  overlay process, external model/tool call, gateway install, provider SDK/API
+  key/account setup, model download, external repo edit, push, pull, cleanup,
+  UI command execution, file move/delete, or destructive action was performed.
 
 ### Model Router Snapshot
 
