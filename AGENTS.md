@@ -77,6 +77,13 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 
 Codex drives 100%: terminal, file edits, browser, account setup. User reviews and approves at decision level. When a step requires the user (account creation needing personal email/password, payment info, biometric auth, physical hardware), pause and ask, then resume driving.
 
+Build in bounded autonomous blocks, not tiny "keep going" slices. Default to
+2-4 related local slices on one surface before stopping. Stop only when a gate
+is required, checks fail, the diff gets broad, product direction changes,
+context is getting heavy, or the block is complete. The user explicitly called
+out that returning every 2-3 minutes just to say "keep going" creates pointless
+friction and burns attention.
+
 Every session closes by updating `CEREBRO_SESSION_HANDOFF.md` with what changed, files touched, tests/checks run, known risks, storage impact, and the next-session starter prompt. Then write a unique Obsidian snapshot of that handoff to `CereBro/Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md` and append a new link to `CereBro/Session History/CereBro Session History.md`. Never overwrite or replace an earlier handoff snapshot/index entry. This append-only Obsidian handoff archive is now user-approved standing behavior for CereBro build sessions.
 
 ## Scope discipline

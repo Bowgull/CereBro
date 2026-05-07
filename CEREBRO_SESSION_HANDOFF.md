@@ -81,6 +81,13 @@ Begin Session 4 after user clarification:
   Hedwig capture queue, Workbench media/evidence surfaces, and Oak/Spock
   validation flow. Treat Reddit as evidence with fingerprints, not automatic
   truth and not model-training data.
+- 2026-05-07 build-cadence clarification: the user does not want to return
+  every 2-3 minutes just to say "keep going." This feels pointless and creates
+  friction. Future CereBro build sessions should run in bounded autonomous
+  blocks: 2-4 related safe slices on one surface, then checks, handoff,
+  Obsidian snapshot, commit, and summary. Stop only when a gate is required,
+  checks fail, product direction changes, the diff gets broad, context is
+  getting heavy, or the block is complete.
 
 ## Audit Snapshot
 
