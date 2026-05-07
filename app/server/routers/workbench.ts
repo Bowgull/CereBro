@@ -326,6 +326,73 @@ export const workbenchRouter = router({
       };
     }),
 
+  evidencePicker: publicProcedure
+    .input(
+      z
+        .object({
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          excludeId: z.number().int().optional(),
+          limit: z.number().int().min(1).max(200).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const { where, args } = evidenceWhere(input);
+      if (input?.excludeId !== undefined) {
+        where.push("wer.id != ?");
+        args.push(input.excludeId);
+      }
+      args.push(input?.limit ?? 80);
+      const result = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+      const items = result.rows.map(rowToEvidence);
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        executesCommand: false,
+        items,
+        summary: {
+          total: items.length,
+          sensitive: items.filter((item) => item.sensitive).length,
+          media: items.filter((item) => item.mediaName != null || item.kind === "image_review" || item.kind === "video_frame").length,
+          comparisons: items.filter((item) => item.kind === "before_after").length,
+        },
+        gates: [
+          "Evidence picker reads local Workbench records only.",
+          "Picking evidence does not open linked targets, fetch sources, execute commands, capture media, or write externally.",
+        ],
+      };
+    }),
+
   evidenceGroups: publicProcedure
     .input(
       z

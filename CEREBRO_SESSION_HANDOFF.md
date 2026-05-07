@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-07 07:14 EDT
+Last updated: 2026-05-07 07:18 EDT
 
 ## Current North Star
 
@@ -101,8 +101,71 @@ Begin Session 4 after user clarification:
   a permission preflight audit row, and comparison history in evidence detail.
   This does not open linked targets, capture media, fetch sources, run
   commands, save files, or write externally.
+- 2026-05-07 07:18 EDT slice: Workbench before/after comparison now uses a
+  dedicated local evidence picker instead of only the visible recent-evidence
+  list. The picker reads up to 120 local Workbench evidence rows, excludes the
+  selected row, supports local search and kind filtering in the detail panel,
+  shows candidate metadata, and keeps gates visible. It does not open linked
+  targets, fetch sources, execute commands, capture media, save files, or write
+  externally.
 
 ## Latest Closeout
+
+### 2026-05-07 07:18 EDT - Workbench Evidence Picker
+
+Files changed:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `app/server/cerebro-foundations.test.ts`
+
+What changed:
+
+- Added `workbench.evidencePicker`, a read-only local candidate query for
+  comparison selection.
+- Added picker gates and summary metadata for total, sensitive, media, and
+  comparison evidence rows.
+- Updated the before/after form to use the dedicated picker rather than the
+  currently visible recent-evidence list.
+- Added local search, kind filtering, selected-candidate metadata, empty state,
+  and visible picker gates in the Workbench detail panel.
+- Expanded the foundation test to cover picker search, exclusion, summary, and
+  no-action guarantees.
+
+Checks run:
+
+- `pnpm test -- server/cerebro-foundations.test.ts` from `app/` passed. Vitest
+  also ran the colocated server suites selected by the project config:
+  4 files, 36 tests.
+- `pnpm check` from `app/` passed.
+
+Gates preserved:
+
+- No Notion or Slack writes.
+- No browser/search/fetch.
+- No external model/tool calls.
+- No media capture and no durable media save.
+- No desktop overlay process.
+- No external repo edits.
+- No moving/deleting/archiving files.
+- No secrets, installs, payments, deployment, account setup, destructive git,
+  or GitHub push.
+
+Known risks:
+
+- The picker query runs when an evidence detail row is selected and currently
+  returns a capped local candidate set. Later it can add server-side pagination
+  if Workbench evidence grows large.
+- The picker filters locally in the panel after loading candidates. It still
+  does not inspect linked files or media bytes.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md` and
+`CEREBRO_SESSION_HANDOFF.md` first. Pick the next safe Workbench slice:
+annotation-coordinate capture tied to temporary image/video previews, or
+server-side pagination for the local evidence picker. Preserve all gates. Run
+checks, update handoff plus Obsidian snapshot/index, and commit locally.
 
 ### 2026-05-07 07:14 EDT - Workbench Before/After Comparison
 

@@ -59,6 +59,10 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
     { id: selectedEvidenceId ?? 0 },
     { enabled: selectedEvidenceId != null },
   );
+  const evidencePicker = trpc.workbench.evidencePicker.useQuery(
+    { limit: 120, excludeId: selectedEvidenceId ?? undefined },
+    { enabled: selectedEvidenceId != null },
+  );
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [targetUri, setTargetUri] = useState("");
@@ -795,11 +799,19 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     }}
                     isCreatingValidationNote={createValidationNote.isPending}
                     validationSavedId={createValidationNote.data?.ok ? createValidationNote.data.evidence.id : null}
-                    evidenceOptions={(evidence.data?.items ?? []).map((item) => ({
+                    evidenceOptions={(evidencePicker.data?.items ?? []).map((item) => ({
                       id: item.id,
                       title: item.title,
                       kind: item.kind,
+                      summary: item.summary,
+                      projectName: item.projectName,
+                      validationStatus: item.validationStatus,
+                      sensitive: item.sensitive,
+                      mediaName: item.mediaName,
+                      createdAt: item.createdAt,
                     }))}
+                    evidencePickerLoading={evidencePicker.isLoading}
+                    evidencePickerGates={evidencePicker.data?.gates ?? []}
                     onCreateComparison={(input) => {
                       createBeforeAfterComparison.mutate(input);
                     }}
@@ -831,6 +843,8 @@ function EvidenceDetailPanel({
   isCreatingValidationNote,
   validationSavedId,
   evidenceOptions,
+  evidencePickerLoading,
+  evidencePickerGates,
   onCreateComparison,
   isCreatingComparison,
   comparisonSavedId,
@@ -914,7 +928,19 @@ function EvidenceDetailPanel({
   onCreateValidationNote?: (input: { evidenceId: number; validatorAgent: ValidatorAgent; status: ValidationNoteStatus; note: string }) => void;
   isCreatingValidationNote?: boolean;
   validationSavedId?: number | null;
-  evidenceOptions?: Array<{ id: number; title: string; kind: string }>;
+  evidenceOptions?: Array<{
+    id: number;
+    title: string;
+    kind: string;
+    summary: string;
+    projectName: string | null;
+    validationStatus: string;
+    sensitive: boolean;
+    mediaName: string | null;
+    createdAt: number;
+  }>;
+  evidencePickerLoading?: boolean;
+  evidencePickerGates?: string[];
   onCreateComparison?: (input: { beforeEvidenceId: number; afterEvidenceId: number; title: string; summary: string; result: string; routeAgent?: string | null }) => void;
   isCreatingComparison?: boolean;
   comparisonSavedId?: number | null;
@@ -926,6 +952,8 @@ function EvidenceDetailPanel({
   const [comparisonTitle, setComparisonTitle] = useState("");
   const [comparisonSummary, setComparisonSummary] = useState("");
   const [comparisonResult, setComparisonResult] = useState("");
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerKind, setPickerKind] = useState<EvidenceKind>("all");
   if (loading) {
     return (
       <aside className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -948,6 +976,22 @@ function EvidenceDetailPanel({
     );
   }
   const item = detail.evidence;
+  const comparisonOptions = (evidenceOptions ?? []).filter((option) => {
+    if (option.id === item.id) return false;
+    if (pickerKind !== "all" && option.kind !== pickerKind) return false;
+    const query = pickerQuery.trim().toLowerCase();
+    if (!query) return true;
+    return [
+      option.title,
+      option.summary,
+      option.kind,
+      option.projectName ?? "",
+      option.mediaName ?? "",
+      option.validationStatus,
+      String(option.id),
+    ].some((value) => value.toLowerCase().includes(query));
+  });
+  const selectedComparison = compareWithId === "none" ? null : comparisonOptions.find((option) => option.id === compareWithId) ?? null;
   return (
     <aside className="rounded p-3" aria-label="Workbench evidence detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="flex flex-wrap gap-1 mb-3">
@@ -1080,6 +1124,32 @@ function EvidenceDetailPanel({
           Append Before/After
         </h4>
         <div className="grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px]">
+            <input
+              value={pickerQuery}
+              onChange={(event) => setPickerQuery(event.target.value)}
+              aria-label="Search comparison evidence picker"
+              placeholder="Search local evidence."
+              className="px-2 py-1.5 rounded text-xs outline-none"
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+            />
+            <select
+              value={pickerKind}
+              onChange={(event) => setPickerKind(event.target.value as EvidenceKind)}
+              aria-label="Filter comparison evidence picker by kind"
+              className="px-2 py-1.5 rounded text-xs outline-none"
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+            >
+              <option value="all">All kinds</option>
+              <option value="manual_note">Manual</option>
+              <option value="image_review">Image</option>
+              <option value="video_frame">Video frame</option>
+              <option value="annotation">Annotation</option>
+              <option value="validation_note">Validation</option>
+              <option value="terminal_output">Terminal</option>
+              <option value="before_after">Before/after</option>
+            </select>
+          </div>
           <select
             value={compareWithId}
             onChange={(event) => setCompareWithId(event.target.value === "none" ? "none" : Number(event.target.value))}
@@ -1087,15 +1157,29 @@ function EvidenceDetailPanel({
             className="px-2 py-1.5 rounded text-xs outline-none"
             style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           >
-            <option value="none">Compare with evidence</option>
-            {(evidenceOptions ?? [])
-              .filter((option) => option.id !== item.id)
-              .map((option) => (
-                <option key={option.id} value={option.id}>
-                  #{option.id} {option.kind.replace(/_/g, " ")} {option.title}
-                </option>
-              ))}
+            <option value="none">{evidencePickerLoading ? "Reading local evidence" : "Compare with evidence"}</option>
+            {comparisonOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                #{option.id} {option.kind.replace(/_/g, " ")} {option.title}
+              </option>
+            ))}
           </select>
+          {selectedComparison && (
+            <div className="rounded px-2 py-2 text-xs leading-relaxed" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              #{selectedComparison.id} {selectedComparison.projectName ?? "unlinked"} {selectedComparison.validationStatus.replace(/_/g, " ")}
+              {selectedComparison.sensitive ? " sensitive" : ""}. {selectedComparison.summary}
+            </div>
+          )}
+          {!evidencePickerLoading && comparisonOptions.length === 0 && (
+            <div className="rounded px-2 py-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              No local evidence matches the picker filters.
+            </div>
+          )}
+          {(evidencePickerGates ?? []).map((gate) => (
+            <div key={gate} className="rounded px-2 py-1.5 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              {gate}
+            </div>
+          ))}
           <input
             value={comparisonTitle}
             onChange={(event) => setComparisonTitle(event.target.value)}

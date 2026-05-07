@@ -191,6 +191,22 @@ describe("CereBro proposal-only shell plans", () => {
     expect(records.writesExternal).toBe(false);
     expect(records.items.map((item) => item.id)).toContain(evidence.evidence.id);
 
+    const picker = await caller.workbench.evidencePicker({
+      query: "video frame",
+      excludeId: imageEvidence.evidence.id,
+      limit: 20,
+    });
+    expect(picker.mode).toBe("read_only");
+    expect(picker.appendOnly).toBe(true);
+    expect(picker.writesExternal).toBe(false);
+    expect(picker.opensBrowser).toBe(false);
+    expect(picker.capturesMedia).toBe(false);
+    expect(picker.executesCommand).toBe(false);
+    expect(picker.items.map((item) => item.id)).toContain(videoFrameEvidence.evidence.id);
+    expect(picker.items.map((item) => item.id)).not.toContain(imageEvidence.evidence.id);
+    expect(picker.summary.media).toBeGreaterThan(0);
+    expect(picker.gates.join(" ")).toContain("does not open linked targets");
+
     const detail = await caller.workbench.evidenceDetail({ id: evidence.evidence.id });
     expect(detail.found).toBe(true);
     expect(detail.opensBrowser).toBe(false);
