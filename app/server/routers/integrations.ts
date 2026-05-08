@@ -6,7 +6,13 @@ import {
   pollInbox,
   publishToOutbox,
 } from "../integrations/notion";
-import { getObsidianStatus, getVaultLayout, getVaultStatus } from "../integrations/vault";
+import {
+  getObsidianKnowledgeRoutes,
+  getObsidianStatus,
+  getVaultLayout,
+  getVaultStatus,
+  OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+} from "../integrations/vault";
 
 export const integrationsRouter = router({
   status: publicProcedure.query(async () => {
@@ -15,7 +21,14 @@ export const integrationsRouter = router({
       getVaultStatus(),
       getObsidianStatus(),
     ]);
-    return { notion, vault, obsidian, vaultLayout: getVaultLayout() };
+    return {
+      notion,
+      vault,
+      obsidian,
+      vaultLayout: getVaultLayout(),
+      obsidianKnowledgeRoutes: getObsidianKnowledgeRoutes(),
+      obsidianRetrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+    };
   }),
   notionPollInbox: publicProcedure.mutation(async () => {
     return pollInbox();

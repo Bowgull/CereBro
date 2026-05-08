@@ -1,6 +1,6 @@
 # CereBro File Lifecycle Plan
 
-Last updated: 2026-05-06
+Last updated: 2026-05-08
 
 ## Purpose
 
@@ -45,7 +45,7 @@ short rule is: history accumulates; current state updates.
 
 ## Storage Roles
 
-### SQLite / libSQL
+### Turso / libSQL
 
 Structured brain and metadata index.
 
@@ -57,10 +57,39 @@ Stores:
 - Approval records.
 - Tool call records.
 - Cleanup scan results and proposed actions.
+- Model/tool capability records, eval notes, and routing evidence.
+- RAG chunk metadata and citation pointers once retrieval is live.
 
 Does not store:
 
 - Large images, videos, renders, model files, zip archives, or heavy exports.
+
+Turso/libSQL cloud is the preferred canonical brain once configured. Local
+SQLite remains the development cache and offline fallback.
+
+### Vector Retrieval
+
+Cloud-backed semantic retrieval for RAG.
+
+Stores:
+
+- Embeddings for approved memory entries.
+- Embeddings for Obsidian notes that should feed LLM context.
+- Embeddings for source summaries and selected source chunks.
+- Embeddings for prompt/tool handoffs and reusable playbooks.
+- Pointers back to Turso rows, Obsidian paths, source URLs, artifacts, and
+  approval records.
+
+Does not store:
+
+- Raw private files by default.
+- Full media files.
+- Unapproved sensitive screenshots.
+- Anything that cannot be traced back to a visible source record.
+
+The vector index is rebuildable. Turso rows, source records, Obsidian notes,
+and approved vault artifacts are the durable record. If the vector index is
+lost, rebuild it from those sources.
 
 ### Google Drive Synced CereBro Vault
 
@@ -76,6 +105,9 @@ Stores:
 - Code handoff packages.
 - Message drafts and communication records.
 - Exports intended to survive chat context.
+
+Drive should run in a storage-conscious mode where possible. The Mac should not
+keep every generated file, render, or source archive pinned locally.
 
 ### Obsidian
 
@@ -93,9 +125,73 @@ Stores:
 - Project notes.
 - Durable reflections and checklists.
 - Index notes that link to vault artifacts.
+- RAG-ready summaries when a source or output is worth retrieving later.
 
 Obsidian does not increase disk capacity or local model capacity. It keeps
 knowledge findable and editable.
+
+Obsidian does not store:
+
+- Raw image batches.
+- Video renders.
+- Full source crawls.
+- Local vector indexes.
+- Duplicate binary files already stored in the Drive vault.
+
+Obsidian notes should be beautiful enough to use directly: clear folders,
+frontmatter, backlinks, callouts, and color-coded navigation. Beauty is part of
+function here. The vault should make history, sources, decisions, and project
+state visible without turning Obsidian into the warehouse.
+
+Current Obsidian lanes:
+
+| Lane | Purpose | Retrieval default |
+|---|---|---|
+| `00_Atlas` | Human entry points, maps, and navigation notes. | Include indexes. |
+| `10_Projects` | Project bridge notes. Every active project routes through one bridge. | Include when current and validated. |
+| `20_Knowledge` | Decisions, sources, learning, playbooks, reviews, ops, and capture syntheses. | Include when current and validated. |
+| `60_Media` | Indexes and notes about media artifacts. Heavy files stay in Drive. | Include indexes. |
+| `80_Templates` | Reusable note templates with retrieval metadata fields. | Include indexes. |
+| `90_Archive` | Append-only session/build history and snapshots. | Archive-only by default. |
+
+RAG-ready Obsidian notes use this metadata contract:
+
+```yaml
+canonical_status:
+retrieval_status:
+llm_summary:
+source_ids:
+related_notes:
+privacy_class:
+```
+
+Retrieval rule: include `retrieval_status: include` and
+`retrieval_status: include_index` for normal context. Include
+`archive_only` only when the user asks for history, provenance, or a prior
+session. Exclude raw captures, duplicate binaries, rejected assets, full crawls,
+and draft notes without a current index.
+
+Write rule: CereBro-created notes must write into the current lanes. Default
+manual durable notes go to `20_Knowledge/Capture` until promoted. Project
+knowledge goes through `10_Projects/<Project>/<Project>.md`. Session handoff
+snapshots go to `90_Archive/CereBro Session History/snapshots/` and update
+`90_Archive/CereBro Session History/CereBro Session History.md`.
+
+Color discipline is part of the knowledge system. Major folders should use
+distinct path-based colors in Obsidian graph/settings and matching CSS where
+possible. Tags can add meaning, but tags should not be required just to make
+nodes readable.
+
+Visual beauty is not cosmetic polish for Obsidian. It is how the knowledge map
+stays usable. Future notes, indexes, templates, and project bridges should
+preserve intentional clusters, distinct colors, readable labels, and clear
+relationships.
+
+Every active project represented in Obsidian should have a CereBro project
+bridge note under `10_Projects/<Project>/<Project>.md`. Build history,
+media indexes, decks, maintenance notes, upgrade plans, sources, and decisions
+link through that bridge. This keeps project work visible to CereBro without
+moving append-only history.
 
 ### Notion
 

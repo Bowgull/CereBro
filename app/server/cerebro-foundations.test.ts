@@ -4,8 +4,10 @@ import path from "path";
 import { AGENT_ROUTING, getAgentById } from "./agentRouter";
 import { appRouter } from "./routers";
 import {
+  getObsidianKnowledgeRoutes,
   getObsidianStatus,
   getVaultLayout,
+  OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
   writeObsidianNote,
   writeVaultTextArtifact,
 } from "./integrations/vault";
@@ -360,20 +362,20 @@ describe("CereBro file lifecycle metadata", () => {
       const written = await writeObsidianNote({
         title: "Hello CereBro",
         body: "# Hello CereBro\n\nTest note.",
-        subdir: "Learning/Notes",
+        subdir: "20_Knowledge/Learning",
       });
 
       expect(written.ok).toBe(true);
-      expect(written.relativePath).toBe("learning/notes/hello-cerebro.md");
+      expect(written.relativePath).toBe("20_Knowledge/Learning/hello-cerebro.md");
       expect(fs.readFileSync(path.join(dir, written.relativePath!), "utf8")).toContain("Test note.");
 
       const second = await writeObsidianNote({
         title: "Hello CereBro",
         body: "# Hello CereBro\n\nSecond note.",
-        subdir: "Learning/Notes",
+        subdir: "20_Knowledge/Learning",
       });
       expect(second.ok).toBe(true);
-      expect(second.relativePath).toMatch(/^learning\/notes\/hello-cerebro-\d{14}\.md$/);
+      expect(second.relativePath).toMatch(/^20_Knowledge\/Learning\/hello-cerebro-\d{14}\.md$/);
       expect(fs.readFileSync(path.join(dir, written.relativePath!), "utf8")).toContain("Test note.");
       expect(fs.readFileSync(path.join(dir, second.relativePath!), "utf8")).toContain("Second note.");
     } finally {
@@ -383,6 +385,24 @@ describe("CereBro file lifecycle metadata", () => {
       if (prevObsidian === undefined) delete process.env.CEREBRO_OBSIDIAN_DIR;
       else process.env.CEREBRO_OBSIDIAN_DIR = prevObsidian;
     }
+  });
+
+  it("documents the Obsidian write and retrieval lanes CereBro should use", () => {
+    const routes = getObsidianKnowledgeRoutes();
+    const routePaths = routes.map((route) => route.relativePath);
+
+    expect(routePaths).toEqual([
+      "00_Atlas",
+      "10_Projects",
+      "20_Knowledge",
+      "60_Media",
+      "80_Templates",
+      "90_Archive",
+    ]);
+    expect(routes.find((route) => route.relativePath === "90_Archive")?.retrievalDefault).toBe("archive_only");
+    expect(routes.find((route) => route.relativePath === "20_Knowledge")?.retrievalDefault).toBe("include_when_validated");
+    expect(OBSIDIAN_RETRIEVAL_METADATA_FIELDS).toContain("retrieval_status");
+    expect(OBSIDIAN_RETRIEVAL_METADATA_FIELDS).toContain("llm_summary");
   });
 
   it("writes text artifacts into configured vault folders without touching the real vault", async () => {

@@ -33,6 +33,13 @@ export interface ObsidianStatus {
   source: "env" | "vault-default" | "none";
 }
 
+export interface ObsidianKnowledgeRoute {
+  key: string;
+  relativePath: string;
+  purpose: string;
+  retrievalDefault: "include_index" | "include_when_validated" | "archive_only" | "exclude";
+}
+
 export const VAULT_LAYOUT: VaultLayoutEntry[] = [
   { key: "inboxCaptures", relativePath: "00_Inbox/captures", purpose: "Unsorted quick captures." },
   { key: "inboxDroppedFiles", relativePath: "00_Inbox/dropped-files", purpose: "User-dropped files waiting for routing." },
@@ -55,6 +62,54 @@ export const VAULT_LAYOUT: VaultLayoutEntry[] = [
   { key: "trashStaging", relativePath: "99_Trash_Staging", purpose: "Review zone before any approved deletion." },
 ];
 
+export const OBSIDIAN_KNOWLEDGE_ROUTES: ObsidianKnowledgeRoute[] = [
+  {
+    key: "atlas",
+    relativePath: "00_Atlas",
+    purpose: "Human entry points, vault maps, and navigation notes.",
+    retrievalDefault: "include_index",
+  },
+  {
+    key: "projects",
+    relativePath: "10_Projects",
+    purpose: "Project bridge notes. Every active project routes through one bridge.",
+    retrievalDefault: "include_when_validated",
+  },
+  {
+    key: "knowledge",
+    relativePath: "20_Knowledge",
+    purpose: "Current decisions, sources, learning, playbooks, reviews, operations, and capture syntheses.",
+    retrievalDefault: "include_when_validated",
+  },
+  {
+    key: "media",
+    relativePath: "60_Media",
+    purpose: "Indexes and notes about media artifacts. Heavy files stay in Drive.",
+    retrievalDefault: "include_index",
+  },
+  {
+    key: "templates",
+    relativePath: "80_Templates",
+    purpose: "Reusable note templates with RAG metadata fields.",
+    retrievalDefault: "include_index",
+  },
+  {
+    key: "archive",
+    relativePath: "90_Archive",
+    purpose: "Append-only session and build history. Searchable by humans, excluded from normal retrieval.",
+    retrievalDefault: "archive_only",
+  },
+];
+
+export const OBSIDIAN_RETRIEVAL_METADATA_FIELDS = [
+  "canonical_status",
+  "retrieval_status",
+  "llm_summary",
+  "source_ids",
+  "related_notes",
+  "privacy_class",
+] as const;
+
 export async function getVaultStatus(): Promise<VaultStatus> {
   const vaultDir = process.env.CEREBRO_VAULT_DIR ?? null;
   if (!vaultDir) return { configured: false, vaultDir: null, exists: false };
@@ -72,6 +127,27 @@ export function isConfigured(): boolean {
 
 export function getVaultLayout(): VaultLayoutEntry[] {
   return VAULT_LAYOUT;
+}
+
+export function getObsidianKnowledgeRoutes(): ObsidianKnowledgeRoute[] {
+  return OBSIDIAN_KNOWLEDGE_ROUTES;
+}
+
+function sanitizeObsidianSubdir(subdir?: string): string | null {
+  if (!subdir?.trim()) return null;
+  const parts = subdir
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const safeParts = parts.map((part) =>
+    part
+      .replace(/^\.+$/, "")
+      .replace(/[^A-Za-z0-9 _.-]+/g, "-")
+      .replace(/^\.+/, "")
+      .replace(/\.+$/, ""),
+  ).filter(Boolean);
+  if (safeParts.length === 0) return null;
+  return safeParts.join("/");
 }
 
 export async function getObsidianStatus(): Promise<ObsidianStatus> {
@@ -185,11 +261,7 @@ export async function writeObsidianNote(args: {
     return { ok: false, reason: `Obsidian vault dir does not exist: ${status.obsidianDir}` };
   }
 
-  const safeSubdir = args.subdir
-    ?.split("/")
-    .map((part) => slug(part))
-    .filter(Boolean)
-    .join("/");
+  const safeSubdir = sanitizeObsidianSubdir(args.subdir) ?? "20_Knowledge/Capture";
   const dir = safeSubdir ? path.join(status.obsidianDir, safeSubdir) : status.obsidianDir;
   await fs.mkdir(dir, { recursive: true });
 

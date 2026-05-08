@@ -1,16 +1,98 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-07 07:24 EDT
+Last updated: 2026-05-08 14:55 EDT
 
 ## Current North Star
 
-CereBro is being built into a local-first, free-cloud-supported personal command
+CereBro is being built into a cloud-backed, local-controlled personal command
 center for everyday work, project building, creative production, research,
 learning, portfolio growth, and freelance work.
+
+The Keep is now the product spine. The Workshop is the dense work surface.
+System machinery stays below the floor until it is needed.
+
+The Mac is the workbench, not the warehouse. Turso/libSQL cloud is the intended
+structured brain, Google Drive is the durable file vault, Obsidian is the
+readable Markdown knowledge layer, and cloud vector retrieval is the intended
+RAG path once selected. Local SQLite, local embeddings, and local model files
+are cache/fallback lanes unless the user approves the storage cost.
 
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+2026-05-08 deck pass:
+
+- Added the Aang-first mode intelligence and behavior plan to the master build
+  plan before deck production: Aang is always the user-facing bridge, Aang
+  reports to Cortana, Cortana routes agents, mode reads are visible, uncertain
+  reads ask one clarifying question, and approved corrections can become memory.
+- Built a 60-slide CereBro finished-product training deck showing the target
+  end-state app, not wireframes and not the current Keep environment.
+- The deck keeps the existing agent sprites as canon. Current Keep walls, room
+  composition, and environment layout are not treated as canon.
+- PixelLab was used for new target room and prop assets. Usable assets were
+  kept as target-room overlays. Weak PixelLab results are not canon and should
+  be regenerated before implementation.
+- Final deliverables were copied to the Drive vault:
+  `/Users/lindsaybell/Library/CloudStorage/GoogleDrive-bocas.joshua@gmail.com/My Drive/CereBro-Vault/03_Outputs/exports/cerebro-end-product-training/cerebro-end-product-training.pptx`
+  and
+  `/Users/lindsaybell/Library/CloudStorage/GoogleDrive-bocas.joshua@gmail.com/My Drive/CereBro-Vault/03_Outputs/exports/cerebro-end-product-training/cerebro-end-product-training-contact-sheet.png`.
+- Deck scope now includes Keep, Aang command bridge, Cortana routing, capture,
+  watch mode, browser, research, source fingerprints, learning sidecar,
+  Workshop, build, evidence annotation, approvals, design review, PixelLab
+  asset lifecycle, meetings, Hedwig, Piccolo, Batman, Oak, Spock, C-3PO,
+  model routing, memory promotion, settings, buttons, dropdown menus,
+  right-click context menus, modular windows, Aang chat states, themes,
+  typography, command palette, notifications, source library, output library,
+  permissions, and every agent room detail.
+
+Open deck caveat:
+
+- This is a stronger training deck, but it is still a target artifact. It is not
+  a claim that the live app already matches it. The next design pass should
+  turn these screens into an implementation-grade product spec, then rebuild
+  the live Keep and workbench against that spec.
+
+2026-05-08 Obsidian full reorganization:
+
+- User approved a full Obsidian reorganization after the initial color/graph
+  pass. The old no-move constraint is superseded for this vault cleanup.
+- Reorganized the Obsidian vault into top-level lanes:
+  `00_Atlas`, `10_Projects`, `20_Knowledge`, `60_Media`, `80_Templates`, and
+  `90_Archive`.
+- Moved CereBro session history to
+  `90_Archive/CereBro Session History/` and Sundesk build history to
+  `90_Archive/Sundesk Build History/`. Snapshots remain append-only.
+- Moved project bridges to `10_Projects/<Project>/<Project>.md` for CereBro,
+  Bridgefour, Declyne, Sundesk, Sygnalist, and Waymark.
+- Moved current knowledge sections to `20_Knowledge/`: Decisions, Sources,
+  Learning, Playbooks, Reviews, Ops, and Capture.
+- Added `00_Atlas/Vault Map.md`, `20_Knowledge/Knowledge Index.md`,
+  `60_Media/Media Index.md`, `90_Archive/Archive Index.md`, and
+  `20_Knowledge/Ops/RAG Ready Knowledge Map.md`.
+- Updated Obsidian graph colors and default search so archive snapshots are
+  hidden from the normal graph view while remaining available in Archive.
+- Updated templates with RAG metadata fields:
+  `canonical_status`, `retrieval_status`, `llm_summary`, `source_ids`,
+  `related_notes`, and `privacy_class`.
+- Ran a wiki-link audit after the move. Result: 221 Markdown notes, 0 broken
+  wiki links.
+- Follow-up lock-in: CereBro's repo rules, lifecycle plan, master build plan,
+  Obsidian doctrine notes, and writer code now agree on the same method.
+  CereBro writes Obsidian notes into the current lanes, preserves canonical
+  folder casing, defaults manual durable notes to `20_Knowledge/Capture`, and
+  treats `90_Archive` as archive-only for normal retrieval.
+- `integrations.status` now exposes the Obsidian knowledge routes and retrieval
+  metadata fields so the app can show the method instead of hardcoding it.
+- `handoffs.archivePlan`, `HandoffArchivePanel`, and `ArtifactsPanel` now point
+  at the new Obsidian lanes instead of old `CereBro/...` paths.
+- RAG-ready notes must carry `canonical_status`, `retrieval_status`,
+  `llm_summary`, `source_ids`, `related_notes`, and `privacy_class`.
+- Normal retrieval includes current validated notes and indexes. Archive enters
+  retrieval only when the user asks for history, provenance, prior decisions,
+  or session recovery. Every answer should cite the note path, source row,
+  artifact, or memory id used.
 
 Begin Session 4 after user clarification:
 
@@ -21,7 +103,9 @@ Begin Session 4 after user clarification:
 - Declyne, Waymark, Sygnalist, Bridgefour, and CereBro are the initial project
   set.
 - Freelance is a mode inside the broader system.
-- Do not delete, move, archive, or migrate any existing vault/repo files.
+- Previous vault no-move instruction is superseded by the approved 2026-05-08
+  Obsidian full reorganization. Future moves still need a reason and link
+  repair. History stays append-only.
 - First thin implementation slice is now live: Project Lab shows read-only
   project profiles, local git status, project modes, next actions, risks, and
   agent ownership for Declyne, Waymark, Sygnalist, Bridgefour, and CereBro.
@@ -74,6 +158,45 @@ Begin Session 4 after user clarification:
   Registry target, Reasoning Gateway direction, eval-backed routing, Surfer's
   Model/Tool Discovery lane, Prompt/Tool Handoff playbooks, and OpenClaw as a
   pattern/reference rather than core runtime.
+- 2026-05-08 cloud-backed learning correction: user clarified CereBro is meant
+  to be a cloud-based solution because the Mac has limited storage and will be
+  used for routine builds. `CEREBRO_MASTER_BUILD_PLAN.md`,
+  `CEREBRO_FILE_LIFECYCLE_PLAN.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`,
+  `AGENTS.md`, and `CLAUDE.md` now replace the old local-first framing with
+  cloud-backed, local-controlled storage and learning. Obsidian remains useful,
+  but it is not the RAG engine or the model brain.
+- 2026-05-08 Obsidian organisation pass: added a CereBro vault CSS snippet,
+  enabled it in Obsidian appearance settings, created the CereBro knowledge
+  folder set, added a knowledge home note, linked the existing `indexes`
+  CereBro home note to it, and added templates for decisions, source summaries,
+  playbooks, and learning notes. Obsidian can now be visibly organized and
+  color-coded without plugins.
+- 2026-05-08 terminology cleanup: remaining build-plan escalation language now
+  says private/cheap first instead of local first.
+- 2026-05-08 Obsidian visual doctrine: user clarified that Obsidian should be
+  extremely beautiful and visually distinct because it can become an invaluable
+  knowledge surface. Updated graph colors to use more distinct path-based
+  groups, aligned the CereBro CSS snippet colors, and recorded the standing
+  rule in `AGENTS.md` and `CEREBRO_FILE_LIFECYCLE_PLAN.md`: Obsidian should use
+  distinct folder/path colors, templates, frontmatter, backlinks, callouts, and
+  indexes. Do not rely on manual tags just to make nodes readable.
+- 2026-05-08 Obsidian graph repair: user showed grey unresolved graph nodes and
+  disconnected blue template nodes. Created real section index notes for
+  Decisions, Sources, Learning, Projects, Playbooks, Reviews, Ops, and Capture;
+  rewired CereBro Knowledge Home to link to those files instead of folders;
+  linked templates from the home and their matching section indexes; linked the
+  legacy `indexes/cerebro-home` note back into the graph; and set Obsidian
+  graph `hideUnresolved` to true so ghost nodes do not pollute the map.
+- 2026-05-08 Obsidian project bridge reorg: user clarified that Sundesk should
+  be visible to CereBro as an active project CereBro will eventually maintain,
+  upgrade, and audit. Added `10_Projects/Sundesk/Sundesk.md` as the project
+  bridge, linked it from the Project Registry and Knowledge Home, and linked the
+  existing Sundesk Build History and Sundesk PPTX Index back to it. Added
+  `80_Templates/Template Library.md` so templates form a deliberate cluster instead
+  of loose blue nodes. Added `20_Knowledge/Ops/Obsidian Knowledge System.md` as a
+  permanent system note for the vault doctrine: visual beauty is comprehension,
+  active projects need bridge notes, graph colors are path-based, and history
+  should not be moved/deleted just to make the graph prettier.
 - 2026-05-07 Reddit direction: CereBro should use Reddit heavily as a trusted
   human-signal source: real user reports, niche community expertise, trend
   radar, product complaints, screenshots, videos, links, and community
@@ -115,8 +238,482 @@ Begin Session 4 after user clarification:
   annotation mode, and displays a local marker. This does not capture
   screenshots, save media bytes, inspect linked files, call a vision model, or
   write externally.
+- 2026-05-08 UX reset direction: the current UI/UX has become too jumbled and
+  too generic-SaaS. The agents and Keep idea stay. The surrounding surfaces need
+  the same simplification pass Sundesk got. Sundesk's product rule was: Daily
+  is the product, Build is the workshop, Settings are the basement. CereBro's
+  matching rule is: the Keep is the product, the Workshop is the work surface,
+  and system machinery stays below the floor until needed.
+- 2026-05-08 user direction: CereBro is an everyday OS and creative workshop,
+  not only a coding harness. It needs to handle quick questions, research,
+  learning code/design, YouTube/anime discovery, anime tracking, source capture,
+  repo analysis, creative work, and project continuation without making the
+  user learn internal architecture first.
+- 2026-05-08 reference locked: the Sundesk final training deck at
+  `/Users/lindsaybell/Documents/Codex/2026-05-07/files-mentioned-by-the-user-task/sundesk/outputs/manual-20260508-sundesk-demo/presentations/sundesk-command-center-training/output/sundesk-command-center-training-manual.pptx`
+  is the simplification reference. It is screenshot-led, routine-led, and
+  shows product use instead of describing feature machinery.
+- 2026-05-08 tool mapping: Gitingest is now planned as a Silver Surfer
+  repo-digestion primitive. Use local CLI/package or a CereBro-native adapter,
+  preserve provenance, token/size counts, ignored files, commit SHA when
+  available, and vault/source-library output.
+- 2026-05-08 product reference: Skales is useful as Aang companion/desktop
+  ergonomics inspiration only. Do not copy code or depend on it because of
+  license/product-overlap risk.
+- 2026-05-08 Aang direction: Aang can become the meeting notetaker surface,
+  Otter-style, but the safe V1 path is transcript-first. Teams and Google Meet
+  transcript imports/fetches require account permissions and meeting transcript
+  availability. Live call joining, recording, and bot attendance are later
+  permission-heavy investigations.
+- 2026-05-08 deck direction: create a 24-slide finished-product CereBro
+  training target deck in the same spirit as the Sundesk command center deck.
+  The deck should use high-fidelity mockups that can be ahead of the current
+  app and should become the UI/UX target. First teaching moment: start in the
+  Keep, ask, capture, route, and watch the agents work. The deck should show
+  one full day in CereBro, all agents visible, everyday OS workflows in the main
+  story, Aang as bigger than meeting notes, and vault-backed deck/notes/contact
+  sheet/source artifacts indexed in Obsidian. Do not generate the PPTX until
+  the 24-slide outline is approved.
+- 2026-05-08 11:05 EDT UI/UX market research reset: user rejected the current
+  finished-product deck direction and clarified that CereBro is unusable if it
+  keeps drifting toward generic SaaS. Ran a research-only pass across product
+  docs, GitHub-facing agent tooling, Reddit, Hacker News, UX doctrine, and
+  pixel-art UI sources. Wrote an Obsidian research package that proposes the
+  Keep-first hybrid OS model: the Keep is where work is understood, the
+  Workshop is where work is done, the Ledger is where work is proven, and the
+  Basement is where the machine is configured. No code changed.
+- 2026-05-08 11:25 EDT full interaction deep dive: user clarified that the
+  CereBro reset must inspect every interaction, not just the high-level shell:
+  buttons, dropdowns, chat, screens, workbench panes, browser/search, anime and
+  media tracking, code building, creative work, research, themes, typography,
+  borders, windows, approvals, and drag/drop behavior. Ran a second research
+  pass across IDEs and AI builders, browsers, research tools, media trackers,
+  design-review tools, OS launchers, and UI design systems. Wrote a full
+  Obsidian interaction package. No app code changed.
+- 2026-05-08 13:07 EDT Aang-first correction: user clarified Aang is not a
+  side helper. Aang is the human bridge and the user should always speak to
+  Aang. Aang reports to Cortana. Cortana routes the CereBro realm and agent
+  layer. User also clarified PixelLab is not the CereBro creative studio. It is
+  the external production tool used to create Keep UI, sprites, and current
+  agent art through the user's tier 1 membership. Patched the interaction docs
+  and wrote the Aang-first full interaction map. No app code changed.
+- 2026-05-08 13:16 EDT mode intelligence and deck gate: added explicit
+  Aang-first mode inference to `CEREBRO_MASTER_BUILD_PLAN.md` and `AGENTS.md`.
+  CereBro should infer the user's mode from context, have Aang show the read,
+  ask only when uncertain or risky, remember corrections with approval, and
+  route through Cortana with proof. Also locked the next training deck quality
+  gate: no wireframes, no grey boxes, no generic SaaS panels, no fake
+  placeholder mock images. The deck must show final target product screens,
+  including end-state Keep rooms that are unique, dynamic, and specific to each
+  agent. No deck generation started.
 
 ## Latest Closeout
+
+### 2026-05-08 13:16 EDT - Mode Intelligence And Deck Gate
+
+Files changed:
+
+- `AGENTS.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+What changed:
+
+- Added a named `Aang-First Mode Intelligence` section to the master plan.
+- Locked the behavior rule: infer mode, have Aang show the read, ask only when
+  unclear or risky, route through Cortana, and record proof.
+- Added mode signals: current zone, active surface, selected object, user
+  language, attachment type, active project, permission mode, recent work, and
+  prior corrections.
+- Added correction memory as a requirement. Repeated corrections can become
+  playbook proposals only with approval.
+- Added runtime requirements for mode inference and Aang confirmation behavior.
+- Added the deck quality gate: the training deck must show final target product
+  screens, not wireframes, grey boxes, placeholder dashboards, or fake
+  low-fidelity mock images.
+- Added the Keep deck requirement: each agent room should look distinct,
+  dynamic, and specific to that agent.
+- Recorded PixelLab as the external production tool for Keep UI, sprites,
+  chamber props, and agent assets.
+
+Gates preserved:
+
+- No app code changed.
+- No deck generated.
+- No images generated.
+- No PixelLab calls.
+- No Notion or Slack writes.
+- No external model/tool calls.
+- No destructive cleanup.
+
+Known risks:
+
+- The deck needs a tight approval gate before production because it will become
+  the visual target for the build.
+- High-fidelity final-state images may require PixelLab asset generation or
+  image generation after approval.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_SESSION_HANDOFF.md`, and the Obsidian
+note `20_Knowledge/Playbooks/CereBro Aang First Full Interaction Map.md`. Treat
+Aang as the human bridge. CereBro must infer mode from context, have Aang show
+the read, ask only when uncertain or risky, remember corrections with approval,
+and route through Cortana. Do not generate a deck, images, or wireframes until
+Josh approves the deck plan. The deck must show final target product screens,
+including unique dynamic rooms for every agent, not placeholders.
+
+### 2026-05-08 13:07 EDT - Aang First Interaction Correction
+
+Files changed:
+
+- `CEREBRO_SESSION_HANDOFF.md`
+- `00_Atlas/CereBro Knowledge Home.md` in the Obsidian vault
+- `20_Knowledge/Sources/2026-05-08 CereBro Full Interaction Source Index.md` in the Obsidian vault
+- `20_Knowledge/Reviews/2026-05-08 Current CereBro Interaction Audit.md` in the Obsidian vault
+- `20_Knowledge/Reviews/2026-05-08 CereBro Market Pattern Matrix.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/Playbooks.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Complete Interaction Spec.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Visual System And Theme Spec.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Aang First Full Interaction Map.md` in the Obsidian vault
+
+What changed:
+
+- Corrected the product hierarchy: the user speaks to Aang; Aang interprets
+  and reports to Cortana; Cortana routes the agents; the Keep shows the route;
+  the Ledger records proof.
+- Corrected PixelLab's role: PixelLab is the external asset production tool for
+  Keep UI, sprites, chamber art, and agent animation assets. CereBro should
+  track and review those outputs, not pretend PixelLab is an in-app creative
+  studio.
+- Added an Aang-first full interaction map covering Keep home, Aang command
+  dock, chamber inspector, Workshop, build mode, browse mode, research mode,
+  media mode, Keep asset review, Ledger, Basement, buttons, dropdowns,
+  segmented controls, comboboxes, context menus, typography, colour, borders,
+  and window rules.
+- Inspected local sibling projects for product-family UI grammar: Bridgefour,
+  Declyne, Waymark, and Sygnalist. Recorded the guardrail that CereBro should
+  share the standard of distinct product identity without copying any one skin.
+
+Research finding:
+
+- Aang is the human-facing operating surface. Cortana is the internal command
+  router. That keeps the product emotionally legible while preserving the
+  agent hierarchy.
+
+Checks run:
+
+- Local repo inspection for Bridgefour, Declyne, Waymark, and Sygnalist.
+- Web source pass for buttons, context menus, dropdowns, dialogs, tooltips,
+  target size, and focus appearance.
+- Obsidian index update.
+
+Gates preserved:
+
+- No app code changed.
+- No app run.
+- No PPTX generated.
+- No Notion or Slack writes.
+- No PixelLab calls.
+- No external model/tool calls beyond web research.
+- No media generation.
+- No destructive cleanup.
+
+Known risks:
+
+- The Aang-first map is still implementation-free. It should be approved before
+  wireframes, deck repair, mockups, or shell code.
+- The next pass should name the exact first-screen layout and interaction
+  order before any styling work starts.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_SESSION_HANDOFF.md`, and the Obsidian note
+`20_Knowledge/Playbooks/CereBro Aang First Full Interaction Map.md` first. Treat
+Aang as the human bridge. Aang reports to Cortana. Cortana routes agents.
+Treat PixelLab as the external Keep/agent asset production tool, not as the
+in-app creative studio. Do not write code until Josh approves the Aang-first
+interaction map. If approved, produce implementation-free wireframes for Keep
+home, Aang command dock, Cortana routing receipt, chamber inspector, Workshop
+presets, browser/research/media surfaces, Keep asset review, Ledger, and
+Basement.
+
+### 2026-05-08 11:25 EDT - Full Interaction Deep Dive
+
+Files changed:
+
+- `CEREBRO_SESSION_HANDOFF.md`
+- `00_Atlas/CereBro Knowledge Home.md` in the Obsidian vault
+- `20_Knowledge/Sources/Sources.md` in the Obsidian vault
+- `20_Knowledge/Sources/2026-05-08 CereBro Full Interaction Source Index.md` in the Obsidian vault
+- `20_Knowledge/Reviews/Reviews.md` in the Obsidian vault
+- `20_Knowledge/Reviews/2026-05-08 Current CereBro Interaction Audit.md` in the Obsidian vault
+- `20_Knowledge/Reviews/2026-05-08 CereBro Market Pattern Matrix.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/Playbooks.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Complete Interaction Spec.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Visual System And Theme Spec.md` in the Obsidian vault
+
+What changed:
+
+- Audited the current app shell against the market research and confirmed the
+  main failure: internal implementation surfaces are exposed as equal primary
+  navigation items.
+- Wrote a current interaction audit that calls out the 14-item rail, dev-heavy
+  header, old Pixel Punk theme, "Ask Aang" composer mismatch, isolated panels,
+  and planning-only workbench.
+- Wrote a market pattern matrix comparing CereBro areas against AI IDEs,
+  browser spaces, source libraries, media trackers, creative tools, design
+  review tools, task systems, and OS launchers.
+- Wrote a complete interaction spec for navigation, Keep chambers, command
+  dock, Workshop modes, build mode, browser mode, research mode, media mode,
+  PixelLab mode, Ledger, approvals, automation, settings, buttons, menus,
+  forms, modals, search, notifications, accessibility, and mobile.
+- Wrote a visual system and theme spec with Keep Dark, Daylight Archive, Ember
+  Forge, Moonlit Violet, High Contrast Terminal, and PixelLab Proof themes.
+- Linked all new notes into Obsidian indexes and Knowledge Home.
+
+Research finding:
+
+- CereBro needs a stable 4-zone OS model and market-native specialist modes.
+  Keep, Workshop, Ledger, and Basement stay constant. Coding, browsing,
+  research, media, creative work, automation, and settings each need their own
+  interaction grammar inside that shell.
+
+Checks run:
+
+- Web research with source links across official docs, Reddit user-signal
+  threads, and design-system guidance.
+- Local inspection of `Home.tsx`, `KeepScene.tsx`, `keepConfig.ts`,
+  `WorkbenchPanel.tsx`, and `index.css`.
+- Obsidian index link update.
+
+Gates preserved:
+
+- No app code changed.
+- No app run.
+- No PPTX generated.
+- No Notion or Slack writes.
+- No PixelLab calls.
+- No external model/tool calls beyond web research.
+- No media generation.
+- No destructive cleanup.
+
+Known risks:
+
+- The interaction spec is implementation-free. It still needs user approval
+  before wireframes, deck repair, mockups, or app changes.
+- The next implementation step should be a scoped shell reset, not piecemeal
+  button restyling.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_SESSION_HANDOFF.md`, and the Obsidian notes
+`20_Knowledge/Reviews/2026-05-08 Current CereBro Interaction Audit.md`,
+`20_Knowledge/Reviews/2026-05-08 CereBro Market Pattern Matrix.md`,
+`20_Knowledge/Playbooks/CereBro Complete Interaction Spec.md`,
+`20_Knowledge/Playbooks/CereBro Visual System And Theme Spec.md`, and
+`20_Knowledge/Sources/2026-05-08 CereBro Full Interaction Source Index.md`.
+Do not write code until Josh approves the interaction direction. If approved,
+draft implementation-free wireframes for the 4-zone shell, Cortana orb command
+dock, Keep chamber inspector, Workshop pane presets, Ledger object receipt,
+Basement settings map, media library mode, and PixelLab asset workflow.
+
+### 2026-05-08 11:05 EDT - UI UX Market Research Reset
+
+Files changed:
+
+- `CEREBRO_SESSION_HANDOFF.md`
+- `00_Atlas/CereBro Knowledge Home.md` in the Obsidian vault
+- `20_Knowledge/Sources/Sources.md` in the Obsidian vault
+- `20_Knowledge/Sources/2026-05-08 AI OS UI UX Source Index.md` in the Obsidian vault
+- `20_Knowledge/Reviews/Reviews.md` in the Obsidian vault
+- `20_Knowledge/Reviews/2026-05-08 CereBro UI UX Market Research Brief.md` in the Obsidian vault
+- `20_Knowledge/Decisions/Decisions.md` in the Obsidian vault
+- `20_Knowledge/Decisions/2026-05-08 CereBro Keep First UX Direction.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/Playbooks.md` in the Obsidian vault
+- `20_Knowledge/Playbooks/CereBro Finished Product UX Spec.md` in the Obsidian vault
+
+What changed:
+
+- Confirmed the prior finished-product deck artifact was not found in the
+  CereBro vault or recent Codex output paths. The handoff shows the 10:00 deck
+  pass had scoped a deck but preserved the gate not to generate PPTX.
+- Researched current AI product and agent UX patterns across official product
+  docs, GitHub-facing agent tooling, Reddit, Hacker News, UX doctrine, and
+  pixel-art UI sources.
+- Wrote a source index with product, Reddit, Hacker News, UX, and PixelLab
+  references.
+- Wrote a market research brief concluding that CereBro should not be a generic
+  dashboard, chat app, or workflow builder.
+- Wrote a proposed Keep-first UX decision.
+- Wrote a draft finished-product UX spec.
+- Linked all new notes into their Obsidian section indexes and Knowledge Home
+  so the graph does not create orphaned nodes.
+
+Research finding:
+
+- The market pattern is intake, visible execution, durable evidence, and
+  permissioned action. CereBro should express that as Keep, Workshop, Ledger,
+  and Basement.
+
+Checks run:
+
+- Web research with source verification and links.
+- Local search for the hated CereBro deck in the CereBro vault and recent Codex
+  output paths.
+- `rg` ban check on new Obsidian notes for em dashes, exclamation marks, and
+  banned AI/corporate register.
+- `git status --short`.
+
+Gates preserved:
+
+- No app code changed.
+- No app run.
+- No redesign implementation.
+- No PPTX generated.
+- No Notion or Slack writes.
+- No external model/tool calls beyond web research.
+- No PixelLab calls.
+- No media generation.
+- No destructive cleanup.
+
+Known risks:
+
+- The research package is a strong first pass, not a final visual system.
+- The next step needs approval before turning this into wireframes, mockups, or
+  app changes.
+- The bad deck still may exist in a separate chat export path not visible from
+  the repo, vault, or recent Codex output search.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_SESSION_HANDOFF.md`, the Obsidian notes
+`20_Knowledge/Reviews/2026-05-08 CereBro UI UX Market Research Brief.md`,
+`20_Knowledge/Decisions/2026-05-08 CereBro Keep First UX Direction.md`,
+`20_Knowledge/Playbooks/CereBro Finished Product UX Spec.md`, and
+`20_Knowledge/Sources/2026-05-08 AI OS UI UX Source Index.md`. Do not write code
+until Josh approves the Keep-first UX direction. If approved, produce the
+first implementation-free design pass: Keep home IA, chamber inspector, orb
+command intake, Workshop shell, Ledger receipt view, Basement settings map,
+and PixelLab asset-state list.
+
+### 2026-05-08 10:00 EDT - Finished UI Training Deck Scope
+
+Files changed:
+
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+What changed:
+
+- Locked the CereBro finished-product training deck target as 24 slides.
+- Confirmed the deck should be high-fidelity and allowed to be ahead of the
+  current app.
+- Confirmed the deck should show a full day in CereBro, not isolated features.
+- Confirmed all agents stay visible, with slide focus limited to the agents
+  involved in the moment.
+- Confirmed everyday OS workflows belong in the main story.
+- Confirmed Aang must be shown as companion, explainer, learning guide, event
+  surface, and meeting-note helper. Not only meeting notes.
+- Confirmed final deck artifacts should live in the CereBro vault media library
+  with Obsidian indexing.
+- Confirmed PPTX generation waits for outline approval.
+
+Checks run:
+
+- Re-read Session 4.5 in `CEREBRO_MASTER_BUILD_PLAN.md`.
+- Re-read the latest closeout in `CEREBRO_SESSION_HANDOFF.md`.
+- Read the `goodfit` skill guidance for the deck voice.
+
+Gates preserved:
+
+- No PPTX generated.
+- No product UI changed.
+- No app run.
+- No Notion or Slack writes.
+- No external model/tool calls.
+- No media generation.
+- No destructive cleanup.
+
+Known risks:
+
+- The deck will need a careful source pass across the Keep visual spec and
+  current plan files before mockup production.
+- The deck must not become a feature inventory. It needs a day-in-the-life
+  training path with the Keep as the product spine.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_SESSION_HANDOFF.md`, Session 4.5 in `CEREBRO_MASTER_BUILD_PLAN.md`,
+the castle UI visual spec, and the Sundesk command center training deck. Draft
+the 24-slide CereBro finished-product training deck outline only. Do not
+generate PPTX until the outline is approved. The deck should teach: start in
+the Keep, ask/capture/route/watch agents work, one full day in CereBro,
+Workshop when needed, system machinery below the floor, all agents visible,
+everyday OS workflows in the main story, Aang as companion/teacher/notetaker,
+and final artifacts saved to the CereBro vault media library.
+
+### 2026-05-08 09:47 EDT - Keep-First UX Reset Plan
+
+Files changed:
+
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+What changed:
+
+- Promoted a Keep-first UX reset ahead of more Workbench/runtime expansion.
+- Added Session 4.5 as the next product gate.
+- Recorded the Sundesk final training deck as the simplification reference.
+- Added the everyday OS lane: ask, capture, research, build, create, learn,
+  watch, and review.
+- Added Gitingest as the Silver Surfer repo-digest direction.
+- Added Skales as Aang companion UX reference only.
+- Added Aang transcript-first meeting notes direction.
+
+Checks run:
+
+- Read the Sundesk final deck text from the supplied PPTX. It has 20 slides and
+  a clear routine-led flow: start here, product map, paste, edit table, fields,
+  tags, links, communities, Today, Waiting On, meetings, timeline views, graph,
+  Build, helpers, data/access, routine.
+- Viewed the Sundesk command center training contact sheet from the Obsidian
+  vault copy.
+- Checked current Teams and Google Meet transcript API docs before recording
+  Aang's meeting-notes path.
+
+Gates preserved:
+
+- No code changes.
+- No app run.
+- No Notion or Slack writes.
+- No external model/tool calls.
+- No media capture or durable media save.
+- No desktop overlay process.
+- No destructive cleanup.
+
+Known risks:
+
+- The current running UI still needs a separate visual/interaction audit before
+  implementation. This update only corrects the plan.
+- Aang meeting notes depend on meeting transcripts, account permissions, and
+  platform-specific rules. Live bot/audio capture remains out of V1 until it is
+  threat-modeled.
+
+Next-session starter prompt:
+
+Continue CereBro from the current branch. Read `AGENTS.md`,
+`CEREBRO_SESSION_HANDOFF.md`, and the new Session 4.5 in
+`CEREBRO_MASTER_BUILD_PLAN.md`. Do not add new Workbench machinery first. Audit
+the current app UI against the Sundesk simplification pattern and draft the
+Keep-first UX spine: first screen, everyday modes, chamber actions, Workshop
+layer, and system-basement rules. Preserve the Keep and visible agents. Run
+checks, update handoff plus Obsidian snapshot/index, and commit locally.
 
 ### 2026-05-07 07:24 EDT - Workbench Annotation Coordinates
 
@@ -1669,9 +2266,12 @@ Do not record serial numbers or hardware UUIDs in repo docs.
 ## Storage And Safety Rules
 
 - Generated assets and deliverables should default to a Google Drive synced CereBro vault once `CEREBRO_VAULT_DIR` is configured.
-- SQLite/libSQL stores structured metadata.
-- Obsidian stores durable Markdown knowledge.
+- Turso/libSQL cloud should become the canonical structured brain once configured.
+- Local SQLite stores structured metadata as a development cache and fallback.
+- Cloud vector retrieval should become the canonical RAG index once selected.
+- Obsidian stores durable Markdown knowledge. It can feed retrieval, but it is not the vector database or the model brain.
 - Notion stores polished learning/client outputs after approval.
+- Local storage is for active work, cache, dev fallback, and explicitly approved local model experiments.
 - Repo folders should not become the default destination for generated images, videos, renders, or client deliverables.
 - Cleanliness is a first-class requirement, not a later cosmetic pass. Every workspace, message, image, video, code artifact, source, note, and temp file needs an owner, destination, metadata trail, retention rule, and cleanup path.
 - The detailed design for that requirement lives in `CEREBRO_FILE_LIFECYCLE_PLAN.md`.
@@ -1693,10 +2293,10 @@ At the end of every session, update this file with:
 - Next recommended session.
 - Next-session starter prompt.
 - Then save a unique timestamped Obsidian snapshot to:
-  `CereBro/Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md`.
+  `90_Archive/CereBro Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md`.
 - Never overwrite a prior handoff snapshot.
 - Then append a new link to the Obsidian index:
-  `CereBro/Session History/CereBro Session History.md`.
+  `90_Archive/CereBro Session History/CereBro Session History.md`.
 - Never replace a prior index entry.
 
 This append-only Obsidian session history is now user-approved standing
@@ -2099,10 +2699,10 @@ Candidates to review later:
     write to Notion, Slack, Sources, the vault, Obsidian, or any external repo.
 - Created the approved Obsidian session handoff archive:
   - Wrote the current real handoff snapshot to
-    `CereBro/Session History/snapshots/2026-05-06 CereBro Session Handoff.md`
+    `90_Archive/CereBro Session History/snapshots/2026-05-06 CereBro Session Handoff.md`
     inside the configured Obsidian vault.
   - Wrote the Obsidian index note
-    `CereBro/Session History/CereBro Session History.md`.
+    `90_Archive/CereBro Session History/CereBro Session History.md`.
   - Read-only inventory found only one real CereBro session handoff file:
     `CEREBRO_SESSION_HANDOFF.md`. Other handoff matches were templates or
     implementation files, not actual session handoffs.
@@ -2400,16 +3000,16 @@ Candidates to review later:
 - `app/.env` (gitignored local config)
 - `app/.env.example`
 - Obsidian vault:
-  - `CereBro/Session History/CereBro Session History.md`
-  - `CereBro/Session History/snapshots/2026-05-07 0510 CereBro Session Handoff - Reasoning Router.md`
+  - `90_Archive/CereBro Session History/CereBro Session History.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-07 0510 CereBro Session Handoff - Reasoning Router.md`
 - Obsidian vault:
-  - `CereBro/Session History/CereBro Session History.md`
-  - `CereBro/Session History/snapshots/2026-05-06 CereBro Session Handoff.md`
-  - `CereBro/Session History/snapshots/2026-05-06 1758 CereBro Session Handoff - Source Review Metadata.md`
-  - `CereBro/Session History/snapshots/2026-05-06 1800 CereBro Session Handoff - Tony Draft Copy Approval.md`
-  - `CereBro/Session History/snapshots/2026-05-06 1803 CereBro Session Handoff - Tony Diagnostic Provenance.md`
-  - `CereBro/Session History/snapshots/2026-05-06 1805 CereBro Session Handoff - Tony Diagnostic Status Label.md`
-  - `CereBro/Session History/snapshots/2026-05-06 1938 CereBro Session Handoff - Aang Companion Overlay.md`
+  - `90_Archive/CereBro Session History/CereBro Session History.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 CereBro Session Handoff.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 1758 CereBro Session Handoff - Source Review Metadata.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 1800 CereBro Session Handoff - Tony Draft Copy Approval.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 1803 CereBro Session Handoff - Tony Diagnostic Provenance.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 1805 CereBro Session Handoff - Tony Diagnostic Status Label.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-06 1938 CereBro Session Handoff - Aang Companion Overlay.md`
 
 ## Tests And Checks
 
@@ -2795,7 +3395,7 @@ Candidates to review later:
   session history index were previously refreshed in-place. The closeout model
   is now corrected to append-only unique snapshots. New recovered archive notes
   and the current unique timestamped snapshot were added under
-  `CereBro/Session History/snapshots/`.
+  `90_Archive/CereBro Session History/snapshots/`.
 - Latest Workbench grouping slice changed code and tests only:
   `app/server/routers/workbench.ts`,
   `app/client/src/components/WorkbenchPanel.tsx`, and
@@ -3175,7 +3775,7 @@ Next, decide whether to:
   model is designed.
 - Obsidian vault root is currently clean after approved deletion of the three
   empty/stub files. Continue using append-only session snapshots under
-  `CereBro/Session History/snapshots/`.
+  `90_Archive/CereBro Session History/snapshots/`.
 - Project Lab Local Inspector readability polish was verified in the in-app
   browser at `http://localhost:3002/`; dev server is running on port 3002.
 - Project Lab Git inspector is now live and was verified in the in-app browser:
@@ -3337,5 +3937,5 @@ project repos without an explicit project-specific request.
 Next-session starter prompt:
 
 ```text
-Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_MODEL_ROUTER_BASELINE.md, and CEREBRO_FILE_LIFECYCLE_PLAN.md first. Continue Session 4 from the live Project Lab, command intake, Surfer Sources, prompt/tool handoff memory, Hedwig Capture Inbox, Hedwig-as-agent Keep slice, Terminal Lab, Approval Queue, first runtime use-spot/path-graph movement, Aang Companion policy shell, Workbench policy shell, the new global append-only learning law, the new general image-understanding requirement, the new global permission-mode direction, the new reasoning-router/model-tool opportunist direction, and the new Reddit Intelligence source lane. Project Intelligence currently has static read-only profiles, local git status, Batman strategy support, deterministic command-intake previews, explicit intake-to-task creation with project linking/project-name display, Tasks project filtering, Project Lab task rollups, Project Lab read-only Git inspector rows for dirty worktrees, Project Lab filtered-card score breakdown chips, Project Lab local signal-block drill-down into inspector queues, Project Lab worktree drill-down into the Git inspector, Project Lab recent-row drill-downs, capped-list disclosure, local inspector search, type chips, sort controls, Signals strip, Sources filter, Missing filter, Local Repos reset-to-All navigation, accessible summary/filter button labels, passive summary and empty-state accessibility labels, Local Inspector accessibility labels, card drill-down accessibility labels, distinct empty-state reset label, close/search accessibility labels, close-button type hygiene, region accessibility labels, status live-region semantics, non-interactive list semantics, busy-state semantics, Keep left-rail and shell accessibility labels, Next Safe Actions strip, Next reason chips, summary-count navigation, empty-filter state, and local action drafts that remain visible by profile slug before a linked harness project row exists, Terminal Lab/Hedwig local observation rollups, self/system improvement categories, a modular panel model, a Surfer source panel scaffold, a local-only Model Tools panel for capability proposals, eval notes, and route previews, a global permission-mode shell with append-only local mode events, advisory permission preflight checks, append-only permission preflight audit records, and a shared server permission-policy helper used by both the Permissions router and Workbench evidence records, a read-only local Approval Queue with status/origin/project/search filters, local grouping, deterministic Oak/Spock preflight notes, and read-only permission preflight audit visibility, a proposal-only Workbench shell with evidence surfaces/permission classes/append-only evidence record shape plus local Workbench evidence record create/list/filter/detail, linked permission preflight ids and preflight detail on evidence records, validation notes that record their own local permission preflight rows, local evidence grouping by project/kind/source/command/validation status, source/command/task/session/artifact picker labels, task/session/artifact grouping, and append-only validation history in the evidence inspector, a proposal-only Aang Companion shell policy with allowed local events/blocked actions/web-mock-first route plus live local event-count strip, approved one-URL public ingestion, first-pass saved-source trust/scrub metadata, Reddit marked as a first-class V1 human-signal source lane, Slack marked as required V1 Hedwig capture, Notion marked as the structured capture database, Obsidian session handoff snapshots/index notes are approved append-only standing closeout behavior, and global history/log/archive/index/note trails must append or version while canonical current-state summaries may update in place. CereBro must understand images as a general input type, not only creative assets or setup screenshots: the user should be able to drag in screenshots, UI states, account screens, app errors, artwork, mockups, diagrams, photos, charts, whiteboards, generated images, and other still images, then ask open-ended questions about them. Video starts with frame/key-frame understanding and annotation. The modular in-app workbench is now a locked product direction: CereBro should show live localhost previews, public browser views, screenshots, images, video/key frames, annotations, terminal/log output, validation notes, and before/after comparisons inside the app; these surfaces are user-visible and agent-readable evidence, not hidden background tools. Add a Codex-like global permission-mode control across all work, not just media: `Default permissions`, `Auto-review`, and `Full access`. Default reads explicit user-provided context and guides. Auto-review proactively inspects approved visible/local evidence and queues suggestions. Full access uses enabled tools in the session, while hard gates still require visible approval for payments, account permission grants, destructive commands, deleting/overwriting files, sending messages, publishing, uploading private media externally, saving sensitive screenshots to memory, installs, tokens/API keys, and sealed Raven/NSFW scope. Vault/Obsidian durable text writers now create timestamped versions on same-title filename collision instead of overwriting, Artifact Library labels its saves as durable history/draft/report trails rather than current-state overwrites, source saves now split current-state `sources` rows from append-only `source_events` provenance, and Surfer Sources displays recent source history events with local owner/scrubbed filters and richer event detail. Aang Companion Overlay is planned as a small always-on desktop surface and now has a proposal-only Keep policy panel for keeping tabs on CereBro: ambient idle presence, click/hotkey quick ask, short status bubbles, open-Keep routing, time-of-day reactions, and quiet lore-accurate idle loops such as goofy fidgeting, tiny airbending practice, sitting, breathing, balancing, and sleepy states. Aang remains an agent, not a pet in the roster. Cortana still routes requests, Hedwig still owns capture/reminders, and Piccolo still owns hygiene. Terminal Lab is a proposal-only panel/router that classifies commands, explains risk, records local preview observations, infers known project links from cwd, accepts manually pasted observed-output summaries with light redaction, can link observations to selected tasks/sessions, filters observations by selected task/session, surfaces deterministic Aang/Tony follow-up suggestions from observed output, surfaces read-only Tony diagnostic command drafts, can convert one of Tony's generated diagnostic drafts into a normal local Terminal Lab preview with parent/root/depth provenance, has copy/approval-note affordances for Tony diagnostic drafts, shows parent-observation provenance and a diagnostic-preview status label on saved diagnostic previews, includes explicit diagnostic evidence and expected-signal notes for Tony draft commands across port conflicts, missing modules/packages, TypeScript symbol errors, package-tool failures, git state, missing files, permission errors, and unclear non-zero exits, supports local observation detail/status transitions, can stage pending local approval-preview rows for command observations without approving or executing commands, can create normal local follow-up tasks from observations, can stage Aang learning-note memory proposals from observations, and never executes commands or writes durable memory directly. Reusable prompt/tool handoffs can be saved as approved vault artifacts, searched read-only, and surfaced in command intake for `prompt_reuse` requests with required reuse disclosure. CereBro must now grow this into a routing playbook tied to the Model/Tool Capability Registry: target model/tool, prompt style, example result, privacy constraints, free-tier sufficiency, eval notes, source URLs, and failure notes. Surfer should propose current models/tools/free tiers only with sources and date checked; Cortana routes; Batman risk-reviews; Spock/Oak validate; Piccolo tracks stale registry entries, cost/rate limits, and storage. Candidate gateway/eval paths include LiteLLM, OpenRouter, direct provider SDKs, a CereBro-native gateway, promptfoo, DeepEval, and custom Vitest fixtures, but do not install or connect any of them without approval. Hedwig has a proposal-only Inbox panel with Notion capture DB schema, Slack DM/capture-channel shape, approval gates, routing rules, local capture preview persistence, recent capture history, read-only triage proposals for saved captures into task/source/learning/reminder/message routes, an explicit `Create Local Task` action that links a capture to a normal local CereBro task without external writes, an explicit `Save Source` action that creates a local unfetched source record plus source event from a capture URL without browsing/fetching, an explicit `Create Reminder Proposal` action that creates a local reminder proposal without scheduling/notifying, an explicit `Create Message Draft` action that creates a local draft proposal without sending/posting, local proposal detail/status transitions for source/reminder/message proposals that remain metadata-only and do not approve external action, editable local review fields for priority/notes/approval scope/external target, and pending local approval-preview rows for source enrichment, Notion capture write, Slack capture read, reminder scheduling, and message sending without approving or executing those external actions. The Approval Queue reads those Hedwig and Terminal approval-preview rows across local surfaces, joins them back to project/task/source/command/capture metadata when available, and still cannot approve, reject, execute, fetch, send, schedule, or write. The Workbench panel defines preview/browser/media/annotation/terminal/validation/comparison surfaces, can create manual local append-only evidence records, filter/group/inspect evidence details, link sources/commands/tasks/sessions/artifacts, append validation notes, show validation history, and does not open tools; the Aang panel defines event policy, local mock controls, live local event counts, and in-app event routing buttons but starts no desktop process. Hedwig is now the 11th agent in router/Keep metadata with a split Crypts Messenger Roost, scaled PixelLab owl sprite, motion config, use-spots, council spot, and path-graph node, and KeepScene now loads directional textures, uses idle/hero/council use-spots for actual movement, swaps facing frames, keeps emotes attached to moving sprites, routes `walking-to-ceremony` through a first BFS path graph into Cortana's hub, and avoids restarting movement tweens when state refreshes do not change an agent state. Do not emphasize session handoffs as a big UI surface; they live in Obsidian. Start proposal-only or implement a small safe slice: continue auditing code surfaces for accidental overwrites of logs/history/notes, add current-state writer proposals only where truly needed, deepen Approval Queue drill-downs or grouping without adding action execution, build the web-only Aang Companion mock inside the Keep without desktop permissions, deepen Workbench task/session linking and validation status display while keeping validation append-only before wiring browser/media automation, prototype image drag/drop artifact intake as temporary-by-default, define the hosted/local vision adapter interface without sending images externally, extend Project Lab local action draft history with status/version trails or add explicit draft-to-task proposals without edits, retrieve and wire Hedwig's PixelLab idle-flutter animation frames if an exposed endpoint is available, replace temporary Hedwig directional derivatives with true PixelLab owl rotations, polish path-graph walking with stair/landing waypoints, revise/approve Hedwig schema details, add approved Notion capture writer only after approval, richer reusable prompt/tool handoff metadata and ranking, proposal-only Reddit Intelligence design, local-only Hedwig Reddit URL save previews, approved open-web search, richer source extraction/validation, project profile persistence, or session linkage. At closeout, update `CEREBRO_SESSION_HANDOFF.md`, save a unique timestamped Obsidian snapshot to `CereBro/Session History/snapshots/`, and append a new link to `CereBro/Session History/CereBro Session History.md` without overwriting any prior snapshot/index entry. Do not write to Notion/Slack or edit external project repos without explicit approval, and do not move/delete existing vault or repo files.
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_MODEL_ROUTER_BASELINE.md, and CEREBRO_FILE_LIFECYCLE_PLAN.md first. Continue Session 4 from the live Project Lab, command intake, Surfer Sources, prompt/tool handoff memory, Hedwig Capture Inbox, Hedwig-as-agent Keep slice, Terminal Lab, Approval Queue, first runtime use-spot/path-graph movement, Aang Companion policy shell, Workbench policy shell, the new global append-only learning law, the new general image-understanding requirement, the new global permission-mode direction, the new reasoning-router/model-tool opportunist direction, and the new Reddit Intelligence source lane. Project Intelligence currently has static read-only profiles, local git status, Batman strategy support, deterministic command-intake previews, explicit intake-to-task creation with project linking/project-name display, Tasks project filtering, Project Lab task rollups, Project Lab read-only Git inspector rows for dirty worktrees, Project Lab filtered-card score breakdown chips, Project Lab local signal-block drill-down into inspector queues, Project Lab worktree drill-down into the Git inspector, Project Lab recent-row drill-downs, capped-list disclosure, local inspector search, type chips, sort controls, Signals strip, Sources filter, Missing filter, Local Repos reset-to-All navigation, accessible summary/filter button labels, passive summary and empty-state accessibility labels, Local Inspector accessibility labels, card drill-down accessibility labels, distinct empty-state reset label, close/search accessibility labels, close-button type hygiene, region accessibility labels, status live-region semantics, non-interactive list semantics, busy-state semantics, Keep left-rail and shell accessibility labels, Next Safe Actions strip, Next reason chips, summary-count navigation, empty-filter state, and local action drafts that remain visible by profile slug before a linked harness project row exists, Terminal Lab/Hedwig local observation rollups, self/system improvement categories, a modular panel model, a Surfer source panel scaffold, a local-only Model Tools panel for capability proposals, eval notes, and route previews, a global permission-mode shell with append-only local mode events, advisory permission preflight checks, append-only permission preflight audit records, and a shared server permission-policy helper used by both the Permissions router and Workbench evidence records, a read-only local Approval Queue with status/origin/project/search filters, local grouping, deterministic Oak/Spock preflight notes, and read-only permission preflight audit visibility, a proposal-only Workbench shell with evidence surfaces/permission classes/append-only evidence record shape plus local Workbench evidence record create/list/filter/detail, linked permission preflight ids and preflight detail on evidence records, validation notes that record their own local permission preflight rows, local evidence grouping by project/kind/source/command/validation status, source/command/task/session/artifact picker labels, task/session/artifact grouping, and append-only validation history in the evidence inspector, a proposal-only Aang Companion shell policy with allowed local events/blocked actions/web-mock-first route plus live local event-count strip, approved one-URL public ingestion, first-pass saved-source trust/scrub metadata, Reddit marked as a first-class V1 human-signal source lane, Slack marked as required V1 Hedwig capture, Notion marked as the structured capture database, Obsidian session handoff snapshots/index notes are approved append-only standing closeout behavior, and global history/log/archive/index/note trails must append or version while canonical current-state summaries may update in place. CereBro must understand images as a general input type, not only creative assets or setup screenshots: the user should be able to drag in screenshots, UI states, account screens, app errors, artwork, mockups, diagrams, photos, charts, whiteboards, generated images, and other still images, then ask open-ended questions about them. Video starts with frame/key-frame understanding and annotation. The modular in-app workbench is now a locked product direction: CereBro should show live localhost previews, public browser views, screenshots, images, video/key frames, annotations, terminal/log output, validation notes, and before/after comparisons inside the app; these surfaces are user-visible and agent-readable evidence, not hidden background tools. Add a Codex-like global permission-mode control across all work, not just media: `Default permissions`, `Auto-review`, and `Full access`. Default reads explicit user-provided context and guides. Auto-review proactively inspects approved visible/local evidence and queues suggestions. Full access uses enabled tools in the session, while hard gates still require visible approval for payments, account permission grants, destructive commands, deleting/overwriting files, sending messages, publishing, uploading private media externally, saving sensitive screenshots to memory, installs, tokens/API keys, and sealed Raven/NSFW scope. Vault/Obsidian durable text writers now create timestamped versions on same-title filename collision instead of overwriting, Artifact Library labels its saves as durable history/draft/report trails rather than current-state overwrites, source saves now split current-state `sources` rows from append-only `source_events` provenance, and Surfer Sources displays recent source history events with local owner/scrubbed filters and richer event detail. Aang Companion Overlay is planned as a small always-on desktop surface and now has a proposal-only Keep policy panel for keeping tabs on CereBro: ambient idle presence, click/hotkey quick ask, short status bubbles, open-Keep routing, time-of-day reactions, and quiet lore-accurate idle loops such as goofy fidgeting, tiny airbending practice, sitting, breathing, balancing, and sleepy states. Aang remains an agent, not a pet in the roster. Cortana still routes requests, Hedwig still owns capture/reminders, and Piccolo still owns hygiene. Terminal Lab is a proposal-only panel/router that classifies commands, explains risk, records local preview observations, infers known project links from cwd, accepts manually pasted observed-output summaries with light redaction, can link observations to selected tasks/sessions, filters observations by selected task/session, surfaces deterministic Aang/Tony follow-up suggestions from observed output, surfaces read-only Tony diagnostic command drafts, can convert one of Tony's generated diagnostic drafts into a normal local Terminal Lab preview with parent/root/depth provenance, has copy/approval-note affordances for Tony diagnostic drafts, shows parent-observation provenance and a diagnostic-preview status label on saved diagnostic previews, includes explicit diagnostic evidence and expected-signal notes for Tony draft commands across port conflicts, missing modules/packages, TypeScript symbol errors, package-tool failures, git state, missing files, permission errors, and unclear non-zero exits, supports local observation detail/status transitions, can stage pending local approval-preview rows for command observations without approving or executing commands, can create normal local follow-up tasks from observations, can stage Aang learning-note memory proposals from observations, and never executes commands or writes durable memory directly. Reusable prompt/tool handoffs can be saved as approved vault artifacts, searched read-only, and surfaced in command intake for `prompt_reuse` requests with required reuse disclosure. CereBro must now grow this into a routing playbook tied to the Model/Tool Capability Registry: target model/tool, prompt style, example result, privacy constraints, free-tier sufficiency, eval notes, source URLs, and failure notes. Surfer should propose current models/tools/free tiers only with sources and date checked; Cortana routes; Batman risk-reviews; Spock/Oak validate; Piccolo tracks stale registry entries, cost/rate limits, and storage. Candidate gateway/eval paths include LiteLLM, OpenRouter, direct provider SDKs, a CereBro-native gateway, promptfoo, DeepEval, and custom Vitest fixtures, but do not install or connect any of them without approval. Hedwig has a proposal-only Inbox panel with Notion capture DB schema, Slack DM/capture-channel shape, approval gates, routing rules, local capture preview persistence, recent capture history, read-only triage proposals for saved captures into task/source/learning/reminder/message routes, an explicit `Create Local Task` action that links a capture to a normal local CereBro task without external writes, an explicit `Save Source` action that creates a local unfetched source record plus source event from a capture URL without browsing/fetching, an explicit `Create Reminder Proposal` action that creates a local reminder proposal without scheduling/notifying, an explicit `Create Message Draft` action that creates a local draft proposal without sending/posting, local proposal detail/status transitions for source/reminder/message proposals that remain metadata-only and do not approve external action, editable local review fields for priority/notes/approval scope/external target, and pending local approval-preview rows for source enrichment, Notion capture write, Slack capture read, reminder scheduling, and message sending without approving or executing those external actions. The Approval Queue reads those Hedwig and Terminal approval-preview rows across local surfaces, joins them back to project/task/source/command/capture metadata when available, and still cannot approve, reject, execute, fetch, send, schedule, or write. The Workbench panel defines preview/browser/media/annotation/terminal/validation/comparison surfaces, can create manual local append-only evidence records, filter/group/inspect evidence details, link sources/commands/tasks/sessions/artifacts, append validation notes, show validation history, and does not open tools; the Aang panel defines event policy, local mock controls, live local event counts, and in-app event routing buttons but starts no desktop process. Hedwig is now the 11th agent in router/Keep metadata with a split Crypts Messenger Roost, scaled PixelLab owl sprite, motion config, use-spots, council spot, and path-graph node, and KeepScene now loads directional textures, uses idle/hero/council use-spots for actual movement, swaps facing frames, keeps emotes attached to moving sprites, routes `walking-to-ceremony` through a first BFS path graph into Cortana's hub, and avoids restarting movement tweens when state refreshes do not change an agent state. Do not emphasize session handoffs as a big UI surface; they live in Obsidian. Start proposal-only or implement a small safe slice: continue auditing code surfaces for accidental overwrites of logs/history/notes, add current-state writer proposals only where truly needed, deepen Approval Queue drill-downs or grouping without adding action execution, build the web-only Aang Companion mock inside the Keep without desktop permissions, deepen Workbench task/session linking and validation status display while keeping validation append-only before wiring browser/media automation, prototype image drag/drop artifact intake as temporary-by-default, define the hosted/local vision adapter interface without sending images externally, extend Project Lab local action draft history with status/version trails or add explicit draft-to-task proposals without edits, retrieve and wire Hedwig's PixelLab idle-flutter animation frames if an exposed endpoint is available, replace temporary Hedwig directional derivatives with true PixelLab owl rotations, polish path-graph walking with stair/landing waypoints, revise/approve Hedwig schema details, add approved Notion capture writer only after approval, richer reusable prompt/tool handoff metadata and ranking, proposal-only Reddit Intelligence design, local-only Hedwig Reddit URL save previews, approved open-web search, richer source extraction/validation, project profile persistence, or session linkage. At closeout, update `CEREBRO_SESSION_HANDOFF.md`, save a unique timestamped Obsidian snapshot to `90_Archive/CereBro Session History/snapshots/`, and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md` without overwriting any prior snapshot/index entry. Do not write to Notion/Slack or edit external project repos without explicit approval, and do not move/delete existing vault or repo files.
 ```

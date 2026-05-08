@@ -117,7 +117,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [sourceUri, setSourceUri] = useState("");
-  const [obsidianSubdir, setObsidianSubdir] = useState("indexes");
+  const [obsidianSubdir, setObsidianSubdir] = useState("20_Knowledge/Capture");
   const [lastWrite, setLastWrite] = useState<string | null>(null);
   const artifacts = trpc.artifacts.list.useQuery({
     kind: kind === "all" ? undefined : kind,

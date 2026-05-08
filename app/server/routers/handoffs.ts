@@ -84,8 +84,8 @@ export const handoffsRouter = router({
         excerpt: excerpt(content),
         recommendedObsidianPath:
           relativePath === "CEREBRO_SESSION_HANDOFF.md"
-            ? "CereBro/Sessions/Current Session Handoff.md"
-            : `CereBro/Sessions/References/${path.basename(relativePath)}`,
+            ? "90_Archive/CereBro Session History/Current Session Handoff.md"
+            : `90_Archive/CereBro Session History/References/${path.basename(relativePath)}`,
       });
     }
 
@@ -94,9 +94,9 @@ export const handoffsRouter = router({
       root,
       obsidian,
       archive: {
-        subdir: "CereBro/Sessions",
-        indexTitle: "CereBro Session Index",
-        indexPath: "CereBro/Session Index.md",
+        subdir: "90_Archive/CereBro Session History",
+        indexTitle: "CereBro Session History",
+        indexPath: "90_Archive/CereBro Session History/CereBro Session History.md",
         writePolicy:
           "Do not write snapshots until the user approves the folder/index shape and selected candidates.",
       },

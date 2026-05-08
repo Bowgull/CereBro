@@ -44,7 +44,7 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
         <StatusBlock label="Obsidian" value={data?.obsidian.exists ? "Ready" : "Missing"} tone={data?.obsidian.exists ? C.success : C.warning} />
-        <StatusBlock label="Folder" value={data?.archive.subdir ?? "CereBro/Sessions"} tone={C.accent} />
+        <StatusBlock label="Folder" value={data?.archive.subdir ?? "90_Archive/CereBro Session History"} tone={C.accent} />
         <StatusBlock label="Candidates" value={String(candidates.length)} tone={C.textSecondary} />
       </div>
 
@@ -90,9 +90,9 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
             <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Archive Shape" detail="needs approval" />
               <div className="space-y-2 mt-2">
-                <MetaBlock label="Snapshot Folder" value={data?.archive.subdir ?? "CereBro/Sessions"} />
+                <MetaBlock label="Snapshot Folder" value={data?.archive.subdir ?? "90_Archive/CereBro Session History"} />
                 <MetaBlock label="Index Note" value={data?.archive.indexTitle ?? "CereBro Session Index"} />
-                <MetaBlock label="Index Path" value={data?.archive.indexPath ?? "CereBro/Session Index.md"} />
+                <MetaBlock label="Index Path" value={data?.archive.indexPath ?? "90_Archive/CereBro Session History/CereBro Session History.md"} />
               </div>
               <div className="text-[11px] leading-relaxed mt-3" style={{ color: C.warning }}>
                 {data?.archive.writePolicy ?? "No Obsidian writes run from this proposal."}

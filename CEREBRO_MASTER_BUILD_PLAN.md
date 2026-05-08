@@ -1,45 +1,79 @@
 # CereBro Master Build Plan
 
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Summary
 
-CereBro is a local-first, free-cloud-supported personal command center for
+CereBro is a cloud-backed, local-controlled personal command center for
 everyday work, project building, creative production, research, learning,
 portfolio growth, and freelance work.
 
-The Keep remains the branded command center, but the build priority is:
+The Keep remains the branded command center, but the build priority is now:
 
 1. Safety, storage, and session handoff.
-2. Model routing and local-first power.
+2. Keep-first UX reset.
 3. Personal command intake and project intelligence.
 4. Source/search/research.
-5. Learning/output memory.
-6. Aang companion surface.
-7. Creative studio.
-8. Agent runtime.
-9. UI/animation polish.
+5. Model routing and cloud-backed learning.
+6. Learning/output memory.
+7. Aang companion and meeting notes.
+8. Keep asset pipeline and creative planning.
+9. Agent runtime.
+10. UI/animation polish.
 
 Core defaults:
 
-- Local-first, not local-only.
+- Cloud-backed, not cloud-blind.
+- Local-controlled, not local-hoarded.
 - Free cloud only unless explicitly approved.
 - Google Drive vault for generated files and deliverables.
-- SQLite/libSQL/Turso for structured brain.
-- Obsidian for durable knowledge.
+- Turso/libSQL cloud is the preferred structured brain once configured.
+  Local SQLite is the development cache and fallback, not the long-term center.
+- Cloud vector retrieval is the preferred RAG path. Local Chroma or local
+  embeddings are smoke-test and fallback lanes unless the user approves the
+  disk cost.
+- Obsidian is the durable Markdown knowledge layer. It is readable history and
+  synthesis, not the vector database and not the model brain.
 - Notion for polished learning/client outputs and the structured capture inbox.
 - Slack is required in V1 as Hedwig's quick-capture intake.
+- Sundesk simplification is the product benchmark. Sundesk's locked rule was:
+  Daily is the product, Build is the workshop, Settings are the basement.
+  CereBro's matching rule is: the Keep is the product, the Workshop is the work
+  surface, and system machinery stays below the floor until needed.
+- The current UI/UX direction is too jumbled and too generic-SaaS. Do not add
+  more primary surfaces until the Keep-first UX spine is redesigned and
+  approved.
+- Aang is the human bridge. The user speaks to Aang first. Aang interprets the
+  request and reports to Cortana. Cortana routes the agent layer. The UI must
+  show that chain instead of making the user speak directly to the router.
+- CereBro must infer the user's mode from context before asking. Aang should
+  show the read, ask only when confidence is low or risk changes, remember
+  corrections, and route through Cortana with a visible receipt.
+- Agents stay visible. The fix is not hiding the roster. The fix is making each
+  floor, chamber, and work surface answer one plain user question at a time.
+- CereBro is an everyday OS and creative workshop, not only a coding harness.
+  Everyday use includes asking questions, learning code/design, web research,
+  YouTube/anime discovery, anime episode tracking, source capture, creative
+  planning, and project work.
 - Reddit is a first-class V1 source lane for human signal, trend sensing,
   niche research, media references, and lived reports. Treat it as evidence
   with provenance, not as truth and not as model-training data.
 - Cleanliness is a first-class product requirement: every workspace, message,
   image, video, code artifact, source, note, and temp file needs an owner,
   destination, metadata trail, retention rule, and cleanup path.
+- Visual beauty is a first-class comprehension requirement. Obsidian, the Keep,
+  and CereBro knowledge surfaces should use distinct colors, intentional
+  clusters, readable labels, useful spacing, and graph structure that tells the
+  truth.
 - The detailed file lifecycle design lives in `CEREBRO_FILE_LIFECYCLE_PLAN.md`.
 - Append-only learning is a global rule: history/log/archive/index/note trails
   accumulate, while canonical current-state summaries may update in place.
   CereBro cannot learn the user's needs if its historical evidence is silently
   overwritten.
+- The Mac is the workbench, not the warehouse. Heavy generated media, vector
+  indexes, source archives, render outputs, and model files should not collect
+  on local disk by default. Piccolo must report storage pressure before it
+  becomes a build blocker.
 - The detailed personal command center and project intelligence design lives in
   `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`.
 - Freelance work is a mode inside the broader command center, not the foundation.
@@ -71,9 +105,124 @@ Core defaults:
   GitHub projects, docs, comparison posts, and risk reports. Surfer proposes;
   Cortana routes; Batman threat-models; Spock/Oak validate; Piccolo watches
   cost, storage, rate limits, and stale registry entries.
+- Gitingest is a strong Silver Surfer primitive for repo digestion. Use the
+  local CLI/package or a CereBro-native adapter by default, not the hosted web
+  path. Surfer should preserve repo URL/path, commit SHA when available, ignored
+  files, token/size counts, output path, source date, and reuse notes.
+- Skales is a product/UX reference for Aang companion behavior and desktop
+  agent ergonomics, not a code dependency. Its BSL license and direct product
+  overlap make copying/integrating code the wrong path.
 - Heavy media tools require storage/compute review.
 - No generated asset is saved only in chat.
 - No destructive cleanup without approval.
+
+## Aang-First Mode Intelligence
+
+CereBro should feel smart because it reads context, not because it asks the
+user to file every thought into a menu.
+
+Behavior rule:
+
+```text
+infer mode -> Aang shows the read -> ask only if unclear or risky -> Cortana routes -> Ledger records proof
+```
+
+Mode signals:
+
+- Current zone: Keep, Workshop, Ledger, Basement.
+- Active surface: browser, code, terminal, research, media, asset review,
+  source reader, preview, approval, settings.
+- Selected object: task, source, file, output, media item, asset, screenshot,
+  approval, memory, decision.
+- User language: ask, save, watch, track, build, fix, review, compare,
+  research, remind, publish, message.
+- Attached content: URL, image, video frame, repo, file, PixelLab asset,
+  screenshot, terminal output.
+- Active project and recent work.
+- Permission mode and risk class.
+- Prior corrections from the user.
+
+Required behavior:
+
+- If confidence is high, Aang states the read and proceeds to Cortana routing.
+- If confidence is medium, Aang offers the likely read and one correction path.
+- If confidence is low, Aang asks a short choice question.
+- If the inferred mode changes risk, Aang pauses for approval.
+- If the user corrects the mode, CereBro records the correction as reusable
+  preference evidence.
+- Repeated corrections can become a playbook rule after approval.
+
+Example:
+
+- User pastes an anime link and says "save this, I want to watch it."
+  Aang reads Media mode, reports to Cortana, and routes to the media tracker.
+- User pastes the same link and says "what are people saying about this."
+  Aang reads Research mode and routes to Surfer.
+- User pastes the same link and says "use this vibe for the Keep."
+  Aang reads Keep asset reference and routes to Gojo with asset review context.
+- User pastes the link with no instruction. Aang asks whether this is watchlist,
+  research, or asset reference.
+
+Acceptance:
+
+- The UI always shows the mode CereBro thinks the user is in.
+- The user can correct the mode without leaving the command flow.
+- Aang is the voice of the inference.
+- Cortana is the router behind the inference.
+- Corrections can teach CereBro future defaults, with proof and approval.
+
+## Cloud-Backed Learning System
+
+CereBro does not become smarter by pretending every note is model training.
+It becomes smarter by keeping receipts, retrieving the right context, and
+turning repeated wins into playbooks.
+
+V1 learning layers:
+
+1. **Structured brain.** Turso/libSQL stores projects, tasks, sessions,
+   sources, memories, artifacts, approvals, evals, tool calls, and routing
+   records. Local SQLite mirrors or backs off when cloud setup is unavailable.
+2. **Readable knowledge.** Obsidian stores durable Markdown: decisions,
+   session handoffs, source summaries, learning notes, project indexes, and
+   approved syntheses. It stays useful to a human even if CereBro is offline.
+3. **Retrieval layer.** RAG indexes approved notes, source summaries, memory
+   entries, prompt/tool handoffs, and selected outputs into a cloud vector
+   service once chosen. The first implementation may use simple SQLite search,
+   but the target is cloud vector retrieval with citations.
+4. **Playbook layer.** Repeated prompts, model/tool handoffs, source workflows,
+   build procedures, validation patterns, and "never do this again" corrections
+   become reusable playbooks with owner, scope, input shape, privacy class,
+   example result, failure notes, and approval gate.
+5. **Evaluation layer.** CereBro records approval, rejection, reuse, stale
+   source warnings, rate limits, failures, validation notes, and whether a
+   result shipped. Routing improves from this evidence, not from vibes.
+6. **Disclosure layer.** When CereBro uses remembered context, it names the
+   memory, source, note, or playbook it relied on. The system shows its work.
+
+Promotion path:
+
+```text
+raw capture -> source/event -> summary -> approved memory -> retrieved context
+-> reusable playbook -> eval-backed routing rule
+```
+
+RAG acceptance for V1:
+
+- Saved sources, Obsidian notes, memory entries, and prompt/tool handoffs can be
+  searched from one route.
+- Answers can cite the exact source row, note path, artifact, or memory id used.
+- Obsidian can feed RAG, but Obsidian is not the RAG engine.
+- Obsidian retrieval uses the current lane contract: `00_Atlas`,
+  `10_Projects`, `20_Knowledge`, `60_Media`, `80_Templates`, and `90_Archive`.
+- Normal retrieval includes only current, validated notes with explicit
+  retrieval metadata. `90_Archive` is archive-only unless the user asks for
+  history or provenance.
+- Every RAG-ready Obsidian note carries `canonical_status`, `retrieval_status`,
+  `llm_summary`, `source_ids`, `related_notes`, and `privacy_class`.
+- Cloud vector storage is preferred for the real index. Local vector storage is
+  optional and size-budgeted.
+- Private or sensitive material is never sent to an external model or vector
+  provider without visible approval and a recorded data summary.
 - CereBro needs a modular in-app workbench function, similar in spirit to the
   Codex app: live localhost preview, browser view, screenshot/image/video
   review, annotation canvas, logs, terminal output, validation notes, and
@@ -118,6 +267,11 @@ Core defaults:
 - Aang should become the always-on companion surface for keeping tabs on
   CereBro: small, ambient, click-to-ask, and event-aware. Aang remains a full
   agent, not a pet in the roster.
+- Aang can become the meeting notetaker surface, Otter-style, but the safe V1
+  path is transcript-first. Google Meet and Microsoft Teams both expose
+  transcript APIs when transcripts exist and permissions are granted. Live
+  meeting attendance, audio capture, bot joins, and screen/desktop recording
+  require separate permission, platform, and consent reviews.
 
 ## Master Session Plan
 
@@ -146,7 +300,7 @@ Do:
 - Confirm Ollama install status.
 - Decide/install only approved lightweight local models.
 - Populate model registry with tested local candidates.
-- Add escalation policy: local first, external only with approval.
+- Add escalation policy: private/cheap first, stronger external lanes only with approval.
 - Expand the router from local-vs-external classes into a capability registry
   for local models, hosted frontier models, free-tier hosted models, specialty
   generation/vision tools, and model gateways.
@@ -236,11 +390,110 @@ Acceptance:
   to, which agent should own it, what is safe to do next, and whether the work
   belongs to everyday life, a personal app, portfolio packaging, or freelance.
 
+### Session 4.5 - Keep-First UX Reset
+
+Do this before expanding the Workbench, runtime, or additional panels.
+
+Source references:
+
+- Sundesk final training target:
+  `/Users/lindsaybell/Documents/Codex/2026-05-07/files-mentioned-by-the-user-task/sundesk/outputs/manual-20260508-sundesk-demo/presentations/sundesk-command-center-training/output/sundesk-command-center-training-manual.pptx`
+- Sundesk simplification rules:
+  Start with the daily routine, show real work happening, keep helper surfaces
+  contextual, and make the powerful engine available without making it the
+  first thing the user has to understand.
+
+Do:
+
+- Audit the current CereBro UI against the question: "What would I do in the
+  next 30 seconds?"
+- Preserve the Keep as the main product surface. Do not replace it with generic
+  SaaS panels or a flat dashboard.
+- Reframe navigation around a small set of everyday modes:
+  `Ask`, `Capture`, `Research`, `Build`, `Create`, `Learn`, `Watch`, and
+  `Review`.
+- Make mode selection intelligent. CereBro should infer the mode from screen,
+  selected object, command language, attachment type, current project, and prior
+  corrections. Aang shows the inferred mode, asks only when uncertain, and
+  reports the final route to Cortana.
+- Treat the mode selector as correction and control, not homework.
+- Show the Aang -> Cortana -> agent route as a visible receipt whenever work is
+  created, routed, approved, or corrected.
+- Make the Keep itself actionable: chambers are not decorative cards. Each
+  chamber should expose one current job, one status, and one next action.
+- Create a Workshop layer for the dense surfaces: repo digestion, terminal,
+  preview/browser, evidence ledger, source review, model/tool registry, and
+  project detail.
+- Move system machinery out of the first read: permissions, storage metadata,
+  model routing, preflight logs, DB records, and adapters stay visible when
+  relevant, not always on top.
+- Define the everyday OS lane explicitly: web questions, code/design learning,
+  anime discovery/tracking, YouTube/research, source capture, creative ideas,
+  reminders, and project continuation all enter through the same simple Keep
+  intake.
+- Keep agents visible and named. The user likes the roster. The simplification
+  target is the surrounding UX, not the agent idea.
+- Draft a 24-slide CereBro finished-product training target deck before
+  rebuilding the UI, mirroring the Sundesk method. The deck should show the app
+  doing real daily work, not describe every feature.
+- The deck should use high-fidelity product mockups that may be ahead of the
+  current app. It is the build target, not a screenshot archive.
+- The deck must not use wireframes, grey boxes, placeholder dashboards, generic
+  SaaS panels, or fake low-fidelity mock images. It must show the final target
+  product output as if CereBro already exists.
+- The Keep in the deck must show the end-state direction, not the current
+  unfinished scene. Each agent room should look distinct, dynamic, and specific
+  to the agent: room design, props, state, animation intent, current work, and
+  relationship to the rest of the Keep.
+- PixelLab is the external production tool for Keep UI, sprites, chamber props,
+  and agent assets. The deck may show PixelLab-produced target assets, but it
+  should not frame PixelLab as CereBro's in-app creative studio.
+- The first teaching moment is: start in the Keep, ask, capture, route, and
+  watch the agents work.
+- The deck should show one full day in CereBro: morning orientation, capture,
+  meeting notes, research, learning, source work, creative workshop, anime or
+  YouTube tracking, project build, review, and end-of-day memory.
+- The deck should show all agents in the Keep while focusing each slide on the
+  agents involved in that moment. Do not flatten agent identity into generic
+  job buttons.
+- Aang should be shown as more than meeting notes: companion, explainer,
+  learning guide, event surface, quiet meeting-note helper, and the small edge
+  of the Keep when the full app is not open.
+- Aang should be shown as the human bridge. The user speaks to Aang. Aang
+  interprets, shows the mode read, reports to Cortana, and stays with the user
+  while the Keep responds.
+- Everyday OS workflows such as anime tracking, YouTube/research, code/design
+  learning, and quick questions belong in the main deck, not an appendix.
+- Final deck artifacts should live in the CereBro vault media library with the
+  deck, notes, contact sheet, and source files indexed in Obsidian.
+- Deck copy should use the user's production voice: short declaratives, no hype,
+  no generic SaaS language, no exclamation marks, no em dashes.
+
+Acceptance:
+
+- CereBro has a locked UX spine before more features are added.
+- The first screen reads as a premium pixel-art AI workshop, not a generic SaaS
+  dashboard with a castle background.
+- The deck depicts final target screens, not wireframes or temporary mock
+  images.
+- The Keep rooms in the deck are unique and agent-specific.
+- The Aang-first mode inference behavior is visible in at least one complete
+  flow.
+- A new user can name what to click for a quick question, source capture, repo
+  analysis, meeting notes, anime tracking, and build continuation without
+  training on internal architecture.
+- The 24-slide training deck outline is approved before PPTX generation begins.
+
 ### Session 5 - Source Library And Hybrid Search
 
 Do:
 
 - Build saved-source ingestion first: URLs, notes, files, GitHub references, pasted research.
+- Add a local repo-digest lane based on Gitingest or a CereBro-native adapter:
+  path/URL in, structured digest out, token/size counts, ignored-file summary,
+  commit SHA when available, provenance, and vault/source-library storage.
+- Route repo digestion to Silver Surfer by default, with Tony and Spock as
+  follow-up owners for implementation and validation packets.
 - Add provenance, freshness, trust level, summaries, citations.
 - Add a Reddit Intelligence lane under Surfer:
   watched subreddits, post/search captures, selected comment pulls,
@@ -278,13 +531,20 @@ Do:
 Acceptance:
 
 - CereBro can save, search, cite, and reuse research, including Reddit human
-  signal with visible provenance and confidence notes.
+  signal and repo digests with visible provenance and confidence notes.
 
 ### Session 6 - Aang Learning Mode And Companion Overlay
 
 Do:
 
 - Make Aang the teaching front door.
+- Make Aang the low-friction meeting notetaker surface, with transcript-first
+  behavior before live attendance. V1 should import or fetch approved Teams and
+  Google Meet transcripts, summarize decisions/action items/questions, and save
+  notes to the right project/source/output lane.
+- Keep meeting capture consent and platform limits explicit. Aang cannot join a
+  call, record audio, read calendars, fetch transcripts, or save meeting notes
+  without the matching account permission and visible approval.
 - Support guides, quizzes, flashcards, checklists, LearningPaths, weekly learning summaries.
 - Connect learning outputs to Source Library, Obsidian, Notion, and Tasks.
 - Save learning progress only with approval.
@@ -303,6 +563,8 @@ Acceptance:
 - CereBro helps the user understand what they are building, not just produce
   outputs. The first companion-overlay design is locked with a narrow safe
   build path.
+- Aang has a defined transcript-first meeting-notes path, with live bot/audio
+  capture treated as a later permission-heavy investigation.
 
 ### Session 7 - Output Library, Obsidian, And Notion
 
@@ -446,6 +708,16 @@ Do:
 - Wire Companion Overlay quick asks through the same Aang -> Cortana route.
   The overlay collects the question. Cortana classifies it. Owner/support
   agents act only through the normal approval model.
+- Add mode inference before routing. The runtime should read screen context,
+  selected object, attachment type, active project, recent history, permission
+  mode, and user corrections before deciding the route.
+- Add Aang mode confirmation behavior. Aang states the inferred mode when
+  confidence is high, offers a correction when confidence is medium, asks a
+  short question when confidence is low, and pauses when risk changes.
+- Add correction memory. When the user changes the inferred mode, record the
+  correction with context, selected object, project, original inference, final
+  mode, and route outcome. Promote repeated corrections to playbook proposals
+  only with approval.
 - Add skill loader.
 - Add tool registry and permission classes.
 - Add model class routing.
@@ -521,6 +793,8 @@ Acceptance:
 
 Do:
 
+- Treat Session 4.5 as the authority for the UX spine. Session 12 implements
+  the fuller shell only after the Keep-first product map is locked.
 - Preserve dark cinematic castle brand.
 - Add/finish left rail, center workspace, right context panel, bottom Ask Aang
   bar, and approval/action area.
@@ -643,3 +917,10 @@ Acceptance:
   web-only iframe/WebView first, Electron, Tauri, or another local shell.
 - Exact first hosted vision provider, local/private vision model, and OCR stack
   after testing against real screenshots, artwork, diagrams, and video frames.
+- Exact meeting-notes path for Aang after account review: Teams transcript API,
+  Google Meet transcript API, calendar-triggered imports, manual transcript
+  upload, or later live meeting bot/audio capture.
+- Exact local repo-digest implementation: depend on Gitingest CLI/package,
+  build a CereBro-native adapter, or support both behind Surfer.
+- Exact Skales teardown scope for Aang companion UX, desktop ergonomics, and
+  approval bubbles. Reference only. No code dependency.

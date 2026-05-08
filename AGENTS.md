@@ -1,6 +1,6 @@
 # CereBro — repo guide for Codex
 
-CereBro V1 is a local-first, harness-first personal AI operating layer with a pixel-art castle UI ("the Keep"). Backend will eventually be the harness (tasks, sessions, projects, memory pipeline, validation, output library, source library, model router, tool adapters). Frontend is the Keep — three floors of agent chambers. The current master build plan is `CEREBRO_MASTER_BUILD_PLAN.md`; every session must update `CEREBRO_SESSION_HANDOFF.md`.
+CereBro V1 is a cloud-backed, local-controlled, harness-first personal AI operating layer with a pixel-art castle UI ("the Keep"). Backend will eventually be the harness (tasks, sessions, projects, memory pipeline, validation, output library, source library, model router, tool adapters). Frontend is the Keep — three floors of agent chambers. The current master build plan is `CEREBRO_MASTER_BUILD_PLAN.md`; every session must update `CEREBRO_SESSION_HANDOFF.md`.
 
 ## Where things live
 
@@ -15,7 +15,7 @@ CereBro V1 is a local-first, harness-first personal AI operating layer with a pi
 - `.Codex/launch.json` — preview-tool config for `pnpm dev` on port 3002.
 - `mockups/` — early HTML mockups. `keep-v2.html` and `keep-v3.html` are reference only; the live app supersedes them. `mockups/shell.html` predates the project and has scope violations (Declyne/Raven references) — do not use as reference.
 - `CEREBRO_MASTER_BUILD_PLAN.md` — current 15-session master plan folding backend, model routing, storage, learning, creative studio, Hedwig, and Keep UX.
-- `CEREBRO_SESSION_HANDOFF.md` — live handoff file. Read first and update at the end of every session. After updating it, save a dated snapshot into the configured Obsidian vault under `CereBro/Session History/snapshots/` and update `CereBro/Session History/CereBro Session History.md`.
+- `CEREBRO_SESSION_HANDOFF.md` — live handoff file. Read first and update at the end of every session. After updating it, save a dated snapshot into the configured Obsidian vault under `90_Archive/CereBro Session History/snapshots/` and update `90_Archive/CereBro Session History/CereBro Session History.md`.
 - `CereBro_V1_*` and `CereBro_Final_Implementation_Pack/` (root) — locked planning docs. `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md` is the canonical visual spec.
 - `.nvmrc` pins Node 22 LTS.
 
@@ -43,8 +43,9 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 
 - Castle aesthetic per `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md`. Dark cinematic, premium, NOT fake-fantasy. Use `cerebroColors` tokens.
 - All 11 agents in the current V1 master plan: Cortana, Tony Stark, Gojo, Silver Surfer, C-3PO (Ground); Aang, Batman, Professor Oak, Spock (Upper Spires); Piccolo and Hedwig (Crypts). Hedwig is a scoped Messenger/Comms agent, visually a messenger owl sharing the Crypts operations layer with Piccolo.
-- Wizard-of-Oz: user is hidden. Cortana is the visible center. A glowing orb in Cortana's Hub represents the user. Cortana faces the orb to "speak to you." No "you" sprite anywhere.
-- Storage tiers: Turso (libSQL cloud, free) for brain. Google Drive synced folder for vault and outputs. Local for heavy regenerable stuff. All paths env-configurable.
+- Aang-first bridge: the user speaks to Aang. Aang interprets the request and reports to Cortana. Cortana routes the agent layer. The Keep should show that chain. No "you" sprite anywhere.
+- Mode intelligence: CereBro should infer the user's mode from context, have Aang show the read, ask only when uncertain or risky, remember corrections with approval, and route through Cortana with a visible receipt.
+- Storage tiers: Turso (libSQL cloud, free) for brain. Cloud vector retrieval for RAG once selected. Google Drive synced folder for vault and outputs. Local for active workspace/cache only. All paths env-configurable.
 - No money. No paid services, no trials.
 - Notion: inbox/outbox pattern, free tier. Notion is also the structured
   Hedwig capture database for ideas, links, TikToks, Reddit posts, articles,
@@ -55,6 +56,29 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 - Obsidian is for durable Markdown knowledge, including approved CereBro
   session handoff snapshots and a session index note. It is not the raw
   catch-all capture inbox.
+- Obsidian can feed RAG, but it is not the RAG engine, the vector database, or
+  the model brain.
+- Obsidian retrieval discipline is locked for V1. Retrieval includes only notes
+  that are current, validated, and marked for retrieval. Archive snapshots do
+  not enter normal RAG unless the user asks for history.
+- CereBro-created Obsidian notes must use the current vault lanes:
+  `00_Atlas`, `10_Projects`, `20_Knowledge`, `60_Media`, `80_Templates`, and
+  `90_Archive`. Do not recreate old `CereBro/...` root folders.
+- Every RAG-ready note should carry `canonical_status`, `retrieval_status`,
+  `llm_summary`, `source_ids`, `related_notes`, and `privacy_class`.
+- Retrieval must cite the exact note path, source row, artifact, or memory id
+  used. The system shows its work.
+- Obsidian must stay beautiful and functional. Use distinct folder/path colors,
+  clean templates, frontmatter, backlinks, callouts, and indexes. Do not rely on
+  manual tags just to make graph nodes readable.
+- Visual beauty is a standing requirement for Obsidian, the Keep, and CereBro
+  knowledge surfaces. Treat beauty as comprehension: distinct colors, intentional
+  clusters, readable labels, useful spacing, and graph structure that tells the
+  truth. Do not let valuable knowledge become a grey pile of disconnected nodes.
+- Every active project represented in Obsidian must have a CereBro project
+  bridge note under `10_Projects/<Project>/<Project>.md`. Build history,
+  media indexes, decks, maintenance notes, upgrade plans, and decisions should
+  link through that bridge instead of floating as separate islands.
 - Historical records are append-only by default. Logs, session indexes,
   handoff archives, audit trails, command/output history, source provenance,
   approval history, running notes, and learning trails must append or create a
@@ -84,7 +108,7 @@ context is getting heavy, or the block is complete. The user explicitly called
 out that returning every 2-3 minutes just to say "keep going" creates pointless
 friction and burns attention.
 
-Every session closes by updating `CEREBRO_SESSION_HANDOFF.md` with what changed, files touched, tests/checks run, known risks, storage impact, and the next-session starter prompt. Then write a unique Obsidian snapshot of that handoff to `CereBro/Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md` and append a new link to `CereBro/Session History/CereBro Session History.md`. Never overwrite or replace an earlier handoff snapshot/index entry. This append-only Obsidian handoff archive is now user-approved standing behavior for CereBro build sessions.
+Every session closes by updating `CEREBRO_SESSION_HANDOFF.md` with what changed, files touched, tests/checks run, known risks, storage impact, and the next-session starter prompt. Then write a unique Obsidian snapshot of that handoff to `90_Archive/CereBro Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md` and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md`. Never overwrite or replace an earlier handoff snapshot/index entry. This append-only Obsidian handoff archive is now user-approved standing behavior for CereBro build sessions.
 
 ## Scope discipline
 
