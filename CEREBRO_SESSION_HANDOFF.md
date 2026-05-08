@@ -93,6 +93,17 @@ Open deck caveat:
   retrieval only when the user asks for history, provenance, prior decisions,
   or session recovery. Every answer should cite the note path, source row,
   artifact, or memory id used.
+- 2026-05-08 GitHub project import: imported all 6 visible Bowgull GitHub repos
+  into Obsidian using the approved bridge/source method: Sundesk, CereBro,
+  Declyne, Bridgefour, Waymark, and sygnalist-brain. Created or updated project
+  bridge notes in `10_Projects`, repository source notes in
+  `20_Knowledge/Sources/GitHub`, `00_Atlas/GitHub Project Map.md`,
+  `20_Knowledge/Sources/GitHub/GitHub Sources.md`, and
+  `20_Knowledge/Playbooks/GitHub Repository Import Method.md`.
+- GitHub import rule is now written into `AGENTS.md`,
+  `CEREBRO_FILE_LIFECYCLE_PLAN.md`, and `CEREBRO_MASTER_BUILD_PLAN.md`: do not
+  copy full repos into Obsidian; use repo URL plus commit SHA fingerprints,
+  bridge notes, source summaries, and live repo inspection for exact code facts.
 
 Begin Session 4 after user clarification:
 

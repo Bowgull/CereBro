@@ -68,6 +68,11 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
   `llm_summary`, `source_ids`, `related_notes`, and `privacy_class`.
 - Retrieval must cite the exact note path, source row, artifact, or memory id
   used. The system shows its work.
+- GitHub project knowledge uses bridge and source notes, not raw code dumps.
+  Every imported repo gets `10_Projects/<Project>/<Project>.md` plus
+  `20_Knowledge/Sources/GitHub/<Project> Repository Source.md`, linked from
+  `00_Atlas/GitHub Project Map.md`. Use commit SHAs as source fingerprints.
+  Inspect the live repo for line-level code facts.
 - Obsidian must stay beautiful and functional. Use distinct folder/path colors,
   clean templates, frontmatter, backlinks, callouts, and indexes. Do not rely on
   manual tags just to make graph nodes readable.

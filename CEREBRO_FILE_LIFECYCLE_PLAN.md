@@ -177,6 +177,19 @@ knowledge goes through `10_Projects/<Project>/<Project>.md`. Session handoff
 snapshots go to `90_Archive/CereBro Session History/snapshots/` and update
 `90_Archive/CereBro Session History/CereBro Session History.md`.
 
+GitHub project import rule: do not copy full repositories into Obsidian. Import
+repository orientation as a project bridge plus a source summary:
+
+- `10_Projects/<Project>/<Project>.md`
+- `20_Knowledge/Sources/GitHub/<Project> Repository Source.md`
+- `00_Atlas/GitHub Project Map.md`
+- `20_Knowledge/Sources/GitHub/GitHub Sources.md`
+
+Each repository source note needs a GitHub URL, owner, repo name, visibility,
+commit SHA, last commit signal, stack summary, scripts, docs list, structure
+summary, trust notes, and retrieval note. Use it for orientation and routing.
+Inspect the live repo for exact code facts.
+
 Color discipline is part of the knowledge system. Major folders should use
 distinct path-based colors in Obsidian graph/settings and matching CSS where
 possible. Tags can add meaning, but tags should not be required just to make

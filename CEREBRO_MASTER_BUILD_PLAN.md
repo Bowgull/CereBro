@@ -219,6 +219,9 @@ RAG acceptance for V1:
   history or provenance.
 - Every RAG-ready Obsidian note carries `canonical_status`, `retrieval_status`,
   `llm_summary`, `source_ids`, `related_notes`, and `privacy_class`.
+- GitHub repositories enter retrieval as source summaries and project bridges,
+  not full-code note dumps. Source fingerprints use repo URL plus commit SHA.
+  For exact code facts, CereBro inspects the live repo or checkout.
 - Cloud vector storage is preferred for the real index. Local vector storage is
   optional and size-budgeted.
 - Private or sensitive material is never sent to an external model or vector
