@@ -542,6 +542,49 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const scoreParts = signalBreakdown(project, projectFilter);
               const pendingDraftForProject = pendingDraftTarget?.slug === project.slug ? pendingDraftTarget : null;
               const lastDraftForProject = lastDraftNotice?.slug === project.slug ? lastDraftNotice : null;
+              const activitySignals: Array<{
+                title: string;
+                count: number;
+                tone: string;
+                detail: string;
+                queue: InspectorQueue;
+              }> = [
+                {
+                  title: "Approvals",
+                  count: project.activity.approvals.pending,
+                  tone: project.activity.approvals.pending > 0 ? C.warning : C.success,
+                  detail: `${project.activity.approvals.sensitive} sensitive`,
+                  queue: "approvals",
+                },
+                {
+                  title: "Hedwig",
+                  count: hedwigTotal(project.activity.hedwig),
+                  tone: hedwigTotal(project.activity.hedwig) > 0 ? C.accent : C.textSecondary,
+                  detail: `${project.activity.hedwig.needsReview} review`,
+                  queue: "hedwig",
+                },
+                {
+                  title: "Terminal",
+                  count: project.activity.terminalStatus.total,
+                  tone: project.activity.terminalStatus.blocked > 0 ? C.danger : project.activity.terminalStatus.reviewing > 0 ? C.warning : C.textSecondary,
+                  detail: `${project.activity.terminalStatus.blocked} blocked`,
+                  queue: "terminal",
+                },
+                {
+                  title: "Sources",
+                  count: project.activity.sourceEvents.total,
+                  tone: project.activity.sourceEvents.sensitive > 0 ? C.warning : C.textSecondary,
+                  detail: `${project.activity.sourceEvents.sensitive} sensitive`,
+                  queue: "sources",
+                },
+                {
+                  title: "Drafts",
+                  count: project.activity.actionDrafts.total,
+                  tone: project.activity.actionDrafts.total > 0 ? C.accent : C.textSecondary,
+                  detail: "local plans",
+                  queue: "drafts",
+                },
+              ];
               return (
                 <article
                   key={project.slug}
@@ -586,18 +629,13 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
-                    <MetaBlock label="Mode" value={project.currentMode} />
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-2 mt-3">
                     <MetaBlock label="Owner" value={AGENT_LABELS[project.ownerAgent] ?? project.ownerAgent} />
                     <MetaBlock label="Branch" value={project.git.branch ?? "unavailable"} />
-                    <MetaBlock label="Upstream" value={project.git.upstream ?? project.git.remote ?? "unavailable"} />
                     <MetaBlock label="Tasks" value={`${project.tasks.inProgress} active / ${project.tasks.open} open`} />
-                    <MetaBlock label="Project Row" value={project.tasks.projectId == null ? "not linked" : `#${project.tasks.projectId}`} />
                     <MetaBlock label="Approvals" value={`${project.activity.approvals.pending} pending`} />
-                    <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
-                    <MetaBlock label="Sources" value={`${project.activity.sourceEvents.total} events`} />
-                    <MetaBlock label="Drafts" value={`${project.activity.actionDrafts.total} plans`} />
+                    <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
                   </div>
 
                   <div className="mt-3">
@@ -621,26 +659,25 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <ChipRow label="Support" items={project.supportAgents.map((agent) => AGENT_LABELS[agent] ?? agent)} tone={C.accent} compact />
                   </div>
 
-                  <div className="mt-3 text-xs leading-relaxed" style={{ color: C.textSecondary }}>
-                    <span className="uppercase tracking-wider text-[10px]" style={{ color: C.textMuted }}>Next </span>
-                    {project.nextAction}
-                  </div>
-
-                  <div className="mt-2 text-xs leading-relaxed rounded px-2 py-1.5" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                    <span className="uppercase tracking-wider text-[10px]" style={{ color: C.accent }}>Safe </span>
-                    {project.nextSafeAction}
-                  </div>
-
                   <div className="mt-3 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                        Draft Actions
+                    <div className="grid gap-1.5 text-xs leading-snug" style={{ color: C.textSecondary }}>
+                      <div className="min-w-0">
+                        <span className="uppercase tracking-wider text-[10px]" style={{ color: C.textMuted }}>Next </span>
+                        <span>{project.nextAction}</span>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.success }}>
-                        proposal only
-                      </span>
+                      <div className="min-w-0">
+                        <span className="uppercase tracking-wider text-[10px]" style={{ color: C.accent }}>Safe </span>
+                        <span>{project.nextSafeAction}</span>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-1">
+                  </div>
+
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Draft Actions</div>
+                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.success }}>proposal only</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
                       {([
                         ["plan_next_slice", "Plan slice"],
                         ["inspect_dirty_state", "Inspect state"],
@@ -665,7 +702,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         </Button>
                       ))}
                     </div>
-                    <div role="status" aria-live="polite" className="mt-2 text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
+                    <div role="status" aria-live="polite" className="mt-1 text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
                       {pendingDraftForProject
                         ? `Creating ${labelize(pendingDraftForProject.actionKey)} draft locally. No task or repo action is running.`
                         : lastDraftForProject
@@ -674,67 +711,35 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <SignalBlock
-                      title="Pending Approvals"
-                      count={project.activity.approvals.pending}
-                      tone={project.activity.approvals.pending > 0 ? C.warning : C.success}
-                      detail={`${project.activity.approvals.sensitive} sensitive`}
-                      chips={countChips(project.activity.approvals.byActionType)}
-                      onSelect={() => {
-                        setInspectorQueue("approvals");
-                        setSelectedSlug(project.slug);
-                      }}
-                    />
-                    <SignalBlock
-                      title="Hedwig Proposals"
-                      count={hedwigTotal(project.activity.hedwig)}
-                      tone={hedwigTotal(project.activity.hedwig) > 0 ? C.accent : C.textSecondary}
-                      detail={`${project.activity.hedwig.needsReview} need review`}
-                      chips={[
-                        `capture ${project.activity.hedwig.pendingCaptures}`,
-                        `source ${project.activity.hedwig.sourceProposals}`,
-                        `reminder ${project.activity.hedwig.reminderProposals}`,
-                        `message ${project.activity.hedwig.messageDrafts}`,
-                      ]}
-                      onSelect={() => {
-                        setInspectorQueue("hedwig");
-                        setSelectedSlug(project.slug);
-                      }}
-                    />
-                    <SignalBlock
-                      title="Terminal Status"
-                      count={project.activity.terminalStatus.total}
-                      tone={project.activity.terminalStatus.blocked > 0 ? C.danger : project.activity.terminalStatus.reviewing > 0 ? C.warning : C.textSecondary}
-                      detail={`${project.activity.terminalStatus.blocked} blocked / ${project.activity.terminalStatus.reviewing} reviewing`}
-                      chips={countChips(project.activity.terminalStatus.byStatus)}
-                      onSelect={() => {
-                        setInspectorQueue("terminal");
-                        setSelectedSlug(project.slug);
-                      }}
-                    />
-                    <SignalBlock
-                      title="Source Events"
-                      count={project.activity.sourceEvents.total}
-                      tone={project.activity.sourceEvents.sensitive > 0 ? C.warning : C.textSecondary}
-                      detail={`${project.activity.sourceEvents.sensitive} sensitive`}
-                      chips={countChips(project.activity.sourceEvents.byEventType)}
-                      onSelect={() => {
-                        setInspectorQueue("sources");
-                        setSelectedSlug(project.slug);
-                      }}
-                    />
-                    <SignalBlock
-                      title="Action Drafts"
-                      count={project.activity.actionDrafts.total}
-                      tone={project.activity.actionDrafts.total > 0 ? C.accent : C.textSecondary}
-                      detail="local proposal plans"
-                      chips={countChips(project.activity.actionDrafts.byActionKey)}
-                      onSelect={() => {
-                        setInspectorQueue("drafts");
-                        setSelectedSlug(project.slug);
-                      }}
-                    />
+                  <div className="mt-3 grid grid-cols-2 gap-1.5 xl:grid-cols-5">
+                    {activitySignals.map((signal) => (
+                      <Button
+                        key={signal.title}
+                        type="button"
+                        aria-label={`Inspect ${project.name} ${signal.title}`}
+                        onClick={() => {
+                          setInspectorQueue(signal.queue);
+                          setSelectedSlug(project.slug);
+                        }}
+                        className="h-auto min-w-0 justify-start rounded p-2 text-left"
+                        variant="secondary"
+                        style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                      >
+                        <span className="block min-w-0 w-full">
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>
+                              {signal.title}
+                            </span>
+                            <span className="text-sm font-semibold shrink-0" style={{ color: signal.tone }}>
+                              {signal.count}
+                            </span>
+                          </span>
+                          <span className="block text-[11px] leading-snug truncate" style={{ color: C.textSecondary }} title={signal.detail}>
+                            {signal.detail}
+                          </span>
+                        </span>
+                      </Button>
+                    ))}
                   </div>
 
                   {project.tasks.recent.length > 0 && (
@@ -1644,76 +1649,6 @@ function EmptyProjectFilter({
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function SignalBlock({
-  title,
-  count,
-  tone,
-  detail,
-  chips,
-  onSelect,
-}: {
-  title: string;
-  count: number;
-  tone: string;
-  detail: string;
-  chips: string[];
-  onSelect?: () => void;
-}) {
-  const content = (
-    <>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-            {title}
-          </div>
-          <div className="text-[11px] truncate" style={{ color: C.textSecondary }} title={detail}>
-            {detail}
-          </div>
-        </div>
-        <div className="text-sm font-semibold shrink-0" style={{ color: tone }}>
-          {count}
-        </div>
-      </div>
-      {chips.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-1">
-          {chips.map((chip) => (
-            <span
-              key={chip}
-              className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}
-            >
-              {labelize(chip)}
-            </span>
-          ))}
-        </div>
-      )}
-    </>
-  );
-
-  const blockStyle = { background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` };
-
-  if (onSelect) {
-    return (
-      <Button
-        type="button"
-        onClick={onSelect}
-        aria-label={`Inspect ${title}`}
-        className="h-auto min-w-0 justify-start rounded px-2 py-2 text-left"
-        variant="secondary"
-        style={blockStyle}
-      >
-        {content}
-      </Button>
-    );
-  }
-
-  return (
-    <div className="min-w-0 rounded px-2 py-2" style={blockStyle}>
-      {content}
     </div>
   );
 }

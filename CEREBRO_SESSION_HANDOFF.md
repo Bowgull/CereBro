@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:11 EDT
+Last updated: 2026-05-09 00:14 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0014 - Front-End Build Steward: Project Card Density
+
+### What Changed
+
+- Cut Project Lab card metadata from 11 always-visible fields to six operational
+  fields: owner, branch, tasks, approvals, Hedwig, and terminal.
+- Merged next action and safe action into one compact CereBro surface.
+- Replaced five large signal blocks with a compact activity strip for approvals,
+  Hedwig, terminal, sources, and drafts.
+- Tightened local draft action controls so they read as lightweight proposals,
+  not a full card inside the card.
+- Removed the unused large signal helper after the card surface moved to the
+  compact strip.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Project cards should now show a visible density change in the running app:
+  less repeated metadata, fewer blocky sections, and clearer click targets for
+  inspection queues.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- The Project Lab detail inspector still needs a focused density and hierarchy
+  pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Project Lab by normalizing the detail inspector queue rail, preview
+  columns, and empty states.
 
 ## 2026-05-09 0011 - Front-End Build Steward: Project Lab Hierarchy
 
