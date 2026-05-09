@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:05 EDT
+Last updated: 2026-05-08 22:08 EDT
 
 ## Current North Star
 
@@ -20,6 +20,47 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2208 - Front-End Build Steward: Approval Security Gate Link
+
+### What Changed
+
+- Added `Security Gate` actions to Approval detail records:
+  - Approval target labels.
+  - Linked permission preflight target summaries.
+- The action opens Security Gate and pre-fills the selected target through
+  local session storage.
+- Wired Approval Gate to shell navigation for the Security surface.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Approval review can now hand risky targets directly to Spock without copying
+  target text.
+- This makes the security path visible at the moment the user is already
+  reviewing a gate.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Audit remaining approval/security surfaces for raw target strings and missing
+  Spock handoff actions.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2205 - Front-End Build Steward: Terminal Security Gate Link
 
@@ -8556,4 +8597,95 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from contradiction and decay metadata. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add local-only candidate detail receipts with linked source preferences and rollup context, then add status history for recommendation candidates. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2206 EDT — Raven candidate detail and history
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven_recommendation_candidate_history`.
+- Added `raven.recommendationCandidateDetail`.
+- Candidate detail returns:
+  - candidate
+  - linked source preferences
+  - local rollup context
+  - status history
+- `raven.updateRecommendationCandidateStatus` now accepts a reason and appends
+  candidate history.
+- Candidate creation now writes an initial `draft` history row.
+- Expanded the Raven foundation test to cover candidate detail, source
+  preference linkage, rollup context, and history reasons.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Candidate detail receipts are backend-only. No UI has been touched.
+- Source preference ids are resolved from local Raven preferences only.
+
+Storage impact:
+
+- Adds `raven_recommendation_candidate_history` to local libSQL.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from candidate detail and history. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add a local-only candidate review queue summary with counts by status, contradiction, decay, and confidence. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2208 EDT — Raven candidate queue summary
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven.recommendationCandidateQueueSummary`.
+- The summary counts local Raven recommendation candidates by:
+  - status
+  - confidence
+  - contradiction state
+  - decay bucket
+- The endpoint also returns one lightweight row per candidate with its status,
+  confidence, contradiction state, decay bucket, and seed category.
+- Expanded the Raven foundation test to cover queue summary counts and
+  no-external-action gates.
+
+Files touched in this slice:
+
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Queue summary is backend-only.
+- Counts are recomputed from local preference and candidate metadata on read.
+
+Storage impact:
+
+- No schema change.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from candidate queue summary. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add a local-only Raven review action planner that suggests deterministic next actions for candidates based on status, contradiction, decay, and confidence. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```

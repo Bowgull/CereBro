@@ -53,7 +53,7 @@ function formatTime(unixSec: number) {
   });
 }
 
-export default function ApprovalDashboardPanel({ onClose }: { onClose: () => void }) {
+export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [origin, setOrigin] = useState<OriginFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("pending");
   const [query, setQuery] = useState("");
@@ -92,6 +92,16 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
   const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
   const preflightTotal = preflights.data?.summary.total ?? 0;
   const blockedPreflights = preflights.data?.summary.blocked ?? 0;
+
+  function openSecurityGate(target: string | null | undefined) {
+    if (!target?.trim() || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem("cerebro:security-target", target.trim());
+    } catch {
+      // Ignore storage failure. The Security Gate form still opens.
+    }
+    onNavigate("security");
+  }
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
@@ -373,6 +383,19 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                 {selected.targetLabel && (
                   <Meta label="Target Label" value={receiptLabel(selected.targetLabel) ?? "unknown"} title={selected.targetLabel} />
                 )}
+                {selected.targetLabel && (
+                  <Button
+                    type="button"
+                    onClick={() => openSecurityGate(selected.targetLabel)}
+                    disabled={!onNavigate}
+                    variant="risk"
+                    size="sm"
+                    className="w-fit"
+                    title={selected.targetLabel}
+                  >
+                    Security Gate
+                  </Button>
+                )}
                 <Meta label="Cost/Risk" value={labelize(selected.costRisk)} />
                 <Meta label="Permission Preflight" value={selected.permissionPreflightId == null ? "unlinked" : `#${selected.permissionPreflightId}`} />
               </Section>
@@ -398,6 +421,19 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                         value={receiptLabel(selected.permissionPreflight.targetSummary) ?? "unknown"}
                         title={selected.permissionPreflight.targetSummary}
                       />
+                    )}
+                    {selected.permissionPreflight.targetSummary && (
+                      <Button
+                        type="button"
+                        onClick={() => openSecurityGate(selected.permissionPreflight?.targetSummary)}
+                        disabled={!onNavigate}
+                        variant="risk"
+                        size="sm"
+                        className="w-fit"
+                        title={selected.permissionPreflight.targetSummary}
+                      >
+                        Security Gate
+                      </Button>
                     )}
                     {selected.permissionPreflight.requiredApprovals.length > 0 && (
                       <div className="grid gap-1">
