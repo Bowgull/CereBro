@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
 
@@ -1102,6 +1103,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               onClick={() => onNavigate("workbench")}
               variant="outline"
               size="sm"
+              title="Open Workbench. Ledger stays read-only."
+              aria-label="Open Workbench receipt bodies. Ledger stays read-only."
             >
               Open Workbench Bodies
             </Button>
@@ -1176,6 +1179,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   onClick={() => openWorkbenchEvidence(selectedEvidence)}
                   variant="outline"
                   size="sm"
+                  title={`Open receipt #${selectedEvidence.id} in Workbench. Ledger keeps the audit trail read-only.`}
+                  aria-label={`Open Workbench body for receipt ${selectedEvidence.id}`}
                 >
                   Open Workbench Body
                 </Button>
@@ -1184,12 +1189,23 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   onClick={() => openProjectPushContext(selectedEvidence)}
                   variant="secondary"
                   size="sm"
+                  title={
+                    selectedEvidence.projectName
+                      ? `Open ${selectedEvidence.projectName} push context in Project Lab. This does not run git.`
+                      : "Open Project Lab push context. This receipt is not linked to a project and does not run git."
+                  }
+                  aria-label={`Open Project Lab push context for receipt ${selectedEvidence.id}. This does not run git.`}
                 >
                   Project Push Context
                 </Button>
               </div>
-              <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                Receipt path: Workbench holds the body. Ledger holds the audit trail. Project Lab reads push context.
+              <div className="mt-1 flex flex-wrap items-center gap-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <Badge variant="secondary" className="uppercase">
+                  <span className="min-w-0 truncate">audit read only</span>
+                </Badge>
+                <span className="min-w-0">
+                  Receipt path: Workbench holds the body. Ledger holds the audit trail. Project Lab reads push context.
+                </span>
               </div>
               <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div className="min-w-0">
@@ -1200,11 +1216,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     {selectedEvidence.summary}
                   </div>
                 </div>
-                <div className="grid gap-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                  <span>Project: {selectedEvidence.projectName ?? "unlinked"}</span>
-                  <span>Route: {selectedEvidence.routeAgent ?? "unrouted"}</span>
-                  <span>Validation: {selectedEvidence.validationStatus.replace(/_/g, " ")}</span>
-                  <span>Target: {selectedEvidence.targetUri ?? "none"}</span>
+                <div className="grid min-w-0 gap-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                  <span className="truncate" title={selectedEvidence.projectName ?? "unlinked"}>Project: {selectedEvidence.projectName ?? "unlinked"}</span>
+                  <span className="truncate" title={selectedEvidence.routeAgent ?? "unrouted"}>Route: {selectedEvidence.routeAgent ?? "unrouted"}</span>
+                  <span className="truncate" title={selectedEvidence.validationStatus.replace(/_/g, " ")}>Validation: {selectedEvidence.validationStatus.replace(/_/g, " ")}</span>
+                  <span className="truncate" title={selectedEvidence.targetUri ?? "none"}>
+                    Target: {selectedEvidence.targetUri ? sourceDisplayName(selectedEvidence.targetUri) : "none"}
+                  </span>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:56 EDT
+Last updated: 2026-05-09 13:15 EDT
 
 ## Current North Star
 
@@ -20,6 +20,35 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1315 EDT - Ledger Receipt Action Boundary Pass
+
+### What Changed
+- Tightened the Ledger selected Workbench receipt preview so its route actions declare their boundaries.
+- Added read-only audit trail labeling to the selected receipt path.
+- Compact target metadata now uses the shared display label helper while preserving the full target in hover text.
+- Added title and aria-label copy for the Workbench and Project Lab Ledger actions so they explain what opens and what does not run.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: continue small Workbench/Ledger density work or move to Project Lab card push-context clarity, with Browser Use visual proof when callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1256 EDT - Terminal Lab Action Boundary Pass
 
