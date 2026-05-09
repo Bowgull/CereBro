@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:27 EDT
+Last updated: 2026-05-09 13:29 EDT
 
 ## Current North Star
 
@@ -20,6 +20,36 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1329 EDT - Hedwig Local Proposal Boundary Pass
+
+### What Changed
+- Tightened Hedwig capture preview so it states no Notion, Slack, task, reminder, or message write runs.
+- Local capture actions now distinguish triage read, source detail read, and Security Gate routing.
+- Triage proposal actions now state local task/source/reminder/message creation boundaries.
+- Proposal detail Security Gate routes now state they gate source enrichment, sync, or external target actions before anything external happens.
+- Proposal status, review save, and approval preview actions now state they remain local until approval.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` first run hit transient `SQLITE_BUSY`; immediate rerun passed 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: do a compact visual-density and copy pass across the main front-end spine, or inspect current localhost visually if Browser Use is callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1327 EDT - Ledger Utility Boundary Pass
 

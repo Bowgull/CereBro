@@ -301,6 +301,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
             type="submit"
             size="sm"
             disabled={!text.trim() || preview.isPending}
+            title={!text.trim() ? "Paste a capture before previewing it." : "Preview the capture locally. No Notion, Slack, task, reminder, or message write runs."}
+            aria-label="Preview local Hedwig capture"
           >
             {preview.isPending ? "Reading" : "Preview"}
           </Button>
@@ -375,6 +377,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         onClick={() => setTriageId(item.id)}
                         variant={triageId === item.id ? "default" : "secondary"}
                         size="sm"
+                        title="Read the local triage proposal for this capture."
+                        aria-label={`Read triage proposal for capture ${item.id}`}
                       >
                         Triage
                       </Button>
@@ -384,6 +388,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           onClick={() => setSelectedProposal({ kind: "source", id: item.id })}
                           variant={selectedProposal?.kind === "source" && selectedProposal.id === item.id ? "default" : "risk"}
                           size="sm"
+                          title="Open the local source proposal detail. This does not fetch or sync."
+                          aria-label={`Open source proposal detail for capture ${item.id}`}
                         >
                           Source Detail
                         </Button>
@@ -395,6 +401,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           disabled={!onNavigate}
                           variant="risk"
                           size="sm"
+                          title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate before any source fetch or external action."}
+                          aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for capture ${item.id} source`}
                         >
                           Security Gate
                         </Button>
@@ -432,6 +440,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                       type="button"
                       onClick={createTaskFromTriage}
                       disabled={createTask.isPending}
+                      title="Create a local task from this triage proposal. No external write runs."
+                      aria-label="Create local task from Hedwig triage"
                       size="sm"
                     >
                       {createTask.isPending ? "Creating" : "Create Local Task"}
@@ -445,6 +455,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         disabled={!onNavigate}
                         variant="risk"
                         size="sm"
+                        title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate before source save or enrichment."}
+                        aria-label="Open Security Gate for triage source"
                       >
                         Security Gate
                       </Button>
@@ -456,6 +468,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         disabled={saveSource.isPending}
                         variant="risk"
                         size="sm"
+                        title="Save a local source record from this triage proposal. This does not fetch or write externally."
+                        aria-label="Save local source from Hedwig triage"
                       >
                         {saveSource.isPending ? "Saving" : "Save Source"}
                       </Button>
@@ -467,6 +481,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         disabled={createReminder.isPending}
                         variant="risk"
                         size="sm"
+                        title="Create a local reminder proposal. This does not schedule anything."
+                        aria-label="Create local reminder proposal"
                       >
                         {createReminder.isPending ? "Saving" : "Create Reminder Proposal"}
                       </Button>
@@ -478,6 +494,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         disabled={createMessageDraft.isPending}
                         variant="risk"
                         size="sm"
+                        title="Create a local message draft. This does not send anything."
+                        aria-label="Create local message draft"
                       >
                         {createMessageDraft.isPending ? "Saving" : "Create Message Draft"}
                       </Button>
@@ -591,6 +609,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         variant="risk"
                         size="sm"
                         className="w-fit"
+                        title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate before source enrichment or sync."}
+                        aria-label="Open Security Gate for proposal source"
                       >
                         Security Gate
                       </Button>
@@ -619,6 +639,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         variant="risk"
                         size="sm"
                         className="w-fit"
+                        title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate before any external target action."}
+                        aria-label="Open Security Gate for proposal external target"
                       >
                         Security Gate
                       </Button>
@@ -640,12 +662,14 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         return proposalDetail.data.statusOptions.map((status) => (
                           <Button
                             key={status}
-                            type="button"
-                            onClick={() => updateSelectedProposalStatus(status)}
-                            disabled={statusUpdatePending || status === currentStatus}
-                            variant={status === currentStatus ? "default" : "secondary"}
-                            size="sm"
-                          >
+                          type="button"
+                          onClick={() => updateSelectedProposalStatus(status)}
+                          disabled={statusUpdatePending || status === currentStatus}
+                          variant={status === currentStatus ? "default" : "secondary"}
+                          size="sm"
+                          title={status === currentStatus ? "This local proposal already has this status." : `Set local proposal status to ${status.replace(/_/g, " ")}.`}
+                          aria-label={`Set proposal status to ${status.replace(/_/g, " ")}`}
+                        >
                             {status.replace(/_/g, " ")}
                           </Button>
                         ));
@@ -697,6 +721,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           type="button"
                           onClick={saveSelectedReview}
                           disabled={reviewUpdatePending}
+                          title="Save local proposal review fields. This does not sync externally."
+                          aria-label="Save local Hedwig proposal review"
                           size="sm"
                         >
                           {reviewUpdatePending ? "Saving" : "Save Local Review"}
@@ -706,6 +732,8 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           onClick={stageApprovalPreview}
                           disabled={createApprovalPreview.isPending}
                           variant="risk"
+                          title="Stage a pending local approval preview. This does not approve or execute the external action."
+                          aria-label="Stage local approval preview"
                           size="sm"
                         >
                           {createApprovalPreview.isPending ? "Staging" : "Stage Approval Preview"}
