@@ -266,6 +266,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [pushReceiptSlug, setPushReceiptSlug] = useState<string | null>(null);
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
+  const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 100 }, { refetchInterval: 10000 });
   const utils = trpc.useUtils();
   const [pendingDraftTarget, setPendingDraftTarget] = useState<{ slug: string; actionKey: DraftActionKey } | null>(null);
   const [lastDraftNotice, setLastDraftNotice] = useState<{ slug: string; id: number } | null>(null);
@@ -298,6 +299,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   );
   const data = overview.data;
   const projects = data?.projects ?? [];
+  const evidenceRows = workbenchEvidence.data?.items ?? [];
+  const evidenceByProjectId = evidenceRows.reduce((map, item) => {
+    if (item.projectId == null) return map;
+    const current = map.get(item.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 };
+    current.total += 1;
+    if (item.kind === "terminal_output") current.terminal += 1;
+    if (item.validationStatus === "needs_review") current.needsReview += 1;
+    if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") current.validated += 1;
+    map.set(item.projectId, current);
+    return map;
+  }, new Map<number, { total: number; terminal: number; needsReview: number; validated: number }>());
   const filteredProjects = [
     ...projects.filter((project) => {
       if (projectFilter === "approvals") return project.activity.approvals.pending > 0;
@@ -357,6 +369,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
+    { label: "Proof", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
     { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
   return (
@@ -379,7 +392,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-6" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         {primaryStats.map((stat) => (
           <StatusBlock
             key={stat.label}
@@ -521,6 +534,9 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const autoPushArmed = autoPushSlugs.has(project.slug);
               const pendingDraftForProject = pendingDraftTarget?.slug === project.slug ? pendingDraftTarget : null;
               const lastDraftForProject = lastDraftNotice?.slug === project.slug ? lastDraftNotice : null;
+              const proofStats = project.tasks.projectId == null
+                ? { total: 0, terminal: 0, needsReview: 0, validated: 0 }
+                : evidenceByProjectId.get(project.tasks.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 };
               const activitySignals: Array<{
                 title: string;
                 count: number;
@@ -615,7 +631,10 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Approvals" value={`${project.activity.approvals.pending} pending`} />
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
+                    <MetaBlock label="Proof" value={`${proofStats.total} receipts / ${proofStats.needsReview} review`} />
                   </div>
+
+                  <ProofStatusStrip stats={proofStats} />
 
                   <div className="mt-2">
                     <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
@@ -1639,6 +1658,26 @@ function MetaBlock({ label, value }: { label: string; value: string }) {
       </div>
       <div className="text-[11px] truncate" style={{ color: C.textSecondary }} title={value}>
         {value}
+      </div>
+    </div>
+  );
+}
+
+function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number; needsReview: number; validated: number } }) {
+  const tone = stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
+  return (
+    <div className="mt-2 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
+          Workbench Proof
+        </span>
+        <Badge variant={stats.total > 0 ? "default" : "secondary"} className="uppercase">{stats.total} receipts</Badge>
+        <Badge variant={stats.terminal > 0 ? "warning" : "secondary"} className="uppercase">{stats.terminal} terminal</Badge>
+        <Badge variant={stats.needsReview > 0 ? "warning" : "secondary"} className="uppercase">{stats.needsReview} review</Badge>
+        <Badge variant={stats.validated > 0 ? "success" : "secondary"} className="uppercase">{stats.validated} validated</Badge>
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Project map signal only. Open Workbench or Ledger for the receipt body.
       </div>
     </div>
   );
