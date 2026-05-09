@@ -42,7 +42,7 @@ const surfaceRules: RuleItem[] = [
 
 export default function UISystemPanel({ onClose }: { onClose: () => void }) {
   return (
-    <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <header className="shrink-0 px-4 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>

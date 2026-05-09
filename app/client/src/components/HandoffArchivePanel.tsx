@@ -25,7 +25,7 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
   const candidates = data?.candidates ?? [];
 
   return (
-    <div className="h-full flex flex-col" style={{ background: C.background }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
         className="flex items-center justify-between px-4 py-2 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}

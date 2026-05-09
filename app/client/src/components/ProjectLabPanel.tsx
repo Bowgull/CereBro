@@ -352,7 +352,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     .slice(0, 3);
 
   return (
-    <div className="h-full flex flex-col" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background }}>
+    <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
         className="flex items-center justify-between px-3 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}

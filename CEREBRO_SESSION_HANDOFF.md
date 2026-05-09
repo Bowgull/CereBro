@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:06 EDT
+Last updated: 2026-05-09 00:08 EDT
 
 ## Current North Star
 
@@ -20,6 +20,51 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0008 - Front-End Build Steward: Remaining Route Frames
+
+### What Changed
+
+- Added explicit full-height border framing, overflow control, and CereBro text
+  color to Project Lab, Model Tools, Security Gate, Artifacts, Piccolo, UI
+  System, and Handoff Archive panels.
+- Standardized the remaining routed surfaces with the prior Ledger and tool
+  route frame passes.
+- Left deeper Project Lab hierarchy work for a dedicated pass because the file
+  is broad and data-heavy.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/PiccoloPanel.tsx`
+- `app/client/src/components/UISystemPanel.tsx`
+- `app/client/src/components/HandoffArchivePanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- The major routed panels now have consistent workspace boundaries, which makes
+  navigation changes more legible in the running app.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Project Lab still needs a focused visual hierarchy pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Run a visible hierarchy pass on Project Lab and any route whose header or
+  first viewport still reads too dense after the frame normalization.
 
 ## 2026-05-09 0006 - Front-End Build Steward: Routed Tool Surface Frames
 
