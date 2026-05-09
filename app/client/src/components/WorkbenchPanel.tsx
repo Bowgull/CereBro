@@ -1418,7 +1418,7 @@ function EvidenceDetailPanel({
         </h4>
         {detail.permissionPreflight == null ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No linked permission preflight record exists for this receipt yet.
+            No linked permission preflight exists for this receipt. Run Security Gate when the target, source, command, or package needs risk review.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1457,7 +1457,7 @@ function EvidenceDetailPanel({
         </h4>
         {detail.validationHistory.length === 0 ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No appended validation notes for this receipt yet.
+            No validation notes yet. Append a local validation note before treating this receipt as checked.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1483,7 +1483,7 @@ function EvidenceDetailPanel({
         </h4>
         {detail.comparisonHistory.length === 0 ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No appended before/after comparisons include this receipt yet.
+            No before/after comparisons include this receipt yet. Pick another local receipt below to append a comparison.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1554,8 +1554,8 @@ function EvidenceDetailPanel({
             </div>
           )}
           {!evidencePickerLoading && comparisonOptions.length === 0 && (
-            <div className="rounded px-2 py-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No local receipts match the picker filters.
+            <div className="rounded px-2 py-2 text-xs leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              No local receipts match the picker filters. Clear the search or switch the picker kind.
             </div>
           )}
           {(evidencePickerGates ?? []).map((gate) => (
@@ -1588,6 +1588,7 @@ function EvidenceDetailPanel({
             <Button
               type="button"
               disabled={compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim() || isCreatingComparison}
+              title={compareWithId === "none" ? "Choose a second local receipt before appending a comparison." : undefined}
               onClick={() => {
                 if (compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim()) return;
                 onCreateComparison?.({
@@ -1648,6 +1649,7 @@ function EvidenceDetailPanel({
             <Button
               type="button"
               disabled={!validationNote.trim() || isCreatingValidationNote}
+              title={!validationNote.trim() ? "Write a validation note before appending it." : undefined}
               onClick={() => {
                 if (!validationNote.trim()) return;
                 onCreateValidationNote?.({

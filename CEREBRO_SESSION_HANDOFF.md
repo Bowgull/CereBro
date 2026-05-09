@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:39 EDT
+Last updated: 2026-05-09 12:52 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1252 EDT - Workbench Receipt Detail State Pass
+
+### What Changed
+
+- Tightened Workbench receipt body empty states for permission preflight, validation trail, comparison trail, and comparison picker filters.
+- Missing preflight now points to Security Gate when the receipt target/source/command/package needs risk review.
+- Missing validation now tells the user to append a local validation note before treating the receipt as checked.
+- Missing comparison now tells the user to pick another local receipt and append a comparison.
+- Disabled append buttons now expose title text for the most predictable missing input.
+- Kept backend semantics and internal `evidence` API names unchanged.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps Workbench as receipt-body owner and makes receipt detail states more explicit.
+- It keeps Security Gate as the risk-review path without auto-running anything.
+- It does not add execution, routing, schema, storage, or backend behavior.
+
+### Known Risks
+
+- Browser visual verification still needs Browser Use when callable.
+- Other non-critical receipt detail states may need the same treatment later.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify Workbench receipt detail states when Browser Use is callable; if unavailable, continue with a small Project Lab push-context density pass that improves manual push/readiness clarity without changing backend semantics. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1239 EDT - Receipt Empty State Action Pass
 
