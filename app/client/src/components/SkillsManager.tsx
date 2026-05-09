@@ -97,6 +97,8 @@ function ItemEditor({ initialContent, onSave, onCancel, title }: AgentEditorProp
             type="button"
             onClick={() => onSave(content)}
             variant="default"
+            title="Write this agent or skill file in the selected Claude Code scope."
+            aria-label="Save agent or skill file"
           >
             <Save size={14} /> Save
           </Button>
@@ -104,6 +106,7 @@ function ItemEditor({ initialContent, onSave, onCancel, title }: AgentEditorProp
             type="button"
             onClick={onCancel}
             variant="outline"
+            title="Close the editor without writing a file."
           >
             <X size={14} /> Cancel
           </Button>
@@ -285,6 +288,8 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                 onClick={() => setScope("global")}
                 variant={scope === "global" ? "secondary" : "outline"}
                 size="sm"
+                title="Use the global Claude Code scope."
+                aria-label="Use global Claude Code scope"
               >
                 <Globe size={12} /> Global
               </Button>
@@ -293,6 +298,8 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                 onClick={() => setScope("project")}
                 variant={scope === "project" ? "secondary" : "outline"}
                 size="sm"
+                title="Use the selected project Claude Code scope."
+                aria-label="Use project Claude Code scope"
               >
                 <FolderOpen size={12} /> Project
               </Button>
@@ -330,7 +337,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Refresh Claude Code agents and skills"
-                title="Refresh"
+                title="Refresh local agent and skill lists. This does not create, update, or delete files."
               >
                 <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
               </Button>
@@ -339,6 +346,8 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                 onClick={() => { setEditingItem(null); setShowEditor(true); }}
                 variant="default"
                 size="sm"
+                title={`Open the editor for a new ${activeTab === "agents" ? "agent" : "skill"} file. Nothing is written until Save.`}
+                aria-label={`Create new ${activeTab === "agents" ? "agent" : "skill"} file`}
               >
                 <Plus size={12} /> New {activeTab === "agents" ? "Agent" : "Skill"}
               </Button>
@@ -414,7 +423,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                       variant="ghost"
                       size="icon-sm"
                       aria-label={`Copy ${item.name}`}
-                      title="Copy content"
+                      title="Copy file content to clipboard. This does not write files."
                     >
                       <Copy size={13} />
                     </Button>
@@ -424,7 +433,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                       variant="ghost"
                       size="icon-sm"
                       aria-label={`Edit ${item.name}`}
-                      title="Edit"
+                      title={`Open ${item.name} in the editor. The file is not changed until Save.`}
                     >
                       <Edit3 size={13} />
                     </Button>
@@ -434,7 +443,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                       variant="destructive"
                       size="icon-sm"
                       aria-label={`Delete ${item.name}`}
-                      title="Delete"
+                      title={`Open the hard-gate confirmation before deleting ${item.name}.`}
                     >
                       <Trash2 size={13} />
                     </Button>
@@ -489,13 +498,15 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
             <div className="mt-1" style={{ color: C.textMuted }}>{pathInfo}</div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)}>
+            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} title="Keep the agent or skill file.">
               Cancel
             </Button>
             <Button
               type="button"
               variant="destructive"
               onClick={() => deleteTarget && handleDelete(deleteTarget)}
+              title="Permanently delete this agent or skill file from the selected Claude Code scope."
+              aria-label="Confirm delete agent or skill file"
             >
               Delete
             </Button>

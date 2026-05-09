@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:31 EDT
+Last updated: 2026-05-09 13:33 EDT
 
 ## Current North Star
 
@@ -20,6 +20,38 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1333 EDT - Skills Manager File Boundary Pass
+
+### What Changed
+- Tightened Skills Manager editor save so it states it writes an agent or skill file in the selected Claude Code scope.
+- Scope buttons now state global vs project scope before file operations.
+- Refresh now states it only reloads local lists and does not create, update, or delete files.
+- New, copy, edit, and delete buttons now distinguish editor-open, clipboard copy, file-write, and hard-gated delete.
+- Delete confirmation now states the file is permanently deleted from the selected Claude Code scope.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/SkillsManager.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` first run hit transient `SQLITE_BUSY`; immediate rerun passed 42 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` rerun after final formatting cleanup.
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+- Skills Manager still writes files directly on Save; future UX should add an explicit hard-gate save confirmation if this surface remains in V1.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: visual density and copy audit across Project Lab, Terminal Lab, Workbench, Ledger, Security, Approval, Hedwig, and Skills Manager, then use Browser Use if callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1331 EDT - Basement Registry Boundary Pass
 
