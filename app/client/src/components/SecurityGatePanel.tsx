@@ -35,6 +35,16 @@ function formatTime(unixSec: number) {
   });
 }
 
+function initialSecurityTarget() {
+  try {
+    const value = window.sessionStorage.getItem("cerebro:security-target") ?? "";
+    window.sessionStorage.removeItem("cerebro:security-target");
+    return value;
+  } catch {
+    return "";
+  }
+}
+
 function linkedProjectName(receipt: object) {
   return "projectName" in receipt && typeof receipt.projectName === "string" ? receipt.projectName : null;
 }
@@ -49,7 +59,7 @@ function linkedSourceUri(receipt: object) {
 
 export default function SecurityGatePanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
-  const [target, setTarget] = useState("");
+  const [target, setTarget] = useState(initialSecurityTarget);
   const [projectId, setProjectId] = useState<number | "none">("none");
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const plan = trpc.securityGate.plan.useQuery();

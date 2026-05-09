@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:51 EDT
+Last updated: 2026-05-08 21:53 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2153 - Front-End Build Steward: Command Security Affordance
+
+### What Changed
+
+- Added a command-preview security affordance for pasted links, GitHub repo
+  targets, npm targets, and PyPI targets.
+- Intake previews now show a Spock receipt block when a security target is
+  detected.
+- Added a `Security Gate` action on the intake preview.
+- The action opens the Security Gate surface and pre-fills the detected target
+  locally through session storage.
+- Security Gate consumes the prefilled target once, then clears it.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Pasted risky targets now route toward Spock before Surfer or Tony can become
+  the implied next step.
+- The affordance is local-only. It does not browse, fetch, clone, install, or
+  execute.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Detection is intentionally conservative and client-side.
+- Existing Raven edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add a small latest-security receipt chip in the Keep dock or command bar.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2151 - Front-End Build Steward: Basement Security Indicator
 
@@ -8074,4 +8117,59 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from the private preference and bridge proposal layer. Keep it backend-only unless the frontend worktree is reconciled. Add proposal status transitions, Approval Queue read-only visibility for Raven bridge exports, and stronger scrub classifications next. Do not approve, export, browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2153 EDT — Raven approval visibility and scrub classes
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Strengthened Raven scrub receipts:
+  - Findings now include labels, severity, and replacement markers.
+  - Receipts expose `findingLabels` and aggregate `severity`.
+  - Added detection for secret-like text, financial IDs, government IDs, and
+    IP addresses in addition to email, phone, URL, and local path.
+- Raven bridge export proposals now stage a pending local approval preview in
+  the normal `approvals` table.
+- Approval Queue read-only backend now recognizes Raven as an origin and labels
+  `raven_bridge_export_proposal` targets.
+- Added Raven bridge proposal listing and status transitions:
+  - `bridgeProposals`
+  - `updateBridgeProposalStatus`
+- Status transitions do not approve or export anything.
+
+Files touched in this slice:
+
+- `app/server/routers/raven.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Approval Queue UI has not been touched in this slice. The backend now returns
+  Raven origin records, but frontend filter options may need a follow-up once
+  the frontend worktree is reconciled.
+- Scrub detection is still deterministic pattern matching, not full privacy
+  reasoning.
+- `blocked_by_hard_gate` preflight records are expected for Raven bridge
+  exports because sensitive sealed-module persistence cannot be approved by a
+  mode setting.
+
+Storage impact:
+
+- Raven bridge proposals now also create local `approvals` and
+  `permission_preflight_records` rows.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, app/server/routers/raven.ts, and app/server/routers/approvals.ts first. Continue Raven from approval visibility and scrub classes. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add read-only Raven proposal detail receipts with linked scrub receipt + approval preview, add cancellation reason/history, and optionally add frontend filter support for Raven in ApprovalDashboardPanel only after checking the other frontend agent's work. Do not approve, export, browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```

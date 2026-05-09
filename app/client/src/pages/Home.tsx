@@ -505,6 +505,7 @@ export default function Home() {
           onDismiss={() => commandIntake.reset()}
           isCreatingTask={createTask.isPending}
           taskCreated={Boolean(createTask.data)}
+          onNavigate={setNav}
           onCreateTask={() => {
             const draft = commandIntake.data?.taskDraft;
             if (!draft || createTask.isPending) return;
@@ -1150,6 +1151,7 @@ function IntakePreview({
   result,
   onDismiss,
   onCreateTask,
+  onNavigate,
   isCreatingTask,
   taskCreated,
 }: {
@@ -1183,9 +1185,24 @@ function IntakePreview({
   };
   onDismiss: () => void;
   onCreateTask: () => void;
+  onNavigate: (id: NavId) => void;
   isCreatingTask: boolean;
   taskCreated: boolean;
 }) {
+  const securityTarget = securityTargetFor(result.originalText);
+  const needsSecurity = result.category === "security_review" || securityTarget != null;
+
+  function openSecurityGate() {
+    if (securityTarget) {
+      try {
+        window.sessionStorage.setItem("cerebro:security-target", securityTarget);
+      } catch {
+        // Ignore storage failures. Navigation still opens the manual form.
+      }
+    }
+    onNavigate("security");
+  }
+
   return (
     <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
       <div
@@ -1256,6 +1273,17 @@ function IntakePreview({
               </div>
             </div>
           )}
+          {needsSecurity && (
+            <div className="mt-2 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex flex-wrap items-center gap-1 mb-1">
+                <PreviewChip label="spock receipt" tone={C.warning} />
+                <PreviewChip label="no browser" tone={C.danger} />
+              </div>
+              <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                {securityTarget ? `Target detected: ${securityLabel(securityTarget)}` : "Security review requested before browser, clone, install, download, or execution."}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-start justify-between gap-2">
@@ -1268,6 +1296,19 @@ function IntakePreview({
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {needsSecurity && (
+              <Button
+                type="button"
+                onClick={openSecurityGate}
+                aria-label="Open Security Gate with this target"
+                variant="risk"
+                size="sm"
+                className="h-7 px-2"
+                title={securityTarget ?? "Open Security Gate"}
+              >
+                Security Gate
+              </Button>
+            )}
             <Button
               type="button"
               onClick={onCreateTask}
@@ -1297,6 +1338,20 @@ function IntakePreview({
       </div>
     </div>
   );
+}
+
+function securityTargetFor(text: string) {
+  const match = text.match(/https?:\/\/[^\s"'<>]+|github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+|npm:[^\s"'<>]+|pypi:[^\s"'<>]+/i);
+  return match?.[0] ?? null;
+}
+
+function securityLabel(target: string) {
+  try {
+    const parsed = new URL(target.startsWith("http") ? target : `https://${target}`);
+    return `${parsed.hostname}${parsed.pathname === "/" ? "" : parsed.pathname}`.slice(0, 80);
+  } catch {
+    return target.slice(0, 80);
+  }
 }
 
 function PreviewChip({ label, tone }: { label: string; tone: string }) {
