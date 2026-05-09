@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:21 EDT
+Last updated: 2026-05-09 06:26 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0626 - Front-End Build Steward: Models Registry Density
+
+### What Changed
+
+- Browser-reviewed the active Basement Models surface after the Workbench pass.
+- Compact-restyled status receipts, configuration rules, registry filters, and
+  capability proposal rows.
+- Restyled selected model-tool detail metadata as compact receipt rows.
+- Tightened Propose, Eval Note, Route Preview, and Gates panels.
+- Compact-restyled the dormant Design Review component so it is less document-
+  shaped if it is wired later.
+
+### Files Touched
+
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed the Models route
+  now shows status, rules, registry, detail, and several rows in the first
+  viewport.
+
+### Front-End Steward Review
+
+- Models now reads like a machine registry rather than a long proposal document.
+  The no-call boundary stays visible while registry and detail work stay close
+  together.
+
+### Known Risks
+
+- `DesignReviewPanel` is still not mounted by `Home.tsx`; its changes are not
+  user-visible until the route is wired.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Basement surfaces with Security or Automation, whichever is visually
+  noisier in the browser.
 
 ## 2026-05-09 0621 - Front-End Build Steward: Workbench Evidence Detail Density
 

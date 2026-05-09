@@ -203,7 +203,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-2 md:grid-cols-5 gap-2" aria-label="Model registry status">
+        <div className="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-5" aria-label="Model registry status">
           <StatusBlock label="Mode" value={policyData?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <StatusBlock label="External calls" value={policyData?.callsExternalModels ? "yes" : "no"} tone={policyData?.callsExternalModels ? C.danger : C.success} />
           <StatusBlock label="Untested" value={String(registryCounts.untested)} tone={registryCounts.untested ? C.warning : C.success} />
@@ -212,26 +212,26 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         {lastWrite && (
-          <div className="mt-3 text-xs rounded p-2" role="status" aria-live="polite" style={{ color: C.success, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mt-2 rounded p-2 text-[11px]" role="status" aria-live="polite" style={{ color: C.success, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             {lastWrite} No model, tool, gateway, browser, fetch, account, token, or install action ran.
           </div>
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto p-3 space-y-2.5" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading}>
-        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading}>
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
-          <div className="grid gap-2 md:grid-cols-3">
+          <div className="mt-2 grid gap-1.5 md:grid-cols-3">
             <MachineRule title="No Calls" body="Registry previews do not call providers, gateways, browsers, or local tools." tone={C.success} />
             <MachineRule title="Source First" body="A source URL is evidence, not trust. Surfer and Oak still validate current claims." tone={C.warning} />
             <MachineRule title="Approval" body="External model/tool use needs a visible action receipt before it runs." tone={C.danger} />
           </div>
         </section>
 
-        <section className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <div className="rounded p-3 space-y-2.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <div className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Registry" detail={`${rows.length} local proposals`} />
-            <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+            <div className="grid gap-1.5 md:grid-cols-[1fr_auto_auto]">
               <Input
                 value={providerFilter}
                 onChange={(event) => setProviderFilter(event.target.value)}
@@ -252,11 +252,11 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
               />
             </div>
 
-            <div className="grid gap-2" role="list" aria-label="Model tool capability proposals">
+            <div className="grid gap-1.5" role="list" aria-label="Model tool capability proposals">
               {capabilities.isLoading ? (
                 <div className="text-xs" style={{ color: C.textMuted }}>Reading local registry.</div>
               ) : rows.length === 0 ? (
-                <div className="rounded p-3 text-xs leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   No local capability proposals match these filters.
                 </div>
               ) : rows.map((item) => (
@@ -267,7 +267,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                   aria-label={`Inspect model tool capability ${item.id}`}
                   aria-pressed={selectedCapability?.id === item.id}
                   variant="outline"
-                  className="h-auto justify-start whitespace-normal p-3 text-left"
+                  className="h-auto justify-start whitespace-normal p-2 text-left"
                   role="listitem"
                   style={{
                     background: selectedCapability?.id === item.id ? C.surfaceRaised : C.surfaceMuted,
@@ -275,14 +275,14 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                   }}
                 >
                   <span className="block w-full min-w-0">
-                    <span className="flex items-start justify-between gap-3">
+                    <span className="flex items-start justify-between gap-2">
                       <span className="min-w-0">
                         <span className="block truncate text-xs font-bold uppercase tracking-widest">{item.provider}</span>
                         <span className="mt-1 block truncate text-xs font-semibold" title={item.toolName}>{item.toolName}</span>
                       </span>
                       <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
                     </span>
-                    <span className="mt-2 flex flex-wrap gap-2">
+                    <span className="mt-1.5 flex flex-wrap gap-1">
                       <Badge label={labelize(item.capabilityKind)} tone={C.accent} />
                       <Badge label={labelize(item.accessMethod)} tone={C.textSecondary} />
                       <Badge label={labelize(item.privacyClass)} tone={toneForPrivacy(item.privacyClass)} />
@@ -293,10 +293,10 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          <aside className="rounded p-3 space-y-2.5" aria-label="Selected model tool detail" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="rounded p-2 space-y-2" aria-label="Selected model tool detail" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Detail" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "none"} />
             {selectedCapability ? (
-              <div className="space-y-2.5">
+              <div className="grid gap-1.5">
                 <Field label="Provider" value={selectedCapability.provider} />
                 <Field label="Tool" value={selectedCapability.toolName} />
                 <Field label="Approval" value={labelize(selectedCapability.approvalLevel)} />
@@ -307,17 +307,17 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
               </div>
             ) : (
-              <div className="text-xs" style={{ color: C.textMuted }}>Select a capability proposal.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>Select a capability proposal.</div>
             )}
           </aside>
         </section>
 
-        <section className="grid gap-3 xl:grid-cols-3">
-          <form onSubmit={submitCapability} className="rounded p-3 space-y-2.5" aria-label="Create local model tool proposal" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="grid gap-2 xl:grid-cols-3">
+          <form onSubmit={submitCapability} className="rounded p-2 space-y-2" aria-label="Create local model tool proposal" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Propose" detail="local only" />
             <Input value={provider} onChange={(event) => setProvider(event.target.value)} aria-label="Model tool provider" placeholder="Provider or tool owner." />
             <Input value={toolName} onChange={(event) => setToolName(event.target.value)} aria-label="Model tool name" placeholder="Model or tool name." />
-            <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <AppSelect label="Capability kind" value={newKind} onChange={(value) => setNewKind(value as CapabilityKind)} options={CAPABILITY_KINDS} />
               <AppSelect label="Access method" value={accessMethod} onChange={(value) => setAccessMethod(value as typeof accessMethod)} options={ACCESS_METHODS} />
               <AppSelect label="Privacy class" value={privacyClass} onChange={(value) => setPrivacyClass(value as PrivacyClass)} options={PRIVACY_CLASSES} />
@@ -331,7 +331,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             </Button>
           </form>
 
-          <form onSubmit={submitEval} className="rounded p-3 space-y-2.5" aria-label="Record local model tool eval note" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <form onSubmit={submitEval} className="rounded p-2 space-y-2" aria-label="Record local model tool eval note" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Eval Note" detail={selectedCapability ? `for ${selectedCapability.id}` : "unlinked"} />
             <AppSelect label="Eval task" value={evalTaskKey} onChange={setEvalTaskKey} options={localEvalTasks.map((task) => task.key)} />
             <AppSelect label="Eval outcome" value={evalOutcome} onChange={(value) => setEvalOutcome(value as typeof evalOutcome)} options={EVAL_OUTCOMES} />
@@ -340,11 +340,11 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             <Button type="submit" disabled={!evalSummary.trim() || recordEval.isPending} aria-label="Record local model tool eval note" className="w-full">
               {recordEval.isPending ? "Recording" : "Record Eval Note"}
             </Button>
-            <div className="grid gap-2 max-h-52 overflow-y-auto" aria-label="Recent model tool eval notes">
+            <div className="grid max-h-52 gap-1.5 overflow-y-auto" aria-label="Recent model tool eval notes">
               {(evals.data?.items ?? []).length === 0 ? (
-                <div className="text-xs" style={{ color: C.textMuted }}>No eval notes for this selection.</div>
+                <div className="text-[11px]" style={{ color: C.textMuted }}>No eval notes for this selection.</div>
               ) : evals.data?.items.map((item) => (
-                <div key={item.id} className="rounded p-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div key={item.id} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   <div className="font-semibold uppercase tracking-wider">{labelize(item.evalTaskKey)}</div>
                   <div className="mt-1" style={{ color: C.textSecondary }}>{item.taskSummary}</div>
                   <div className="mt-1 flex gap-2">
@@ -356,7 +356,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             </div>
           </form>
 
-          <section className="rounded p-3 space-y-2.5" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="rounded p-2 space-y-2" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Route Preview" detail={route?.routeStatus ?? "proposal"} />
             <Input value={routeTask} onChange={(event) => setRouteTask(event.target.value)} aria-label="Route preview task kind" />
             <Input value={routeModality} onChange={(event) => setRouteModality(event.target.value)} aria-label="Route preview modality" />
@@ -366,19 +366,19 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
               Requires frontier reasoning
             </label>
             {route && (
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {route.lanes.map((lane) => (
-                    <div key={lane.lane} className="rounded p-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={lane.lane} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="font-semibold uppercase tracking-wider">{labelize(lane.lane)}</div>
                       <div className="mt-1" style={{ color: C.textSecondary }}>{lane.reason}</div>
                       <div className="mt-1" style={{ color: C.textMuted }}>{labelize(lane.approvalLevel)}. {labelize(lane.status)}</div>
                     </div>
                   ))}
                 </div>
-                <div className="rounded p-2 text-xs leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   {route.noActionTaken.join(" ")}
                 </div>
               </div>
@@ -386,11 +386,11 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </section>
         </section>
 
-        <section className="rounded p-3" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Gates" detail="always visible" />
-          <div className="grid gap-2 md:grid-cols-2">
+          <div className="mt-2 grid gap-1.5 md:grid-cols-2">
             {(policyData?.gates ?? []).map((gate) => (
-              <div key={gate} className="text-xs leading-relaxed rounded p-2" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 {gate}
               </div>
             ))}
@@ -412,18 +412,18 @@ function SectionTitle({ title, detail }: { title: string; detail?: string }) {
 
 function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
-      <div className="mt-1 text-xs font-semibold truncate" title={value} style={{ color: tone }}>{value}</div>
+      <div className="mt-0.5 truncate text-[11px] font-semibold" title={value} style={{ color: tone }}>{value}</div>
     </div>
   );
 }
 
 function MachineRule({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
-    <div className="rounded p-3 min-h-24" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
-      <div className="mt-2 text-xs leading-relaxed" style={{ color: C.textSecondary }}>{body}</div>
+      <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{body}</div>
     </div>
   );
 }
@@ -450,9 +450,9 @@ function Badge({ label, tone }: { label: string; tone: string }) {
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
-      <div className="mt-1 text-xs leading-relaxed break-words" style={{ color: C.textSecondary }}>{value}</div>
+    <div className="grid grid-cols-[76px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+      <div className="truncate font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="break-words" style={{ color: C.textSecondary }}>{value}</div>
     </div>
   );
 }
@@ -463,7 +463,7 @@ function SourceField({ value }: { value: string | null | undefined }) {
     <div>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Sources</div>
       {sources.length === 0 ? (
-        <div className="mt-1 text-xs leading-relaxed" style={{ color: C.textSecondary }}>No source URLs recorded.</div>
+        <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>No source URLs recorded.</div>
       ) : (
         <div className="mt-1 flex flex-wrap gap-1">
           {sources.map((source) => (

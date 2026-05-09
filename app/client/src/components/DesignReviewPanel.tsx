@@ -96,11 +96,11 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest">Design Review</h2>
-            <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+            <h2 className="text-[13px] font-bold uppercase tracking-widest">Design Review</h2>
+            <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
               Gojo review loop. Local records only.
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
             Close
           </Button>
         </div>
-        <div role="status" aria-live="polite" className="mt-3 text-xs" style={{ color: C.textMuted }}>
+        <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
           {plan.isLoading ? "Reading design policy." : "Policy loaded. No screenshot, browser, command, or file action started."}
         </div>
       </header>
@@ -125,32 +125,32 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
             Loading design review policy.
           </div>
         ) : (
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="grid gap-3 content-start">
-              <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <div className="flex flex-wrap gap-2 mb-3">
+          <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="grid gap-2 content-start">
+              <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="mb-2 flex flex-wrap gap-1">
                   <Chip label={planData.mode.replace(/_/g, " ")} tone={C.warning} />
                   <Chip label={planData.ownerAgent} tone={C.accent} />
                   <Chip label={planData.writesExternal ? "external write" : "local only"} tone={planData.writesExternal ? C.danger : C.success} />
                   <Chip label={planData.opensBrowser ? "browser opens" : "no browser"} tone={planData.opensBrowser ? C.danger : C.success} />
                   <Chip label={planData.executesCommand ? "commands run" : "no command run"} tone={planData.executesCommand ? C.danger : C.success} />
                 </div>
-                <div className="grid gap-3 lg:grid-cols-2">
+                <div className="grid gap-2 lg:grid-cols-2">
                   <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textMuted }}>Source Files</h3>
+                    <h3 className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Source Files</h3>
                     <div className="grid gap-1">
                       {planData.sourceFiles.map((file) => (
-                        <div key={file} className="rounded px-2 py-1.5 text-xs font-mono" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+                        <div key={file} className="rounded px-2 py-1 text-[11px] font-mono" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                           {file}
                         </div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textMuted }}>Route</h3>
+                    <h3 className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Route</h3>
                     <div className="grid gap-1">
                       {planData.routeChain.map((step, index) => (
-                        <div key={step} className="rounded px-2 py-1.5 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+                        <div key={step} className="rounded px-2 py-1 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                           {index + 1}. {step}
                         </div>
                       ))}
@@ -159,18 +159,18 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                 </div>
               </section>
 
-              <section className="rounded p-3" aria-label="Create design review" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <div className="flex items-start justify-between gap-3 mb-3">
+              <section className="rounded p-2" aria-label="Create design review" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="mb-2 flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-xs font-bold uppercase tracking-widest">Record Review</h3>
-                    <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Record Review</h3>
+                    <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
                       Local checklist. Link Workbench evidence when proof exists.
                     </p>
                   </div>
                   <Chip label="append only" tone={C.success} />
                 </div>
 
-                <div className="grid gap-2 md:grid-cols-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   <Select value={targetType} onValueChange={(value) => setTargetType(value as TargetType)}>
                     <SelectTrigger aria-label="Design review target type" className="w-full">
                       <SelectValue />
@@ -200,7 +200,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                     </SelectContent>
                   </Select>
                   <Select value={String(evidenceId)} onValueChange={(value) => setEvidenceId(value === "none" ? "none" : Number(value))}>
-                    <SelectTrigger aria-label="Linked Workbench evidence" className="w-full md:col-span-2">
+                    <SelectTrigger aria-label="Linked Workbench evidence" className="w-full col-span-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,11 +214,11 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                   </Select>
                 </div>
 
-                <div className="mt-3 rounded p-3" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>Checklist</h4>
-                  <div className="grid gap-2 sm:grid-cols-2">
+                <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Checklist</h4>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {planData.checklist.map((item) => (
-                      <label key={item.key} className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
+                      <label key={item.key} className="flex items-center gap-2 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                         <Checkbox
                           checked={checked.includes(item.key)}
                           onCheckedChange={() => toggleChecklist(item.key)}
@@ -230,14 +230,16 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                   </div>
                 </div>
 
-                <div className="mt-3 grid gap-2">
-                  <Textarea value={proofSummary} onChange={(event) => setProofSummary(event.target.value)} aria-label="Design review proof summary" placeholder="What was checked. Name the proof or say what proof is missing." rows={4} />
-                  <Textarea value={violations} onChange={(event) => setViolations(event.target.value)} aria-label="Design review violations" placeholder="Violations, one per line. Leave blank only if none were found." rows={4} />
-                  <Textarea value={nextActions} onChange={(event) => setNextActions(event.target.value)} aria-label="Design review next actions" placeholder="Next actions, one per line. Required." rows={4} />
+                <div className="mt-2 grid gap-1.5">
+                  <Textarea value={proofSummary} onChange={(event) => setProofSummary(event.target.value)} aria-label="Design review proof summary" placeholder="What was checked. Name the proof or say what proof is missing." rows={3} />
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <Textarea value={violations} onChange={(event) => setViolations(event.target.value)} aria-label="Design review violations" placeholder="Violations, one per line. Leave blank only if none were found." rows={3} />
+                    <Textarea value={nextActions} onChange={(event) => setNextActions(event.target.value)} aria-label="Design review next actions" placeholder="Next actions, one per line. Required." rows={3} />
+                  </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <div role="status" aria-live="polite" className="text-xs" style={{ color: C.textMuted }}>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
                     {createReview.data?.ok ? `Saved review #${createReview.data.review.id}. No external action.` : "Review records append. They do not patch code."}
                   </div>
                   <Button
@@ -254,31 +256,31 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
 
               <section className="grid gap-2" aria-label="Design review gates">
                 {planData.gates.map((gate) => (
-                  <div key={gate} className="rounded px-3 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div key={gate} className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     {gate}
                   </div>
                 ))}
               </section>
             </div>
 
-            <aside className="rounded p-3 h-fit xl:sticky xl:top-3" aria-label="Recent design reviews" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex items-start justify-between gap-3 mb-3">
+            <aside className="h-fit rounded p-2 xl:sticky xl:top-3" aria-label="Recent design reviews" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Recent Reviews</h3>
-                  <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Reviews</h3>
+                  <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
                     Local design proof ledger.
                   </p>
                 </div>
                 <Chip label={`${reviews.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
               </div>
               {(reviews.data?.items ?? []).length === 0 ? (
-                <div className="rounded px-3 py-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                   No design reviews yet. Record the first one after checking `DESIGN.md`.
                 </div>
               ) : (
-                <div className="grid gap-2">
+                <div className="grid gap-1.5">
                   {reviews.data?.items.map((review) => (
-                    <article key={review.id} className="rounded p-3" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <article key={review.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`#${review.id}`} tone={C.textMuted} />
                         <Chip label={labelize(review.targetType)} tone={C.accent} />
@@ -286,16 +288,16 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                         <Chip label={review.checklistScore} tone={C.gold} />
                         {review.evidenceId != null && <Chip label={`evidence #${review.evidenceId}`} tone={C.success} />}
                       </div>
-                      <h4 className="mt-2 text-xs font-semibold" style={{ color: C.textPrimary }}>{review.targetLabel}</h4>
-                      <p className="mt-1 text-xs leading-relaxed" style={{ color: C.textMuted }}>{review.proofSummary}</p>
+                      <h4 className="mt-1.5 text-[11px] font-semibold" style={{ color: C.textPrimary }}>{review.targetLabel}</h4>
+                      <p className="mt-1 max-h-[34px] overflow-hidden text-[11px] leading-snug" style={{ color: C.textMuted }}>{review.proofSummary}</p>
                       {review.violations.length > 0 && (
-                        <div className="mt-2 grid gap-1">
+                        <div className="mt-1.5 grid gap-0.5">
                           {review.violations.slice(0, 3).map((violation) => (
                             <div key={violation} className="text-[11px]" style={{ color: C.warning }}>{violation}</div>
                           ))}
                         </div>
                       )}
-                      <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
+                      <div className="mt-1.5 text-[11px]" style={{ color: C.textMuted }}>
                         {review.nextActions[0]}
                       </div>
                     </article>
@@ -303,7 +305,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                 </div>
               )}
               {evidencePicker.isLoading && (
-                <div className="mt-3 text-xs" style={{ color: C.textMuted }}>
+                <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
                   Reading Workbench evidence links.
                 </div>
               )}
