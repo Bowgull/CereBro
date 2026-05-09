@@ -429,6 +429,13 @@ developer convenience. It should eventually:
 - Keep agent-initiated execution approval-gated.
 - Block or escalate destructive commands, secret exposure, deployments, and
   external account operations.
+- Act as the first Code Lab shape. Terminal Lab should teach the build loop
+  through commands, failures, checks, diffs, Tony handoffs, Spock gates, and
+  Project Lab context. Do not add a separate primary Code Lab surface until this
+  lane is crowded enough to justify promotion.
+- Every teaching frame should answer: what Aang thinks this command/output
+  means, what it proves, what Tony can do next, what Spock must gate, and what
+  should not happen yet.
 
 ## V1 Data Additions
 

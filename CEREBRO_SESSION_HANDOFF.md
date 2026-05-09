@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:00 EDT
+Last updated: 2026-05-09 11:04 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1104 EDT - Build Plan Front-End Path Ordering
+
+### What Changed
+
+- Added an explicit current front-end build path to `CEREBRO_MASTER_BUILD_PLAN.md`.
+- Locked the order: Keep-first UX spine, Project Lab as map, Terminal Lab as Aang's build-teaching lane, Workbench as visual proof, Ledger as receipts, Model/Tool Registry as basement capability map, backend runtime after proof.
+- Folded Codebase-to-Course and Coding Lab into Terminal Lab instead of a new Code Lab surface.
+- Added the Terminal Lab teaching contract to `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`.
+- Added the Obsidian implementation fix into Session 7: color/path rules, project bridge notes, readable session-history index styling, archive lane rules, and Raven's separate visible lane without private data movement.
+- Included the referenced skills/tools and Raven smart recommender plan docs so the master plan does not point at missing local files.
+
+### Files Touched
+
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`
+- `CEREBRO_SKILLS_AND_TOOLS_LAYER.md`
+- `CEREBRO_RAVEN_SMART_RECOMMENDER_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `rg` verified the new build path, Terminal Lab Code Lab wording, and Obsidian grey-pile fix.
+- `git diff` reviewed the docs-only patch.
+- No app checks were needed because no app code changed in this slice.
+
+### Front-End Steward Review
+
+- The path now tells the front-end building agent what to build next and what not to create.
+- Connected plugins remain capability proposals and build-session aids, not new product surfaces.
+- Terminal Lab is now the teaching surface for coding work.
+- The backend agent is explicitly later and should consume visible receipts instead of replacing them.
+
+### Known Risks
+
+- The plan now has the right order, but the UI still needs the next slices to catch up.
+- Obsidian color/style rules are specified, not implemented as vault CSS or templates yet.
+- Existing Raven/server/docs edits remain unrelated to this docs-only ordering pass.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No browser, connector, external model, Notion, Slack, or command execution.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Follow the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts -> Model/Tool Registry as basement capability map -> backend runtime after proof. Do not add a new Code Lab surface. Next safe slice: connect Terminal Lab teaching frames to Project Lab context by showing selected project branch/dirty/push-readiness evidence in the Terminal Lab rail without executing commands or adding new primary surfaces. Verify in browser DOM, run pnpm check if app code changes, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1100 EDT - Front-End Build Steward: Terminal Lab Teaching Frame
 

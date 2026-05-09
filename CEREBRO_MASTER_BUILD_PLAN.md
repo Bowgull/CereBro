@@ -1,6 +1,6 @@
 # CereBro Master Build Plan
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Summary
 
@@ -20,6 +20,58 @@ The Keep remains the branded command center, but the build priority is now:
 8. Keep asset pipeline and creative planning.
 9. Agent runtime.
 10. UI/animation polish.
+
+Current build instruction:
+
+- CereBro is being built to replace the Codex chat as the user's everyday AI
+  operating layer.
+- While CereBro is still under construction, Tony/Codex sessions remain the
+  external build worker. The work they do is evidence for CereBro's future
+  workflow: inspect, plan, build, verify, archive, resume.
+- Installed Codex plugins affect how Tony/Codex sessions can build CereBro now.
+  They do not change CereBro's product direction, architecture, agent model, or
+  roadmap by themselves.
+- Do not change CereBro's product shape just because a new tool exists.
+  Evaluate the tool, borrow lessons, and borrow code only after
+  license/security review. Wrap useful pieces inside CereBro's existing Keep,
+  Workshop, agent, memory, permission, and receipt model.
+- Build autonomy in stages. First make the work visible and recoverable. Then
+  move repeated, proven steps into CereBro itself.
+- Tony should read this plan before continuing build passes.
+
+Current build-session plugin rule:
+
+1. Use installed plugins when they make the current build pass better.
+2. Record which plugin, skill, or connector was used when it affects evidence,
+   output, storage, or privacy.
+3. Keep plugin use inside the current task scope.
+4. Treat installed plugins as build aids and future reference lanes, not
+   automatic CereBro features.
+5. Defer OpenClaw/ShibaClaw/OpenCode installs. Study them as references only.
+
+Current front-end build path:
+
+1. **Keep-first UX spine.** The Keep remains the product spine. The first read
+   should answer what CereBro thinks the user is doing, who owns it, what proof
+   exists, and what needs approval.
+2. **Project Lab as map.** Project Lab shows project state, dirty work, branch,
+   push readiness, active risks, and the next safe action.
+3. **Terminal Lab as Aang's build-teaching lane.** Do not create a separate
+   Code Lab surface yet. Fold Codebase-to-Course and Coding Lab lessons into
+   Terminal Lab: explain commands, failures, check output, next safe commands,
+   Tony handoffs, and Spock gates.
+4. **Workbench as visual proof.** Localhost preview, browser views,
+   screenshots, images, annotations, before/after, and validation evidence live
+   in Workbench.
+5. **Ledger as receipts.** Ledger records route, evidence, command/output,
+   approvals, validation, artifacts, memory writes, and next actions.
+6. **Model/Tool Registry as basement capability map.** Connected tools and
+   external services are readable capability proposals, not primary product
+   surfaces. Use this for Nano Banana-style vision, PixelLab, Hugging Face,
+   GitHub, Notion, Browser Use, and future tools.
+7. **Backend agent runtime after proof.** Build the backend agent only after the
+   visible Project Lab -> Terminal Lab -> Workbench -> Ledger loop is coherent.
+   The backend agent should consume the visible receipts, not replace them.
 
 Core defaults:
 
@@ -92,6 +144,21 @@ Core defaults:
   install or configure it yet. Cookie extraction, proxies, browser automation,
   downloads, MCP servers, and upstream tools require Spock receipt and explicit
   approval per channel.
+- Raven is now an active sealed smart recommender track, not a parked generic
+  review feature. The implementation source is
+  `CEREBRO_RAVEN_SMART_RECOMMENDER_PLAN.md`. Raven is a private adult-content
+  discovery and taste agent with its own chat, settings, source adapters,
+  candidate queue, hard-boundary controls, and taste graph. CereBro never reads,
+  writes, routes, indexes, exports, validates, or syncs Raven data. No CereBro
+  agent touches Raven. The only bridge is a sealed launcher that opens Raven
+  after explicit user action and carries no Raven content back.
+- Raven hard boundaries are visible settings, not hidden config. Locked V1
+  blocks include illegal content, minors or age-ambiguous content,
+  non-consensual content, coercion or trafficking indicators, hidden-camera
+  indicators, doxxing or stalking vectors, malware/scam/popup/forced-download
+  sources, and access-control bypass. User-defined blocked terms, performers,
+  studios, sources, tags, formats, visual styles, and never-show-again items
+  are enforced before scoring.
 - Docling is a first-class candidate for document source intake. Use it as the
   preferred local path for PDFs, DOCX, PPTX, XLSX, HTML, images, scanned pages,
   transcripts, tables, formulas, figures, layout, and reading-order extraction
@@ -115,6 +182,15 @@ Core defaults:
   and CereBro knowledge surfaces should use distinct colors, intentional
   clusters, readable labels, useful spacing, and graph structure that tells the
   truth.
+- Nothing new lands grey. Every active project, build history, source lane,
+  archive lane, commit/session record, and durable project note needs a visible
+  colour group or style rule before it becomes another pile in Obsidian.
+- Raven stays separate from CereBro, but separate does not mean invisible or
+  grey. Raven gets its own colour lane, bridge note, and archive colour rules
+  while private operational data stays sealed outside CereBro memory.
+- Sundesk stays simpler than CereBro. CereBro can build, explain, archive,
+  demo, and QA Sundesk from outside. Sundesk should not inherit CereBro's agent
+  runtime or tool registry unless a Sundesk product requirement demands it.
 - The detailed file lifecycle design lives in `CEREBRO_FILE_LIFECYCLE_PLAN.md`.
 - Append-only learning is a global rule: history/log/archive/index/note trails
   accumulate, while canonical current-state summaries may update in place.
@@ -126,6 +202,10 @@ Core defaults:
   becomes a build blocker.
 - The detailed personal command center and project intelligence design lives in
   `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`.
+- The skills/tools operating contract lives in
+  `CEREBRO_SKILLS_AND_TOOLS_LAYER.md`. It defines agent skill loadouts,
+  allowed tools, forbidden tools, memory lanes, approval gates, and output
+  receipts. Skills teach. Tools act.
 - Freelance work is a mode inside the broader command center, not the foundation.
 - Surfer can research only with approval.
 - Spock is now the security gate. Surfer scouts, but Spock checks risky links,
@@ -150,6 +230,19 @@ Core defaults:
   It should learn which hosted models, local models, free-tier tools, and
   specialty services work for which jobs, then route through the best available
   lane with visible approval and recorded evidence.
+- New plugins and external tools are build aids, reference material, and
+  possible future capability lanes. They do not change CereBro's behaviour by
+  themselves.
+- Current installed Codex plugin lanes for build sessions: Remotion for Gojo
+  video work, Presentations/Documents/Spreadsheets for artifacts, Google Drive
+  for vault-aware outputs, GitHub for PR/CI/review flows, Browser Use for
+  localhost QA, Notion for capture/spec/research work, Hugging Face for model
+  and research discovery, Canva for design variants, Supabase for future
+  database work, Game Studio for Phaser/Keep/playtest work, and Computer Use
+  only when desktop control is explicitly needed and safe.
+- Record what each tool can do, what code or patterns may be borrowed, what data
+  it touches, what approval it needs, and whether it belongs inside CereBro,
+  beside CereBro, or as a manual handoff.
 - The user wants to use free and generous hosted AI tiers where practical:
   DeepSeek-style reasoning/coding models, Gemini/Nano Banana-style image or
   vision tools, OpenRouter-style multi-model access, PixelLab-like generation
@@ -182,6 +275,36 @@ Core defaults:
 - Heavy media tools require storage/compute review.
 - No generated asset is saved only in chat.
 - No destructive cleanup without approval.
+
+## Reference Intake And Plugin Rule
+
+External tools, repos, and installed plugins can influence CereBro in three
+ways:
+
+1. **Lesson.** Adopt the product pattern, UX idea, safety rule, or workflow
+   shape.
+2. **Borrowed code.** Copy or adapt code only after license, security,
+   maintenance, install surface, storage, privacy, and product-fit review.
+3. **Adapter.** Keep the tool outside CereBro and call it through an approved,
+   receipt-backed lane when useful.
+
+Default to lesson. Borrow code only when it is small, reviewed, and clearly
+better than rebuilding. Use adapters when the tool should remain separate. Use
+installed plugins during current Codex/Tony build sessions when they help the
+task, then record that use in the handoff if it affects proof, storage, output,
+or privacy.
+
+Current references from this pass:
+
+- Brik: Gojo motion/design reference. No dependency until export/API value is
+  proven.
+- Codebase to Course: Terminal Lab teaching reference for turning repo and
+  command work into teachable lessons. Do not add a separate Code Lab surface
+  unless Terminal Lab becomes too crowded after the teaching lane is proven.
+- OpenCode: coding-agent UX and session-management reference.
+- ShibaClaw: security-hardening reference for agent tool execution.
+- OpenClaw: broad desktop/channel automation reference. High-risk. Do not
+  install or integrate until Spock review and explicit approval.
 
 ## Aang-First Mode Intelligence
 
@@ -329,8 +452,8 @@ RAG acceptance for V1:
   policy: payments, account permission grants, deleting/overwriting files,
   sending messages or emails, publishing, uploading private files/images
   externally, saving sensitive screenshots to memory, installing system-level
-  software, giving tokens/API keys to tools, destructive commands, and sealed
-  Raven/NSFW scope.
+  software, giving tokens/API keys to tools, destructive commands, and Raven
+  sealed scope. Raven is not routed through CereBro agents.
 - CereBro should learn reusable prompts and external tool/model handoffs over
   time. When it suggests reusing or adapting one, it must say which prompt it is
   using, why it applies, and whether an external tool/model call needs approval.
@@ -659,6 +782,19 @@ Do:
 - Make outputs first-class: specs, briefs, source summaries, learning notes, client docs, creative plans.
 - Obsidian receives durable Markdown notes, including approved CereBro session
   handoff snapshots and an index note for build history.
+- Obsidian must not become a grey pile. Add visible folder/path colour rules
+  for active projects, build history, source lanes, archive lanes, decisions,
+  media, output artifacts, and session records.
+- Every active project represented in Obsidian needs a project bridge note
+  under `10_Projects/<Project>/<Project>.md`, with backlinks to build history,
+  source summaries, media indexes, maintenance notes, decisions, and current
+  next actions.
+- Session history needs a readable index style: dated entries, short slice
+  names, project/surface labels, and color lane guidance. Archive snapshots
+  remain append-only and out of normal retrieval unless history is requested.
+- Raven gets its own colour lane, bridge note, and archive styling, but private
+  Raven operational data stays sealed outside CereBro memory, retrieval, and
+  normal Obsidian knowledge notes.
 - Notion receives polished user-facing/team-facing pages after approval.
 - Notion also becomes the structured capture database for quick ideas, links,
   TikToks, Reddit posts, articles, conversation notes, learning seeds,
@@ -805,6 +941,8 @@ Do:
   mode, and route outcome. Promote repeated corrections to playbook proposals
   only with approval.
 - Add skill loader.
+- Use `CEREBRO_SKILLS_AND_TOOLS_LAYER.md` as the implementation contract for
+  agent skills, tool permissions, memory access, approval gates, and receipts.
 - Add tool registry and permission classes.
 - Add model class routing.
 - Add Model/Tool Capability Registry reads/writes for routing proposals,
@@ -987,6 +1125,12 @@ Acceptance:
 ## Open Decisions For Later
 
 - Exact local model shortlist after Ollama testing.
+- Raven first source adapter: Eporner open metadata path, ThePornDB/Stash-box
+  token path, or manual URL enrichment first.
+- Raven storage split: keep `raven_private_*` tables in the current DB for the
+  next slice or move to a dedicated Raven DB before source adapters.
+- Raven thumbnail policy for V1. Default is no thumbnails until enabled in
+  Raven Settings.
 - Exact hosted frontier lane/provider for me-level reasoning and coding.
 - Exact model/tool gateway path: LiteLLM, OpenRouter, direct provider SDKs,
   CereBro-native gateway, or a staged combination.
