@@ -1309,14 +1309,14 @@ function EvidenceDetailPanel({
   if (loading) {
     return (
       <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-        Reading evidence detail.
+        Reading receipt body.
       </aside>
     );
   }
   if (!detail) {
     return (
       <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-        Select an evidence record to inspect links, coordinates, and gates.
+        Select a receipt to inspect body, links, coordinates, and gates.
       </aside>
     );
   }
@@ -1354,7 +1354,7 @@ function EvidenceDetailPanel({
     onNavigate("security");
   }
   return (
-    <aside className="rounded p-2" aria-label="Workbench evidence detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <aside className="rounded p-2" aria-label="Workbench receipt body" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="mb-2 flex flex-wrap gap-1">
         <Chip label={`#${item.id}`} tone={C.textMuted} />
         <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
@@ -1408,8 +1408,8 @@ function EvidenceDetailPanel({
         <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
         <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
         <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
-        <Meta label="Before Evidence" value={item.beforeEvidenceId == null ? "none" : `Evidence #${item.beforeEvidenceId}`} />
-        <Meta label="After Evidence" value={item.afterEvidenceId == null ? "none" : `Evidence #${item.afterEvidenceId}`} />
+        <Meta label="Before Receipt" value={item.beforeEvidenceId == null ? "none" : `Receipt #${item.beforeEvidenceId}`} />
+        <Meta label="After Receipt" value={item.afterEvidenceId == null ? "none" : `Receipt #${item.afterEvidenceId}`} />
         <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
       </div>
       <div className="mt-2 rounded p-2" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1418,7 +1418,7 @@ function EvidenceDetailPanel({
         </h4>
         {detail.permissionPreflight == null ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No linked permission preflight record exists for this evidence yet.
+            No linked permission preflight record exists for this receipt yet.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1453,11 +1453,11 @@ function EvidenceDetailPanel({
       </div>
       <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Validation History
+          Validation Trail
         </h4>
         {detail.validationHistory.length === 0 ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No appended validation notes for this evidence yet.
+            No appended validation notes for this receipt yet.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1479,11 +1479,11 @@ function EvidenceDetailPanel({
       </div>
       <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Comparison History
+          Comparison Trail
         </h4>
         {detail.comparisonHistory.length === 0 ? (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No appended before/after comparisons include this evidence yet.
+            No appended before/after comparisons include this receipt yet.
           </div>
         ) : (
           <div className="grid gap-2">
@@ -1492,8 +1492,8 @@ function EvidenceDetailPanel({
                 <div className="flex flex-wrap gap-1">
                   <Chip label={`#${entry.id}`} tone={C.textMuted} />
                   {entry.sessionDisplayName && <Chip label={entry.sessionDisplayName} tone={C.gold} />}
-                  <Chip label={`before #${entry.beforeEvidenceId ?? "none"}`} tone={C.accent} />
-                  <Chip label={`after #${entry.afterEvidenceId ?? "none"}`} tone={C.accent} />
+                  <Chip label={`before receipt #${entry.beforeEvidenceId ?? "none"}`} tone={C.accent} />
+                  <Chip label={`after receipt #${entry.afterEvidenceId ?? "none"}`} tone={C.accent} />
                   <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
@@ -1509,15 +1509,15 @@ function EvidenceDetailPanel({
       </div>
       <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Append Before/After
+          Append Before/After Receipt
         </h4>
         <div className="grid gap-2">
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px]">
             <Input
               value={pickerQuery}
               onChange={(event) => setPickerQuery(event.target.value)}
-              aria-label="Search comparison evidence picker"
-              placeholder="Search local evidence."
+              aria-label="Search comparison receipt picker"
+              placeholder="Search local receipts."
             />
             <AppSelect
               label="Picker kind"
@@ -1536,11 +1536,11 @@ function EvidenceDetailPanel({
             />
           </div>
           <AppSelect
-            label="Compare with"
+            label="Compare with receipt"
             value={String(compareWithId)}
             onChange={(value) => setCompareWithId(value === "none" ? "none" : Number(value))}
             options={[
-              { value: "none", label: evidencePickerLoading ? "Reading local evidence" : "Compare with evidence" },
+              { value: "none", label: evidencePickerLoading ? "Reading local receipts" : "Compare with receipt" },
               ...comparisonOptions.map((option) => ({
                 value: String(option.id),
                 label: `#${option.id} ${option.kind.replace(/_/g, " ")} ${option.title}`,
@@ -1555,7 +1555,7 @@ function EvidenceDetailPanel({
           )}
           {!evidencePickerLoading && comparisonOptions.length === 0 && (
             <div className="rounded px-2 py-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No local evidence matches the picker filters.
+              No local receipts match the picker filters.
             </div>
           )}
           {(evidencePickerGates ?? []).map((gate) => (
@@ -1572,8 +1572,8 @@ function EvidenceDetailPanel({
           <Textarea
             value={comparisonSummary}
             onChange={(event) => setComparisonSummary(event.target.value)}
-            aria-label="Before/after comparison summary"
-            placeholder="What changed between these evidence records."
+            aria-label="Before/after receipt comparison summary"
+            placeholder="What changed between these receipt bodies."
           />
           <Textarea
             value={comparisonResult}
@@ -1583,7 +1583,7 @@ function EvidenceDetailPanel({
           />
           <div className="flex items-center justify-between gap-2">
             <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
-              {comparisonSavedId ? `Saved comparison #${comparisonSavedId}.` : "Creates a new local comparison record."}
+              {comparisonSavedId ? `Saved comparison receipt #${comparisonSavedId}.` : "Creates a new local comparison receipt."}
             </div>
             <Button
               type="button"
@@ -1602,7 +1602,7 @@ function EvidenceDetailPanel({
                 setComparisonSummary("");
                 setComparisonResult("");
               }}
-              aria-label="Append local before/after comparison"
+              aria-label="Append local before/after receipt comparison"
               size="sm"
             >
               {isCreatingComparison ? "Saving" : "Append"}
@@ -1612,7 +1612,7 @@ function EvidenceDetailPanel({
       </div>
       <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Append Validation Note
+          Append Validation Receipt
         </h4>
         <div className="grid gap-2">
           <AppSelect
@@ -1639,11 +1639,11 @@ function EvidenceDetailPanel({
             value={validationNote}
             onChange={(event) => setValidationNote(event.target.value)}
             aria-label="Validation note"
-            placeholder="Local validation note. This appends a new evidence record."
+            placeholder="Local validation note. This appends a new receipt."
           />
           <div className="flex items-center justify-between gap-2">
             <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
-              {validationSavedId ? `Saved note #${validationSavedId}.` : "Original evidence is not overwritten."}
+              {validationSavedId ? `Saved validation receipt #${validationSavedId}.` : "Original receipt is not overwritten."}
             </div>
             <Button
               type="button"

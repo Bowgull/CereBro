@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:01 EDT
+Last updated: 2026-05-09 12:04 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1204 EDT - Workbench Detail Receipt Language
+
+### What Changed
+
+- Updated Workbench detail panel copy to use receipt body, validation trail, comparison trail, and audit language.
+- Empty states now say receipt instead of evidence record where the user is reading a saved body.
+- Before/after labels now say before receipt and after receipt.
+- Validation append and comparison append controls now say they create local receipts.
+- This is copy alignment only. No data shape, routing behavior, or execution behavior changed.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `rg` found no remaining stale Workbench detail strings for reading evidence detail, selecting evidence record, evidence detail aria label, before/after evidence, history headings, local evidence picker, original evidence, new evidence record, or compare with evidence.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps Workbench as the receipt body owner and makes the body/audit model explicit in detail views.
+- Ledger remains the audit trail owner. Project Lab remains the push context owner. Terminal Lab remains the teaching lane.
+- Workbench remains local and append-only.
+- Manual push remains visible and separate. No hidden execution path was added.
+
+### Known Risks
+
+- This pass targeted Workbench detail copy; broader Workbench list/form labels still use some data-model evidence terms.
+- Browser visual verification still needs the Browser Use plugin when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Workbench.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Workbench detail receipt body/trail language when Browser Use is callable; if unavailable, continue by tightening Workbench list/form language from Evidence to Receipt where it is user-facing and does not rename data model APIs. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1201 EDT - Aang Receipt Language Alignment
 
