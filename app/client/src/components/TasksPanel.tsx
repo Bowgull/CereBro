@@ -145,6 +145,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           type="submit"
           size="sm"
           disabled={!title.trim() || create.isPending}
+          title={!title.trim() ? "Enter a task title before adding a local task receipt." : "Add a local task receipt to the Ledger work queue."}
+          aria-label="Add local task receipt"
         >
           Add
         </Button>
@@ -215,7 +217,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                 className="min-w-24 shrink-0"
                 variant={statusVariant(t.status)}
                 size="sm"
-                title="Click to advance status"
+                title={`Advance local task status from ${STATUS_LABEL[t.status] ?? t.status} to ${STATUS_LABEL[NEXT_STATUS[t.status]] ?? NEXT_STATUS[t.status]}.`}
+                aria-label={`Advance task ${t.title} status`}
               >
                 {STATUS_LABEL[t.status] ?? t.status}
               </Button>
@@ -252,7 +255,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                 variant="destructive"
                 size="sm"
                 aria-label={`Delete task ${t.title}`}
-                title="Delete task"
+                title="Open the hard-gate confirmation before deleting this local task receipt."
               >
                 Delete
               </Button>
@@ -279,6 +282,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             <Button
               type="button"
               onClick={() => setDeleteGate(null)}
+              title="Keep the task receipt visible."
               variant="ghost"
             >
               Cancel
@@ -293,6 +297,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                   { onSuccess: () => setDeleteGate(null) },
                 );
               }}
+              title="Permanently delete this local task receipt after confirmation."
+              aria-label="Confirm delete task receipt"
               variant="destructive"
             >
               {del.isPending ? "Deleting" : "Delete Task"}

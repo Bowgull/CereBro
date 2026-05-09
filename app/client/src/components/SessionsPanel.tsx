@@ -150,6 +150,8 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
                           type="button"
                           variant="outline"
                           size="sm"
+                          title="Edit local run ledger title and notes."
+                          aria-label={`Edit run ledger row ${s.displayName}`}
                           onClick={() => {
                             setEditingId(s.id);
                             setTitleDraft(s.title ?? "");
@@ -178,13 +180,15 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
                               className="min-h-12"
                             />
                             <div className="flex gap-1.5 justify-end">
-                              <Button type="button" variant="ghost" size="sm" onClick={() => setEditingId(null)}>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setEditingId(null)} title="Discard local run ledger edits.">
                                 Cancel
                               </Button>
                               <Button
                                 type="button"
                                 size="sm"
                                 disabled={updateLedger.isPending}
+                                title="Save local run ledger title and notes. This does not change the run transcript."
+                                aria-label={`Save run ledger edits for ${s.displayName}`}
                                 onClick={() => {
                                   updateLedger.mutate(
                                     { id: s.id, title: titleDraft, notes: notesDraft },

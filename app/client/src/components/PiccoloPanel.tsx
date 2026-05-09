@@ -97,6 +97,8 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
             size="sm"
             onClick={() => setSaveGateOpen(true)}
             disabled={!data || saveReport.isPending}
+            title={!data ? "Read the hygiene report before saving." : "Open the hard gate before writing a durable vault report."}
+            aria-label="Open Piccolo report save gate"
           >
             {saveReport.isPending ? "Saving" : "Save Report"}
           </Button>
@@ -185,10 +187,17 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
             Target: `cleanup_report` artifact owned by Piccolo. Findings: {findings.length}. Mode: {data?.mode ?? "read_only"}.
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setSaveGateOpen(false)}>
+            <Button type="button" variant="ghost" onClick={() => setSaveGateOpen(false)} title="Cancel the durable report write.">
               Cancel
             </Button>
-            <Button type="button" variant="risk" onClick={handleSaveReport} disabled={!data || saveReport.isPending}>
+            <Button
+              type="button"
+              variant="risk"
+              onClick={handleSaveReport}
+              disabled={!data || saveReport.isPending}
+              title="Write the cleanup report to the vault. This does not move, archive, or delete files."
+              aria-label="Confirm Piccolo cleanup report vault write"
+            >
               {saveReport.isPending ? "Saving" : "Save Report"}
             </Button>
           </DialogFooter>
