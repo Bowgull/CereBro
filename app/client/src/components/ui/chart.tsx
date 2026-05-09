@@ -171,7 +171,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
+        "grid min-w-[8rem] items-start gap-1.5 rounded-md border border-[#334155] bg-[#181F2A] px-2.5 py-1.5 text-[12px] text-[#F4EFE3] shadow-[0_16px_42px_rgba(0,0,0,0.42)]",
         className
       )}
     >
@@ -188,7 +188,7 @@ function ChartTooltipContent({
               <div
                 key={item.dataKey}
                 className={cn(
-                  "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
+                  "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-[#7E8898]",
                   indicator === "dot" && "items-center"
                 )}
               >
@@ -228,12 +228,12 @@ function ChartTooltipContent({
                     >
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
-                        <span className="text-muted-foreground">
+                        <span className="text-[#B8C0CC]">
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
                       {item.value && (
-                        <span className="text-foreground font-mono font-medium tabular-nums">
+                        <span className="font-mono font-medium tabular-nums text-[#F4EFE3]">
                           {item.value.toLocaleString()}
                         </span>
                       )}
@@ -285,7 +285,7 @@ function ChartLegendContent({
             <div
               key={item.value}
               className={cn(
-                "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3"
+                "flex items-center gap-1.5 text-[12px] text-[#B8C0CC] [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-[#7E8898]"
               )}
             >
               {itemConfig?.icon && !hideIcon ? (

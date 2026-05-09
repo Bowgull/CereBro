@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:51 EDT
+Last updated: 2026-05-08 23:55 EDT
 
 ## Current North Star
 
@@ -20,6 +20,51 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2355 - Front-End Build Steward: Compact Overlay Helpers
+
+### What Changed
+
+- Normalized `NavigationMenu`, `Popover`, `HoverCard`, `Pagination`,
+  `Field`, `Form`, `Label`, and chart tooltip/legend surfaces away from stock
+  shadcn theme tokens.
+- Applied CereBro dark shell surfaces, borders, compact text, focus states,
+  disabled states, and 8px max radius.
+- Preserved component APIs and behavior.
+
+### Files Touched
+
+- `app/client/src/components/ui/navigation-menu.tsx`
+- `app/client/src/components/ui/popover.tsx`
+- `app/client/src/components/ui/hover-card.tsx`
+- `app/client/src/components/ui/pagination.tsx`
+- `app/client/src/components/ui/field.tsx`
+- `app/client/src/components/ui/form.tsx`
+- `app/client/src/components/ui/label.tsx`
+- `app/client/src/components/ui/chart.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Overlay and helper primitives now inherit the same dark, compact system as
+  the active shell controls.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Visible impact depends on where these stock primitives appear in future work.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue the remaining stock primitive audit with calendar, sidebar,
+  input-group, item, kbd, breadcrumb, and command-adjacent helpers.
 
 ## 2026-05-08 2351 - Front-End Build Steward: Compact Control Primitives
 
