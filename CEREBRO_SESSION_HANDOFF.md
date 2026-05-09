@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:58 EDT
+Last updated: 2026-05-09 00:01 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0001 - Front-End Build Steward: Compact Sidebar Helpers
+
+### What Changed
+
+- Normalized `Sidebar`, `InputOTP`, `Resizable`, `ButtonGroup`, `Avatar`, and
+  `ScrollArea` away from stock shadcn theme tokens.
+- Applied CereBro dark shell surfaces, borders, compact text, focus rings,
+  disabled states, active states, and 8px max radius.
+- Ran the UI primitive stock-token scan. No remaining `bg-background`,
+  `bg-popover`, `text-muted-*`, `border-input`, `border-border`, `ring-ring`,
+  `bg-muted`, `bg-accent`, large radius, or stock shadow hits remain in
+  `app/client/src/components/ui`.
+
+### Files Touched
+
+- `app/client/src/components/ui/sidebar.tsx`
+- `app/client/src/components/ui/input-otp.tsx`
+- `app/client/src/components/ui/resizable.tsx`
+- `app/client/src/components/ui/button-group.tsx`
+- `app/client/src/components/ui/avatar.tsx`
+- `app/client/src/components/ui/scroll-area.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` failed once with
+  `SQLITE_BUSY`, then passed on rerun.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- The shared UI primitive folder is now normalized against the main CereBro
+  token and density rules, with the obvious stock theme classes removed.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- A deeper visual QA pass should still inspect real rendered sidebar and OTP
+  states once they are used in visible panels.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Move from primitives to visible shell QA. Inspect the live app panels for
+  spacing, hierarchy, focus, and empty/error states that still feel unchanged.
 
 ## 2026-05-08 2358 - Front-End Build Steward: Compact Form Helpers
 
