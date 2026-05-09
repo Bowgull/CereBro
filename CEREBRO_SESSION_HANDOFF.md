@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:45 EDT
+Last updated: 2026-05-08 23:47 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2347 - Front-End Build Steward: Compact Dormant Surfaces
+
+### What Changed
+
+- Normalized dormant `PixelOffice` away from retro neon/pixel-panel styling to
+  CereBro background, surface, border, and grid tokens.
+- Normalized dormant `ManusDialog` away from the light 20px-radius modal into
+  compact CereBro dialog density, token text colors, and token logo well.
+- Preserved existing behavior.
+
+### Files Touched
+
+- `app/client/src/components/PixelOffice.tsx`
+- `app/client/src/components/ManusDialog.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Dormant surfaces no longer reintroduce neon office styling or light modal
+  treatment if they are reused later.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Both components appear unreferenced in the current app shell.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue with visible surfaces first. If no visible outliers remain, do a
+  targeted primitive pass for stock controls that are likely to be used next.
 
 ## 2026-05-08 2345 - Front-End Build Steward: Compact Fallback Surfaces
 
