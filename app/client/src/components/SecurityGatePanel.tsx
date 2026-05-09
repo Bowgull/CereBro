@@ -110,7 +110,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
           </Button>
         </div>
 
-        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Security gate posture">
+        <div className="mt-2 grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Security gate posture">
           <Stat label="Mode" value={plan.data?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <Stat label="Owner" value={plan.data?.ownerAgent ?? "spock"} tone={C.accent} />
           <Stat label="Receipts" value={String(recent.data?.items.length ?? 0)} tone={C.gold} />
@@ -118,9 +118,9 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_380px]" aria-label="Security Gate workspace">
-        <section className="grid gap-3 content-start">
-          <form onSubmit={inspectTarget} className="rounded p-3 grid gap-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <main className="grid flex-1 gap-2 overflow-y-auto p-3 xl:grid-cols-[minmax(0,1fr)_360px]" aria-label="Security Gate workspace">
+        <section className="grid content-start gap-2">
+          <form onSubmit={inspectTarget} className="grid gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Inspect Target" detail="local string review" />
             <Input
               value={target}
@@ -128,7 +128,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               aria-label="Security target"
               placeholder="URL, GitHub repo, package, file, or site."
             />
-            <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <AppSelect
                 label="Project link"
                 value={String(projectId)}
@@ -156,10 +156,10 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 ]}
               />
             </div>
-            <div className="rounded p-2 text-[11px] leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
               Link a project or source when the target belongs to known work. Leave links empty for standalone URL triage.
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               <Button type="submit" disabled={!target.trim() || inspect.isPending} variant="secondary">
                 {inspect.isPending ? "Inspecting" : "Inspect"}
               </Button>
@@ -167,13 +167,13 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 {createReview.isPending ? "Recording" : "Record Receipt"}
               </Button>
             </div>
-            <p className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+            <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
               This creates local evidence only. Browser, clone, download, install, and execution stay gated.
             </p>
           </form>
 
           {receipt && (
-            <section className="rounded p-3 grid gap-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="grid gap-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="flex items-start justify-between gap-3">
                 <SectionTitle title="Receipt" detail={labelize(receipt.targetKind)} />
                 <Chip label={labelize(receipt.riskLevel)} tone={riskTone(receipt.riskLevel)} />
@@ -184,7 +184,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 {receiptSourceTitle && <Chip label={receiptSourceTitle} tone={C.accent} />}
                 {!receiptSourceTitle && receiptSourceUri && <Chip label={sourceDisplayName(receiptSourceUri)} tone={C.accent} />}
               </div>
-              <div className="grid gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <Meta label="Project Link" value={receiptProjectName ?? "unlinked"} />
                 <Meta
                   label="Source Link"
@@ -192,19 +192,19 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   title={receiptSourceUri ?? undefined}
                 />
               </div>
-              <div className="grid gap-2 md:grid-cols-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
                 <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
                 <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
                 <ReceiptList title="Checks" items={receipt.checks} tone={C.accent} />
               </div>
-              <div className="rounded p-2 text-xs leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 Browser profile: {receipt.browserPolicy.profile}. Downloads {receipt.browserPolicy.blockDownloads ? "blocked" : "allowed only after approval"}.
               </div>
             </section>
           )}
 
-          <section className="rounded p-3 grid gap-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="grid gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Scanner Plan" detail={`${plan.data?.scannerPlan.length ?? 0} adapters`} />
             {(plan.data?.scannerPlan ?? []).map((item) => (
               <div key={item.tool} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -212,7 +212,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   <Chip label={item.tool} tone={C.accent} />
                   <Chip label={labelize(item.status)} tone={C.textMuted} />
                 </div>
-                <p className="mt-1 text-xs leading-relaxed" style={{ color: C.textMuted }}>{item.target}</p>
+                <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
                 <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.source}>
                   Source: {sourceDisplayName(item.source)}
                 </div>
@@ -221,12 +221,12 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
           </section>
         </section>
 
-        <aside className="rounded p-3 grid gap-2 content-start" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <aside className="grid content-start gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Recent Receipts" detail="append-only" />
           {recent.isLoading ? (
-            <div className="text-xs" style={{ color: C.textMuted }}>Reading local receipts.</div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local receipts.</div>
           ) : (recent.data?.items ?? []).length === 0 ? (
-            <div className="text-xs" style={{ color: C.textMuted }}>No security receipts recorded yet.</div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>No security receipts recorded yet.</div>
           ) : (
             recent.data?.items.map((item) => (
               <article key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -237,7 +237,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                   {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={C.warning} />}
                 </div>
-                <div className="mt-1 text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={item.targetUri}>
+                <div className="mt-1 truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={item.targetUri}>
                   {sourceDisplayName(item.targetUri)}
                 </div>
                 {(item.sourceTitle || item.sourceUri) && (
@@ -250,7 +250,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
             ))
           )}
           {(plan.data?.gates ?? []).map((gate) => (
-            <div key={gate} className="rounded p-2 text-[11px] leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
               {gate}
             </div>
           ))}
@@ -280,9 +280,9 @@ function Stat({ label, value, tone }: { label: string; value: string; tone: stri
 
 function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
+    <div className="grid grid-cols-[82px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+      <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
   );
 }
@@ -321,9 +321,9 @@ function ReceiptList({ title, items, tone }: { title: string; items: string[]; t
   return (
     <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: tone }}>{title}</div>
-      <div className="grid gap-1">
+      <div className="grid gap-0.5">
         {items.slice(0, 5).map((item) => (
-          <div key={item} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>{item}</div>
+          <div key={item} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>{item}</div>
         ))}
       </div>
     </div>
