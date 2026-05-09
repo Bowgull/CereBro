@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:01 EDT
+Last updated: 2026-05-08 22:03 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2203 - Front-End Build Steward: Security Gate Link Detail
+
+### What Changed
+
+- Added explicit linked context fields to Security Gate receipt details:
+  - `Project Link`
+  - `Source Link`
+- Added a selector hint explaining when to link a project/source before
+  recording a Spock receipt.
+- Existing compact chips remain, but the receipt detail now spells out whether
+  a recorded receipt is linked or unlinked.
+
+### Files Touched
+
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Security Gate receipts now show provenance context as fields, not only as
+  badges.
+- This keeps Spock receipts readable when the target belongs to a project or
+  saved source.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue tightening receipt affordances in Terminal Lab and Approval surfaces.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2201 - Front-End Build Steward: Workbench Security Gate Link
 
@@ -8387,4 +8427,51 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from private preference rollups. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add contradiction/decay metadata to read-only rollups or create a local-only recommendation candidate draft table that stores no media and uses only Raven private preference/event metadata. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2202 EDT — Raven local recommendation candidates
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven_recommendation_candidates`.
+- Added `raven.draftRecommendationCandidates`, which creates text-only local
+  draft candidates from `raven_private_preferences`.
+- Added `raven.recommendationCandidates` for private read-only listing.
+- Added `raven.updateRecommendationCandidateStatus` for local status changes:
+  `draft`, `kept`, `passed`, `hidden`.
+- Candidate drafts store no URLs, no media paths, no fetched source content,
+  and no generated media. They store seed category, seed text, rationale,
+  confidence, linked private preference ids, and status.
+- Expanded the Raven foundation test to cover candidate draft/list/status
+  behavior and no-external-action gates.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Candidate generation is deterministic and basic. It does not yet include
+  decay, contradiction detection, or ranking beyond preference weights.
+- Candidate status changes are local metadata only.
+
+Storage impact:
+
+- Adds `raven_recommendation_candidates` to local libSQL.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from local recommendation candidates. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add contradiction and decay metadata to preference rollups and candidate drafting, using only local Raven private preference/event metadata. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```

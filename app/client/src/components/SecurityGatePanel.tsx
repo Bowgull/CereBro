@@ -156,6 +156,9 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 ]}
               />
             </div>
+            <div className="rounded p-2 text-[11px] leading-relaxed" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Link a project or source when the target belongs to known work. Leave links empty for standalone URL triage.
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={!target.trim() || inspect.isPending} variant="secondary">
                 {inspect.isPending ? "Inspecting" : "Inspect"}
@@ -180,6 +183,14 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 {receiptProjectName && <Chip label={receiptProjectName} tone={C.gold} />}
                 {receiptSourceTitle && <Chip label={receiptSourceTitle} tone={C.accent} />}
                 {!receiptSourceTitle && receiptSourceUri && <Chip label={sourceDisplayName(receiptSourceUri)} tone={C.accent} />}
+              </div>
+              <div className="grid gap-2 md:grid-cols-2">
+                <Meta label="Project Link" value={receiptProjectName ?? "unlinked"} />
+                <Meta
+                  label="Source Link"
+                  value={receiptSourceTitle ?? (receiptSourceUri ? sourceDisplayName(receiptSourceUri) : "unlinked")}
+                  title={receiptSourceUri ?? undefined}
+                />
               </div>
               <div className="grid gap-2 md:grid-cols-2">
                 <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
