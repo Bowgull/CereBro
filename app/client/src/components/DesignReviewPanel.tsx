@@ -170,7 +170,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                   <Chip label="append only" tone={C.success} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                   <Select value={targetType} onValueChange={(value) => setTargetType(value as TargetType)}>
                     <SelectTrigger aria-label="Design review target type" className="w-full">
                       <SelectValue />
@@ -200,7 +200,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                     </SelectContent>
                   </Select>
                   <Select value={String(evidenceId)} onValueChange={(value) => setEvidenceId(value === "none" ? "none" : Number(value))}>
-                    <SelectTrigger aria-label="Linked Workbench evidence" className="w-full col-span-2">
+                    <SelectTrigger aria-label="Linked Workbench evidence" className="w-full sm:col-span-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -216,7 +216,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
 
                 <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   <h4 className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Checklist</h4>
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                     {planData.checklist.map((item) => (
                       <label key={item.key} className="flex items-center gap-2 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                         <Checkbox
@@ -232,7 +232,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
 
                 <div className="mt-2 grid gap-1.5">
                   <Textarea value={proofSummary} onChange={(event) => setProofSummary(event.target.value)} aria-label="Design review proof summary" placeholder="What was checked. Name the proof or say what proof is missing." rows={3} />
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                     <Textarea value={violations} onChange={(event) => setViolations(event.target.value)} aria-label="Design review violations" placeholder="Violations, one per line. Leave blank only if none were found." rows={3} />
                     <Textarea value={nextActions} onChange={(event) => setNextActions(event.target.value)} aria-label="Design review next actions" placeholder="Next actions, one per line. Required." rows={3} />
                   </div>

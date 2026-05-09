@@ -425,7 +425,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Chip label="local db" tone={C.success} />
               </div>
 
-              <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
                 <AppSelect
                   label="Evidence kind"
                   value={kind}
@@ -582,14 +582,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   onChange={(event) => setAnnotationText(event.target.value)}
                   placeholder="Annotation note, optional."
                   aria-label="Evidence annotation text"
-                  className="col-span-2"
+                  className="sm:col-span-2"
                 />
                 <Textarea
                   value={summary}
                   onChange={(event) => setSummary(event.target.value)}
                   placeholder="What is visible, what matters, and which agent should care."
                   aria-label="Evidence summary"
-                  className="col-span-2 xl:col-span-4"
+                  className="sm:col-span-2 xl:col-span-4"
                 />
               </div>
               <div
@@ -760,13 +760,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
                 <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
               </div>
-              <div className="mb-2 grid grid-cols-2 gap-1.5 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
+              <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
                 <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
                   placeholder="Search evidence."
                   aria-label="Search Workbench evidence"
-                  className="col-span-2 xl:col-span-1"
+                  className="sm:col-span-2 xl:col-span-1"
                 />
                 <AppSelect
                   label="Filter kind"

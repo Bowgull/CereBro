@@ -254,7 +254,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <form onSubmit={submit} className="space-y-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-[145px_145px_minmax(0,1fr)_70px] gap-1.5">
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[145px_145px_minmax(0,1fr)_70px]">
           <AppSelect
             label="Artifact kind"
             value={writeKind}
@@ -286,7 +286,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
             {isWriting ? "Saving" : "Save"}
           </Button>
         </div>
-        <div className="grid grid-cols-[minmax(0,1fr)_210px] gap-1.5">
+        <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-[minmax(0,1fr)_210px]">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}

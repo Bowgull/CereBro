@@ -117,7 +117,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         <TaskStat label="Done" value={String(doneTasks)} tone={doneTasks > 0 ? C.success : C.textMuted} />
       </div>
 
-      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)_160px_64px] gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="grid grid-cols-1 gap-1.5 px-2.5 py-1.5 shrink-0 sm:grid-cols-[minmax(0,1fr)_160px_64px]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -127,7 +127,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         <Select value={sessionDraft} onValueChange={setSessionDraft}>
           <SelectTrigger
             size="sm"
-            className="w-40"
+            className="w-full"
             aria-label="Link new task to session"
           >
             <SelectValue placeholder="Run link" />

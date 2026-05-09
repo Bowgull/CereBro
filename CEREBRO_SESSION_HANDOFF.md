@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:37 EDT
+Last updated: 2026-05-09 07:43 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0743 EDT - Front-End Build Steward: Responsive Form Surfaces
+
+### What Changed
+
+- Patched active route forms after the compact primitive pass so controls stack cleanly on narrow surfaces before stepping up at `sm`, `lg`, or `xl`.
+- Updated Workbench Add Evidence and Recent Evidence filters from fixed two-column defaults to responsive grids.
+- Updated Design Review record form, checklist, and textarea pair to one-column mobile defaults with two-column desktop structure.
+- Updated Ledger task, memory proposal, and artifact writer forms so fixed-width controls no longer force cramped layouts on narrow drawers.
+- Browser DOM verified Workbench Add Evidence plus Ledger Tasks, Outputs, and Memory after reload at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed Workbench and Ledger route controls still render.
+
+### Front-End Steward Review
+
+- This pass makes compact controls feel intentional on active surfaces instead of just smaller.
+- Narrow surfaces now get a single-column form shape first, then denser multi-column structure when space exists.
+- Screenshot capture still times out, so visual proof used DOM state plus localhost health.
+
+### Known Risks
+
+- Design Review was patched from source and TypeScript because it is not exposed as a primary route button in the current shell.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Responsive Form Surfaces. Next safe slice: inspect remaining fixed grid/card surfaces in Workbench, Security Gate, Approval Dashboard, and Model Tools, then patch only active responsive-density debt. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0737 EDT - Front-End Build Steward: Form Primitive Density
 

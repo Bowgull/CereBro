@@ -163,7 +163,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={submit} className="grid grid-cols-[120px_145px_minmax(0,1fr)_140px_76px] gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="grid grid-cols-1 gap-1.5 px-2.5 py-1.5 shrink-0 sm:grid-cols-[120px_145px_minmax(0,1fr)] lg:grid-cols-[120px_145px_minmax(0,1fr)_140px_76px]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <AppSelect
           label="Memory proposal kind"
           value={kind}
@@ -192,7 +192,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           placeholder="tags, comma-sep"
-          className="w-40"
+          className="w-full"
         />
         <Button
           type="submit"
