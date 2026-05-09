@@ -127,7 +127,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-hard-gate={gate}
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-[#334155] bg-[#181F2A] p-4 text-[#F4EFE3] shadow-[0_24px_70px_rgba(0,0,0,0.48)] duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_24px_70px_rgba(0,0,0,0.58)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-3 rounded-md border border-[#334155] bg-[#181F2A] p-3 text-[#F4EFE3] shadow-[0_24px_70px_rgba(0,0,0,0.48)] duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_24px_70px_rgba(0,0,0,0.58)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:max-w-lg",
           className
         )}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -137,7 +137,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-3 right-3 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute top-2.5 right-2.5 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>
@@ -152,7 +152,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1.5 text-left", className)}
+      className={cn("flex flex-col gap-1 text-left", className)}
       {...props}
     />
   );

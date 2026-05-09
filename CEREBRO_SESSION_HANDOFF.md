@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:34 EDT
+Last updated: 2026-05-08 22:35 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2235 - Front-End Build Steward: Compact Dialog Drawer Primitives
+
+### What Changed
+
+- Tightened shared `Dialog` content density and radius.
+- Tightened shared `Drawer` top/bottom radius and header/footer padding.
+- Preserved hard-gate modal styling and existing visible focus states.
+
+### Files Touched
+
+- `app/client/src/components/ui/dialog.tsx`
+- `app/client/src/components/ui/drawer.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `pnpm check` failed on existing dirty Raven type errors in
+  `app/server/routers/raven.ts`.
+- `pnpm test -- server/cerebro-foundations.test.ts` failed on existing dirty
+  Raven work with `SQLITE_BUSY: database is locked`.
+
+### Front-End Steward Review
+
+- Dialog and drawer primitives now match the compact shell density and 8px-max
+  radius rule more closely.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree are currently blocking full
+  verification and were left untouched.
+
+### Next Front-End Slice
+
+- Do not continue widening primitive edits until the dirty Raven backend work is
+  reconciled or the frontend branch is isolated from it.
 
 ## 2026-05-08 2234 - Front-End Build Steward: Compact Card Primitive
 
