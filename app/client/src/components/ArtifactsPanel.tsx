@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -354,7 +355,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   {artifact.sourceUri && (
                     <div className="text-[10px] truncate mt-0.5" style={{ color: C.textMuted }} title={artifact.sourceUri}>
-                      Source: {artifact.sourceDisplayName ?? artifact.sourceUri}
+                      Source: {artifact.sourceDisplayName ?? sourceDisplayName(artifact.sourceUri)}
                     </div>
                   )}
                 </div>

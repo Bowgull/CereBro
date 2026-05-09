@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:10 EDT
+Last updated: 2026-05-08 22:17 EDT
 
 ## Current North Star
 
@@ -20,6 +20,41 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2217 - Front-End Build Steward: Artifact Source Label Fallback
+
+### What Changed
+
+- Updated Output Library artifact rows so source fallback labels use the shared
+  compact source label helper.
+- Full raw source URI remains available in the tooltip.
+
+### Files Touched
+
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Output Library now matches the current receipt rule: compact labels in dense
+  rows, raw evidence on hover.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue compacting remaining raw labels in Project Lab and Surfer detail
+  rows.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2210 - Front-End Build Steward: Hedwig Security Gate Link
 
