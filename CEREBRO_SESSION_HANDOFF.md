@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:47 EDT
+Last updated: 2026-05-08 23:17 EDT
 
 ## Current North Star
 
@@ -20,6 +20,47 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2317 - Front-End Build Steward: Compact Alert Empty Primitives
+
+### What Changed
+
+- Normalized `AlertDialog` to the CereBro hard-gate modal shape: dark shell,
+  amber risk border, compact padding, 8px radius, and destructive default action.
+- Tightened `Empty` primitives to compact dark shell surfaces with token colors,
+  smaller icon wells, and reduced spacing.
+- Left behavior unchanged.
+
+### Files Touched
+
+- `app/client/src/components/ui/alert-dialog.tsx`
+- `app/client/src/components/ui/empty.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `pnpm check` failed on existing dirty Raven backend type errors in
+  `app/server/routers/raven.ts`.
+- `pnpm test -- server/cerebro-foundations.test.ts` failed on existing dirty
+  Raven backend expectations around `decision_draft_note` timeline filters.
+
+### Front-End Steward Review
+
+- Alert confirmations and empty states now align with the compact CereBro shell
+  instead of stock shadcn spacing and radius.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Existing Raven/server edits in the worktree were left untouched.
+- Full repo checks are blocked until the dirty Raven backend work is reconciled.
+
+### Next Front-End Slice
+
+- Continue the primitive and visible-surface sweep only if backend dirt remains
+  isolated. `ManusDialog` and `PixelOffice` are unreferenced, so prioritize
+  referenced surfaces first.
 
 ## 2026-05-08 2247 - Front-End Build Steward: Compact Skills Manager Shell
 
