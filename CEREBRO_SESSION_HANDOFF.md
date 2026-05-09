@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:17 EDT
+Last updated: 2026-05-09 06:21 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0621 - Front-End Build Steward: Workbench Evidence Detail Density
+
+### What Changed
+
+- Browser-reviewed a selected Workbench evidence record after the queue-density
+  pass.
+- Tightened the evidence detail empty, loading, and selected states.
+- Restyled evidence metadata as compact receipt rows.
+- Reduced padding across permission preflight, validation history, comparison
+  history, and append-control blocks.
+- Kept append before/after and validation-note controls visible in the right
+  rail at wider browser width.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed selected evidence
+  detail and append controls render in the compact rail.
+
+### Front-End Steward Review
+
+- Workbench detail now behaves like an inspection rail instead of a document
+  stack. The selected record, metadata receipt, history, and append actions stay
+  closer together.
+
+### Known Risks
+
+- Workbench still needs a final route pass for mobile/detail transitions and
+  any overflow introduced by unusually long metadata values.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Browser-review Workbench end to end, then move to the next Workshop surface
+  that still reads as a document.
 
 ## 2026-05-09 0617 - Front-End Build Steward: Workbench Recent Evidence Density
 

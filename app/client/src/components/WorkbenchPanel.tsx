@@ -1117,21 +1117,21 @@ function EvidenceDetailPanel({
   const [pickerKind, setPickerKind] = useState<EvidenceKind>("all");
   if (loading) {
     return (
-      <aside className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
         Reading evidence detail.
       </aside>
     );
   }
   if (!detail) {
     return (
-      <aside className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
         Select an evidence record to inspect links, coordinates, and gates.
       </aside>
     );
   }
   if (!detail.found) {
     return (
-      <aside className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
         {detail.gates[0]}
       </aside>
     );
@@ -1163,16 +1163,16 @@ function EvidenceDetailPanel({
     onNavigate("security");
   }
   return (
-    <aside className="rounded p-3" aria-label="Workbench evidence detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="flex flex-wrap gap-1 mb-3">
+    <aside className="rounded p-2" aria-label="Workbench evidence detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="mb-2 flex flex-wrap gap-1">
         <Chip label={`#${item.id}`} tone={C.textMuted} />
         <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
         <Chip label={item.permissionClass.replace(/_/g, " ")} tone={C.gold} />
         {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
       </div>
-      <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
-      <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>{item.summary}</p>
-      <div className="mt-3 grid gap-2">
+      <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
+      <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.summary}</p>
+      <div className="mt-2 grid gap-1">
         <Meta label="Owner" value={item.ownerAgent} />
         <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
         <Meta label="Project" value={item.projectName ?? "unlinked"} />
@@ -1221,12 +1221,12 @@ function EvidenceDetailPanel({
         <Meta label="After Evidence" value={item.afterEvidenceId == null ? "none" : `Evidence #${item.afterEvidenceId}`} />
         <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
       </div>
-      <div className="mt-3 rounded p-3" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+      <div className="mt-2 rounded p-2" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Permission Preflight
         </h4>
         {detail.permissionPreflight == null ? (
-          <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No linked permission preflight record exists for this evidence yet.
           </div>
         ) : (
@@ -1245,7 +1245,7 @@ function EvidenceDetailPanel({
             )}
             <ul className="grid gap-1" style={{ color: C.textMuted }}>
               {detail.permissionPreflight.reasons.map((reason) => (
-                <li key={reason} className="text-xs leading-relaxed">
+              <li key={reason} className="text-[11px] leading-snug">
                   {reason}
                 </li>
               ))}
@@ -1253,19 +1253,19 @@ function EvidenceDetailPanel({
           </div>
         )}
       </div>
-      <div className="mt-3 grid gap-2">
+      <div className="mt-2 grid gap-1.5">
         {detail.gates.map((gate) => (
-          <div key={gate} className="rounded px-2 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+          <div key={gate} className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             {gate}
           </div>
         ))}
       </div>
-      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Validation History
         </h4>
         {detail.validationHistory.length === 0 ? (
-          <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No appended validation notes for this evidence yet.
           </div>
         ) : (
@@ -1280,18 +1280,18 @@ function EvidenceDetailPanel({
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
                 </div>
-                <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>{entry.summary}</p>
+                <p className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>{entry.summary}</p>
               </article>
             ))}
           </div>
         )}
       </div>
-      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Comparison History
         </h4>
         {detail.comparisonHistory.length === 0 ? (
-          <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No appended before/after comparisons include this evidence yet.
           </div>
         ) : (
@@ -1307,17 +1307,17 @@ function EvidenceDetailPanel({
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
                 </div>
-                <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>{entry.summary}</p>
+                <p className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>{entry.summary}</p>
                 {entry.comparisonResult && (
-                  <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textSecondary }}>{entry.comparisonResult}</p>
+                  <p className="mt-2 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{entry.comparisonResult}</p>
                 )}
               </article>
             ))}
           </div>
         )}
       </div>
-      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Append Before/After
         </h4>
         <div className="grid gap-2">
@@ -1419,8 +1419,8 @@ function EvidenceDetailPanel({
           </div>
         </div>
       </div>
-      <div className="mt-3 rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Append Validation Note
         </h4>
         <div className="grid gap-2">
@@ -1511,9 +1511,9 @@ function formatSeconds(value: number) {
 
 function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
+    <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+      <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
   );
 }
