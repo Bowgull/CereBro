@@ -21,11 +21,11 @@ export default function AangCompanionPanel({
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-2.5 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest">Aang Companion</h2>
-            <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+            <h2 className="text-[12px] font-bold uppercase tracking-widest">Aang Companion</h2>
+            <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
               Event policy and web mock path. No desktop process.
             </p>
           </div>
@@ -40,33 +40,33 @@ export default function AangCompanionPanel({
             Close
           </Button>
         </div>
-        <div role="status" aria-live="polite" className="mt-3 text-xs" style={{ color: C.textMuted }}>
+        <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
           {policy.isLoading ? "Reading companion policy." : `Local mock state: ${localState}. Local events ${localEvents.data?.activeCount ?? 0}. No notifications sent.`}
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4" aria-label="Aang Companion policy" aria-busy={policy.isLoading}>
+      <main className="flex-1 overflow-y-auto p-2" aria-label="Aang Companion policy" aria-busy={policy.isLoading}>
         {!data ? (
-          <div className="rounded p-4 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+          <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             Loading companion policy.
           </div>
         ) : (
-          <div className="grid gap-4">
-            <section className="rounded p-4" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex flex-wrap gap-2 mb-3">
+          <div className="grid gap-2">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex flex-wrap gap-1">
                 <Chip label={data.mode.replace(/_/g, " ")} tone={C.warning} />
                 <Chip label={data.startsDesktopProcess ? "desktop process" : "no desktop process"} tone={C.success} />
                 <Chip label={data.sendsNotifications ? "notifications" : "no notifications"} tone={C.success} />
                 <Chip label={data.readsScreen ? "screen access" : "no screen access"} tone={C.success} />
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                 {data.summary}
               </p>
             </section>
 
-            <section className="rounded p-4" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <h3 className="text-xs font-bold uppercase tracking-widest mb-3">Local Controls</h3>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Aang Companion local mock state">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <h3 className="mb-2 text-[11px] font-bold uppercase tracking-widest">Local Controls</h3>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Aang Companion local mock state">
                 {(["awake", "muted", "parked", "sleeping"] as LocalState[]).map((state) => (
                   <Button
                     key={state}
@@ -88,22 +88,22 @@ export default function AangCompanionPanel({
               </div>
             </section>
 
-            <section className="rounded p-4" aria-label="Live local companion event counts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex items-center justify-between gap-3 mb-3">
+            <section className="rounded p-2" aria-label="Live local companion event counts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Local Event Strip</h3>
-                  <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Local Event Strip</h3>
+                  <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
                     Read-only counts. No notification channel.
                   </p>
                 </div>
                 <Chip label={`${localEvents.data?.bubbleCount ?? 0} bubbles`} tone={C.warning} />
               </div>
               {(localEvents.data?.gates ?? []).map((gate) => (
-                <div key={gate} className="mb-2 rounded px-3 py-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <div key={gate} className="mb-1.5 rounded p-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                   {gate}
                 </div>
               ))}
-              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-1.5 md:grid-cols-2 xl:grid-cols-4">
                 {(localEvents.data?.events ?? []).map((event) => (
                   <Button
                     key={event.id}
@@ -111,7 +111,7 @@ export default function AangCompanionPanel({
                     onClick={() => onNavigate?.(event.route as CompanionRoute)}
                     aria-label={`Open ${event.route} for ${event.label}`}
                     variant="outline"
-                    className="h-auto justify-start whitespace-normal p-3 text-left"
+                    className="h-auto justify-start whitespace-normal p-2 text-left"
                     style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                   >
                     <span className="block w-full min-w-0">
@@ -119,13 +119,13 @@ export default function AangCompanionPanel({
                         <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
                         <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
                       </span>
-                      <span className="mt-2 block text-lg font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
+                      <span className="mt-1.5 block text-[13px] font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
                         {event.count}
                       </span>
-                      <span className="mt-1 block text-xs leading-snug" style={{ color: C.textMuted }}>
+                      <span className="mt-1 block text-[11px] leading-snug" style={{ color: C.textMuted }}>
                         {event.label}
                       </span>
-                      <span className="mt-2 block text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
+                      <span className="mt-1.5 block text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
                         Open {event.route}
                       </span>
                     </span>
@@ -134,37 +134,37 @@ export default function AangCompanionPanel({
               </div>
             </section>
 
-            <section className="grid gap-3 md:grid-cols-3" aria-label="Companion shell options">
+            <section className="grid gap-1.5 md:grid-cols-3" aria-label="Companion shell options">
               {data.shellOptions.map((option) => (
-                <article key={option.id} className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <article key={option.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xs font-bold uppercase tracking-widest">{option.label}</h3>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">{option.label}</h3>
                     <Chip label={option.status.replace(/_/g, " ")} tone={option.status === "recommended_first" ? C.accent : C.textMuted} />
                   </div>
-                  <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>{option.reason}</p>
+                  <p className="mt-1.5 text-[11px] leading-snug" style={{ color: C.textMuted }}>{option.reason}</p>
                 </article>
               ))}
             </section>
 
-            <section className="grid gap-3 lg:grid-cols-2" aria-label="Companion events">
-              <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-2">Allowed Local Events</h3>
-                <div className="grid gap-2">
+            <section className="grid gap-1.5 lg:grid-cols-2" aria-label="Companion events">
+              <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-widest">Allowed Local Events</h3>
+                <div className="grid gap-1.5">
                   {data.allowedEvents.map((event) => (
-                    <div key={event.id} className="rounded px-2 py-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={event.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap items-center gap-1">
                         <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
                         <Chip label={`route ${event.route}`} tone={C.gold} />
                         <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
                       </div>
-                      <div className="mt-1 text-xs" style={{ color: C.textSecondary }}>{event.label}</div>
+                      <div className="mt-1 text-[11px]" style={{ color: C.textSecondary }}>{event.label}</div>
                     </div>
                   ))}
                 </div>
               </article>
 
-              <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-2">Blocked Events</h3>
+              <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-widest">Blocked Events</h3>
                 <div className="flex flex-wrap gap-1">
                   {data.blockedEvents.map((event) => (
                     <Chip key={event} label={event} tone={C.danger} />
@@ -173,28 +173,28 @@ export default function AangCompanionPanel({
               </article>
             </section>
 
-            <section className="grid gap-3 lg:grid-cols-2" aria-label="Companion behavior">
-              <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-2">Idle States</h3>
+            <section className="grid gap-1.5 lg:grid-cols-2" aria-label="Companion behavior">
+              <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-widest">Idle States</h3>
                 <div className="flex flex-wrap gap-1">
                   {data.idleStates.map((state) => (
                     <Chip key={state.id} label={`${state.label} / ${state.motion}`} tone={C.textMuted} />
                   ))}
                 </div>
               </article>
-              <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-2">First Build Slice</h3>
+              <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-widest">First Build Slice</h3>
                 <ul className="grid gap-1" style={{ color: C.textMuted }}>
                   {data.firstBuildSlice.map((item) => (
-                    <li key={item} className="text-xs leading-relaxed">{item}</li>
+                    <li key={item} className="text-[11px] leading-snug">{item}</li>
                   ))}
                 </ul>
               </article>
             </section>
 
-            <section className="grid gap-2" aria-label="Companion gates">
+            <section className="grid gap-1.5" aria-label="Companion gates">
               {data.gates.map((gate) => (
-                <div key={gate} className="rounded px-3 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <div key={gate} className="rounded p-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                   {gate}
                 </div>
               ))}

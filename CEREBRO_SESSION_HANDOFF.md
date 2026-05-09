@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:59 EDT
+Last updated: 2026-05-09 07:02 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0702 EDT - Front-End Build Steward: Aang Companion Density
+
+### What Changed
+
+- Browser-reviewed the active Keep Aang surface after the zone header pass.
+- Tightened the Aang Companion header, policy summary, local controls, event
+  strip, event cards, shell options, allowed/blocked event lists, idle states,
+  first-build slice, and gates.
+- Reduced oversized companion cards and event counts into compact receipt blocks
+  while preserving the no-desktop-process, no-notifications, no-screen-access
+  policy posture.
+
+### Files Touched
+
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed Aang
+  Companion shows compact policy, controls, event strip, shell options, event
+  lists, behavior, and gates.
+
+### Front-End Steward Review
+
+- Aang Companion now reads as a compact policy and routing surface, not a long
+  spec page. The safety posture stays visible without eating the viewport.
+
+### Known Risks
+
+- Browser screenshot capture was avoided because recent screenshot attempts
+  timed out. This pass used DOM verification plus checks.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Keep with Capture/Hedwig, then move through Workshop surfaces by
+  current visible density debt.
 
 ## 2026-05-09 0659 EDT - Front-End Build Steward: Zone Header Density
 
