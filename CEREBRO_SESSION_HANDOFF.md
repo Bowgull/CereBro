@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:46 EDT
+Last updated: 2026-05-09 08:14 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0814 EDT - Front-End Build Steward: Shell Density Pass
+
+### What Changed
+
+- Tightened the Keep shell header spacing, mark size, action button height, and developer-tools menu width.
+- Tightened the left zone rail button padding so the global nav matches the compact surface density.
+- Converted the Aang command bar from a loose flex row to explicit responsive grid tracks.
+- Kept Attach and Preview visible as compact command actions instead of hiding core command affordances at common widths.
+- Browser DOM verified the Keep header, zone nav, command bar, Attach, Preview, and Tools menu groups at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed shell controls and menu groups still render.
+
+### Front-End Steward Review
+
+- The global shell now matches the compact primitive and route-surface passes.
+- The command bar keeps the visible action model: mode, input, security receipt, attach placeholder, and route preview.
+- Screenshot capture still times out, so visual proof used DOM state plus localhost health.
+
+### Known Risks
+
+- This pass changes layout only. It does not alter routing, session controls, command preview, or security receipts.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Shell Density Pass. Next safe slice: inspect active shell and route surfaces for any remaining primitive-normalization fallout, especially focus states, disabled states, destructive labels, and menu grouping. Patch only visible debt. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0746 EDT - Front-End Build Steward: Responsive Grid Surfaces
 

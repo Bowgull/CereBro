@@ -237,19 +237,19 @@ export default function Home() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
-        className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
+        className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 shrink-0"
         aria-label="Keep header"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <div
-            className="w-7 h-7 flex items-center justify-center rounded"
+            className="w-6 h-6 flex items-center justify-center rounded"
             style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.gold }}
           >
-            <span className="text-base leading-none">◆</span>
+            <span className="text-sm leading-none">◆</span>
           </div>
           <div>
-            <h1 className="text-[13px] font-bold uppercase tracking-widest leading-none" style={{ color: C.textPrimary }}>
+            <h1 className="text-[12px] font-bold uppercase tracking-widest leading-none" style={{ color: C.textPrimary }}>
               CereBro
             </h1>
             <p className="text-[10px] leading-none mt-0.5" style={{ color: C.textMuted }}>
@@ -260,7 +260,7 @@ export default function Home() {
 
         <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
           <div
-            className="flex min-w-0 items-center gap-2 rounded px-2 py-1"
+            className="flex min-w-0 items-center gap-1.5 rounded px-2 py-1"
             style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>
@@ -273,17 +273,17 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1 min-w-0">
           <PermissionModeControl />
 
           <div
-            className="flex items-center gap-1.5 text-xs px-2 py-1 rounded shrink-0"
+            className="flex h-7 items-center gap-1.5 rounded px-1.5 text-[11px] shrink-0"
             role="status"
             aria-label={`Connection status: ${connected ? "Online" : "Offline"}`}
             style={{ border: `1px solid ${C.borderSoft}`, background: C.surface }}
           >
             <span className="w-2 h-2 rounded-full" style={{ background: connected ? C.success : C.danger }} />
-            <span className="hidden sm:inline text-xs font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
+            <span className="hidden sm:inline text-[11px] font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
               {connected ? "Online" : "Offline"}
             </span>
           </div>
@@ -294,7 +294,7 @@ export default function Home() {
             aria-pressed={isContextPanelOpen}
             aria-expanded={isContextPanelOpen}
             aria-label={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
-            className="shrink-0"
+            className="h-7 shrink-0 px-2"
             variant={isContextPanelOpen ? "secondary" : "outline"}
             size="sm"
             style={{
@@ -309,7 +309,7 @@ export default function Home() {
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
-                className="shrink-0"
+                className="h-7 shrink-0 px-2"
                 aria-label="Open developer tools"
                 variant="outline"
                 size="sm"
@@ -317,7 +317,7 @@ export default function Home() {
                 Tools
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Session</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem onSelect={startDemo}>
@@ -371,7 +371,7 @@ export default function Home() {
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="h-auto w-full justify-start rounded-none px-2.5 py-2 text-left"
+                  className="h-auto w-full justify-start rounded-none px-2 py-1.5 text-left"
                   variant="ghost"
                   style={{
                     background: isActive ? C.surfaceRaised : "transparent",
@@ -400,7 +400,7 @@ export default function Home() {
             })}
           </div>
           <div
-            className="px-2.5 py-1.5 text-[10px] leading-snug hidden lg:block"
+            className="px-2 py-1.5 text-[10px] leading-snug hidden lg:block"
             style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface, color: C.textMuted }}
           >
             {connMode === "live" ? "Live. Watching ~/.claude/." : "Demo. Simulated sessions."}
@@ -1576,11 +1576,11 @@ function CommandBar({
         event.preventDefault();
         onSubmit();
       }}
-      className="flex items-center gap-2 px-2.5 py-1.5 shrink-0"
+      className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 px-2.5 py-1.5 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
       aria-label="Ask Aang command bar"
       style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}
     >
-      <div className="flex rounded overflow-hidden shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex h-7 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${C.borderSoft}` }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
           <Button
             key={m}
@@ -1590,7 +1590,7 @@ function CommandBar({
             aria-label={`Set command mode to ${m}`}
             variant={mode === m ? "secondary" : "ghost"}
             size="sm"
-            className="h-7 rounded-none px-2"
+            className="h-full rounded-none px-1.5 sm:px-2"
             style={{
               background: mode === m ? C.accentSoft : "transparent",
               color: mode === m ? C.textPrimary : C.textMuted,
@@ -1601,7 +1601,7 @@ function CommandBar({
         ))}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0">
         <div className="flex items-center gap-2">
           <Input
             type="text"
@@ -1625,7 +1625,7 @@ function CommandBar({
         </div>
       </div>
 
-      <div className="hidden xl:block shrink-0 w-48">
+      <div className="hidden xl:block shrink-0 w-44">
         <div className="text-[10px] uppercase tracking-wider leading-none mb-1" style={{ color: C.textMuted }}>
           Route Preview
         </div>
@@ -1669,7 +1669,7 @@ function CommandBar({
         aria-label="Attach artifact unavailable until Phase 6"
         variant="secondary"
         size="sm"
-        className="hidden h-7 shrink-0 px-2 sm:block"
+        className="h-7 shrink-0 px-2"
         style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
         title="Phase 6"
       >
@@ -1681,7 +1681,7 @@ function CommandBar({
         aria-label={isClassifying ? "Reading command intent" : "Preview command routing"}
         variant={value.trim() && !isClassifying ? "secondary" : "outline"}
         size="sm"
-        className="hidden h-7 shrink-0 px-2 md:block"
+        className="h-7 shrink-0 px-2"
         style={{
           border: `1px solid ${C.borderSoft}`,
           color: value.trim() && !isClassifying ? C.textPrimary : C.textMuted,
