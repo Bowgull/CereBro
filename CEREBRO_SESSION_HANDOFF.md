@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:09 EDT
+Last updated: 2026-05-09 06:12 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0612 - Front-End Build Steward: Workbench Surface Receipts
+
+### What Changed
+
+- Browser-reviewed Workbench after the header-density pass.
+- Changed Workbench surface cards to compact two-column receipt cards at the
+  current browser width.
+- Tightened surface owner, permission, and record-chip spacing.
+- Changed Workbench permission cards to compact two-column receipt blocks.
+- Reduced Evidence Record padding and list rhythm so the Add Evidence editor
+  starts entering the first viewport.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed surface cards now
+  render in compact pairs without overlap.
+
+### Front-End Steward Review
+
+- Workbench is beginning to read like a real work surface instead of a long
+  document. The top viewport now gives route choice, safety state, and surface
+  coverage before the editor.
+
+### Known Risks
+
+- The Add Evidence editor remains tall and still needs grouped lanes,
+  collapsible optional metadata, and stronger visual hierarchy.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Compact the Add Evidence editor by grouping required fields first and moving
+  optional links into dense rows.
 
 ## 2026-05-09 0609 - Front-End Build Steward: Workbench Header Density
 

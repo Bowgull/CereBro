@@ -365,20 +365,20 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </p>
             </section>
 
-            <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
+            <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Workbench surfaces">
               {data.surfaces.map((surface) => (
-                <article key={surface.id} className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{surface.label}</h3>
+                <article key={surface.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex items-start justify-between gap-1.5">
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest leading-snug" style={{ color: C.textPrimary }}>{surface.label}</h3>
                     <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "partially_live" ? C.accent : C.textMuted} />
                   </div>
-                  <div className="mt-2 text-[11px] uppercase tracking-wider" style={{ color: C.gold }}>
+                  <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
                     {surface.ownerAgent}
                   </div>
-                  <p className="mt-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+                  <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     {surface.permission}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-1">
+                  <div className="mt-2 flex flex-wrap gap-1">
                     {surface.records.slice(0, 5).map((record) => (
                       <Chip key={record} label={record.replace(/_/g, " ")} tone={C.textMuted} />
                     ))}
@@ -387,10 +387,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
             </section>
 
-            <section className="grid gap-2 lg:grid-cols-2" aria-label="Workbench permissions">
+            <section className="grid grid-cols-2 gap-1.5" aria-label="Workbench permissions">
               {data.permissionModel.map((item) => (
-                <article key={item.class} className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <h3 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
+                <article key={item.class} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: C.textPrimary }}>
                     {item.class.replace(/_/g, " ")}
                   </h3>
                   <List title="Allowed" tone={C.success} items={item.allowed} />
@@ -399,14 +399,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <h3 className="text-xs font-bold uppercase tracking-widest mb-2">Evidence Record</h3>
-              <div className="flex flex-wrap gap-1 mb-3">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2">Evidence Record</h3>
+              <div className="flex flex-wrap gap-1 mb-2">
                 {data.evidenceRecordShape.required.map((field) => (
                   <Chip key={field} label={field.replace(/_/g, " ")} tone={C.accent} />
                 ))}
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+              <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                 {data.evidenceRecordShape.note}
               </p>
             </section>
@@ -1555,11 +1555,11 @@ function AppSelect({
 
 function List({ title, tone, items }: { title: string; tone: string; items: string[] }) {
   return (
-    <div className="mb-3 last:mb-0">
+    <div className="mb-2 last:mb-0">
       <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: tone }}>{title}</div>
-      <ul className="grid gap-1" style={{ color: C.textMuted }}>
+      <ul className="grid gap-0.5" style={{ color: C.textMuted }}>
         {items.map((item) => (
-          <li key={item} className="text-xs leading-relaxed">
+          <li key={item} className="text-[11px] leading-snug">
             {item}
           </li>
         ))}
