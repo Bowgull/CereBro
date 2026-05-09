@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:15 EDT
+Last updated: 2026-05-09 11:24 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1124 EDT - Workbench Proof Findability
+
+### What Changed
+
+- Ledger Overview now includes a Workbench Evidence receipt card.
+- The card shows total local Workbench evidence records and the count of terminal proof records.
+- Terminal Lab now reads recent Workbench terminal-output evidence records.
+- Terminal Lab observations show an evidence chip when a saved Workbench proof exists for that command observation.
+- The Proof button becomes Open Proof for observations with saved evidence and opens Workbench with terminal evidence filters staged.
+- Workbench now reads a temporary evidence-filter handoff from session storage and applies kind, query, grouping, and a visible notice.
+- No command execution, git execution, external write, durable memory write, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this tool set, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This follows the locked path: Workbench as visual proof, Ledger as receipts, Terminal Lab as Aang's build-teaching lane.
+- Saved terminal proof now has a visible return path instead of living only in Workbench search.
+- Ledger now names evidence as a primary receipt object.
+- The flow remains manual and local.
+
+### Known Risks
+
+- Terminal Lab currently reads the latest 50 terminal-output evidence records. A dedicated lookup endpoint may be cleaner later.
+- The Workbench filter handoff is temporary browser session state, not durable history.
+- Visual browser proof still needs a plugin pass when Browser Use is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this flow.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: make Ledger evidence receipts show the newest Workbench proof rows inline, without executing commands, adding a new Code Lab surface, or writing external memory. Verify in browser DOM when available, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1115 EDT - Terminal To Workbench Proof Draft
 

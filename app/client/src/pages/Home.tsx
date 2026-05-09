@@ -924,6 +924,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const outputs = trpc.artifacts.list.useQuery({ limit: 50 });
   const memory = trpc.memory.list.useQuery({});
   const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
+  const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 50 });
 
   const taskRows = tasks.data ?? [];
   const sessionRows = sessions.data ?? [];
@@ -931,6 +932,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const outputRows = outputs.data ?? [];
   const memoryRows = memory.data ?? [];
   const proposalRows = proposals.data ?? [];
+  const evidenceRows = workbenchEvidence.data?.items ?? [];
+  const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
   const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
 
@@ -964,6 +967,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: C.gold,
     },
     {
+      label: "Evidence",
+      value: String(evidenceRows.length),
+      meta: `${terminalEvidenceCount} terminal proof records`,
+      target: "workbench" as NavId,
+      tone: C.accentViolet,
+    },
+    {
       label: "Memory",
       value: String(memoryRows.length),
       meta: `${proposalRows.length} proposed`,
@@ -991,7 +1001,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-5" aria-label="Ledger proof objects">
+        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-6" aria-label="Ledger proof objects">
           {cards.map((card) => (
             <Button
               key={card.label}

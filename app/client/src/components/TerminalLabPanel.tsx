@@ -68,6 +68,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
   const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
+  const terminalEvidence = trpc.workbench.evidence.useQuery(
+    { kind: "terminal_output", limit: 50 },
+    { refetchInterval: 10000 },
+  );
   const preview = trpc.terminalLab.previewCommand.useMutation();
   const observeOutput = trpc.terminalLab.observeOutput.useMutation();
   const linkObservation = trpc.terminalLab.linkObservation.useMutation();
@@ -86,6 +90,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
   const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
   const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
+  const evidenceByObservationId = new Map(
+    (terminalEvidence.data?.items ?? [])
+      .filter((item) => item.commandObservationId != null)
+      .map((item) => [item.commandObservationId!, item]),
+  );
   const projectRows = projectOverview.data?.projects ?? [];
   const contextPath = selectedObservation?.cwd ?? "/Users/lindsaybell/Desktop/CereBro";
   const contextProject =
@@ -306,6 +315,25 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       );
     } catch {
       // Workbench will still open; the user can add the evidence manually.
+    }
+    onNavigate("workbench");
+  }
+
+  function openWorkbenchProof(observationId: number) {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "terminal_lab",
+          kind: "terminal_output",
+          query: `terminal_lab:observation:${observationId}`,
+          groupBy: "command",
+          notice: `Showing Workbench proof for Terminal Lab observation #${observationId}.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can filter manually.
     }
     onNavigate("workbench");
   }
@@ -561,11 +589,16 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 ) : (
                   observationRows.map((item) => (
                     <div key={item.id} className="rounded p-1.5 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      {(() => {
+                        const savedEvidence = evidenceByObservationId.get(item.id);
+                        return (
+                          <>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`#${item.id}`} tone={C.textMuted} />
                         <Chip label={item.risk.replace(/_/g, " ")} tone={toneForRisk(item.risk)} />
                         <Chip label={item.suggestedAgent ?? "cortana"} tone={C.gold} />
                         <Chip label={item.status} tone={C.textSecondary} />
+                        {savedEvidence && <Chip label={`evidence #${savedEvidence.id}`} tone={C.success} />}
                         {item.diagnosticStatus && <Chip label={item.diagnosticStatus.replace(/_/g, " ")} tone={C.warning} />}
                         {item.diagnosticParentId != null && <Chip label={`from #${item.diagnosticParentId}`} tone={C.gold} />}
                         {item.diagnosticRootId != null && <Chip label={`root #${item.diagnosticRootId}`} tone={C.textSecondary} />}
@@ -758,12 +791,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           </Button>
                           <Button
                             type="button"
-                            onClick={() => stageWorkbenchProof(item)}
+                            onClick={() => savedEvidence ? openWorkbenchProof(item.id) : stageWorkbenchProof(item)}
                             disabled={!onNavigate}
                             variant="secondary"
                             size="sm"
                           >
-                            Proof
+                            {savedEvidence ? "Open Proof" : "Proof"}
                           </Button>
                           <Button
                             type="button"
@@ -776,6 +809,9 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           </Button>
                         </ActionGroup>
                       </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   ))
                 )}

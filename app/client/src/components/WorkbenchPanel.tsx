@@ -35,6 +35,13 @@ type WorkbenchDraft = {
   sessionId?: number | null;
   commandObservationId?: number | null;
 };
+type WorkbenchFilterDraft = {
+  source?: string;
+  kind?: EvidenceKind;
+  query?: string;
+  groupBy?: EvidenceGroupBy;
+  notice?: string;
+};
 
 type TemporaryMediaPreview = {
   name: string;
@@ -195,6 +202,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench proof draft. Review it, then save local evidence." : "Workbench proof draft staged. Review it, then save local evidence.");
     } catch {
       setStagedDraftNotice("Workbench draft could not be read. Add the evidence manually.");
+    }
+  }, []);
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:workbench-filter");
+      if (raw) window.sessionStorage.removeItem("cerebro:workbench-filter");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as WorkbenchFilterDraft;
+      if (draft.kind && draft.kind !== "all") setFilterKind(draft.kind);
+      if (draft.query) setFilterQuery(draft.query);
+      if (draft.groupBy) setGroupBy(draft.groupBy);
+      setStagedDraftNotice(draft.notice ?? "Workbench evidence filter staged.");
+    } catch {
+      setStagedDraftNotice("Workbench filter could not be read. Use the evidence search.");
     }
   }, []);
 
