@@ -475,55 +475,61 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       {item.diagnosticDrafts.length > 0 && (
                         <div className="space-y-1">
                           {item.diagnosticDrafts.map((draft) => (
-                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
-                                  Tony: {draft.title}
+                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                              <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
+                                      Tony: {draft.title}
+                                    </div>
+                                    <Chip label="suggested only" tone={C.warning} />
+                                  </div>
+                                  <div className="text-[11px] rounded px-2 py-1 mt-1 truncate" style={{ background: C.background, color: C.textPrimary }} title={draft.command}>
+                                    <code>{compactCommandLabel(draft.command)}</code>
+                                  </div>
+                                  <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={draft.reason}>{draft.reason}</div>
                                 </div>
-                                <Chip label="suggested only" tone={C.warning} />
+                                <div className="flex flex-wrap gap-1 lg:justify-end lg:self-start">
+                                  <Button
+                                    type="button"
+                                    onClick={() => previewTonyDraft(item.id, draft.command)}
+                                    disabled={previewDiagnosticDraft.isPending}
+                                    variant="risk"
+                                    size="sm"
+                                  >
+                                    {previewDiagnosticDraft.isPending ? "Previewing" : "Preview"}
+                                  </Button>
+                                  <CopyButton
+                                    label="Copy"
+                                    active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
+                                    fallback={copiedDraftKey === `draft-command:${item.id}:${draft.command}:fallback`}
+                                    onClick={() => copyTonyDraft(`draft-command:${item.id}:${draft.command}`, draft.command)}
+                                  />
+                                  <CopyButton
+                                    label="Approval"
+                                    active={copiedDraftKey === `draft-approval:${item.id}:${draft.command}`}
+                                    fallback={copiedDraftKey === `draft-approval:${item.id}:${draft.command}:fallback`}
+                                    onClick={() =>
+                                      copyTonyDraft(
+                                        `draft-approval:${item.id}:${draft.command}`,
+                                        approvalPromptForTonyDraft({
+                                          observationId: item.id,
+                                          title: draft.title,
+                                          command: draft.command,
+                                          reason: draft.reason,
+                                          approvalGate: draft.approvalGate,
+                                        }),
+                                      )
+                                    }
+                                  />
+                                </div>
                               </div>
-                              <div className="text-[11px] rounded px-2 py-1 mt-1 truncate" style={{ background: C.background, color: C.textPrimary }} title={draft.command}>
-                                <code>{compactCommandLabel(draft.command)}</code>
-                              </div>
-                              <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>{draft.reason}</div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-1">
+                              <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-1">
                                 <DiagnosticNote label="Evidence" value={draft.evidence} />
                                 <DiagnosticNote label="Expected" value={draft.expectedSignal} />
                               </div>
-                              <div className="text-[10px] leading-snug mt-1" style={{ color: C.warning }}>{draft.approvalGate}</div>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                <Button
-                                  type="button"
-                                  onClick={() => previewTonyDraft(item.id, draft.command)}
-                                  disabled={previewDiagnosticDraft.isPending}
-                                  variant="risk"
-                                  size="sm"
-                                >
-                                  {previewDiagnosticDraft.isPending ? "Previewing" : "Preview Via Approval Path"}
-                                </Button>
-                                <CopyButton
-                                  label="Copy"
-                                  active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
-                                  fallback={copiedDraftKey === `draft-command:${item.id}:${draft.command}:fallback`}
-                                  onClick={() => copyTonyDraft(`draft-command:${item.id}:${draft.command}`, draft.command)}
-                                />
-                                <CopyButton
-                                  label="Copy Approval"
-                                  active={copiedDraftKey === `draft-approval:${item.id}:${draft.command}`}
-                                  fallback={copiedDraftKey === `draft-approval:${item.id}:${draft.command}:fallback`}
-                                  onClick={() =>
-                                    copyTonyDraft(
-                                      `draft-approval:${item.id}:${draft.command}`,
-                                      approvalPromptForTonyDraft({
-                                        observationId: item.id,
-                                        title: draft.title,
-                                        command: draft.command,
-                                        reason: draft.reason,
-                                        approvalGate: draft.approvalGate,
-                                      }),
-                                    )
-                                  }
-                                />
+                              <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.warning }} title={draft.approvalGate}>
+                                {draft.approvalGate}
                               </div>
                             </div>
                           ))}

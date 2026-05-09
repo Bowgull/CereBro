@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:50 EDT
+Last updated: 2026-05-09 05:53 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0553 - Front-End Build Steward: Terminal Lab Diagnostic Drafts
+
+### What Changed
+
+- Browser-reviewed Terminal Lab after the observation action grouping pass.
+- Flattened Tony diagnostic draft cards so title, command, reason, and actions
+  scan as one compact row before evidence details.
+- Shortened the diagnostic action labels to Preview, Copy, and Approval.
+- Preserved evidence, expected signal, approval gate text, and proposal-only
+  behavior.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` first failed with a
+  transient `SQLITE_BUSY: database is locked` from the unrelated Raven path,
+  then passed on rerun.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Terminal Lab diagnostic drafts now read as compact proposal rows rather than
+  nested mini-pages inside each observation.
+
+### Known Risks
+
+- The right rail still needs a dedicated density pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Terminal Lab by compacting the right rail policy, output, live links,
+  and approval preview blocks.
 
 ## 2026-05-09 0550 - Front-End Build Steward: Terminal Lab Action Groups
 
