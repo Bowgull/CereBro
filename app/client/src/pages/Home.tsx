@@ -970,7 +970,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: C.gold,
     },
     {
-      label: "Evidence",
+      label: "Receipts",
       value: String(evidenceRows.length),
       meta: `${terminalEvidenceCount} terminal proof records`,
       target: "workbench" as NavId,
@@ -1072,10 +1072,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           ))}
         </section>
 
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench evidence receipts">
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench receipts">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Latest Evidence
+              Latest Workbench Receipts
             </div>
             <Button
               type="button"
@@ -1088,11 +1088,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
           {workbenchEvidence.isLoading ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Reading local evidence receipts.
+              Reading local Workbench receipts.
             </div>
           ) : latestEvidenceRows.length === 0 ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No Workbench evidence receipts yet.
+              No Workbench receipts yet.
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
@@ -1103,7 +1103,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   onClick={() => setSelectedEvidenceId(item.id)}
                   variant="secondary"
                   className="h-auto justify-start rounded p-2 text-left"
-                  aria-label={`Preview Workbench evidence receipt ${item.id}`}
+                  aria-label={`Preview Workbench receipt ${item.id}`}
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                 >
                   <span className="block w-full min-w-0">
@@ -1149,7 +1149,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   variant="outline"
                   size="sm"
                 >
-                  Open Receipt
+                  Open Workbench Body
                 </Button>
                 <Button
                   type="button"
@@ -1159,6 +1159,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 >
                   Project Push Context
                 </Button>
+              </div>
+              <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                Receipt path: Workbench holds the body. Ledger holds the audit trail. Project Lab reads push context.
               </div>
               <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div className="min-w-0">
@@ -1172,7 +1175,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 <div className="grid gap-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                   <span>Project: {selectedEvidence.projectName ?? "unlinked"}</span>
                   <span>Route: {selectedEvidence.routeAgent ?? "unrouted"}</span>
-                  <span>Status: {selectedEvidence.validationStatus.replace(/_/g, " ")}</span>
+                  <span>Validation: {selectedEvidence.validationStatus.replace(/_/g, " ")}</span>
                   <span>Target: {selectedEvidence.targetUri ?? "none"}</span>
                 </div>
               </div>

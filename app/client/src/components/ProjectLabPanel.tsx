@@ -1722,7 +1722,7 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
     <div className="mt-2 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="flex flex-wrap items-center gap-1">
         <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
-          Workbench Proof
+          Workbench Receipts
         </span>
         <Badge variant={stats.total > 0 ? "default" : "secondary"} className="uppercase">{stats.total} receipts</Badge>
         <Badge variant={stats.terminal > 0 ? "warning" : "secondary"} className="uppercase">{stats.terminal} terminal</Badge>
@@ -1730,7 +1730,7 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
         <Badge variant={stats.validated > 0 ? "success" : "secondary"} className="uppercase">{stats.validated} validated</Badge>
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Project map signal only. Open Workbench or Ledger for the receipt body.
+        Project map signal only. Workbench has the body. Ledger has the audit trail.
       </div>
     </div>
   );
@@ -1751,7 +1751,7 @@ function PushDecisionNote({
       return {
         label: "hold",
         tone: C.warning,
-        text: `${stats.needsReview} Workbench receipt${stats.needsReview === 1 ? "" : "s"} need review. Check Workbench or Ledger before commit.`,
+        text: `${stats.needsReview} Workbench receipt${stats.needsReview === 1 ? "" : "s"} need review. Check the Workbench body and Ledger audit trail before commit.`,
       };
     }
     if (stats.total === 0) {

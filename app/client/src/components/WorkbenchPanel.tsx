@@ -499,20 +499,20 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             <section className="rounded p-2" aria-label="Project proof grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Proof</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Receipts</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Local receipt grouping. Use this before push decisions.
+                    Local proof state before push decisions.
                   </p>
                 </div>
                 <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
               </div>
               {projectProofEvidence.isLoading ? (
                 <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  Reading local proof records.
+                  Reading local receipt records.
                 </div>
               ) : projectProofGroups.length === 0 ? (
                 <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  No project proof exists yet.
+                  No project receipts exist yet.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2 xl:grid-cols-3">
@@ -528,7 +528,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         setFilterQuery("");
                         setGroupBy("project");
                       }}
-                      aria-label={`Open Workbench proof for ${group.label}`}
+                      aria-label={`Open Workbench receipts for ${group.label}`}
                       style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                     >
                       <span className="block w-full">

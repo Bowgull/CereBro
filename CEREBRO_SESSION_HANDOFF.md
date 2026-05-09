@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:51 EDT
+Last updated: 2026-05-09 11:53 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1153 EDT - Receipt Language Alignment
+
+### What Changed
+
+- Aligned receipt language across Ledger, Workbench, and Project Lab.
+- Ledger now labels the evidence block as Latest Workbench Receipts.
+- Ledger's selected receipt preview now names the path: Workbench body, Ledger audit trail, Project Lab push context.
+- Project Lab now says Workbench Receipts instead of Workbench Proof.
+- Workbench's project grouping now says Project Receipts while preserving proof-state meaning.
+- This is copy and navigation-language alignment only. No data shape or execution behavior changed.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps the proof loop legible: Workbench owns receipt bodies, Ledger owns audit trail, Project Lab owns push context.
+- It supports the future push-to-GitHub UI by giving the user the same nouns across surfaces.
+- Manual push remains visible and separate. No hidden execution path was added.
+- Terminal Lab remains the code/build teaching lane. No new Code Lab surface was added.
+
+### Known Risks
+
+- The terminology is now more consistent, but visual verification still needs the Browser Use plugin when callable.
+- Some older surfaces may still use generic "evidence" where the data model name is exposed.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this UI language pass.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Ledger, Workbench, and Project Lab receipt language when Browser Use is callable; if unavailable, continue by tightening the read-only path between Terminal Lab command observations and Ledger receipts without executing commands. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1151 EDT - Ledger To Project Push Context
 
