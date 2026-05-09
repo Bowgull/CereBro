@@ -1091,16 +1091,16 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   ];
 
   return (
-    <div className="h-full overflow-y-auto p-3" style={{ background: C.background }} aria-label="Basement overview">
-      <div className="grid gap-3">
-        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="flex items-start justify-between gap-3">
+    <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Basement overview">
+      <div className="grid gap-2">
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              <h2 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                 Basement Overview
               </h2>
-              <p className="text-[11px] leading-relaxed mt-1 max-w-2xl" style={{ color: C.textMuted }}>
-                Machine configuration lives here. Providers, bridge state, model/tool proposals, storage hygiene, permissions, and automation stay out of the daily Keep until needed.
+              <p className="text-[10px] leading-snug mt-1 max-w-2xl" style={{ color: C.textMuted }}>
+                Machine configuration. Providers, models, storage, security, and automation stay below the Keep until needed.
               </p>
             </div>
             <Badge variant="warning" className="px-2 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -1118,7 +1118,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               aria-label={`Open ${card.label}`}
               title={card.meta}
               variant="outline"
-              className="h-auto justify-start whitespace-normal p-2.5 text-left"
+              className="h-auto justify-start whitespace-normal p-2 text-left"
               style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
             >
               <span className="block w-full min-w-0">
@@ -1130,7 +1130,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     {card.value}
                   </span>
                 </span>
-                <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                <span className="block text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
                   {card.meta}
                 </span>
               </span>
@@ -1138,11 +1138,11 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           ))}
         </section>
 
-        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
             Configuration Rules
           </div>
-          <div className="grid gap-2 mt-2 md:grid-cols-3">
+          <div className="grid gap-1.5 mt-1.5 md:grid-cols-3">
             <LedgerRule title="Secrets" body="Tokens, keys, and account grants need explicit approval." tone={C.danger} />
             <LedgerRule title="Models" body="Capability proposals do not call providers by themselves." tone={C.accent} />
             <LedgerRule title="Automation" body="Watchers report first. Writes and cleanup stay gated." tone={C.gold} />

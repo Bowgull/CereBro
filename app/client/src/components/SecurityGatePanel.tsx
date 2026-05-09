@@ -97,20 +97,21 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-[13px] font-bold uppercase tracking-widest">Security Gate</h2>
-            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Spock receipt for links, repos, packages, files, and browser targets. No browsing or execution.
-            </p>
+      <header className="shrink-0 px-2 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h2 className="text-[12px] font-bold uppercase tracking-wider">Security Gate</h2>
+              <Badge variant="warning" className="uppercase">No browsing</Badge>
+              <Badge variant="secondary" className="uppercase">No execution</Badge>
+            </div>
           </div>
           <Button type="button" onClick={onClose} aria-label="Close Security Gate" variant="outline" size="sm">
             Close
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Security gate posture">
+        <div className="mt-1.5 grid grid-cols-2 gap-1 xl:grid-cols-4" aria-label="Security gate posture">
           <Stat label="Mode" value={plan.data?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <Stat label="Owner" value={plan.data?.ownerAgent ?? "spock"} tone={C.accent} />
           <Stat label="Receipts" value={String(recent.data?.items.length ?? 0)} tone={C.gold} />
@@ -118,9 +119,9 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
         </div>
       </header>
 
-      <main className="grid flex-1 gap-2 overflow-y-auto p-3 xl:grid-cols-[minmax(0,1fr)_360px]" aria-label="Security Gate workspace">
+      <main className="grid flex-1 gap-2 overflow-y-auto p-2 xl:grid-cols-[minmax(0,1fr)_340px]" aria-label="Security Gate workspace">
         <section className="grid content-start gap-2">
-          <form onSubmit={inspectTarget} className="grid gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <form onSubmit={inspectTarget} className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Inspect Target" detail="local string review" />
             <Input
               value={target}
@@ -156,8 +157,8 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 ]}
               />
             </div>
-            <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-              Link a project or source when the target belongs to known work. Leave links empty for standalone URL triage.
+            <div className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Link known work when available. Standalone targets can remain unlinked.
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Button type="submit" disabled={!target.trim() || inspect.isPending} variant="secondary">
@@ -167,14 +168,14 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 {createReview.isPending ? "Recording" : "Record Receipt"}
               </Button>
             </div>
-            <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+            <p className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
               This creates local evidence only. Browser, clone, download, install, and execution stay gated.
             </p>
           </form>
 
           {receipt && (
-            <section className="grid gap-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex items-start justify-between gap-3">
+            <section className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex items-start justify-between gap-2">
                 <SectionTitle title="Receipt" detail={labelize(receipt.targetKind)} />
                 <Chip label={labelize(receipt.riskLevel)} tone={riskTone(receipt.riskLevel)} />
               </div>
@@ -198,21 +199,21 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
                 <ReceiptList title="Checks" items={receipt.checks} tone={C.accent} />
               </div>
-              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 Browser profile: {receipt.browserPolicy.profile}. Downloads {receipt.browserPolicy.blockDownloads ? "blocked" : "allowed only after approval"}.
               </div>
             </section>
           )}
 
-          <section className="grid gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Scanner Plan" detail={`${plan.data?.scannerPlan.length ?? 0} adapters`} />
             {(plan.data?.scannerPlan ?? []).map((item) => (
-              <div key={item.tool} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div key={item.tool} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-1">
                   <Chip label={item.tool} tone={C.accent} />
                   <Chip label={labelize(item.status)} tone={C.textMuted} />
                 </div>
-                <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
+                <p className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
                 <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.source}>
                   Source: {sourceDisplayName(item.source)}
                 </div>
@@ -221,7 +222,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
           </section>
         </section>
 
-        <aside className="grid content-start gap-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <aside className="grid content-start gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Recent Receipts" detail="append-only" />
           {recent.isLoading ? (
             <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local receipts.</div>
@@ -229,7 +230,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
             <div className="text-[11px]" style={{ color: C.textMuted }}>No security receipts recorded yet.</div>
           ) : (
             recent.data?.items.map((item) => (
-              <article key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <article key={item.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-1">
                   <Chip label={`#${item.id}`} tone={C.textMuted} />
                   <Chip label={labelize(item.targetKind)} tone={C.accent} />
@@ -245,12 +246,12 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                     Source: {item.sourceTitle ?? sourceDisplayName(item.sourceUri ?? "")}
                   </div>
                 )}
-                <div className="mt-1 text-[11px]" style={{ color: C.textMuted }}>{formatTime(item.createdAt)}</div>
+                <div className="mt-1 text-[10px]" style={{ color: C.textMuted }}>{formatTime(item.createdAt)}</div>
               </article>
             ))
           )}
           {(plan.data?.gates ?? []).map((gate) => (
-            <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div key={gate} className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
               {gate}
             </div>
           ))}
@@ -262,8 +263,8 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
 
 function SectionTitle({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</h3>
+    <div className="flex items-center justify-between gap-2">
+      <h3 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>{title}</h3>
       <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{detail}</span>
     </div>
   );
@@ -271,16 +272,16 @@ function SectionTitle({ title, detail }: { title: string; detail: string }) {
 
 function Stat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
-      <div className="mt-0.5 text-xs font-semibold truncate" style={{ color: tone }} title={value}>{value}</div>
+      <div className="mt-0.5 text-[11px] font-semibold truncate" style={{ color: tone }} title={value}>{value}</div>
     </div>
   );
 }
 
 function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div className="grid grid-cols-[82px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+    <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-1.5 text-[10px] leading-snug">
       <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
       <div className="break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
@@ -299,7 +300,7 @@ function AppSelect({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="grid gap-1 text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+    <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
       {label}
       <UiSelect value={value} onValueChange={onChange} aria-label={label}>
         <SelectTrigger className="w-full normal-case">
@@ -319,11 +320,11 @@ function AppSelect({
 
 function ReceiptList({ title, items, tone }: { title: string; items: string[]; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: tone }}>{title}</div>
+    <div className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: tone }}>{title}</div>
       <div className="grid gap-0.5">
         {items.slice(0, 5).map((item) => (
-          <div key={item} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>{item}</div>
+          <div key={item} className="text-[10px] leading-snug" style={{ color: C.textMuted }}>{item}</div>
         ))}
       </div>
     </div>

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:20 EDT
+Last updated: 2026-05-09 07:24 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0724 EDT - Front-End Build Steward: Basement Security Density
+
+### What Changed
+
+- Browser-reviewed the active Basement overview and Security Gate surfaces.
+- Tightened the Basement overview into a compact machine-configuration map.
+- Compressed Security Gate header receipts, posture stats, target form, receipt body, scanner plan, recent receipt rail, and gate list.
+- Kept Spock security behavior unchanged. No browsing, clone, download, install, execution, or external scan was added.
+- Confirmed `localhost:3002` is healthy after a transient curl miss. A temporary auto-bumped dev server on `3003` was stopped.
+
+### Files Touched
+
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK` after one transient connection miss.
+- In-app browser DOM review confirmed Basement overview and Security Gate compact receipt shape.
+
+### Front-End Steward Review
+
+- Security Gate now matches the compact Basement machine-control language.
+- The no-browse/no-execute stance is visible at the top of the surface.
+- Screenshot capture remains unstable in the in-app browser, so visual proof used DOM shape plus localhost health.
+
+### Known Risks
+
+- This was a density-only pass. It does not record security receipts or run scanners.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No security receipt was recorded during this slice.
+- No browser-source intake, Notion, Slack, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Basement Security Density. Next safe slice: inspect Basement Automation and UI System surfaces for remaining density, hard-gate shape, and primitive debt. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0720 EDT - Front-End Build Steward: Project Lab Density
 
