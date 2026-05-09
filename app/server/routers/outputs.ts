@@ -8,6 +8,7 @@ import {
   type OutputRow,
 } from "../cerebroDb";
 import { writeOutput as vaultWriteOutput } from "../integrations/vault";
+import { sessionDisplayName } from "./sessions";
 
 const KINDS = ["text", "code", "file", "diff", "tool_result"] as const;
 
@@ -20,9 +21,20 @@ function artifactKindForOutput(kind: string, ext: string): string {
 }
 
 function rowToOutput(r: Record<string, unknown>): OutputRow {
+  const sessionId = r.session_id == null ? null : Number(r.session_id);
   return {
     id: Number(r.id),
-    sessionId: r.session_id == null ? null : Number(r.session_id),
+    sessionId,
+    sessionDisplayName:
+      sessionId == null
+        ? null
+        : sessionDisplayName({
+            id: sessionId,
+            title: r.session_title == null ? null : String(r.session_title),
+            projectName: r.session_project_name == null ? null : String(r.session_project_name),
+            heroClass: r.session_hero_class == null ? null : String(r.session_hero_class),
+            endedAt: r.session_ended_at == null ? null : Number(r.session_ended_at),
+          }),
     projectId: r.project_id == null ? null : Number(r.project_id),
     kind: String(r.kind) as OutputKind,
     title: r.title == null ? null : String(r.title),
@@ -48,21 +60,35 @@ export const outputsRouter = router({
       const where: string[] = [];
       const args: (string | number)[] = [];
       if (input?.sessionId !== undefined) {
-        where.push("session_id = ?");
+        where.push("o.session_id = ?");
         args.push(input.sessionId);
       }
       if (input?.projectId !== undefined) {
-        where.push("project_id = ?");
+        where.push("o.project_id = ?");
         args.push(input.projectId);
       }
       const limit = input?.limit ?? 100;
       args.push(limit);
       const result = await db.execute({
         sql: `
-          SELECT id, session_id, project_id, kind, title, body, tool_name, created_at
-          FROM outputs
+          SELECT
+            o.id,
+            o.session_id,
+            o.project_id,
+            o.kind,
+            o.title,
+            o.body,
+            o.tool_name,
+            o.created_at,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            p.name AS session_project_name
+          FROM outputs o
+          LEFT JOIN sessions s ON s.id = o.session_id
+          LEFT JOIN projects p ON p.id = s.project_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-          ORDER BY created_at DESC
+          ORDER BY o.created_at DESC
           LIMIT ?
         `,
         args,

@@ -3,7 +3,9 @@ import fs from "fs/promises";
 import { promisify } from "util";
 import { z } from "zod";
 import { getCerebroDb } from "../cerebroDb";
+import { sourceDisplayName } from "../displayLabels";
 import { publicProcedure, router } from "../_core/trpc";
+import { sessionDisplayName } from "./sessions";
 
 const execFileAsync = promisify(execFile);
 
@@ -153,8 +155,20 @@ function parseStatus(status: string | null) {
 }
 
 function rowToTaskSummary(r: Record<string, unknown>) {
+  const sessionId = r.session_id == null ? null : Number(r.session_id);
   return {
     id: Number(r.id),
+    sessionId,
+    sessionDisplayName:
+      sessionId == null
+        ? null
+        : sessionDisplayName({
+            id: sessionId,
+            title: r.session_title == null ? null : String(r.session_title),
+            projectName: r.session_project_name == null ? null : String(r.session_project_name),
+            heroClass: r.session_hero_class == null ? null : String(r.session_hero_class),
+            endedAt: r.session_ended_at == null ? null : Number(r.session_ended_at),
+          }),
     title: String(r.title),
     status: String(r.status),
     agent: r.agent == null ? null : String(r.agent),
@@ -192,17 +206,29 @@ async function taskRollupForPath(pathValue: string) {
     }),
     db.execute({
       sql: `
-        SELECT id, title, status, agent, updated_at
-        FROM tasks
-        WHERE project_id = ?
+        SELECT
+          t.id,
+          t.session_id,
+          t.title,
+          t.status,
+          t.agent,
+          t.updated_at,
+          s.hero_class AS session_hero_class,
+          s.title AS session_title,
+          s.ended_at AS session_ended_at,
+          p.name AS session_project_name
+        FROM tasks t
+        LEFT JOIN sessions s ON s.id = t.session_id
+        LEFT JOIN projects p ON p.id = s.project_id
+        WHERE t.project_id = ?
         ORDER BY
-          CASE status
+          CASE t.status
             WHEN 'in_progress' THEN 0
             WHEN 'open' THEN 1
             WHEN 'done' THEN 2
             WHEN 'cancelled' THEN 3
           END,
-          updated_at DESC
+          t.updated_at DESC
         LIMIT 5
       `,
       args: [projectId],
@@ -517,6 +543,8 @@ async function sourceEventRollupForProject(projectId: number | null) {
         id: number;
         eventType: string;
         title: string | null;
+        sourceDisplayName: string | null;
+        uri: string | null;
         trustLevel: string | null;
         sensitive: boolean;
         createdAt: number;
@@ -554,7 +582,7 @@ async function sourceEventRollupForProject(projectId: number | null) {
     }),
     db.execute({
       sql: `
-        SELECT id, event_type, title, trust_level, sensitive_data_flag, created_at
+        SELECT id, event_type, title, uri, trust_level, sensitive_data_flag, created_at
         FROM source_events
         WHERE project_id = ?
         ORDER BY created_at DESC, id DESC
@@ -573,6 +601,8 @@ async function sourceEventRollupForProject(projectId: number | null) {
       id: Number(row.id),
       eventType: String(row.event_type),
       title: row.title == null ? null : String(row.title),
+      uri: row.uri == null ? null : String(row.uri),
+      sourceDisplayName: row.uri == null ? null : sourceDisplayName(String(row.uri)),
       trustLevel: row.trust_level == null ? null : String(row.trust_level),
       sensitive: Boolean(row.sensitive_data_flag),
       createdAt: Number(row.created_at),
@@ -938,7 +968,7 @@ async function projectDetailForSlug(slug: string) {
     }),
     db.execute({
       sql: `
-        SELECT id, event_type, title, trust_level, sensitive_data_flag, created_at
+        SELECT id, event_type, title, uri, trust_level, sensitive_data_flag, created_at
         FROM source_events
         WHERE project_id = ?
         ORDER BY created_at DESC, id DESC
@@ -974,6 +1004,8 @@ async function projectDetailForSlug(slug: string) {
       id: Number(row.id),
       eventType: String(row.event_type),
       title: row.title == null ? null : String(row.title),
+      uri: row.uri == null ? null : String(row.uri),
+      sourceDisplayName: row.uri == null ? null : sourceDisplayName(String(row.uri)),
       trustLevel: row.trust_level == null ? null : String(row.trust_level),
       sensitive: Boolean(row.sensitive_data_flag),
       createdAt: Number(row.created_at),

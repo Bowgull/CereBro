@@ -1,5 +1,12 @@
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const LABELS: Record<string, string> = {
   default_permissions: "Default permissions",
@@ -32,26 +39,33 @@ export default function PermissionModeControl() {
       <span className="hidden md:inline text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>
         Mode
       </span>
-      <select
+      <Select
         value={mode}
         disabled={isPending}
-        onChange={(event) => {
+        onValueChange={(value) => {
           setMode.mutate({
-            mode: event.target.value as "default_permissions" | "auto_review" | "full_access",
+            mode: value as "default_permissions" | "auto_review" | "full_access",
             reason: "Changed from the Keep header mode selector.",
             requestedByAgent: "cortana",
           });
         }}
-        aria-label="Set global permission mode"
-        className="max-w-[150px] bg-transparent text-xs font-semibold outline-none"
-        style={{ color: isPending ? C.textMuted : C.textPrimary }}
       >
-        {Object.entries(LABELS).map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger
+          aria-label="Set global permission mode"
+          size="sm"
+          className="h-7 max-w-[170px] border-0 bg-transparent px-1"
+          style={{ color: isPending ? C.textMuted : C.textPrimary }}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(LABELS).map(([value, label]) => (
+            <SelectItem key={value} value={value}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <span className="sr-only" role="status" aria-live="polite">
         {isPending ? "Recording local permission mode." : `Current permission mode: ${LABELS[mode] ?? mode}. Hard gates still require approval.`}
       </span>

@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
@@ -36,6 +47,7 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
   const data = plan.data;
   const selectedTask = tasks.data?.find((task) => String(task.id) === selectedTaskId);
   const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
+  const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -179,96 +191,80 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full flex flex-col" style={{ background: C.background }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-center justify-between px-3 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             Terminal Lab
           </div>
-          <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>
+          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
             Proposal-only command explanation and approval gates. No shell execution.
           </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} variant="outline" size="sm" className="shrink-0">
           Close
-        </button>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
         <StatusBlock label="Owner" value={data?.ownerAgent ?? "tony"} tone={C.accent} />
         <StatusBlock label="Support" value={(data?.supportAgents ?? ["aang"]).join(", ")} tone={C.gold} />
         <StatusBlock label="Execution" value="disabled" tone={C.warning} />
       </div>
 
-      <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <input
+          <Input
             value={command}
             onChange={(event) => setCommand(event.target.value)}
             placeholder="Paste a command to explain before running it elsewhere."
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <button
+          <Button
             type="submit"
             disabled={!command.trim() || preview.isPending}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-            style={{
-              background: command.trim() && !preview.isPending ? C.accentSoft : C.surfaceMuted,
-              color: command.trim() && !preview.isPending ? C.textPrimary : C.textMuted,
-              border: `1px solid ${C.borderSoft}`,
-            }}
           >
             {preview.isPending ? "Reading" : "Preview"}
-          </button>
+          </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <label className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Task Link</div>
-            <select
-              value={selectedTaskId}
-              onChange={(event) => setSelectedTaskId(event.target.value)}
-              className="w-full px-2 py-1.5 text-xs rounded outline-none"
-              style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
-            >
-              <option value="">No task link</option>
-              {(tasks.data ?? []).map((task) => (
-                <option key={task.id} value={task.id}>
-                  #{task.id} {task.projectName ? `${task.projectName}: ` : ""}{task.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Session Link</div>
-            <select
-              value={selectedSessionId}
-              onChange={(event) => setSelectedSessionId(event.target.value)}
-              className="w-full px-2 py-1.5 text-xs rounded outline-none"
-              style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
-            >
-              <option value="">No session link</option>
-              {(sessions.data ?? []).map((session) => (
-                <option key={session.id} value={session.id}>
-                  #{session.id} {session.projectName ?? "Unknown"} {session.endedAt == null ? "active" : "ended"}
-                </option>
-              ))}
-            </select>
-          </label>
+          <AppSelect
+            label="Task Link"
+            value={selectedTaskId || "none"}
+            onChange={(value) => setSelectedTaskId(value === "none" ? "" : value)}
+            options={[
+              { value: "none", label: "No task link" },
+              ...(tasks.data ?? []).map((task) => ({
+                value: String(task.id),
+                label: `#${task.id} ${task.projectName ? `${task.projectName}: ` : ""}${task.title}`,
+              })),
+            ]}
+          />
+          <AppSelect
+            label="Session Link"
+            value={selectedSessionId || "none"}
+            onChange={(value) => setSelectedSessionId(value === "none" ? "" : value)}
+            options={[
+              { value: "none", label: "No session link" },
+              ...(sessions.data ?? []).map((session) => ({
+                value: String(session.id),
+                label: session.displayName,
+              })),
+            ]}
+          />
         </div>
         <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
           This panel classifies intent only. Commands still run through Codex with the normal approval path.
           {(selectedTask || selectedSession) && (
-            <span> New previews will attach to {selectedTask ? `task #${selectedTask.id}` : ""}{selectedTask && selectedSession ? " and " : ""}{selectedSession ? `session #${selectedSession.id}` : ""}.</span>
+            <span> New previews will attach to {selectedTask ? `task #${selectedTask.id}` : ""}{selectedTask && selectedSession ? " and " : ""}{selectedSession ? selectedSession.displayName : ""}.</span>
           )}
         </div>
       </form>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-3 p-4">
-          <div className="space-y-3 min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-2.5 p-3">
+          <div className="space-y-2.5 min-w-0">
             {preview.data && (
               <section className="space-y-2">
                 <SectionTitle title="Command Preview" detail={preview.data.risk.replace(/_/g, " ")} />
@@ -412,7 +408,9 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
                         {item.diagnosticRootId != null && <Chip label={`root #${item.diagnosticRootId}`} tone={C.textSecondary} />}
                         {item.diagnosticDepth != null && <Chip label={`depth ${item.diagnosticDepth}`} tone={C.textMuted} />}
                         {item.taskId != null && <Chip label={`task #${item.taskId}`} tone={C.accent} />}
-                        {item.sessionId != null && <Chip label={`session #${item.sessionId}`} tone={C.accent} />}
+                        {item.sessionId != null && (
+                          <Chip label={sessionLabelById.get(item.sessionId) ?? `Run #${item.sessionId}`} tone={C.accent} />
+                        )}
                         {item.exitCode != null && <Chip label={`exit ${item.exitCode}`} tone={item.exitCode === 0 ? C.success : C.warning} />}
                       </div>
                       <div
@@ -472,19 +470,15 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
                               </div>
                               <div className="text-[10px] leading-snug mt-1" style={{ color: C.warning }}>{draft.approvalGate}</div>
                               <div className="flex flex-wrap gap-1 mt-2">
-                                <button
+                                <Button
                                   type="button"
                                   onClick={() => previewTonyDraft(item.id, draft.command)}
                                   disabled={previewDiagnosticDraft.isPending}
-                                  className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                                  style={{
-                                    background: previewDiagnosticDraft.isPending ? C.background : C.surface,
-                                    color: previewDiagnosticDraft.isPending ? C.textMuted : C.gold,
-                                    border: `1px solid ${C.borderSoft}`,
-                                  }}
+                                  variant="risk"
+                                  size="sm"
                                 >
                                   {previewDiagnosticDraft.isPending ? "Previewing" : "Preview Via Approval Path"}
-                                </button>
+                                </Button>
                                 <CopyButton
                                   label="Copy"
                                   active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
@@ -514,109 +508,77 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
                         </div>
                       )}
                       <div className="flex flex-wrap gap-1">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setSelectedObservationId(item.id)}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: selectedObservationId === item.id ? C.accentSoft : C.surfaceMuted,
-                            color: selectedObservationId === item.id ? C.textPrimary : C.textMuted,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant={selectedObservationId === item.id ? "secondary" : "ghost"}
+                          size="sm"
                         >
                           Attach Output
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => setObservationStatus(item.id, "reviewing")}
                           disabled={updateObservationStatus.isPending || item.status === "reviewing"}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: item.status === "reviewing" ? C.accentSoft : C.surfaceMuted,
-                            color: item.status === "reviewing" ? C.textMuted : C.textSecondary,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant={item.status === "reviewing" ? "secondary" : "ghost"}
+                          size="sm"
                         >
                           Review
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => setObservationStatus(item.id, "blocked")}
                           disabled={updateObservationStatus.isPending || item.status === "blocked"}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: item.status === "blocked" ? C.accentSoft : C.surfaceMuted,
-                            color: item.status === "blocked" ? C.textMuted : C.warning,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="risk"
+                          size="sm"
                         >
                           Block
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => stageCommandApprovalPreview(item.id)}
                           disabled={createApprovalPreview.isPending}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: C.surfaceMuted,
-                            color: C.gold,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="risk"
+                          size="sm"
                         >
                           Approval Preview
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => attachSelectedLinks(item.id)}
                           disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: selectedTaskId || selectedSessionId ? C.surfaceMuted : C.background,
-                            color: selectedTaskId || selectedSessionId ? C.textSecondary : C.textMuted,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="secondary"
+                          size="sm"
                         >
                           Link Selected
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => createFollowUpTask(item.id)}
                           disabled={createTaskFromObservation.isPending || item.taskId != null}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: item.taskId == null ? C.surfaceMuted : C.background,
-                            color: item.taskId == null ? C.gold : C.textMuted,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="secondary"
+                          size="sm"
                         >
                           Create Task
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => createLearningNote(item.id)}
                           disabled={createLearningProposal.isPending}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: C.surfaceMuted,
-                            color: C.success,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="secondary"
+                          size="sm"
                         >
                           Stage Learning Note
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={() => setObservationStatus(item.id, "archived")}
                           disabled={updateObservationStatus.isPending || item.status === "archived"}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: item.status === "archived" ? C.background : C.surfaceMuted,
-                            color: item.status === "archived" ? C.textMuted : C.textSecondary,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="ghost"
+                          size="sm"
                         >
                           Archive
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))
@@ -625,7 +587,7 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
             </section>
           </div>
 
-          <aside className="space-y-3 min-w-0">
+          <aside className="space-y-2.5 min-w-0">
             <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Policy" detail="locked" />
               <div className="mt-2 space-y-1">
@@ -637,34 +599,24 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
 
             <form onSubmit={submitOutput} className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Observed Output" detail={selectedObservationId == null ? "select row" : `#${selectedObservationId}`} />
-              <textarea
+              <Textarea
                 value={outputText}
                 onChange={(event) => setOutputText(event.target.value)}
                 placeholder="Paste output from a command that was run through the normal approved path."
                 rows={5}
-                className="w-full px-2 py-1.5 text-xs rounded outline-none resize-none"
-                style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
               />
               <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-2">
-                <input
+                <Input
                   value={exitCode}
                   onChange={(event) => setExitCode(event.target.value)}
                   placeholder="0"
-                  className="px-2 py-1.5 text-xs rounded outline-none"
-                  style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
                 />
-                <button
+                <Button
                   type="submit"
                   disabled={selectedObservationId == null || !outputText.trim() || observeOutput.isPending}
-                  className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-                  style={{
-                    background: selectedObservationId != null && outputText.trim() && !observeOutput.isPending ? C.accentSoft : C.surfaceMuted,
-                    color: selectedObservationId != null && outputText.trim() && !observeOutput.isPending ? C.textPrimary : C.textMuted,
-                    border: `1px solid ${C.borderSoft}`,
-                  }}
                 >
                   {observeOutput.isPending ? "Saving" : "Save Summary"}
-                </button>
+                </Button>
               </div>
               <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
                 This saves a redacted local summary only. It does not execute commands or write outside the harness DB.
@@ -727,20 +679,59 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
 function SectionTitle({ title, detail }: { title: string; detail: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>{detail}</div>
     </div>
   );
 }
 
 function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
   return (
-    <span
-      className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"
-      style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
-    >
+    <Badge variant={variant} className="uppercase">
       {label}
-    </span>
+    </Badge>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly { value: string; label: string }[];
+}) {
+  return (
+    <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+      {label}
+      <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+        <SelectTrigger className="w-full normal-case">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </UiSelect>
+    </label>
   );
 }
 
@@ -756,18 +747,14 @@ function CopyButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-      style={{
-        background: active || fallback ? C.accentSoft : C.surface,
-        color: active ? C.success : fallback ? C.warning : C.textSecondary,
-        border: `1px solid ${C.borderSoft}`,
-      }}
+      variant={active ? "secondary" : fallback ? "risk" : "outline"}
+      size="sm"
     >
       {active ? "Copied" : fallback ? "Loaded" : label}
-    </button>
+    </Button>
   );
 }
 
@@ -792,19 +779,15 @@ function ScopeButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider"
-      style={{
-        color: disabled ? C.textMuted : active ? C.textPrimary : C.textSecondary,
-        background: active ? C.accentSoft : C.surfaceMuted,
-        border: `1px solid ${C.borderSoft}`,
-      }}
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
     >
       {label}
-    </button>
+    </Button>
   );
 }
 

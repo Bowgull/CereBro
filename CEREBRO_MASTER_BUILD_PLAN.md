@@ -43,6 +43,34 @@ Core defaults:
 - The current UI/UX direction is too jumbled and too generic-SaaS. Do not add
   more primary surfaces until the Keep-first UX spine is redesigned and
   approved.
+- Root `DESIGN.md` is now active. UI work must read it before touching code,
+  assets, motion, or product copy. It binds the castle spec, Keep-first layout,
+  workbench proof surfaces, voice rules, and anti-slop checks into one
+  agent-readable source.
+- The active Keep composition canon lives in the Obsidian note
+  `20_Knowledge/Playbooks/CereBro Keep Composition Spec.md`. Read it before
+  changing Keep layout, PixelLab room prompts, pathing, zoom behavior, council
+  staging, time/weather ambience, room props, or agent animation states.
+- External design, document, and agent projects are reference material, not
+  default dependencies. Impeccable, Awesome DESIGN.md, UI UX Pro Max,
+  Uncodixfy, Google Stitch, v0.app, React Bits, Huashu Design, Ruflo, Docling,
+  Addy Osmani Agent Skills, AIDLC, Archon, Hermes, Multica, GenericAgent,
+  LobeHub, local-deep-research, ppt-master, Pixelle-Video, VoxCPM, Maigret,
+  CloakBrowser, Awesome Codex Skills, and AirLLM are tracked in
+  `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`. Use their patterns through
+  CereBro-native rules and the license matrix.
+- Uncodixfy is a standing UI judgment rule. Stitch is a high-fidelity sketch
+  lane. v0 is a disposable React/Tailwind component sketch lane. None of them
+  outrank `DESIGN.md`, the castle spec, the active renderer, real data, or
+  screenshot proof.
+- Public GitHub does not equal automatic clearance. Every repo needs license,
+  security, maintenance, install-surface, storage, privacy, and product-fit
+  review before copying code, installing, running scripts, running Docker,
+  starting daemons, downloading weights, or authenticating services.
+- Material UI work must run an anti-slop pass before delivery. The pass checks
+  for generic AI UI, fake premium gradients, nested cards, placeholder assets
+  presented as final, missing proof, unclear agent routing, broken voice, and
+  motion without function.
 - Aang is the human bridge. The user speaks to Aang first. Aang interprets the
   request and reports to Cortana. Cortana routes the agent layer. The UI must
   show that chain instead of making the user speak directly to the router.
@@ -58,6 +86,28 @@ Core defaults:
 - Reddit is a first-class V1 source lane for human signal, trend sensing,
   niche research, media references, and lived reports. Treat it as evidence
   with provenance, not as truth and not as model-training data.
+- Agent Reach is now a non-negotiable source-access reference for Raven,
+  Surfer, and future agents. Use its channel registry, upstream-tool handoff,
+  and doctor/watch health-check pattern as source architecture input. Do not
+  install or configure it yet. Cookie extraction, proxies, browser automation,
+  downloads, MCP servers, and upstream tools require Spock receipt and explicit
+  approval per channel.
+- Docling is a first-class candidate for document source intake. Use it as the
+  preferred local path for PDFs, DOCX, PPTX, XLSX, HTML, images, scanned pages,
+  transcripts, tables, formulas, figures, layout, and reading-order extraction
+  once the adapter is built. Docling output must carry source path, checksum,
+  parser version, extraction settings, page or coordinate evidence when
+  available, and Oak validation status.
+- local-deep-research is the companion candidate for local-first research once
+  Docling and Source Library receipts are ready.
+- ppt-master is an editable-PPTX candidate. Compare it against the current
+  presentation plugin before changing deck generation.
+- Pixelle-Video and VoxCPM are future media adapters, not V1 defaults. Video
+  and voice model downloads require storage, license, safety, and consent
+  receipts.
+- Maigret is restricted to self-audit or narrow user-approved public-source
+  research. CloakBrowser is restricted to study of browser isolation ideas, not
+  stealth automation or bot bypass.
 - Cleanliness is a first-class product requirement: every workspace, message,
   image, video, code artifact, source, note, and temp file needs an owner,
   destination, metadata trail, retention rule, and cleanup path.
@@ -78,6 +128,23 @@ Core defaults:
   `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`.
 - Freelance work is a mode inside the broader command center, not the foundation.
 - Surfer can research only with approval.
+- Spock is now the security gate. Surfer scouts, but Spock checks risky links,
+  GitHub repos, packages, downloads, browser targets, phishing risk, ad-heavy
+  sites, and execution requests before Surfer browses deeply or Tony runs code.
+- Security receipts are required before pasted GitHub repos can move from
+  metadata review into clone, install, build, or execution. Repo stars are weak
+  signal. Spock checks ownership, age, recent commits, workflows, package
+  scripts, lockfiles, binaries, known vulnerabilities, malicious package
+  heuristics, secrets, and suspicious network or credential behaviour.
+- Browser safety is a V1 operating layer, not a side feature. Anime and
+  streaming sites, fake download pages, popup-heavy sites, and ad-network
+  pages open only in an isolated browser profile after approval. Popups,
+  notifications, downloads, camera, mic, geolocation, credential entry, and
+  third-party cookies are blocked by default for risky targets.
+- Security scanners are tools, not truth. The planned Spock stack is OpenSSF
+  Scorecard, OSV-Scanner, Datadog GuardDog, Gitleaks, zizmor, Semgrep,
+  phishing and malware host feeds, and later YARA/ClamAV-style file triage.
+  Scanner versions should be pinned and scanner execution should stay isolated.
 - External model calls require approval.
 - CereBro should become a model/tool opportunist, not a one-provider assistant.
   It should learn which hosted models, local models, free-tier tools, and
@@ -451,6 +518,12 @@ Do:
 - PixelLab is the external production tool for Keep UI, sprites, chamber props,
   and agent assets. The deck may show PixelLab-produced target assets, but it
   should not frame PixelLab as CereBro's in-app creative studio.
+- Keep room generation must start from the whole fortress composition, not
+  isolated pretty rooms. The first layout is a wide 2-floor fortress with
+  Cortana central, Aang near the entry, Gojo in an elevated gallery wing,
+  sealed future wings for the other agents, visible doors, stairs, walking
+  lanes, click-to-zoom camera focus, and local time/weather visible through
+  every window and gap.
 - The first teaching moment is: start in the Keep, ask, capture, route, and
   watch the agents work.
 - The deck should show one full day in CereBro: morning orientation, capture,
@@ -492,6 +565,11 @@ Acceptance:
 Do:
 
 - Build saved-source ingestion first: URLs, notes, files, GitHub references, pasted research.
+- Add a Docling-backed document intake lane for approved local files:
+  PDFs, DOCX, PPTX, XLSX, HTML, images, scanned pages, transcripts, tables,
+  formulas, figures, and reading order. Store parser receipts with source path,
+  checksum, parser version, extraction settings, page or coordinate evidence,
+  export format, and Oak validation status.
 - Add a local repo-digest lane based on Gitingest or a CereBro-native adapter:
   path/URL in, structured digest out, token/size counts, ignored-file summary,
   commit SHA when available, provenance, and vault/source-library storage.
@@ -530,6 +608,11 @@ Do:
 - Add search abstraction with simple SQLite/local search first.
 - Keep Meilisearch as later upgrade.
 - Surfer handles approved external research only.
+- Surfer's long-term source-access layer should be Agent-Reach-shaped:
+  public page, search, GitHub, RSS, YouTube, Reddit, X/Twitter, and other
+  channels register as capabilities with health checks, risk class, credential
+  needs, and approval requirements. Agent Reach is a source of patterns, not a
+  bypass around CereBro gates.
 
 Acceptance:
 

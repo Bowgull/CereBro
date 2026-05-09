@@ -951,11 +951,11 @@ export const terminalLabRouter = router({
       const db = await getCerebroDb();
       const task = await db.execute({
         sql: `
-          INSERT INTO tasks (project_id, title, agent)
-          VALUES (?, ?, ?)
-          RETURNING id, project_id, title, status, agent, created_at, updated_at
+          INSERT INTO tasks (project_id, session_id, title, agent)
+          VALUES (?, ?, ?, ?)
+          RETURNING id, project_id, session_id, title, status, agent, created_at, updated_at
         `,
-        args: [observation.projectId, `Follow up terminal observation: ${titleBase}`, agent],
+        args: [observation.projectId, observation.sessionId, `Follow up terminal observation: ${titleBase}`, agent],
       });
       const taskId = Number(task.rows[0]!.id);
       await db.execute({
@@ -975,6 +975,7 @@ export const terminalLabRouter = router({
         task: {
           id: taskId,
           projectId: observation.projectId,
+          sessionId: observation.sessionId,
           title: String(task.rows[0]!.title),
           status: String(task.rows[0]!.status),
           agent: task.rows[0]!.agent == null ? null : String(task.rows[0]!.agent),

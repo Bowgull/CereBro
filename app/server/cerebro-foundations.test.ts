@@ -11,7 +11,7 @@ import {
   writeObsidianNote,
   writeVaultTextArtifact,
 } from "./integrations/vault";
-import { getCerebroDb } from "./cerebroDb";
+import { getCerebroDb, recordOutput } from "./cerebroDb";
 import { getSkillById, listSkillFiles } from "./skillLoader";
 
 describe("CereBro agent routing metadata", () => {
@@ -27,6 +27,9 @@ describe("CereBro agent routing metadata", () => {
     expect(getAgentById("oak")?.toolScope).toContain("validate_output");
     expect(getAgentById("spock")?.role).toContain("Logic checker");
     expect(getAgentById("spock")?.toolScope).toContain("bloat_check");
+    expect(getAgentById("spock")?.role).toContain("security gate");
+    expect(getAgentById("spock")?.toolScope).toContain("security_gate");
+    expect(getAgentById("spock")?.toolScope).toContain("security_scan");
   });
 
   it("binds Aang to a real learning skill file", () => {
@@ -66,6 +69,126 @@ describe("CereBro skill files", () => {
 });
 
 describe("CereBro proposal-only shell plans", () => {
+  it("keeps Raven behind the sealed private module boundary", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const initial = await caller.raven.status();
+    expect(initial.mode).toBe("sealed_private_module");
+    expect(initial.writesCoreMemory).toBe(false);
+    expect(initial.writesExternal).toBe(false);
+    expect(initial.opensBrowser).toBe(false);
+
+    const rejected = await caller.raven.requestUnlock({ phrase: "open raven" });
+    expect(rejected.ok).toBe(false);
+    expect(rejected.status).toBe("sealed");
+
+    const requested = await caller.raven.requestUnlock({ phrase: "execute order 66" });
+    expect(requested.ok).toBe(true);
+    expect(requested.status).toBe("confirmation_required");
+    expect(requested.message).toBe("Please confirm.");
+
+    const unlocked = await caller.raven.confirmUnlock({
+      phrase: "I swear I’m up to no good.",
+      privacyScope: "Vitest Raven boundary check.",
+    });
+    expect(unlocked.ok).toBe(true);
+    expect(unlocked.status).toBe("unlocked");
+    expect(unlocked.boundary.writesCoreMemory).toBe(false);
+    expect(unlocked.boundary.writesExternal).toBe(false);
+
+    const event = await caller.raven.addPrivateEvent({
+      ravenSessionId: unlocked.session.id,
+      eventType: "taste_note",
+      title: "Boundary note",
+      body: "Private Raven event. Not core memory.",
+      metadata: { testRun: true },
+    });
+    expect(event.ok).toBe(true);
+    expect(event.writesCoreMemory).toBe(false);
+    expect(event.event.privacyClass).toBe("raven_private");
+
+    const recent = await caller.raven.recentEvents({
+      ravenSessionId: unlocked.session.id,
+      limit: 5,
+    });
+    expect(recent.mode).toBe("private_read");
+    expect(recent.items.map((item) => item.id)).toContain(event.event.id);
+
+    const locked = await caller.raven.lock({
+      ravenSessionId: unlocked.session.id,
+      phrase: "we’re done here",
+    });
+    expect(locked.ok).toBe(true);
+    expect(locked.status).toBe("sealed");
+  });
+
+  it("routes risky web and repo targets through Spock before Surfer or Tony act", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const plan = await caller.securityGate.plan();
+    expect(plan.mode).toBe("proposal_only");
+    expect(plan.ownerAgent).toBe("spock");
+    expect(plan.routeChain.join(" ")).toContain("Spock gates");
+    expect(plan.protectedSurfaces).toContain("GitHub repos.");
+    expect(plan.browserBaseline.popupBlocking).toBe(true);
+
+    const repo = await caller.securityGate.inspectTarget({
+      target: "https://github.com/DataDog/guarddog",
+    });
+    expect(repo.opensBrowser).toBe(false);
+    expect(repo.clonesRepo).toBe(false);
+    expect(repo.executesCommand).toBe(false);
+    expect(repo.receipt.targetKind).toBe("github_repo");
+    expect(repo.receipt.riskLevel).toBe("medium");
+    expect(repo.receipt.blockedActions.join(" ")).toContain("No npm install");
+    expect(repo.receipt.checks.join(" ")).toContain("Run Scorecard");
+
+    const animeSite = await caller.securityGate.inspectTarget({
+      target: "https://watch-anime-example.test/free-download-login",
+    });
+    expect(animeSite.receipt.targetKind).toBe("browser_site");
+    expect(animeSite.receipt.riskLevel).toBe("high");
+    expect(animeSite.receipt.browserPolicy.popupBlocking).toBe(true);
+    expect(animeSite.receipt.browserPolicy.blockCredentialEntry).toBe(true);
+    expect(animeSite.receipt.allowedActions.join(" ")).toContain("isolated browser profile");
+
+    const review = await caller.securityGate.createReview({
+      target: "https://watch-anime-example.test/free-download-login",
+    });
+    expect(review.ok).toBe(true);
+    expect(review.appendOnly).toBe(true);
+    expect(review.opensBrowser).toBe(false);
+    expect(review.downloadsFile).toBe(false);
+    expect(review.executesCommand).toBe(false);
+    expect(review.permissionPreflightId).toBeGreaterThan(0);
+    expect(review.review?.ownerAgent).toBe("spock");
+    expect(review.review?.riskLevel).toBe("high");
+    expect(review.gates.join(" ")).toContain("did not open a browser");
+
+    const recent = await caller.securityGate.recent({ limit: 5 });
+    expect(recent.mode).toBe("read_only");
+    expect(recent.appendOnly).toBe(true);
+    expect(recent.items.map((item) => item.id)).toContain(review.review?.id);
+
+    const intake = await caller.commandIntake.preview({
+      text: "is this github repo safe or malware",
+      mode: "quick",
+    });
+    expect(intake.category).toBe("security_review");
+    expect(intake.projectMode).toBe("QA");
+    expect(intake.agents).toContain("spock");
+    expect(intake.agents).toContain("surfer");
+    expect(intake.permissionGates.join(" ")).toContain("Spock security receipt");
+  });
+
   it("defines the modular workbench without opening tools or writing externally", async () => {
     const caller = appRouter.createCaller({
       user: null,
@@ -315,6 +438,68 @@ describe("CereBro proposal-only shell plans", () => {
     expect(events.events.map((event) => event.id)).toContain("pending_approval");
     expect(events.events.map((event) => event.id)).toContain("workbench_evidence");
     expect(events.gates.join(" ")).toContain("do not notify");
+  });
+
+  it("records local design review state without opening tools", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const plan = await caller.designReview.plan();
+    expect(plan.mode).toBe("proposal_only");
+    expect(plan.writesExternal).toBe(false);
+    expect(plan.opensBrowser).toBe(false);
+    expect(plan.capturesMedia).toBe(false);
+    expect(plan.executesCommand).toBe(false);
+    expect(plan.sourceFiles).toContain("DESIGN.md");
+    expect(plan.routeChain[0]).toContain("Aang");
+    expect(plan.checklist.map((item) => item.key)).toContain("generic_ui_checked");
+
+    const review = await caller.designReview.create({
+      targetType: "workbench",
+      targetLabel: "Workbench evidence detail",
+      status: "ready_for_patch",
+      checklist: ["design_md_loaded", "generic_ui_checked", "proof_visible"],
+      violations: ["Proof is present but Gojo review is not visible in the app yet."],
+      nextActions: ["Expose Design Review as a first-class panel."],
+      proofSummary: "Read DESIGN.md and recorded the review as local state only.",
+    });
+    expect(review.ok).toBe(true);
+    expect(review.appendOnly).toBe(true);
+    expect(review.writesExternal).toBe(false);
+    expect(review.opensBrowser).toBe(false);
+    expect(review.capturesMedia).toBe(false);
+    expect(review.executesCommand).toBe(false);
+    expect(review.review.routeChain).toContain("Aang reads mode");
+    expect(review.review.checklistScore).toBe("3/10");
+    expect(review.permissionPreflightId).toBeGreaterThan(0);
+
+    const reviews = await caller.designReview.list({ limit: 10 });
+    expect(reviews.mode).toBe("read_only");
+    expect(reviews.writesExternal).toBe(false);
+    expect(reviews.items.map((item) => item.id)).toContain(review.review.id);
+  });
+
+  it("shows Aang to Cortana routing and design protocol in intake preview", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const preview = await caller.commandIntake.preview({
+      text: "Use the new DESIGN.md rules to fix the generic CereBro Workbench UI.",
+      mode: "build",
+    });
+    expect(preview.mode).toBe("proposal_only");
+    expect(preview.category).toBe("project_design");
+    expect(preview.routeChain[0]).toBe("Aang reads mode");
+    expect(preview.routeChain[1]).toBe("Cortana routes");
+    expect(preview.designProtocol?.required).toBe(true);
+    expect(preview.designProtocol?.checklist.join(" ")).toContain("DESIGN.md");
+    expect(preview.agents).toContain("gojo");
   });
 });
 
@@ -698,6 +883,60 @@ describe("Terminal Lab planning", () => {
       projectName: "CereBro",
       projectPath: "/Users/lindsaybell/Desktop/CereBro",
     });
+    const db = await getCerebroDb();
+    const sessionClaudeId = `test-terminal-${Date.now()}`;
+    const session = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, hero_class)
+        VALUES (?, ?, ?)
+        RETURNING id
+      `,
+      args: [sessionClaudeId, task.projectId, "tony"],
+    });
+    const sessionId = Number(session.rows[0]!.id);
+    const sessionLinkedTask = await caller.tasks.create({
+      title: "Task from linked run",
+      agent: "aang",
+      sessionId,
+    });
+    expect(sessionLinkedTask.sessionId).toBe(sessionId);
+    expect(sessionLinkedTask.projectId).toBe(task.projectId);
+    expect(sessionLinkedTask.sessionDisplayName).toContain(`Active Tony run #${sessionId}`);
+    const sessionRows = await caller.sessions.list({ limit: 20 });
+    expect(sessionRows.find((row) => row.id === sessionId)?.displayName).toContain(`Active Tony run #${sessionId}`);
+    const renamedRun = await caller.sessions.updateLedger({
+      id: sessionId,
+      title: "Terminal QA run",
+      notes: "Local run note for task receipts.",
+    });
+    expect(renamedRun.ok).toBe(true);
+    expect(renamedRun.session?.displayName).toBe("Terminal QA run");
+    expect(renamedRun.session?.notes).toBe("Local run note for task receipts.");
+    const titledTask = await caller.tasks.create({
+      title: "Task from titled run",
+      sessionId,
+    });
+    expect(titledTask.sessionDisplayName).toBe("Terminal QA run");
+    await recordOutput({
+      claudeSessionId: sessionClaudeId,
+      kind: "text",
+      title: "Linked output",
+      body: "This output keeps the titled run receipt.",
+      toolName: null,
+    });
+    const outputs = await caller.outputs.list({ sessionId, limit: 10 });
+    expect(outputs.find((output) => output.title === "Linked output")?.sessionDisplayName).toBe("Terminal QA run");
+    const linkedArtifact = await caller.artifacts.recordExternal({
+      kind: "qa_report",
+      title: "Linked QA artifact",
+      storageProvider: "local",
+      storagePath: "test:linked-qa-artifact",
+      sessionId,
+      approved: true,
+    });
+    expect(linkedArtifact.ok).toBe(true);
+    const linkedArtifacts = await caller.artifacts.list({ sessionId, limit: 10 });
+    expect(linkedArtifacts.find((artifact) => artifact.title === "Linked QA artifact")?.sessionDisplayName).toBe("Terminal QA run");
 
     const readOnly = await caller.terminalLab.previewCommand({
       command: "rg -n Terminal CEREBRO_MASTER_BUILD_PLAN.md",
@@ -745,6 +984,7 @@ describe("Terminal Lab planning", () => {
     const failedPreview = await caller.terminalLab.previewCommand({
       command: "rg -n MissingThing missing-file.md",
       cwd: "/Users/lindsaybell/Desktop/CereBro",
+      sessionId,
     });
     await caller.terminalLab.observeOutput({
       observationId: failedPreview.observationId,
@@ -864,6 +1104,7 @@ describe("Terminal Lab planning", () => {
     if (followUpTask.ok) {
       expect(followUpTask.task.title).toContain("Follow up terminal observation:");
       expect(followUpTask.task.agent).toBe("tony");
+      expect(followUpTask.task.sessionId).toBe(sessionId);
       expect(followUpTask.observation?.taskId).toBe(followUpTask.task.id);
       expect(followUpTask.observation?.projectId).toBe(followUpTask.task.projectId);
     }
@@ -879,6 +1120,23 @@ describe("Terminal Lab planning", () => {
 
     const proposals = await caller.memory.proposals({ limit: 5 });
     expect(proposals.map((item) => item.id)).toContain(learningProposal.proposal?.id);
+    expect(proposals.find((item) => item.id === learningProposal.proposal?.id)?.sessionDisplayName).toBe("Terminal QA run");
+    await caller.memory.setProposalOakStatus({
+      id: learningProposal.proposal?.id ?? -1,
+      oakStatus: "validated",
+      oakNotes: "Validated for run receipt test.",
+    });
+    const approvedMemory = await caller.memory.approveProposal({
+      id: learningProposal.proposal?.id ?? -1,
+      approvalReason: "Local test approval.",
+    });
+    expect(approvedMemory.sessionDisplayName).toBe("Terminal QA run");
+    const memoryRows = await caller.memory.list({ limit: 10 });
+    expect(memoryRows.find((item) => item.id === approvedMemory.memoryEntryId)?.sessionDisplayName).toBe("Terminal QA run");
+    const filteredMemoryRows = await caller.memory.list({ sessionId, limit: 10 });
+    expect(filteredMemoryRows.map((item) => item.id)).toContain(approvedMemory.memoryEntryId);
+    const filteredProposals = await caller.memory.proposals({ sessionId, limit: 10 });
+    expect(filteredProposals.map((item) => item.id)).toContain(learningProposal.proposal?.id);
 
     const modulePreview = await caller.terminalLab.previewCommand({
       command: "pnpm test",

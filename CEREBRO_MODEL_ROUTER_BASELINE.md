@@ -77,7 +77,9 @@ Current storage support:
 
 Policy baseline:
 
-- Local-first, not local-only.
+- Cloud-backed, local-controlled.
+- Local models are optional helper lanes, not the long-term storage strategy.
+- The Mac is the workbench, not the warehouse.
 - Local models handle summaries, formatting, tagging, learning drafts, source
   cards, and light reasoning.
 - Free/generous hosted model and tool tiers are useful lanes for everyday work,

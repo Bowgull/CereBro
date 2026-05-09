@@ -1056,11 +1056,11 @@ export const hedwigRouter = router({
       const db = await getCerebroDb();
       const task = await db.execute({
         sql: `
-          INSERT INTO tasks (project_id, title, agent)
-          VALUES (?, ?, ?)
-          RETURNING id, project_id, title, status, agent, created_at, updated_at
+          INSERT INTO tasks (project_id, session_id, title, agent)
+          VALUES (?, ?, ?, ?)
+          RETURNING id, project_id, session_id, title, status, agent, created_at, updated_at
         `,
-        args: [projectId, triage.taskDraft.title, triage.taskDraft.agent],
+        args: [projectId, capture.sessionId, triage.taskDraft.title, triage.taskDraft.agent],
       });
       const taskId = Number(task.rows[0]!.id);
       await db.execute({
@@ -1082,6 +1082,7 @@ export const hedwigRouter = router({
         task: {
           id: taskId,
           projectId,
+          sessionId: capture.sessionId,
           title: String(task.rows[0]!.title),
           status: String(task.rows[0]!.status),
           agent: task.rows[0]!.agent == null ? null : String(task.rows[0]!.agent),

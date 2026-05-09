@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
   const [text, setText] = useState("");
@@ -250,9 +263,9 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
             Proposal-only Slack and Notion capture schema. No external writes.
           </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} aria-label="Close Hedwig Capture Inbox" variant="outline" size="sm" className="shrink-0">
           Close
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -264,32 +277,22 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
 
       <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px_auto] gap-2">
-          <input
+          <Input
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="Paste a thought, link, reminder, Reddit post, article, or save-for-later item."
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <input
+          <Input
             value={sourceLabel}
             onChange={(event) => setSourceLabel(event.target.value)}
             placeholder="Source label"
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <button
+          <Button
             type="submit"
             disabled={!text.trim() || preview.isPending}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-            style={{
-              background: text.trim() && !preview.isPending ? C.accentSoft : C.surfaceMuted,
-              color: text.trim() && !preview.isPending ? C.textPrimary : C.textMuted,
-              border: `1px solid ${C.borderSoft}`,
-            }}
           >
             {preview.isPending ? "Reading" : "Preview"}
-          </button>
+          </Button>
         </div>
         <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
           Preview classifies the capture and shows the proposed Notion row. It does not save to Notion, read Slack, post Slack, or create tasks.
@@ -351,33 +354,28 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                       <div className="text-[11px] leading-snug line-clamp-2" style={{ color: C.textMuted }} title={item.rawText}>
                         {item.rawText}
                       </div>
-                      <button
+                      {item.sourceUri && (
+                        <div className="text-[10px] truncate" style={{ color: C.textMuted }} title={item.sourceUri}>
+                          Source: {sourceDisplayName(item.sourceUri)}
+                        </div>
+                      )}
+                      <Button
                         type="button"
                         onClick={() => setTriageId(item.id)}
-                        className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background: triageId === item.id ? C.accentSoft : C.surfaceMuted,
-                          color: triageId === item.id ? C.textPrimary : C.textMuted,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        variant={triageId === item.id ? "default" : "secondary"}
+                        size="sm"
                       >
                         Triage
-                      </button>
+                      </Button>
                       {item.sourceUri && (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setSelectedProposal({ kind: "source", id: item.id })}
-                          className="ml-1 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background:
-                              selectedProposal?.kind === "source" && selectedProposal.id === item.id ? C.accentSoft : C.surfaceMuted,
-                            color:
-                              selectedProposal?.kind === "source" && selectedProposal.id === item.id ? C.textPrimary : C.gold,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant={selectedProposal?.kind === "source" && selectedProposal.id === item.id ? "default" : "risk"}
+                          size="sm"
                         >
                           Source Detail
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))
@@ -406,63 +404,46 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                     {triage.data.messageDraft && <MetaBlock label="Message" value="draft only; needs recipient" />}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <Button
                       type="button"
                       onClick={createTaskFromTriage}
                       disabled={createTask.isPending}
-                      className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-                      style={{
-                        background: createTask.isPending ? C.surfaceMuted : C.accentSoft,
-                        color: createTask.isPending ? C.textMuted : C.textPrimary,
-                        border: `1px solid ${C.borderSoft}`,
-                      }}
+                      size="sm"
                     >
                       {createTask.isPending ? "Creating" : "Create Local Task"}
-                    </button>
+                    </Button>
                     {triage.data.sourceDraft && (
-                      <button
+                      <Button
                         type="button"
                         onClick={saveSourceFromTriage}
                         disabled={saveSource.isPending}
-                        className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background: saveSource.isPending ? C.surfaceMuted : C.surfaceMuted,
-                          color: saveSource.isPending ? C.textMuted : C.gold,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        variant="risk"
+                        size="sm"
                       >
                         {saveSource.isPending ? "Saving" : "Save Source"}
-                      </button>
+                      </Button>
                     )}
                     {triage.data.reminderDraft && (
-                      <button
+                      <Button
                         type="button"
                         onClick={createReminderFromTriage}
                         disabled={createReminder.isPending}
-                        className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background: createReminder.isPending ? C.surfaceMuted : C.surfaceMuted,
-                          color: createReminder.isPending ? C.textMuted : C.gold,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        variant="risk"
+                        size="sm"
                       >
                         {createReminder.isPending ? "Saving" : "Create Reminder Proposal"}
-                      </button>
+                      </Button>
                     )}
                     {triage.data.messageDraft && (
-                      <button
+                      <Button
                         type="button"
                         onClick={createMessageDraftFromTriage}
                         disabled={createMessageDraft.isPending}
-                        className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background: createMessageDraft.isPending ? C.surfaceMuted : C.surfaceMuted,
-                          color: createMessageDraft.isPending ? C.textMuted : C.gold,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        variant="risk"
+                        size="sm"
                       >
                         {createMessageDraft.isPending ? "Saving" : "Create Message Draft"}
-                      </button>
+                      </Button>
                     )}
                   </div>
                   {createTask.data?.ok && createTask.data.task && (
@@ -560,7 +541,7 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                       <MetaBlock label="Recipient" value={proposalDetail.data.item.recipientHint ?? "needs recipient"} />
                     )}
                     {"sourceUri" in proposalDetail.data.item && proposalDetail.data.item.sourceUri && (
-                      <MetaBlock label="Source URI" value={proposalDetail.data.item.sourceUri} />
+                      <MetaBlock label="Source" value={sourceDisplayName(proposalDetail.data.item.sourceUri)} title={proposalDetail.data.item.sourceUri} />
                     )}
                     {"reviewPriority" in proposalDetail.data.item && (
                       <MetaBlock label="Review Priority" value={proposalDetail.data.item.reviewPriority ?? "normal"} />
@@ -586,112 +567,78 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                       {(() => {
                         const currentStatus = proposalDetail.data.item.status;
                         return proposalDetail.data.statusOptions.map((status) => (
-                          <button
+                          <Button
                             key={status}
                             type="button"
                             onClick={() => updateSelectedProposalStatus(status)}
                             disabled={statusUpdatePending || status === currentStatus}
-                            className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                            style={{
-                              background: status === currentStatus ? C.accentSoft : C.surfaceMuted,
-                              color: statusUpdatePending || status === currentStatus ? C.textMuted : C.textPrimary,
-                              border: `1px solid ${C.borderSoft}`,
-                            }}
+                            variant={status === currentStatus ? "default" : "secondary"}
+                            size="sm"
                           >
                             {status.replace(/_/g, " ")}
-                          </button>
+                          </Button>
                         ));
                       })()}
                     </div>
                     <div className="space-y-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <SectionTitle title="Review Fields" detail="local edit" />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <label className="min-w-0">
-                          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Priority</div>
-                          <select
-                            value={reviewPriority}
-                            onChange={(event) => setReviewPriority(event.target.value)}
-                            className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                            style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
-                          >
-                            {["low", "normal", "high", "urgent"].map((priority) => (
-                              <option key={priority} value={priority}>{priority}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label className="min-w-0">
-                          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Approval Action</div>
-                          <select
-                            value={approvalAction}
-                            onChange={(event) => setApprovalAction(event.target.value)}
-                            className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                            style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
-                          >
-                            {["source_enrichment", "notion_capture_write", "slack_capture_read", "schedule_reminder", "send_message"].map((action) => (
-                              <option key={action} value={action}>{action.replace(/_/g, " ")}</option>
-                            ))}
-                          </select>
-                        </label>
+                        <AppSelect
+                          label="Priority"
+                          value={reviewPriority}
+                          onChange={setReviewPriority}
+                          options={["low", "normal", "high", "urgent"]}
+                        />
+                        <AppSelect
+                          label="Approval Action"
+                          value={approvalAction}
+                          onChange={setApprovalAction}
+                          options={["source_enrichment", "notion_capture_write", "slack_capture_read", "schedule_reminder", "send_message"]}
+                        />
                       </div>
-                      <input
+                      <Input
                         value={approvalScope}
                         onChange={(event) => setApprovalScope(event.target.value)}
                         placeholder="Approval scope, e.g. one Notion capture row or one Slack DM read"
-                        className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                        style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
                       />
-                      <input
+                      <Input
                         value={externalTarget}
                         onChange={(event) => setExternalTarget(event.target.value)}
                         placeholder="Proposed external target, still gated"
-                        className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                        style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
                       />
-                      <textarea
+                      <Textarea
                         value={reviewNotes}
                         onChange={(event) => setReviewNotes(event.target.value)}
                         placeholder="Local review notes. Do not paste secrets."
                         rows={4}
-                        className="w-full px-2 py-1.5 text-xs rounded outline-none resize-none"
-                        style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
                       />
                       {selectedProposal.kind === "source" && (
                         <label className="flex items-center gap-2 text-[11px]" style={{ color: C.textMuted }}>
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={needsReview}
-                            onChange={(event) => setNeedsReview(event.target.checked)}
+                            onCheckedChange={(checked) => setNeedsReview(checked === true)}
                           />
                           Needs local review before external sync/enrichment
                         </label>
                       )}
                       <div className="flex flex-wrap gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={saveSelectedReview}
                           disabled={reviewUpdatePending}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: reviewUpdatePending ? C.background : C.accentSoft,
-                            color: reviewUpdatePending ? C.textMuted : C.textPrimary,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          size="sm"
                         >
                           {reviewUpdatePending ? "Saving" : "Save Local Review"}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={stageApprovalPreview}
                           disabled={createApprovalPreview.isPending}
-                          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                          style={{
-                            background: createApprovalPreview.isPending ? C.background : C.surface,
-                            color: createApprovalPreview.isPending ? C.textMuted : C.gold,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          variant="risk"
+                          size="sm"
                         >
                           {createApprovalPreview.isPending ? "Staging" : "Stage Approval Preview"}
-                        </button>
+                        </Button>
                       </div>
                       {createApprovalPreview.data?.ok && createApprovalPreview.data.approval && (
                         <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
@@ -789,20 +736,15 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                       <div className="text-[11px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={reminder.approvalRequired}>
                         {reminder.approvalRequired}
                       </div>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setSelectedProposal({ kind: "reminder", id: reminder.id })}
-                        className="mt-2 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background:
-                            selectedProposal?.kind === "reminder" && selectedProposal.id === reminder.id ? C.accentSoft : C.surface,
-                          color:
-                            selectedProposal?.kind === "reminder" && selectedProposal.id === reminder.id ? C.textPrimary : C.textMuted,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        className="mt-2"
+                        variant={selectedProposal?.kind === "reminder" && selectedProposal.id === reminder.id ? "default" : "secondary"}
+                        size="sm"
                       >
                         Details
-                      </button>
+                      </Button>
                     </div>
                   ))
                 )}
@@ -831,20 +773,15 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                       <div className="text-[11px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={draft.approvalRequired}>
                         {draft.approvalRequired}
                       </div>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setSelectedProposal({ kind: "message", id: draft.id })}
-                        className="mt-2 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                        style={{
-                          background:
-                            selectedProposal?.kind === "message" && selectedProposal.id === draft.id ? C.accentSoft : C.surface,
-                          color:
-                            selectedProposal?.kind === "message" && selectedProposal.id === draft.id ? C.textPrimary : C.textMuted,
-                          border: `1px solid ${C.borderSoft}`,
-                        }}
+                        className="mt-2"
+                        variant={selectedProposal?.kind === "message" && selectedProposal.id === draft.id ? "default" : "secondary"}
+                        size="sm"
                       >
                         Details
-                      </button>
+                      </Button>
                     </div>
                   ))
                 )}
@@ -876,22 +813,61 @@ function SectionTitle({ title, detail }: { title: string; detail: string }) {
 }
 
 function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
   return (
-    <span
-      className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"
-      style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
-    >
+    <Badge variant={variant} className="uppercase">
       {label}
-    </span>
+    </Badge>
   );
 }
 
-function MetaBlock({ label, value }: { label: string; value: string }) {
+function MetaBlock({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <div className="rounded p-2 min-w-0" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-[11px] leading-snug truncate mt-0.5" style={{ color: C.textSecondary }} title={value}>{value}</div>
+      <div className="text-[11px] leading-snug truncate mt-0.5" style={{ color: C.textSecondary }} title={title ?? value}>{value}</div>
     </div>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly string[];
+}) {
+  return (
+    <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+      {label}
+      <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+        <SelectTrigger className="w-full normal-case">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option.replace(/_/g, " ")}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </UiSelect>
+    </label>
   );
 }
 

@@ -57,6 +57,8 @@ export type ToolCategory =
   | "convene_ceremony"   // Aang only. Trigger multi-agent gathering.
   | "route_task"         // Cortana only. Pick mode + assign owner/support agents.
   | "set_permissions"    // Cortana only. Narrow tool scope per task.
+  | "security_gate"      // Spock only. Preflight URLs, repos, files, and execution requests.
+  | "security_scan"      // Spock only. Run approved scanner adapters and record receipts.
   | "validate_output"    // Oak only. Stamp output green or red.
   | "block_write"        // Oak only. Refuse a memory or artifact write.
   | "logic_check"        // Spock only. Detect contradictions, schema mismatches.
@@ -176,8 +178,9 @@ export const AGENT_ROUTING: AgentRouting[] = [
       "Browser intelligence. Source review, web research, GitHub reviews, " +
       "source provenance. Standard extraction ladder: user-provided → static " +
       "fetch → metadata → readability → Playwright text → screenshot → " +
-      "Crawl4AI → manual. Does not own private browsing without per-session " +
-      "approval.",
+      "Crawl4AI → manual. Does not bypass Spock's security gate for pasted " +
+      "URLs, GitHub repos, downloads, package installs, or browser sessions. " +
+      "Does not own private browsing without per-session approval.",
     defaultModelClass: "local_summary",
     escalationModelClass: "long_context_external",
     skills: ["web-scraping"],
@@ -187,8 +190,9 @@ export const AGENT_ROUTING: AgentRouting[] = [
     ],
     notes:
       "Browser DISABLED by default. User must explicitly enable in Settings " +
-      "before any browse, fetch, or extract action. Surfer's chamber renders " +
-      "as locked until enabled.",
+      "before any browse, fetch, or extract action. Spock preflight is required " +
+      "for risky URLs, GitHub repos, downloads, package installs, and ad-heavy " +
+      "browser targets. Surfer's chamber renders as locked until enabled.",
   },
   {
     id: "c3po",
@@ -251,16 +255,20 @@ export const AGENT_ROUTING: AgentRouting[] = [
     floor: "upper",
     chamber: "Observatory",
     role:
-      "Logic checker, contradiction detector, bloat detector. Catches " +
-      "inconsistent assumptions, schema mismatches, scope creep, premature " +
-      "abstraction, overengineering. Recommends simplification. Does not " +
-      "own generic validation; that is Oak's role.",
+      "Logic checker, contradiction detector, bloat detector, and security " +
+      "gate. Catches inconsistent assumptions, schema mismatches, scope creep, " +
+      "premature abstraction, overengineering, phishing risk, suspicious " +
+      "GitHub repos, malicious package signals, secret exposure, unsafe browser " +
+      "targets, and command execution risk. Produces security receipts before " +
+      "Surfer browses risky targets or Tony runs/install code from pasted repos. " +
+      "Recommends simplification. Does not own generic validation; that is " +
+      "Oak's role.",
     defaultModelClass: "local_reasoner",
     escalationModelClass: "strong_reasoning_external",
     skills: [],
     toolScope: [
       "read_metadata", "search_memory", "format_output", "logic_check",
-      "bloat_check",
+      "bloat_check", "security_gate", "security_scan",
     ],
   },
   {

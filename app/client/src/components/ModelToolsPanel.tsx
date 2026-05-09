@@ -1,6 +1,19 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge as UiBadge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const CAPABILITY_KINDS = [
   "text_reasoning",
@@ -28,6 +41,13 @@ type PrivacyClass = (typeof PRIVACY_CLASSES)[number];
 
 function labelize(value: string) {
   return value.replace(/_/g, " ");
+}
+
+function splitSourceUris(value: string | null | undefined) {
+  return (value ?? "")
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function formatTime(unixSec: number) {
@@ -164,30 +184,31 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest">Model Tools</h2>
-            <p className="text-xs mt-1" style={{ color: C.textMuted }}>
-              Local capability registry. Proposal records only.
+            <h2 className="text-[13px] font-bold uppercase tracking-widest">Basement Model Registry</h2>
+            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              Capability proposals, route previews, and local eval notes. No provider calls.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close Model Tools"
-            className="px-2 py-1 text-xs font-semibold uppercase rounded"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            variant="outline"
+            size="sm"
           >
             Close
-          </button>
+          </Button>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2" aria-label="Model Tools status">
+        <div className="mt-2 grid grid-cols-2 md:grid-cols-5 gap-2" aria-label="Model registry status">
           <StatusBlock label="Mode" value={policyData?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <StatusBlock label="External calls" value={policyData?.callsExternalModels ? "yes" : "no"} tone={policyData?.callsExternalModels ? C.danger : C.success} />
           <StatusBlock label="Untested" value={String(registryCounts.untested)} tone={registryCounts.untested ? C.warning : C.success} />
           <StatusBlock label="External lanes" value={String(registryCounts.external)} tone={registryCounts.external ? C.warning : C.textSecondary} />
+          <StatusBlock label="Blocked" value={String(registryCounts.blocked)} tone={registryCounts.blocked ? C.danger : C.success} />
         </div>
 
         {lastWrite && (
@@ -197,38 +218,38 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading}>
+      <main className="flex-1 overflow-y-auto p-3 space-y-2.5" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading}>
+        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Configuration Rules" detail="machine boundary" />
+          <div className="grid gap-2 md:grid-cols-3">
+            <MachineRule title="No Calls" body="Registry previews do not call providers, gateways, browsers, or local tools." tone={C.success} />
+            <MachineRule title="Source First" body="A source URL is evidence, not trust. Surfer and Oak still validate current claims." tone={C.warning} />
+            <MachineRule title="Approval" body="External model/tool use needs a visible action receipt before it runs." tone={C.danger} />
+          </div>
+        </section>
+
         <section className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <div className="rounded p-4 space-y-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="rounded p-3 space-y-2.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Registry" detail={`${rows.length} local proposals`} />
             <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
-              <input
+              <Input
                 value={providerFilter}
                 onChange={(event) => setProviderFilter(event.target.value)}
                 aria-label="Filter model tools by provider"
                 placeholder="Filter provider."
-                className="px-3 py-2 rounded text-xs outline-none"
-                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
               />
-              <select
+              <AppSelect
+                label="Capability"
                 value={kind}
-                onChange={(event) => setKind(event.target.value as CapabilityKind | "all")}
-                aria-label="Filter model tools by capability"
-                className="px-3 py-2 rounded text-xs outline-none"
-                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-              >
-                <option value="all">All capabilities</option>
-                {CAPABILITY_KINDS.map((item) => <option key={item} value={item}>{labelize(item)}</option>)}
-              </select>
-              <select
+                onChange={(value) => setKind(value as CapabilityKind | "all")}
+                options={["all", ...CAPABILITY_KINDS]}
+              />
+              <AppSelect
+                label="Eval status"
                 value={evalStatus}
-                onChange={(event) => setEvalStatus(event.target.value as EvalStatusFilter)}
-                aria-label="Filter model tools by eval status"
-                className="px-3 py-2 rounded text-xs outline-none"
-                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-              >
-                {EVAL_STATUS_FILTERS.map((item) => <option key={item} value={item}>{labelize(item)}</option>)}
-              </select>
+                onChange={(value) => setEvalStatus(value as EvalStatusFilter)}
+                options={EVAL_STATUS_FILTERS}
+              />
             </div>
 
             <div className="grid gap-2" role="list" aria-label="Model tool capability proposals">
@@ -239,44 +260,47 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                   No local capability proposals match these filters.
                 </div>
               ) : rows.map((item) => (
-                <button
+                <Button
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedCapabilityId(item.id)}
                   aria-label={`Inspect model tool capability ${item.id}`}
                   aria-pressed={selectedCapability?.id === item.id}
-                  className="text-left rounded p-3"
+                  variant="outline"
+                  className="h-auto justify-start whitespace-normal p-3 text-left"
                   role="listitem"
                   style={{
                     background: selectedCapability?.id === item.id ? C.surfaceRaised : C.surfaceMuted,
                     border: `1px solid ${selectedCapability?.id === item.id ? C.accent : C.borderSoft}`,
                   }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold uppercase tracking-widest truncate">{item.provider}</div>
-                      <div className="text-sm font-semibold mt-1 break-words">{item.toolName}</div>
-                    </div>
-                    <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge label={labelize(item.capabilityKind)} tone={C.accent} />
-                    <Badge label={labelize(item.accessMethod)} tone={C.textSecondary} />
-                    <Badge label={labelize(item.privacyClass)} tone={toneForPrivacy(item.privacyClass)} />
-                  </div>
-                </button>
+                  <span className="block w-full min-w-0">
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="min-w-0">
+                        <span className="block truncate text-xs font-bold uppercase tracking-widest">{item.provider}</span>
+                        <span className="mt-1 block break-words text-xs font-semibold">{item.toolName}</span>
+                      </span>
+                      <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
+                    </span>
+                    <span className="mt-2 flex flex-wrap gap-2">
+                      <Badge label={labelize(item.capabilityKind)} tone={C.accent} />
+                      <Badge label={labelize(item.accessMethod)} tone={C.textSecondary} />
+                      <Badge label={labelize(item.privacyClass)} tone={toneForPrivacy(item.privacyClass)} />
+                    </span>
+                  </span>
+                </Button>
               ))}
             </div>
           </div>
 
-          <aside className="rounded p-4 space-y-3" aria-label="Selected model tool detail" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="rounded p-3 space-y-2.5" aria-label="Selected model tool detail" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Detail" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "none"} />
             {selectedCapability ? (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <Field label="Provider" value={selectedCapability.provider} />
                 <Field label="Tool" value={selectedCapability.toolName} />
                 <Field label="Approval" value={labelize(selectedCapability.approvalLevel)} />
-                <Field label="Sources" value={selectedCapability.sourceUris ?? "No source URLs recorded."} />
+                <SourceField value={selectedCapability.sourceUris} />
                 <Field label="Strengths" value={selectedCapability.strengths ?? "No strengths recorded."} />
                 <Field label="Weaknesses" value={selectedCapability.weaknesses ?? "No weaknesses recorded."} />
                 <Field label="Risk" value={selectedCapability.riskReview ?? "No risk review recorded."} />
@@ -289,33 +313,33 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
         </section>
 
         <section className="grid gap-3 xl:grid-cols-3">
-          <form onSubmit={submitCapability} className="rounded p-4 space-y-3" aria-label="Create local model tool proposal" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <form onSubmit={submitCapability} className="rounded p-3 space-y-2.5" aria-label="Create local model tool proposal" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Propose" detail="local only" />
-            <input value={provider} onChange={(event) => setProvider(event.target.value)} aria-label="Model tool provider" placeholder="Provider or tool owner." className="w-full px-3 py-2 rounded text-xs outline-none" style={inputStyle()} />
-            <input value={toolName} onChange={(event) => setToolName(event.target.value)} aria-label="Model tool name" placeholder="Model or tool name." className="w-full px-3 py-2 rounded text-xs outline-none" style={inputStyle()} />
+            <Input value={provider} onChange={(event) => setProvider(event.target.value)} aria-label="Model tool provider" placeholder="Provider or tool owner." />
+            <Input value={toolName} onChange={(event) => setToolName(event.target.value)} aria-label="Model tool name" placeholder="Model or tool name." />
             <div className="grid gap-2 md:grid-cols-2">
-              <Select label="Capability kind" value={newKind} onChange={(value) => setNewKind(value as CapabilityKind)} options={CAPABILITY_KINDS} />
-              <Select label="Access method" value={accessMethod} onChange={(value) => setAccessMethod(value as typeof accessMethod)} options={ACCESS_METHODS} />
-              <Select label="Privacy class" value={privacyClass} onChange={(value) => setPrivacyClass(value as PrivacyClass)} options={PRIVACY_CLASSES} />
-              <Select label="Approval level" value={approvalLevel} onChange={(value) => setApprovalLevel(value as typeof approvalLevel)} options={APPROVAL_LEVELS} />
+              <AppSelect label="Capability kind" value={newKind} onChange={(value) => setNewKind(value as CapabilityKind)} options={CAPABILITY_KINDS} />
+              <AppSelect label="Access method" value={accessMethod} onChange={(value) => setAccessMethod(value as typeof accessMethod)} options={ACCESS_METHODS} />
+              <AppSelect label="Privacy class" value={privacyClass} onChange={(value) => setPrivacyClass(value as PrivacyClass)} options={PRIVACY_CLASSES} />
+              <AppSelect label="Approval level" value={approvalLevel} onChange={(value) => setApprovalLevel(value as typeof approvalLevel)} options={APPROVAL_LEVELS} />
             </div>
-            <textarea value={sourceUris} onChange={(event) => setSourceUris(event.target.value)} aria-label="Model tool source URLs" placeholder="Source URLs. Required before trust, but still not verified here." rows={2} className="w-full px-3 py-2 rounded text-xs outline-none resize-none" style={inputStyle()} />
-            <textarea value={strengths} onChange={(event) => setStrengths(event.target.value)} aria-label="Model tool strengths" placeholder="Strengths." rows={2} className="w-full px-3 py-2 rounded text-xs outline-none resize-none" style={inputStyle()} />
-            <textarea value={weaknesses} onChange={(event) => setWeaknesses(event.target.value)} aria-label="Model tool weaknesses" placeholder="Weaknesses or failure risks." rows={2} className="w-full px-3 py-2 rounded text-xs outline-none resize-none" style={inputStyle()} />
-            <button type="submit" disabled={!provider.trim() || !toolName.trim() || createCapability.isPending} aria-label="Create local model tool proposal" className="w-full px-3 py-2 text-xs font-semibold uppercase rounded" style={buttonStyle(!provider.trim() || !toolName.trim() || createCapability.isPending)}>
+            <Textarea value={sourceUris} onChange={(event) => setSourceUris(event.target.value)} aria-label="Model tool source URLs" placeholder="Source URLs. Required before trust, but still not verified here." rows={2} />
+            <Textarea value={strengths} onChange={(event) => setStrengths(event.target.value)} aria-label="Model tool strengths" placeholder="Strengths." rows={2} />
+            <Textarea value={weaknesses} onChange={(event) => setWeaknesses(event.target.value)} aria-label="Model tool weaknesses" placeholder="Weaknesses or failure risks." rows={2} />
+            <Button type="submit" disabled={!provider.trim() || !toolName.trim() || createCapability.isPending} aria-label="Create local model tool proposal" className="w-full">
               {createCapability.isPending ? "Recording" : "Create Proposal"}
-            </button>
+            </Button>
           </form>
 
-          <form onSubmit={submitEval} className="rounded p-4 space-y-3" aria-label="Record local model tool eval note" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <form onSubmit={submitEval} className="rounded p-3 space-y-2.5" aria-label="Record local model tool eval note" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Eval Note" detail={selectedCapability ? `for ${selectedCapability.id}` : "unlinked"} />
-            <Select label="Eval task" value={evalTaskKey} onChange={setEvalTaskKey} options={localEvalTasks.map((task) => task.key)} />
-            <Select label="Eval outcome" value={evalOutcome} onChange={(value) => setEvalOutcome(value as typeof evalOutcome)} options={EVAL_OUTCOMES} />
-            <textarea value={evalSummary} onChange={(event) => setEvalSummary(event.target.value)} aria-label="Model tool eval summary" placeholder="What was checked or blocked." rows={4} className="w-full px-3 py-2 rounded text-xs outline-none resize-none" style={inputStyle()} />
-            <textarea value={evalNotes} onChange={(event) => setEvalNotes(event.target.value)} aria-label="Model tool validation notes" placeholder="Validation notes. No provider call is made." rows={3} className="w-full px-3 py-2 rounded text-xs outline-none resize-none" style={inputStyle()} />
-            <button type="submit" disabled={!evalSummary.trim() || recordEval.isPending} aria-label="Record local model tool eval note" className="w-full px-3 py-2 text-xs font-semibold uppercase rounded" style={buttonStyle(!evalSummary.trim() || recordEval.isPending)}>
+            <AppSelect label="Eval task" value={evalTaskKey} onChange={setEvalTaskKey} options={localEvalTasks.map((task) => task.key)} />
+            <AppSelect label="Eval outcome" value={evalOutcome} onChange={(value) => setEvalOutcome(value as typeof evalOutcome)} options={EVAL_OUTCOMES} />
+            <Textarea value={evalSummary} onChange={(event) => setEvalSummary(event.target.value)} aria-label="Model tool eval summary" placeholder="What was checked or blocked." rows={4} />
+            <Textarea value={evalNotes} onChange={(event) => setEvalNotes(event.target.value)} aria-label="Model tool validation notes" placeholder="Validation notes. No provider call is made." rows={3} />
+            <Button type="submit" disabled={!evalSummary.trim() || recordEval.isPending} aria-label="Record local model tool eval note" className="w-full">
               {recordEval.isPending ? "Recording" : "Record Eval Note"}
-            </button>
+            </Button>
             <div className="grid gap-2 max-h-52 overflow-y-auto" aria-label="Recent model tool eval notes">
               {(evals.data?.items ?? []).length === 0 ? (
                 <div className="text-xs" style={{ color: C.textMuted }}>No eval notes for this selection.</div>
@@ -332,17 +356,17 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             </div>
           </form>
 
-          <section className="rounded p-4 space-y-3" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="rounded p-3 space-y-2.5" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Route Preview" detail={route?.routeStatus ?? "proposal"} />
-            <input value={routeTask} onChange={(event) => setRouteTask(event.target.value)} aria-label="Route preview task kind" className="w-full px-3 py-2 rounded text-xs outline-none" style={inputStyle()} />
-            <input value={routeModality} onChange={(event) => setRouteModality(event.target.value)} aria-label="Route preview modality" className="w-full px-3 py-2 rounded text-xs outline-none" style={inputStyle()} />
-            <Select label="Route privacy class" value={routePrivacy} onChange={(value) => setRoutePrivacy(value as PrivacyClass)} options={PRIVACY_CLASSES} />
+            <Input value={routeTask} onChange={(event) => setRouteTask(event.target.value)} aria-label="Route preview task kind" />
+            <Input value={routeModality} onChange={(event) => setRouteModality(event.target.value)} aria-label="Route preview modality" />
+            <AppSelect label="Route privacy class" value={routePrivacy} onChange={(value) => setRoutePrivacy(value as PrivacyClass)} options={PRIVACY_CLASSES} />
             <label className="flex items-center gap-2 text-xs" style={{ color: C.textSecondary }}>
-              <input type="checkbox" checked={requiresFrontier} onChange={(event) => setRequiresFrontier(event.target.checked)} />
+              <Checkbox checked={requiresFrontier} onCheckedChange={(checked) => setRequiresFrontier(checked === true)} />
               Requires frontier reasoning
             </label>
             {route && (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />
                 <div className="space-y-2">
@@ -362,7 +386,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </section>
         </section>
 
-        <section className="rounded p-4" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-3" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Gates" detail="always visible" />
           <div className="grid gap-2 md:grid-cols-2">
             {(policyData?.gates ?? []).map((gate) => (
@@ -375,18 +399,6 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
       </main>
     </div>
   );
-}
-
-function inputStyle() {
-  return { background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary };
-}
-
-function buttonStyle(disabled: boolean) {
-  return {
-    background: disabled ? C.surfaceMuted : C.accentSoft,
-    color: disabled ? C.textMuted : C.textPrimary,
-    border: `1px solid ${C.borderSoft}`,
-  };
 }
 
 function SectionTitle({ title, detail }: { title: string; detail?: string }) {
@@ -402,16 +414,37 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
   return (
     <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
-      <div className="mt-1 text-sm font-semibold truncate" title={value} style={{ color: tone }}>{value}</div>
+      <div className="mt-1 text-xs font-semibold truncate" title={value} style={{ color: tone }}>{value}</div>
+    </div>
+  );
+}
+
+function MachineRule({ title, body, tone }: { title: string; body: string; tone: string }) {
+  return (
+    <div className="rounded p-3 min-h-24" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
+      <div className="mt-2 text-xs leading-relaxed" style={{ color: C.textSecondary }}>{body}</div>
     </div>
   );
 }
 
 function Badge({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
   return (
-    <span className="inline-flex rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: tone, border: `1px solid ${tone}66`, background: `${tone}11` }}>
+    <UiBadge variant={variant} className="uppercase">
       {label}
-    </span>
+    </UiBadge>
   );
 }
 
@@ -424,7 +457,32 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Select({
+function SourceField({ value }: { value: string | null | undefined }) {
+  const sources = splitSourceUris(value);
+  return (
+    <div>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Sources</div>
+      {sources.length === 0 ? (
+        <div className="mt-1 text-xs leading-relaxed" style={{ color: C.textSecondary }}>No source URLs recorded.</div>
+      ) : (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {sources.map((source) => (
+            <span
+              key={source}
+              className="max-w-full truncate rounded px-1.5 py-0.5 text-[10px]"
+              style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              title={source}
+            >
+              {sourceDisplayName(source)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppSelect({
   label,
   value,
   onChange,
@@ -438,15 +496,22 @@ function Select({
   return (
     <label className="grid gap-1 text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
       {label}
-      <select
+      <UiSelect
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onValueChange={onChange}
         aria-label={label}
-        className="px-3 py-2 rounded text-xs outline-none normal-case"
-        style={inputStyle()}
       >
-        {options.map((item) => <option key={item} value={item}>{labelize(item)}</option>)}
-      </select>
+        <SelectTrigger className="w-full normal-case">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((item) => (
+            <SelectItem key={item} value={item}>
+              {labelize(item)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </UiSelect>
     </label>
   );
 }

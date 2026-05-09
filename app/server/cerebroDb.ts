@@ -31,6 +31,7 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE TABLE IF NOT EXISTS tasks (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         session_id INTEGER REFERENCES sessions(id) ON DELETE SET NULL,
          title TEXT NOT NULL,
          status TEXT NOT NULL DEFAULT 'open',
          agent TEXT,
@@ -44,6 +45,8 @@ async function ensureSchema(client: Client): Promise<void> {
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          claude_session_id TEXT NOT NULL UNIQUE,
          project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         title TEXT,
+         notes TEXT,
          hero_class TEXT,
          started_at INTEGER NOT NULL DEFAULT (unixepoch()),
          last_seen_at INTEGER NOT NULL DEFAULT (unixepoch()),
@@ -302,6 +305,47 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_workbench_evidence_created ON workbench_evidence_records(created_at DESC)`,
       `CREATE INDEX IF NOT EXISTS idx_workbench_evidence_project ON workbench_evidence_records(project_id)`,
       `CREATE INDEX IF NOT EXISTS idx_workbench_evidence_kind ON workbench_evidence_records(kind)`,
+      `CREATE TABLE IF NOT EXISTS design_review_records (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         target_type TEXT NOT NULL,
+         target_label TEXT NOT NULL,
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL,
+         status TEXT NOT NULL DEFAULT 'needs_review',
+         owner_agent TEXT NOT NULL DEFAULT 'gojo',
+         route_chain TEXT NOT NULL,
+         checklist_json TEXT NOT NULL,
+         violations_json TEXT NOT NULL,
+         next_actions_json TEXT NOT NULL,
+         proof_summary TEXT NOT NULL,
+         permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_design_review_created ON design_review_records(created_at DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_design_review_project ON design_review_records(project_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_design_review_status ON design_review_records(status)`,
+      `CREATE TABLE IF NOT EXISTS security_review_records (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         target_uri TEXT NOT NULL,
+         target_kind TEXT NOT NULL,
+         risk_level TEXT NOT NULL,
+         status TEXT NOT NULL DEFAULT 'receipt',
+         owner_agent TEXT NOT NULL DEFAULT 'spock',
+         route_chain TEXT NOT NULL,
+         checks_json TEXT NOT NULL,
+         findings_json TEXT NOT NULL,
+         allowed_actions_json TEXT NOT NULL,
+         blocked_actions_json TEXT NOT NULL,
+         scanner_plan_json TEXT NOT NULL,
+         browser_policy_json TEXT NOT NULL,
+         permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL,
+         source_id INTEGER REFERENCES sources(id) ON DELETE SET NULL,
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_security_review_created ON security_review_records(created_at DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_security_review_target ON security_review_records(target_uri)`,
+      `CREATE INDEX IF NOT EXISTS idx_security_review_risk ON security_review_records(risk_level)`,
       `CREATE TABLE IF NOT EXISTS project_action_drafts (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
@@ -504,6 +548,34 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_permission_preflight_created ON permission_preflight_records(created_at DESC)`,
       `CREATE INDEX IF NOT EXISTS idx_permission_preflight_decision ON permission_preflight_records(decision)`,
       `CREATE INDEX IF NOT EXISTS idx_permission_preflight_action ON permission_preflight_records(action_class)`,
+      `CREATE TABLE IF NOT EXISTS raven_private_sessions (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         status TEXT NOT NULL DEFAULT 'active',
+         unlock_stage TEXT NOT NULL DEFAULT 'confirmed',
+         privacy_scope TEXT NOT NULL,
+         opened_by TEXT NOT NULL DEFAULT 'cortana',
+         lock_reason TEXT,
+         permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         last_seen_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         locked_at INTEGER
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_raven_private_sessions_status ON raven_private_sessions(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_raven_private_sessions_created ON raven_private_sessions(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS raven_private_events (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         raven_session_id INTEGER REFERENCES raven_private_sessions(id) ON DELETE CASCADE,
+         event_type TEXT NOT NULL,
+         title TEXT,
+         body TEXT NOT NULL,
+         source_uri TEXT,
+         source_label TEXT,
+         privacy_class TEXT NOT NULL DEFAULT 'raven_private',
+         metadata_json TEXT,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_raven_private_events_session ON raven_private_events(raven_session_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_raven_private_events_created ON raven_private_events(created_at DESC)`,
       `CREATE TABLE IF NOT EXISTS skill_registry (
          id TEXT PRIMARY KEY,
          name TEXT NOT NULL,
@@ -519,9 +591,34 @@ async function ensureSchema(client: Client): Promise<void> {
   );
 
   await ensureSourceMetadataColumns(client);
+  await ensureTaskSessionColumns(client);
+  await ensureSessionLedgerColumns(client);
   await ensureHedwigProposalMetadataColumns(client);
   await ensureWorkbenchEvidenceColumns(client);
   await ensureApprovalColumns(client);
+}
+
+async function ensureSessionLedgerColumns(client: Client): Promise<void> {
+  const table = await client.execute(`PRAGMA table_info(sessions)`);
+  const existing = new Set(table.rows.map((row) => String(row.name)));
+  const columns: Array<{ name: string; sql: string }> = [
+    { name: "title", sql: `ALTER TABLE sessions ADD COLUMN title TEXT` },
+    { name: "notes", sql: `ALTER TABLE sessions ADD COLUMN notes TEXT` },
+  ];
+  for (const column of columns) {
+    if (!existing.has(column.name)) {
+      await client.execute(column.sql);
+    }
+  }
+}
+
+async function ensureTaskSessionColumns(client: Client): Promise<void> {
+  const table = await client.execute(`PRAGMA table_info(tasks)`);
+  const existing = new Set(table.rows.map((row) => String(row.name)));
+  if (!existing.has("session_id")) {
+    await client.execute(`ALTER TABLE tasks ADD COLUMN session_id INTEGER REFERENCES sessions(id) ON DELETE SET NULL`);
+  }
+  await client.execute(`CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id)`);
 }
 
 async function ensureSourceMetadataColumns(client: Client): Promise<void> {
@@ -630,6 +727,7 @@ export interface MemoryRow {
   source: string | null;
   projectId: number | null;
   sessionId: number | null;
+  sessionDisplayName?: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -642,6 +740,7 @@ export interface MemoryProposalRow {
   source: string | null;
   projectId: number | null;
   sessionId: number | null;
+  sessionDisplayName?: string | null;
   proposedByAgent: string;
   status: MemoryProposalStatus;
   oakStatus: string;
@@ -656,6 +755,7 @@ export type OutputKind = "text" | "code" | "file" | "diff" | "tool_result";
 export interface OutputRow {
   id: number;
   sessionId: number | null;
+  sessionDisplayName?: string | null;
   projectId: number | null;
   kind: OutputKind;
   title: string | null;
@@ -669,6 +769,7 @@ export interface SourceRow {
   id: number;
   kind: SourceKind;
   uri: string;
+  sourceDisplayName?: string;
   title: string | null;
   summary: string | null;
   sourceType: string;
@@ -750,8 +851,11 @@ export interface ArtifactInput {
 
 export interface SessionRow {
   id: number;
+  displayName: string;
   claudeSessionId: string;
   projectId: number | null;
+  title: string | null;
+  notes: string | null;
   projectName: string | null;
   projectPath: string | null;
   heroClass: string | null;
@@ -992,8 +1096,12 @@ export type TaskStatus = "open" | "in_progress" | "done" | "cancelled";
 export interface TaskRow {
   id: number;
   projectId: number | null;
+  sessionId: number | null;
+  sessionDisplayName?: string | null;
   projectName: string | null;
   projectPath: string | null;
+  sessionClaudeSessionId?: string | null;
+  sessionStartedAt?: number | null;
   title: string;
   status: TaskStatus;
   agent: string | null;

@@ -7,21 +7,38 @@ import {
   type TaskRow,
   type TaskStatus,
 } from "../cerebroDb";
+import { sessionDisplayName } from "./sessions";
 
 const TASK_STATUSES = ["open", "in_progress", "done", "cancelled"] as const;
 const statusSchema = z.enum(TASK_STATUSES);
 
 function rowToTask(r: Record<string, unknown>): TaskRow {
-  return {
+  const task = {
     id: Number(r.id),
     projectId: r.project_id == null ? null : Number(r.project_id),
+    sessionId: r.session_id == null ? null : Number(r.session_id),
     projectName: r.project_name == null ? null : String(r.project_name),
     projectPath: r.project_path == null ? null : String(r.project_path),
+    sessionClaudeSessionId: r.session_claude_session_id == null ? null : String(r.session_claude_session_id),
+    sessionStartedAt: r.session_started_at == null ? null : Number(r.session_started_at),
     title: String(r.title),
     status: String(r.status) as TaskStatus,
     agent: r.agent == null ? null : String(r.agent),
     createdAt: Number(r.created_at),
     updatedAt: Number(r.updated_at),
+  };
+  return {
+    ...task,
+    sessionDisplayName:
+      task.sessionId == null
+        ? null
+        : sessionDisplayName({
+            id: task.sessionId,
+            title: r.session_title == null ? null : String(r.session_title),
+            projectName: r.session_project_name == null ? task.projectName : String(r.session_project_name),
+            heroClass: r.session_hero_class == null ? null : String(r.session_hero_class),
+            endedAt: r.session_ended_at == null ? null : Number(r.session_ended_at),
+          }),
   };
 }
 
@@ -32,8 +49,15 @@ async function getTaskById(id: number): Promise<TaskRow | null> {
       SELECT
         t.id,
         t.project_id,
+        t.session_id,
         p.name AS project_name,
         p.path AS project_path,
+        s.claude_session_id AS session_claude_session_id,
+        s.title AS session_title,
+        s.hero_class AS session_hero_class,
+        s.started_at AS session_started_at,
+        s.ended_at AS session_ended_at,
+        sp.name AS session_project_name,
         t.title,
         t.status,
         t.agent,
@@ -41,6 +65,8 @@ async function getTaskById(id: number): Promise<TaskRow | null> {
         t.updated_at
       FROM tasks t
       LEFT JOIN projects p ON p.id = t.project_id
+      LEFT JOIN sessions s ON s.id = t.session_id
+      LEFT JOIN projects sp ON sp.id = s.project_id
       WHERE t.id = ?
       LIMIT 1
     `,
@@ -84,6 +110,7 @@ export const tasksRouter = router({
         .object({
           status: statusSchema.optional(),
           projectId: z.number().int().optional(),
+          sessionId: z.number().int().optional(),
         })
         .optional(),
     )
@@ -99,12 +126,23 @@ export const tasksRouter = router({
         where.push("t.project_id = ?");
         args.push(input.projectId);
       }
+      if (input?.sessionId !== undefined) {
+        where.push("t.session_id = ?");
+        args.push(input.sessionId);
+      }
       const sql = `
         SELECT
           t.id,
           t.project_id,
+          t.session_id,
           p.name AS project_name,
           p.path AS project_path,
+          s.claude_session_id AS session_claude_session_id,
+          s.title AS session_title,
+          s.hero_class AS session_hero_class,
+          s.started_at AS session_started_at,
+          s.ended_at AS session_ended_at,
+          sp.name AS session_project_name,
           t.title,
           t.status,
           t.agent,
@@ -112,6 +150,8 @@ export const tasksRouter = router({
           t.updated_at
         FROM tasks t
         LEFT JOIN projects p ON p.id = t.project_id
+        LEFT JOIN sessions s ON s.id = t.session_id
+        LEFT JOIN projects sp ON sp.id = s.project_id
         ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
         ORDER BY
           CASE t.status
@@ -132,24 +172,32 @@ export const tasksRouter = router({
         title: z.string().min(1).max(280),
         agent: z.string().max(64).optional(),
         projectId: z.number().int().optional(),
+        sessionId: z.number().int().optional(),
         projectName: z.string().min(1).max(160).optional(),
         projectPath: z.string().min(1).max(1000).optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const db = await getCerebroDb();
-      const projectId =
+      let projectId =
         input.projectId ??
         (input.projectName && input.projectPath
           ? await getOrCreateProjectByPath(input.projectName, input.projectPath)
           : null);
+      if (projectId == null && input.sessionId != null) {
+        const session = await db.execute({
+          sql: `SELECT project_id FROM sessions WHERE id = ? LIMIT 1`,
+          args: [input.sessionId],
+        });
+        projectId = session.rows[0]?.project_id == null ? null : Number(session.rows[0].project_id);
+      }
       const result = await db.execute({
         sql: `
-          INSERT INTO tasks (title, agent, project_id)
-          VALUES (?, ?, ?)
-          RETURNING id, project_id, title, status, agent, created_at, updated_at
+          INSERT INTO tasks (title, agent, project_id, session_id)
+          VALUES (?, ?, ?, ?)
+          RETURNING id, project_id, session_id, title, status, agent, created_at, updated_at
         `,
-        args: [input.title, input.agent ?? null, projectId],
+        args: [input.title, input.agent ?? null, projectId, input.sessionId ?? null],
       });
       const row = result.rows[0];
       if (!row) {
@@ -175,7 +223,7 @@ export const tasksRouter = router({
           UPDATE tasks
           SET status = ?, updated_at = unixepoch()
           WHERE id = ?
-          RETURNING id, project_id, title, status, agent, created_at, updated_at
+          RETURNING id, project_id, session_id, title, status, agent, created_at, updated_at
         `,
         args: [input.status, input.id],
       });

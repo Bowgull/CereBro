@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const TRUST_TONES: Record<string, string> = {
   official: C.success,
@@ -51,78 +54,63 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
   return (
     <div className="h-full flex flex-col" style={{ background: C.background }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-center justify-between px-3 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             Surfer Sources
             <span className="ml-2" style={{ color: C.textSecondary }}>{savedSources.length}</span>
           </div>
-          <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>
+          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
             Source cards, browser ladder, and approval-gated research previews.
           </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} variant="outline" size="sm" className="shrink-0">
           Close
-        </button>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
         <StatusBlock label="Browser" value={data?.browserEnabled ? "Enabled" : "Locked"} tone={data?.browserEnabled ? C.success : C.warning} />
         <StatusBlock label="Owner" value={data?.ownerAgent ?? "surfer"} tone={C.accent} />
         <StatusBlock label="Trusted" value={`${savedSources.filter((source) => ["official", "primary", "high"].includes(source.trustLevel)).length}/${savedSources.length}`} tone={C.textSecondary} />
       </div>
 
-      <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <input
+          <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Ask Surfer what to find, compare, source, or preview."
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <button
+          <Button
             type="submit"
             disabled={!query.trim() || preview.isPending}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-            style={{
-              background: query.trim() && !preview.isPending ? C.accentSoft : C.surfaceMuted,
-              color: query.trim() && !preview.isPending ? C.textPrimary : C.textMuted,
-              border: `1px solid ${C.borderSoft}`,
-            }}
           >
             {preview.isPending ? "Reading" : "Preview"}
-          </button>
+          </Button>
         </div>
         <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
           This panel does not browse yet. It previews the research plan and approval gates before Surfer touches the web.
         </div>
       </form>
 
-      <form onSubmit={submitUrl} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submitUrl} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <input
+          <Input
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Approved public URL to ingest as a source."
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <button
+          <Button
             type="submit"
             disabled={!url.trim() || ingestUrl.isPending}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-            style={{
-              background: url.trim() && !ingestUrl.isPending ? C.accentSoft : C.surfaceMuted,
-              color: url.trim() && !ingestUrl.isPending ? C.textPrimary : C.textMuted,
-              border: `1px solid ${C.borderSoft}`,
-            }}
+            variant="risk"
           >
             {ingestUrl.isPending ? "Fetching" : "Ingest URL"}
-          </button>
+          </Button>
         </div>
         <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
           Clicking Ingest URL approves one public fetch and source-library record. No private, logged-in, crawler, or screenshot action runs here.
@@ -130,15 +118,15 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
         {ingestUrl.data && (
           <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
             {ingestUrl.data.ok && ingestUrl.data.source
-              ? `Saved source: ${ingestUrl.data.source.title ?? ingestUrl.data.source.uri}`
+              ? `Saved source: ${ingestUrl.data.source.title ?? ingestUrl.data.source.sourceDisplayName ?? ingestUrl.data.source.uri}`
                 : ingestUrl.data.reason ?? "URL ingestion failed."}
           </div>
         )}
       </form>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-3 p-4">
-          <div className="space-y-3 min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-2.5 p-3">
+          <div className="space-y-2.5 min-w-0">
             {preview.data && (
               <section className="space-y-2">
                 <SectionTitle title="Research Preview" detail={preview.data.taskType.replace(/_/g, " ")} />
@@ -178,7 +166,8 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
                     wordCount={source.wordCount ?? null}
                     sensitiveDataFlag={source.sensitiveDataFlag}
                     preview={source.summary ?? "Saved source record without summary."}
-                    whyItMatters={source.uri}
+                    whyItMatters={source.sourceDisplayName ?? source.uri}
+                    sourceUri={source.uri}
                     requiredApproval={source.trustNotes ?? "Already saved in the Source Library."}
                     scrubNotes={source.scrubNotes ?? undefined}
                   />
@@ -187,37 +176,29 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
             </section>
           </div>
 
-          <aside className="space-y-3 min-w-0">
+          <aside className="space-y-2.5 min-w-0">
             <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Source History" detail={`${sourceEvents.length} events`} />
               <div className="flex flex-wrap gap-1 mt-2">
                 {(["all", "surfer", "hedwig"] as const).map((owner) => (
-                  <button
+                  <Button
                     key={owner}
                     type="button"
                     onClick={() => setEventOwner(owner)}
-                    className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                    style={{
-                      background: eventOwner === owner ? C.accentSoft : C.surfaceMuted,
-                      color: eventOwner === owner ? C.textPrimary : C.textMuted,
-                      border: `1px solid ${C.borderSoft}`,
-                    }}
+                    variant={eventOwner === owner ? "secondary" : "ghost"}
+                    size="sm"
                   >
                     {owner}
-                  </button>
+                  </Button>
                 ))}
-                <button
+                <Button
                   type="button"
                   onClick={() => setSensitiveEventsOnly((value) => !value)}
-                  className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded"
-                  style={{
-                    background: sensitiveEventsOnly ? C.accentSoft : C.surfaceMuted,
-                    color: sensitiveEventsOnly ? C.textPrimary : C.warning,
-                    border: `1px solid ${C.borderSoft}`,
-                  }}
+                  variant={sensitiveEventsOnly ? "secondary" : "risk"}
+                  size="sm"
                 >
                   Scrubbed
-                </button>
+                </Button>
               </div>
               <div className="space-y-2 mt-2">
                 {sourceEvents.length === 0 ? (
@@ -237,7 +218,7 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
                         {event.title ?? event.uri}
                       </div>
                       <div className="text-[10px] leading-snug truncate mt-1" style={{ color: C.textMuted }} title={event.uri}>
-                        {event.uri}
+                        {event.sourceDisplayName ?? event.uri}
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {event.trustLevel && <MiniBadge label={event.trustLevel} tone={TRUST_TONES[event.trustLevel] ?? C.textMuted} />}
@@ -317,7 +298,7 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
 function SectionTitle({ title, detail }: { title: string; detail: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+      <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
         {title}
       </div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>
@@ -338,6 +319,7 @@ function SourceCard({
   whyItMatters,
   requiredApproval,
   scrubNotes,
+  sourceUri,
 }: {
   title: string;
   sourceType: string;
@@ -349,8 +331,8 @@ function SourceCard({
   whyItMatters: string;
   requiredApproval: string;
   scrubNotes?: string;
+  sourceUri?: string;
 }) {
-  const tone = TRUST_TONES[trustLevel] ?? C.textMuted;
   return (
     <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -362,12 +344,9 @@ function SourceCard({
             {sourceType.replace(/_/g, " ")}
           </div>
         </div>
-        <span
-          className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
-          style={{ color: tone, background: `${tone}1a`, border: `1px solid ${tone}55` }}
-        >
+        <Badge variant={badgeVariant(trustLevel)} className="uppercase shrink-0">
           {trustLevel}
-        </span>
+        </Badge>
       </div>
       {(freshnessStatus || wordCount != null || sensitiveDataFlag) && (
         <div className="flex flex-wrap gap-1 mb-2">
@@ -379,7 +358,7 @@ function SourceCard({
       <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
         {preview}
       </div>
-      <div className="text-[11px] leading-relaxed mt-2 break-all" style={{ color: C.textMuted }}>
+      <div className="text-[11px] leading-relaxed mt-2 break-all" style={{ color: C.textMuted }} title={sourceUri}>
         {whyItMatters}
       </div>
       <div className="text-[11px] leading-relaxed mt-2" style={{ color: C.warning }}>
@@ -395,12 +374,27 @@ function SourceCard({
 }
 
 function MiniBadge({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accent
+          ? "default"
+          : "secondary";
+
   return (
-    <span
-      className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-      style={{ color: tone, background: `${tone}14`, border: `1px solid ${tone}44` }}
-    >
+    <Badge variant={variant} className="uppercase">
       {label.replace(/_/g, " ")}
-    </span>
+    </Badge>
   );
+}
+
+function badgeVariant(trustLevel: string): "default" | "secondary" | "destructive" | "warning" | "success" {
+  if (trustLevel === "official" || trustLevel === "primary") return "success";
+  if (trustLevel === "high") return "default";
+  if (trustLevel === "medium") return "warning";
+  if (trustLevel === "low") return "destructive";
+  return "secondary";
 }

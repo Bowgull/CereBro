@@ -1,19 +1,30 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const STATUS_LABEL: Record<string, string> = {
   open: "Open",
   in_progress: "In progress",
   done: "Done",
   cancelled: "Cancelled",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  open: C.warning,
-  in_progress: C.accent,
-  done: C.success,
-  cancelled: C.textMuted,
 };
 
 const NEXT_STATUS: Record<string, "open" | "in_progress" | "done" | "cancelled"> = {
@@ -26,8 +37,17 @@ const NEXT_STATUS: Record<string, "open" | "in_progress" | "done" | "cancelled">
 export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [projectFilter, setProjectFilter] = useState<number | "all">("all");
-  const list = trpc.tasks.list.useQuery(projectFilter === "all" ? undefined : { projectId: projectFilter });
+  const [sessionFilter, setSessionFilter] = useState<number | "all">("all");
+  const listFilters =
+    projectFilter === "all" && sessionFilter === "all"
+      ? undefined
+      : {
+          ...(projectFilter === "all" ? {} : { projectId: projectFilter }),
+          ...(sessionFilter === "all" ? {} : { sessionId: sessionFilter }),
+        };
+  const list = trpc.tasks.list.useQuery(listFilters);
   const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 10000 });
   const create = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
@@ -47,17 +67,21 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
     },
   });
   const [title, setTitle] = useState("");
+  const [sessionDraft, setSessionDraft] = useState("none");
+  const [deleteGate, setDeleteGate] = useState<{ id: number; title: string } | null>(null);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-    create.mutate({ title: trimmed });
+    const sessionId = sessionDraft === "none" ? undefined : Number(sessionDraft);
+    create.mutate({ title: trimmed, sessionId });
     setTitle("");
   }
 
   const tasks = list.data ?? [];
   const projectOptions = projects.data ?? [];
+  const sessionOptions = sessions.data ?? [];
 
   return (
     <div
@@ -65,47 +89,58 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
       style={{ background: `${C.background}f5`, borderTop: `1px solid ${C.borderSoft}` }}
     >
       <div
-        className="flex items-center justify-between px-3 py-2 shrink-0"
+        className="flex items-center justify-between px-2.5 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
-        <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-          Tasks
-          <span className="ml-2" style={{ color: C.textSecondary }}>
-            {tasks.length}
-          </span>
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Ledger Work Queue
+            <span className="ml-2" style={{ color: C.textSecondary }}>
+              {tasks.length}
+            </span>
+          </div>
+          <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>
+            Tasks are proof objects. Status changes stay visible.
+          </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} variant="outline" size="sm">
           Close
-        </button>
+        </Button>
       </div>
 
-      <form onSubmit={submit} className="flex gap-2 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <input
+      <form onSubmit={submit} className="flex gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="New task. Enter to add."
-          className="flex-1 px-2 py-1.5 text-xs rounded outline-none"
-          style={{
-            background: C.surfaceMuted,
-            color: C.textPrimary,
-            border: `1px solid ${C.borderSoft}`,
-          }}
+          className="flex-1"
         />
-        <button
+        <Select value={sessionDraft} onValueChange={setSessionDraft}>
+          <SelectTrigger
+            size="sm"
+            className="w-40"
+            aria-label="Link new task to session"
+          >
+            <SelectValue placeholder="Run link" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No run link</SelectItem>
+            {sessionOptions.map((session) => (
+              <SelectItem key={session.id} value={String(session.id)}>
+                {session.displayName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
           type="submit"
           disabled={!title.trim() || create.isPending}
-          className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-          style={{
-            background: title.trim() ? C.accentSoft : C.surfaceMuted,
-            color: title.trim() ? C.textPrimary : C.textMuted,
-            border: `1px solid ${C.borderSoft}`,
-          }}
         >
           Add
-        </button>
+        </Button>
       </form>
 
-      <div className="flex items-center gap-1 px-3 py-2 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <FilterButton
           label="All"
           active={projectFilter === "all"}
@@ -123,34 +158,49 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           />
         ))}
       </div>
+      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <FilterButton
+          label="All Runs"
+          active={sessionFilter === "all"}
+          count={tasks.length}
+          onClick={() => setSessionFilter("all")}
+        />
+        {sessionOptions.map((session) => (
+          <FilterButton
+            key={session.id}
+            label={session.title || `Run #${session.id}`}
+            active={sessionFilter === session.id}
+            count={tasks.filter((task) => task.sessionId === session.id).length}
+            title={session.displayName}
+            onClick={() => setSessionFilter(session.id)}
+          />
+        ))}
+      </div>
 
       <div className="flex-1 overflow-y-auto">
         {list.isLoading ? (
-          <div className="px-3 py-3 text-xs" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>Loading.</div>
         ) : tasks.length === 0 ? (
-          <div className="px-3 py-3 text-xs" style={{ color: C.textMuted }}>
+          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>
             No tasks yet. Add one above.
           </div>
         ) : (
           tasks.map((t) => (
             <div
               key={t.id}
-              className="flex items-center gap-2 px-3 py-2"
+              className="flex items-center gap-2 px-2.5 py-1.5"
               style={{ borderBottom: `1px solid ${C.borderSoft}` }}
             >
-              <button
+              <Button
+                type="button"
                 onClick={() => setStatus.mutate({ id: t.id, status: NEXT_STATUS[t.status] })}
-                className="text-xs px-2 py-0.5 rounded uppercase tracking-wider shrink-0"
-                style={{
-                  color: STATUS_COLOR[t.status] ?? C.textMuted,
-                  background: `${STATUS_COLOR[t.status] ?? C.textMuted}22`,
-                  border: `1px solid ${STATUS_COLOR[t.status] ?? C.textMuted}55`,
-                  minWidth: 96,
-                }}
+                className="min-w-24 shrink-0"
+                variant={statusVariant(t.status)}
+                size="sm"
                 title="Click to advance status"
               >
                 {STATUS_LABEL[t.status] ?? t.status}
-              </button>
+              </Button>
               <div
                 className="flex-1 text-xs"
                 style={{
@@ -159,28 +209,79 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                 }}
               >
                 <div>{t.title}</div>
-                {t.projectId != null && (
-                  <div
-                    className="text-[10px] uppercase tracking-wider mt-0.5 truncate"
-                    style={{ color: C.textMuted }}
-                    title={t.projectPath ?? undefined}
-                  >
-                    {t.projectName ?? `Project #${t.projectId}`}
+                {(t.projectId != null || t.sessionId != null) && (
+                  <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                    {t.projectId != null && (
+                      <span
+                        className="text-[10px] uppercase tracking-wider truncate"
+                        style={{ color: C.textMuted }}
+                        title={t.projectPath ?? undefined}
+                      >
+                        {t.projectName ?? `Project #${t.projectId}`}
+                      </span>
+                    )}
+                    {t.sessionId != null && (
+                      <Badge variant="outline" className="text-[10px] uppercase" title={t.sessionDisplayName ?? undefined}>
+                        {t.sessionDisplayName ?? `Run #${t.sessionId}`}
+                      </Badge>
+                    )}
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => del.mutate({ id: t.id })}
-                className="text-xs uppercase tracking-wider"
-                style={{ color: C.textMuted }}
-                title="Delete"
+              <Button
+                type="button"
+                onClick={() => setDeleteGate({ id: t.id, title: t.title })}
+                variant="destructive"
+                size="sm"
+                aria-label={`Delete task ${t.title}`}
+                title="Delete task"
               >
-                ×
-              </button>
+                Delete
+              </Button>
             </div>
           ))
         )}
       </div>
+
+      <Dialog open={deleteGate != null} onOpenChange={(open) => !open && setDeleteGate(null)}>
+        <DialogContent gate showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Delete Task</DialogTitle>
+            <DialogDescription>
+              This removes a local task row from the Ledger work queue. Cancel keeps the record visible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.warning }}>
+              Target
+            </div>
+            <div style={{ color: C.textPrimary }}>{deleteGate?.title ?? "Unknown task"}</div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setDeleteGate(null)}
+              variant="ghost"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!deleteGate || del.isPending}
+              onClick={() => {
+                if (!deleteGate || del.isPending) return;
+                del.mutate(
+                  { id: deleteGate.id },
+                  { onSuccess: () => setDeleteGate(null) },
+                );
+              }}
+              variant="destructive"
+            >
+              {del.isPending ? "Deleting" : "Delete Task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -199,20 +300,24 @@ function FilterButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      type="button"
       onClick={onClick}
-      className="px-2 py-1 text-[10px] uppercase tracking-wider rounded shrink-0"
-      style={{
-        color: active ? C.textPrimary : C.textMuted,
-        background: active ? C.surfaceRaised : "transparent",
-        border: `1px solid ${active ? C.accentSoft : C.borderSoft}`,
-      }}
+      className="shrink-0"
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
       title={title}
     >
       {label}
-      <span className="ml-1" style={{ color: active ? C.accent : C.textMuted }}>
+      <Badge variant={active ? "default" : "secondary"} className="ml-1">
         {count}
-      </span>
-    </button>
+      </Badge>
+    </Button>
   );
+}
+
+function statusVariant(status: string): "default" | "secondary" | "risk" {
+  if (status === "open") return "risk";
+  if (status === "in_progress") return "default";
+  return "secondary";
 }

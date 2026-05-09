@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 14:55 EDT
+Last updated: 2026-05-08 21:32 EDT
 
 ## Current North Star
 
@@ -20,6 +20,3736 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2132 - Front-End Build Steward: Workbench Target Labels
+
+### What Changed
+
+- Updated Workbench evidence list rows so target receipts show compact target
+  labels instead of raw full strings.
+- Updated Workbench evidence detail:
+  - Source metadata now uses compact source labels when only a URI exists.
+  - Target metadata now uses compact target labels.
+  - Raw source and target values remain available as tooltips.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Workbench evidence now follows the source/target receipt rule used across the
+  Ledger and Basement surfaces.
+- Dense receipt lists stay readable while preserving inspectable raw values.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Non-URL target strings fall back to the helper's compact string behavior.
+
+### Next Front-End Slice
+
+- Continue Approval and Security Gate receipt shaping.
+- Then move into route-level visual QA when browser tooling is available.
+
+## 2026-05-08 2131 - Front-End Build Steward: Model Tool Source Labels
+
+### What Changed
+
+- Updated Model Tools selected capability details so source receipts use compact
+  source labels instead of dense raw URL strings.
+- Added local source parsing for comma/newline separated source entries.
+- Kept each full raw source URI available as tooltip evidence.
+
+### Files Touched
+
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Basement model registry now follows the same source receipt rule as Surfer,
+  Hedwig, Output Library, and Project Lab.
+- Raw URLs remain part of the record, but dense UI uses readable source labels.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Source entry parsing is intentionally simple: comma or newline separated.
+
+### Next Front-End Slice
+
+- Continue Approval and Security Gate receipt shaping.
+- Then run another localhost check and archive pass.
+
+## 2026-05-08 2129 - Front-End Build Steward: Hedwig Source Receipt
+
+### What Changed
+
+- Ran a route-level source receipt audit across Surfer, Hedwig, Output Library,
+  and Project Lab source surfaces.
+- Added a visible compact source receipt to Hedwig local capture rows:
+  - The capture list now shows `Source: <compact label>` directly on each
+    captured item with a `sourceUri`.
+  - The full raw source URI remains available in the tooltip.
+- Kept the existing `Source Detail` action for deeper source review.
+
+### Files Touched
+
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Hedwig now matches the current provenance rule: list rows should show source
+  origin without requiring a detail click.
+- The UI still keeps raw URLs out of dense list text while preserving the raw
+  value for inspection.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- The visible change is subtle by design. It affects Hedwig capture rows that
+  already have a `sourceUri`.
+
+### Next Front-End Slice
+
+- Continue source/project receipt cleanup in Approval surfaces and Model Tools.
+- Then run another localhost check and archive pass.
+
+## 2026-05-08 2127 - Front-End Build Steward: Source Label Helper
+
+### What Changed
+
+- Consolidated duplicate source display-label helpers:
+  - Added `app/server/displayLabels.ts`.
+  - Added `app/client/src/lib/displayLabels.ts`.
+  - Updated artifact, surfer, and project intelligence routers to use the
+    shared server helper.
+  - Updated Hedwig source detail UI to use the shared client helper.
+- Verified the duplicate helper scan now shows only the two shared helpers and
+  their call sites.
+
+### Files Touched
+
+- `app/server/displayLabels.ts`
+- `app/client/src/lib/displayLabels.ts`
+- `app/server/routers/artifacts.ts`
+- `app/server/routers/surfer.ts`
+- `app/server/routers/projectIntelligence.ts`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Duplicate helper scan completed:
+  - `app/server/displayLabels.ts`
+  - `app/client/src/lib/displayLabels.ts`
+  - call sites only elsewhere.
+
+### Front-End Steward Review
+
+- Source receipt language is now easier to keep consistent across Surfer,
+  Hedwig, Output Library, and Project Lab.
+- The client/server split is intentional. Browser bundles should not import
+  server modules.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- The same function exists once per runtime boundary. A truly shared package is
+  unnecessary until more display helpers accumulate.
+
+### Next Front-End Slice
+
+- Run a route-level visual pass across source receipt surfaces.
+- Then continue project receipt cleanup in Project Lab and Approval surfaces.
+
+## 2026-05-08 2125 - Front-End Build Steward: Project Lab Source Receipts
+
+### What Changed
+
+- Added compact source receipt data to Project Lab:
+  - Source event rollups now include `uri`.
+  - Source event rollups now include `sourceDisplayName`.
+  - Project detail source event rows now include `uri`.
+  - Project detail source event rows now include `sourceDisplayName`.
+- Updated Project Lab UI:
+  - Project card recent source events use source display labels when no title
+    is present.
+  - Project inspector source rows use source display labels when no title is
+    present.
+  - Project inspector source fields show the compact `Source` receipt.
+
+### Files Touched
+
+- `app/server/routers/projectIntelligence.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Project Lab now matches Surfer, Hedwig, and Output Library for source
+  receipts.
+- Source provenance reads as compact labels while retaining the underlying raw
+  URI in data for inspection.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- The same `sourceDisplayName` helper now exists in several routers. It should
+  move to a shared helper when the next backend cleanup slice is scheduled.
+
+### Next Front-End Slice
+
+- Run a route-level visual pass across Surfer, Hedwig, Output Library, and
+  Project Lab source rows.
+- Then consolidate duplicate display-label helpers.
+
+## 2026-05-08 2123 - Front-End Build Steward: Surfer Source Receipts
+
+### What Changed
+
+- Added compact source display labels to Surfer data:
+  - `SourceRow` now allows `sourceDisplayName`.
+  - `surfer.panel` saved source rows return `sourceDisplayName`.
+  - `surfer.panel` source event rows return `sourceDisplayName`.
+- Updated Surfer UI:
+  - Saved source cards show compact source labels instead of raw full URLs.
+  - Source history rows show compact source labels instead of raw full URLs.
+  - Full URLs remain available in tooltips.
+  - URL ingestion success copy uses source title first, then compact source
+    label, then raw URL as fallback.
+
+### Files Touched
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/surfer.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Surfer now matches Output Library and Hedwig: source provenance is compact by
+  default, with the full URL still inspectable.
+- This remains display-only. No fetch, trust, or enrichment behavior changed.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Source event labels are derived from URL parsing and fall back to truncation
+  for non-URL strings.
+
+### Next Front-End Slice
+
+- Carry compact source receipts into Project Lab source event summaries.
+- Then run a route-level visual pass across Surfer, Hedwig, Output Library, and
+  Project Lab source rows.
+
+## 2026-05-08 2121 - Front-End Build Steward: Source Receipt Labels
+
+### What Changed
+
+- Added compact source display labels for Output Library artifact rows:
+  - `artifacts.list` now returns `sourceDisplayName`.
+  - Output Library shows `hostname/path` style source receipts.
+  - Full source URL remains available in the tooltip.
+- Updated Hedwig source proposal detail:
+  - Source URL metadata now renders as `Source`.
+  - The visible value uses the compact source display label.
+  - The full URL remains available in the tooltip.
+
+### Files Touched
+
+- `app/server/routers/artifacts.ts`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Source receipts now read like provenance labels, not pasted raw URLs.
+- This is display-only. It does not fetch, enrich, or trust any source.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Source display names are derived from URL parsing. Non-URL strings fall back
+  to a truncated raw value.
+
+### Next Front-End Slice
+
+- Continue source receipts into Surfer Sources and source-event surfaces.
+- Then run a route-level visual pass when browser inspection is stable.
+
+## 2026-05-08 2118 - Front-End Build Steward: Project Source Labels
+
+### What Changed
+
+- Cleaned up Workbench project/source selector labels:
+  - Source link options now join project names.
+  - Command link options now join project names.
+  - Artifact link options now join project names.
+- Updated Workbench UI labels:
+  - Source selector no longer shows raw `project <id>` labels.
+  - Command selector no longer shows raw `project <id>` labels.
+  - Artifact selector now includes the linked project name when known.
+
+### Files Touched
+
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Workbench link selectors now read as receipts instead of database ids.
+- This keeps source, command, and artifact links aligned with the run receipt
+  normalization already completed.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Remaining raw ids are technical fallback labels or explicit row ids.
+
+### Next Front-End Slice
+
+- Run a browser route pass over Workshop and Ledger once stable inspection is
+  available.
+- Then continue source receipts in Output Library and Hedwig source surfaces.
+
+## 2026-05-08 2116 - Front-End Build Steward: Workbench Run History
+
+### What Changed
+
+- Finished Workbench run receipts in evidence detail history:
+  - Validation history rows now join session title/agent/state data.
+  - Comparison history rows now join session title/agent/state data.
+  - Both history card types show the run display chip when linked.
+- Kept Workbench detail consistent with prior Ledger passes:
+  - Main evidence detail uses `sessionDisplayName`.
+  - Session link options use saved run titles when present.
+
+### Files Touched
+
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Raw run-label text sweep completed. Remaining `Run #` strings are fallback
+  labels when no display name is available, and `claudeSessionId` remains only
+  in the Sessions technical id column.
+
+### Front-End Steward Review
+
+- Workbench validation and before/after proof rows now speak the same run
+  language as Tasks, Project Lab, Outputs, Memory, and Terminal Lab.
+- This closes the obvious run-provenance gaps without adding new execution or
+  external-write behavior.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- The DOM/runtime check was limited to localhost health. A visual route pass
+  should follow when the browser bridge exposes stable inspection again.
+
+### Next Front-End Slice
+
+- Run a full browser route pass over Ledger and Workshop run labels.
+- Then continue with the next provenance lane: project receipts and source
+  receipts.
+
+## 2026-05-08 2114 - Front-End Build Steward: Memory Run Links
+
+### What Changed
+
+- Added optional run selection to Memory proposal creation.
+  - New proposals can now carry `sessionId` from the UI.
+  - Proposed and saved memory rows already show the run receipt when linked.
+- Swept visible raw run labels:
+  - Tasks run filters now use saved run titles when present.
+  - Terminal Lab session selector and observation chips now use display names.
+  - Workbench session link selector now uses display names.
+  - Workbench evidence detail now receives and shows `sessionDisplayName`.
+- Extended Workbench router session link options:
+  - Link options now compute display names from saved run title or fallback
+    active/closed agent/project labels.
+
+### Files Touched
+
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Memory proposals can now join the same run proof trail at creation time.
+- Remaining raw session ids are fallback labels or technical receipts, not the
+  primary visible path.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Workbench validation/comparison history rows may still lack display names if
+  they are rendered from minimal historical queries.
+
+### Next Front-End Slice
+
+- Add run receipts to Workbench validation/comparison history if they appear in
+  the detail panel.
+- Then do a compact browser DOM pass over Ledger and Workshop run labels.
+
+## 2026-05-08 2109 - Front-End Build Steward: Session Filters
+
+### What Changed
+
+- Added session filtering to Output Library:
+  - `artifacts.list` accepts `sessionId`.
+  - Output Library has an `All Runs` filter row.
+  - Durable vault artifact writes can optionally link to a run.
+- Added session filtering to Memory:
+  - `memory.list` accepts `sessionId`.
+  - `memory.proposals` accepts `sessionId`.
+  - Memory has an `All Runs` filter row that filters saved entries and
+    proposals together.
+- Kept Obsidian note writes unchanged:
+  - The optional run selector applies to vault artifact writes.
+  - Obsidian note writes still use the existing Obsidian writer path.
+
+### Files Touched
+
+- `app/server/routers/artifacts.ts`
+- `app/server/routers/memory.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `pnpm check` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Output and Memory now let the user narrow Ledger receipts by the same titled
+  run labels used in Tasks and Project Lab.
+- The run link on durable artifact writes makes manual reports and drafts part
+  of the same proof trail.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Filter counts are local to the currently loaded filtered rows, not global
+  aggregate counts.
+
+### Next Front-End Slice
+
+- Add optional run selection to Memory proposal creation.
+- Add a compact linked-run column or chip to any remaining Ledger surfaces that
+  still expose raw `sessionId`.
+
+## 2026-05-08 2105 - Front-End Build Steward: Output Memory Run Receipts
+
+### What Changed
+
+- Carried run display receipts into more Ledger paths:
+  - `outputs.list` now returns `sessionDisplayName`.
+  - `artifacts.list` now returns `sessionDisplayName`.
+  - `memory.list` now returns `sessionDisplayName`.
+  - `memory.proposals` now returns `sessionDisplayName`.
+  - `memory.approveProposal` now returns the joined run display label after
+    writing a proposal.
+- Updated visible Ledger surfaces:
+  - Output Library artifact rows show the run receipt when linked.
+  - Memory proposal rows show the run receipt when linked.
+  - Saved Memory rows show the run receipt when linked.
+- Preserved the title-aware path from the editable Sessions ledger:
+  - If a run has a saved title, Output and Memory receipts show that title.
+  - Untitled runs still fall back to derived active/closed agent/project labels.
+
+### Files Touched
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/outputs.ts`
+- `app/server/routers/artifacts.ts`
+- `app/server/routers/memory.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `pnpm check` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Tasks, Project Lab, Output Library, and Memory now share the same run receipt
+  vocabulary.
+- The Ledger is closer to a single proof trail: task, output, artifact, and
+  memory rows can now point back to the same titled run.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Output Library writes still do not expose a session picker. This pass only
+  displays receipts when a session is already linked.
+
+### Next Front-End Slice
+
+- Add session filters to Output Library and Memory.
+- Then add optional session selection to durable Output Library writes.
+
+## 2026-05-09 - Agent Reach Source Requirement
+
+### What Changed
+
+- Recorded `Panniantong/Agent-Reach` as a non-negotiable source-access
+  reference for Raven, Surfer, and future CereBro agents.
+- Verified MIT license from the repository `LICENSE`.
+- Recorded current HEAD fingerprint:
+  `17624268a059ccfb23eba8a2ba50f9f92c8dc0ca`.
+- Added Agent Reach to:
+  - `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+  - `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+  - `CEREBRO_MASTER_BUILD_PLAN.md`
+  - Raven's Obsidian project plan
+  - Raven build history
+  - Obsidian GitHub source notes
+- Decision: use Agent Reach's channel registry, doctor/watch health checks,
+  source-risk classification, credential-needs metadata, and upstream-tool
+  handoff pattern.
+- No install, clone, script execution, cookie extraction, proxy setup, media
+  download, MCP server setup, or browser automation was performed.
+
+### Files Touched
+
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  - `10_Projects/Raven/Raven.md`
+  - `20_Knowledge/Sources/GitHub/Agent Reach/Agent Reach Repository Source.md`
+  - `90_Archive/Raven Build History/Raven Build History.md`
+  - `90_Archive/Raven Build History/snapshots/2026-05-09 Agent Reach Source Requirement.md`
+
+### Checks Run
+
+- GitHub repository inspection only.
+- `git ls-remote https://github.com/Panniantong/Agent-Reach HEAD` returned
+  `17624268a059ccfb23eba8a2ba50f9f92c8dc0ca`.
+- Fetched `LICENSE`, `pyproject.toml`, `docs/install.md`, and `SECURITY.md`
+  through the GitHub connector.
+
+### Known Risks
+
+- Agent Reach has a broad install surface: `pipx`/`pip`, upstream tools,
+  optional Playwright, `browser-cookie3`, cookies, proxies, MCP servers, and
+  download-capable tools.
+- Reddit and X/Twitter richer lanes depend on cookies or other sensitive setup.
+- For Raven, Agent Reach must not write Raven data on this Mac.
+- For CereBro, Agent Reach must not bypass Aang, Cortana, Spock, the Approval
+  Queue, Ledger receipts, or per-channel approval.
+
+### Next Slice
+
+- Design a shared `SourceGateway` interface for Raven and CereBro using the
+  Agent-Reach-shaped channel model.
+- Start with public/manual lanes only.
+- Keep cookie, proxy, download, MCP, browser automation, and watcher channels
+  disabled until Spock records a channel receipt and the user approves.
+
+## 2026-05-08 2100 - Front-End Build Steward: Editable Run Ledger
+
+### What Changed
+
+- Added local run metadata to the Sessions ledger:
+  - `sessions.title`
+  - `sessions.notes`
+  - Existing databases get both columns through an additive migration.
+- Updated session display naming:
+  - A saved run title now becomes the canonical display name.
+  - Untitled runs still fall back to derived active/closed agent/project labels.
+- Added `sessions.updateLedger`:
+  - Updates only local Ledger title and notes.
+  - Does not touch Claude session ids, project ownership, or external systems.
+- Updated front-end surfaces:
+  - Sessions ledger rows show saved notes under the run label.
+  - Each row has a compact inline editor for title and notes.
+  - Task receipts and Project Lab receipts inherit saved run titles through the
+    existing `sessionDisplayName` path.
+
+### Files Touched
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/sessions.ts`
+- `app/server/routers/tasks.ts`
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/SessionsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `pnpm check` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- The Sessions ledger now has user-authored labels instead of only generated
+  labels.
+- The edit UI stays compact and visible. No hidden automation, external write,
+  or approval side effect was added.
+
+### Known Risks
+
+- The inline editor has not had screenshot QA in this turn.
+- Run notes are currently visible only in Sessions. Outputs and Memory should
+  consume the same run label path next.
+
+### Next Front-End Slice
+
+- Carry `sessionDisplayName` into Outputs and Memory receipt rows.
+- Then add a small session filter where those surfaces already support project
+  or source filtering.
+
+## 2026-05-08 2053 - Front-End Build Steward: Human Run Labels
+
+### What Changed
+
+- Added a shared session display-name contract:
+  - `sessions.list` now returns `displayName`.
+  - Display names include active/closed state, agent class, run id, and project
+    name when known.
+- Extended task session receipts:
+  - `tasks.list` and `tasks.create` now return `sessionDisplayName` when a task
+    is linked to a run.
+  - Project Lab recent tasks now receive the same session display label.
+- Updated front-end surfaces:
+  - Sessions ledger shows the readable run name in the first column.
+  - Tasks create-row run selector uses the readable label.
+  - Tasks row receipts show the readable label instead of only `Run #id`.
+  - Project Lab task receipts show the readable label when present.
+
+### Files Touched
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/sessions.ts`
+- `app/server/routers/tasks.ts`
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `pnpm check` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Runs now have a human-readable receipt across Ledger and Project Lab.
+- The label is computed in the router, not stored as duplicate database state.
+- This keeps provenance visible while preserving the compact shell density.
+
+### Known Risks
+
+- The label is still derived from `hero_class`; future user-facing run titles
+  should become canonical once the Sessions ledger supports naming.
+- Browser screenshot capture was not available in this turn.
+
+### Next Front-End Slice
+
+- Add editable local run titles or run notes to the Sessions ledger.
+- Then use those titles in Tasks, Project Lab, Outputs, and Memory receipts.
+
+## 2026-05-08 2042 - Front-End Build Steward: Task Session Linkage
+
+### What Changed
+
+- Added first-class session linkage to Ledger tasks:
+  - `tasks.session_id` is now part of the schema.
+  - Existing local databases get the column through an additive migration.
+  - `idx_tasks_session` is created after the migration gate, so older
+    databases do not fail boot.
+- Updated task router behavior:
+  - Task list rows now return `sessionId`, session started time, and the
+    linked Claude session id when present.
+  - `tasks.list` can filter by `sessionId`.
+  - `tasks.create` accepts `sessionId`.
+  - If a task is created with a session and no explicit project, the task
+    inherits the session project.
+- Linked generated work:
+  - Terminal Lab follow-up tasks now keep the originating observation session.
+  - Hedwig capture tasks now keep the originating capture session when present.
+- Updated front-end surfaces:
+  - Tasks panel has a compact optional run selector in the create row.
+  - Task rows show a small `Run #` receipt when linked.
+  - Tasks panel now has a compact run filter row.
+  - Run selector labels show active/closed state and project name when known.
+  - Project Lab current-task rows show the linked run id when present.
+
+### Files Touched
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/tasks.ts`
+- `app/server/routers/terminalLab.ts`
+- `app/server/routers/hedwig.ts`
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- This is the first functional bridge after the visual normalization pass.
+- The UI now shows task provenance in a small receipt instead of turning runs
+  into a large new surface.
+- Project Lab remains read-only for task creation. It now reflects session
+  linkage without adding hidden writes.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn, so visual QA used
+  runtime availability plus TypeScript and router tests.
+- Run filter counts are intentionally local to the current task query. A later
+  aggregate endpoint can make cross-filter counts exact if needed.
+
+### Next Front-End Slice
+
+- Continue linking command observations, tasks, and Project Lab into a clearer
+  “this came from that run” trail.
+- Add richer session names once the session ledger has user-facing run titles.
+
+## 2026-05-08 2036 - Front-End Build Steward: Viewport Polish
+
+### What Changed
+
+- Ran a viewport-oriented DOM pass after the broad four-zone QA.
+- Applied a small shell polish patch:
+  - Shortened the Ask Aang placeholder from `Ask Aang. He will read the mode
+    before Cortana routes it.` to `Ask Aang. Cortana routes it.`
+  - Gave Keep view toggles explicit accessible names:
+    - `Show Keep blueprint view`
+    - `Show Keep scene view`
+  - Changed visible Keep view toggle labels from lowercase `blueprint` /
+    `scene` to `Blueprint` / `Scene`.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime checks passed:
+  - No `Unexpected Error`.
+  - `Show Keep blueprint view` count: 1.
+  - `Show Keep scene view` count: 1.
+  - Short Ask Aang placeholder count: 1.
+
+### Front-End Steward Review
+
+- The command bar now fits the compact shell better.
+- Keep view toggles now have clearer names for browser automation and assistive
+  tech.
+
+### Known Risks
+
+- Screenshot capture is still not reliable through the current browser bridge.
+- Further visual polish should stay small and route-specific until screenshot
+  QA works.
+
+### Next Front-End Slice
+
+- Either continue small live-browser polish patches or switch from UI cleanup
+  into the next functional build slice.
+
+## 2026-05-08 2034 - Front-End Build Steward: Broad Visual QA
+
+### What Changed
+
+- Ran a broad four-zone browser QA pass after the primitive normalization,
+  dead-code cleanup, and density work.
+- No corrective patch was needed in this pass.
+
+### Files Touched
+
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime checks passed:
+  - Keep renders with castle/blueprint content.
+  - Ask Aang command input count: 1.
+  - Tools button count: 1.
+  - Workshop renders Workbench.
+  - Workshop exposes Project Lab, Terminal Lab, and Research exact route
+    buttons.
+  - Ledger renders overview.
+  - Ledger exposes Tasks, Outputs, and Memory route buttons.
+  - Basement renders overview.
+  - Basement exposes Settings, Models, and Automation route buttons.
+  - Tools menu exposes Skills and Clear Sessions menu items.
+  - No `Unexpected Error` in any checked zone.
+
+### Front-End Steward Review
+
+- The app is stable after the normalization and density passes.
+- Current route duplication is intentional where overview cards and zone tabs
+  both expose the same destinations.
+- Remaining native control matches live inside shared primitives only.
+
+### Known Risks
+
+- This pass used DOM/runtime QA. Screenshot capture still has not been reliable
+  enough for a screenshot-first visual review.
+- Fine visual issues may remain in dense rows until a screenshot/manual
+  viewport pass is done.
+
+### Next Front-End Slice
+
+- Do a screenshot/manual viewport polish pass when image capture cooperates.
+- Otherwise continue with small targeted visual patches from the live browser:
+  dense row line-height, card heights, and mobile wrapping.
+
+## 2026-05-08 2032 - Front-End Build Steward: Ledger Basement Density
+
+### What Changed
+
+- Continued density and hierarchy work through Ledger and Basement detail
+  panels.
+- Tightened Ledger panels:
+  - `TasksPanel`
+  - `SessionsPanel`
+  - `ArtifactsPanel`
+  - `MemoryPanel`
+  - `ApprovalDashboardPanel`
+- Tightened Basement panels:
+  - `ConfigPanel`
+  - `ModelToolsPanel`
+  - `PiccoloPanel`
+- Reduced first-level header, status strip, form, filter, list, and card
+  spacing across those panels.
+- Kept behavior unchanged. No new execution, write, approval, fetch, scheduling,
+  or cleanup behavior was added.
+
+### Files Touched
+
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime checks passed:
+  - No `Unexpected Error`.
+  - Ledger route rendered.
+  - Tasks panel rendered.
+  - Basement route rendered.
+  - Model Registry rendered.
+
+### Front-End Steward Review
+
+- Ledger and Basement panels now better match Workshop and shell density.
+- Repeated destination controls count twice in the browser because both the zone
+  tabs and overview cards expose the same routes. That is expected.
+- The pass stayed focused on first-level layout density. Deep inspector content
+  can still be tuned separately.
+
+### Known Risks
+
+- This was DOM/runtime QA, not screenshot QA.
+- Some panels may now need visual line-height review in dense rows, especially
+  Output Library and Approval Queue.
+
+### Next Front-End Slice
+
+- Run a broad visual QA pass across Keep, Workshop, Ledger, and Basement.
+- If screenshot capture still fails, use DOM probes plus selective manual
+  browser inspection and keep diffs small.
+
+## 2026-05-08 2030 - Front-End Build Steward: Workshop Density
+
+### What Changed
+
+- Continued visual density and hierarchy work through the live Workshop
+  surfaces.
+- Tightened `WorkbenchPanel`:
+  - Smaller header band.
+  - Smaller status text.
+  - Reduced main gutter and grid gaps.
+  - Denser evidence lane cards.
+  - Smaller first-level summary blocks.
+- Tightened `TerminalLabPanel`:
+  - Smaller header/status strip.
+  - Reduced command form spacing.
+  - Reduced main content gutter.
+  - Narrowed the right column slightly.
+- Tightened `SurferSourcesPanel`:
+  - Smaller header/status strip.
+  - Reduced research/public URL form spacing.
+  - Reduced main content gutter.
+  - Narrowed the right column slightly.
+- Tightened `ProjectLabPanel`:
+  - Smaller header/status strip.
+  - Reduced filter/control band spacing.
+  - Reduced project grid gutter and first-level card padding.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime checks passed:
+  - No `Unexpected Error`.
+  - Workbench visible after opening Workshop.
+  - `Open Terminal Lab` exact button count: 1.
+  - `Open Research` exact button count: 1.
+  - `Open Project Lab` exact button count: 1.
+  - Terminal Lab visible after opening Terminal Lab.
+  - Surfer Sources visible after opening Research.
+  - Project Lab visible after opening Project Lab.
+
+### Front-End Steward Review
+
+- Workshop now feels closer to the compact shell density instead of carrying
+  large prototype-era gutters.
+- The pass stayed at the first-level layout layer. Deep inspector/detail
+  surfaces were not rewritten in this slice.
+
+### Known Risks
+
+- This is still DOM/runtime QA, not screenshot QA.
+- Browser-tool output again included a Statsig network warning from the in-app
+  harness, not from CereBro.
+- Workbench remains the largest dense panel. Its deep evidence inspector should
+  get a separate pass if it feels visually heavy.
+
+### Next Front-End Slice
+
+- Continue density pass through Ledger detail panels or Basement detail panels.
+- Then do screenshot-based visual review when browser image capture cooperates.
+
+## 2026-05-08 2025 - Front-End Build Steward: Zone Content Density
+
+### What Changed
+
+- Continued visual hierarchy work inside the live zone content.
+- Tightened Keep view controls:
+  - Reduced floor/view control band padding.
+  - Reduced floor button height.
+  - Reduced empty Hub callout size.
+- Tightened Keep first-action dock:
+  - Reduced bottom/side inset.
+  - Reduced grid gap and padding.
+  - Reduced state block and action-card padding.
+  - Hid secondary action metadata until wider viewports.
+- Tightened Ledger overview:
+  - Reduced page padding and grid gaps.
+  - Reduced intro band padding and copy scale.
+  - Reduced metric-card padding and value size.
+  - Reduced Receipt Rules block density.
+- Tightened Basement overview with the same pattern:
+  - Smaller intro band.
+  - Smaller configuration cards.
+  - Smaller Configuration Rules block.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime checks passed:
+  - No `Unexpected Error`.
+  - Ledger overview and Receipt Rules visible after opening Ledger.
+  - Basement overview and Configuration Rules visible after opening Basement.
+  - Keep first-action dock controls present:
+    - `Evidence: Open Workshop`
+    - `Resume: Active work`
+    - `Approvals: Waiting gates`
+    - `Capture: Hedwig intake`
+
+### Front-End Steward Review
+
+- The live content layer now better matches the tighter shell density.
+- Ledger and Basement overview cards read more like operational summaries than
+  landing-page blocks.
+- Keep first actions remain available without taking as much vertical space
+  over the castle/blueprint.
+
+### Known Risks
+
+- This is still DOM/runtime QA, not screenshot QA.
+- The visible-text probe does not reliably see bottom overlay text, so use role
+  checks for the Keep first-action dock.
+
+### Next Front-End Slice
+
+- Continue into Workshop panel spacing and dense panel headers.
+- Then run a broad visual QA pass when screenshot capture is reliable.
+
+## 2026-05-08 2022 - Front-End Build Steward: Shell Density Pass
+
+### What Changed
+
+- Started the visual density and hierarchy pass on the live four-zone shell.
+- Tightened the global header:
+  - Reduced vertical padding.
+  - Reduced mark size.
+  - Added a compact active-zone receipt in the center.
+- Tightened the left zone rail:
+  - Reduced rail width.
+  - Reduced item padding.
+  - Added a small framed glyph cell for the active zone.
+  - Hid rail blurbs until wider viewports.
+- Tightened the zone surface row:
+  - Reduced padding and tab height.
+  - Added a compact zone marker.
+  - Hid surface metadata until wider viewports.
+  - Tightened receipt badges.
+- Tightened the context panel:
+  - Reduced width from `w-72` to `270px`.
+  - Reduced section padding and text scale in dense receipt areas.
+- Tightened the Ask Aang command bar:
+  - Reduced vertical padding.
+  - Reduced mode/input/action heights.
+  - Hid the explanatory routing sentence until `2xl`.
+  - Reduced route-preview width.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Native-control audit remains clean outside shared primitive internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - Permission mode control count: 1.
+  - Tools control count: 1.
+  - `Open Workshop` exact button count: 1.
+  - `Open Project Lab` exact button count after opening Workshop: 1.
+  - Ask Aang input count: 1.
+
+### Front-End Steward Review
+
+- The first viewport should now feel more like a compact operational shell and
+  less like stacked prototype bands.
+- The active zone is visible in the header without requiring the user to parse
+  the left rail.
+- The command bar takes less height while preserving route preview and hard-gate
+  language.
+
+### Known Risks
+
+- This was DOM/runtime QA, not a screenshot-reviewed visual pass.
+- `Open Keep` still has two exact matches because both the left rail and zone
+  surface expose Keep. That is expected. Workshop and Project Lab remain single
+  exact targets.
+- Browser-tool output included a Statsig network warning from the in-app harness,
+  not from the CereBro app.
+
+### Next Front-End Slice
+
+- Continue visual hierarchy into zone content: Keep first-action dock, Ledger
+  overview cards, Basement overview cards, and Workshop panel spacing.
+- Then do a screenshot-based review if the browser image path cooperates.
+
+## 2026-05-08 2016 - Front-End Build Steward: Dead Fork Cleanup
+
+### What Changed
+
+- Removed confirmed unused old fork/showcase components:
+  - `AIChatBox.tsx`
+  - `AgentPanel.tsx`
+  - `DashboardLayout.tsx`
+  - `DashboardLayoutSkeleton.tsx`
+  - `HeroPanel.tsx`
+  - `Onboarding.tsx`
+  - `TranscriptInput.tsx`
+  - `pages/ComponentShowcase.tsx`
+- Cleaned the stale Onboarding import comment from `Home.tsx`.
+- Confirmed `App.tsx` only routes `/` and `/404`; `ComponentShowcase` was not
+  reachable from the app router.
+- Confirmed deleted components had no remaining source references after cleanup.
+- Re-ran the native-control audit. Remaining matches are only shared primitive
+  internals:
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/sidebar.tsx`
+
+### Files Touched
+
+- `app/client/src/components/AIChatBox.tsx` deleted
+- `app/client/src/components/AgentPanel.tsx` deleted
+- `app/client/src/components/DashboardLayout.tsx` deleted
+- `app/client/src/components/DashboardLayoutSkeleton.tsx` deleted
+- `app/client/src/components/HeroPanel.tsx` deleted
+- `app/client/src/components/Onboarding.tsx` deleted
+- `app/client/src/components/TranscriptInput.tsx` deleted
+- `app/client/src/pages/ComponentShowcase.tsx` deleted
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- Reference audit passed for deleted component names.
+- Native-control audit passed for active app code; remaining matches are shared
+  primitive internals only.
+- `pnpm check` passed.
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - `Open Workshop` exact button count: 1.
+  - `Open Project Lab` exact button count after opening Workshop: 1.
+
+### Front-End Steward Review
+
+- The active app is no longer carrying a large dead showcase/fork control
+  surface.
+- The primitive normalization pass now has a clean audit boundary: shared UI
+  internals are the only native controls left.
+- The duplicate `Open Keep` target is expected because both left rail and zone
+  surface expose Keep. Workshop and Project Lab remain exact single targets.
+
+### Known Risks
+
+- If the old showcase route is wanted later, it should be rebuilt against the
+  CereBro primitive system instead of restored wholesale.
+- If onboarding returns, it should be written as a CereBro setup flow rather
+  than reusing the deleted fork wizard.
+
+### Next Front-End Slice
+
+- Move from primitive cleanup into visual density and hierarchy review across
+  the four live zones.
+- Start with the live first viewport: header, left rail, zone surface row,
+  command bar, and context panel spacing.
+
+## 2026-05-08 2013 - Front-End Build Steward: Utility Surfaces
+
+### What Changed
+
+- Normalized `HandoffArchivePanel` close control and size chip with shared
+  primitives.
+- Normalized `ErrorBoundary` reload action with the shared destructive button
+  primitive.
+- Audited reachability for remaining native-control files.
+- Confirmed `ErrorBoundary` is live through `App.tsx`.
+- Confirmed `HandoffArchivePanel` exists but is not currently wired into the
+  live shell.
+- Confirmed the remaining native-control matches are old fork/showcase or
+  disabled onboarding surfaces:
+  - `HeroPanel`
+  - `Onboarding`
+  - `TranscriptInput`
+  - `AgentPanel`
+  - `AIChatBox`
+  - `DashboardLayout`
+  - Shared ui internals: `input`, `textarea`, `sidebar`
+
+### Files Touched
+
+- `app/client/src/components/HandoffArchivePanel.tsx`
+- `app/client/src/components/ErrorBoundary.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused utility native-control audit passed for `HandoffArchivePanel` and
+  `ErrorBoundary`.
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - Global permission mode control count: 1.
+  - Tools control count: 1.
+  - `Open Workshop` exact button count: 1.
+
+### Front-End Steward Review
+
+- The live error fallback now uses the shared destructive action shape.
+- The handoff archive proposal surface is closer to the shared control grammar,
+  although it is not currently a live route.
+- The remaining raw controls should not be normalized blindly. They should be
+  deleted if dead, or redesigned if reintroduced.
+
+### Known Risks
+
+- `ComponentShowcase` still imports `AIChatBox`. That page is not the live
+  CereBro shell, but it may still compile as a dev route.
+- `Onboarding` is currently commented out in `Home.tsx`; re-enabling it would
+  reintroduce old native controls.
+- `DashboardLayout`, `AgentPanel`, `HeroPanel`, and `TranscriptInput` appear to
+  be old fork surfaces. Confirm before deleting.
+
+### Next Front-End Slice
+
+- Decide dead-code cleanup versus normalization for old fork panels.
+- Preferred next move: remove or quarantine confirmed dead fork components
+  instead of spending polish on surfaces that CereBro no longer uses.
+
+## 2026-05-08 1958 - Front-End Build Steward: Skills Manager
+
+### What Changed
+
+- Normalized `SkillsManager`, which is still reachable from the live Tools
+  menu.
+- Replaced editor close/save/cancel controls with shared buttons.
+- Replaced the editor textarea with the shared textarea primitive.
+- Replaced modal close, Agents/Skills tabs, Global/Project scope controls,
+  Refresh, New, row copy/edit/delete icon controls, project selector, and new
+  item name input with shared primitives.
+- Replaced the browser `confirm()` delete path with a shared hard-gate dialog.
+- Ran a focused audit. `SkillsManager.tsx` now has no raw `<button>`,
+  `<input>`, `<textarea>`, `<select>`, or `confirm()` use.
+
+### Files Touched
+
+- `app/client/src/components/SkillsManager.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused `SkillsManager` native-control audit passed.
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - Tools menu opens.
+  - Skills menu item opens the Claude Code Manager.
+  - Close control count: 1.
+  - New Agent/Skill control count: 1.
+
+### Front-End Steward Review
+
+- The last reachable Tools modal now follows the shared primitive system.
+- Destructive agent/skill deletion is now shaped as an explicit hard gate.
+- This still edits real Claude Code agent/skill files through the existing
+  mutation paths, so future UX should make scope and destination more visible.
+
+### Known Risks
+
+- `SkillsManager` still has old fork styling and copy. Controls are normalized,
+  but the surface needs a CereBro visual-density redesign later.
+- Remaining raw controls are now mostly legacy/dead or shell-error surfaces:
+  `ErrorBoundary`, `TranscriptInput`, `AIChatBox`, `AgentPanel`,
+  `DashboardLayout`, `HeroPanel`, `Onboarding`, and `HandoffArchivePanel`.
+- `HandoffArchivePanel` may still be useful if it is wired anywhere. Audit
+  reachability before rewriting.
+
+### Next Front-End Slice
+
+- Sweep `HandoffArchivePanel`, `ErrorBoundary`, and any reachable utility
+  surfaces.
+- Then either normalize or delete confirmed dead fork panels.
+
+## 2026-05-08 1955 - Front-End Build Steward: Active Surface Leftovers
+
+### What Changed
+
+- Continued the primitive normalization pass through active CereBro leftovers.
+- Replaced the global permission-mode native select with the shared select
+  primitive.
+- Normalized Design Review controls:
+  - Target/status/project/evidence selects now use shared selects.
+  - Checklist toggles now use the shared checkbox primitive.
+- Normalized Aang Companion controls:
+  - Close, local-state controls, event-route cards, and chips now use shared
+    buttons and badges.
+- Normalized remaining Model Registry capability row controls.
+- Normalized Basement Configuration copy/close controls.
+- Replaced the Workbench temporary media file control with the shared input
+  primitive.
+- Ran a focused audit across the changed active files. No raw native controls
+  remain in:
+  - `PermissionModeControl.tsx`
+  - `DesignReviewPanel.tsx`
+  - `AangCompanionPanel.tsx`
+  - `ModelToolsPanel.tsx`
+  - `ConfigPanel.tsx`
+  - `WorkbenchPanel.tsx`
+
+### Files Touched
+
+- `app/client/src/components/PermissionModeControl.tsx`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused active-file native-control audit passed.
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - Global permission mode control count: 1.
+  - Context panel control count: 1.
+  - `Open Workshop` exact button count: 1.
+  - `Open Project Lab` exact button count: 1.
+
+### Front-End Steward Review
+
+- The active shell, Workshop, Ledger, Basement, Design Review, and Aang
+  Companion surfaces now speak the shared primitive language.
+- The permission mode selector is no longer a native browser island in the
+  header.
+- Design Review remains local-record-only and does not patch code or start
+  browser/command/file actions.
+
+### Known Risks
+
+- Remaining raw controls are mostly legacy or secondary surfaces:
+  `SkillsManager`, `ErrorBoundary`, old `AgentPanel`, `HeroPanel`,
+  `AIChatBox`, `TranscriptInput`, `DashboardLayout`, `HandoffArchivePanel`, and
+  `Onboarding`.
+- `SkillsManager` is still reachable from the Tools menu and should be the next
+  cleanup target.
+- Browser screenshot capture was not used for this pass.
+
+### Next Front-End Slice
+
+- Normalize `SkillsManager` because it remains reachable from the live Tools
+  menu.
+- Then sweep `HandoffArchivePanel` and the old fork panels or delete confirmed
+  dead code.
+
+## 2026-05-08 1951 - Front-End Build Steward: Home Shell Controls
+
+### What Changed
+
+- Continued the front-end primitive normalization pass through the Home shell.
+- Replaced remaining native Home buttons and input with shared primitives:
+  - Activity log close.
+  - Clear Sessions hard-gate footer actions.
+  - Keep floor/view toggles.
+  - Keep first-action dock.
+  - Zone surface buttons.
+  - Ledger and Basement overview card buttons.
+  - Intake preview Create Task and Dismiss actions.
+  - Context-panel agent/session badges and session row controls.
+  - Command mode buttons, Ask Aang input, route-preview chips, Attach, and
+    Preview.
+- Replaced Home-shell custom chips with shared badges.
+- Tightened zone surface accessible names so `Open Project Lab` resolves as an
+  exact browser target while keeping the surface metadata visible/title-backed.
+- Ran a focused Home native-control audit. `Home.tsx` now has no raw
+  `<button>`, `<input>`, `<textarea>`, or `<select>` controls.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused Home native-control audit passed.
+- Browser DOM/runtime check passed:
+  - No `Unexpected Error`.
+  - `Open Workshop` exact button count: 1.
+  - `Open Project Lab` exact button count: 1.
+  - `Open Terminal Lab` exact button count: 1.
+  - Project Lab visible after opening Workshop.
+
+### Front-End Steward Review
+
+- The global shell now uses the same control grammar as the normalized Ledger,
+  Workshop, Project Lab, and Basement panels.
+- Browser automation can target Project Lab directly again.
+- The hard-gate Clear Sessions modal still uses the shared destructive action.
+
+### Known Risks
+
+- This was DOM/runtime QA, not screenshot QA.
+- Button-as-card layouts should still get visual screenshot review once capture
+  is reliable again.
+- A few informational cards remain custom non-interactive surfaces. That is
+  acceptable for now because they are not controls.
+
+### Next Front-End Slice
+
+- Sweep any remaining build-only or rarely used component surfaces for raw
+  controls.
+- Then do a broader visual density pass across the four zones.
+
+## 2026-05-08 1941 - Front-End Build Steward: Project Lab Runtime Check
+
+### What Changed
+
+- Browser-checked Workshop after the Project Lab normalization pass.
+- Confirmed via DOM snapshot:
+  - No `Unexpected Error` screen is visible.
+  - Workshop is visible.
+  - Project Lab content is visible.
+- The specific browser locator for `Open Project Lab` did not resolve by that
+  exact accessible name, but Project Lab content was already present in the
+  Workshop snapshot.
+
+### Files Touched
+
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- Browser DOM/runtime check passed for Workshop / Project Lab visibility.
+- Prior `pnpm check` for Project Lab passed.
+
+### Front-End Steward Review
+
+- Project Lab remains renderable after the large control normalization pass.
+- Accessible naming for the Project Lab route button should be tightened later
+  so browser automation can target it directly.
+
+### Known Risks
+
+- This remains DOM/runtime QA, not screenshot QA.
+- Project Lab route button accessible naming should be audited with the Home
+  shell pass.
+
+### Next Front-End Slice
+
+- Continue Home shell and route button accessibility/control normalization.
+- Then sweep build-only surfaces.
+
+## 2026-05-08 1941 - Front-End Build Steward: Project Lab Inspector
+
+### What Changed
+
+- Continued Project Lab normalization through the local inspector.
+- Replaced inspector Hide, queue tabs, search, reset, type filters, sort
+  filters, detail row selectors, draft note textarea, append-note button,
+  selectable status blocks, empty-state buttons, signal blocks, and recent-list
+  row controls with shared primitives.
+- Added shared `Input` and `Textarea` usage to Project Lab.
+- Ran a focused Project Lab native-control audit.
+- The audit found no raw `<button>`, `<input>`, `<textarea>`, or `<select>`
+  controls in `ProjectLabPanel`.
+- Kept Project Lab read-only/proposal-only. No repo edits, command execution,
+  GitHub writes, external writes, or task behavior changes were added.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused Project Lab native-control audit passed.
+
+### Front-End Steward Review
+
+- Project Lab is no longer a major native-control island.
+- The inspector now shares the same button/input/textarea/badge language as
+  Ledger, Workshop, and Basement surfaces.
+
+### Known Risks
+
+- Project Lab is large. The native-control audit is clean, but browser visual
+  QA is still needed for dense button-as-row/card layouts.
+- Screenshot capture has timed out in this browser session, so use DOM/runtime
+  checks until screenshots recover.
+
+### Next Front-End Slice
+
+- Browser-check Workshop / Project Lab runtime.
+- Then continue shell/Home remaining raw controls and less-used build-only
+  surfaces.
+
+## 2026-05-08 1939 - Front-End Build Steward: Project Lab Cards
+
+### What Changed
+
+- Continued Project Lab primitive normalization into the project card area.
+- Replaced project Inspect controls with shared buttons.
+- Replaced priority/status/rank pills with shared badges.
+- Replaced local draft-action buttons with shared buttons.
+- Replaced recent Terminal observation and Hedwig capture row buttons with
+  shared button-as-row controls.
+- Replaced worktree dirty-state button with a shared destructive button-as-card
+  control.
+- Kept all behavior read-only/proposal-only. No repo edits, command execution,
+  GitHub writes, task creation behavior change, or external action was added.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- The main Project Lab card list now uses shared button and badge primitives for
+  its primary action rows.
+- Dirty worktree state remains visually risk-marked.
+
+### Known Risks
+
+- The Project Lab detail inspector still has many bespoke controls.
+- Button-as-card layout needs browser QA once the inspector pass is complete.
+
+### Next Front-End Slice
+
+- Normalize Project Lab local inspector header/search/filter controls.
+- Then continue nested inspector queue/detail actions.
+
+## 2026-05-08 1938 - Front-End Build Steward: Project Lab Top Filters
+
+### What Changed
+
+- Started the Project Lab normalization pass.
+- Replaced the always-visible Project Lab view filter buttons with shared
+  buttons.
+- Replaced attention signal filter buttons with shared buttons.
+- Replaced next-safe-action project cards with shared button-as-card controls.
+- Replaced next-safe-action reason pills with shared badges.
+- Kept Project Lab read-only. No repo edits, command execution, GitHub writes,
+  external writes, or task creation behavior was added.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- The top Project Lab control band is now closer to the shared CereBro control
+  system.
+- This was deliberately bounded because Project Lab is large and contains many
+  inspector surfaces.
+
+### Known Risks
+
+- Project Lab still has many bespoke controls in cards, local inspector,
+  signal blocks, draft notes, and nested helper components.
+- Button-as-card layout needs browser QA once more of the surface is normalized.
+
+### Next Front-End Slice
+
+- Continue Project Lab card and inspector controls in small passes.
+- Run a focused Project Lab native-control audit after each pass.
+
+## 2026-05-08 1936 - Front-End Build Steward: Workshop Runtime Check
+
+### What Changed
+
+- Browser-checked the Workshop route after Terminal Lab and Surfer Sources
+  control migration.
+- Confirmed via DOM snapshot:
+  - Workshop route opens.
+  - Workbench is visible.
+  - Terminal / Terminal Lab is visible.
+  - Surfer / Sources is visible.
+  - No `Unexpected Error` screen is visible.
+
+### Files Touched
+
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- Browser DOM/runtime check passed for Workshop.
+- Prior `pnpm check` for the Terminal/Surfer migration passed.
+
+### Front-End Steward Review
+
+- Workshop remains reachable after the normalization pass.
+- The main work surfaces are visible together: Workbench, Terminal, and Surfer.
+
+### Known Risks
+
+- This is DOM/runtime QA, not screenshot QA. Screenshot capture has timed out in
+  this browser session.
+- Project Lab still contains many bespoke controls and is the next major
+  Workshop cleanup target.
+
+### Next Front-End Slice
+
+- Normalize Project Lab controls in bounded passes.
+- Then browser-check Workshop again.
+
+## 2026-05-08 1935 - Front-End Build Steward: Terminal Surfer Control Audit
+
+### What Changed
+
+- Continued Terminal Lab normalization beyond the intake row.
+- Replaced diagnostic draft preview, copy, approval-copy, observation status,
+  approval-preview, link, task creation, learning-note, archive, output summary,
+  exit-code, and save-summary controls with shared primitives.
+- Replaced observed-output textarea and exit-code input with shared primitives.
+- Replaced helper `CopyButton` and `ScopeButton` internals with the shared
+  button primitive.
+- Ran a focused native-control audit across `TerminalLabPanel` and
+  `SurferSourcesPanel`.
+- The audit found no raw `<button>`, `<input>`, `<select>`, or `<textarea>`
+  controls in those two panels.
+- No command execution, shell action, external write, package install, approval
+  execution, or additional browser action was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused Terminal/Surfer native-control audit passed.
+
+### Front-End Steward Review
+
+- Terminal Lab is now much closer to a governed build surface: local previews,
+  local output summaries, and approval previews share the same control grammar.
+- Surfer Sources now aligns with the same control grammar while keeping public
+  URL ingest visibly risk-marked.
+
+### Known Risks
+
+- Surfer's `Ingest URL` still performs the existing approved public fetch
+  immediately after click. A future pass should add a hard-gate receipt.
+- Terminal Lab has many local actions. They are normalized but still need a
+  clearer grouping pass.
+
+### Next Front-End Slice
+
+- Browser-check Workshop routes after the Terminal/Surfer migration.
+- Then continue remaining main surfaces: Project Lab, Config/Basement leftovers,
+  and Home shell action buttons.
+
+## 2026-05-08 1933 - Front-End Build Steward: Surfer Terminal Intake Controls
+
+### What Changed
+
+- Continued primitive normalization into Workshop/source surfaces.
+- Terminal Lab:
+  - Replaced close, command input, Preview button, task link select, and session
+    link select with shared primitives.
+  - Replaced local chip rendering with the shared badge primitive.
+- Surfer Sources:
+  - Replaced close, research query input, Preview button, public URL input,
+    Ingest URL button, source-history owner filters, and Scrubbed filter with
+    shared primitives.
+  - Replaced source trust and mini pills with the shared badge primitive.
+  - Kept Ingest URL visibly risk-colored because it approves one public fetch.
+- No command execution, shell action, external browse beyond existing approved
+  URL ingest behavior, install, Notion write, Slack action, or approval
+  execution was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Terminal's top command-intake path now matches the normalized CereBro controls
+  while still stating execution is disabled.
+- Surfer's source planning and public-ingest forms now use normalized controls
+  and clearer risk coloring.
+
+### Known Risks
+
+- Terminal Lab still has deeper native controls in observation diagnostics,
+  local output notes, and helper button rows.
+- Surfer Sources still permits existing approved public URL ingestion after
+  pressing the risk button. A future pass should add a hard-gate receipt before
+  public fetch.
+
+### Next Front-End Slice
+
+- Continue Terminal Lab observation/detail controls.
+- Then run browser DOM checks on Workshop routes.
+
+## 2026-05-08 1932 - Front-End Build Steward: Terminal Intake Controls
+
+### What Changed
+
+- Continued primitive normalization outside Ledger into `TerminalLabPanel`.
+- Replaced Terminal Lab close, command input, Preview button, task link select,
+  and session link select with shared primitives.
+- Replaced Terminal Lab chips with the shared badge primitive.
+- Kept Terminal Lab proposal-only. No command execution, shell action,
+  package install, browser action, external write, or approval execution was
+  added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Terminal Lab's top command intake now matches the normalized CereBro control
+  system.
+- The surface still clearly says execution is disabled.
+
+### Known Risks
+
+- Lower observation and diagnostic controls in Terminal Lab still contain
+  bespoke buttons and native inputs.
+- Deeper cleanup should stay local-only and preserve approval-preview behavior.
+
+### Next Front-End Slice
+
+- Normalize Surfer Sources top forms.
+- Then return to Terminal Lab's observation/detail action controls.
+
+## 2026-05-08 1927 - Front-End Build Steward: Output Library Controls
+
+### What Changed
+
+- Continued Ledger primitive normalization through the Output Library.
+- Replaced Output Library close, kind filters, write kind select, title/body,
+  source/subdir fields, and Save control with shared primitives.
+- Replaced artifact lifecycle pills with the shared badge primitive.
+- Removed the now-unused `stateColor` helper.
+- Ran a focused native-control audit across Ledger panels:
+  - `TasksPanel`
+  - `ArtifactsPanel`
+  - `SessionsPanel`
+  - `ApprovalDashboardPanel`
+  - `MemoryPanel`
+- The audit found no raw `<button>`, `<select>`, `<input>`, `<textarea>`, or
+  native checkbox controls in those panels.
+- No behavior changes were made to durable artifact writes. Existing writes
+  still require valid title/body and continue through the existing approved
+  write paths.
+
+### Files Touched
+
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused Ledger native-control audit passed.
+
+### Front-End Steward Review
+
+- The visible Ledger suite now has a consistent shared-control language across
+  Tasks, Sessions, Approvals, Outputs, and Memory.
+- Destructive controls and risk-adjacent actions now use the normalized
+  destructive/risk surfaces instead of one-off styles.
+
+### Known Risks
+
+- Output writes are still immediate after pressing Save. The UI describes them
+  as durable history/draft/report saves, but a future pass should add a hard
+  gate or receipt preview for durable writes.
+- Browser visual screenshot capture has not recovered yet.
+
+### Next Front-End Slice
+
+- Browser-check Ledger after the Output Library pass.
+- Then continue native-control normalization outside Ledger, likely Terminal Lab
+  or Surfer Sources.
+
+## 2026-05-08 1925 - Front-End Build Steward: Tasks Sessions Controls
+
+### What Changed
+
+- Restarted the local dev server cleanly. It is running at
+  `http://localhost:3002/` under session `31131`.
+- Continued Ledger primitive normalization through Tasks and Sessions.
+- Replaced Tasks close, add, status advance, delete, filter, cancel, and
+  destructive confirm controls with shared primitives.
+- Replaced the Tasks input with the shared input primitive.
+- Replaced project filter count pills with shared badges inside shared buttons.
+- Replaced Sessions close control with the shared button primitive.
+- Kept existing task status, delete hard gate, and session polling behavior.
+
+### Files Touched
+
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/SessionsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Tasks now matches the Ledger destructive/risk-state language used by Memory.
+- Sessions had only one visible bespoke control and is now clean at the header.
+
+### Known Risks
+
+- Task status button coloring is now mapped to shared variants instead of custom
+  per-status colors. It is more consistent, but less individually colored.
+- Outputs remains the largest Ledger form-control island.
+
+### Next Front-End Slice
+
+- Normalize `ArtifactsPanel` / Ledger Output Library controls.
+- Run the focused Ledger native-control audit again.
+
+## 2026-05-08 1923 - Front-End Build Steward: Ledger Runtime Audit
+
+### What Changed
+
+- Removed the now-unused `KIND_COLOR` mapping from `MemoryPanel`.
+- Ran a focused native-control audit for `ApprovalDashboardPanel` and
+  `MemoryPanel`.
+- Confirmed the audit returns no raw `<button>`, `<select>`, `<input>`,
+  `<textarea>`, or native checkbox matches in those two Ledger panels.
+- Browser-checked the Ledger route through the in-app browser.
+- Confirmed via DOM snapshot that:
+  - Ledger route opens.
+  - Approval surfaces are visible.
+  - Memory / Knowledge Receipts are visible.
+  - No `Unexpected Error` screen is visible.
+- Observed that the dev server optimized new Radix dependencies during the
+  session and reloaded the browser client.
+
+### Files Touched
+
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Focused native-control audit passed for Approval Dashboard and Memory.
+- Browser DOM/runtime check passed for Ledger route visibility.
+
+### Front-End Steward Review
+
+- The two highest-visibility Ledger receipt surfaces now use shared primitives
+  rather than native control islands.
+- Runtime DOM check shows Ledger is rendering after the migrations.
+
+### Known Risks
+
+- Browser log buffer still contains stale HMR/Radix errors from before Vite
+  optimized the new dependencies. Restart the dev server before the next visual
+  QA pass.
+- Screenshot capture still timed out earlier. Use DOM checks until screenshot
+  capture succeeds again.
+
+### Next Front-End Slice
+
+- Restart the local dev server cleanly.
+- Reopen localhost and check browser logs after a fresh page load.
+- Continue Ledger cleanup through Tasks, Sessions, and Outputs if the fresh
+  runtime is clean.
+
+## 2026-05-08 1922 - Front-End Build Steward: Memory Receipt Controls
+
+### What Changed
+
+- Continued Ledger control normalization into `MemoryPanel`.
+- Replaced memory kind filter buttons with the shared button primitive.
+- Replaced memory search and proposal fields with shared input primitives.
+- Replaced the proposal kind native select with the shared select primitive.
+- Replaced Propose, Close, Delete, Cancel, and Delete Receipt controls with
+  shared buttons.
+- Replaced custom memory/proposal pills with the shared badge primitive.
+- Preserved the existing hard-gate dialog for deleting memory receipts.
+- No memory promotion, external write, source fetch, Notion write, Slack action,
+  or agent execution was added.
+
+### Files Touched
+
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Memory now fits the same Ledger control language as Tasks and Approval
+  Dashboard.
+- Destructive memory deletion still goes through the hard-gate modal.
+- Proposal entry remains local and explicit.
+
+### Known Risks
+
+- `KIND_COLOR` remains only as a legacy mapping and may be removable after a
+  small cleanup pass.
+- Memory is still a bottom drawer with compact height. It may need a full Ledger
+  page version later.
+
+### Next Front-End Slice
+
+- Run a focused native-control audit for visible Ledger panels.
+- Browser-check Ledger routes for runtime errors after the control migrations.
+
+## 2026-05-08 1921 - Front-End Build Steward: Approval Ledger Controls
+
+### What Changed
+
+- Continued the Ledger control normalization pass.
+- Replaced Approval Dashboard native selects with the shared select primitive:
+  - Project filter.
+  - Approval preview grouping.
+- Replaced approval group cards with shared button-as-card controls while
+  preserving local filter behavior.
+- Replaced approval preview row cards with shared button-as-card controls while
+  preserving selected-detail behavior.
+- No approval, rejection, execution, external write, tool call, browser fetch,
+  Notion write, Slack action, or command run was added.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Approval Dashboard now uses shared input, button, badge, and select primitives
+  across the visible filter and receipt-list surfaces.
+- It continues to read as an action receipt gate, not an execution surface.
+
+### Known Risks
+
+- Shared button-as-card composition still needs successful screenshot QA.
+- Browser console should be rechecked after the Ledger and Memory passes.
+
+### Next Front-End Slice
+
+- Normalize Memory filters and proposal controls.
+- Then run browser DOM/runtime checks for Ledger routes.
+
+## 2026-05-08 1919 - Front-End Build Steward: Browser Runtime Check
+
+### What Changed
+
+- Used the in-app browser to reload `http://localhost:3002/` after the
+  Workbench control passes.
+- Confirmed the stale `NAV_ITEMS is not defined` runtime error cleared after
+  reload.
+- Confirmed via DOM snapshot that:
+  - Keep is visible.
+  - Workshop is visible.
+  - Ledger is visible.
+  - Basement is visible.
+  - Workbench / Add Evidence is visible after opening Workshop.
+  - No `Unexpected Error` screen is visible.
+
+### Files Touched
+
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` had already passed for the Workbench card-action pass.
+- Browser DOM runtime check passed for the main shell and Workshop route.
+
+### Front-End Steward Review
+
+- The app is not sitting on the prior error boundary screen.
+- The Workbench route loads after the shared-control migration.
+- The browser screenshot API timed out, so this was DOM/runtime verification,
+  not pixel screenshot QA.
+
+### Known Risks
+
+- Browser console still contains older Radix hook and Vite HMR websocket errors
+  in the log buffer. The current DOM is rendering, but those logs should be
+  revisited if they recur after a fresh server restart.
+- Screenshot QA still needs a successful capture before claiming visual
+  polish.
+
+### Next Front-End Slice
+
+- Restart or refresh the dev server if the stale console errors keep appearing.
+- Continue Ledger filter normalization, starting with Approval Dashboard and
+  Memory.
+
+## 2026-05-08 1918 - Front-End Build Steward: Workbench Card Actions
+
+### What Changed
+
+- Continued the Workbench normalization sweep after a native-control audit.
+- Replaced Workbench lane card actions with the shared button primitive while
+  preserving their selected-state border and staging behavior.
+- Replaced Workbench evidence row actions with the shared button primitive while
+  preserving the selected evidence state and detail-panel behavior.
+- Kept the file picker native. It is the actual browser file input and remains
+  temporary-by-default.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- The Workbench primary lane and evidence-list actions now share focus,
+  disabled, compact density, and token behavior with the rest of the normalized
+  control family.
+- The Workbench is now much less visually split between custom cards and system
+  controls.
+
+### Known Risks
+
+- Shared button-as-card composition needs browser visual QA to confirm no text
+  clipping in dense evidence rows.
+- Remaining native controls in other main-route panels still need targeted
+  cleanup.
+
+### Next Front-End Slice
+
+- Browser-inspect Workbench at localhost.
+- Then move to Approval Dashboard or Memory filters, since those remain
+  high-visibility Ledger control surfaces.
+
+## 2026-05-08 1916 - Front-End Build Steward: Workbench Filters And Detail Controls
+
+### What Changed
+
+- Continued Workbench primitive normalization beyond the Add Evidence form.
+- Replaced native filter selects with the shared select primitive:
+  - Evidence kind filter.
+  - Project filter.
+  - Evidence grouping.
+- Replaced the Reset filter button with the shared button primitive.
+- Replaced the group-card filter buttons with shared buttons while preserving
+  their local filtering behavior.
+- Normalized the evidence detail appenders:
+  - Before/After picker search now uses shared input.
+  - Before/After kind and comparison selects now use shared select.
+  - Comparison title, summary, and result now use shared input/textarea.
+  - Append comparison now uses shared button.
+  - Validator agent and validation status now use shared select.
+  - Validation note now uses shared textarea.
+  - Append validation now uses shared button.
+- Kept all Workbench behavior local-only and append-only.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- First `pnpm check` caught one numeric select value mismatch.
+- Fixed `compareWithId` conversion to string for the shared select value.
+- Second `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Workbench now has a substantially cleaner shared-control footprint across the
+  primary evidence list, filters, grouping, Add Evidence, and detail appenders.
+- The panel is closer to the product promise: visible local evidence, shared by
+  user and agents, without hidden tool action.
+
+### Known Risks
+
+- A few lower Workbench buttons may still be native if they sit outside the
+  inspected sections.
+- This pass did not include browser screenshot QA.
+
+### Next Front-End Slice
+
+- Run a targeted `rg` sweep for remaining native controls in main-route panels.
+- Then inspect localhost visually for Keep, Workbench, Ledger, and Basement.
+
+## 2026-05-08 1914 - Front-End Build Steward: Workbench Evidence Selects
+
+### What Changed
+
+- Continued the Workbench normalization pass.
+- Replaced the visible native selects in the Add Evidence form with the shared
+  select primitive.
+- Covered:
+  - Evidence kind.
+  - Project link.
+  - Task link.
+  - Session link.
+  - Route agent.
+  - Source link.
+  - Command link.
+  - Artifact link.
+  - Permission class.
+- Kept the existing route/permission state behavior intact.
+- No external capture, browser action, file write, provider call, or durable
+  media save was added.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- The main Workbench evidence-entry form now uses shared select, input,
+  textarea, button, badge, and checkbox primitives.
+- This makes the first practical evidence path more coherent with the Basement
+  and Ledger normalization work.
+
+### Known Risks
+
+- Workbench still has native selects and buttons in lower filter/detail
+  surfaces.
+- Long option labels can still be dense because the underlying data includes
+  full task, source, command, and artifact names.
+
+### Next Front-End Slice
+
+- Normalize Workbench filters and detail-inspector controls.
+- Then use the browser to visually inspect the Keep, Workbench, Ledger, and
+  Basement routes.
+
+## 2026-05-08 1912 - Front-End Build Steward: Hedwig Action Button Normalization
+
+### What Changed
+
+- Continued the Hedwig control normalization pass.
+- Replaced remaining bespoke `<button>` controls in `HedwigInboxPanel` with the
+  shared button primitive.
+- Covered:
+  - Local capture triage.
+  - Source detail selection.
+  - Create Local Task.
+  - Save Source.
+  - Create Reminder Proposal.
+  - Create Message Draft.
+  - Proposal status transitions.
+  - Reminder/message detail selection.
+- Risk-adjacent proposal actions now use the shared risk button variant.
+- No Notion, Slack, reminder scheduling, message sending, browser, fetch, or
+  external write action was added.
+
+### Files Touched
+
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `rg "<button|</button>" client/src/components/HedwigInboxPanel.tsx -n`
+  returned no matches.
+
+### Front-End Steward Review
+
+- Hedwig is no longer a hand-styled button island.
+- The panel now uses shared buttons, badges, inputs, textarea, select, and
+  checkbox primitives in the visible proposal/review flows.
+
+### Known Risks
+
+- This pass did not change behavior or add hard gates. It only made existing
+  local proposal actions visually consistent and risk-colored.
+- The actions still need stronger receipt linkage in a later backend/UI pass.
+
+### Next Front-End Slice
+
+- Sweep Workbench for native selects and bespoke buttons.
+- Then review main-route panels for any remaining native control islands.
+
+## 2026-05-08 1911 - Front-End Build Steward: Workshop Hedwig Control Sweep
+
+### What Changed
+
+- Continued from the shorthand `'` keep-building request.
+- Replaced the Workbench `Sensitive` native checkbox with the shared checkbox
+  primitive.
+- Normalized the Hedwig proposal review field cluster:
+  - Priority and Approval Action now use the shared select primitive.
+  - Approval Scope and External Target now use the shared input primitive.
+  - Local Review Notes now uses the shared textarea primitive.
+  - Needs Review now uses the shared checkbox primitive.
+  - Save Local Review and Stage Approval Preview now use shared buttons.
+- Kept Hedwig proposal and approval preview behavior local-only. No Notion,
+  Slack, reminder, message, browser, fetch, or external action was run.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Workbench and Hedwig now carry the same shared checkbox language as the Model
+  Registry.
+- Hedwig's review block now reads like a governed Basement/Workshop form rather
+  than a hand-styled island.
+- The risk action remains visually distinct through the shared risk button.
+
+### Known Risks
+
+- Hedwig still has other bespoke buttons elsewhere in the panel. This pass
+  focused on the proposal review cluster because it contains the visible gated
+  external-action fields.
+- Design Review still contains a native checkbox, but that panel is build-only
+  and no longer on the primary user rail.
+
+### Next Front-End Slice
+
+- Continue Hedwig button cleanup where it affects proposal actions.
+- Then sweep remaining main-route bespoke selects and native form controls.
+
+## 2026-05-08 1908 - Front-End Build Steward: Checkbox Token Normalization
+
+### What Changed
+
+- Normalized the shared checkbox primitive to CereBro shell tokens.
+- Replaced generic theme classes with dark shell surfaces, visible focus ring,
+  disabled state, error state, compact 4px control radius, and token-matched
+  checked state.
+- Replaced the remaining native `Requires frontier reasoning` checkbox in
+  `ModelToolsPanel` with the shared checkbox primitive.
+
+### Files Touched
+
+- `app/client/src/components/ui/checkbox.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- The visible Model Registry controls now use shared input, textarea, button,
+  badge, select, and checkbox primitives.
+- The checkbox primitive now follows the same compact density and focus-state
+  language as the rest of the normalized UI family.
+
+### Known Risks
+
+- Other panels still contain native checkboxes and should move to the shared
+  checkbox primitive during their surface passes.
+- This pass did not add a full checkbox showcase audit.
+
+### Next Front-End Slice
+
+- Continue replacing native checkbox usage in Workbench and Hedwig where those
+  surfaces are visible in Workshop and Basement flows.
+- Keep each pass small enough to run `pnpm check` and archive.
+
+## 2026-05-08 1907 - Front-End Build Steward: Model Registry Select Migration
+
+### What Changed
+
+- Continued the shared primitive normalization pass inside
+  `ModelToolsPanel`.
+- Replaced the remaining native filter selects with the shared Radix-backed
+  `ui/select` primitive.
+- Replaced the local form-select helper internals with the shared select
+  primitive across:
+  - Capability kind.
+  - Access method.
+  - Privacy class.
+  - Approval level.
+  - Eval task.
+  - Eval outcome.
+  - Route privacy class.
+- Removed now-unused local input/button style helpers from the panel.
+
+### Files Touched
+
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Model Registry now uses shared input, textarea, button, badge, and select
+  primitives for its primary form controls.
+- This closes the obvious half-native form state left by the previous Basement
+  registry pass.
+
+### Known Risks
+
+- The checkbox in Route Preview is still native. It should move to the shared
+  checkbox primitive in a later control sweep.
+- Broader form-heavy panels still need the same select migration.
+
+### Next Front-End Slice
+
+- Continue shared control cleanup on the next form-heavy surface.
+- Prioritize checkboxes, switches, and select fields that are visible in the
+  main Keep / Workshop / Ledger / Basement routes.
+
+## 2026-05-08 1906 - Front-End Build Steward: Piccolo Automation Hygiene
+
+### What Changed
+
+- Continued the Basement cleanup into `PiccoloPanel`.
+- Reframed the surface as `Basement Automation Hygiene`.
+- Added a three-rule governance band:
+  - Read-only scans.
+  - Durable report writes require a hard gate.
+  - Cleanup proposals remain proposals until action receipts are approved.
+- Replaced bespoke header buttons with normalized shared buttons.
+- Replaced custom severity pills with the shared badge primitive.
+- Put `Save Report` behind the normalized hard-gate dialog.
+- Kept Piccolo cleanup read-only. Saving a report still only writes a
+  `cleanup_report` artifact after confirmation. It does not move, archive, or
+  delete files.
+
+### Files Touched
+
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Piccolo now matches the Basement rule: automation and hygiene are visible,
+  bounded, and gated.
+- The only durable write on the surface is named and confirmed before it runs.
+- Cleanup remains proposal-only.
+
+### Known Risks
+
+- The save-report flow still writes into the artifact library with
+  `approved: true` after the hard gate. A later backend pass should preserve
+  the UI receipt or approval id with the artifact record.
+- The hygiene report itself is still driven by the existing report endpoint.
+  This pass did not add scheduler automation.
+
+### Next Front-End Slice
+
+- Continue Basement normalization through the Settings surface or the model/tool
+  select controls.
+- Add receipt linkage for gated local writes when the backend approval model is
+  ready.
+
+## 2026-05-08 1905 - Front-End Build Steward: Basement Model Registry
+
+### What Changed
+
+- Continued the visible front-end normalization pass after the user typed `'`.
+- Reframed `ModelToolsPanel` from a generic tools page into the Basement Model
+  Registry.
+- Added a compact five-part registry status strip:
+  - Mode.
+  - External calls.
+  - Untested.
+  - External lanes.
+  - Blocked.
+- Added a Configuration Rules band that makes the model registry boundary
+  visible:
+  - Registry previews do not call providers, gateways, browsers, or local tools.
+  - Source URLs are evidence, not trust.
+  - External model/tool use needs a visible action receipt before it runs.
+- Converted local inputs, textareas, action buttons, close button, and badges
+  in this panel to shared normalized primitives where available.
+- Kept route previews proposal-only. No provider call, gateway call, browser
+  action, install, account setup, token use, or external write was added.
+
+### Files Touched
+
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+
+### Front-End Steward Review
+
+- Basement now has a clearer first model/tool governance surface.
+- The panel states the machine boundary before listing capabilities or route
+  previews.
+- Risk and disabled states now use the same normalized button and badge family
+  as the rest of the current shell pass.
+
+### Known Risks
+
+- The panel still uses local inline `select` styling because there is not yet a
+  complete app-wide select primitive migration.
+- Route previews remain deterministic proposal UI. They do not yet connect to a
+  real eval-backed router.
+- Browser screenshot verification was not run for this narrow pass. Localhost
+  remains available at `http://localhost:3002/`.
+
+### Next Front-End Slice
+
+- Continue Basement cleanup through Piccolo Automation.
+- Normalize remaining native select/check controls where shared primitives
+  exist.
+- Keep all automation and model/tool surfaces proposal-only unless the user
+  approves an external action.
+
+2026-05-08 Front rail cleanup correction:
+
+- User called out that the primitive normalization did not visibly change much
+  and asked why Design Review and UI / UX were on the front end.
+- Answer: they were build-phase reference surfaces, not end-user front-end
+  surfaces.
+- Removed `Design Review` and `UI / UX` from the primary left rail in
+  `app/client/src/pages/Home.tsx`.
+- Left the component files in place for now. They can be deleted or moved
+  behind a build-only/dev route later.
+
+Files touched in this correction:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`: passed.
+
+Known risks:
+
+- This only removes the two build-only panels from the primary nav. It does
+  not yet make the primitive work visually dramatic across the whole app.
+- The next visible improvement should be a real shell pass: nav reduction,
+  mode/route/evidence hierarchy, shared select fields, and removal of old
+  inline card/control styling.
+
+Storage impact:
+
+- No database, Notion, Slack, browser storage, or generated media changes.
+- Obsidian archive snapshot created for this handoff. Session history index
+  appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md,
+CEREBRO_UX_SYSTEM.md, and CEREBRO_SESSION_HANDOFF.md. Continue the visible UI
+normalization pass. Do not do another invisible primitive-only slice. Reduce
+the primary left rail to true user surfaces, move build/dev/reference panels
+out of the front rail, convert native selects and bespoke controls on the
+remaining visible panels, and make the mode/route/evidence hierarchy readable
+in the first viewport. Then run pnpm check, targeted tests, and browser
+screenshots. Update the handoff and Obsidian archive at the end.
+```
+
+## 2026-05-08 1825 - Front-End Build Steward: Four-Zone Shell Pass
+
+### What Changed
+
+- Started the local dev server at `http://localhost:3002/` so the front-end
+  pass can be watched live.
+- Replaced the crowded primary left rail with the 4-zone CereBro OS dock:
+  Keep, Workshop, Ledger, Basement.
+- Added a compact secondary surface strip inside the active zone so existing
+  panels remain reachable without making every internal tool a primary route.
+- Mapped current surfaces into the new IA:
+  - Keep: Keep, Aang, Capture.
+  - Workshop: Workbench, Project Lab, Terminal Lab, Research.
+  - Ledger: Tasks, Approvals, Outputs, Memory.
+  - Basement: Settings, Models, Automation.
+- Updated the command dock labels from implementation modes to user-facing
+  mode reads: Ask, Research, Build.
+- Added visible Aang-to-Cortana route copy under the command input so the shell
+  starts showing the required chain before a task is sent.
+- Removed the broken `%VITE_ANALYTICS_ENDPOINT%/umami` script placeholder from
+  `app/client/index.html`; it was causing malformed URI errors in localhost.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/index.html`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `curl http://localhost:3002/` confirmed the analytics placeholder is no
+  longer emitted in the served HTML.
+- Dev server HMR accepted `Home.tsx` and `index.html` changes.
+
+### Front-End Steward Review
+
+- This pass moves CereBro away from feature-pile navigation and toward the
+  locked Keep / Workshop / Ledger / Basement model.
+- Existing panels are still present. This is a shell IA pass, not a full
+  rewrite of panel contents.
+- The Keep remains the first screen and the product spine.
+- Workshop is now the default zone for evidence/tool work.
+- Ledger now owns proof/history surfaces.
+- Basement now owns settings, models, and automation.
+
+### Known Risks
+
+- The top header still exposes too many dev-era controls. Next shell pass should
+  reduce Demo, Live, Skills, Clear, Log, and Context into calmer global actions.
+- The secondary surface strip is functional, but panel interiors still carry
+  older panel-specific styling and should be normalized as surfaces are rebuilt.
+- Browser screenshot verification was not available from the current toolset;
+  the user can inspect the live localhost while the dev server remains running.
+- The dev server still logs missing session cookie messages during unauthenticated
+  polling. That is existing auth noise, not part of this visual pass.
+
+### Next Front-End Slice
+
+- Turn the header into the required thin project/status bar.
+- Move dev-only controls out of the daily shell.
+- Promote the Aang command bridge into a fuller mode/read/route/permission
+  preview without increasing shell clutter.
+- Continue using Threshold Summarize And Clear if context grows heavy.
+
+## 2026-05-08 1828 - Front-End Build Steward: Header Compression Pass
+
+### What Changed
+
+- Continued the front-end steward pass instead of stopping after the first shell
+  correction.
+- Compressed the top header into a calmer daily bar:
+  - visible brand/project identity on the left
+  - Aang/Cortana/Ledger chain in the center
+  - permission mode, connection state, context, and tools on the right
+- Moved dev-era controls into a compact Tools menu:
+  - Demo
+  - Live
+  - Skills
+  - Log
+  - Clear Sessions
+- Kept all existing actions reachable while reducing top-level noise.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `Home.tsx` update.
+
+### Front-End Steward Review
+
+- This pass supports the locked header rule: left current project/route, center
+  active chain summary, right status and global actions.
+- It removes another visible chunk of feature-pile behavior without deleting
+  working controls.
+- Clear Sessions is still available, but demoted because it is a dev/session
+  action, not a daily user action.
+
+### Known Risks
+
+- The Tools menu uses native `details`. It is acceptable for this swift pass,
+  but should move to the normalized dropdown primitive once the shell settles.
+- Header still does not show active project because the shell does not yet have
+  a global selected-project object.
+
+### Next Front-End Slice
+
+- Improve the Aang command bridge into one compact object with mode read,
+  route preview, permission preview, and attachment affordance.
+
+## 2026-05-08 1830 - Front-End Build Steward: Command Bridge Route Preview
+
+### What Changed
+
+- Continued building inside the live localhost session.
+- Added a compact route preview to the bottom command bridge.
+- Current route previews:
+  - Ask: Aang, Cortana.
+  - Research: Aang, Cortana, Surfer, Oak.
+  - Build: Aang, Cortana, Tony, Spock.
+- Added explicit preview-only gate copy: gates stay closed until approval.
+- Kept the intake preview mutation unchanged; this is a visible shell/UX pass.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `Home.tsx` update.
+
+### Front-End Steward Review
+
+- This pass makes the Aang-first chain more legible before submission.
+- It supports the locked UX rule that the user should see mode, route, and
+  approval posture before work starts.
+- It avoids creating another panel or modal.
+
+### Known Risks
+
+- The route preview is mode-based static shell state. The server-side
+  `commandIntake.preview` response still provides the richer real classification
+  after the user submits text.
+- Attachment handling remains disabled and still needs a proper evidence object
+  model before it becomes active.
+
+### Next Front-End Slice
+
+- Bind the static route preview more tightly to actual `commandIntake.preview`
+  results after submit.
+- Add a small project selector once the global selected-project model is ready.
+
+## 2026-05-08 1833 - Front-End Build Steward: Keep First Action Dock
+
+### What Changed
+
+- Added a compact first-action dock directly over the Keep home surface.
+- The Keep now exposes the finished-product first-screen actions:
+  - Evidence opens Workshop.
+  - Resume opens Project Lab.
+  - Approvals opens Ledger approval gates.
+  - Capture opens Hedwig intake.
+- Added a small Keep State readout so the first screen names whether chambers
+  are calm or moving.
+- Kept the action dock compact and anchored to the Keep rather than adding
+  another primary nav surface.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `Home.tsx` update.
+
+### Front-End Steward Review
+
+- This pass follows the finished-product UX spec: the first screen must support
+  asking, dropping/reviewing evidence, resuming active work, and reviewing
+  waiting approvals without opening a separate dashboard.
+- Ask remains in the command dock. The Keep dock covers the remaining first
+  actions.
+- Pixel art remains the anchor. The dock is a compact operational overlay, not
+  a replacement for the Keep.
+
+### Known Risks
+
+- The Evidence action opens the current Workbench shell. The Workbench still
+  needs a deeper build/review preset pass.
+- The Resume action currently opens Project Lab because there is not yet a
+  canonical active-work object.
+- Approval count is not wired into the dock yet.
+
+### Next Front-End Slice
+
+- Add live counts to the Keep dock after approval/task/source summaries are
+  exposed cheaply enough for the home shell.
+- Deepen the Workbench default view so Evidence opens to a useful surface.
+
+## 2026-05-08 1835 - Front-End Build Steward: Workbench Evidence Lanes
+
+### What Changed
+
+- Continued from the Keep Evidence action into the Workbench surface.
+- Reframed Workbench copy from "planning only" to "shared evidence surface for
+  user and agents."
+- Added first-read Workbench lanes:
+  - Preview: screens, images, browser views.
+  - Terminal: command output and logs.
+  - Validate: Oak or Spock notes.
+  - Compare: before and after proof.
+- Lane buttons stage the matching local evidence kind, route agent, and
+  permission class without opening browser/media tools or external writes.
+- Kept the Workbench local-only and append-only.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `WorkbenchPanel.tsx` update.
+
+### Front-End Steward Review
+
+- This pass gives the Keep Evidence action a meaningful destination.
+- It follows the Workbench rule: the user and agents look at the same evidence.
+- It keeps risky actions gated. The new lane buttons only prepare local records.
+
+### Known Risks
+
+- The lane buttons stage fields but do not scroll/focus the evidence form yet.
+- Workbench still needs a denser split-pane layout later. This pass improves
+  first-read utility without changing the whole panel architecture.
+
+### Next Front-End Slice
+
+- Add focus/scroll behavior from a lane button to the Add Evidence form.
+- Start turning Ledger into the proof layer instead of separate task/memory
+  panels.
+
+## 2026-05-08 1836 - Front-End Build Steward: Ledger Task Risk Pass
+
+### What Changed
+
+- Reframed the Tasks panel as `Ledger Work Queue`.
+- Added explicit copy that tasks are proof objects and status changes stay
+  visible.
+- Changed the task delete affordance from a quiet `x` to a visible destructive
+  `Delete` button.
+- Added explicit `type="button"` and an accessible label to task row controls.
+
+### Files Touched
+
+- `app/client/src/components/TasksPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `TasksPanel.tsx` update.
+
+### Front-End Steward Review
+
+- This pass supports the Ledger rule: proof before summary.
+- It also fixes a small risk-state issue. Deleting a task should not be hidden
+  behind a tiny neutral glyph.
+
+### Known Risks
+
+- Task deletion is still immediate. A future pass should route destructive
+  task removal through a hard gate or convert it to cancel/archive.
+- Tasks are only one Ledger object. Outputs, Memory, Sessions, and Approvals
+  still need the same proof-layer framing.
+
+### Next Front-End Slice
+
+- Add a Ledger overview surface or make the zone header show proof counts across
+  Tasks, Approvals, Outputs, Memory, and Sessions.
+
+## 2026-05-08 1840 - Front-End Build Steward: Ledger Gate And Tools Menu
+
+### What Changed
+
+- Added a hard-gate dialog before deleting a task from the Ledger work queue.
+- The delete gate names the action, target, and safer cancel path.
+- Replaced the temporary native header `details` Tools menu with the normalized
+  dropdown primitive.
+- Grouped the Tools menu by purpose:
+  - Session: Demo, Live.
+  - Tools: Skills, Log.
+  - Risk: Clear Sessions.
+- Kept Clear Sessions in the destructive/risk group instead of mixing it with
+  normal utilities.
+
+### Files Touched
+
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted both `TasksPanel.tsx` and `Home.tsx`.
+
+### Front-End Steward Review
+
+- This pass closes the immediate-delete risk called out in the prior Ledger
+  pass.
+- It also removes the temporary menu shape and brings the header back under the
+  shared primitive/menu grouping rule.
+- No external writes, browser actions, installs, or project repo operations were
+  introduced.
+
+### Known Risks
+
+- The task delete gate uses the normalized dialog, but task deletion still
+  removes the row after confirmation. A future data-model pass should consider
+  archive/cancel as the default Ledger behavior.
+- Clear Sessions is grouped as risk, but does not yet use a hard gate.
+
+### Next Front-End Slice
+
+- Put Clear Sessions behind a hard gate or move it deeper into Basement/dev
+  settings.
+- Add a Ledger overview surface that unifies tasks, approvals, outputs, memory,
+  and sessions as proof objects.
+
+## 2026-05-08 1841 - Front-End Build Steward: Shell Risk Gate And Sessions Route
+
+### What Changed
+
+- Put `Clear Sessions` behind a hard-gate dialog.
+- The clear gate names the target and clarifies that it clears visible Keep
+  sessions, not saved Ledger records.
+- Added `Sessions` back into the Ledger zone strip as a proof surface.
+- Wired the existing `SessionsPanel` into the new 4-zone navigation map.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `Home.tsx` update.
+
+### Front-End Steward Review
+
+- Clear Sessions now follows the hard-gate modal rule.
+- Ledger now includes the run-history surface it needs to prove work.
+- This pass fixes a regression from the shell IA compression: the existing
+  Sessions panel was imported but no longer reachable.
+
+### Known Risks
+
+- The Sessions panel itself still uses older panel structure and needs a Ledger
+  proof-layer framing pass.
+- The hard gate clears visible sessions after confirmation, but does not yet
+  create a receipt. A future pass should record local UI clear events.
+
+### Next Front-End Slice
+
+- Reframe Sessions as Ledger run history.
+- Add a compact Ledger overview surface before individual proof object views.
+
+## 2026-05-08 1847 - Front-End Build Steward: Ledger Proof Surfaces
+
+### What Changed
+
+- Reframed Sessions as `Ledger Run History`.
+- Added session proof stats: Active, Ended, Projects.
+- Added receipt-type chips to the active zone header. Ledger now exposes Tasks,
+  Sessions, Approvals, Outputs, and Memory as proof object types.
+- Reframed Outputs as `Ledger Output Library`.
+- Added output receipt stats: Rows, Write Policy, Owner.
+- Restored Sessions as a reachable Ledger surface in the 4-zone shell.
+
+### Files Touched
+
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed after each slice.
+- Vite HMR accepted `SessionsPanel.tsx`, `Home.tsx`, and
+  `ArtifactsPanel.tsx`.
+
+### Front-End Steward Review
+
+- This pass makes Ledger read as proof before summary.
+- Sessions now explains what it proves: start/end/project ownership.
+- Outputs now explains durable artifact receipts and write policy.
+- The zone header now shows the conceptual receipt map without adding another
+  page.
+
+### Known Risks
+
+- The Ledger still lacks one unified overview surface with live counts across
+  all proof objects.
+- Memory still needs a proof-layer framing pass.
+- Output writing is still available from the Output Library. It is existing
+  behavior, but future UX should show destination and approval state more
+  clearly before write.
+
+### Next Front-End Slice
+
+- Reframe Memory as Ledger knowledge receipts.
+- Add a compact Ledger overview once counts are cheap and stable enough.
+
+## 2026-05-08 1854 - Front-End Build Steward: Memory Knowledge Receipts
+
+### What Changed
+
+- Reframed Memory as `Ledger Knowledge Receipts`.
+- Added explanatory copy: memory needs source, approval, and Oak status before
+  becoming truth.
+- Added summary stats:
+  - Saved.
+  - Trusted.
+  - Proposed.
+- Replaced the tiny `x` plus browser `confirm()` delete flow with a visible
+  destructive `Delete` button and normalized hard-gate dialog.
+- Added explicit button types and accessible delete labels.
+
+### Files Touched
+
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `MemoryPanel.tsx` update.
+
+### Front-End Steward Review
+
+- Memory now fits the Ledger model as proof/knowledge receipts rather than an
+  isolated drawer.
+- Deletion now follows the same visible risk pattern as task deletion.
+- The pass removes a native browser confirm, which did not match the CereBro
+  hard-gate modal shape.
+
+### Known Risks
+
+- Trusted count is currently a local kind heuristic: facts plus references.
+  Future Oak validation status should drive this.
+- Memory proposal actions remain read-only/listed here. Promotion and approval
+  still need a fuller Ledger/Oak flow.
+
+### Next Front-End Slice
+
+- Add a compact Ledger overview that gathers Tasks, Sessions, Approvals,
+  Outputs, and Memory into one proof read.
+
+## 2026-05-08 1856 - Front-End Build Steward: Ledger Overview
+
+### What Changed
+
+- Added a first-class `Ledger Overview` route to the 4-zone shell.
+- Left rail Ledger now opens the overview instead of jumping straight into
+  Tasks.
+- Added Ledger proof cards with local live counts:
+  - Tasks.
+  - Sessions.
+  - Approvals.
+  - Outputs.
+  - Memory.
+- Added receipt rules for external action approvals, memory truth, and output
+  artifact receipts.
+- Kept all existing Ledger surfaces reachable from the zone strip.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `Home.tsx` update.
+
+### Front-End Steward Review
+
+- This pass completes the first practical Ledger IA correction. Ledger is now a
+  proof layer with an overview and object-specific surfaces.
+- It uses existing tRPC list endpoints. No backend schema changes.
+- The overview reads as local receipts, not analytics.
+
+### Known Risks
+
+- Counts are live local reads, but not yet optimized as one summary endpoint.
+- The overview uses heuristics for open tasks and active sessions. That is fine
+  for V1 shell clarity, but a dedicated Ledger summary router would be cleaner.
+
+### Next Front-End Slice
+
+- Start Basement cleanup: move model/tools/automation/settings into a clearer
+  configuration map.
+- Or continue Ledger polish by reframing Approvals as the universal action
+  receipt surface.
+
+## 2026-05-08 1858 - Front-End Build Steward: Approval Action Receipts
+
+### What Changed
+
+- Reframed Approvals from `Approval Queue` to `Action Receipt Gate`.
+- Added explicit copy that the surface owns universal local receipts for
+  approvals, blocks, and permission preflights.
+- Added receipt summary stats:
+  - Pending.
+  - Sensitive.
+  - Preflights.
+  - Blocked.
+- Kept the surface read-only. No approve/reject/execute actions were added.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Vite HMR accepted the `ApprovalDashboardPanel.tsx` update.
+
+### Front-End Steward Review
+
+- This pass makes Approvals match the Ledger rule: action receipts and gates
+  are visible before summary.
+- It keeps execution out of the approval surface while still showing risk and
+  preflight state.
+
+### Known Risks
+
+- The receipt stats depend on the current filtered query, not a global summary.
+  A later backend summary endpoint would make this cleaner.
+- The surface still needs a clearer future path for approve/reject actions, but
+  those must remain hard-gated and explicitly designed.
+
+### Next Front-End Slice
+
+- Start Basement cleanup: make settings, models, and automation read as machine
+  configuration rather than another set of feature panels.
+
+## 2026-05-08 1902 - Front-End Build Steward: Basement Configuration Map
+
+### What Changed
+
+- Reworked `ConfigPanel` from old fork/dungeon styling into CereBro Basement
+  configuration styling.
+- Renamed the surface from `Bridge Configuration` to `Basement Configuration`.
+- Removed visible old-fork language such as heroes/dungeon phrasing from the
+  primary setup copy.
+- Converted neon purple/gold hard-coded styling to CereBro tokens.
+- Added a first-class `Basement Overview` route to the 4-zone shell.
+- Left rail Basement now opens the overview before Settings, Models, or
+  Automation.
+- Basement Overview shows:
+  - Settings: bridge/local watcher status.
+  - Models: capability registry mode.
+  - Automation: Piccolo storage scan mode.
+- Added configuration rules for secrets, model proposals, and automation gates.
+
+### Files Touched
+
+- `app/client/src/components/ConfigPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed after each slice.
+- Vite HMR accepted `ConfigPanel.tsx` and `Home.tsx`.
+
+### Front-End Steward Review
+
+- This pass moves Basement toward the locked role: configure the machine.
+- It removes a high-visibility fork artifact from Settings.
+- It preserves existing bridge functionality while making the surface match
+  CereBro's shell and language.
+
+### Known Risks
+
+- `ConfigPanel` is still a fixed modal overlay. Future pass should make
+  Settings a proper Basement workspace surface or a normalized hard-gate/side
+  drawer, depending on final shell direction.
+- Some command strings still reference `claude-dungeon-bridge.mjs`; renaming
+  the script may require backend/static asset coordination.
+
+### Next Front-End Slice
+
+- Continue Basement cleanup through Model Tools and Piccolo Automation.
+- Or normalize Settings out of a fixed modal into a Basement workspace panel.
+
+2026-05-08 UI primitive call-site audit slice:
+
+- Continued the UI normalization pass after the shared primitive refactor.
+- Audited the first visible product surfaces against the normalized primitive
+  layer:
+  Home shell, Workbench, Approval Queue, Design Review, UI / UX, Project Lab,
+  Model Tools, and Hedwig Inbox.
+- Replaced high-visibility bespoke controls with shared primitives where the
+  change was low-risk:
+  - Approval Queue now uses shared `Button`, `Input`, and `Badge` for close,
+    search, reset, filters, and status chips.
+  - Workbench now uses shared `Button`, `Input`, `Textarea`, and `Badge` for
+    close, evidence fields, temporary media frame input, clear/save actions,
+    search, and chips.
+  - Design Review now uses shared `Button`, `Input`, `Textarea`, and `Badge`
+    for close, target label, proof/violation/next-action fields, save action,
+    and chips.
+  - UI / UX panel now uses shared `Button` and `Card` primitives for close,
+    rule sections, Golden Path, and Build Gate.
+  - Project Lab now uses shared `Button` for close and shared `Badge` for chip
+    rows.
+  - Model Tools now uses shared `Button`, `Input`, `Textarea`, and `Badge` for
+    close, filter, proposal fields, eval note fields, route fields, submit
+    actions, and chips.
+  - Hedwig Inbox now uses shared `Button`, `Input`, and `Badge` for close,
+    capture preview fields, preview action, and chips.
+- Kept native `<select>` controls in this slice where converting to Radix
+  `Select` would make the diff broad. They now sit beside normalized fields
+  and remain marked for the next pass.
+- Did not add hard-gate dialog usage yet because these panels are mostly
+  proposal/read-only surfaces and do not execute approvals directly.
+
+Files touched in this slice:
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `app/client/src/components/UISystemPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`: passed.
+- `pnpm test -- --run server/cerebro-foundations.test.ts server/agents.test.ts`:
+  passed. Vitest also ran configured bridge and auth tests. 4 files, 40 tests.
+- Browser preview via in-app browser:
+  - Started `pnpm dev`.
+  - Loaded `http://localhost:3002/`.
+  - Opened Workbench, Approvals, Design Review, UI / UX, Project Lab, Model
+    Tools, and Inbox from the left rail.
+  - Verified each audited panel rendered with a single Close control.
+  - Captured a visible Inbox screenshot after the shared primitive pass.
+
+Known risks:
+
+- Native selects remain in the audited panels. Next pass should convert the
+  highest-value filters to shared Radix `Select` wrappers or add a small local
+  select adapter.
+- Many Project Lab action buttons remain bespoke because that file is large
+  and action-heavy. The close control and chip rows were normalized first.
+- Hedwig Inbox still has deeper proposal action buttons and review form fields
+  using bespoke styling below the first viewport.
+- Workbench still has many native selects and lower-detail append controls
+  that should move to shared primitives in a second pass.
+- Browser verification was a smoke pass, not a pixel-perfect visual audit.
+
+Storage impact:
+
+- No database, Notion, Slack, browser storage, or generated media changes.
+- Obsidian archive snapshot created for this handoff. Session history index
+  appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md,
+CEREBRO_UX_SYSTEM.md, and CEREBRO_SESSION_HANDOFF.md. Continue the UI
+call-site normalization pass. Convert native selects and remaining bespoke
+buttons in Workbench, Approval Queue, Hedwig Inbox, Project Lab, and Model
+Tools to shared primitives or a small local SelectField adapter. Then audit
+hard-gate surfaces and add DialogContent gate where an approval modal is
+actually required. Run pnpm check, targeted tests, and browser screenshots.
+Update the handoff and Obsidian archive at the end.
+```
+
+2026-05-08 UI primitive normalization slice:
+
+- User asked to continue the CereBro UI primitive normalization pass after the
+  UI/UX system lock.
+- Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+  `CEREBRO_UX_SYSTEM.md`, and this handoff first.
+- Refactored the shared primitives requested by the user:
+  `button`, `card`, `dialog`, `drawer`, `dropdown-menu`, `context-menu`,
+  `input`, `textarea`, `select`, `tabs`, `badge`, and `table`.
+- Replaced the old neon fork theme variables in `app/client/src/index.css`
+  with CereBro shell tokens from `DESIGN.md`: dark shell background,
+  dark raised surfaces, soft borders, warm primary text, muted metadata,
+  blue active state, violet routing state, gold identity markers, green
+  success, amber risk/review, and red destructive/blocked state.
+- Removed the global all-button uppercase treatment and global mono body font.
+  Product UI now defaults to compact system sans, with monospace reserved for
+  explicit local component use.
+- Normalized primitive density:
+  - Buttons are 28 to 36 px tall depending on size.
+  - Inputs and selects default to 32 px.
+  - Menus use 12 px item text and compact groups.
+  - Tables use 10 px uppercase headers and 12 px rows.
+  - Cards, drawers, and dialogs use 8 px radius max.
+- Added visible CereBro focus states across controls using blue focus rings
+  and invalid/destructive red rings.
+- Added a `risk` button variant for caution/approval lanes.
+- Added `success`, `warning`, and `violet` badge variants for status chips
+  without inventing new color families.
+- Added `gate` support to `DialogContent` so hard-gate modals can use the
+  approval shape without changing every caller immediately.
+- Strengthened destructive menu item styling. Destructive choices now read red
+  by default and red-blocked on focus, making the required separate destructive
+  menu grouping visible once call sites are audited.
+- Updated drawer, dialog, menu, select, input, tabs, card, badge, and table
+  defaults to dark shell surfaces and token-aligned borders instead of shadcn
+  defaults.
+
+Files touched in this slice:
+
+- `app/client/src/index.css`
+- `app/client/src/components/ui/button.tsx`
+- `app/client/src/components/ui/card.tsx`
+- `app/client/src/components/ui/dialog.tsx`
+- `app/client/src/components/ui/drawer.tsx`
+- `app/client/src/components/ui/dropdown-menu.tsx`
+- `app/client/src/components/ui/context-menu.tsx`
+- `app/client/src/components/ui/input.tsx`
+- `app/client/src/components/ui/textarea.tsx`
+- `app/client/src/components/ui/select.tsx`
+- `app/client/src/components/ui/tabs.tsx`
+- `app/client/src/components/ui/badge.tsx`
+- `app/client/src/components/ui/table.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`: passed.
+- `pnpm test -- --run server/cerebro-foundations.test.ts server/agents.test.ts`:
+  passed. Vitest also ran configured bridge and auth tests. 4 files, 40 tests.
+
+Known risks:
+
+- This pass normalizes primitive defaults. It does not yet audit every call
+  site for better labels, destructive grouping, disabled-state explanations,
+  icon tooltips, or hard-gate `DialogContent gate` adoption.
+- `alert-dialog`, `sheet`, `popover`, `command`, `tooltip`, `calendar`,
+  `sidebar`, `checkbox`, `switch`, and other inherited primitives still carry
+  older shadcn visual defaults in places.
+- Some older surfaces still use bespoke inline styles and local `Badge`
+  helpers instead of shared primitives.
+- Browser screenshot verification was not run in this slice. The requested
+  code checks passed.
+
+Storage impact:
+
+- No database, Notion, Slack, browser storage, or generated media changes.
+- Obsidian archive snapshot created for this handoff. Session history index
+  appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md,
+CEREBRO_UX_SYSTEM.md, and CEREBRO_SESSION_HANDOFF.md. Continue the CereBro UI
+normalization pass by auditing call sites. Start with Home, Workbench, Approval
+Queue, Design Review, UI / UX, Project Lab, Model Tools, and Hedwig Inbox.
+Adopt the normalized primitives, add hard-gate DialogContent gate usage where
+approval is required, split destructive menu items into their own groups, add
+disabled-state reasons where space allows, and add icon labels/tooltips for
+tool actions. Then run pnpm check and targeted tests. Update the handoff and
+Obsidian archive at the end.
+```
+
+2026-05-08 UI UX system lock slice:
+
+- User asked whether everything all-encompassing for frontend and UX was
+  already decided. Answer: no. The constitution existed, but the operating
+  manual did not.
+- Read `DESIGN.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`, relevant
+  `CEREBRO_MASTER_BUILD_PLAN.md` sections, current app surfaces, and existing
+  UI primitives.
+- Added `CEREBRO_FRONTEND_SYSTEM.md` as the canonical frontend system:
+  shell, typography, color, borders, buttons, inputs, dropdowns, context menus,
+  trays, drawers, panels, tables, status chips, modals, toasts, empty states,
+  motion, accessibility, and component debt.
+- Added `CEREBRO_UX_SYSTEM.md` as the V1 UX operating manual:
+  modes, route chain, golden path, Keep UX, Workshop UX, Ledger UX, approvals,
+  Spock security, evidence, memory, capture, council, blocked states, errors,
+  first run, daily open, navigation, Aang companion, notifications, keyboard,
+  and UX debt.
+- Added `app/client/src/components/UISystemPanel.tsx`, an in-app reference
+  surface summarizing the canonical UI and UX rules.
+- Added `UI / UX` to the left rail in `app/client/src/pages/Home.tsx`.
+- Opened `http://localhost:3002/` in the in-app browser, clicked `UI / UX`,
+  and verified the panel renders inside the app shell.
+
+Files touched in this slice:
+
+- `CEREBRO_FRONTEND_SYSTEM.md`
+- `CEREBRO_UX_SYSTEM.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `app/client/src/components/UISystemPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+
+Checks run:
+
+- `pnpm check`: passed.
+- `pnpm test -- --run server/cerebro-foundations.test.ts server/agents.test.ts`:
+  passed. Vitest also ran the configured bridge and auth tests. 4 files, 40
+  tests.
+- Browser preview: loaded `http://localhost:3002/`, opened `UI / UX`, and
+  verified the in-app reference panel.
+
+Known risks:
+
+- The docs are now locked, but the shared UI primitives have not yet been
+  refactored to enforce them. `button.tsx`, `card.tsx`, `dialog.tsx`,
+  `drawer.tsx`, dropdowns, and context menus still carry default visual
+  patterns in places.
+- The nav still has too many top-level surfaces. The UX system names the target
+  simplification, but this slice did not collapse nav.
+- The in-app UI/UX panel is a reference surface, not a live compliance checker.
+
+Next-session starter prompt:
+
+```text
+Use DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Start the
+UI primitive normalization pass. Refactor the shared button, card, dialog,
+drawer, dropdown, context menu, input, textarea, select, tabs, badge, and table
+primitives so they enforce CereBro tokens, radius, focus states, menu rules,
+hard-gate language, and compact density. Then audit Home, Workbench, Approval,
+Design Review, and UI / UX surfaces against the new primitives.
+```
+
+2026-05-08 Keep tile blueprint implementation slice:
+
+- User pushed on the castle floor count and council-space problem. Decision
+  moved from a strict 2-floor plan to a 3-readable-level fortress with a short
+  undercroft. Cortana owns the vertical center, not an equal room in a row.
+- Locked all 11 agent room addresses before final castle art:
+  - Aang: ground-left threshold.
+  - Cortana: oversized central command nave.
+  - Gojo: upper-right gallery.
+  - Batman: upper-west war room.
+  - Spock: upper observatory.
+  - Oak: upper archive lab.
+  - Tony: command-west forge.
+  - Surfer: command-east cartography.
+  - C-3PO: ground-east scriptorium.
+  - Piccolo: undercroft watch crypt.
+  - Hedwig: undercroft relay roost.
+- Added detailed mockups:
+  - `mockups/keep-fortress-wireframe.html` for the full residency massing.
+  - `mockups/keep-tile-blueprint.html` for the 64 by 34 tile planning grid.
+- Added `CEREBRO_KEEP_TILE_BLUEPRINT.md` as the repo-readable blueprint
+  reference with room coordinates, floor courses, stairs, path nodes, zoom
+  bounds, prop zones, and PixelLab prompt rules.
+- Added `app/client/src/lib/keepFortressMap.ts` as the typed app contract for
+  rooms, doors, halls, stairs, path nodes, council spots, prop zones, and zoom
+  bounds.
+- Added `app/client/src/components/KeepFortressBlueprint.tsx`, an in-app
+  blueprint surface rendered from the typed map.
+- Updated `app/client/src/pages/Home.tsx` so Home defaults to the Blueprint
+  view while preserving the existing PixelLab Phaser Scene behind a Scene
+  toggle.
+- Opened `http://localhost:3002/` in the in-app browser and verified the live
+  app renders the fitted blueprint inside the Keep shell.
+
+Files touched in this slice:
+
+- `CEREBRO_KEEP_TILE_BLUEPRINT.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `app/client/src/components/KeepFortressBlueprint.tsx`
+- `app/client/src/lib/keepFortressMap.ts`
+- `app/client/src/pages/Home.tsx`
+- `mockups/keep-fortress-wireframe.html`
+- `mockups/keep-tile-blueprint.html`
+
+Checks run:
+
+- `pnpm check`: passed.
+- `pnpm test -- --run server/cerebro-foundations.test.ts server/agents.test.ts`:
+  passed. Vitest also ran the configured bridge and auth tests. 4 files, 40
+  tests.
+- Browser preview: loaded `http://localhost:3002/` and verified the live
+  Blueprint view renders all 11 assigned rooms inside the app shell.
+
+Known risks:
+
+- The live Phaser scene still uses the older 3-floor PixelLab layout. The new
+  blueprint is rendered as a React planning surface, not yet as Phaser room
+  geometry.
+- The typed map and HTML mockup duplicate the same coordinates manually. Next
+  pass should make the typed map the only source and remove drift.
+- Room prop zones are first-pass placement blocks, not final PixelLab art.
+- The Home view now defaults to Blueprint for this build phase. That is
+  intentional while the castle is being rebuilt, but the final default should
+  return to the live Scene once the Phaser rebuild lands.
+
+Next-session starter prompt:
+
+```text
+Use DESIGN.md and CEREBRO_KEEP_TILE_BLUEPRINT.md. Convert the typed
+KEEP_FORTRESS_MAP into the Phaser Keep scene: draw the 64 by 34 fortress shell,
+floor slabs, hallways, room rectangles, doors, stairs, path nodes, zoom bounds,
+and agent spots from app/client/src/lib/keepFortressMap.ts. Keep PixelLab final
+room art deferred. The goal is a Phaser debug castle that matches the in-app
+Blueprint view exactly, with the existing Scene toggle preserved.
+```
+
+2026-05-08 Keep composition canon slice:
+
+- User approved the next Keep direction before implementation: wide fortress,
+  2 floors, 3 active hero rooms first, sealed future wings, zoom-in-place,
+  visible stairs/doors/walking paths, and PixelLab as the art source.
+- Locked the first hero rooms for the next visual pass: Cortana, Aang, and
+  Gojo. Spock remains required in the system and security plan, but his room is
+  not part of the first room generation set.
+- Locked Cortana's behavior: highest authority and operations room, central
+  chamber only, hybrid glass-tech/cathedral command tube, council table that can
+  fit all 10 agents if needed, and council calls only when real judgment is
+  required.
+- Locked Aang's council role: threshold bridge by default, not a table expert.
+  He moves closer only when user intent, priority, approval, or tone is the
+  issue.
+- Locked Gojo's first-room direction: high-end gallery/control room hybrid with
+  body-language animation for critique and visual review.
+- Locked movement rules: visible travel for work moving through the Keep,
+  Cortana call signals in each room when orders are issued, and return behavior
+  that either sends agents back, walks them to visible work, or keeps them
+  active if blocked.
+- Locked animation stance: shared state names across agents, distinct body
+  language per agent, no constant floating icons, no overbuilt Gojo block
+  feature in V1, and speech shown one agent at a time with summary on demand.
+- Locked ambient world direction: local time drives sky exactly, exact-location
+  weather may be used only after visible permission/setup, interior lighting
+  follows the sky, and weather appears through every window, slit, gap, arch,
+  and exterior cutaway while storms affect only the shell and windows.
+- Added the canonical Obsidian note
+  `20_Knowledge/Playbooks/CereBro Keep Composition Spec.md` with retrieval
+  enabled. It covers the fortress layers, placement plan, pathing grammar,
+  council staging, time/weather behavior, PixelLab generation strategy, and
+  first 3 hero rooms.
+- Updated the Obsidian Playbooks index and CereBro project bridge to link the
+  new Keep composition spec.
+- Updated `CEREBRO_MASTER_BUILD_PLAN.md` to point future Keep, PixelLab,
+  pathing, zoom, council, ambience, prop, and animation work to the new
+  Obsidian spec.
+
+Files touched in this slice:
+
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/CereBro Keep Composition Spec.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/Playbooks.md`
+- Obsidian:
+  `10_Projects/CereBro/CereBro.md`
+
+Checks run:
+
+- Manual note/index review. No app code changed.
+
+Known risks:
+
+- This is design canon only. No Phaser layout, PixelLab prompt, room asset,
+  path graph, zoom behavior, or weather integration has been implemented yet.
+- Exact room dimensions, Cortana chamber width, Gojo side placement, sealed wing
+  labeling, and weather source remain open.
+
+Next-session starter prompt:
+
+```text
+Read DESIGN.md, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 20_Knowledge/Playbooks/CereBro Keep Composition Spec.md first. Do not generate PixelLab assets yet. Draft the first implementation-grade Keep fortress map: 2-floor wide fortress, Cortana central chamber, Aang entry chamber, Gojo elevated gallery wing, sealed future wings, doors, stairs, walking lanes, path nodes, council spots, zoom bounds, and local time/weather layer requirements. Ask for approval before code or asset generation.
+```
+
+2026-05-08 Spock security gate slice:
+
+- User clarified the need: CereBro should protect daily browsing and pasted
+  GitHub repos from phishing, malware, hostile ads, fake buttons, unsafe
+  downloads, poisoned packages, suspicious workflows, and credential theft.
+- Decision locked: do not add a new cybersecurity agent yet. Spock becomes the
+  security gate. Surfer scouts only after Spock's receipt. Tony cannot clone,
+  install, build, or run pasted repo code until Spock clears the execution lane.
+- Added Spock tool scopes in `app/server/agentRouter.ts`: `security_gate` and
+  `security_scan`. Surfer's role now explicitly says it does not bypass Spock
+  for risky links, GitHub repos, downloads, package installs, or browser
+  sessions.
+- Added `security_review_records` to the libSQL schema. Security receipts are
+  append-only local records with target, target kind, risk level, route chain,
+  checks, findings, allowed actions, blocked actions, scanner plan, browser
+  policy, and permission preflight link.
+- Added `app/server/routers/securityGate.ts` with:
+  - `plan`: returns the Spock security posture and planned scanner stack.
+  - `inspectTarget`: classifies a target without browsing, cloning,
+    downloading, installing, or executing.
+  - `createReview`: records a local Spock security receipt.
+  - `recent`: reads recent receipts.
+- Wired `securityGate` into the app router.
+- Added `security_review` to command intake. Terms such as safe, security,
+  cyber, malware, phishing, popups, ad blocker, uBlock, virus, suspicious link,
+  and repo safety now route to Spock with Surfer, Batman, and Oak support.
+- Updated `CEREBRO_MASTER_BUILD_PLAN.md` and `AGENTS.md` with the locked
+  security posture: GitHub repo safety, browser isolation, popup/ad blocking,
+  scanner stack, and the rule that scanners are tools, not truth.
+
+Files touched in this implementation slice:
+
+- `app/server/agentRouter.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/routers/securityGate.ts`
+- `app/server/routers.ts`
+- `app/server/routers/commandIntake.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `AGENTS.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`: passed.
+- `pnpm test -- --run app/server/cerebro-foundations.test.ts app/server/agents.test.ts`:
+  passed. Vitest also ran the configured bridge and auth tests. 4 files, 40
+  tests.
+
+Known risks:
+
+- This is the first deterministic receipt layer. It does not yet run the
+  external scanners.
+- The browser isolation policy is represented in the route, not yet enforced in
+  an in-app browser profile.
+- uBlock/adblock-style filtering is planned. No filter engine is wired yet.
+- Security tools are themselves attack surfaces. Future adapters must pin
+  versions, isolate execution, and record tool provenance.
+
+Next-session starter prompt:
+
+```text
+Continue the Spock security gate. Add the first scanner adapter path for GitHub repos: quarantine clone metadata only, no install, then run Scorecard, OSV-Scanner, Gitleaks, zizmor, and GuardDog where available. Surface the security receipt in the app before Surfer or Tony can proceed.
+```
+
+2026-05-08 runtime design enforcement slice:
+
+- Implemented the first in-app design enforcement loop instead of leaving the
+  new rules as docs only.
+- Added `app/server/routers/designReview.ts` with `plan`, `list`, and `create`
+  procedures. It records local append-only design review records with
+  `DESIGN.md` checklist state, violations, next actions, Aang -> Cortana ->
+  Gojo -> Tony -> Spock/Oak route chain, Workbench evidence links, and a local
+  permission preflight audit row.
+- Added `design_review_records` to the idempotent libSQL schema.
+- Added `app/client/src/components/DesignReviewPanel.tsx` and a left-rail
+  "Design Review" surface. The panel shows source files, routing chain,
+  checklist, Workbench evidence link picker, local review form, gates, and
+  recent review ledger.
+- Updated command intake so design-ish requests return an explicit route chain
+  and `designProtocol` checklist. The Ask Aang preview now shows the Aang ->
+  Cortana route and flags when Gojo design review is required.
+- Added test coverage for the design review route and the intake design
+  protocol.
+- Ran `pnpm check`: passed.
+- Ran `pnpm test`: passed. 4 files, 39 tests.
+- Started the dev server on `http://localhost:3002/` and confirmed the page
+  served over HTTP with `curl`. Stopped the server after the smoke check.
+
+Files touched in this implementation slice:
+
+- `app/server/routers/designReview.ts`
+- `app/server/routers.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/routers/commandIntake.ts`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Screenshot/browser inspection is still not automated in this slice. The panel
+  records proof and links Workbench evidence, but it does not yet open the
+  browser or capture screenshots.
+- The Design Review panel can record local review state. It does not yet patch
+  code or enforce blocking gates automatically.
+- The dev server logged missing optional Vite analytics env vars and stale
+  `baseline-browser-mapping` data. These did not block build, tests, or the
+  HTTP smoke check.
+
+Next-session starter prompt:
+
+```text
+Use DESIGN.md. Continue from the Design Review panel. Wire one real visual proof path: from Workbench evidence or browser screenshot to Design Review, then show before/after comparison and block delivery until Gojo review has a linked evidence record.
+```
+
+2026-05-08 external reference intake and anti-generic enforcement:
+
+- User clarified that the reference list is not only for CereBro research. Codex
+  itself must use the lessons to build faster, less generic, and with stronger
+  design judgment.
+- Added root `DESIGN.md` as the active agent-readable design law. It binds the
+  Keep, Workshop, Ledger, voice rules, pixel-art constraints, proof surfaces,
+  motion rules, and anti-slop review into one file that must be read before UI,
+  motion, prototype, deck, asset, or product-copy work.
+- Added `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md` to turn Impeccable,
+  Awesome DESIGN.md, getdesign.md, Huashu Design, UI UX Pro Max, React Bits,
+  Uncodixfy, Ruflo, and AirLLM into CereBro-native operating rules.
+- Updated `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md` with
+  verified license reads for the new references. Huashu is workflow-reference
+  only because its license requires written authorization for team, product,
+  client, or commercial integration. React Bits is held as motion/component
+  reference because it uses MIT + Commons Clause.
+- Updated `CEREBRO_MASTER_BUILD_PLAN.md` and `AGENTS.md` so root `DESIGN.md`,
+  external-reference discipline, and anti-slop review are locked into future
+  build behavior.
+- Strengthened `frontend-design.skill.md`, `anti-slop-review.skill.md`, and
+  `SKILLS.md` so Gojo/Tony work must load `DESIGN.md`, inspect existing
+  renderers/assets/tokens, run screenshot or browser review when UI changes,
+  and name exact generic-AI violations before delivery.
+- No runtime app code changed in this slice. This was a rules and operating
+  system pass.
+
+Files touched in this slice:
+
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `AGENTS.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/SKILLS.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/skills/frontend-design.skill.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/skills/anti-slop-review.skill.md`
+
+Checks run:
+
+- Web verification of project identity and licenses for the referenced
+  projects.
+- `rg` check for banned voice terms in new design/reference files and updated
+  skills.
+- `git diff` review of the changed planning and skill files.
+
+Known risks:
+
+- This does not yet enforce the rules in code at runtime. It makes the rules
+  available and binding for agent work.
+- `CEREBRO_MODEL_ROUTER_BASELINE.md`, `CLAUDE.md`, and `outputs/` were already
+  modified or untracked before this slice and were not touched.
+- Existing repo docs still contain older em dash typography in inherited text.
+  New files and new skill changes avoid that register.
+
+Next-session starter prompt:
+
+```text
+Use root DESIGN.md and CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md. Build the first runtime enforcement slice: expose the active design/anti-slop checklist in the CereBro app or wire Gojo's review flow to a real UI surface. Preserve the Phaser Keep and run visual checks.
+```
 
 2026-05-08 deck pass:
 
@@ -2956,6 +6686,36 @@ Candidates to review later:
   - This was docs-only. It did not browse Reddit, fetch sources, install a
     Reddit package, create a Reddit app, download media, write Notion/Slack, or
     save vault media.
+- Folded Uncodixfy, Google Stitch, v0.app, and Docling into the standing
+  CereBro design/source rules.
+- `DESIGN.md` now treats Uncodixfy as anti-generic judgment, Stitch as
+  high-fidelity UI exploration, v0 as disposable React/Tailwind component
+  scaffolding, and Docling as the preferred local document-intelligence
+  candidate once an adapter exists.
+- `AGENTS.md` and `CLAUDE.md` now tell future agents to apply those rules to
+  themselves as well as CereBro: generators are sketch lanes, Docling output is
+  evidence, and all source/document claims need receipts.
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, and the
+  frontend/anti-slop skills now carry the same rule: no pasted generator output
+  as final implementation, no private document sent externally when local
+  parsing can extract structure first, and screenshot/provenance proof wins.
+- Added the larger external source batch to the reference plan and license
+  matrix: Emil Kowalski Skill, Anthropic frontend-design skill, Forrest Chang
+  Karpathy Skills, Addy Osmani Agent Skills, AIDLC Workflows, Archon, Hermes,
+  Multica, GenericAgent, LobeHub, local-deep-research, ppt-master,
+  Pixelle-Video, VoxCPM, Maigret, CloakBrowser, and Awesome Codex Skills.
+- Locked the intake stance: public GitHub is source material, not automatic
+  clearance. No clone, install, script, Docker, daemon, model-weight download,
+  service auth, or code paste until license, security, maintenance, install
+  surface, storage, privacy, and product fit are recorded.
+- Categorized the batch:
+  - Use now as rewritten rules: Emil, Anthropic frontend-design, Addy Osmani,
+    AIDLC, and Karpathy-style coding discipline.
+  - Study for architecture: Archon, Hermes, Multica, GenericAgent, and LobeHub.
+  - Park as future adapters: local-deep-research, ppt-master, Pixelle-Video,
+    and VoxCPM.
+  - Restrict hard: Maigret and CloakBrowser.
 
 ## Files Touched This Session
 
@@ -2964,7 +6724,14 @@ Candidates to review later:
 - `CEREBRO_MODEL_ROUTER_BASELINE.md`
 - `CEREBRO_FILE_LIFECYCLE_PLAN.md`
 - `CEREBRO_PROJECT_INTELLIGENCE_PLAN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CEREBRO_FRONTEND_SYSTEM.md`
+- `DESIGN.md`
 - `AGENTS.md`
+- `CLAUDE.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/skills/frontend-design.skill.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/skills/anti-slop-review.skill.md`
 - `app/server/agentRouter.ts`
 - `app/server/cerebroDb.ts`
 - `app/server/routers/outputs.ts`
@@ -3013,6 +6780,12 @@ Candidates to review later:
 - Obsidian vault:
   - `90_Archive/CereBro Session History/CereBro Session History.md`
   - `90_Archive/CereBro Session History/snapshots/2026-05-07 0510 CereBro Session Handoff - Reasoning Router.md`
+- Obsidian vault:
+  - `90_Archive/CereBro Session History/CereBro Session History.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-08 1752 CereBro Session Handoff - External Reference Rules.md`
+- Obsidian vault:
+  - `90_Archive/CereBro Session History/CereBro Session History.md`
+  - `90_Archive/CereBro Session History/snapshots/2026-05-08 1807 CereBro Session Handoff - Source Batch Intake Rules.md`
 - Obsidian vault:
   - `90_Archive/CereBro Session History/CereBro Session History.md`
   - `90_Archive/CereBro Session History/snapshots/2026-05-06 CereBro Session Handoff.md`
@@ -3383,10 +7156,20 @@ Candidates to review later:
   - `pnpm test -- --runInBand` in `app/`: passed. 4 test files, 33 tests.
   - Added append-only local `project_action_draft_notes`.
   - Project Lab draft detail now returns recent local notes for each draft.
-  - Project Lab Drafts inspector can append a local note to a draft without
-    creating a task, editing repos, running commands, browsing/searching,
-    fetching sources, or writing to Notion/Slack.
-  - Test coverage now verifies draft notes append and appear in project detail.
+- Project Lab Drafts inspector can append a local note to a draft without
+  creating a task, editing repos, running commands, browsing/searching,
+  fetching sources, or writing to Notion/Slack.
+- Test coverage now verifies draft notes append and appear in project detail.
+- External reference rule fold-in checks:
+  - Docs-only update. No app tests needed.
+  - Current sources checked for Google Stitch, v0.app, and Docling before
+    writing rules.
+  - Current GitHub API metadata checked for the larger source batch before
+    adding license/status rows.
+  - `rg` checked edited docs for banned voice markers and showed only
+    pre-existing lines in repo guides/matrix text, not new product-rule copy.
+  - `git diff` reviewed the changed docs. Worktree remains dirty with broad
+    pre-existing changes plus this docs slice.
 
 ## Storage Impact This Session
 
@@ -3443,6 +7226,14 @@ Candidates to review later:
 - Latest Reddit intelligence plan slice is docs-only. It adds no dependencies,
   Reddit API app, OAuth tokens, source fetches, media downloads, Notion rows,
   Slack records, browser actions, command execution, or vault media files.
+- Latest external reference rule fold-in is docs-only. It adds no dependencies,
+  no Stitch/v0/Docling installation, no API calls, no generated UI, no parsed
+  documents, no Notion rows, no Slack records, no browser actions, no command
+  execution, no media assets, and no external repo changes.
+- Latest larger source-batch fold-in is docs-only. It adds no dependencies, no
+  cloned repos, no scripts, no Docker, no daemons, no model weights, no service
+  auth, no generated media, no OSINT search, no stealth browser use, no Notion
+  rows, no Slack records, no command execution, and no external repo changes.
 
 ## Known Risks
 
@@ -3464,6 +7255,17 @@ Candidates to review later:
 - Workbench group-card drill-downs depend on local labels and search fields.
   They are useful for inspection, but they are not a full relational query UI
   yet.
+- Stitch and v0 are now marked important, but product/service terms still need
+  review before any generated code/assets are exported or reused.
+- Docling is marked as the preferred document-intelligence candidate, but no
+  adapter exists yet. Future implementation must pin parser version, decide
+  storage paths, record receipts, and keep Oak validation in the loop.
+- Some newly tracked repos returned no license or `NOASSERTION` from GitHub API.
+  They remain concept-only until license files and terms are reviewed.
+- Maigret and CloakBrowser are deliberately restricted. They should not become
+  default CereBro tools.
+- VoxCPM and Pixelle-Video imply heavy model/media storage and safety review
+  before any install or download.
 - Aang's Workbench evidence event is a local Keep route only. It does not send a
   desktop notification, start an overlay process, inspect the screen, or capture
   media.
@@ -3948,5 +7750,5 @@ project repos without an explicit project-specific request.
 Next-session starter prompt:
 
 ```text
-Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_MODEL_ROUTER_BASELINE.md, and CEREBRO_FILE_LIFECYCLE_PLAN.md first. Continue Session 4 from the live Project Lab, command intake, Surfer Sources, prompt/tool handoff memory, Hedwig Capture Inbox, Hedwig-as-agent Keep slice, Terminal Lab, Approval Queue, first runtime use-spot/path-graph movement, Aang Companion policy shell, Workbench policy shell, the new global append-only learning law, the new general image-understanding requirement, the new global permission-mode direction, the new reasoning-router/model-tool opportunist direction, and the new Reddit Intelligence source lane. Project Intelligence currently has static read-only profiles, local git status, Batman strategy support, deterministic command-intake previews, explicit intake-to-task creation with project linking/project-name display, Tasks project filtering, Project Lab task rollups, Project Lab read-only Git inspector rows for dirty worktrees, Project Lab filtered-card score breakdown chips, Project Lab local signal-block drill-down into inspector queues, Project Lab worktree drill-down into the Git inspector, Project Lab recent-row drill-downs, capped-list disclosure, local inspector search, type chips, sort controls, Signals strip, Sources filter, Missing filter, Local Repos reset-to-All navigation, accessible summary/filter button labels, passive summary and empty-state accessibility labels, Local Inspector accessibility labels, card drill-down accessibility labels, distinct empty-state reset label, close/search accessibility labels, close-button type hygiene, region accessibility labels, status live-region semantics, non-interactive list semantics, busy-state semantics, Keep left-rail and shell accessibility labels, Next Safe Actions strip, Next reason chips, summary-count navigation, empty-filter state, and local action drafts that remain visible by profile slug before a linked harness project row exists, Terminal Lab/Hedwig local observation rollups, self/system improvement categories, a modular panel model, a Surfer source panel scaffold, a local-only Model Tools panel for capability proposals, eval notes, and route previews, a global permission-mode shell with append-only local mode events, advisory permission preflight checks, append-only permission preflight audit records, and a shared server permission-policy helper used by both the Permissions router and Workbench evidence records, a read-only local Approval Queue with status/origin/project/search filters, local grouping, deterministic Oak/Spock preflight notes, and read-only permission preflight audit visibility, a proposal-only Workbench shell with evidence surfaces/permission classes/append-only evidence record shape plus local Workbench evidence record create/list/filter/detail, linked permission preflight ids and preflight detail on evidence records, validation notes that record their own local permission preflight rows, local evidence grouping by project/kind/source/command/validation status, source/command/task/session/artifact picker labels, task/session/artifact grouping, and append-only validation history in the evidence inspector, a proposal-only Aang Companion shell policy with allowed local events/blocked actions/web-mock-first route plus live local event-count strip, approved one-URL public ingestion, first-pass saved-source trust/scrub metadata, Reddit marked as a first-class V1 human-signal source lane, Slack marked as required V1 Hedwig capture, Notion marked as the structured capture database, Obsidian session handoff snapshots/index notes are approved append-only standing closeout behavior, and global history/log/archive/index/note trails must append or version while canonical current-state summaries may update in place. CereBro must understand images as a general input type, not only creative assets or setup screenshots: the user should be able to drag in screenshots, UI states, account screens, app errors, artwork, mockups, diagrams, photos, charts, whiteboards, generated images, and other still images, then ask open-ended questions about them. Video starts with frame/key-frame understanding and annotation. The modular in-app workbench is now a locked product direction: CereBro should show live localhost previews, public browser views, screenshots, images, video/key frames, annotations, terminal/log output, validation notes, and before/after comparisons inside the app; these surfaces are user-visible and agent-readable evidence, not hidden background tools. Add a Codex-like global permission-mode control across all work, not just media: `Default permissions`, `Auto-review`, and `Full access`. Default reads explicit user-provided context and guides. Auto-review proactively inspects approved visible/local evidence and queues suggestions. Full access uses enabled tools in the session, while hard gates still require visible approval for payments, account permission grants, destructive commands, deleting/overwriting files, sending messages, publishing, uploading private media externally, saving sensitive screenshots to memory, installs, tokens/API keys, and sealed Raven/NSFW scope. Vault/Obsidian durable text writers now create timestamped versions on same-title filename collision instead of overwriting, Artifact Library labels its saves as durable history/draft/report trails rather than current-state overwrites, source saves now split current-state `sources` rows from append-only `source_events` provenance, and Surfer Sources displays recent source history events with local owner/scrubbed filters and richer event detail. Aang Companion Overlay is planned as a small always-on desktop surface and now has a proposal-only Keep policy panel for keeping tabs on CereBro: ambient idle presence, click/hotkey quick ask, short status bubbles, open-Keep routing, time-of-day reactions, and quiet lore-accurate idle loops such as goofy fidgeting, tiny airbending practice, sitting, breathing, balancing, and sleepy states. Aang remains an agent, not a pet in the roster. Cortana still routes requests, Hedwig still owns capture/reminders, and Piccolo still owns hygiene. Terminal Lab is a proposal-only panel/router that classifies commands, explains risk, records local preview observations, infers known project links from cwd, accepts manually pasted observed-output summaries with light redaction, can link observations to selected tasks/sessions, filters observations by selected task/session, surfaces deterministic Aang/Tony follow-up suggestions from observed output, surfaces read-only Tony diagnostic command drafts, can convert one of Tony's generated diagnostic drafts into a normal local Terminal Lab preview with parent/root/depth provenance, has copy/approval-note affordances for Tony diagnostic drafts, shows parent-observation provenance and a diagnostic-preview status label on saved diagnostic previews, includes explicit diagnostic evidence and expected-signal notes for Tony draft commands across port conflicts, missing modules/packages, TypeScript symbol errors, package-tool failures, git state, missing files, permission errors, and unclear non-zero exits, supports local observation detail/status transitions, can stage pending local approval-preview rows for command observations without approving or executing commands, can create normal local follow-up tasks from observations, can stage Aang learning-note memory proposals from observations, and never executes commands or writes durable memory directly. Reusable prompt/tool handoffs can be saved as approved vault artifacts, searched read-only, and surfaced in command intake for `prompt_reuse` requests with required reuse disclosure. CereBro must now grow this into a routing playbook tied to the Model/Tool Capability Registry: target model/tool, prompt style, example result, privacy constraints, free-tier sufficiency, eval notes, source URLs, and failure notes. Surfer should propose current models/tools/free tiers only with sources and date checked; Cortana routes; Batman risk-reviews; Spock/Oak validate; Piccolo tracks stale registry entries, cost/rate limits, and storage. Candidate gateway/eval paths include LiteLLM, OpenRouter, direct provider SDKs, a CereBro-native gateway, promptfoo, DeepEval, and custom Vitest fixtures, but do not install or connect any of them without approval. Hedwig has a proposal-only Inbox panel with Notion capture DB schema, Slack DM/capture-channel shape, approval gates, routing rules, local capture preview persistence, recent capture history, read-only triage proposals for saved captures into task/source/learning/reminder/message routes, an explicit `Create Local Task` action that links a capture to a normal local CereBro task without external writes, an explicit `Save Source` action that creates a local unfetched source record plus source event from a capture URL without browsing/fetching, an explicit `Create Reminder Proposal` action that creates a local reminder proposal without scheduling/notifying, an explicit `Create Message Draft` action that creates a local draft proposal without sending/posting, local proposal detail/status transitions for source/reminder/message proposals that remain metadata-only and do not approve external action, editable local review fields for priority/notes/approval scope/external target, and pending local approval-preview rows for source enrichment, Notion capture write, Slack capture read, reminder scheduling, and message sending without approving or executing those external actions. The Approval Queue reads those Hedwig and Terminal approval-preview rows across local surfaces, joins them back to project/task/source/command/capture metadata when available, and still cannot approve, reject, execute, fetch, send, schedule, or write. The Workbench panel defines preview/browser/media/annotation/terminal/validation/comparison surfaces, can create manual local append-only evidence records, filter/group/inspect evidence details, link sources/commands/tasks/sessions/artifacts, append validation notes, show validation history, and does not open tools; the Aang panel defines event policy, local mock controls, live local event counts, and in-app event routing buttons but starts no desktop process. Hedwig is now the 11th agent in router/Keep metadata with a split Crypts Messenger Roost, scaled PixelLab owl sprite, motion config, use-spots, council spot, and path-graph node, and KeepScene now loads directional textures, uses idle/hero/council use-spots for actual movement, swaps facing frames, keeps emotes attached to moving sprites, routes `walking-to-ceremony` through a first BFS path graph into Cortana's hub, and avoids restarting movement tweens when state refreshes do not change an agent state. Do not emphasize session handoffs as a big UI surface; they live in Obsidian. Start proposal-only or implement a small safe slice: continue auditing code surfaces for accidental overwrites of logs/history/notes, add current-state writer proposals only where truly needed, deepen Approval Queue drill-downs or grouping without adding action execution, build the web-only Aang Companion mock inside the Keep without desktop permissions, deepen Workbench task/session linking and validation status display while keeping validation append-only before wiring browser/media automation, prototype image drag/drop artifact intake as temporary-by-default, define the hosted/local vision adapter interface without sending images externally, extend Project Lab local action draft history with status/version trails or add explicit draft-to-task proposals without edits, retrieve and wire Hedwig's PixelLab idle-flutter animation frames if an exposed endpoint is available, replace temporary Hedwig directional derivatives with true PixelLab owl rotations, polish path-graph walking with stair/landing waypoints, revise/approve Hedwig schema details, add approved Notion capture writer only after approval, richer reusable prompt/tool handoff metadata and ranking, proposal-only Reddit Intelligence design, local-only Hedwig Reddit URL save previews, approved open-web search, richer source extraction/validation, project profile persistence, or session linkage. At closeout, update `CEREBRO_SESSION_HANDOFF.md`, save a unique timestamped Obsidian snapshot to `90_Archive/CereBro Session History/snapshots/`, and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md` without overwriting any prior snapshot/index entry. Do not write to Notion/Slack or edit external project repos without explicit approval, and do not move/delete existing vault or repo files.
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_MODEL_ROUTER_BASELINE.md, and CEREBRO_FILE_LIFECYCLE_PLAN.md first. Continue Session 4 from the live Project Lab, command intake, Surfer Sources, prompt/tool handoff memory, Hedwig Capture Inbox, Hedwig-as-agent Keep slice, Terminal Lab, Approval Queue, first runtime use-spot/path-graph movement, Aang Companion policy shell, Workbench policy shell, the new global append-only learning law, the new general image-understanding requirement, the new global permission-mode direction, the new reasoning-router/model-tool opportunist direction, the new Reddit Intelligence source lane, and the expanded external reference rule fold-in: Uncodixfy is standing anti-generic UI judgment, Google Stitch is high-fidelity UI exploration only, v0.app is disposable React/Tailwind component scaffolding only, Docling is the preferred local document-intelligence candidate once an adapter exists, local-deep-research and ppt-master are strong adapter candidates after review, agent-harness repos feed Tony/Spock/Oak runbooks before runtime changes, Pixelle-Video and VoxCPM are parked media adapters, and Maigret/CloakBrowser are restricted by default. Project Intelligence currently has static read-only profiles, local git status, Batman strategy support, deterministic command-intake previews, explicit intake-to-task creation with project linking/project-name display, Tasks project filtering, Project Lab task rollups, Project Lab read-only Git inspector rows for dirty worktrees, Project Lab filtered-card score breakdown chips, Project Lab local signal-block drill-down into inspector queues, Project Lab worktree drill-down into the Git inspector, Project Lab recent-row drill-downs, capped-list disclosure, local inspector search, type chips, sort controls, Signals strip, Sources filter, Missing filter, Local Repos reset-to-All navigation, accessible summary/filter button labels, passive summary and empty-state accessibility labels, Local Inspector accessibility labels, card drill-down accessibility labels, distinct empty-state reset label, close/search accessibility labels, close-button type hygiene, region accessibility labels, status live-region semantics, non-interactive list semantics, busy-state semantics, Keep left-rail and shell accessibility labels, Next Safe Actions strip, Next reason chips, summary-count navigation, empty-filter state, and local action drafts that remain visible by profile slug before a linked harness project row exists, Terminal Lab/Hedwig local observation rollups, self/system improvement categories, a modular panel model, a Surfer source panel scaffold, a local-only Model Tools panel for capability proposals, eval notes, and route previews, a global permission-mode shell with append-only local mode events, advisory permission preflight checks, append-only permission preflight audit records, and a shared server permission-policy helper used by both the Permissions router and Workbench evidence records, a read-only local Approval Queue with status/origin/project/search filters, local grouping, deterministic Oak/Spock preflight notes, and read-only permission preflight audit visibility, a proposal-only Workbench shell with evidence surfaces/permission classes/append-only evidence record shape plus local Workbench evidence record create/list/filter/detail, linked permission preflight ids and preflight detail on evidence records, validation notes that record their own local permission preflight rows, local evidence grouping by project/kind/source/command/validation status, source/command/task/session/artifact picker labels, task/session/artifact grouping, and append-only validation history in the evidence inspector, a proposal-only Aang Companion shell policy with allowed local events/blocked actions/web-mock-first route plus live local event-count strip, approved one-URL public ingestion, first-pass saved-source trust/scrub metadata, Reddit marked as a first-class V1 human-signal source lane, Slack marked as required V1 Hedwig capture, Notion marked as the structured capture database, Obsidian session handoff snapshots/index notes are approved append-only standing closeout behavior, and global history/log/archive/index/note trails must append or version while canonical current-state summaries may update in place. CereBro must understand images as a general input type, not only creative assets or setup screenshots: the user should be able to drag in screenshots, UI states, account screens, app errors, artwork, mockups, diagrams, photos, charts, whiteboards, generated images, and other still images, then ask open-ended questions about them. Video starts with frame/key-frame understanding and annotation. The modular in-app workbench is now a locked product direction: CereBro should show live localhost previews, public browser views, screenshots, images, video/key frames, annotations, terminal/log output, validation notes, and before/after comparisons inside the app; these surfaces are user-visible and agent-readable evidence, not hidden background tools. Add a Codex-like global permission-mode control across all work, not just media: `Default permissions`, `Auto-review`, and `Full access`. Default reads explicit user-provided context and guides. Auto-review proactively inspects approved visible/local evidence and queues suggestions. Full access uses enabled tools in the session, while hard gates still require visible approval for payments, account permission grants, destructive commands, deleting/overwriting files, sending messages, publishing, uploading private media externally, saving sensitive screenshots to memory, installs, tokens/API keys, and sealed Raven/NSFW scope. Vault/Obsidian durable text writers now create timestamped versions on same-title filename collision instead of overwriting, Artifact Library labels its saves as durable history/draft/report trails rather than current-state overwrites, source saves now split current-state `sources` rows from append-only `source_events` provenance, and Surfer Sources displays recent source history events with local owner/scrubbed filters and richer event detail. Aang Companion Overlay is planned as a small always-on desktop surface and now has a proposal-only Keep policy panel for keeping tabs on CereBro: ambient idle presence, click/hotkey quick ask, short status bubbles, open-Keep routing, time-of-day reactions, and quiet lore-accurate idle loops such as goofy fidgeting, tiny airbending practice, sitting, breathing, balancing, and sleepy states. Aang remains an agent, not a pet in the roster. Cortana still routes requests, Hedwig still owns capture/reminders, and Piccolo still owns hygiene. Terminal Lab is a proposal-only panel/router that classifies commands, explains risk, records local preview observations, infers known project links from cwd, accepts manually pasted observed-output summaries with light redaction, can link observations to selected tasks/sessions, filters observations by selected task/session, surfaces deterministic Aang/Tony follow-up suggestions from observed output, surfaces read-only Tony diagnostic command drafts, can convert one of Tony's generated diagnostic drafts into a normal local Terminal Lab preview with parent/root/depth provenance, has copy/approval-note affordances for Tony diagnostic drafts, shows parent-observation provenance and a diagnostic-preview status label on saved diagnostic previews, includes explicit diagnostic evidence and expected-signal notes for Tony draft commands across port conflicts, missing modules/packages, TypeScript symbol errors, package-tool failures, git state, missing files, permission errors, and unclear non-zero exits, supports local observation detail/status transitions, can stage pending local approval-preview rows for command observations without approving or executing commands, can create normal local follow-up tasks from observations, can stage Aang learning-note memory proposals from observations, and never executes commands or writes durable memory directly. Reusable prompt/tool handoffs can be saved as approved vault artifacts, searched read-only, and surfaced in command intake for `prompt_reuse` requests with required reuse disclosure. CereBro must now grow this into a routing playbook tied to the Model/Tool Capability Registry: target model/tool, prompt style, example result, privacy constraints, free-tier sufficiency, eval notes, source URLs, and failure notes. Surfer should propose current models/tools/free tiers only with sources and date checked; Cortana routes; Batman risk-reviews; Spock/Oak validate; Piccolo tracks stale registry entries, cost/rate limits, and storage. Candidate gateway/eval paths include LiteLLM, OpenRouter, direct provider SDKs, a CereBro-native gateway, promptfoo, DeepEval, and custom Vitest fixtures, but do not install or connect any of them without approval. Hedwig has a proposal-only Inbox panel with Notion capture DB schema, Slack DM/capture-channel shape, approval gates, routing rules, local capture preview persistence, recent capture history, read-only triage proposals for saved captures into task/source/learning/reminder/message routes, an explicit `Create Local Task` action that links a capture to a normal local CereBro task without external writes, an explicit `Save Source` action that creates a local unfetched source record plus source event from a capture URL without browsing/fetching, an explicit `Create Reminder Proposal` action that creates a local reminder proposal without scheduling/notifying, an explicit `Create Message Draft` action that creates a local draft proposal without sending/posting, local proposal detail/status transitions for source/reminder/message proposals that remain metadata-only and do not approve external action, editable local review fields for priority/notes/approval scope/external target, and pending local approval-preview rows for source enrichment, Notion capture write, Slack capture read, reminder scheduling, and message sending without approving or executing those external actions. The Approval Queue reads those Hedwig and Terminal approval-preview rows across local surfaces, joins them back to project/task/source/command/capture metadata when available, and still cannot approve, reject, execute, fetch, send, schedule, or write. The Workbench panel defines preview/browser/media/annotation/terminal/validation/comparison surfaces, can create manual local append-only evidence records, filter/group/inspect evidence details, link sources/commands/tasks/sessions/artifacts, append validation notes, show validation history, and does not open tools; the Aang panel defines event policy, local mock controls, live local event counts, and in-app event routing buttons but starts no desktop process. Hedwig is now the 11th agent in router/Keep metadata with a split Crypts Messenger Roost, scaled PixelLab owl sprite, motion config, use-spots, council spot, and path-graph node, and KeepScene now loads directional textures, uses idle/hero/council use-spots for actual movement, swaps facing frames, keeps emotes attached to moving sprites, routes `walking-to-ceremony` through a first BFS path graph into Cortana's hub, and avoids restarting movement tweens when state refreshes do not change an agent state. Do not emphasize session handoffs as a big UI surface; they live in Obsidian. Start proposal-only or implement a small safe slice: continue auditing code surfaces for accidental overwrites of logs/history/notes, add current-state writer proposals only where truly needed, deepen Approval Queue drill-downs or grouping without adding action execution, build the web-only Aang Companion mock inside the Keep without desktop permissions, deepen Workbench task/session linking and validation status display while keeping validation append-only before wiring browser/media automation, prototype image drag/drop artifact intake as temporary-by-default, define the hosted/local vision adapter interface without sending images externally, define a Docling document-intake adapter plan with parser receipts before installing anything, extend Project Lab local action draft history with status/version trails or add explicit draft-to-task proposals without edits, retrieve and wire Hedwig's PixelLab idle-flutter animation frames if an exposed endpoint is available, replace temporary Hedwig directional derivatives with true PixelLab owl rotations, polish path-graph walking with stair/landing waypoints, revise/approve Hedwig schema details, add approved Notion capture writer only after approval, richer reusable prompt/tool handoff metadata and ranking, proposal-only Reddit Intelligence design, local-only Hedwig Reddit URL save previews, approved open-web search, richer source extraction/validation, project profile persistence, or session linkage. At closeout, update `CEREBRO_SESSION_HANDOFF.md`, save a unique timestamped Obsidian snapshot to `90_Archive/CereBro Session History/snapshots/`, and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md` without overwriting any prior snapshot/index entry. Do not write to Notion/Slack or edit external project repos without explicit approval, and do not move/delete existing vault or repo files.
 ```

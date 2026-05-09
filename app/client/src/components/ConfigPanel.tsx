@@ -5,6 +5,8 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { cerebroColors as C } from "@/lib/keepConfig";
+import { Button } from "@/components/ui/button";
 
 interface ConfigPanelProps {
   onClose: () => void;
@@ -45,30 +47,35 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="w-[680px] max-h-[85vh] overflow-y-auto rounded border-2 border-[#4B0082] bg-[#0d0a1a] text-white"
-        style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+        className="w-[680px] max-h-[85vh] overflow-y-auto rounded"
+        style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.border}`, fontFamily: "'IBM Plex Mono', monospace" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#4B0082]">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚙️</span>
-            <h2 className="text-base font-bold text-[#FFD700] uppercase tracking-widest">
-              Bridge Configuration
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+          <div>
+            <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Basement Configuration
             </h2>
+            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              Local bridge, session watcher, and machine status.
+            </p>
           </div>
-          <button
+          <Button
+            type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-white text-lg leading-none"
+            variant="ghost"
+            size="sm"
+            style={{ color: C.textMuted }}
           >
-            ✕
-          </button>
+            Close
+          </Button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-3 space-y-3">
           {/* Connection Status */}
           <section>
-            <h3 className="text-xs font-bold text-[#AA88FF] uppercase tracking-widest mb-3">
-              📡 Server Status
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+              Machine Status
             </h3>
             <div className="grid grid-cols-2 gap-2 text-xs">
               {[
@@ -78,13 +85,13 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 { label: "Tracked Projects", value: String(status?.trackedProjects ?? 0), ok: (status?.trackedProjects ?? 0) > 0 },
                 { label: "Total Sessions", value: String(status?.totalSessions ?? 0), ok: (status?.totalSessions ?? 0) > 0 },
               ].map((item) => (
-                <div key={item.label} className="flex items-start gap-2 bg-[#0a0a18] px-3 py-2 rounded">
-                  <span className={item.ok ? "text-green-400" : "text-yellow-500"}>
+                <div key={item.label} className="flex items-start gap-2 px-2.5 py-1.5 rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <span style={{ color: item.ok ? C.success : C.warning }}>
                     {item.ok ? "✓" : "○"}
                   </span>
                   <div className="min-w-0">
-                    <div className="text-gray-500 text-xs">{item.label}</div>
-                    <div className="text-white truncate text-xs">{item.value}</div>
+                    <div className="text-xs" style={{ color: C.textMuted }}>{item.label}</div>
+                    <div className="truncate text-xs" style={{ color: C.textPrimary }}>{item.value}</div>
                   </div>
                 </div>
               ))}
@@ -93,103 +100,115 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
 
           {/* Bridge API Key */}
           <section>
-            <h3 className="text-xs font-bold text-[#AA88FF] uppercase tracking-widest mb-3">
-              🔑 Bridge API Key
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+              Bridge API Key
             </h3>
-            <p className="text-xs text-gray-400 mb-3">
-              Use this key to authenticate the local bridge script running on your machine.
+            <p className="text-xs mb-3" style={{ color: C.textMuted }}>
+              Local session watcher authentication. Treat this like a secret.
             </p>
             {keyLoading ? (
-              <div className="text-xs text-gray-500 animate-pulse">Generating key...</div>
+              <div className="text-xs animate-pulse" style={{ color: C.textMuted }}>Generating key.</div>
             ) : (
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-[#0a0a18] border border-[#4B0082] px-3 py-2 text-xs text-[#FFD700] rounded font-mono break-all">
+                <code className="flex-1 px-2.5 py-1.5 text-xs rounded font-mono break-all" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.gold }}>
                   {bridgeData?.apiKey || "Loading..."}
                 </code>
-                <button
+                <Button
+                  type="button"
                   onClick={() => bridgeData?.apiKey && copyToClipboard(bridgeData.apiKey, "key")}
-                  className="shrink-0 px-3 py-2 text-xs border border-[#4B0082] text-[#AA88FF] hover:bg-[#4B0082] hover:text-white rounded transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                 >
-                  {copied === "key" ? "✓ Copied!" : "Copy"}
-                </button>
+                  {copied === "key" ? "Copied" : "Copy"}
+                </Button>
               </div>
             )}
           </section>
 
           {/* Quick Start */}
           <section>
-            <h3 className="text-xs font-bold text-[#AA88FF] uppercase tracking-widest mb-3">
-              🚀 Quick Start
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+              Local Bridge Setup
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div>
-                <div className="text-xs text-gray-500 mb-1">1. Download the bridge script:</div>
+                <div className="text-xs mb-1" style={{ color: C.textMuted }}>1. Download the bridge script.</div>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-[#0a0a18] border border-[#1a1a2e] px-3 py-2 text-xs text-green-300 rounded">
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
                     curl -O {serverUrl}/bridge/claude-dungeon-bridge.mjs
                   </code>
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => copyToClipboard(`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`, "download")}
-                    className="shrink-0 px-3 py-2 text-xs border border-[#4B0082] text-[#AA88FF] hover:bg-[#4B0082] hover:text-white rounded transition-colors"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
-                    {copied === "download" ? "✓" : "Copy"}
-                  </button>
+                    {copied === "download" ? "Copied" : "Copy"}
+                  </Button>
                 </div>
               </div>
 
               <div>
-                <div className="text-xs text-gray-500 mb-1">2. Run the bridge (Node.js 18+ required):</div>
+                <div className="text-xs mb-1" style={{ color: C.textMuted }}>2. Run the bridge with Node 22.</div>
                 <div className="flex items-start gap-2">
-                  <code className="flex-1 bg-[#0a0a18] border border-[#1a1a2e] px-3 py-2 text-xs text-green-300 rounded break-all leading-relaxed">
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded break-all leading-relaxed" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
                     {bridgeCommand}
                   </code>
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => copyToClipboard(bridgeCommand, "cmd")}
-                    className="shrink-0 px-3 py-2 text-xs border border-[#4B0082] text-[#AA88FF] hover:bg-[#4B0082] hover:text-white rounded transition-colors"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
-                    {copied === "cmd" ? "✓" : "Copy"}
-                  </button>
+                    {copied === "cmd" ? "Copied" : "Copy"}
+                  </Button>
                 </div>
               </div>
 
               <div>
-                <div className="text-xs text-gray-500 mb-1">3. Start Claude Code in any project:</div>
-                <code className="block bg-[#0a0a18] border border-[#1a1a2e] px-3 py-2 text-xs text-green-300 rounded">
+                <div className="text-xs mb-1" style={{ color: C.textMuted }}>3. Start Claude Code in any project.</div>
+                <code className="block px-2.5 py-1.5 text-xs rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
                   claude  # or claude-code
                 </code>
               </div>
 
-              <div className="bg-[#0a1a0a] border border-[#1a3a1a] px-3 py-2 rounded text-xs text-green-400">
-                ✅ Heroes will automatically appear in the dungeon map when Claude Code is active!
+              <div className="px-2.5 py-1.5 rounded text-xs" style={{ background: `${C.success}12`, border: `1px solid ${C.success}44`, color: C.success }}>
+                Active sessions appear in the Keep and Ledger.
               </div>
             </div>
           </section>
 
           {/* How It Works */}
           <section>
-            <h3 className="text-xs font-bold text-[#AA88FF] uppercase tracking-widest mb-3">
-              ℹ️ How It Works
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+              How It Works
             </h3>
-            <div className="text-xs text-gray-400 space-y-2 leading-relaxed">
+            <div className="text-xs space-y-2 leading-relaxed" style={{ color: C.textMuted }}>
               <div className="flex gap-2">
-                <span className="text-[#4B0082] shrink-0">▶</span>
-                <span>The bridge script monitors <code className="text-[#FFD700]">~/.claude/projects/</code> on your local machine</span>
+                <span style={{ color: C.accent }} className="shrink-0">›</span>
+                <span>The bridge script monitors <code style={{ color: C.gold }}>~/.claude/projects/</code> on your local machine.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#4B0082] shrink-0">▶</span>
-                <span>It reads Claude Code's JSONL transcript files to detect tool usage</span>
+                <span style={{ color: C.accent }} className="shrink-0">›</span>
+                <span>It reads Claude Code JSONL transcript files to detect session activity.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#4B0082] shrink-0">▶</span>
-                <span>Tool events are mapped to hero states: Bash → ⚔️ Fighting, WebSearch → 🔮 Casting, Idle → 💤 Resting</span>
+                <span style={{ color: C.accent }} className="shrink-0">›</span>
+                <span>Tool events map to agent state, route, evidence, and Ledger records.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#4B0082] shrink-0">▶</span>
-                <span>Hero data is pushed to this cloud server via the Bridge API every 2 seconds</span>
+                <span style={{ color: C.accent }} className="shrink-0">›</span>
+                <span>Session data is pushed to this server through the bridge API.</span>
               </div>
               <div className="flex gap-2">
-                <span className="text-[#4B0082] shrink-0">▶</span>
-                <span>The web app receives updates via WebSocket and animates heroes in real-time</span>
+                <span style={{ color: C.accent }} className="shrink-0">›</span>
+                <span>The Keep receives updates through WebSocket and shows live state.</span>
               </div>
             </div>
           </section>
@@ -197,14 +216,14 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
           {/* Tracked Projects */}
           {status?.projects && status.projects.length > 0 && (
             <section>
-              <h3 className="text-xs font-bold text-[#AA88FF] uppercase tracking-widest mb-3">
-                📁 Tracked Projects ({status.projects.length})
+              <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+                Tracked Projects ({status.projects.length})
               </h3>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {status.projects.map((p) => (
-                  <div key={p.encodedName} className="flex items-center justify-between bg-[#0a0a18] px-3 py-1.5 rounded text-xs">
-                    <span className="text-white truncate flex-1">{p.realPath}</span>
-                    <span className="text-gray-500 shrink-0 ml-2">{p.sessionCount} session{p.sessionCount !== 1 ? "s" : ""}</span>
+                  <div key={p.encodedName} className="flex items-center justify-between px-2.5 py-1.5 rounded text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <span className="truncate flex-1" style={{ color: C.textPrimary }}>{p.realPath}</span>
+                    <span className="shrink-0 ml-2" style={{ color: C.textMuted }}>{p.sessionCount} session{p.sessionCount !== 1 ? "s" : ""}</span>
                   </div>
                 ))}
               </div>
@@ -213,13 +232,16 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-[#4B0082] flex justify-end">
-          <button
+        <div className="px-5 py-3 flex justify-end" style={{ borderTop: `1px solid ${C.borderSoft}` }}>
+          <Button
+            type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-bold uppercase border border-[#4B0082] text-[#AA88FF] hover:bg-[#4B0082] hover:text-white rounded transition-colors"
+            variant="outline"
+            size="sm"
+            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

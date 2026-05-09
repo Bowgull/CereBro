@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const KIND_OPTIONS = [
   "all",
@@ -96,14 +107,6 @@ function formatRelative(unixSec: number): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function stateColor(state: string): string {
-  if (state === "published") return C.success;
-  if (state === "review" || state === "inbox") return C.warning;
-  if (state === "temp") return C.danger;
-  if (state === "archived" || state === "superseded") return C.textMuted;
-  return C.accent;
-}
-
 function writePolicyCopy(policy: WritePolicy): string {
   if (policy === "draft") return "Draft trail: same-title saves create timestamped versions.";
   if (policy === "report") return "Report history: each same-title save preserves earlier reports.";
@@ -114,6 +117,8 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [kind, setKind] = useState<KindFilter>("all");
   const [writeKind, setWriteKind] = useState<WriteKind>("obsidian_note");
+  const [sessionFilter, setSessionFilter] = useState("all");
+  const [writeSessionId, setWriteSessionId] = useState("none");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [sourceUri, setSourceUri] = useState("");
@@ -121,8 +126,10 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const [lastWrite, setLastWrite] = useState<string | null>(null);
   const artifacts = trpc.artifacts.list.useQuery({
     kind: kind === "all" ? undefined : kind,
+    sessionId: sessionFilter === "all" ? undefined : Number(sessionFilter),
     limit: 200,
   });
+  const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 10000 });
   const writeVault = trpc.artifacts.writeTextToVault.useMutation({
     onSuccess: () => utils.artifacts.list.invalidate(),
   });
@@ -131,6 +138,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   });
 
   const rows = artifacts.data ?? [];
+  const sessionOptions = sessions.data ?? [];
   const isWriting = writeVault.isPending || writeObsidian.isPending;
   const writeCopy = WRITE_KIND_COPY[writeKind];
 
@@ -158,6 +166,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
         kind: writeKind,
         title: trimmedTitle,
         body: trimmedBody,
+        sessionId: writeSessionId === "none" ? undefined : Number(writeSessionId),
         ownerAgent: writeCopy.ownerAgent,
         sourceUri: trimmedSourceUri || undefined,
         approved: true,
@@ -176,100 +185,116 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full flex flex-col" style={{ background: C.background }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-center justify-between px-2.5 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div>
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Artifact Library
+          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Ledger Output Library
             <span className="ml-2" style={{ color: C.textSecondary }}>{rows.length}</span>
           </div>
           <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>
-            Metadata trail for saved notes, outputs, messages, reports, and vault files. History accumulates.
+            Artifact receipts for saved notes, outputs, messages, reports, and vault files. History accumulates.
           </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} variant="outline" size="sm">
           Close
-        </button>
+        </Button>
       </div>
 
-      <div className="flex items-center gap-1 px-4 py-2 shrink-0 flex-wrap" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-3 gap-2 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <OutputStat label="Rows" value={String(rows.length)} tone={C.gold} />
+        <OutputStat label="Write Policy" value={writeCopy.policy} tone={C.success} />
+        <OutputStat label="Owner" value={writeCopy.ownerAgent} tone={C.accent} />
+      </div>
+
+      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 flex-wrap" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         {KIND_OPTIONS.map((k) => {
           const active = kind === k;
           return (
-            <button
+            <Button
+              type="button"
               key={k}
               onClick={() => setKind(k)}
-              className="px-2 py-1 text-xs uppercase tracking-wider rounded whitespace-nowrap"
-              style={{
-                color: active ? C.textPrimary : C.textMuted,
-                background: active ? C.surfaceRaised : "transparent",
-                border: `1px solid ${active ? C.accentSoft : C.borderSoft}`,
-              }}
+              className="whitespace-nowrap"
+              variant={active ? "secondary" : "ghost"}
+              size="sm"
             >
               {k.replace(/_/g, " ")}
-            </button>
+            </Button>
           );
         })}
       </div>
+      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <FilterButton
+          label="All Runs"
+          active={sessionFilter === "all"}
+          count={rows.length}
+          onClick={() => setSessionFilter("all")}
+        />
+        {sessionOptions.map((session) => (
+          <FilterButton
+            key={session.id}
+            label={session.title || `Run #${session.id}`}
+            active={sessionFilter === String(session.id)}
+            count={rows.filter((row) => row.sessionId === session.id).length}
+            title={session.displayName}
+            onClick={() => setSessionFilter(String(session.id))}
+          />
+        ))}
+      </div>
 
-      <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[170px_minmax(0,1fr)_auto] gap-2">
-          <select
+      <form onSubmit={submit} className="px-2.5 py-1.5 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-1 md:grid-cols-[170px_180px_minmax(0,1fr)_auto] gap-2">
+          <AppSelect
+            label="Artifact kind"
             value={writeKind}
-            onChange={(e) => setWriteKind(e.target.value as WriteKind)}
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
-            aria-label="Artifact kind"
-          >
-            {WRITE_KINDS.map((k) => (
-              <option key={k} value={k}>{WRITE_KIND_COPY[k].label}</option>
-            ))}
-          </select>
-          <input
+            onChange={(value) => setWriteKind(value as WriteKind)}
+            options={WRITE_KINDS.map((k) => ({ value: k, label: WRITE_KIND_COPY[k].label }))}
+          />
+          <AppSelect
+            label="Run link"
+            value={writeSessionId}
+            onChange={setWriteSessionId}
+            options={[
+              { value: "none", label: "No run link" },
+              ...sessionOptions.map((session) => ({
+                value: String(session.id),
+                label: session.displayName,
+              })),
+            ]}
+          />
+          <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={`${writeCopy.label} title`}
-            className="px-2 py-1.5 text-xs rounded outline-none"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
           />
-          <button
+          <Button
             type="submit"
             disabled={!title.trim() || !body.trim() || isWriting}
-            className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded"
-            style={{
-              background: title.trim() && body.trim() ? C.accentSoft : C.surfaceMuted,
-              color: title.trim() && body.trim() ? C.textPrimary : C.textMuted,
-              border: `1px solid ${C.borderSoft}`,
-            }}
           >
             {isWriting ? "Saving" : "Save"}
-          </button>
+          </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-2">
-          <textarea
+          <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder={writeCopy.body}
-            className="px-2 py-1.5 text-xs rounded outline-none resize-none min-h-20"
-            style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
+            className="min-h-20"
           />
           <div className="space-y-2">
             {writeKind === "obsidian_note" ? (
-              <input
+              <Input
                 value={obsidianSubdir}
                 onChange={(e) => setObsidianSubdir(e.target.value)}
                 placeholder="Obsidian subfolder"
-                className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
               />
             ) : (
-              <input
+              <Input
                 value={sourceUri}
                 onChange={(e) => setSourceUri(e.target.value)}
                 placeholder={writeKind === "source_note" ? "Source URL or file path" : "Optional source/context URI"}
-                className="w-full px-2 py-1.5 text-xs rounded outline-none"
-                style={{ background: C.surfaceMuted, color: C.textPrimary, border: `1px solid ${C.borderSoft}` }}
               />
             )}
             <div className="text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
@@ -289,19 +314,17 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {artifacts.isLoading ? (
-          <div className="px-4 py-3 text-xs" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-2.5 py-1.5 text-xs" style={{ color: C.textMuted }}>Loading.</div>
         ) : rows.length === 0 ? (
-          <div className="px-4 py-3 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="px-2.5 py-1.5 text-xs leading-relaxed" style={{ color: C.textMuted }}>
             No artifacts recorded for this filter yet. They appear as approved writes, Notion publishes,
             Obsidian notes, message drafts, and cleanup reports are saved.
           </div>
         ) : (
-          rows.map((artifact) => {
-            const color = stateColor(artifact.lifecycleState);
-            return (
+          rows.map((artifact) => (
               <div
                 key={artifact.id}
-                className="grid grid-cols-1 md:grid-cols-[160px_120px_minmax(0,1fr)_140px] gap-2 md:gap-3 px-4 py-2 items-start"
+                className="grid grid-cols-1 md:grid-cols-[160px_120px_minmax(0,1fr)_140px] gap-2 md:gap-2 px-2.5 py-1.5 items-start"
                 style={{ borderBottom: `1px solid ${C.borderSoft}` }}
               >
                 <div>
@@ -311,14 +334,16 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: C.textMuted }}>
                     {artifact.kind.replace(/_/g, " ")}
                   </div>
+                  {artifact.sessionDisplayName && (
+                    <Badge variant="outline" className="mt-1 max-w-full uppercase" title={artifact.sessionDisplayName}>
+                      {artifact.sessionDisplayName}
+                    </Badge>
+                  )}
                 </div>
                 <div>
-                  <span
-                    className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    style={{ color, background: `${color}22`, border: `1px solid ${color}55` }}
-                  >
+                  <Badge variant={badgeVariant(artifact.lifecycleState)} className="uppercase">
                     {artifact.lifecycleState.replace(/_/g, " ")}
-                  </span>
+                  </Badge>
                   <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>
                     {artifact.retentionRule.replace(/_/g, " ")}
                   </div>
@@ -329,7 +354,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   {artifact.sourceUri && (
                     <div className="text-[10px] truncate mt-0.5" style={{ color: C.textMuted }} title={artifact.sourceUri}>
-                      Source: {artifact.sourceUri}
+                      Source: {artifact.sourceDisplayName ?? artifact.sourceUri}
                     </div>
                   )}
                 </div>
@@ -344,10 +369,87 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   )}
                 </div>
               </div>
-            );
-          })
+            ))
         )}
       </div>
     </div>
   );
+}
+
+function FilterButton({
+  label,
+  active,
+  count,
+  title,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  count: number;
+  title?: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      type="button"
+      onClick={onClick}
+      className="shrink-0"
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
+      title={title}
+    >
+      {label}
+      <Badge variant={active ? "default" : "secondary"} className="ml-1">
+        {count}
+      </Badge>
+    </Button>
+  );
+}
+
+function OutputStat({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="text-xs font-semibold mt-0.5 truncate" style={{ color: tone }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly { value: string; label: string }[];
+}) {
+  return (
+    <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={label} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </UiSelect>
+  );
+}
+
+function badgeVariant(state: string): "default" | "secondary" | "destructive" | "warning" | "success" {
+  if (state === "published") return "success";
+  if (state === "review" || state === "inbox") return "warning";
+  if (state === "temp") return "destructive";
+  if (state === "archived" || state === "superseded") return "secondary";
+  return "default";
 }

@@ -1,5 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -36,9 +38,16 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
             Proposal-only Obsidian session history plan.
           </div>
         </div>
-        <button onClick={onClose} className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button
+          type="button"
+          onClick={onClose}
+          variant="ghost"
+          size="sm"
+          className="shrink-0"
+          style={{ color: C.textMuted }}
+        >
           Close
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -70,9 +79,9 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
                         {candidate.relativePath}
                       </div>
                     </div>
-                    <span className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+                    <Badge variant="secondary" className="shrink-0" style={{ color: C.textMuted }}>
                       {formatSize(candidate.byteSize)}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="text-xs leading-relaxed mt-2" style={{ color: C.textSecondary }}>
                     {candidate.excerpt || "No excerpt available."}

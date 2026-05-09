@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const AGENT_LABELS: Record<string, string> = {
   aang: "Aang",
@@ -349,24 +353,24 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full flex flex-col" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-center justify-between px-3 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             Project Lab
             <span className="ml-2" style={{ color: C.textSecondary }}>{projects.length}</span>
           </div>
-          <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>
+          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
             Read-only project intelligence for local repos, agent ownership, and next build direction.
           </div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close Project Lab" className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} aria-label="Close Project Lab" variant="outline" size="sm" className="shrink-0">
           Close
-        </button>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 xl:grid-cols-10 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-2 md:grid-cols-5 xl:grid-cols-10 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
         <StatusBlock label="Local Repos" value={String(data?.summary.local ?? 0)} tone={C.accent} onSelect={() => setProjectFilter("all")} />
         <StatusBlock label="Dirty" value={String(data?.summary.dirty ?? 0)} tone={(data?.summary.dirty ?? 0) > 0 ? C.danger : C.success} onSelect={() => setProjectFilter("dirty")} />
@@ -379,7 +383,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         <StatusBlock label="Scanned" value={formatScannedAt(data?.scannedAt)} tone={C.textSecondary} />
       </div>
 
-      <div className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <ChipRow label="Intake" items={data?.intakeCategories ?? []} />
         <ChipRow label="Modes" items={data?.projectModes ?? []} tone={C.accent} />
         <div className="flex items-center gap-2">
@@ -388,21 +392,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex flex-wrap gap-1 min-w-0">
             {projectFilters.map((filter) => (
-              <button
+              <Button
                 key={filter.id}
                 type="button"
                 onClick={() => setProjectFilter(filter.id)}
                 aria-pressed={projectFilter === filter.id}
                 aria-label={`Show ${filter.label} projects`}
-                className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                style={{
-                  color: projectFilter === filter.id ? C.background : C.textSecondary,
-                  background: projectFilter === filter.id ? C.accent : C.surfaceMuted,
-                  border: `1px solid ${projectFilter === filter.id ? C.accent : C.borderSoft}`,
-                }}
+                variant={projectFilter === filter.id ? "default" : "secondary"}
+                size="sm"
               >
                 {filter.label} {filter.count}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -416,20 +416,16 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
             <div className="flex flex-wrap gap-1 min-w-0">
               {attentionSignals.map((signal) => (
-                <button
+                <Button
                   key={`${signal.label}-${signal.id}`}
                   type="button"
                   onClick={() => setProjectFilter(signal.id)}
                   aria-label={`Show ${signal.label} signal projects`}
-                  className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                  style={{
-                    color: projectFilter === signal.id ? C.background : C.textSecondary,
-                    background: projectFilter === signal.id ? signal.tone : C.surfaceMuted,
-                    border: `1px solid ${projectFilter === signal.id ? signal.tone : C.borderSoft}`,
-                  }}
+                  variant={projectFilter === signal.id ? "default" : "secondary"}
+                  size="sm"
                 >
                   {signal.label} {signal.count}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -441,7 +437,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 min-w-0 flex-1">
               {nextSafeProjects.map(({ project, score }) => (
-                <button
+                <Button
                   key={project.slug}
                   type="button"
                   aria-label={`Inspect next safe action for ${project.name}`}
@@ -449,32 +445,30 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     setInspectorQueue(preferredInspectorQueue(project, "attention"));
                     setSelectedSlug(project.slug);
                   }}
-                  className="min-w-0 rounded px-2 py-1 text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
-                  style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                  className="h-auto min-w-0 justify-start rounded px-2 py-1 text-left"
+                  variant="secondary"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.accent }} title={project.name}>
-                      {project.name}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.warning }}>
-                      {score}
-                    </span>
-                  </div>
-                  <div className="text-[11px] leading-snug truncate" title={project.nextSafeAction}>
-                    {project.nextSafeAction}
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {attentionReasons(project).slice(0, 3).map((reason) => (
-                      <span
-                        key={reason}
-                        className="text-[10px] px-1.5 py-0.5 rounded"
-                        style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}
-                      >
-                        {reason}
+                  <span className="block min-w-0 w-full">
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.accent }} title={project.name}>
+                        {project.name}
                       </span>
-                    ))}
-                  </div>
-                </button>
+                      <span className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.warning }}>
+                        {score}
+                      </span>
+                    </span>
+                    <span className="block text-[11px] leading-snug truncate" title={project.nextSafeAction}>
+                      {project.nextSafeAction}
+                    </span>
+                    <span className="flex flex-wrap gap-1 mt-1">
+                      {attentionReasons(project).slice(0, 3).map((reason) => (
+                        <Badge key={reason} variant="secondary" className="uppercase">
+                          {reason}
+                        </Badge>
+                      ))}
+                    </span>
+                  </span>
+                </Button>
               ))}
             </div>
           </div>
@@ -499,9 +493,9 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {overview.isLoading ? (
-          <div className="px-4 py-3 text-xs" style={{ color: C.textMuted }}>Reading project landscape.</div>
+          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>Reading project landscape.</div>
         ) : projects.length === 0 ? (
-          <div className="px-4 py-3 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="px-3 py-2 text-xs leading-relaxed" style={{ color: C.textMuted }}>
             No project profiles are available yet.
           </div>
         ) : filteredProjects.length === 0 ? (
@@ -512,7 +506,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             onSelectFilter={setProjectFilter}
           />
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 p-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5 p-3">
             {filteredProjects.map((project, index) => {
               const statusTone = toneForStatus(project.git.statusText, project.localExists);
               const reasons = attentionReasons(project);
@@ -524,7 +518,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                 <article
                   key={project.slug}
                   aria-label={`${project.name} project card`}
-                  className="min-w-0 rounded p-3"
+                  className="min-w-0 rounded p-2.5"
                   style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -534,43 +528,33 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           {project.name}
                         </h2>
                         {projectFilter !== "all" && (
-                          <span
-                            className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                            style={{ color: C.warning, background: `${C.warning}14`, border: `1px solid ${C.warning}66` }}
-                          >
+                          <Badge variant="warning" className="uppercase">
                             #{index + 1} · {rankScore}
-                          </span>
+                          </Badge>
                         )}
-                        <span
-                          className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                          style={{ color: C.accent, background: `${C.accent}1a`, border: `1px solid ${C.accentSoft}` }}
-                        >
+                        <Badge variant="default" className="uppercase">
                           {labelize(project.priorityClass)}
-                        </span>
+                        </Badge>
                       </div>
                       <div className="text-xs leading-relaxed mt-1" style={{ color: C.textSecondary }}>
                         {project.status}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <button
+                      <Button
                         type="button"
                         aria-label={`Inspect ${project.name}`}
                         onClick={() => {
                           setInspectorQueue(preferredInspectorQueue(project, projectFilter));
                           setSelectedSlug(project.slug);
                         }}
-                        className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        style={{ color: C.accent, background: `${C.accent}14`, border: `1px solid ${C.accentSoft}` }}
+                        size="sm"
                       >
                         Inspect
-                      </button>
-                      <span
-                        className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                        style={{ color: statusTone, background: `${statusTone}1a`, border: `1px solid ${statusTone}66` }}
-                      >
+                      </Button>
+                      <Badge variant={project.localExists && project.git.statusText !== "dirty" ? "success" : project.git.statusText === "dirty" ? "destructive" : "warning"} className="uppercase">
                         {project.localExists ? project.git.statusText : "missing"}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
 
@@ -635,7 +619,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         ["package_proof", "Package proof"],
                         ["validation_pass", "Validate"],
                       ] as Array<[DraftActionKey, string]>).map(([actionKey, label]) => (
-                        <button
+                        <Button
                           key={actionKey}
                           type="button"
                           disabled={createActionDraft.isPending}
@@ -645,15 +629,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             setInspectorQueue("drafts");
                             setSelectedSlug(project.slug);
                           }}
-                          className="text-[10px] uppercase tracking-wider px-2 py-1 rounded text-left"
-                          style={{
-                            color: createActionDraft.isPending ? C.textMuted : C.textSecondary,
-                            background: C.surface,
-                            border: `1px solid ${C.borderSoft}`,
-                          }}
+                          className="h-auto justify-start rounded text-left"
+                          variant="secondary"
+                          size="sm"
                         >
                           {label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     <div role="status" aria-live="polite" className="mt-2 text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
@@ -746,6 +727,15 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             </span>
                             <span className="truncate" title={task.title}>
                               {task.title}
+                              {task.sessionId != null && (
+                                <span
+                                  className="ml-1 uppercase tracking-wider"
+                                  style={{ color: C.textMuted }}
+                                  title={task.sessionDisplayName ?? undefined}
+                                >
+                                  {task.sessionDisplayName ?? `Run #${task.sessionId}`}
+                                </span>
+                              )}
                             </span>
                           </div>
                         ))}
@@ -762,7 +752,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           </div>
                           <div className="space-y-1">
                             {project.activity.recentCommands.map((item) => (
-                              <button
+                              <Button
                                 type="button"
                                 key={item.id}
                                 aria-label={`Inspect Terminal observation for ${project.name}: ${item.command}`}
@@ -770,14 +760,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                                   setInspectorQueue("terminal");
                                   setSelectedSlug(project.slug);
                                 }}
-                                className="w-full text-[11px] leading-snug px-2 py-1 rounded min-w-0 text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
-                                style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                                className="h-auto w-full min-w-0 justify-start rounded text-left"
+                                variant="secondary"
+                                size="sm"
                               >
-                                <span className="uppercase tracking-wider mr-1" style={{ color: item.risk === "read_only" ? C.success : C.warning }}>
-                                  {labelize(item.risk)}
+                                <span className="min-w-0 truncate">
+                                  <Badge variant={item.risk === "read_only" ? "success" : "warning"} className="mr-1 uppercase">
+                                    {labelize(item.risk)}
+                                  </Badge>
+                                  <span className="truncate" title={item.command}>{item.command}</span>
                                 </span>
-                                <span className="truncate" title={item.command}>{item.command}</span>
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         </div>
@@ -790,7 +783,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           </div>
                           <div className="space-y-1">
                             {project.activity.recentCaptures.map((item) => (
-                              <button
+                              <Button
                                 type="button"
                                 key={item.id}
                                 aria-label={`Inspect Hedwig capture for ${project.name}: ${item.title}`}
@@ -798,14 +791,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                                   setInspectorQueue("hedwig");
                                   setSelectedSlug(project.slug);
                                 }}
-                                className="w-full text-[11px] leading-snug px-2 py-1 rounded min-w-0 text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
-                                style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                                className="h-auto w-full min-w-0 justify-start rounded text-left"
+                                variant="secondary"
+                                size="sm"
                               >
-                                <span className="uppercase tracking-wider mr-1" style={{ color: item.sensitive ? C.danger : C.accent }}>
-                                  {labelize(item.status)}
+                                <span className="min-w-0 truncate">
+                                  <Badge variant={item.sensitive ? "destructive" : "default"} className="mr-1 uppercase">
+                                    {labelize(item.status)}
+                                  </Badge>
+                                  <span className="truncate" title={item.title}>{labelize(item.captureType)}: {item.title}</span>
                                 </span>
-                                <span className="truncate" title={item.title}>{labelize(item.captureType)}: {item.title}</span>
-                              </button>
+                              </Button>
                             ))}
                           </div>
                         </div>
@@ -840,7 +836,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           items={project.activity.sourceEvents.recent.map((item) => ({
                             id: item.id,
                             label: labelize(item.eventType),
-                            text: item.title ?? item.trustLevel ?? "source event",
+                            text: item.title ?? item.sourceDisplayName ?? item.trustLevel ?? "source event",
                             tone: item.sensitive ? C.danger : C.accent,
                           }))}
                         />
@@ -849,37 +845,40 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                   )}
 
                   {project.git.dirty && (
-                    <button
+                    <Button
                       type="button"
                       aria-label={`Inspect Worktree Changes for ${project.name}`}
                       onClick={() => {
                         setInspectorQueue("git");
                         setSelectedSlug(project.slug);
                       }}
-                      className="mt-3 w-full text-left rounded p-2 transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
+                      className="mt-3 h-auto w-full justify-start rounded p-2 text-left"
+                      variant="destructive"
                       style={{ background: `${C.danger}0d`, border: `1px solid ${C.danger}33` }}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                          Worktree Changes
-                        </div>
-                        <div className="text-[10px] uppercase tracking-wider" style={{ color: C.danger }}>
-                          {project.git.dirtyCount}
-                        </div>
-                      </div>
-                      <div className="space-y-1" role="list" aria-label={`${project.name} worktree changes`}>
-                        {project.git.changes.slice(0, 5).map((change) => (
-                          <div
-                            key={change}
-                            role="listitem"
-                            className="text-[11px] leading-snug break-all px-2 py-1 rounded"
-                            style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
-                          >
-                            {change}
-                          </div>
-                        ))}
-                      </div>
-                    </button>
+                      <span className="block w-full">
+                        <span className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                            Worktree Changes
+                          </span>
+                          <span className="text-[10px] uppercase tracking-wider" style={{ color: C.danger }}>
+                            {project.git.dirtyCount}
+                          </span>
+                        </span>
+                        <span className="space-y-1" role="list" aria-label={`${project.name} worktree changes`}>
+                          {project.git.changes.slice(0, 5).map((change) => (
+                            <span
+                              key={change}
+                              role="listitem"
+                              className="block text-[11px] leading-snug break-all px-2 py-1 rounded"
+                              style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                            >
+                              {change}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                    </Button>
                   )}
                 </article>
               );
@@ -1066,12 +1065,13 @@ function ProjectDetailInspector({
       items: sources.map((item: any) => ({
         id: item.id,
         label: labelize(item.eventType),
-        text: item.title ?? item.trustLevel ?? "source event",
+        text: item.title ?? item.sourceDisplayName ?? item.trustLevel ?? "source event",
         meta: item.trustLevel ?? compactTime(item.createdAt),
         tone: item.sensitive ? C.danger : C.accent,
         fields: [
           ["Event Type", labelize(item.eventType)],
           ["Title", item.title ?? "untitled"],
+          ["Source", item.sourceDisplayName ?? item.uri ?? "not recorded"],
           ["Trust Level", item.trustLevel ?? "unknown"],
           ["Sensitive", item.sensitive ? "yes" : "no"],
           ["Created", compactTime(item.createdAt)],
@@ -1172,9 +1172,9 @@ function ProjectDetailInspector({
             {projectName}
           </div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Hide local inspector" className="text-xs uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
+        <Button type="button" onClick={onClose} aria-label="Hide local inspector" variant="outline" size="sm" className="shrink-0">
           Hide
-        </button>
+        </Button>
       </div>
 
       <div className="mt-2 text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
@@ -1187,7 +1187,7 @@ function ProjectDetailInspector({
         <div className="mt-3">
           <div className="flex flex-wrap gap-1">
             {queues.map((queue) => (
-              <button
+              <Button
                 key={queue.id}
                 type="button"
                 aria-pressed={activeQueue === queue.id}
@@ -1199,15 +1199,11 @@ function ProjectDetailInspector({
                   setInspectorLabelFilter(null);
                   setInspectorSort("default");
                 }}
-                className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                style={{
-                  color: activeQueue === queue.id ? C.background : C.textSecondary,
-                  background: activeQueue === queue.id ? C.accent : C.surfaceMuted,
-                  border: `1px solid ${activeQueue === queue.id ? C.accent : C.borderSoft}`,
-                }}
+                variant={activeQueue === queue.id ? "default" : "secondary"}
+                size="sm"
               >
                 {queue.label} {queue.items.length}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -1215,7 +1211,7 @@ function ProjectDetailInspector({
             <div className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
               Search
             </div>
-            <input
+            <Input
               type="search"
               aria-label={`Search ${active.label} inspector rows`}
               value={inspectorSearch}
@@ -1224,11 +1220,10 @@ function ProjectDetailInspector({
                 setSelectedItemId(null);
               }}
               placeholder={`Filter ${active.label.toLowerCase()} rows`}
-              className="min-w-0 flex-1 rounded px-2 py-1 text-[11px] outline-none"
-              style={{ color: C.textSecondary, background: C.background, border: `1px solid ${C.borderSoft}` }}
+              className="min-w-0 flex-1"
             />
             {filterActive && (
-              <button
+              <Button
                 type="button"
                 aria-label="Reset inspector filters"
                 onClick={() => {
@@ -1236,11 +1231,11 @@ function ProjectDetailInspector({
                   setInspectorLabelFilter(null);
                   setSelectedItemId(null);
                 }}
-                className="text-[10px] uppercase tracking-wider shrink-0"
-                style={{ color: C.textMuted }}
+                variant="ghost"
+                size="sm"
               >
                 Reset
-              </button>
+              </Button>
             )}
           </div>
 
@@ -1250,7 +1245,7 @@ function ProjectDetailInspector({
                 Type
               </div>
               <div className="flex flex-wrap gap-1 min-w-0">
-                <button
+                <Button
                   type="button"
                   aria-pressed={inspectorLabelFilter == null}
                   aria-label={`Show all ${active.label} row types`}
@@ -1258,17 +1253,13 @@ function ProjectDetailInspector({
                     setInspectorLabelFilter(null);
                     setSelectedItemId(null);
                   }}
-                  className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                  style={{
-                    color: inspectorLabelFilter == null ? C.background : C.textSecondary,
-                    background: inspectorLabelFilter == null ? C.accent : C.surfaceMuted,
-                    border: `1px solid ${inspectorLabelFilter == null ? C.accent : C.borderSoft}`,
-                  }}
+                  variant={inspectorLabelFilter == null ? "default" : "secondary"}
+                  size="sm"
                 >
                   All {active.items.length}
-                </button>
+                </Button>
                 {labelFilters.map(([label, count]) => (
-                  <button
+                  <Button
                     type="button"
                     key={label}
                     aria-pressed={inspectorLabelFilter === label}
@@ -1277,15 +1268,11 @@ function ProjectDetailInspector({
                       setInspectorLabelFilter(label);
                       setSelectedItemId(null);
                     }}
-                    className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                    style={{
-                      color: inspectorLabelFilter === label ? C.background : C.textSecondary,
-                      background: inspectorLabelFilter === label ? C.accent : C.surfaceMuted,
-                      border: `1px solid ${inspectorLabelFilter === label ? C.accent : C.borderSoft}`,
-                    }}
+                    variant={inspectorLabelFilter === label ? "default" : "secondary"}
+                    size="sm"
                   >
                     {labelize(label)} {count}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -1297,7 +1284,7 @@ function ProjectDetailInspector({
             </div>
             <div className="flex flex-wrap gap-1 min-w-0">
               {sortOptions.map((option) => (
-                <button
+                <Button
                   type="button"
                   key={option.id}
                   aria-pressed={inspectorSort === option.id}
@@ -1306,15 +1293,11 @@ function ProjectDetailInspector({
                     setInspectorSort(option.id);
                     setSelectedItemId(null);
                   }}
-                  className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                  style={{
-                    color: inspectorSort === option.id ? C.background : C.textSecondary,
-                    background: inspectorSort === option.id ? C.accent : C.surfaceMuted,
-                    border: `1px solid ${inspectorSort === option.id ? C.accent : C.borderSoft}`,
-                  }}
+                  variant={inspectorSort === option.id ? "default" : "secondary"}
+                  size="sm"
                 >
                   {option.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -1388,29 +1371,31 @@ function DetailColumn({
         <>
           <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
             {visibleItems.map((item) => (
-              <button
+              <Button
                 type="button"
                 key={item.id}
                 aria-pressed={selectedId === item.id}
                 aria-label={`Inspect ${item.label}: ${item.text}`}
                 onClick={() => onSelect?.(item.id)}
-                className="w-full grid grid-cols-[86px_minmax(0,1fr)_72px] gap-2 text-[11px] leading-snug px-2 py-1 rounded text-left"
+                className="h-auto w-full justify-start rounded px-2 py-1 text-left"
+                variant={selectedId === item.id ? "secondary" : "ghost"}
                 style={{
-                  color: C.textSecondary,
                   background: selectedId === item.id ? `${C.accent}14` : C.surface,
                   border: `1px solid ${selectedId === item.id ? C.accentSoft : C.borderSoft}`,
                 }}
               >
-                <span className="uppercase tracking-wider truncate" style={{ color: item.tone }} title={item.label}>
-                  {item.label}
+                <span className="grid w-full grid-cols-[86px_minmax(0,1fr)_72px] gap-2 text-[11px] leading-snug">
+                  <span className="uppercase tracking-wider truncate" style={{ color: item.tone }} title={item.label}>
+                    {item.label}
+                  </span>
+                  <span className="truncate" title={item.text}>
+                    {item.text}
+                  </span>
+                  <span className="truncate text-right" style={{ color: C.textMuted }} title={item.meta}>
+                    {item.meta}
+                  </span>
                 </span>
-                <span className="truncate" title={item.text}>
-                  {item.text}
-                </span>
-                <span className="truncate text-right" style={{ color: C.textMuted }} title={item.meta}>
-                  {item.meta}
-                </span>
-              </button>
+              </Button>
             ))}
           </div>
           {items.length > visibleItems.length && (
@@ -1497,32 +1482,26 @@ function DetailPreview({
               <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
                 Append Draft Note
               </div>
-              <textarea
+              <Textarea
                 value={draftNote ?? ""}
                 onChange={(event) => onDraftNoteChange?.(event.target.value)}
                 aria-label="Append local Project Lab draft note"
                 placeholder="Local note for this draft. No task is created."
-                className="w-full min-h-20 rounded px-2 py-1 text-[11px] outline-none resize-y"
-                style={{ color: C.textSecondary, background: C.background, border: `1px solid ${C.borderSoft}` }}
+                className="min-h-20"
               />
               <div className="mt-2 flex items-center justify-between gap-2">
                 <div role="status" aria-live="polite" className="text-[10px]" style={{ color: C.textMuted }}>
                   {savedNoteForThisDraft ? `Saved note #${savedNoteForThisDraft}.` : "Notes append to local draft history."}
                 </div>
-                <button
+                <Button
                   type="button"
                   disabled={!draftNote?.trim() || appendingDraftNote}
                   onClick={() => onAppendDraftNote?.(item.id as number)}
                   aria-label="Append local Project Lab draft note"
-                  className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                  style={{
-                    color: draftNote?.trim() && !appendingDraftNote ? C.background : C.textMuted,
-                    background: draftNote?.trim() && !appendingDraftNote ? C.accent : C.surfaceMuted,
-                    border: `1px solid ${draftNote?.trim() && !appendingDraftNote ? C.accent : C.borderSoft}`,
-                  }}
+                  size="sm"
                 >
                   {appendingDraftNote ? "Saving" : "Append"}
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -1546,14 +1525,15 @@ function StatusBlock({ label, value, tone, onSelect }: { label: string; value: s
 
   if (onSelect) {
     return (
-      <button
+      <Button
         type="button"
         onClick={onSelect}
         aria-label={`Show ${label} project view`}
-        className="min-w-0 text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
+        className="h-auto min-w-0 justify-start text-left"
+        variant="ghost"
       >
         {content}
-      </button>
+      </Button>
     );
   }
 
@@ -1605,29 +1585,29 @@ function EmptyProjectFilter({
               This local view has no matching project cards right now. No data was changed.
             </div>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onShowAll}
             aria-label="Reset to all projects"
-            className="text-[10px] uppercase tracking-wider px-2 py-1 rounded shrink-0"
-            style={{ color: C.background, background: C.accent, border: `1px solid ${C.accent}` }}
+            className="shrink-0"
+            size="sm"
           >
             All
-          </button>
+          </Button>
         </div>
         {signals.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
             {signals.map((signal) => (
-              <button
+              <Button
                 key={`${signal.label}-${signal.id}`}
                 type="button"
                 onClick={() => onSelectFilter(signal.id)}
                 aria-label={`Show ${signal.label} signal projects`}
-                className="text-[10px] uppercase tracking-wider px-2 py-1 rounded"
-                style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                variant="secondary"
+                size="sm"
               >
                 {signal.label} {signal.count}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -1686,15 +1666,16 @@ function SignalBlock({
 
   if (onSelect) {
     return (
-      <button
+      <Button
         type="button"
         onClick={onSelect}
         aria-label={`Inspect ${title}`}
-        className="min-w-0 rounded px-2 py-2 text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
+        className="h-auto min-w-0 justify-start rounded px-2 py-2 text-left"
+        variant="secondary"
         style={blockStyle}
       >
         {content}
-      </button>
+      </Button>
     );
   }
 
@@ -1721,21 +1702,23 @@ function RecentList({
       </div>
       <div className="space-y-1">
         {items.map((item) => (
-          <button
+          <Button
             type="button"
             key={item.id}
             onClick={onSelect}
             aria-label={`Inspect ${title}: ${item.label} ${item.text}`}
-            className="w-full grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug px-2 py-1 rounded text-left transition-colors hover:brightness-110 focus:outline-none focus:ring-1"
-            style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+            className="h-auto w-full justify-start rounded px-2 py-1 text-left"
+            variant="secondary"
           >
-            <span className="uppercase tracking-wider truncate" style={{ color: item.tone }} title={item.label}>
-              {item.label}
+            <span className="grid w-full grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+              <span className="uppercase tracking-wider truncate" style={{ color: item.tone }} title={item.label}>
+                {item.label}
+              </span>
+              <span className="truncate" title={item.text}>
+                {item.text}
+              </span>
             </span>
-            <span className="truncate" title={item.text}>
-              {item.text}
-            </span>
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -1765,15 +1748,20 @@ function ChipRow({
       </div>
       <div className="flex flex-wrap gap-1 min-w-0">
         {items.map((item) => (
-          <span
-            key={item}
-            className="text-[10px] px-1.5 py-0.5 rounded"
-            style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
-          >
+          <Badge key={item} variant={badgeVariantForTone(tone)} className="uppercase">
             {labelize(item)}
-          </span>
+          </Badge>
         ))}
       </div>
     </div>
   );
+}
+
+function badgeVariantForTone(tone: string) {
+  if (tone === C.danger) return "destructive";
+  if (tone === C.warning || tone === C.gold) return "warning";
+  if (tone === C.success) return "success";
+  if (tone === C.accentViolet || tone === C.glowViolet) return "violet";
+  if (tone === C.accent) return "default";
+  return "secondary";
 }

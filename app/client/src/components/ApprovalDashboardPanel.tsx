@@ -1,10 +1,21 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type OriginFilter = "all" | "hedwig" | "terminal" | "project_lab" | "source" | "other";
 type StatusFilter = "pending" | "approved" | "rejected" | "cancelled";
 type GroupFilter = "origin" | "project" | "action_type" | "status" | "risk";
+type SelectOption = { value: string; label: string };
 
 const origins: Array<{ id: OriginFilter; label: string }> = [
   { id: "all", label: "All" },
@@ -72,56 +83,62 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
   const items = approvals.data?.items ?? [];
   const selected = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
   const preflightItems = preflights.data?.items ?? [];
+  const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
+  const preflightTotal = preflights.data?.summary.total ?? 0;
+  const blockedPreflights = preflights.data?.summary.blocked ?? 0;
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Approval Queue
+            <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Action Receipt Gate
             </h2>
-            <p className="text-xs mt-1" style={{ color: C.textMuted }}>
-              Local preview records. No action buttons.
+            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              Universal local receipts for approvals, blocks, and permission preflights. No action execution.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close approval queue"
-            className="px-2 py-1 text-xs font-semibold uppercase rounded"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            variant="outline"
+            size="sm"
           >
             Close
-          </button>
+          </Button>
         </div>
 
-        <div className="mt-4 grid gap-2 lg:grid-cols-[1fr_auto_auto]">
+        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Approval receipt summary">
+          <ReceiptStat label="Pending" value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
+          <ReceiptStat label="Sensitive" value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
+          <ReceiptStat label="Preflights" value={String(preflightTotal)} tone={C.accent} />
+          <ReceiptStat label="Blocked" value={String(blockedPreflights)} tone={blockedPreflights > 0 ? C.danger : C.textMuted} />
+        </div>
+
+        <div className="mt-2 grid gap-2 lg:grid-cols-[1fr_auto_auto]">
           <label className="sr-only" htmlFor="approval-search">Search approval previews</label>
-          <input
+          <Input
             id="approval-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search action, project, reason, command, capture, source."
             aria-label="Search approval previews"
-            className="w-full px-3 py-2 rounded text-xs outline-none"
-            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           />
-          <select
-            value={projectId}
-            onChange={(event) => setProjectId(event.target.value === "all" ? "all" : Number(event.target.value))}
-            aria-label="Filter approvals by project"
-            className="px-3 py-2 rounded text-xs outline-none"
-            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-          >
-            <option value="all">All projects</option>
-            {projectOptions.map((project) => (
-              <option key={project.slug} value={project.tasks.projectId ?? ""}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-          <button
+          <AppSelect
+            label="Filter approvals by project"
+            value={String(projectId)}
+            onChange={(value) => setProjectId(value === "all" ? "all" : Number(value))}
+            options={[
+              { value: "all", label: "All projects" },
+              ...projectOptions.map((project) => ({
+                value: String(project.tasks.projectId ?? ""),
+                label: project.name,
+              })),
+            ]}
+          />
+          <Button
             type="button"
             onClick={() => {
               setQuery("");
@@ -131,14 +148,13 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
               setSelectedId(null);
             }}
             aria-label="Reset approval filters to pending local previews"
-            className="px-3 py-2 text-xs font-semibold uppercase rounded"
-            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            variant="outline"
           >
             Reset
-          </button>
+          </Button>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2" aria-label="Approval origin filters">
+        <div className="mt-2 flex flex-wrap gap-2" aria-label="Approval origin filters">
           {origins.map((item) => (
             <FilterButton key={item.id} active={origin === item.id} label={item.label} onClick={() => setOrigin(item.id)} />
           ))}
@@ -149,36 +165,35 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
           ))}
         </div>
 
-        <div className="mt-3 rounded p-3" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="mt-2 rounded p-2.5" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="flex items-center justify-between gap-3 mb-2">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Groups
               </div>
-              <div className="text-xs mt-1" style={{ color: C.textMuted }}>
+              <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                 Local previews only. No approval action.
               </div>
             </div>
-            <select
+            <AppSelect
+              label="Group approval previews"
               value={groupBy}
-              onChange={(event) => setGroupBy(event.target.value as GroupFilter)}
-              aria-label="Group approval previews"
-              className="px-2 py-1.5 rounded text-xs outline-none"
-              style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-            >
-              <option value="origin">Origin</option>
-              <option value="project">Project</option>
-              <option value="action_type">Action type</option>
-              <option value="status">Status</option>
-              <option value="risk">Risk</option>
-            </select>
+              onChange={(value) => setGroupBy(value as GroupFilter)}
+              options={[
+                { value: "origin", label: "Origin" },
+                { value: "project", label: "Project" },
+                { value: "action_type", label: "Action type" },
+                { value: "status", label: "Status" },
+                { value: "risk", label: "Risk" },
+              ]}
+            />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {(groups.data?.groups ?? []).length === 0 ? (
               <div className="text-xs" style={{ color: C.textMuted }}>No groups match these filters.</div>
             ) : (
               groups.data?.groups.map((group) => (
-                <button
+                <Button
                   key={group.key}
                   type="button"
                   onClick={() => {
@@ -189,20 +204,22 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                     setSelectedId(null);
                   }}
                   aria-label={`Filter approval previews by ${labelize(group.label)}`}
-                  className="min-w-44 rounded p-2 text-left"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                  className="h-auto min-w-44 justify-start rounded p-2 text-left"
+                  variant="secondary"
                 >
-                  <div className="text-xs font-semibold leading-snug truncate" style={{ color: C.textPrimary }} title={group.label}>
-                    {labelize(group.label)}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    <Chip label={`${group.count} previews`} tone={C.accent} />
-                    {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
-                  </div>
-                  <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-                    {group.sampleIds.map((id) => `#${id}`).join(", ")}
-                  </div>
-                </button>
+                  <span className="block w-full">
+                    <span className="block truncate text-xs font-semibold leading-snug" title={group.label}>
+                      {labelize(group.label)}
+                    </span>
+                    <span className="mt-2 flex flex-wrap gap-1">
+                      <Chip label={`${group.count} previews`} tone={C.accent} />
+                      {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
+                    </span>
+                    <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                      {group.sampleIds.map((id) => `#${id}`).join(", ")}
+                    </span>
+                  </span>
+                </Button>
               ))
             )}
           </div>
@@ -219,13 +236,13 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
             : `Showing ${items.length} ${status} preview${items.length === 1 ? "" : "s"}. Sensitive ${approvals.data?.summary.sensitive ?? 0}.`}
         </div>
 
-        <div className="mt-3 rounded p-3" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="mt-2 rounded p-2.5" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Permission Preflights
               </div>
-              <div className="text-xs mt-1" style={{ color: C.textMuted }}>
+              <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                 Local audit history. Policy evidence only.
               </div>
             </div>
@@ -235,7 +252,7 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
               {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
             </div>
           </div>
-          <div className="mt-3 grid gap-2">
+          <div className="mt-2 grid gap-2">
             {preflights.isLoading ? (
               <div className="text-xs" style={{ color: C.textMuted }}>Reading local preflight records.</div>
             ) : preflightItems.length === 0 ? (
@@ -271,56 +288,59 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
       </header>
 
       <div className="flex-1 grid gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px]" style={{ minHeight: 0 }}>
-        <section className="overflow-y-auto p-4" aria-label="Approval preview list">
+        <section className="overflow-y-auto p-3" aria-label="Approval preview list">
           {(approvals.data?.gates ?? []).map((gate) => (
-            <div key={gate} className="mb-2 rounded px-3 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div key={gate} className="mb-2 rounded px-2.5 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               {gate}
             </div>
           ))}
 
           {items.length === 0 ? (
-            <div className="rounded p-4 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-3 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               No approval previews match these filters. Reset filters or stage a preview from Hedwig or Terminal Lab.
             </div>
           ) : (
             <div className="grid gap-3">
               {items.map((item) => (
-                <button
+                <Button
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   aria-label={`Inspect approval ${item.id}: ${labelize(item.actionType)}`}
-                  className="w-full text-left rounded p-3 transition-colors"
+                  className="h-auto w-full justify-start rounded p-3 text-left"
+                  variant="secondary"
                   style={{
                     background: selected?.id === item.id ? C.surfaceRaised : C.surface,
                     border: `1px solid ${selected?.id === item.id ? C.accent : C.borderSoft}`,
                     color: C.textPrimary,
                   }}
                 >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Chip label={`#${item.id}`} tone={C.textMuted} />
-                    <Chip label={labelize(item.origin)} tone={C.accent} />
-                    <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
-                    {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
-                    {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
-                    {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
-                  </div>
-                  <div className="mt-2 text-sm font-semibold" style={{ color: C.textPrimary }}>
-                    {labelize(item.actionType)}
-                  </div>
-                  <div className="mt-1 text-xs line-clamp-2" style={{ color: C.textMuted }}>
-                    {item.targetLabel ?? item.reason ?? item.contextSummary ?? "No target label recorded."}
-                  </div>
-                  <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-                    {formatTime(item.createdAt)}
-                  </div>
-                </button>
+                  <span className="block w-full">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <Chip label={`#${item.id}`} tone={C.textMuted} />
+                      <Chip label={labelize(item.origin)} tone={C.accent} />
+                      <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
+                      {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
+                      {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
+                      {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
+                    </span>
+                    <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>
+                      {labelize(item.actionType)}
+                    </span>
+                    <span className="mt-1 block text-xs whitespace-normal line-clamp-2" style={{ color: C.textMuted }}>
+                      {item.targetLabel ?? item.reason ?? item.contextSummary ?? "No target label recorded."}
+                    </span>
+                    <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                      {formatTime(item.createdAt)}
+                    </span>
+                  </span>
+                </Button>
               ))}
             </div>
           )}
         </section>
 
-        <aside className="overflow-y-auto p-4" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <aside className="overflow-y-auto p-3" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
           {!selected ? (
             <div className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Select an approval preview to inspect validation notes.
@@ -405,27 +425,75 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
 
 function FilterButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className="px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider"
-      style={{
-        background: active ? C.accentSoft : C.surface,
-        border: `1px solid ${active ? C.accent : C.borderSoft}`,
-        color: active ? C.textPrimary : C.textMuted,
-      }}
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
     >
       {label}
-    </button>
+    </Button>
+  );
+}
+
+function ReceiptStat({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="text-xs font-semibold mt-0.5" style={{ color: tone }}>
+        {value}
+      </div>
+    </div>
   );
 }
 
 function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${tone}22`, color: tone }}>
+    <Badge variant={variant} className="uppercase">
       {label}
-    </span>
+    </Badge>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly SelectOption[];
+}) {
+  return (
+    <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={label} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={`${option.value}-${option.label}`} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </UiSelect>
   );
 }
 

@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb, recordArtifact } from "../cerebroDb";
+import { sourceDisplayName } from "../displayLabels";
 import { writeVaultTextArtifact } from "../integrations/vault";
+import { sessionDisplayName } from "./sessions";
 
 const artifactKindSchema = z.enum([
   "source_url",
@@ -92,6 +94,8 @@ function defaultRetention(kind: string): z.infer<typeof retentionRuleSchema> {
 }
 
 function rowToArtifact(r: Record<string, unknown>) {
+  const sessionId = r.session_id == null ? null : Number(r.session_id);
+  const sourceUri = r.source_uri == null ? null : String(r.source_uri);
   return {
     id: Number(r.id),
     kind: String(r.kind),
@@ -99,11 +103,22 @@ function rowToArtifact(r: Record<string, unknown>) {
     title: r.title == null ? null : String(r.title),
     projectId: r.project_id == null ? null : Number(r.project_id),
     taskId: r.task_id == null ? null : Number(r.task_id),
-    sessionId: r.session_id == null ? null : Number(r.session_id),
+    sessionId,
+    sessionDisplayName:
+      sessionId == null
+        ? null
+        : sessionDisplayName({
+            id: sessionId,
+            title: r.session_title == null ? null : String(r.session_title),
+            projectName: r.session_project_name == null ? null : String(r.session_project_name),
+            heroClass: r.session_hero_class == null ? null : String(r.session_hero_class),
+            endedAt: r.session_ended_at == null ? null : Number(r.session_ended_at),
+          }),
     ownerAgent: r.owner_agent == null ? null : String(r.owner_agent),
     storageProvider: String(r.storage_provider),
     storagePath: String(r.storage_path),
-    sourceUri: r.source_uri == null ? null : String(r.source_uri),
+    sourceUri,
+    sourceDisplayName: sourceUri == null ? null : sourceDisplayName(sourceUri),
     retentionRule: String(r.retention_rule),
     cleanupEligibleAt: r.cleanup_eligible_at == null ? null : Number(r.cleanup_eligible_at),
     createdAt: Number(r.created_at),
@@ -119,6 +134,7 @@ export const artifactsRouter = router({
           kind: artifactKindSchema.optional(),
           lifecycleState: lifecycleStateSchema.optional(),
           projectId: z.number().int().optional(),
+          sessionId: z.number().int().optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
         .optional(),
@@ -128,27 +144,49 @@ export const artifactsRouter = router({
       const where: string[] = [];
       const args: (string | number)[] = [];
       if (input?.kind) {
-        where.push("kind = ?");
+        where.push("a.kind = ?");
         args.push(input.kind);
       }
       if (input?.lifecycleState) {
-        where.push("lifecycle_state = ?");
+        where.push("a.lifecycle_state = ?");
         args.push(input.lifecycleState);
       }
       if (input?.projectId !== undefined) {
-        where.push("project_id = ?");
+        where.push("a.project_id = ?");
         args.push(input.projectId);
+      }
+      if (input?.sessionId !== undefined) {
+        where.push("a.session_id = ?");
+        args.push(input.sessionId);
       }
       args.push(input?.limit ?? 100);
       const result = await db.execute({
         sql: `
-          SELECT id, kind, lifecycle_state, title, project_id, task_id,
-                 session_id, owner_agent, storage_provider, storage_path,
-                 source_uri, retention_rule, cleanup_eligible_at,
-                 created_at, updated_at
-          FROM artifacts
+          SELECT
+            a.id,
+            a.kind,
+            a.lifecycle_state,
+            a.title,
+            a.project_id,
+            a.task_id,
+            a.session_id,
+            a.owner_agent,
+            a.storage_provider,
+            a.storage_path,
+            a.source_uri,
+            a.retention_rule,
+            a.cleanup_eligible_at,
+            a.created_at,
+            a.updated_at,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            p.name AS session_project_name
+          FROM artifacts a
+          LEFT JOIN sessions s ON s.id = a.session_id
+          LEFT JOIN projects p ON p.id = s.project_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-          ORDER BY created_at DESC
+          ORDER BY a.created_at DESC
           LIMIT ?
         `,
         args,

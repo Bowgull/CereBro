@@ -10,11 +10,13 @@ import {
   type MemoryRow,
 } from "../cerebroDb";
 import { writeObsidianNote } from "../integrations/vault";
+import { sessionDisplayName } from "./sessions";
 
 const KINDS = ["fact", "note", "reference", "feedback"] as const;
 const kindSchema = z.enum(KINDS);
 
 function rowToMemory(r: Record<string, unknown>): MemoryRow {
+  const sessionId = r.session_id == null ? null : Number(r.session_id);
   return {
     id: Number(r.id),
     kind: String(r.kind) as MemoryKind,
@@ -22,13 +24,15 @@ function rowToMemory(r: Record<string, unknown>): MemoryRow {
     tags: r.tags == null ? null : String(r.tags),
     source: r.source == null ? null : String(r.source),
     projectId: r.project_id == null ? null : Number(r.project_id),
-    sessionId: r.session_id == null ? null : Number(r.session_id),
+    sessionId,
+    sessionDisplayName: sessionLabelFromRow(sessionId, r),
     createdAt: Number(r.created_at),
     updatedAt: Number(r.updated_at),
   };
 }
 
 function rowToProposal(r: Record<string, unknown>): MemoryProposalRow {
+  const sessionId = r.session_id == null ? null : Number(r.session_id);
   return {
     id: Number(r.id),
     kind: String(r.kind) as MemoryKind,
@@ -36,7 +40,8 @@ function rowToProposal(r: Record<string, unknown>): MemoryProposalRow {
     tags: r.tags == null ? null : String(r.tags),
     source: r.source == null ? null : String(r.source),
     projectId: r.project_id == null ? null : Number(r.project_id),
-    sessionId: r.session_id == null ? null : Number(r.session_id),
+    sessionId,
+    sessionDisplayName: sessionLabelFromRow(sessionId, r),
     proposedByAgent: String(r.proposed_by_agent),
     status: String(r.status) as MemoryProposalStatus,
     oakStatus: String(r.oak_status),
@@ -48,12 +53,24 @@ function rowToProposal(r: Record<string, unknown>): MemoryProposalRow {
   };
 }
 
+function sessionLabelFromRow(sessionId: number | null, r: Record<string, unknown>) {
+  if (sessionId == null) return null;
+  return sessionDisplayName({
+    id: sessionId,
+    title: r.session_title == null ? null : String(r.session_title),
+    projectName: r.session_project_name == null ? null : String(r.session_project_name),
+    heroClass: r.session_hero_class == null ? null : String(r.session_hero_class),
+    endedAt: r.session_ended_at == null ? null : Number(r.session_ended_at),
+  });
+}
+
 export const memoryRouter = router({
   list: publicProcedure
     .input(
       z
         .object({
           kind: kindSchema.optional(),
+          sessionId: z.number().int().optional(),
           search: z.string().max(280).optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
@@ -64,11 +81,15 @@ export const memoryRouter = router({
       const where: string[] = [];
       const args: (string | number)[] = [];
       if (input?.kind) {
-        where.push("kind = ?");
+        where.push("m.kind = ?");
         args.push(input.kind);
       }
+      if (input?.sessionId !== undefined) {
+        where.push("m.session_id = ?");
+        args.push(input.sessionId);
+      }
       if (input?.search) {
-        where.push("(body LIKE ? OR tags LIKE ?)");
+        where.push("(m.body LIKE ? OR m.tags LIKE ?)");
         const like = `%${input.search}%`;
         args.push(like, like);
       }
@@ -76,11 +97,25 @@ export const memoryRouter = router({
       args.push(limit);
       const result = await db.execute({
         sql: `
-          SELECT id, kind, body, tags, source, project_id, session_id,
-                 created_at, updated_at
-          FROM memory_entries
+          SELECT
+            m.id,
+            m.kind,
+            m.body,
+            m.tags,
+            m.source,
+            m.project_id,
+            m.session_id,
+            m.created_at,
+            m.updated_at,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            p.name AS session_project_name
+          FROM memory_entries m
+          LEFT JOIN sessions s ON s.id = m.session_id
+          LEFT JOIN projects p ON p.id = s.project_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-          ORDER BY created_at DESC
+          ORDER BY m.created_at DESC
           LIMIT ?
         `,
         args,
@@ -95,6 +130,7 @@ export const memoryRouter = router({
           status: z
             .enum(["pending", "validated", "needs_revision", "blocked", "approved", "written", "rejected"])
             .optional(),
+          sessionId: z.number().int().optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
         .optional(),
@@ -104,19 +140,42 @@ export const memoryRouter = router({
       const where: string[] = [];
       const args: (string | number)[] = [];
       if (input?.status) {
-        where.push("status = ?");
+        where.push("mp.status = ?");
         args.push(input.status);
+      }
+      if (input?.sessionId !== undefined) {
+        where.push("mp.session_id = ?");
+        args.push(input.sessionId);
       }
       const limit = input?.limit ?? 100;
       args.push(limit);
       const result = await db.execute({
         sql: `
-          SELECT id, kind, body, tags, source, project_id, session_id,
-                 proposed_by_agent, status, oak_status, oak_notes,
-                 approval_id, memory_entry_id, created_at, updated_at
-          FROM memory_proposals
+          SELECT
+            mp.id,
+            mp.kind,
+            mp.body,
+            mp.tags,
+            mp.source,
+            mp.project_id,
+            mp.session_id,
+            mp.proposed_by_agent,
+            mp.status,
+            mp.oak_status,
+            mp.oak_notes,
+            mp.approval_id,
+            mp.memory_entry_id,
+            mp.created_at,
+            mp.updated_at,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            p.name AS session_project_name
+          FROM memory_proposals mp
+          LEFT JOIN sessions s ON s.id = mp.session_id
+          LEFT JOIN projects p ON p.id = s.project_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-          ORDER BY created_at DESC
+          ORDER BY mp.created_at DESC
           LIMIT ?
         `,
         args,
@@ -290,7 +349,38 @@ export const memoryRouter = router({
         `,
         args: [approvalId, memoryEntryId, input.id],
       });
-      return rowToProposal(updated.rows[0]!);
+      if (!updated.rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: `No proposal ${input.id}` });
+      const withSession = await db.execute({
+        sql: `
+          SELECT
+            mp.id,
+            mp.kind,
+            mp.body,
+            mp.tags,
+            mp.source,
+            mp.project_id,
+            mp.session_id,
+            mp.proposed_by_agent,
+            mp.status,
+            mp.oak_status,
+            mp.oak_notes,
+            mp.approval_id,
+            mp.memory_entry_id,
+            mp.created_at,
+            mp.updated_at,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            p.name AS session_project_name
+          FROM memory_proposals mp
+          LEFT JOIN sessions s ON s.id = mp.session_id
+          LEFT JOIN projects p ON p.id = s.project_id
+          WHERE mp.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      return rowToProposal(withSession.rows[0] ?? updated.rows[0]);
     }),
 
   create: publicProcedure

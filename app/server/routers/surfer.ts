@@ -1,14 +1,17 @@
 import { z } from "zod";
 import { getCerebroDb, recordArtifact, recordSourceEvent, type SourceKind, type SourceRow } from "../cerebroDb";
+import { sourceDisplayName } from "../displayLabels";
 import { publicProcedure, router } from "../_core/trpc";
 
 const TRUST_LEVELS = ["official", "primary", "high", "medium", "low", "unknown"] as const;
 
 function rowToSource(r: Record<string, unknown>): SourceRow {
+  const uri = String(r.uri);
   return {
     id: Number(r.id),
     kind: String(r.kind) as SourceKind,
-    uri: String(r.uri),
+    uri,
+    sourceDisplayName: sourceDisplayName(uri),
     title: r.title == null ? null : String(r.title),
     summary: r.summary == null ? null : String(r.summary),
     sourceType: r.source_type == null ? "public_url" : String(r.source_type),
@@ -27,10 +30,12 @@ function rowToSource(r: Record<string, unknown>): SourceRow {
 }
 
 function rowToSourceEvent(r: Record<string, unknown>) {
+  const uri = String(r.uri);
   return {
     id: Number(r.id),
     sourceId: r.source_id == null ? null : Number(r.source_id),
-    uri: String(r.uri),
+    uri,
+    sourceDisplayName: sourceDisplayName(uri),
     eventType: String(r.event_type),
     title: r.title == null ? null : String(r.title),
     summary: r.summary == null ? null : String(r.summary),

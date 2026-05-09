@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type LocalState = "awake" | "muted" | "parked" | "sleeping";
 type CompanionRoute = "home" | "approvals" | "terminal" | "inbox" | "sources" | "workbench" | "tasks" | "automation";
@@ -27,15 +29,16 @@ export default function AangCompanionPanel({
               Event policy and web mock path. No desktop process.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close Aang Companion policy"
-            className="px-2 py-1 text-xs font-semibold uppercase rounded"
+            variant="outline"
+            size="sm"
             style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
           >
             Close
-          </button>
+          </Button>
         </div>
         <div role="status" aria-live="polite" className="mt-3 text-xs" style={{ color: C.textMuted }}>
           {policy.isLoading ? "Reading companion policy." : `Local mock state: ${localState}. Local events ${localEvents.data?.activeCount ?? 0}. No notifications sent.`}
@@ -65,12 +68,14 @@ export default function AangCompanionPanel({
               <h3 className="text-xs font-bold uppercase tracking-widest mb-3">Local Controls</h3>
               <div className="flex flex-wrap gap-2" role="group" aria-label="Aang Companion local mock state">
                 {(["awake", "muted", "parked", "sleeping"] as LocalState[]).map((state) => (
-                  <button
+                  <Button
                     key={state}
                     type="button"
                     onClick={() => setLocalState(state)}
                     aria-pressed={localState === state}
-                    className="px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider"
+                    variant={localState === state ? "secondary" : "outline"}
+                    size="sm"
+                    className="h-7 px-2"
                     style={{
                       background: localState === state ? C.accentSoft : C.surfaceMuted,
                       border: `1px solid ${localState === state ? C.accent : C.borderSoft}`,
@@ -78,7 +83,7 @@ export default function AangCompanionPanel({
                     }}
                   >
                     {state}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </section>
@@ -100,28 +105,31 @@ export default function AangCompanionPanel({
               ))}
               <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
                 {(localEvents.data?.events ?? []).map((event) => (
-                  <button
+                  <Button
                     key={event.id}
                     type="button"
                     onClick={() => onNavigate?.(event.route as CompanionRoute)}
                     aria-label={`Open ${event.route} for ${event.label}`}
-                    className="rounded p-3 text-left"
+                    variant="outline"
+                    className="h-auto justify-start whitespace-normal p-3 text-left"
                     style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                   >
-                    <div className="flex flex-wrap items-center gap-1">
-                      <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
-                      <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
-                    </div>
-                    <div className="mt-2 text-lg font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
-                      {event.count}
-                    </div>
-                    <div className="mt-1 text-xs leading-snug" style={{ color: C.textMuted }}>
-                      {event.label}
-                    </div>
-                    <div className="mt-2 text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
-                      Open {event.route}
-                    </div>
-                  </button>
+                    <span className="block w-full min-w-0">
+                      <span className="flex flex-wrap items-center gap-1">
+                        <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
+                        <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
+                      </span>
+                      <span className="mt-2 block text-lg font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
+                        {event.count}
+                      </span>
+                      <span className="mt-1 block text-xs leading-snug" style={{ color: C.textMuted }}>
+                        {event.label}
+                      </span>
+                      <span className="mt-2 block text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
+                        Open {event.route}
+                      </span>
+                    </span>
+                  </Button>
                 ))}
               </div>
             </section>
@@ -199,9 +207,19 @@ export default function AangCompanionPanel({
 }
 
 function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accent
+          ? "default"
+          : "secondary";
+
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${tone}22`, color: tone }}>
+    <Badge variant={variant} className="px-1.5 py-0.5" style={{ background: `${tone}22`, color: tone }}>
       {label}
-    </span>
+    </Badge>
   );
 }

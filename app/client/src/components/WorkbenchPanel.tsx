@@ -1,13 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 type EvidenceKind = "all" | "manual_note" | "image_review" | "video_frame" | "annotation" | "validation_note" | "terminal_output" | "before_after";
 type PermissionClass = "manual_note" | "media_review" | "annotation" | "validation";
 type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
 type EvidenceGroupBy = "project" | "task" | "session" | "kind" | "source" | "command" | "artifact" | "validation_status";
+type SelectOption = { value: string; label: string };
 
 type TemporaryMediaPreview = {
   name: string;
@@ -88,6 +102,48 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
   );
+  const workbenchLanes = [
+    {
+      label: "Preview",
+      meta: "Screens, images, browser views",
+      kind: "image_review" as EvidenceKind,
+      agent: "gojo",
+      permission: "media_review" as PermissionClass,
+      tone: C.accent,
+    },
+    {
+      label: "Terminal",
+      meta: "Command output and logs",
+      kind: "terminal_output" as EvidenceKind,
+      agent: "tony",
+      permission: "manual_note" as PermissionClass,
+      tone: C.warning,
+    },
+    {
+      label: "Validate",
+      meta: "Oak or Spock notes",
+      kind: "validation_note" as EvidenceKind,
+      agent: "spock",
+      permission: "validation" as PermissionClass,
+      tone: C.accentViolet,
+    },
+    {
+      label: "Compare",
+      meta: "Before and after proof",
+      kind: "before_after" as EvidenceKind,
+      agent: "gojo",
+      permission: "validation" as PermissionClass,
+      tone: C.gold,
+    },
+  ];
+
+  function stageLane(lane: (typeof workbenchLanes)[number]) {
+    setKind(lane.kind);
+    setRouteAgent(lane.agent);
+    setPermissionClass(lane.permission);
+    setTitle((current) => current.trim() || `${lane.label} evidence`);
+    setSummary((current) => current.trim() || `${lane.meta}. Add the concrete observation, source, and receipt before saving.`);
+  }
 
   useEffect(() => {
     const url = temporaryMedia?.url;
@@ -220,49 +276,93 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest">Workbench</h2>
-            <p className="text-xs mt-1" style={{ color: C.textMuted }}>
-              Visible evidence shell. Planning only.
+            <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
+            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              Shared evidence surface for user and agents.
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             aria-label="Close workbench"
-            className="px-2 py-1 text-xs font-semibold uppercase rounded"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            variant="outline"
+            size="sm"
           >
             Close
-          </button>
+          </Button>
         </div>
-        <div role="status" aria-live="polite" className="mt-3 text-xs" style={{ color: C.textMuted }}>
-          {plan.isLoading ? "Reading workbench policy." : "Workbench policy loaded. No browser or media tools started."}
+        <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
+          {plan.isLoading ? "Reading Workbench state." : "Local evidence only. Browser, media tools, and external writes stay gated."}
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4" aria-label="Workbench plan" aria-busy={plan.isLoading}>
+      <main className="flex-1 overflow-y-auto p-3" aria-label="Workbench plan" aria-busy={plan.isLoading}>
         {!data ? (
           <div className="rounded p-4 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             Loading workbench plan.
           </div>
         ) : (
-          <div className="grid gap-4">
-            <section className="rounded p-4" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="grid gap-3">
+            <section className="grid gap-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
+              <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+                  Active Job
+                </div>
+                <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
+                  Gather proof before summary.
+                </div>
+                <p className="text-xs leading-relaxed mt-2" style={{ color: C.textMuted }}>
+                  Pick a lane, record the observation, then append evidence. Nothing opens external tools from here.
+                </p>
+              </div>
+
+              {workbenchLanes.map((lane) => (
+                <Button
+                  key={lane.label}
+                  type="button"
+                  onClick={() => stageLane(lane)}
+                  aria-label={`Stage ${lane.label} evidence`}
+                  className="h-auto justify-start rounded p-2.5 text-left"
+                  variant="secondary"
+                  style={{
+                    background: kind === lane.kind ? C.surfaceRaised : C.surface,
+                    border: `1px solid ${kind === lane.kind ? lane.tone : C.borderSoft}`,
+                    color: C.textSecondary,
+                  }}
+                >
+                  <span className="block w-full">
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: lane.tone }}>
+                        {lane.label}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                        {lane.agent}
+                      </span>
+                    </span>
+                    <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                      {lane.meta}
+                    </span>
+                  </span>
+                </Button>
+              ))}
+            </section>
+
+            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="flex flex-wrap gap-2 mb-3">
                 <Chip label={data.mode.replace(/_/g, " ")} tone={C.warning} />
                 <Chip label={data.opensBrowser ? "browser opens" : "no browser"} tone={C.success} />
                 <Chip label={data.capturesMedia ? "media capture" : "no media capture"} tone={C.success} />
                 <Chip label={data.writesExternal ? "external writes" : "no external writes"} tone={C.success} />
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
                 {data.summary}
               </p>
             </section>
 
-            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
+            <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
               {data.surfaces.map((surface) => (
                 <article key={surface.id} className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex items-start justify-between gap-2">
@@ -284,7 +384,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               ))}
             </section>
 
-            <section className="grid gap-3 lg:grid-cols-2" aria-label="Workbench permissions">
+            <section className="grid gap-2 lg:grid-cols-2" aria-label="Workbench permissions">
               {data.permissionModel.map((item) => (
                 <article key={item.class} className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: C.textPrimary }}>
@@ -296,7 +396,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               ))}
             </section>
 
-            <section className="rounded p-4" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <h3 className="text-xs font-bold uppercase tracking-widest mb-2">Evidence Record</h3>
               <div className="flex flex-wrap gap-1 mb-3">
                 {data.evidenceRecordShape.required.map((field) => (
@@ -308,11 +408,11 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               </p>
             </section>
 
-            <section className="rounded p-4" aria-label="Create local Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-3" aria-label="Create local Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="flex items-center justify-between gap-3 mb-3">
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest">Add Evidence</h3>
-                  <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                     Manual local record. Append-only. No capture.
                   </p>
                 </div>
@@ -320,191 +420,166 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               </div>
 
               <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)]">
-                <select
+                <AppSelect
+                  label="Evidence kind"
                   value={kind}
-                  onChange={(event) => {
-                    const nextKind = event.target.value as EvidenceKind;
+                  onChange={(value) => {
+                    const nextKind = value as EvidenceKind;
                     setKind(nextKind);
                     if (nextKind === "image_review" || nextKind === "video_frame") setPermissionClass("media_review");
                     if (nextKind === "annotation") setPermissionClass("annotation");
                     if (nextKind === "validation_note") setPermissionClass("validation");
                   }}
-                  aria-label="Evidence kind"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="manual_note">Manual note</option>
-                  <option value="image_review">Image review note</option>
-                  <option value="video_frame">Video frame note</option>
-                  <option value="annotation">Annotation note</option>
-                  <option value="validation_note">Validation note</option>
-                  <option value="terminal_output">Terminal output note</option>
-                  <option value="before_after">Before/after note</option>
-                </select>
-                <input
+                  options={[
+                    { value: "manual_note", label: "Manual note" },
+                    { value: "image_review", label: "Image review note" },
+                    { value: "video_frame", label: "Video frame note" },
+                    { value: "annotation", label: "Annotation note" },
+                    { value: "validation_note", label: "Validation note" },
+                    { value: "terminal_output", label: "Terminal output note" },
+                    { value: "before_after", label: "Before/after note" },
+                  ]}
+                />
+                <Input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="Evidence title."
                   aria-label="Evidence title"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
-                <select
-                  value={projectId}
-                  onChange={(event) => setProjectId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Evidence project link"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No project</option>
-                  {projectOptions.map((project) => (
-                    <option key={project.slug} value={project.tasks.projectId ?? ""}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-                <input
+                <AppSelect
+                  label="Project link"
+                  value={String(projectId)}
+                  onChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No project" },
+                    ...projectOptions.map((project) => ({
+                      value: String(project.tasks.projectId ?? ""),
+                      label: project.name,
+                    })),
+                  ]}
+                />
+                <Input
                   value={targetUri}
                   onChange={(event) => setTargetUri(event.target.value)}
                   placeholder="Optional target URL, file path, artifact id, or panel."
                   aria-label="Evidence target"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
-                <select
-                  value={taskId}
-                  onChange={(event) => setTaskId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Link evidence to local task"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No task link</option>
-                  {(linkOptions.data?.tasks ?? [])
+                <AppSelect
+                  label="Task link"
+                  value={String(taskId)}
+                  onChange={(value) => setTaskId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No task link" },
+                    ...(linkOptions.data?.tasks ?? [])
                     .filter((task) => projectId === "none" || task.projectId === projectId)
-                    .map((task) => (
-                      <option key={task.id} value={task.id}>
-                        #{task.id} {task.projectName ?? "unlinked"} {task.status} {task.title}
-                      </option>
-                    ))}
-                </select>
-                <select
-                  value={sessionId}
-                  onChange={(event) => setSessionId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Link evidence to local session"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No session link</option>
-                  {(linkOptions.data?.sessions ?? [])
+                    .map((task) => ({
+                      value: String(task.id),
+                      label: `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`,
+                    })),
+                  ]}
+                />
+                <AppSelect
+                  label="Session link"
+                  value={String(sessionId)}
+                  onChange={(value) => setSessionId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No session link" },
+                    ...(linkOptions.data?.sessions ?? [])
                     .filter((session) => projectId === "none" || session.projectId === projectId)
-                    .map((session) => (
-                      <option key={session.id} value={session.id}>
-                        #{session.id} {session.projectName ?? "unlinked"} {session.endedAt == null ? "live" : "ended"} {session.claudeSessionId}
-                      </option>
-                    ))}
-                </select>
-                <select
+                    .map((session) => ({
+                      value: String(session.id),
+                      label: session.displayName,
+                    })),
+                  ]}
+                />
+                <AppSelect
+                  label="Route agent"
                   value={routeAgent}
-                  onChange={(event) => setRouteAgent(event.target.value)}
-                  aria-label="Route evidence to agent"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="gojo">Gojo</option>
-                  <option value="surfer">Surfer</option>
-                  <option value="tony">Tony</option>
-                  <option value="oak">Professor Oak</option>
-                  <option value="spock">Spock</option>
-                  <option value="aang">Aang</option>
-                  <option value="cortana">Cortana</option>
-                </select>
-                <select
-                  value={sourceId}
-                  onChange={(event) => setSourceId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Link evidence to saved source"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No source link</option>
-                  {(linkOptions.data?.sources ?? []).map((source) => (
-                    <option key={source.id} value={source.id}>
-                      #{source.id} {source.projectId == null ? "unlinked" : `project ${source.projectId}`} {source.trustLevel}/{source.freshnessStatus} {source.title ?? source.uri}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={commandObservationId}
-                  onChange={(event) => setCommandObservationId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Link evidence to command observation"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No command link</option>
-                  {(linkOptions.data?.commandObservations ?? []).map((command) => (
-                    <option key={command.id} value={command.id}>
-                      #{command.id} {command.status}/{command.risk} {command.projectId == null ? "unlinked" : `project ${command.projectId}`} {command.command.slice(0, 80)}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={artifactId}
-                  onChange={(event) => setArtifactId(event.target.value === "none" ? "none" : Number(event.target.value))}
-                  aria-label="Link evidence to local artifact"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="none">No artifact link</option>
-                  {(linkOptions.data?.artifacts ?? [])
+                  onChange={setRouteAgent}
+                  options={[
+                    { value: "gojo", label: "Gojo" },
+                    { value: "surfer", label: "Surfer" },
+                    { value: "tony", label: "Tony" },
+                    { value: "oak", label: "Professor Oak" },
+                    { value: "spock", label: "Spock" },
+                    { value: "aang", label: "Aang" },
+                    { value: "cortana", label: "Cortana" },
+                  ]}
+                />
+                <AppSelect
+                  label="Source link"
+                  value={String(sourceId)}
+                  onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No source link" },
+                    ...(linkOptions.data?.sources ?? []).map((source) => ({
+                      value: String(source.id),
+                      label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${source.title ?? source.uri}`,
+                    })),
+                  ]}
+                />
+                <AppSelect
+                  label="Command link"
+                  value={String(commandObservationId)}
+                  onChange={(value) => setCommandObservationId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No command link" },
+                    ...(linkOptions.data?.commandObservations ?? []).map((command) => ({
+                      value: String(command.id),
+                      label: `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`,
+                    })),
+                  ]}
+                />
+                <AppSelect
+                  label="Artifact link"
+                  value={String(artifactId)}
+                  onChange={(value) => setArtifactId(value === "none" ? "none" : Number(value))}
+                  options={[
+                    { value: "none", label: "No artifact link" },
+                    ...(linkOptions.data?.artifacts ?? [])
                     .filter((artifact) => projectId === "none" || artifact.projectId === projectId)
-                    .map((artifact) => (
-                      <option key={artifact.id} value={artifact.id}>
-                        #{artifact.id} {artifact.lifecycleState} {artifact.title ?? artifact.storagePath}
-                      </option>
-                    ))}
-                </select>
-                <select
+                    .map((artifact) => ({
+                      value: String(artifact.id),
+                      label: `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`,
+                    })),
+                  ]}
+                />
+                <AppSelect
+                  label="Permission class"
                   value={permissionClass}
-                  onChange={(event) => setPermissionClass(event.target.value as PermissionClass)}
-                  aria-label="Evidence permission class"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="manual_note">Manual note</option>
-                  <option value="media_review">Media review</option>
-                  <option value="annotation">Annotation</option>
-                  <option value="validation">Validation</option>
-                </select>
-                <input
+                  onChange={(value) => setPermissionClass(value as PermissionClass)}
+                  options={[
+                    { value: "manual_note", label: "Manual note" },
+                    { value: "media_review", label: "Media review" },
+                    { value: "annotation", label: "Annotation" },
+                    { value: "validation", label: "Validation" },
+                  ]}
+                />
+                <Input
                   value={viewport}
                   onChange={(event) => setViewport(event.target.value)}
                   placeholder="Viewport, such as 1440x900."
                   aria-label="Evidence viewport"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
-                <input
+                <Input
                   value={coordinates}
                   onChange={(event) => setCoordinates(event.target.value)}
                   placeholder="Coordinates, such as x=120 y=80 w=300 h=140."
                   aria-label="Evidence coordinates"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
-                <input
+                <Input
                   value={annotationText}
                   onChange={(event) => setAnnotationText(event.target.value)}
                   placeholder="Annotation note, optional."
                   aria-label="Evidence annotation text"
-                  className="md:col-span-2 px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                  className="md:col-span-2"
                 />
-                <textarea
+                <Textarea
                   value={summary}
                   onChange={(event) => setSummary(event.target.value)}
                   placeholder="What is visible, what matters, and which agent should care."
                   aria-label="Evidence summary"
-                  className="md:col-span-2 min-h-24 px-3 py-2 rounded text-xs outline-none resize-y"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                  className="md:col-span-2"
                 />
               </div>
               <div
@@ -533,7 +608,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
                     Choose Media
-                    <input
+                    <Input
                       type="file"
                       accept="image/*,video/*"
                       className="sr-only"
@@ -613,28 +688,27 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                         {temporaryMedia.name}
                       </div>
                       {temporaryMedia.kind === "video" && (
-                        <input
+                        <Input
                           value={mediaFrameTimeSec}
                           onChange={(event) => setMediaFrameTimeSec(event.target.value)}
                           inputMode="decimal"
                           placeholder="Frame time in seconds."
                           aria-label="Video frame time in seconds"
-                          className="px-2 py-1.5 rounded text-xs outline-none"
-                          style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                         />
                       )}
                       <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
                         Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
                       </div>
-                      <button
+                      <Button
                         type="button"
                         onClick={clearTemporaryMedia}
                         aria-label="Clear temporary Workbench media"
-                        className="w-fit rounded px-2 py-1.5 text-xs font-semibold uppercase tracking-wider"
-                        style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
+                        variant="ghost"
+                        size="sm"
+                        className="w-fit"
                       >
                         Clear
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -645,10 +719,9 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
               </div>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <label className="flex items-center gap-2 text-xs" style={{ color: C.textMuted }}>
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={sensitive}
-                    onChange={(event) => setSensitive(event.target.checked)}
+                    onCheckedChange={(checked) => setSensitive(checked === true)}
                     aria-label="Mark evidence as sensitive"
                   />
                   Sensitive
@@ -656,73 +729,62 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 <div role="status" aria-live="polite" className="text-xs flex-1" style={{ color: C.textMuted }}>
                   {createEvidence.data?.ok ? `Saved evidence #${createEvidence.data.evidence.id}. No external action.` : "Evidence records append. They do not replace earlier notes."}
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={submitEvidence}
                   disabled={!title.trim() || !summary.trim() || createEvidence.isPending}
                   aria-label="Save local Workbench evidence"
-                  className="px-3 py-2 rounded text-xs font-semibold uppercase tracking-wider"
-                  style={{
-                    background: title.trim() && summary.trim() && !createEvidence.isPending ? C.accentSoft : C.surfaceMuted,
-                    border: `1px solid ${C.borderSoft}`,
-                    color: title.trim() && summary.trim() && !createEvidence.isPending ? C.textPrimary : C.textMuted,
-                  }}
                 >
                   {createEvidence.isPending ? "Saving" : "Save Local Evidence"}
-                </button>
+                </Button>
               </div>
             </section>
 
-            <section className="rounded p-4" aria-label="Recent Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-3" aria-label="Recent Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="flex items-center justify-between gap-3 mb-3">
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest">Recent Evidence</h3>
-                  <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                     Filter and inspect local records.
                   </p>
                 </div>
                 <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
               </div>
               <div className="grid gap-2 mb-3 md:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
-                <input
+                <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
                   placeholder="Search evidence."
                   aria-label="Search Workbench evidence"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                 />
-                <select
+                <AppSelect
+                  label="Filter kind"
                   value={filterKind}
-                  onChange={(event) => setFilterKind(event.target.value as EvidenceKind)}
-                  aria-label="Filter evidence by kind"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="all">All kinds</option>
-                  <option value="manual_note">Manual note</option>
-                  <option value="image_review">Image review</option>
-                  <option value="video_frame">Video frame</option>
-                  <option value="annotation">Annotation</option>
-                  <option value="validation_note">Validation</option>
-                  <option value="terminal_output">Terminal</option>
-                  <option value="before_after">Before/after</option>
-                </select>
-                <select
-                  value={filterProjectId}
-                  onChange={(event) => setFilterProjectId(event.target.value === "all" ? "all" : Number(event.target.value))}
-                  aria-label="Filter evidence by project"
-                  className="px-3 py-2 rounded text-xs outline-none"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                >
-                  <option value="all">All projects</option>
-                  {projectOptions.map((project) => (
-                    <option key={project.slug} value={project.tasks.projectId ?? ""}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-                <button
+                  onChange={(value) => setFilterKind(value as EvidenceKind)}
+                  options={[
+                    { value: "all", label: "All kinds" },
+                    { value: "manual_note", label: "Manual note" },
+                    { value: "image_review", label: "Image review" },
+                    { value: "video_frame", label: "Video frame" },
+                    { value: "annotation", label: "Annotation" },
+                    { value: "validation_note", label: "Validation" },
+                    { value: "terminal_output", label: "Terminal" },
+                    { value: "before_after", label: "Before/after" },
+                  ]}
+                />
+                <AppSelect
+                  label="Filter project"
+                  value={String(filterProjectId)}
+                  onChange={(value) => setFilterProjectId(value === "all" ? "all" : Number(value))}
+                  options={[
+                    { value: "all", label: "All projects" },
+                    ...projectOptions.map((project) => ({
+                      value: String(project.tasks.projectId ?? ""),
+                      label: project.name,
+                    })),
+                  ]}
+                />
+                <Button
                   type="button"
                   onClick={() => {
                     setFilterQuery("");
@@ -730,11 +792,10 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     setFilterProjectId("all");
                   }}
                   aria-label="Reset Workbench evidence filters"
-                  className="px-3 py-2 rounded text-xs font-semibold uppercase tracking-wider"
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
+                  variant="secondary"
                 >
                   Reset
-                </button>
+                </Button>
               </div>
               <div className="mb-3 rounded p-3" aria-label="Workbench evidence groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -742,26 +803,25 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                       Evidence Groups
                     </h4>
-                    <p className="text-xs mt-1" style={{ color: C.textMuted }}>
+                    <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                       Local grouping. No source fetch. No command run.
                     </p>
                   </div>
-                  <select
+                  <AppSelect
+                    label="Group evidence"
                     value={groupBy}
-                    onChange={(event) => setGroupBy(event.target.value as EvidenceGroupBy)}
-                    aria-label="Group Workbench evidence"
-                    className="px-2 py-1.5 rounded text-xs outline-none"
-                    style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-                  >
-                    <option value="project">Project</option>
-                    <option value="task">Task</option>
-                    <option value="session">Session</option>
-                    <option value="kind">Kind</option>
-                    <option value="source">Source</option>
-                    <option value="command">Command</option>
-                    <option value="artifact">Artifact</option>
-                    <option value="validation_status">Validation status</option>
-                  </select>
+                    onChange={(value) => setGroupBy(value as EvidenceGroupBy)}
+                    options={[
+                      { value: "project", label: "Project" },
+                      { value: "task", label: "Task" },
+                      { value: "session", label: "Session" },
+                      { value: "kind", label: "Kind" },
+                      { value: "source", label: "Source" },
+                      { value: "command", label: "Command" },
+                      { value: "artifact", label: "Artifact" },
+                      { value: "validation_status", label: "Validation status" },
+                    ]}
+                  />
                 </div>
                 {(evidenceGroups.data?.gates ?? []).map((gate) => (
                   <div key={gate} className="mb-2 rounded px-2 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -775,7 +835,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 ) : (
                   <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
                     {evidenceGroups.data?.groups.map((group) => (
-                      <button
+                      <Button
                         key={group.key}
                         type="button"
                         onClick={() => {
@@ -793,21 +853,23 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                           }
                         }}
                         aria-label={`Filter Workbench evidence by ${group.label}`}
-                        className="rounded p-2 text-left"
-                        style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+                        className="h-auto justify-start rounded p-2 text-left"
+                        variant="secondary"
                       >
-                        <div className="text-xs font-semibold leading-snug break-words" style={{ color: C.textPrimary }}>
-                          {group.label}
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          <Chip label={`${group.count} records`} tone={C.accent} />
-                          <Chip label={`${group.validationNotes} validations`} tone={C.warning} />
-                          {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
-                        </div>
-                        <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-                          Sample: {group.sampleIds.map((id) => `#${id}`).join(", ")}
-                        </div>
-                      </button>
+                        <span className="block">
+                          <span className="block text-xs font-semibold leading-snug break-words">
+                            {group.label}
+                          </span>
+                          <span className="mt-2 flex flex-wrap gap-1">
+                            <Chip label={`${group.count} records`} tone={C.accent} />
+                            <Chip label={`${group.validationNotes} validations`} tone={C.warning} />
+                            {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
+                          </span>
+                          <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                            Sample: {group.sampleIds.map((id) => `#${id}`).join(", ")}
+                          </span>
+                        </span>
+                      </Button>
                     ))}
                   </div>
                 )}
@@ -825,34 +887,39 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                 <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
                   <div className="grid gap-2">
                     {evidence.data?.items.map((item) => (
-                    <button
+                    <Button
                       key={item.id}
                       type="button"
                       onClick={() => setSelectedEvidenceId(item.id)}
                       aria-label={`Inspect Workbench evidence ${item.id}`}
-                      className="rounded p-3 text-left"
+                      className="h-auto justify-start rounded p-2.5 text-left"
+                      variant="secondary"
                       style={{
                         background: selectedEvidenceId === item.id ? C.surfaceRaised : C.surfaceMuted,
                         border: `1px solid ${selectedEvidenceId === item.id ? C.accent : C.borderSoft}`,
                       }}
                     >
-                      <div className="flex flex-wrap items-center gap-1">
-                        <Chip label={`#${item.id}`} tone={C.textMuted} />
-                        <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
-                        <Chip label={item.validationStatus.replace(/_/g, " ")} tone={C.warning} />
-                        {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
-                        {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
-                        {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
-                        {item.mediaKind && <Chip label={item.mediaKind.replace(/_/g, " ")} tone={C.accent} />}
-                        {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
-                        {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
-                      </div>
-                      <div className="mt-2 text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</div>
-                      <p className="mt-1 text-xs leading-relaxed" style={{ color: C.textMuted }}>{item.summary}</p>
-                      {item.targetUri && (
-                        <div className="mt-2 text-[11px] break-all" style={{ color: C.textMuted }}>{item.targetUri}</div>
-                      )}
-                    </button>
+                      <span className="block w-full">
+                        <span className="flex flex-wrap items-center gap-1">
+                          <Chip label={`#${item.id}`} tone={C.textMuted} />
+                          <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
+                          <Chip label={item.validationStatus.replace(/_/g, " ")} tone={C.warning} />
+                          {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
+                          {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
+                          {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
+                          {item.mediaKind && <Chip label={item.mediaKind.replace(/_/g, " ")} tone={C.accent} />}
+                          {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
+                          {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
+                        </span>
+                        <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</span>
+                        <span className="mt-1 block text-xs leading-relaxed whitespace-normal" style={{ color: C.textMuted }}>{item.summary}</span>
+                        {item.targetUri && (
+                          <span className="mt-2 block text-[11px] truncate" style={{ color: C.textMuted }} title={item.targetUri}>
+                            Target: {sourceDisplayName(item.targetUri)}
+                          </span>
+                        )}
+                      </span>
+                    </Button>
                     ))}
                   </div>
                   <EvidenceDetailPanel
@@ -937,6 +1004,7 @@ function EvidenceDetailPanel({
           taskTitle: string | null;
           sessionId: number | null;
           sessionClaudeId: string | null;
+          sessionDisplayName: string | null;
           sourceId: number | null;
           sourceTitle: string | null;
           sourceUri: string | null;
@@ -976,6 +1044,8 @@ function EvidenceDetailPanel({
           title: string;
           summary: string;
           ownerAgent: string;
+          sessionId: number | null;
+          sessionDisplayName: string | null;
           validationStatus: string;
           permissionPreflightId: number | null;
           createdAt: number;
@@ -984,6 +1054,8 @@ function EvidenceDetailPanel({
           id: number;
           title: string;
           summary: string;
+          sessionId: number | null;
+          sessionDisplayName: string | null;
           beforeEvidenceId: number | null;
           afterEvidenceId: number | null;
           comparisonResult: string | null;
@@ -1076,11 +1148,15 @@ function EvidenceDetailPanel({
         <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
         <Meta label="Project" value={item.projectName ?? "unlinked"} />
         <Meta label="Task" value={item.taskTitle ?? (item.taskId == null ? "unlinked" : `Task #${item.taskId}`)} />
-        <Meta label="Session" value={item.sessionClaudeId ?? (item.sessionId == null ? "unlinked" : `Session #${item.sessionId}`)} />
-        <Meta label="Source" value={item.sourceTitle ?? item.sourceUri ?? (item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)} />
+        <Meta label="Session" value={item.sessionDisplayName ?? (item.sessionId == null ? "unlinked" : `Run #${item.sessionId}`)} />
+        <Meta
+          label="Source"
+          value={item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)}
+          title={item.sourceUri ?? undefined}
+        />
         <Meta label="Command" value={item.command ?? (item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`)} />
         <Meta label="Artifact" value={item.artifactTitle ?? item.artifactPath ?? (item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)} />
-        <Meta label="Target" value={item.targetUri ?? "none"} />
+        <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
         <Meta label="Viewport" value={item.viewport ?? "none"} />
         <Meta label="Coordinates" value={item.coordinates ?? "none"} />
         <Meta label="Annotation" value={item.annotationText ?? "none"} />
@@ -1149,6 +1225,7 @@ function EvidenceDetailPanel({
                 <div className="flex flex-wrap gap-1">
                   <Chip label={`#${entry.id}`} tone={C.textMuted} />
                   <Chip label={entry.ownerAgent} tone={C.accent} />
+                  {entry.sessionDisplayName && <Chip label={entry.sessionDisplayName} tone={C.gold} />}
                   <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
@@ -1173,6 +1250,7 @@ function EvidenceDetailPanel({
               <article key={entry.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-1">
                   <Chip label={`#${entry.id}`} tone={C.textMuted} />
+                  {entry.sessionDisplayName && <Chip label={entry.sessionDisplayName} tone={C.gold} />}
                   <Chip label={`before #${entry.beforeEvidenceId ?? "none"}`} tone={C.accent} />
                   <Chip label={`after #${entry.afterEvidenceId ?? "none"}`} tone={C.accent} />
                   <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
@@ -1194,45 +1272,40 @@ function EvidenceDetailPanel({
         </h4>
         <div className="grid gap-2">
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px]">
-            <input
+            <Input
               value={pickerQuery}
               onChange={(event) => setPickerQuery(event.target.value)}
               aria-label="Search comparison evidence picker"
               placeholder="Search local evidence."
-              className="px-2 py-1.5 rounded text-xs outline-none"
-              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
             />
-            <select
+            <AppSelect
+              label="Picker kind"
               value={pickerKind}
-              onChange={(event) => setPickerKind(event.target.value as EvidenceKind)}
-              aria-label="Filter comparison evidence picker by kind"
-              className="px-2 py-1.5 rounded text-xs outline-none"
-              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-            >
-              <option value="all">All kinds</option>
-              <option value="manual_note">Manual</option>
-              <option value="image_review">Image</option>
-              <option value="video_frame">Video frame</option>
-              <option value="annotation">Annotation</option>
-              <option value="validation_note">Validation</option>
-              <option value="terminal_output">Terminal</option>
-              <option value="before_after">Before/after</option>
-            </select>
+              onChange={(value) => setPickerKind(value as EvidenceKind)}
+              options={[
+                { value: "all", label: "All kinds" },
+                { value: "manual_note", label: "Manual" },
+                { value: "image_review", label: "Image" },
+                { value: "video_frame", label: "Video frame" },
+                { value: "annotation", label: "Annotation" },
+                { value: "validation_note", label: "Validation" },
+                { value: "terminal_output", label: "Terminal" },
+                { value: "before_after", label: "Before/after" },
+              ]}
+            />
           </div>
-          <select
-            value={compareWithId}
-            onChange={(event) => setCompareWithId(event.target.value === "none" ? "none" : Number(event.target.value))}
-            aria-label="Compare selected evidence with another evidence record"
-            className="px-2 py-1.5 rounded text-xs outline-none"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-          >
-            <option value="none">{evidencePickerLoading ? "Reading local evidence" : "Compare with evidence"}</option>
-            {comparisonOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                #{option.id} {option.kind.replace(/_/g, " ")} {option.title}
-              </option>
-            ))}
-          </select>
+          <AppSelect
+            label="Compare with"
+            value={String(compareWithId)}
+            onChange={(value) => setCompareWithId(value === "none" ? "none" : Number(value))}
+            options={[
+              { value: "none", label: evidencePickerLoading ? "Reading local evidence" : "Compare with evidence" },
+              ...comparisonOptions.map((option) => ({
+                value: String(option.id),
+                label: `#${option.id} ${option.kind.replace(/_/g, " ")} ${option.title}`,
+              })),
+            ]}
+          />
           {selectedComparison && (
             <div className="rounded px-2 py-2 text-xs leading-relaxed" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               #{selectedComparison.id} {selectedComparison.projectName ?? "unlinked"} {selectedComparison.validationStatus.replace(/_/g, " ")}
@@ -1249,35 +1322,29 @@ function EvidenceDetailPanel({
               {gate}
             </div>
           ))}
-          <input
+          <Input
             value={comparisonTitle}
             onChange={(event) => setComparisonTitle(event.target.value)}
             aria-label="Before/after comparison title"
             placeholder="Comparison title."
-            className="px-2 py-1.5 rounded text-xs outline-none"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           />
-          <textarea
+          <Textarea
             value={comparisonSummary}
             onChange={(event) => setComparisonSummary(event.target.value)}
             aria-label="Before/after comparison summary"
             placeholder="What changed between these evidence records."
-            className="min-h-20 px-2 py-1.5 rounded text-xs outline-none resize-y"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           />
-          <textarea
+          <Textarea
             value={comparisonResult}
             onChange={(event) => setComparisonResult(event.target.value)}
             aria-label="Before/after comparison result"
             placeholder="Result or next local review status."
-            className="min-h-16 px-2 py-1.5 rounded text-xs outline-none resize-y"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           />
           <div className="flex items-center justify-between gap-2">
             <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
               {comparisonSavedId ? `Saved comparison #${comparisonSavedId}.` : "Creates a new local comparison record."}
             </div>
-            <button
+            <Button
               type="button"
               disabled={compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim() || isCreatingComparison}
               onClick={() => {
@@ -1295,15 +1362,10 @@ function EvidenceDetailPanel({
                 setComparisonResult("");
               }}
               aria-label="Append local before/after comparison"
-              className="px-2 py-1.5 rounded text-xs font-semibold uppercase tracking-wider"
-              style={{
-                background: compareWithId !== "none" && comparisonTitle.trim() && comparisonSummary.trim() && comparisonResult.trim() && !isCreatingComparison ? C.accentSoft : C.surfaceMuted,
-                border: `1px solid ${C.borderSoft}`,
-                color: compareWithId !== "none" && comparisonTitle.trim() && comparisonSummary.trim() && comparisonResult.trim() && !isCreatingComparison ? C.textPrimary : C.textMuted,
-              }}
+              size="sm"
             >
               {isCreatingComparison ? "Saving" : "Append"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -1312,41 +1374,37 @@ function EvidenceDetailPanel({
           Append Validation Note
         </h4>
         <div className="grid gap-2">
-          <select
+          <AppSelect
+            label="Validator agent"
             value={validatorAgent}
-            onChange={(event) => setValidatorAgent(event.target.value as ValidatorAgent)}
-            aria-label="Validator agent"
-            className="px-2 py-1.5 rounded text-xs outline-none"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-          >
-            <option value="oak">Professor Oak</option>
-            <option value="spock">Spock</option>
-          </select>
-          <select
+            onChange={(value) => setValidatorAgent(value as ValidatorAgent)}
+            options={[
+              { value: "oak", label: "Professor Oak" },
+              { value: "spock", label: "Spock" },
+            ]}
+          />
+          <AppSelect
+            label="Validation status"
             value={validationStatus}
-            onChange={(event) => setValidationStatus(event.target.value as ValidationNoteStatus)}
-            aria-label="Validation note status"
-            className="px-2 py-1.5 rounded text-xs outline-none"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
-          >
-            <option value="needs_review">Needs review</option>
-            <option value="looks_consistent">Looks consistent</option>
-            <option value="blocked">Blocked</option>
-            <option value="validated_for_local_use">Validated for local use</option>
-          </select>
-          <textarea
+            onChange={(value) => setValidationStatus(value as ValidationNoteStatus)}
+            options={[
+              { value: "needs_review", label: "Needs review" },
+              { value: "looks_consistent", label: "Looks consistent" },
+              { value: "blocked", label: "Blocked" },
+              { value: "validated_for_local_use", label: "Validated for local use" },
+            ]}
+          />
+          <Textarea
             value={validationNote}
             onChange={(event) => setValidationNote(event.target.value)}
             aria-label="Validation note"
             placeholder="Local validation note. This appends a new evidence record."
-            className="min-h-20 px-2 py-1.5 rounded text-xs outline-none resize-y"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
           />
           <div className="flex items-center justify-between gap-2">
             <div role="status" aria-live="polite" className="text-[11px]" style={{ color: C.textMuted }}>
               {validationSavedId ? `Saved note #${validationSavedId}.` : "Original evidence is not overwritten."}
             </div>
-            <button
+            <Button
               type="button"
               disabled={!validationNote.trim() || isCreatingValidationNote}
               onClick={() => {
@@ -1360,15 +1418,10 @@ function EvidenceDetailPanel({
                 setValidationNote("");
               }}
               aria-label="Append local validation note"
-              className="px-2 py-1.5 rounded text-xs font-semibold uppercase tracking-wider"
-              style={{
-                background: validationNote.trim() && !isCreatingValidationNote ? C.accentSoft : C.surfaceMuted,
-                border: `1px solid ${C.borderSoft}`,
-                color: validationNote.trim() && !isCreatingValidationNote ? C.textPrimary : C.textMuted,
-              }}
+              size="sm"
             >
               {isCreatingValidationNote ? "Saving" : "Append"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -1406,20 +1459,59 @@ function formatSeconds(value: number) {
   return `${minutes}m ${seconds.toFixed(1)}s`;
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
+function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <div>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }}>{value}</div>
+      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
   );
 }
 
 function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${tone}22`, color: tone }}>
+    <Badge variant={variant} className="uppercase">
       {label}
-    </span>
+    </Badge>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly SelectOption[];
+}) {
+  return (
+    <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={label} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={`${option.value}-${option.label}`} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </UiSelect>
   );
 }
 

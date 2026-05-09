@@ -1,10 +1,7 @@
 import { useState, useMemo } from "react";
 import KeepScene from "@/components/KeepScene";
+import KeepFortressBlueprint from "@/components/KeepFortressBlueprint";
 import EstablishingShot from "@/components/EstablishingShot";
-// Onboarding wizard pinned for now — Claude will configure CereBro from the
-// planning files when backend phases land. Re-enable by importing from
-// "@/components/Onboarding" and restoring the showOnboarding gate below.
-// import Onboarding, { isOnboardingComplete } from "@/components/Onboarding";
 import SkillsManager from "@/components/SkillsManager";
 import ConfigPanel from "@/components/ConfigPanel";
 import TasksPanel from "@/components/TasksPanel";
@@ -21,6 +18,26 @@ import WorkbenchPanel from "@/components/WorkbenchPanel";
 import AangCompanionPanel from "@/components/AangCompanionPanel";
 import ModelToolsPanel from "@/components/ModelToolsPanel";
 import PermissionModeControl from "@/components/PermissionModeControl";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
@@ -36,7 +53,9 @@ type NavId =
   | "home"
   | "projects"
   | "inbox"
+  | "ledger"
   | "tasks"
+  | "sessions"
   | "sources"
   | "terminal"
   | "approvals"
@@ -45,34 +64,95 @@ type NavId =
   | "model_tools"
   | "outputs"
   | "memory"
+  | "basement"
   | "automation"
   | "settings";
 
-interface NavItem {
+type ZoneId = "keep" | "workshop" | "ledger" | "basement";
+
+interface ZoneNavItem {
+  zone: ZoneId;
   id: NavId;
   label: string;
-  glyph: string;       // simple monospace symbol; pixel-art icons later
-  ready: boolean;      // shows live content vs Phase-X stub
+  glyph: string;
+  blurb: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: "home",       label: "Home",           glyph: "◆", ready: true },
-  { id: "projects",   label: "Project Lab",    glyph: "▣", ready: true },
-  { id: "inbox",      label: "Inbox",          glyph: "✉", ready: true },
-  { id: "tasks",      label: "Tasks",          glyph: "✓", ready: true },
-  { id: "sources",    label: "Sources",        glyph: "⌘", ready: true },
-  { id: "terminal",   label: "Terminal Lab",   glyph: ">_", ready: true },
-  { id: "approvals",  label: "Approvals",      glyph: "◇", ready: true },
-  { id: "workbench",  label: "Workbench",      glyph: "▤", ready: true },
-  { id: "companion",  label: "Aang",           glyph: "○", ready: true },
-  { id: "model_tools", label: "Model Tools",   glyph: "△", ready: true },
-  { id: "outputs",    label: "Outputs",        glyph: "✦", ready: true },
-  { id: "memory",     label: "Memory",         glyph: "◈", ready: true },
-  { id: "automation", label: "Automation",     glyph: "⟳", ready: true },
-  { id: "settings",   label: "Settings",       glyph: "⚙", ready: true },
+interface ZoneSurface {
+  id: NavId;
+  label: string;
+  meta: string;
+}
+
+const ZONE_NAV_ITEMS: ZoneNavItem[] = [
+  { zone: "keep", id: "home", label: "Keep", glyph: "◆", blurb: "Understand what is active." },
+  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: "Do the work with evidence." },
+  { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: "Prove what happened." },
+  { zone: "basement", id: "basement", label: "Basement", glyph: "⚙", blurb: "Configure the machine." },
 ];
 
+const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
+  keep: [
+    { id: "home", label: "Keep", meta: "Agents and current state" },
+    { id: "companion", label: "Aang", meta: "Human bridge" },
+    { id: "inbox", label: "Capture", meta: "Hedwig intake" },
+  ],
+  workshop: [
+    { id: "workbench", label: "Workbench", meta: "Evidence surface" },
+    { id: "projects", label: "Project Lab", meta: "Local project state" },
+    { id: "terminal", label: "Terminal Lab", meta: "Command previews" },
+    { id: "sources", label: "Research", meta: "Source review" },
+  ],
+  ledger: [
+    { id: "ledger", label: "Overview", meta: "Proof read" },
+    { id: "tasks", label: "Tasks", meta: "Work queue" },
+    { id: "sessions", label: "Sessions", meta: "Run history" },
+    { id: "approvals", label: "Approvals", meta: "Waiting gates" },
+    { id: "outputs", label: "Outputs", meta: "Artifacts" },
+    { id: "memory", label: "Memory", meta: "Knowledge records" },
+  ],
+  basement: [
+    { id: "basement", label: "Overview", meta: "Machine map" },
+    { id: "settings", label: "Settings", meta: "Storage and app config" },
+    { id: "model_tools", label: "Models", meta: "Capability proposals" },
+    { id: "automation", label: "Automation", meta: "Piccolo watchers" },
+  ],
+};
+
+const ZONE_RECEIPTS: Record<ZoneId, string[]> = {
+  keep: ["state", "route", "approval"],
+  workshop: ["evidence", "tools", "validation"],
+  ledger: ["tasks", "sessions", "approvals", "outputs", "memory"],
+  basement: ["permissions", "models", "storage"],
+};
+
+const NAV_TO_ZONE = Object.entries(ZONE_SURFACES).reduce<Record<NavId, ZoneId>>(
+  (acc, [zone, surfaces]) => {
+    for (const surface of surfaces) acc[surface.id] = zone as ZoneId;
+    return acc;
+  },
+  {} as Record<NavId, ZoneId>,
+);
+
 type Mode = "quick" | "explore" | "build";
+
+const MODE_LABELS: Record<Mode, string> = {
+  quick: "Ask",
+  explore: "Research",
+  build: "Build",
+};
+
+const MODE_HINTS: Record<Mode, string> = {
+  quick: "Aang answers or captures the next object.",
+  explore: "Aang routes Surfer and Oak for source work.",
+  build: "Aang routes Cortana, Tony, and Spock.",
+};
+
+const MODE_ROUTES: Record<Mode, string[]> = {
+  quick: ["Aang", "Cortana"],
+  explore: ["Aang", "Cortana", "Surfer", "Oak"],
+  build: ["Aang", "Cortana", "Tony", "Spock"],
+};
 
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
@@ -86,6 +166,7 @@ export default function Home() {
   const [showLog, setShowLog] = useState(false);
   const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
+  const [showClearGate, setShowClearGate] = useState(false);
 
   const selectedHero = useMemo(
     () => heroes.find((h) => h.id === selectedHeroId) || null,
@@ -153,28 +234,43 @@ export default function Home() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
-        className="flex items-center justify-between gap-3 px-4 py-2 shrink-0"
+        className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
         aria-label="Keep header"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <div
-            className="w-8 h-8 flex items-center justify-center rounded"
+            className="w-7 h-7 flex items-center justify-center rounded"
             style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.gold }}
           >
-            <span className="text-lg leading-none">◆</span>
+            <span className="text-base leading-none">◆</span>
           </div>
           <div>
-            <h1 className="text-sm font-bold uppercase tracking-widest leading-none" style={{ color: C.textPrimary }}>
+            <h1 className="text-[13px] font-bold uppercase tracking-widest leading-none" style={{ color: C.textPrimary }}>
               CereBro
             </h1>
-            <p className="text-xs leading-none mt-0.5" style={{ color: C.textMuted }}>
+            <p className="text-[10px] leading-none mt-0.5" style={{ color: C.textMuted }}>
               The Keep
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto min-w-0">
+        <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
+          <div
+            className="flex min-w-0 items-center gap-2 rounded px-2 py-1"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>
+              {ZONE_NAV_ITEMS.find((item) => item.zone === NAV_TO_ZONE[nav])?.label ?? "Keep"}
+            </span>
+            <span className="h-3 w-px shrink-0" style={{ background: C.borderSoft }} />
+            <span className="truncate text-[11px] leading-none" style={{ color: C.textMuted }}>
+              <span style={{ color: C.gold }}>Aang</span> reads. <span style={{ color: C.accentViolet }}>Cortana</span> routes. Ledger records.
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 min-w-0">
           <PermissionModeControl />
 
           <div
@@ -189,187 +285,200 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${C.borderSoft}` }}>
-            <button
-              type="button"
-              onClick={startDemo}
-              aria-pressed={connMode === "demo"}
-              aria-label="Start demo sessions"
-              className="px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors shrink-0"
-              style={{ background: connMode === "demo" ? C.accentSoft : "transparent", color: connMode === "demo" ? C.textPrimary : C.textMuted }}
-            >
-              Demo
-            </button>
-            <button
-              type="button"
-              onClick={startLive}
-              aria-pressed={connMode === "live"}
-              aria-label="Start live session watch"
-              className="px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors shrink-0"
-              style={{ background: connMode === "live" ? C.danger : "transparent", color: connMode === "live" ? C.background : C.textMuted }}
-            >
-              Live
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowSkillsManager(true)}
-            aria-label="Open skills manager"
-            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
-          >
-            Skills
-          </button>
-          <button
-            type="button"
-            onClick={clearHeroes}
-            aria-label="Clear visible sessions"
-            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowLog((v) => !v)}
-            aria-pressed={showLog}
-            aria-expanded={showLog}
-            aria-label={showLog ? "Hide activity log" : "Show activity log"}
-            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
-            style={{
-              border: `1px solid ${showLog ? C.accent : C.borderSoft}`,
-              color: showLog ? C.accent : C.textSecondary,
-              background: showLog ? `${C.accent}11` : "transparent",
-            }}
-          >
-            Log
-          </button>
-          <button
+          <Button
             type="button"
             onClick={() => setIsContextPanelOpen((v) => !v)}
             aria-pressed={isContextPanelOpen}
             aria-expanded={isContextPanelOpen}
             aria-label={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
-            className="px-2 py-1 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+            className="shrink-0"
+            variant={isContextPanelOpen ? "secondary" : "outline"}
+            size="sm"
             style={{
               border: `1px solid ${isContextPanelOpen ? C.accent : C.borderSoft}`,
-              color: isContextPanelOpen ? C.accent : C.textSecondary,
-              background: isContextPanelOpen ? `${C.accent}11` : "transparent",
             }}
             title={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
           >
             Context
-          </button>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                className="shrink-0"
+                aria-label="Open developer tools"
+                variant="outline"
+                size="sm"
+              >
+                Tools
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel>Session</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onSelect={startDemo}>
+                  Demo
+                  <span className="ml-auto text-[10px]" style={{ color: connMode === "demo" ? C.accent : C.textMuted }}>
+                    {connMode === "demo" ? "active" : "start"}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={startLive}>
+                  Live
+                  <span className="ml-auto text-[10px]" style={{ color: connMode === "live" ? C.danger : C.textMuted }}>
+                    {connMode === "live" ? "active" : "watch"}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Tools</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onSelect={() => setShowSkillsManager(true)}>
+                  Skills
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowLog((v) => !v)}>
+                  {showLog ? "Hide Log" : "Show Log"}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Risk</DropdownMenuLabel>
+              <DropdownMenuItem variant="destructive" onSelect={() => setShowClearGate(true)}>
+                Clear Sessions
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
       {/* ── Main: left rail + center + right context panel ─────────────── */}
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-        {/* Left rail — canonical 9 sections */}
+        {/* Left rail — four-zone OS dock */}
         <nav
-          className="w-14 lg:w-48 flex flex-col shrink-0 overflow-hidden"
-          aria-label="Keep sections"
+          className="w-12 lg:w-44 flex flex-col shrink-0 overflow-hidden"
+          aria-label="CereBro zones"
           style={{ background: C.backgroundSoft, borderRight: `1px solid ${C.borderSoft}` }}
         >
-          <div className="flex-1 overflow-y-auto py-2">
-            {NAV_ITEMS.map((item) => {
-              const isActive = nav === item.id;
+          <div className="flex-1 overflow-y-auto py-1.5">
+            {ZONE_NAV_ITEMS.map((item) => {
+              const isActive = NAV_TO_ZONE[nav] === item.zone;
               return (
-                <button
-                  key={item.id}
+                <Button
+                  key={item.zone}
                   type="button"
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="w-full text-left px-3 py-2 flex items-center gap-2.5 transition-colors"
+                  className="h-auto w-full justify-start rounded-none px-2.5 py-2 text-left"
+                  variant="ghost"
                   style={{
                     background: isActive ? C.surfaceRaised : "transparent",
                     borderLeft: isActive ? `2px solid ${C.accent}` : "2px solid transparent",
                     color: isActive ? C.textPrimary : C.textSecondary,
                   }}
                 >
-                  <span className="text-sm shrink-0" style={{ color: isActive ? C.accent : C.textMuted }}>{item.glyph}</span>
-                  <span className="hidden lg:block text-xs uppercase tracking-widest font-semibold flex-1">{item.label}</span>
-                  {!item.ready && (
-                    <span
-                      className="hidden lg:inline text-[9px] px-1 rounded"
-                      style={{ background: `${C.warning}22`, color: C.warning }}
-                    >
-                      stub
+                  <span
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-sm"
+                    style={{
+                      background: isActive ? C.surfaceMuted : "transparent",
+                      color: isActive ? C.accent : C.textMuted,
+                      border: `1px solid ${isActive ? C.borderSoft : "transparent"}`,
+                    }}
+                  >
+                    {item.glyph}
+                  </span>
+                  <span className="hidden lg:block min-w-0">
+                    <span className="block text-[11px] uppercase tracking-widest font-semibold">{item.label}</span>
+                    <span className="hidden xl:block text-[10px] leading-snug mt-0.5 normal-case tracking-normal" style={{ color: C.textMuted }}>
+                      {item.blurb}
                     </span>
-                  )}
-                </button>
+                  </span>
+                </Button>
               );
             })}
           </div>
           <div
-            className="px-3 py-2 text-xs hidden lg:block"
+            className="px-2.5 py-1.5 text-[10px] leading-snug hidden lg:block"
             style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface, color: C.textMuted }}
           >
-            {connMode === "live" ? "Live — watching ~/.claude/" : "Demo — simulated sessions"}
+            {connMode === "live" ? "Live. Watching ~/.claude/." : "Demo. Simulated sessions."}
           </div>
         </nav>
 
         {/* Center workspace */}
-        <main className="flex-1 relative overflow-hidden" aria-label="Keep workspace" style={{ minHeight: 0, background: C.background }}>
-          {nav === "home" && (
-            <HomeView
-              floor={floor}
-              setFloor={setFloor}
+        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: C.background }}>
+          <ZoneHeader nav={nav} onNavigate={setNav} />
+
+          <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
+            {nav === "home" && (
+              <HomeView
+                floor={floor}
+                setFloor={setFloor}
               agentStates={agentStates}
               heroesCount={heroes.length}
               connMode={connMode}
+              onNavigate={setNav}
             />
-          )}
-          {nav === "tasks" && <PanelHost><TasksPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "memory" && <PanelHost><MemoryPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
-          {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
-          {nav === "model_tools" && <PanelHost><ModelToolsPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "outputs" && <PanelHost><ArtifactsPanel onClose={() => setNav("home")} /></PanelHost>}
-          {nav === "automation" && <PanelHost><PiccoloPanel onClose={() => setNav("home")} /></PanelHost>}
+            )}
+            {nav === "ledger" && <LedgerOverview onNavigate={setNav} />}
+            {nav === "tasks" && <PanelHost><TasksPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "sessions" && <PanelHost><SessionsPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "memory" && <PanelHost><MemoryPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "basement" && <BasementOverview onNavigate={setNav} />}
+            {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
+            {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
+            {nav === "model_tools" && <PanelHost><ModelToolsPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "outputs" && <PanelHost><ArtifactsPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "automation" && <PanelHost><PiccoloPanel onClose={() => setNav("home")} /></PanelHost>}
 
-          {showLog && (
-            <div
-              className="absolute bottom-0 left-0 right-0 h-40 overflow-y-auto p-3"
-              style={{ background: `${C.background}f5`, borderTop: `1px solid ${C.borderSoft}` }}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-                  Activity
-                </div>
-                <button type="button" onClick={() => setShowLog(false)} aria-label="Close activity log" className="text-xs" style={{ color: C.textMuted }}>
-                  Close
-                </button>
-              </div>
-              {log.length === 0 ? (
-                <div className="text-xs py-2" style={{ color: C.textMuted }}>No activity yet.</div>
-              ) : (
-                log.slice(-30).map((entry, i) => (
-                  <div
-                    key={i}
-                    className="text-xs leading-relaxed py-0.5"
-                    style={{ color: C.textSecondary, borderBottom: `1px solid ${C.borderSoft}` }}
-                  >
-                    {entry}
+            {showLog && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-40 overflow-y-auto p-3"
+                style={{ background: `${C.background}f5`, borderTop: `1px solid ${C.borderSoft}` }}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Activity
                   </div>
-                ))
-              )}
-            </div>
-          )}
+                  <Button
+                    type="button"
+                    onClick={() => setShowLog(false)}
+                    aria-label="Close activity log"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2"
+                    style={{ color: C.textMuted }}
+                  >
+                    Close
+                  </Button>
+                </div>
+                {log.length === 0 ? (
+                  <div className="text-xs py-2" style={{ color: C.textMuted }}>No activity yet.</div>
+                ) : (
+                  log.slice(-30).map((entry, i) => (
+                    <div
+                      key={i}
+                      className="text-xs leading-relaxed py-0.5"
+                      style={{ color: C.textSecondary, borderBottom: `1px solid ${C.borderSoft}` }}
+                    >
+                      {entry}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </main>
 
         {/* Right context panel — active agent + state + sessions + Oak + perms */}
         {isContextPanelOpen && (
           <aside
-            className="w-72 shrink-0 flex flex-col overflow-hidden"
+            className="w-[270px] shrink-0 flex flex-col overflow-hidden"
             aria-label="Context panel"
             style={{ background: C.backgroundSoft, borderLeft: `1px solid ${C.borderSoft}` }}
           >
@@ -433,24 +542,70 @@ export default function Home() {
         />
       )}
 
+      <Dialog open={showClearGate} onOpenChange={setShowClearGate}>
+        <DialogContent gate showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Clear Visible Sessions</DialogTitle>
+            <DialogDescription>
+              This clears the local session sprites from the Keep view. It does not delete saved Ledger records.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.warning }}>
+              Target
+            </div>
+            <div style={{ color: C.textPrimary }}>
+              {heroes.length} visible session{heroes.length === 1 ? "" : "s"}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setShowClearGate(false)}
+              variant="outline"
+              size="sm"
+              style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                clearHeroes();
+                setShowClearGate(false);
+              }}
+              variant="destructive"
+              size="sm"
+              style={{ background: `${C.danger}22`, border: `1px solid ${C.danger}66`, color: C.danger }}
+            >
+              Clear View
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
 
 // ── Home view: castle scene ──────────────────────────────────────────────────
 function HomeView({
-  floor, setFloor, agentStates, heroesCount, connMode,
+  floor, setFloor, agentStates, heroesCount, connMode, onNavigate,
 }: {
   floor: FloorId;
   setFloor: (id: FloorId) => void;
   agentStates: Record<string, AgentState>;
   heroesCount: number;
   connMode: "demo" | "live";
+  onNavigate: (id: NavId) => void;
 }) {
+  const [keepView, setKeepView] = useState<"scene" | "blueprint">("blueprint");
+  const activeAgents = Object.values(agentStates).filter((state) => state && state !== "idle" && state !== "dormant").length;
+
   return (
     <div className="h-full flex flex-col">
       <div
-        className="flex items-center justify-between gap-3 px-4 py-2 shrink-0"
+        className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
         style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
       >
         <div className="flex items-center gap-1">
@@ -458,13 +613,15 @@ function HomeView({
             const f = FLOORS[id];
             const isActive = id === floor;
             return (
-              <button
+              <Button
                 key={id}
                 type="button"
                 onClick={() => setFloor(id)}
                 aria-pressed={isActive}
                 aria-label={`Show ${f.name}`}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded transition-colors whitespace-nowrap"
+                variant={isActive ? "secondary" : "ghost"}
+                size="sm"
+                className="h-7 px-2.5"
                 style={{
                   background: isActive ? C.surfaceRaised : "transparent",
                   color: isActive ? C.textPrimary : C.textMuted,
@@ -473,32 +630,67 @@ function HomeView({
                 title={f.blurb}
               >
                 {f.name}
-              </button>
+              </Button>
             );
           })}
         </div>
-        <div className="text-xs uppercase tracking-widest" style={{ color: C.textMuted }}>
-          The Keep
+        <div className="flex items-center gap-2">
+          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${C.borderSoft}` }}>
+            {(["blueprint", "scene"] as const).map((id) => {
+              const isActive = keepView === id;
+              return (
+                <Button
+                  key={id}
+                  type="button"
+                  onClick={() => setKeepView(id)}
+                  aria-pressed={isActive}
+                  aria-label={`Show Keep ${id} view`}
+                  variant={isActive ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 rounded-none px-2"
+                  style={{
+                    background: isActive ? C.surfaceRaised : "transparent",
+                    color: isActive ? C.textPrimary : C.textMuted,
+                  }}
+                >
+                  {id === "blueprint" ? "Blueprint" : "Scene"}
+                </Button>
+              );
+            })}
+          </div>
+          <div className="hidden sm:block text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            The Keep
+          </div>
         </div>
       </div>
 
       <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0, background: C.background }}>
-        <KeepScene agentStates={agentStates} />
+        {keepView === "blueprint" ? (
+          <KeepFortressBlueprint />
+        ) : (
+          <KeepScene agentStates={agentStates} />
+        )}
 
-        {heroesCount === 0 && (
-          <div className="absolute bottom-4 right-4 pointer-events-none">
+        <KeepHomeDock
+          activeAgents={activeAgents}
+          heroesCount={heroesCount}
+          onNavigate={onNavigate}
+        />
+
+        {keepView === "scene" && heroesCount === 0 && (
+          <div className="absolute bottom-3 right-3 pointer-events-none">
             <div
-              className="px-4 py-3 rounded"
+              className="px-3 py-2 rounded"
               style={{
                 background: `${C.background}f0`,
                 border: `1px solid ${C.borderSoft}`,
-                maxWidth: 240,
+                maxWidth: 220,
               }}
             >
-              <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+              <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                 The Hub waits
               </div>
-              <div className="text-xs mt-1 leading-relaxed" style={{ color: C.textSecondary }}>
+              <div className="text-[11px] mt-1 leading-relaxed" style={{ color: C.textSecondary }}>
                 {connMode === "demo"
                   ? "Press Demo to spawn simulated sessions."
                   : "Start a Claude Code session in any project. The Hub orb will light when you arrive."}
@@ -506,6 +698,101 @@ function HomeView({
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function KeepHomeDock({
+  activeAgents,
+  heroesCount,
+  onNavigate,
+}: {
+  activeAgents: number;
+  heroesCount: number;
+  onNavigate: (id: NavId) => void;
+}) {
+  const actions: Array<{
+    label: string;
+    meta: string;
+    value: string;
+    tone: string;
+    target: NavId;
+  }> = [
+    {
+      label: "Evidence",
+      meta: "Open Workshop",
+      value: "Workbench",
+      tone: C.accent,
+      target: "workbench",
+    },
+    {
+      label: "Resume",
+      meta: "Active work",
+      value: heroesCount > 0 ? `${heroesCount} session${heroesCount === 1 ? "" : "s"}` : "No sessions",
+      tone: heroesCount > 0 ? C.success : C.textMuted,
+      target: "projects",
+    },
+    {
+      label: "Approvals",
+      meta: "Waiting gates",
+      value: "Review",
+      tone: C.warning,
+      target: "approvals",
+    },
+    {
+      label: "Capture",
+      meta: "Hedwig intake",
+      value: "Inbox",
+      tone: C.gold,
+      target: "inbox",
+    },
+  ];
+
+  return (
+    <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
+      <div
+        className="pointer-events-auto grid grid-cols-2 lg:grid-cols-[0.95fr_repeat(4,1fr)] gap-1.5 rounded p-1.5"
+        style={{ background: `${C.background}e8`, border: `1px solid ${C.borderSoft}` }}
+        aria-label="Keep first actions"
+      >
+        <div className="hidden lg:block px-2 py-1">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Keep State
+          </div>
+          <div className="text-xs font-semibold mt-1" style={{ color: C.textPrimary }}>
+            {activeAgents > 0 ? `${activeAgents} chamber${activeAgents === 1 ? "" : "s"} moving` : "Calm watch"}
+          </div>
+          <div className="hidden xl:block text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
+            Ask through Aang. Cortana routes the work.
+          </div>
+        </div>
+
+        {actions.map((action) => (
+          <Button
+            key={action.label}
+            type="button"
+            onClick={() => onNavigate(action.target)}
+            aria-label={`${action.label}: ${action.meta}`}
+            variant="outline"
+            className="h-auto justify-start whitespace-normal px-2 py-1.5 text-left"
+            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+          >
+            <span className="block w-full min-w-0">
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-widest" style={{ color: action.tone }}>
+                  {action.label}
+                </span>
+                <span className="hidden xl:inline text-[10px]" style={{ color: C.textMuted }}>
+                  {action.meta}
+                </span>
+              </span>
+              <span className="block truncate text-[11px] font-semibold mt-1" style={{ color: C.textPrimary }}>
+                {action.value}
+              </span>
+            </span>
+          </Button>
+        ))}
       </div>
     </div>
   );
@@ -544,6 +831,306 @@ function PanelHost({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) => void }) {
+  const zone = NAV_TO_ZONE[nav];
+  const zoneItem = ZONE_NAV_ITEMS.find((item) => item.zone === zone) ?? ZONE_NAV_ITEMS[0];
+  const surfaces = ZONE_SURFACES[zone];
+  const receipts = ZONE_RECEIPTS[zone];
+
+  return (
+    <div
+      className="shrink-0 px-2.5 py-1.5 flex items-center gap-2 overflow-hidden"
+      style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+    >
+      <div className="hidden xl:flex min-w-[150px] items-center gap-2">
+        <div className="h-7 w-1 rounded-full" style={{ background: C.accent }} />
+        <div className="min-w-0">
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            {zoneItem.label}
+          </div>
+          <div className="truncate text-[10px] leading-snug mt-0.5" style={{ color: C.textMuted }}>
+            {zoneItem.blurb}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-stretch gap-1 overflow-x-auto" role="group" aria-label={`${zoneItem.label} surfaces`}>
+        {surfaces.map((surface) => {
+          const isActive = nav === surface.id;
+          return (
+            <Button
+              key={surface.id}
+              type="button"
+              onClick={() => onNavigate(surface.id)}
+              aria-pressed={isActive}
+              aria-label={`Open ${surface.label}`}
+              className="h-8 shrink-0 justify-start whitespace-normal px-2 text-left"
+              variant={isActive ? "secondary" : "outline"}
+              style={{
+                background: isActive ? C.surfaceRaised : C.surface,
+                color: isActive ? C.textPrimary : C.textSecondary,
+                border: `1px solid ${isActive ? C.accentSoft : C.borderSoft}`,
+              }}
+              title={surface.meta}
+            >
+              <span className="block min-w-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider leading-none">
+                  {surface.label}
+                </span>
+                <span className="hidden xl:block text-[10px] leading-none mt-1" style={{ color: C.textMuted }}>
+                  {surface.meta}
+                </span>
+              </span>
+            </Button>
+          );
+        })}
+      </div>
+
+      <div className="hidden 2xl:flex items-center gap-1.5 shrink-0" aria-label={`${zoneItem.label} receipt types`}>
+        {receipts.map((receipt) => (
+          <Badge
+            key={receipt}
+            variant={zone === "ledger" ? "warning" : "secondary"}
+            className="px-1.5 py-0.5"
+            style={{ color: zone === "ledger" ? C.gold : C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+          >
+            {receipt}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
+  const approvals = trpc.approvals.list.useQuery({
+    status: "pending",
+    origin: "all",
+    limit: 50,
+  });
+  const outputs = trpc.artifacts.list.useQuery({ limit: 50 });
+  const memory = trpc.memory.list.useQuery({});
+  const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
+
+  const taskRows = tasks.data ?? [];
+  const sessionRows = sessions.data ?? [];
+  const approvalRows = approvals.data?.items ?? [];
+  const outputRows = outputs.data ?? [];
+  const memoryRows = memory.data ?? [];
+  const proposalRows = proposals.data ?? [];
+  const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
+  const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
+
+  const cards = [
+    {
+      label: "Tasks",
+      value: String(openTasks),
+      meta: `${taskRows.length} total work records`,
+      target: "tasks" as NavId,
+      tone: C.warning,
+    },
+    {
+      label: "Sessions",
+      value: String(activeSessions),
+      meta: `${sessionRows.length} recent runs`,
+      target: "sessions" as NavId,
+      tone: C.success,
+    },
+    {
+      label: "Approvals",
+      value: String(approvalRows.length),
+      meta: "pending gates",
+      target: "approvals" as NavId,
+      tone: approvalRows.length > 0 ? C.warning : C.textMuted,
+    },
+    {
+      label: "Outputs",
+      value: String(outputRows.length),
+      meta: "artifact receipts",
+      target: "outputs" as NavId,
+      tone: C.gold,
+    },
+    {
+      label: "Memory",
+      value: String(memoryRows.length),
+      meta: `${proposalRows.length} proposed`,
+      target: "memory" as NavId,
+      tone: C.accent,
+    },
+  ];
+
+  return (
+    <div className="h-full overflow-y-auto p-3" style={{ background: C.background }} aria-label="Ledger overview">
+      <div className="grid gap-3">
+        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Ledger Overview
+              </h2>
+              <p className="text-[11px] leading-relaxed mt-1 max-w-2xl" style={{ color: C.textMuted }}>
+                Proof before summary. This surface gathers the local records that show what was asked, what ran, what needs approval, what was saved, and what CereBro thinks it knows.
+              </p>
+            </div>
+            <Badge variant="warning" className="px-2 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              local receipts
+            </Badge>
+          </div>
+        </section>
+
+        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-5" aria-label="Ledger proof objects">
+          {cards.map((card) => (
+            <Button
+              key={card.label}
+              type="button"
+              onClick={() => onNavigate(card.target)}
+              aria-label={`Open ${card.label}`}
+              title={card.meta}
+              variant="outline"
+              className="h-auto justify-start whitespace-normal p-2.5 text-left"
+              style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            >
+              <span className="block w-full min-w-0">
+                <span className="flex items-start justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-widest" style={{ color: card.tone }}>
+                    {card.label}
+                  </span>
+                  <span className="text-base font-semibold leading-none" style={{ color: C.textPrimary }}>
+                    {card.value}
+                  </span>
+                </span>
+                <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                  {card.meta}
+                </span>
+              </span>
+            </Button>
+          ))}
+        </section>
+
+        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Receipt Rules
+          </div>
+          <div className="grid gap-2 mt-2 md:grid-cols-3">
+            <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
+            <LedgerRule title="Memory" body="Needs source, approval, and Oak status before truth." tone={C.accent} />
+            <LedgerRule title="Output" body="Needs owner, destination, write policy, and artifact path." tone={C.gold} />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function LedgerRule({ title, body, tone }: { title: string; body: string; tone: string }) {
+  return (
+    <div className="rounded px-2.5 py-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: tone }}>
+        {title}
+      </div>
+      <div className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
+        {body}
+      </div>
+    </div>
+  );
+}
+
+function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const connection = trpc.agents.connectionStatus.useQuery(undefined, { refetchInterval: 10000 });
+  const modelPolicy = trpc.modelTools.policy.useQuery();
+  const piccolo = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
+  const status = connection.data;
+  const hygiene = piccolo.data;
+
+  const cards = [
+    {
+      label: "Settings",
+      value: status?.claudeExists ? "Ready" : "Setup",
+      meta: "Bridge and local watcher",
+      target: "settings" as NavId,
+      tone: status?.claudeExists ? C.success : C.warning,
+    },
+    {
+      label: "Models",
+      value: modelPolicy.data?.mode ?? "proposal",
+      meta: "Capability registry",
+      target: "model_tools" as NavId,
+      tone: C.accent,
+    },
+    {
+      label: "Automation",
+      value: hygiene?.mode ?? "read only",
+      meta: "Piccolo storage scan",
+      target: "automation" as NavId,
+      tone: C.gold,
+    },
+  ];
+
+  return (
+    <div className="h-full overflow-y-auto p-3" style={{ background: C.background }} aria-label="Basement overview">
+      <div className="grid gap-3">
+        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Basement Overview
+              </h2>
+              <p className="text-[11px] leading-relaxed mt-1 max-w-2xl" style={{ color: C.textMuted }}>
+                Machine configuration lives here. Providers, bridge state, model/tool proposals, storage hygiene, permissions, and automation stay out of the daily Keep until needed.
+              </p>
+            </div>
+            <Badge variant="warning" className="px-2 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              configuration
+            </Badge>
+          </div>
+        </section>
+
+        <section className="grid gap-2 md:grid-cols-3" aria-label="Basement configuration map">
+          {cards.map((card) => (
+            <Button
+              key={card.label}
+              type="button"
+              onClick={() => onNavigate(card.target)}
+              aria-label={`Open ${card.label}`}
+              title={card.meta}
+              variant="outline"
+              className="h-auto justify-start whitespace-normal p-2.5 text-left"
+              style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            >
+              <span className="block w-full min-w-0">
+                <span className="flex items-start justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-widest" style={{ color: card.tone }}>
+                    {card.label}
+                  </span>
+                  <span className="max-w-28 truncate text-xs font-semibold uppercase leading-none" style={{ color: C.textPrimary }}>
+                    {card.value}
+                  </span>
+                </span>
+                <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                  {card.meta}
+                </span>
+              </span>
+            </Button>
+          ))}
+        </section>
+
+        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Configuration Rules
+          </div>
+          <div className="grid gap-2 mt-2 md:grid-cols-3">
+            <LedgerRule title="Secrets" body="Tokens, keys, and account grants need explicit approval." tone={C.danger} />
+            <LedgerRule title="Models" body="Capability proposals do not call providers by themselves." tone={C.accent} />
+            <LedgerRule title="Automation" body="Watchers report first. Writes and cleanup stay gated." tone={C.gold} />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
 function IntakePreview({
   result,
   onDismiss,
@@ -558,6 +1145,13 @@ function IntakePreview({
     projectMode: string | null;
     project: { slug: string; label: string; localPath: string } | null;
     agents: string[];
+    routeChain: string[];
+    designProtocol: {
+      required: boolean;
+      checklist: string[];
+      ownerAgent: string;
+      route: string;
+    } | null;
     promptHandoffSuggestions: Array<{
       artifactId: number;
       title: string;
@@ -592,6 +1186,11 @@ function IntakePreview({
           </div>
           <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
             {result.nextStep}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1" aria-label="Aang Cortana route chain">
+            {result.routeChain.map((step, index) => (
+              <PreviewChip key={`${step}-${index}`} label={`${index + 1}. ${step}`} tone={index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary} />
+            ))}
           </div>
           {result.promptHandoffSuggestions.length > 0 && (
             <div className="mt-2 space-y-1">
@@ -631,6 +1230,17 @@ function IntakePreview({
               <PreviewChip key={agent} label={agent} tone={agent === "batman" ? C.warning : C.textSecondary} />
             ))}
           </div>
+          {result.designProtocol && (
+            <div className="mt-2 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex flex-wrap gap-1 mb-1">
+                <PreviewChip label="design review required" tone={C.warning} />
+                <PreviewChip label={result.designProtocol.ownerAgent} tone={C.accent} />
+              </div>
+              <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                {result.designProtocol.checklist[0]}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-start justify-between gap-2">
@@ -643,20 +1253,30 @@ function IntakePreview({
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
+            <Button
               type="button"
               onClick={onCreateTask}
               disabled={isCreatingTask}
               aria-label={taskCreated ? "Task saved" : isCreatingTask ? "Saving task" : `Create task: ${result.taskDraft.title}`}
-              className="text-xs uppercase tracking-wider"
+              variant={taskCreated ? "secondary" : "default"}
+              size="sm"
+              className="h-7 px-2"
               style={{ color: taskCreated ? C.success : isCreatingTask ? C.textMuted : C.accent }}
               title={result.taskDraft.title}
             >
               {taskCreated ? "Task Saved" : isCreatingTask ? "Saving" : "Create Task"}
-            </button>
-            <button type="button" onClick={onDismiss} aria-label="Dismiss intake preview" className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>
+            </Button>
+            <Button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss intake preview"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2"
+              style={{ color: C.textMuted }}
+            >
               Dismiss
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -666,12 +1286,13 @@ function IntakePreview({
 
 function PreviewChip({ label, tone }: { label: string; tone: string }) {
   return (
-    <span
-      className="text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider"
+    <Badge
+      variant="secondary"
+      className="px-1.5 py-0.5"
       style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
     >
       {label}
-    </span>
+    </Badge>
   );
 }
 
@@ -690,26 +1311,27 @@ function ContextPanel({
     <div className="flex flex-col h-full overflow-hidden">
       {/* Active Agent */}
       <div
-        className="px-3 py-2.5 shrink-0"
+        className="px-2.5 py-2 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
-        <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
+        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
           Active Agent
         </div>
         {agent ? (
           <>
             <div className="flex items-center justify-between mb-1">
-              <div className="text-sm font-semibold" style={{ color: C.textPrimary }}>
+              <div className="text-[13px] font-semibold" style={{ color: C.textPrimary }}>
                 {agent.name}
               </div>
-              <div
-                className="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded"
+              <Badge
+                variant="violet"
+                className="px-1.5 py-0.5"
                 style={{ background: `${C.accent}22`, color: C.accent }}
               >
                 {agent.chamber}
-              </div>
+              </Badge>
             </div>
-            <div className="text-xs leading-snug" style={{ color: C.textSecondary }}>
+            <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
               {agent.role.split(". ")[0]}.
             </div>
           </>
@@ -719,7 +1341,7 @@ function ContextPanel({
       </div>
 
       {/* Mode + Model Class */}
-      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-2 gap-2">
           <div>
             <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Mode</div>
@@ -735,25 +1357,26 @@ function ContextPanel({
       </div>
 
       {/* Tool Permissions */}
-      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
           Tool Scope
         </div>
         {agent?.toolScope?.length ? (
           <div className="flex flex-wrap gap-1">
             {agent.toolScope.slice(0, 6).map((t) => (
-              <span
+              <Badge
                 key={t}
-                className="text-[10px] px-1.5 py-0.5 rounded"
+                variant="secondary"
+                className="px-1.5 py-0.5"
                 style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}
               >
                 {t}
-              </span>
+              </Badge>
             ))}
             {agent.toolScope.length > 6 && (
-              <span className="text-[10px]" style={{ color: C.textMuted }}>
+              <Badge variant="outline" className="px-1.5 py-0.5" style={{ color: C.textMuted }}>
                 +{agent.toolScope.length - 6}
-              </span>
+              </Badge>
             )}
           </div>
         ) : (
@@ -762,7 +1385,7 @@ function ContextPanel({
       </div>
 
       {/* Oak Validation */}
-      <div className="px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="flex items-center justify-between">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
             Oak Validation
@@ -776,14 +1399,15 @@ function ContextPanel({
       {/* Sessions list (moved from left rail) */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div
-          className="px-3 py-2 flex items-center justify-between shrink-0"
+          className="px-2.5 py-1.5 flex items-center justify-between shrink-0"
           style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
         >
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             Sessions
           </span>
-          <span
-            className="text-xs font-semibold px-1.5 py-0.5 rounded"
+          <Badge
+            variant={heroes.length > 0 ? "violet" : "secondary"}
+            className="px-1.5 py-0.5"
             style={{
               background: heroes.length > 0 ? `${C.accent}22` : C.surfaceMuted,
               color: heroes.length > 0 ? C.accent : C.textMuted,
@@ -791,11 +1415,11 @@ function ContextPanel({
             }}
           >
             {heroes.length}
-          </span>
+          </Badge>
         </div>
         <div className="flex-1 overflow-y-auto">
           {heroes.length === 0 ? (
-            <div className="p-3 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+            <div className="p-2.5 text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
               {connMode === "demo"
                 ? "Press Demo to spawn simulated sessions."
                 : "No active Claude Code sessions. Start one in any project."}
@@ -806,26 +1430,29 @@ function ContextPanel({
               const stateLabel = STATE_LABELS[hero.state as keyof typeof STATE_LABELS];
               const isSelected = hero.id === selectedHeroId;
               return (
-                <button
+                <Button
                   key={hero.id}
                   type="button"
                   onClick={() => onSelectHero(isSelected ? null : hero.id)}
                   aria-pressed={isSelected}
                   aria-label={`${isSelected ? "Deselect" : "Select"} session ${hero.name}`}
-                  className="w-full text-left px-3 py-2 transition-colors"
+                  variant="ghost"
+                  className="h-auto w-full justify-start rounded-none px-2.5 py-1.5 text-left whitespace-normal"
                   style={{
                     background: isSelected ? C.surfaceRaised : "transparent",
                     borderBottom: `1px solid ${C.borderSoft}`,
                     borderLeft: isSelected ? `2px solid ${C.accent}` : "2px solid transparent",
                   }}
                 >
-                  <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }}>
-                    {hero.name}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: stateColor }}>
-                    {stateLabel}
-                  </div>
-                </button>
+                  <span className="block min-w-0">
+                    <span className="block truncate text-xs font-semibold" style={{ color: C.textPrimary }}>
+                      {hero.name}
+                    </span>
+                    <span className="block text-[10px] uppercase tracking-wider mt-0.5" style={{ color: stateColor }}>
+                      {stateLabel}
+                    </span>
+                  </span>
+                </Button>
               );
             })
           )}
@@ -833,7 +1460,7 @@ function ContextPanel({
       </div>
 
       {/* Next Actions */}
-      <div className="px-3 py-2 shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
+      <div className="px-2.5 py-1.5 shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
           Next Actions
         </div>
@@ -862,58 +1489,99 @@ function CommandBar({
         event.preventDefault();
         onSubmit();
       }}
-      className="flex items-center gap-2 px-3 py-2 shrink-0"
+      className="flex items-center gap-2 px-2.5 py-1.5 shrink-0"
       aria-label="Ask Aang command bar"
       style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}
     >
       <div className="flex rounded overflow-hidden shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${C.borderSoft}` }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
-          <button
+          <Button
             key={m}
             type="button"
             onClick={() => onModeChange(m)}
             aria-pressed={mode === m}
             aria-label={`Set command mode to ${m}`}
-            className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
+            variant={mode === m ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 rounded-none px-2"
             style={{
               background: mode === m ? C.accentSoft : "transparent",
               color: mode === m ? C.textPrimary : C.textMuted,
             }}
           >
-            {m}
-          </button>
+            {MODE_LABELS[m]}
+          </Button>
         ))}
       </div>
 
-      <input
-        type="text"
-        aria-label="Ask Aang command input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Ask Aang…"
-        className="flex-1 px-3 py-1.5 text-sm rounded outline-none"
-        style={{
-          background: C.surface,
-          border: `1px solid ${C.borderSoft}`,
-          color: C.textPrimary,
-        }}
-      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <Input
+            type="text"
+            aria-label="Ask Aang command input"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Ask Aang. Cortana routes it."
+            className="h-7 flex-1 min-w-0"
+            style={{
+              background: C.surface,
+              border: `1px solid ${C.borderSoft}`,
+              color: C.textPrimary,
+            }}
+          />
+        </div>
+        <div className="hidden 2xl:flex items-center gap-1.5 mt-1 text-[10px]" style={{ color: C.textMuted }}>
+          <span style={{ color: C.gold }}>Aang</span>
+          <span>reads {MODE_LABELS[mode]}.</span>
+          <span style={{ color: C.accentViolet }}>Cortana</span>
+          <span>{MODE_HINTS[mode]}</span>
+        </div>
+      </div>
 
-      <button
+      <div className="hidden xl:block shrink-0 w-48">
+        <div className="text-[10px] uppercase tracking-wider leading-none mb-1" style={{ color: C.textMuted }}>
+          Route Preview
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {MODE_ROUTES[mode].map((agent, index) => (
+            <Badge
+              key={agent}
+              variant={index === 0 ? "warning" : index === 1 ? "violet" : "secondary"}
+              className="px-1.5 py-0.5"
+              style={{
+                color: index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary,
+                background: C.surfaceMuted,
+                border: `1px solid ${C.borderSoft}`,
+              }}
+            >
+              {agent}
+            </Badge>
+          ))}
+        </div>
+        <div className="text-[10px] leading-none mt-1" style={{ color: C.warning }}>
+          Preview only. Gates stay closed.
+        </div>
+      </div>
+
+      <Button
         type="button"
         disabled
         aria-label="Attach artifact unavailable until Phase 6"
-        className="hidden sm:block px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        variant="secondary"
+        size="sm"
+        className="hidden h-7 shrink-0 px-2 sm:block"
         style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
         title="Phase 6"
       >
         Attach
-      </button>
-      <button
+      </Button>
+      <Button
         type="submit"
         disabled={!value.trim() || isClassifying}
         aria-label={isClassifying ? "Reading command intent" : "Preview command routing"}
-        className="hidden md:block px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider rounded shrink-0"
+        variant={value.trim() && !isClassifying ? "secondary" : "outline"}
+        size="sm"
+        className="hidden h-7 shrink-0 px-2 md:block"
         style={{
           border: `1px solid ${C.borderSoft}`,
           color: value.trim() && !isClassifying ? C.textPrimary : C.textMuted,
@@ -923,7 +1591,7 @@ function CommandBar({
         title="Preview routing"
       >
         {isClassifying ? "Reading" : "Preview"}
-      </button>
+      </Button>
     </form>
   );
 }

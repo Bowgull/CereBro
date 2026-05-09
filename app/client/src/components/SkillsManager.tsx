@@ -8,6 +8,25 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { cerebroColors as C } from "@/lib/keepConfig";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   X, Plus, Trash2, Edit3, Save, RefreshCw, Globe, FolderOpen,
   Bot, Zap, ChevronDown, ChevronRight, Copy, AlertCircle
@@ -57,33 +76,37 @@ function ItemEditor({ initialContent, onSave, onCancel, title }: AgentEditorProp
       <div className="bg-[#0d0d1a] border-2 border-[#4B0082] rounded-lg w-full max-w-3xl flex flex-col font-mono text-white" style={{ maxHeight: "90vh" }}>
         <div className="flex items-center justify-between p-4 border-b border-[#4B0082] bg-[#1a0a2e]">
           <h3 className="text-[#FFD700] font-bold text-sm uppercase tracking-widest">{title}</h3>
-          <button onClick={onCancel} className="text-gray-400 hover:text-white"><X size={18} /></button>
+          <Button type="button" onClick={onCancel} aria-label="Close editor" variant="ghost" size="icon-sm">
+            <X size={18} />
+          </Button>
         </div>
         <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3">
           <div className="text-xs text-gray-400 bg-[#1a1a2e] border border-[#333366] rounded p-2">
             <strong className="text-[#88AAFF]">Format:</strong> YAML frontmatter between <code>---</code> markers, then Markdown system prompt.
           </div>
-          <textarea
+          <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 bg-[#0a0a14] border border-[#333366] rounded p-3 text-xs text-[#00FF88] font-mono resize-none focus:outline-none focus:border-[#4B0082]"
+            className="flex-1 min-h-80 font-mono text-xs text-[#00FF88]"
             style={{ minHeight: "320px" }}
             spellCheck={false}
           />
         </div>
         <div className="flex gap-2 p-4 border-t border-[#4B0082] bg-[#1a0a2e]">
-          <button
+          <Button
+            type="button"
             onClick={() => onSave(content)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#4B0082] hover:bg-[#6a00b8] text-white text-sm font-bold rounded transition-colors"
+            variant="default"
           >
             <Save size={14} /> Save
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
             onClick={onCancel}
-            className="flex items-center gap-2 px-4 py-2 border border-[#333366] text-gray-400 hover:text-white text-sm rounded transition-colors"
+            variant="outline"
           >
             <X size={14} /> Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -103,6 +126,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
   const [editingItem, setEditingItem] = useState<{ name: string; content: string } | null>(null);
   const [newItemName, setNewItemName] = useState("");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // ── Agents Queries ──────────────────────────────────────────────────────────
   const globalAgents = trpc.agents.globalAgents.useQuery(undefined, { refetchInterval: 3000 });
@@ -194,7 +218,6 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
   };
 
   const handleDelete = (name: string) => {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
     if (activeTab === "agents") {
       if (scope === "global") deleteGlobalAgent.mutate({ agentName: name });
       else deleteProjectAgent.mutate({ projectPath: selectedProject, agentName: name });
@@ -202,6 +225,7 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
       if (scope === "global") deleteGlobalSkill.mutate({ skillName: name });
       else deleteProjectSkill.mutate({ projectPath: selectedProject, skillName: name });
     }
+    setDeleteTarget(null);
   };
 
   const currentItems = activeTab === "agents"
@@ -226,89 +250,98 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
               <h2 className="text-[#FFD700] font-bold text-lg">⚔️ Claude Code Manager</h2>
               <p className="text-xs text-gray-400 mt-0.5">{pathInfo}</p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white text-xl"><X size={20} /></button>
+            <Button type="button" onClick={onClose} aria-label="Close Claude Code Manager" variant="ghost" size="icon-sm">
+              <X size={20} />
+            </Button>
           </div>
 
           {/* Tab Bar */}
           <div className="flex border-b border-[#4B0082]">
-            <button
+            <Button
+              type="button"
               onClick={() => setActiveTab("agents")}
-              className={`flex items-center gap-2 px-6 py-3 text-xs font-bold uppercase border-b-2 transition-colors ${
-                activeTab === "agents"
-                  ? "border-[#FFD700] text-[#FFD700]"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
-              }`}
+              variant={activeTab === "agents" ? "secondary" : "ghost"}
+              className="h-auto rounded-none border-b-2 px-6 py-3"
+              style={{ borderBottomColor: activeTab === "agents" ? "#FFD700" : "transparent", color: activeTab === "agents" ? "#FFD700" : C.textMuted }}
             >
               <Bot size={14} /> Agents
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
               onClick={() => setActiveTab("skills")}
-              className={`flex items-center gap-2 px-6 py-3 text-xs font-bold uppercase border-b-2 transition-colors ${
-                activeTab === "skills"
-                  ? "border-[#FFD700] text-[#FFD700]"
-                  : "border-transparent text-gray-500 hover:text-gray-300"
-              }`}
+              variant={activeTab === "skills" ? "secondary" : "ghost"}
+              className="h-auto rounded-none border-b-2 px-6 py-3"
+              style={{ borderBottomColor: activeTab === "skills" ? "#FFD700" : "transparent", color: activeTab === "skills" ? "#FFD700" : C.textMuted }}
             >
               <Zap size={14} /> Skills
-            </button>
+            </Button>
           </div>
 
           {/* Scope Selector */}
           <div className="flex items-center gap-4 px-4 py-3 border-b border-[#4B0082]/30 bg-black/30">
             <div className="flex gap-2">
-              <button
+              <Button
+                type="button"
                 onClick={() => setScope("global")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${
-                  scope === "global" ? "bg-[#4B0082] text-white" : "bg-[#1a1a2e] text-gray-400 hover:text-white"
-                }`}
+                variant={scope === "global" ? "secondary" : "outline"}
+                size="sm"
               >
                 <Globe size={12} /> Global
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => setScope("project")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${
-                  scope === "project" ? "bg-[#4B0082] text-white" : "bg-[#1a1a2e] text-gray-400 hover:text-white"
-                }`}
+                variant={scope === "project" ? "secondary" : "outline"}
+                size="sm"
               >
                 <FolderOpen size={12} /> Project
-              </button>
+              </Button>
             </div>
 
             {scope === "project" && (
-              <select
-                value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value)}
-                className="bg-[#1a1a2e] border border-[#333366] text-gray-300 text-xs px-2 py-1.5 rounded focus:outline-none focus:border-[#4B0082] flex-1 max-w-xs"
+              <Select
+                value={selectedProject || "none"}
+                onValueChange={(value) => setSelectedProject(value === "none" ? "" : value)}
               >
+                <SelectTrigger aria-label="Select Claude Code project" className="flex-1 max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
                 {projects.length === 0 ? (
-                  <option value="">No projects detected yet</option>
+                  <SelectItem value="none" disabled>No projects detected yet</SelectItem>
                 ) : (
                   projects.map((p) => (
-                    <option key={p.encodedName} value={p.realPath}>
+                    <SelectItem key={p.encodedName} value={p.realPath}>
                       {p.realPath.split("/").pop() || p.realPath} ({p.sessionCount} sessions)
-                    </option>
+                    </SelectItem>
                   ))
                 )}
-              </select>
+                </SelectContent>
+              </Select>
             )}
 
             <div className="ml-auto flex items-center gap-2">
-              <button
+              <Button
+                type="button"
                 onClick={() => {
                   if (activeTab === "agents") scope === "global" ? globalAgents.refetch() : projectAgents.refetch();
                   else scope === "global" ? globalSkills.refetch() : projectSkills.refetch();
                 }}
-                className="text-gray-500 hover:text-[#FFD700] p-1"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Refresh Claude Code agents and skills"
                 title="Refresh"
               >
                 <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={() => { setEditingItem(null); setShowEditor(true); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 text-white text-xs font-bold uppercase rounded hover:bg-green-600"
+                variant="default"
+                size="sm"
               >
                 <Plus size={12} /> New {activeTab === "agents" ? "Agent" : "Skill"}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -316,12 +349,12 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
           {showEditor && !editingItem && (
             <div className="px-4 py-2 bg-black/50 border-b border-[#4B0082]/20 flex items-center gap-2">
               <span className="text-gray-400 text-xs">Name:</span>
-              <input
+              <Input
                 type="text"
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
                 placeholder={activeTab === "agents" ? "my-agent" : "my-skill"}
-                className="bg-black border border-[#333366] text-[#00FF88] text-xs px-2 py-1 rounded focus:outline-none focus:border-[#4B0082] w-48"
+                className="h-7 w-48 font-mono text-xs text-[#00FF88]"
                 autoFocus
                 onKeyDown={(e) => e.key === "Escape" && setShowEditor(false)}
               />
@@ -373,24 +406,36 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-2 shrink-0">
-                    <button
+                    <Button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(item.content); toast.success("Copied!"); }}
-                      className="text-gray-600 hover:text-gray-400 p-1" title="Copy content"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Copy ${item.name}`}
+                      title="Copy content"
                     >
                       <Copy size={13} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); setEditingItem({ name: item.name, content: item.content }); setShowEditor(true); }}
-                      className="text-gray-600 hover:text-[#FFD700] p-1" title="Edit"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Edit ${item.name}`}
+                      title="Edit"
                     >
                       <Edit3 size={13} />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(item.name); }}
-                      className="text-gray-600 hover:text-red-400 p-1" title="Delete"
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(item.name); }}
+                      variant="destructive"
+                      size="icon-sm"
+                      aria-label={`Delete ${item.name}`}
+                      title="Delete"
                     >
                       <Trash2 size={13} />
-                    </button>
+                    </Button>
                     {expandedItem === item.name
                       ? <ChevronDown size={14} className="text-gray-500" />
                       : <ChevronRight size={14} className="text-gray-500" />
@@ -425,6 +470,36 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
           onCancel={() => { setShowEditor(false); setEditingItem(null); setNewItemName(""); }}
         />
       )}
+
+      <Dialog open={deleteTarget != null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent gate>
+          <DialogHeader>
+            <DialogTitle>Delete {activeTab === "agents" ? "Agent" : "Skill"}</DialogTitle>
+            <DialogDescription>
+              This deletes `{deleteTarget}` from the selected Claude Code scope. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.warning }}>
+              Target
+            </div>
+            <div style={{ color: C.textPrimary }}>{deleteTarget}</div>
+            <div className="mt-1" style={{ color: C.textMuted }}>{pathInfo}</div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

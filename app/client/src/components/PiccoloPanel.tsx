@@ -1,17 +1,26 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
-
-function severityColor(severity: string): string {
-  if (severity === "action_required") return C.danger;
-  if (severity === "warning") return C.warning;
-  return C.accent;
-}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
+  const [saveGateOpen, setSaveGateOpen] = useState(false);
   const report = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
   const saveReport = trpc.artifacts.writeTextToVault.useMutation({
-    onSuccess: () => utils.artifacts.list.invalidate(),
+    onSuccess: () => {
+      setSaveGateOpen(false);
+      utils.artifacts.list.invalidate();
+    },
   });
   const data = report.data;
   const findings = data?.findings ?? [];
@@ -68,42 +77,49 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full flex flex-col" style={{ background: C.background }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-start justify-between gap-3 px-5 py-4 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Piccolo Hygiene
+            Basement Automation Hygiene
             <span className="ml-2" style={{ color: C.textSecondary }}>{findings.length}</span>
           </div>
           <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>
-            Read-only storage and workspace scan. No cleanup actions run here.
+            Piccolo scans storage drift, cleanup candidates, and vault health. Cleanup stays approval-gated.
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSaveReport}
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="risk"
+            size="sm"
+            onClick={() => setSaveGateOpen(true)}
             disabled={!data || saveReport.isPending}
-            className="text-xs uppercase tracking-wider"
-            style={{ color: data && !saveReport.isPending ? C.textSecondary : C.textMuted }}
           >
             {saveReport.isPending ? "Saving" : "Save Report"}
-          </button>
-          <button onClick={onClose} className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>
+          </Button>
+          <Button type="button" onClick={onClose} variant="outline" size="sm">
             Close
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Vault" value={data?.vault.exists ? "Ready" : "Needs setup"} tone={data?.vault.exists ? C.success : C.warning} />
         <StatusBlock label="Obsidian" value={data?.obsidian.exists ? "Ready" : "Needs setup"} tone={data?.obsidian.exists ? C.success : C.warning} />
         <StatusBlock label="Artifacts" value={String(data?.artifactCounts.artifacts ?? 0)} tone={C.accent} />
         <StatusBlock label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
       </div>
 
+      <div className="grid gap-2 px-2.5 py-1.5 shrink-0 md:grid-cols-3" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <RuleCard title="Read Only" body="Scans can report drift. They do not move, archive, delete, install, or schedule." tone={C.success} />
+        <RuleCard title="Durable Write" body="Saving a report writes a vault artifact and must pass the hard gate first." tone={C.warning} />
+        <RuleCard title="Cleanup" body="Cleanup proposals remain proposals until an action receipt is approved." tone={C.danger} />
+      </div>
+
       {data?.vault.vaultDir && (
-        <div className="px-4 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
           <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Vault Path</div>
           <div className="text-xs break-all" style={{ color: C.textSecondary }}>{data.vault.vaultDir}</div>
           {saveReport.data && (
@@ -118,28 +134,24 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {report.isLoading ? (
-          <div className="px-4 py-3 text-xs" style={{ color: C.textMuted }}>Scanning.</div>
+          <div className="px-2.5 py-1.5 text-xs" style={{ color: C.textMuted }}>Scanning.</div>
         ) : findings.length === 0 ? (
-          <div className="px-4 py-3 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="px-2.5 py-1.5 text-xs leading-relaxed" style={{ color: C.textMuted }}>
             No hygiene findings. Piccolo is only reporting; archive and delete actions remain approval-gated.
           </div>
         ) : (
           findings.map((finding) => {
-            const color = severityColor(finding.severity);
             return (
-              <div key={finding.id} className="px-4 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+              <div key={finding.id} className="px-2.5 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <span
-                    className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    style={{ color, background: `${color}22`, border: `1px solid ${color}55` }}
-                  >
+                  <Badge variant={badgeVariant(finding.severity)} className="uppercase">
                     {finding.severity.replace(/_/g, " ")}
-                  </span>
+                  </Badge>
                   <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
                     {finding.area}
                   </span>
                 </div>
-                <div className="text-sm font-semibold" style={{ color: C.textPrimary }}>
+                <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>
                   {finding.title}
                 </div>
                 <div className="text-xs leading-relaxed mt-1" style={{ color: C.textSecondary }}>
@@ -153,6 +165,28 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
           })
         )}
       </div>
+
+      <Dialog open={saveGateOpen} onOpenChange={setSaveGateOpen}>
+        <DialogContent gate>
+          <DialogHeader>
+            <DialogTitle>Save Piccolo Report</DialogTitle>
+            <DialogDescription>
+              This writes a durable cleanup report to the vault. It does not move, archive, or delete files.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded p-3 text-xs leading-relaxed" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            Target: `cleanup_report` artifact owned by Piccolo. Findings: {findings.length}. Mode: {data?.mode ?? "read_only"}.
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setSaveGateOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="risk" onClick={handleSaveReport} disabled={!data || saveReport.isPending}>
+              {saveReport.isPending ? "Saving" : "Save Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -168,4 +202,19 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
       </div>
     </div>
   );
+}
+
+function RuleCard({ title, body, tone }: { title: string; body: string; tone: string }) {
+  return (
+    <div className="rounded p-3 min-h-24" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
+      <div className="mt-2 text-xs leading-relaxed" style={{ color: C.textSecondary }}>{body}</div>
+    </div>
+  );
+}
+
+function badgeVariant(severity: string): "default" | "destructive" | "warning" {
+  if (severity === "action_required") return "destructive";
+  if (severity === "warning") return "warning";
+  return "default";
 }

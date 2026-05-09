@@ -24,6 +24,7 @@ const intakeCategories = [
   "source_capture",
   "prompt_reuse",
   "artifact_write",
+  "security_review",
 ] as const;
 
 const projectModes = ["Build", "Design", "QA", "Ship", "Package", "Pitch", "Learn", "Hygiene"] as const;
@@ -51,6 +52,7 @@ const categoryRules: Array<{ category: IntakeCategory; keywords: string[] }> = [
   { category: "project_package", keywords: ["package", "readme", "case study", "screenshot", "demo", "portfolio"] },
   { category: "freelance", keywords: ["freelance", "client", "proposal", "lead", "invoice", "contract"] },
   { category: "prompt_reuse", keywords: ["reuse prompt", "that prompt", "old prompt", "excel prompt", "spreadsheet prompt", "pixellab prompt", "prompt from", "handoff prompt", "deepseek prompt", "nanobanana", "nano banana", "tool handoff"] },
+  { category: "security_review", keywords: ["safe", "security", "cyber", "malware", "phishing", "anti phishing", "popup", "popups", "ad blocker", "adblock", "ublock", "ublock origin", "virus", "scan this repo", "github repo safe", "suspicious link"] },
   { category: "research", keywords: ["research", "source", "docs", "compare", "look up", "find", "google", "best", "right now", "latest", "current", "reddit", "youtube"] },
   { category: "learning", keywords: ["teach", "learn", "explain", "understand", "lesson"] },
   { category: "creative", keywords: ["idea", "creative", "image", "video", "prompt", "brand"] },
@@ -79,6 +81,7 @@ function modeForCategory(category: IntakeCategory): ProjectMode | null {
   if (category === "freelance") return "Pitch";
   if (category === "learning" || category === "self_improvement" || category === "prompt_reuse") return "Learn";
   if (category === "file_hygiene") return "Hygiene";
+  if (category === "security_review") return "QA";
   if (category === "decision" || category === "system_improvement") return "Build";
   return null;
 }
@@ -100,6 +103,12 @@ function agentsFor(category: IntakeCategory, projectSlug: string | null): string
     agents.add("c3po");
   }
   if (category === "research" || category === "source_capture") agents.add("surfer");
+  if (category === "security_review") {
+    agents.add("spock");
+    agents.add("surfer");
+    agents.add("batman");
+    agents.add("oak");
+  }
   if (category === "prompt_reuse") {
     agents.add("aang");
     agents.add("c3po");
@@ -140,6 +149,11 @@ function permissionGates(category: IntakeCategory, text: string): string[] {
   if (category === "file_hygiene") gates.push("Moving, archiving, or deleting files requires explicit approval.");
   if (category === "artifact_write") gates.push("Vault, Obsidian, Notion, and repo writes require explicit approval.");
   if (category === "research" || category === "source_capture") gates.push("External browsing/source capture requires approval when requested.");
+  if (category === "security_review") {
+    gates.push("Spock security receipt is required before Surfer opens risky links.");
+    gates.push("Tony cannot clone, install, build, or run pasted repos until Spock clears the execution lane.");
+    gates.push("Downloads, login prompts, browser permissions, and package lifecycle scripts stay blocked by default.");
+  }
   if (category === "prompt_reuse") gates.push("Saved prompts can be suggested from memory, but external tools/models still require explicit approval.");
   if (category === "self_improvement") gates.push("Personal recommendations should stay proposal-only until saved or scheduled.");
   if (category === "system_improvement") gates.push("CereBro improvement ideas need Batman/Spock review before implementation.");
@@ -162,12 +176,52 @@ function nextStep(category: IntakeCategory, projectLabel: string | null): string
   if (category === "project_package" || category === "portfolio") return `${target}ask Gojo and C-3PO to shape the proof into portfolio material.`;
   if (category === "freelance") return "ask Batman to pick the offer angle, then C-3PO can draft client-facing material.";
   if (category === "research" || category === "source_capture") return `${target}ask Surfer to gather source cards, then Oak can validate anything important.`;
+  if (category === "security_review") return `${target}ask Spock for a security receipt before Surfer browses or Tony runs anything.`;
   if (category === "prompt_reuse") return `${target}search reusable prompt/tool handoff memory, then explain which prompt fits and why before adapting it.`;
   if (category === "self_improvement") return "ask Aang to shape this into a learning or habit path, with Surfer finding current resources if needed.";
   if (category === "system_improvement") return "ask Surfer to find references, then Batman and Spock decide whether it improves CereBro or adds bloat.";
   if (category === "file_hygiene") return "ask Piccolo for a read-only cleanup report and approval-gated proposals.";
   if (category === "message" || category === "reminder") return "ask Hedwig to draft or schedule the follow-up once reminder tooling is wired.";
   return "keep this as a lightweight intake note until the user asks for an action.";
+}
+
+function routeChainFor(category: IntakeCategory, agents: string[]) {
+  const chain = ["Aang reads mode", "Cortana routes"];
+  if (agents.includes("gojo")) chain.push("Gojo reviews design");
+  if (agents.includes("tony")) chain.push("Tony scopes patch");
+  if (agents.includes("surfer")) chain.push("Surfer gathers sources");
+  if (agents.includes("batman")) chain.push("Batman checks risk");
+  if (agents.includes("spock")) chain.push("Spock checks logic");
+  if (agents.includes("oak")) chain.push("Oak validates");
+  if (category === "message" || category === "reminder") chain.push("Hedwig prepares capture");
+  return chain;
+}
+
+function designProtocolFor(category: IntakeCategory, text: string) {
+  const designIntent =
+    category === "project_design" ||
+    category === "project_package" ||
+    category === "portfolio" ||
+    category === "creative" ||
+    text.includes("ui") ||
+    text.includes("ux") ||
+    text.includes("design") ||
+    text.includes("generic") ||
+    text.includes("slop");
+
+  if (!designIntent) return null;
+  return {
+    required: true,
+    checklist: [
+      "Read DESIGN.md before touching UI.",
+      "Read the existing renderer and component files.",
+      "Inventory tokens and assets before adding new ones.",
+      "Record Gojo anti-slop review before delivery.",
+      "Use Workbench evidence or screenshot review when visuals change.",
+    ],
+    ownerAgent: "gojo",
+    route: "Aang -> Cortana -> Gojo -> Tony -> Spock/Oak",
+  };
 }
 
 function taskTitleFor(text: string, category: IntakeCategory, projectLabel: string | null): string {
@@ -204,6 +258,8 @@ export const commandIntakeRouter = router({
         projectMode,
         project: project ? { slug: project.slug, label: project.label, localPath: project.localPath } : null,
         agents,
+        routeChain: routeChainFor(category, agents),
+        designProtocol: designProtocolFor(category, normalized),
         promptHandoffSuggestions,
         permissionGates: permissionGates(category, normalized),
         nextStep: nextStep(category, project?.label ?? null),

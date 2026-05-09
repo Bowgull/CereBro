@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CereBro Keep Tile Blueprint</title>
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: #181f2a;
+      --panel2: #202a38;
+      --line: #334155;
+      --line2: #253041;
+      --text: #f4efe3;
+      --muted: #b8c0cc;
+      --dim: #7e8898;
+      --blue: #6ba6ff;
+      --violet: #a78bfa;
+      --green: #9fd2b7;
+      --gold: #d9b56a;
+      --amber: #f6c177;
+      --red: #ef6f6c;
+      --stone: #6b7280;
+      --crypt: #4ade80;
+      --owl: #e9d5ff;
+      --tile: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% -8%, rgba(107, 166, 255, 0.13), transparent 34%),
+        linear-gradient(180deg, #111827 0%, #0e1116 42%, #070a0f 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 12px;
+      max-width: 680px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border: 1px solid rgba(244, 239, 227, 0.25);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .blueprint-wrap,
+    .spec {
+      border: 1px solid var(--line2);
+      background: rgba(8, 11, 16, 0.72);
+    }
+
+    .blueprint-wrap {
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .blueprint {
+      position: relative;
+      width: calc(var(--tile) * 64);
+      height: calc(var(--tile) * 34);
+      background:
+        linear-gradient(180deg, rgba(27, 38, 59, 0.72), rgba(8, 11, 18, 0.94)),
+        linear-gradient(rgba(107, 166, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(107, 166, 255, 0.08) 1px, transparent 1px);
+      background-size: auto, var(--tile) var(--tile), var(--tile) var(--tile);
+      border: 2px solid rgba(107, 114, 128, 0.66);
+      box-shadow: 0 26px 44px rgba(0, 0, 0, 0.46);
+    }
+
+    .shell {
+      position: absolute;
+      left: calc(var(--tile) * 1);
+      top: calc(var(--tile) * 1);
+      width: calc(var(--tile) * 62);
+      height: calc(var(--tile) * 32);
+      border: 2px solid rgba(107, 114, 128, 0.62);
+      background: rgba(13, 17, 25, 0.58);
+      clip-path: polygon(
+        0 100%, 0 18%, 6% 18%, 6% 8%, 12% 8%, 12% 18%,
+        24% 18%, 24% 10%, 30% 10%, 30% 18%,
+        42% 18%, 42% 3%, 58% 3%, 58% 18%,
+        70% 18%, 70% 10%, 76% 10%, 76% 18%,
+        88% 18%, 88% 8%, 94% 8%, 94% 18%, 100% 18%, 100% 100%
+      );
+    }
+
+    .course {
+      position: absolute;
+      left: calc(var(--tile) * 2);
+      width: calc(var(--tile) * 60);
+      height: 7px;
+      background: repeating-linear-gradient(90deg, #3b4658 0 24px, #252f3f 24px 27px);
+      border-top: 1px solid rgba(244, 239, 227, 0.16);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.72);
+    }
+
+    .course.upper { top: calc(var(--tile) * 11); }
+    .course.command { top: calc(var(--tile) * 20); }
+    .course.ground { top: calc(var(--tile) * 27); }
+    .course.crypt { top: calc(var(--tile) * 28); opacity: 0.68; }
+
+    .hall {
+      position: absolute;
+      height: calc(var(--tile) * 1);
+      background: rgba(107, 166, 255, 0.14);
+      border-top: 1px solid rgba(107, 166, 255, 0.34);
+      border-bottom: 1px solid rgba(107, 166, 255, 0.24);
+    }
+
+    .hall.upper { left: calc(var(--tile) * 3); top: calc(var(--tile) * 10); width: calc(var(--tile) * 58); }
+    .hall.command { left: calc(var(--tile) * 3); top: calc(var(--tile) * 19); width: calc(var(--tile) * 58); background: rgba(167, 139, 250, 0.16); }
+    .hall.ground { left: calc(var(--tile) * 3); top: calc(var(--tile) * 26); width: calc(var(--tile) * 58); }
+    .hall.crypt { left: calc(var(--tile) * 8); top: calc(var(--tile) * 28); width: calc(var(--tile) * 48); background: rgba(74, 222, 128, 0.13); }
+
+    .room {
+      position: absolute;
+      left: calc(var(--tile) * var(--x));
+      top: calc(var(--tile) * var(--y));
+      width: calc(var(--tile) * var(--w));
+      height: calc(var(--tile) * var(--h));
+      border: 2px solid var(--c);
+      background:
+        linear-gradient(180deg, rgba(32, 42, 56, 0.83), rgba(12, 16, 24, 0.92));
+      overflow: hidden;
+    }
+
+    .room.sealed {
+      border-style: dashed;
+      background:
+        repeating-linear-gradient(135deg, rgba(32, 42, 56, 0.46) 0 12px, rgba(8, 11, 16, 0.7) 12px 24px);
+    }
+
+    .room.crypt {
+      background:
+        linear-gradient(180deg, rgba(16, 32, 27, 0.84), rgba(6, 10, 10, 0.96));
+    }
+
+    .room h2 {
+      margin: 6px 7px 2px;
+      color: var(--text);
+      font-size: 10px;
+      line-height: 1.1;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .room p {
+      margin: 0 7px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.25;
+    }
+
+    .floor-line {
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: calc(var(--tile) * 1);
+      height: 2px;
+      background: rgba(244, 239, 227, 0.18);
+    }
+
+    .window-row {
+      position: absolute;
+      top: calc(var(--tile) * 1.7);
+      right: 7px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .window {
+      width: 11px;
+      height: 18px;
+      border: 1px solid rgba(107, 166, 255, 0.58);
+      background: rgba(107, 166, 255, 0.13);
+    }
+
+    .door {
+      position: absolute;
+      bottom: 7px;
+      width: 13px;
+      height: 24px;
+      border: 2px solid rgba(217, 181, 106, 0.75);
+      background: rgba(5, 7, 11, 0.7);
+    }
+
+    .door.left { left: 5px; }
+    .door.right { right: 5px; }
+    .door.center { left: 50%; translate: -50% 0; }
+
+    .spot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 1px solid rgba(244, 239, 227, 0.78);
+      background: var(--c);
+    }
+
+    .agent { left: 50%; bottom: 34px; translate: -50% 0; }
+    .entry { left: 7px; bottom: 36px; }
+    .exit { right: 7px; bottom: 36px; }
+    .call { right: 7px; top: 7px; background: var(--violet); }
+
+    .prop {
+      position: absolute;
+      border: 1px solid rgba(244, 239, 227, 0.36);
+      background: rgba(244, 239, 227, 0.08);
+    }
+
+    .tube {
+      left: 50%;
+      top: 22px;
+      width: 52px;
+      height: 112px;
+      translate: -50% 0;
+      border-color: rgba(167, 139, 250, 0.74);
+      background: rgba(167, 139, 250, 0.15);
+      box-shadow: 0 0 32px rgba(167, 139, 250, 0.22);
+    }
+
+    .council {
+      left: 50%;
+      bottom: 42px;
+      width: 178px;
+      height: 42px;
+      translate: -50% 0;
+      border-color: rgba(217, 181, 106, 0.72);
+      background: rgba(5, 7, 11, 0.56);
+    }
+
+    .routing { right: 18px; top: 62px; width: 74px; height: 52px; border-color: rgba(107, 166, 255, 0.5); }
+    .ledger { left: 18px; top: 62px; width: 66px; height: 46px; border-color: rgba(217, 181, 106, 0.5); }
+    .desk { left: 44px; bottom: 38px; width: 54px; height: 28px; border-color: rgba(159, 210, 183, 0.55); }
+    .plinth { left: 52px; bottom: 42px; width: 62px; height: 32px; border-color: rgba(107, 166, 255, 0.55); }
+    .rail { left: 24px; bottom: 32px; width: 118px; height: 4px; border: 0; background: rgba(107, 166, 255, 0.62); }
+    .forge { left: 24px; bottom: 36px; width: 42px; height: 34px; border-color: rgba(239, 111, 108, 0.5); }
+    .map { right: 24px; bottom: 38px; width: 50px; height: 34px; border-color: rgba(107, 166, 255, 0.52); }
+    .lectern { left: 42px; bottom: 36px; width: 34px; height: 38px; border-color: rgba(217, 181, 106, 0.52); }
+    .watch { left: 44px; bottom: 28px; width: 82px; height: 4px; border: 0; background: rgba(74, 222, 128, 0.42); }
+    .roost { right: 40px; top: 30px; width: 34px; height: 28px; border-color: rgba(233, 213, 255, 0.58); }
+
+    .seat {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border: 1px solid rgba(217, 181, 106, 0.82);
+      background: rgba(217, 181, 106, 0.18);
+    }
+
+    .s1 { left: 34%; bottom: 32px; } .s2 { left: 40%; bottom: 25px; }
+    .s3 { left: 46%; bottom: 22px; } .s4 { left: 52%; bottom: 22px; }
+    .s5 { left: 58%; bottom: 25px; } .s6 { left: 64%; bottom: 32px; }
+    .s7 { left: 33%; bottom: 84px; } .s8 { left: 45%; bottom: 93px; }
+    .s9 { left: 55%; bottom: 93px; } .s10 { left: 67%; bottom: 84px; }
+
+    .stair {
+      position: absolute;
+      left: calc(var(--tile) * var(--x));
+      top: calc(var(--tile) * var(--y));
+      width: calc(var(--tile) * var(--w));
+      height: calc(var(--tile) * var(--h));
+      border-left: 4px solid rgba(217, 181, 106, 0.78);
+      border-bottom: 4px solid rgba(217, 181, 106, 0.78);
+      transform: skewX(var(--skew));
+    }
+
+    .path-node {
+      position: absolute;
+      left: calc(var(--tile) * var(--x));
+      top: calc(var(--tile) * var(--y));
+      width: 10px;
+      height: 10px;
+      border: 1px solid rgba(244, 239, 227, 0.76);
+      background: rgba(107, 166, 255, 0.48);
+    }
+
+    .zoom {
+      position: absolute;
+      left: calc(var(--tile) * var(--x));
+      top: calc(var(--tile) * var(--y));
+      width: calc(var(--tile) * var(--w));
+      height: calc(var(--tile) * var(--h));
+      border: 2px dotted rgba(244, 239, 227, 0.42);
+      pointer-events: none;
+    }
+
+    .label {
+      position: absolute;
+      padding: 3px 5px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: rgba(8, 11, 16, 0.82);
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .spec {
+      padding: 12px;
+      overflow: auto;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      display: grid;
+      grid-template-columns: 1fr 1.7fr;
+      gap: 12px;
+    }
+
+    .spec h2 {
+      margin: 0 0 8px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .spec h3 {
+      margin: 14px 0 6px;
+      color: var(--text);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .spec table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .spec .wide {
+      grid-column: 1 / -1;
+    }
+
+    .spec th,
+    .spec td {
+      border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+      padding: 5px 4px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    code {
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <h1>Keep tile blueprint</h1>
+        <div>64 by 34 planning grid. 16 px preview tiles. Built for Phaser and PixelLab prompts.</div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background: var(--violet)"></i>Cortana</span>
+        <span><i class="swatch" style="background: var(--green)"></i>Aang</span>
+        <span><i class="swatch" style="background: var(--blue)"></i>Gojo, Spock, Surfer</span>
+        <span><i class="swatch" style="background: var(--red)"></i>Tony</span>
+        <span><i class="swatch" style="background: var(--gold)"></i>C-3PO and council</span>
+        <span><i class="swatch" style="background: var(--crypt)"></i>Piccolo</span>
+        <span><i class="swatch" style="background: var(--owl)"></i>Hedwig</span>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <div class="blueprint-wrap">
+        <div class="blueprint" aria-label="Tile accurate Keep blueprint">
+          <div class="shell"></div>
+          <div class="course upper"></div>
+          <div class="course command"></div>
+          <div class="course ground"></div>
+          <div class="course crypt"></div>
+          <div class="hall upper"></div>
+          <div class="hall command"></div>
+          <div class="hall ground"></div>
+          <div class="hall crypt"></div>
+
+          <section class="room sealed" style="--x:4; --y:4; --w:10; --h:7; --c:var(--amber);">
+            <h2>Batman war room</h2><p>Strategy. Threat model. Sequencing.</p>
+            <div class="window-row"><i class="window"></i><i class="window"></i></div>
+            <i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room sealed" style="--x:16; --y:4; --w:9; --h:7; --c:var(--blue);">
+            <h2>Spock observatory</h2><p>Security gate. Logic check. Risk receipt.</p>
+            <div class="window-row"><i class="window"></i><i class="window"></i></div>
+            <i class="door left"></i><i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room sealed" style="--x:27; --y:4; --w:8; --h:7; --c:#8fb4d9;">
+            <h2>Oak archive lab</h2><p>Research shelves. Source memory. Dedup.</p>
+            <div class="window-row"><i class="window"></i></div>
+            <i class="door left"></i><i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room" style="--x:45; --y:4; --w:14; --h:7; --c:var(--blue);">
+            <h2>Gojo gallery</h2><p>Review plinth. Proof rail. Palette wall.</p>
+            <div class="window-row"><i class="window"></i><i class="window"></i><i class="window"></i></div>
+            <i class="prop plinth"></i><i class="prop rail"></i>
+            <i class="door left"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room sealed" style="--x:4; --y:13; --w:10; --h:7; --c:var(--red);">
+            <h2>Tony forge</h2><p>Code. Diff. Build. Tool bench.</p>
+            <i class="prop forge"></i>
+            <i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room" style="--x:18; --y:9; --w:28; --h:14; --c:var(--violet);">
+            <h2>Cortana command nave</h2><p>Tube, routing wall, ledger, council table, 10 seats.</p>
+            <i class="prop tube"></i><i class="prop routing"></i><i class="prop ledger"></i><i class="prop council"></i>
+            <i class="seat s1"></i><i class="seat s2"></i><i class="seat s3"></i><i class="seat s4"></i><i class="seat s5"></i>
+            <i class="seat s6"></i><i class="seat s7"></i><i class="seat s8"></i><i class="seat s9"></i><i class="seat s10"></i>
+            <i class="door left"></i><i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room sealed" style="--x:50; --y:13; --w:10; --h:7; --c:var(--blue);">
+            <h2>Surfer cartography</h2><p>Sources. Browser lane. Spock gate.</p>
+            <i class="prop map"></i>
+            <i class="door left"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room" style="--x:5; --y:22; --w:12; --h:6; --c:var(--green);">
+            <h2>Aang threshold</h2><p>Entry. Mode read. Request cards.</p>
+            <i class="prop desk"></i>
+            <i class="door left"></i><i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room sealed" style="--x:50; --y:22; --w:10; --h:6; --c:var(--gold);">
+            <h2>C-3PO scriptorium</h2><p>Format. Translate. Polish.</p>
+            <i class="prop lectern"></i>
+            <i class="door left"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room crypt" style="--x:10; --y:29; --w:16; --h:4; --c:var(--crypt);">
+            <h2>Piccolo watch crypt</h2><p>Watchers. Heartbeats. Maintenance.</p>
+            <i class="prop watch"></i>
+            <i class="door right"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <section class="room crypt" style="--x:36; --y:29; --w:16; --h:4; --c:var(--owl);">
+            <h2>Hedwig relay roost</h2><p>Capture chute. Notion. Slack. Reminders.</p>
+            <i class="prop roost"></i>
+            <i class="door left"></i><i class="spot agent"></i><i class="spot call"></i><i class="floor-line"></i>
+          </section>
+
+          <div class="stair" style="--x:17; --y:20; --w:7; --h:5; --skew:-24deg;"></div>
+          <div class="stair" style="--x:40; --y:10; --w:7; --h:5; --skew:24deg;"></div>
+          <div class="stair" style="--x:30; --y:26; --w:5; --h:4; --skew:-20deg;"></div>
+
+          <i class="path-node" style="--x:11; --y:25;"></i>
+          <i class="path-node" style="--x:18; --y:25;"></i>
+          <i class="path-node" style="--x:26; --y:19;"></i>
+          <i class="path-node" style="--x:31; --y:19;"></i>
+          <i class="path-node" style="--x:45; --y:19;"></i>
+          <i class="path-node" style="--x:45; --y:10;"></i>
+          <i class="path-node" style="--x:52; --y:10;"></i>
+          <i class="path-node" style="--x:31; --y:28;"></i>
+          <i class="path-node" style="--x:18; --y:28;"></i>
+          <i class="path-node" style="--x:44; --y:28;"></i>
+
+          <div class="zoom" style="--x:3; --y:20; --w:17; --h:9;"></div>
+          <div class="zoom" style="--x:16; --y:8; --w:32; --h:16;"></div>
+          <div class="zoom" style="--x:43; --y:3; --w:18; --h:9;"></div>
+          <div class="zoom" style="--x:8; --y:28; --w:46; --h:6; border-color:rgba(74,222,128,0.52);"></div>
+
+          <div class="label" style="left:calc(var(--tile) * 2); top:calc(var(--tile) * 25); color:var(--green);">main entry</div>
+          <div class="label" style="left:calc(var(--tile) * 23); top:calc(var(--tile) * 18); color:var(--violet);">command lane</div>
+          <div class="label" style="left:calc(var(--tile) * 25); top:calc(var(--tile) * 14); color:var(--gold);">council table</div>
+          <div class="label" style="left:calc(var(--tile) * 47); top:calc(var(--tile) * 2); color:var(--blue);">gallery view</div>
+          <div class="label" style="left:calc(var(--tile) * 25); top:calc(var(--tile) * 31); color:var(--crypt);">short undercroft</div>
+        </div>
+      </div>
+
+      <aside class="spec">
+        <div>
+          <h2>Blueprint decisions</h2>
+          <p>The castle is now a fixed planning grid. PixelLab room prompts should use these coordinates and keep the same side-cutaway camera.</p>
+
+          <h3>Grid</h3>
+          <p><code>64 cols x 34 rows</code>. One planning tile maps to one Phaser logical tile. Pixel art can render at 16 px or 32 px as long as the room anchors stay fixed.</p>
+
+          <h3>Paths</h3>
+          <p>Aang starts at ground. The main path climbs to Cortana, crosses the command lane, and reaches Gojo through the upper stair. The undercroft gets a smaller maintenance stair.</p>
+
+          <h3>PixelLab rule</h3>
+          <p>Generate rooms inside this template. Fixed dimensions. Same camera. Door anchors visible. Walking lane clear. Back wall props only. No standalone fantasy painting.</p>
+        </div>
+
+        <div>
+          <h3>Residency</h3>
+          <table>
+            <tr><th>Agent</th><th>Room</th><th>Grid</th></tr>
+            <tr><td>Aang</td><td>Threshold</td><td><code>x5 y22 w12 h6</code></td></tr>
+            <tr><td>Cortana</td><td>Command nave</td><td><code>x18 y9 w28 h14</code></td></tr>
+            <tr><td>Gojo</td><td>Gallery</td><td><code>x45 y4 w14 h7</code></td></tr>
+            <tr><td>Batman</td><td>War room</td><td><code>x4 y4 w10 h7</code></td></tr>
+            <tr><td>Spock</td><td>Observatory</td><td><code>x16 y4 w9 h7</code></td></tr>
+            <tr><td>Oak</td><td>Archive lab</td><td><code>x27 y4 w8 h7</code></td></tr>
+            <tr><td>Tony</td><td>Forge</td><td><code>x4 y13 w10 h7</code></td></tr>
+            <tr><td>Surfer</td><td>Cartography</td><td><code>x50 y13 w10 h7</code></td></tr>
+            <tr><td>C-3PO</td><td>Scriptorium</td><td><code>x50 y22 w10 h6</code></td></tr>
+            <tr><td>Piccolo</td><td>Watch crypt</td><td><code>x10 y29 w16 h4</code></td></tr>
+            <tr><td>Hedwig</td><td>Relay roost</td><td><code>x36 y29 w16 h4</code></td></tr>
+          </table>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

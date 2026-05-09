@@ -2,6 +2,7 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb } from "../cerebroDb";
 import { type PerceptionClass, recordPermissionPreflight } from "../permissionPolicy";
+import { sessionDisplayName } from "./sessions";
 
 const evidenceKinds = [
   "manual_note",
@@ -57,6 +58,16 @@ function rowToEvidence(row: Record<string, unknown>) {
     createdAt: Number(row.created_at),
     taskTitle: row.task_title == null ? null : String(row.task_title),
     sessionClaudeId: row.claude_session_id == null ? null : String(row.claude_session_id),
+    sessionDisplayName:
+      row.session_id == null
+        ? null
+        : sessionDisplayName({
+            id: Number(row.session_id),
+            title: row.session_title == null ? null : String(row.session_title),
+            projectName: row.session_project_name == null ? (row.project_name == null ? null : String(row.project_name)) : String(row.session_project_name),
+            heroClass: row.session_hero_class == null ? null : String(row.session_hero_class),
+            endedAt: row.session_ended_at == null ? null : Number(row.session_ended_at),
+          }),
     sourceTitle: row.source_title == null ? null : String(row.source_title),
     sourceUri: row.source_uri == null ? null : String(row.source_uri),
     command: row.command == null ? null : String(row.command),
@@ -353,6 +364,9 @@ export const workbenchRouter = router({
             p.name AS project_name,
             t.title AS task_title,
             s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
             src.title AS source_title,
             src.uri AS source_uri,
             co.command,
@@ -415,6 +429,9 @@ export const workbenchRouter = router({
             p.name AS project_name,
             t.title AS task_title,
             s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
             src.title AS source_title,
             src.uri AS source_uri,
             co.command,
@@ -505,6 +522,9 @@ export const workbenchRouter = router({
             p.name AS project_name,
             t.title AS task_title,
             s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
             src.title AS source_title,
             src.uri AS source_uri,
             co.command,
@@ -541,9 +561,16 @@ export const workbenchRouter = router({
       const [validationHistory, comparisonHistory] = await Promise.all([
         db.execute({
           sql: `
-            SELECT wer.*, p.name AS project_name
+            SELECT
+              wer.*,
+              p.name AS project_name,
+              s.claude_session_id,
+              s.title AS session_title,
+              s.hero_class AS session_hero_class,
+              s.ended_at AS session_ended_at
             FROM workbench_evidence_records wer
             LEFT JOIN projects p ON p.id = wer.project_id
+            LEFT JOIN sessions s ON s.id = wer.session_id
             WHERE wer.kind = 'validation_note' AND wer.target_uri = ?
             ORDER BY wer.created_at ASC, wer.id ASC
           `,
@@ -551,9 +578,16 @@ export const workbenchRouter = router({
         }),
         db.execute({
           sql: `
-            SELECT wer.*, p.name AS project_name
+            SELECT
+              wer.*,
+              p.name AS project_name,
+              s.claude_session_id,
+              s.title AS session_title,
+              s.hero_class AS session_hero_class,
+              s.ended_at AS session_ended_at
             FROM workbench_evidence_records wer
             LEFT JOIN projects p ON p.id = wer.project_id
+            LEFT JOIN sessions s ON s.id = wer.session_id
             WHERE wer.kind = 'before_after'
               AND (wer.before_evidence_id = ? OR wer.after_evidence_id = ?)
             ORDER BY wer.created_at ASC, wer.id ASC
@@ -589,17 +623,19 @@ export const workbenchRouter = router({
     const [sources, commands, tasks, sessions, artifacts] = await Promise.all([
       db.execute({
         sql: `
-          SELECT id, uri, title, source_type, trust_level, freshness_status, project_id, created_at
-          FROM sources
-          ORDER BY created_at DESC, id DESC
+          SELECT src.id, src.uri, src.title, src.source_type, src.trust_level, src.freshness_status, src.project_id, p.name AS project_name, src.created_at
+          FROM sources src
+          LEFT JOIN projects p ON p.id = src.project_id
+          ORDER BY src.created_at DESC, src.id DESC
           LIMIT 30
         `,
       }),
       db.execute({
         sql: `
-          SELECT id, command, risk, status, project_id, created_at
-          FROM command_observations
-          ORDER BY created_at DESC, id DESC
+          SELECT co.id, co.command, co.risk, co.status, co.project_id, p.name AS project_name, co.created_at
+          FROM command_observations co
+          LEFT JOIN projects p ON p.id = co.project_id
+          ORDER BY co.created_at DESC, co.id DESC
           LIMIT 30
         `,
       }),
@@ -622,7 +658,7 @@ export const workbenchRouter = router({
       }),
       db.execute({
         sql: `
-          SELECT s.id, s.claude_session_id, s.hero_class, s.project_id, p.name AS project_name, s.started_at, s.ended_at
+          SELECT s.id, s.claude_session_id, s.title, s.hero_class, s.project_id, p.name AS project_name, s.started_at, s.ended_at
           FROM sessions s
           LEFT JOIN projects p ON p.id = s.project_id
           ORDER BY COALESCE(s.ended_at, s.last_seen_at, s.started_at) DESC, s.id DESC
@@ -631,9 +667,10 @@ export const workbenchRouter = router({
       }),
       db.execute({
         sql: `
-          SELECT id, kind, lifecycle_state, title, project_id, storage_provider, storage_path, created_at
-          FROM artifacts
-          ORDER BY created_at DESC, id DESC
+          SELECT a.id, a.kind, a.lifecycle_state, a.title, a.project_id, p.name AS project_name, a.storage_provider, a.storage_path, a.created_at
+          FROM artifacts a
+          LEFT JOIN projects p ON p.id = a.project_id
+          ORDER BY a.created_at DESC, a.id DESC
           LIMIT 40
         `,
       }),
@@ -652,6 +689,7 @@ export const workbenchRouter = router({
         trustLevel: String(row.trust_level),
         freshnessStatus: String(row.freshness_status),
         projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
         createdAt: Number(row.created_at),
       })),
       commandObservations: commands.rows.map((row) => ({
@@ -660,6 +698,7 @@ export const workbenchRouter = router({
         risk: String(row.risk),
         status: String(row.status),
         projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
         createdAt: Number(row.created_at),
       })),
       tasks: tasks.rows.map((row) => ({
@@ -673,6 +712,13 @@ export const workbenchRouter = router({
       })),
       sessions: sessions.rows.map((row) => ({
         id: Number(row.id),
+        displayName: sessionDisplayName({
+          id: Number(row.id),
+          title: row.title == null ? null : String(row.title),
+          projectName: row.project_name == null ? null : String(row.project_name),
+          heroClass: row.hero_class == null ? null : String(row.hero_class),
+          endedAt: row.ended_at == null ? null : Number(row.ended_at),
+        }),
         claudeSessionId: String(row.claude_session_id),
         heroClass: row.hero_class == null ? null : String(row.hero_class),
         projectId: row.project_id == null ? null : Number(row.project_id),
@@ -686,6 +732,7 @@ export const workbenchRouter = router({
         lifecycleState: String(row.lifecycle_state),
         title: row.title == null ? null : String(row.title),
         projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
         storageProvider: String(row.storage_provider),
         storagePath: String(row.storage_path),
         createdAt: Number(row.created_at),
