@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
+import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -769,7 +769,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                                   <Badge variant={item.risk === "read_only" ? "success" : "warning"} className="mr-1 uppercase">
                                     {labelize(item.risk)}
                                   </Badge>
-                                  <span className="truncate" title={item.command}>{item.command}</span>
+                                  <span className="truncate" title={item.command}>{compactCommandLabel(item.command)}</span>
                                 </span>
                               </Button>
                             ))}
@@ -1041,11 +1041,11 @@ function ProjectDetailInspector({
       items: terminal.map((item: any) => ({
         id: item.id,
         label: labelize(item.status),
-        text: item.outputSummary ?? item.command,
+        text: item.outputSummary ?? compactCommandLabel(item.command),
         meta: labelize(item.risk),
         tone: item.status === "blocked" ? C.danger : item.status === "reviewing" ? C.warning : C.accent,
         fields: [
-          ["Command", item.command],
+          ["Command", compactCommandLabel(item.command), item.command],
           ["Status", labelize(item.status)],
           ["Risk", labelize(item.risk)],
           ["Suggested Agent", item.suggestedAgent ? (AGENT_LABELS[item.suggestedAgent] ?? item.suggestedAgent) : "none"],
@@ -1348,7 +1348,7 @@ function DetailColumn({
 }: {
   title: string;
   empty: string;
-  items: Array<{ id: string | number; label: string; text: string; meta: string; tone: string; fields?: string[][] }>;
+  items: Array<{ id: string | number; label: string; text: string; meta: string; tone: string; fields?: Array<[string, string, string?]> }>;
   totalItems: number;
   filterActive: boolean;
   filterLabel: string;
@@ -1426,7 +1426,7 @@ function DetailPreview({
   appendedDraftNoteId,
   appendedDraftNoteDraftId,
 }: {
-  item: { id: string | number; label: string; text: string; meta: string; tone: string; fields?: string[][] } | null;
+  item: { id: string | number; label: string; text: string; meta: string; tone: string; fields?: Array<[string, string, string?]> } | null;
   activeQueue?: InspectorQueue;
   draftNote?: string;
   onDraftNoteChange?: (value: string) => void;
@@ -1458,7 +1458,7 @@ function DetailPreview({
             </span>
           </div>
           <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-1">
-            {(item.fields ?? []).map(([label, value]) => (
+            {(item.fields ?? []).map(([label, value, title]) => (
               <div
                 key={label}
                 className={`min-w-0 rounded px-2 py-1 ${isLongField(value) ? "md:col-span-2" : ""}`}
@@ -1470,6 +1470,7 @@ function DetailPreview({
                 <div
                   className="text-[11px] leading-relaxed break-words whitespace-pre-wrap"
                   style={{ color: C.textSecondary }}
+                  title={title ?? value}
                 >
                   {value}
                 </div>

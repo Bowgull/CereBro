@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { trpc } from "@/lib/trpc";
-import { sourceDisplayName } from "@/lib/displayLabels";
+import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1168,8 +1168,16 @@ function EvidenceDetailPanel({
           value={item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)}
           title={item.sourceUri ?? undefined}
         />
-        <Meta label="Command" value={item.command ?? (item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`)} />
-        <Meta label="Artifact" value={item.artifactTitle ?? item.artifactPath ?? (item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)} />
+        <Meta
+          label="Command"
+          value={item.command ? compactCommandLabel(item.command) : item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`}
+          title={item.command ?? undefined}
+        />
+        <Meta
+          label="Artifact"
+          value={item.artifactTitle ?? (item.artifactPath ? compactPathLabel(item.artifactPath) : item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)}
+          title={item.artifactPath ?? undefined}
+        />
         <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
         {item.targetUri && (
           <Button

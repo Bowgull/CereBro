@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:25 EDT
+Last updated: 2026-05-08 22:28 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2228 - Front-End Build Steward: Compact Workbench Project Commands
+
+### What Changed
+
+- Updated Workbench evidence detail command and artifact fields to use compact
+  command/path labels with full evidence in hover titles.
+- Updated Project Lab recent command buttons and terminal inspector fields to
+  use compact command labels.
+- Extended Project Lab inspector fields with optional full-evidence hover
+  titles for compacted values.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` initially failed because the dev server was
+  down, then passed after restarting `pnpm dev` on port 3002.
+
+### Front-End Steward Review
+
+- Workbench and Project Lab now keep command evidence visible but no longer let
+  raw command/path strings dominate compact inspector rows.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+- Dev server is now running at `http://localhost:3002/`.
+
+### Next Front-End Slice
+
+- Continue remaining dense display cleanup in approval, model tool, and config
+  surfaces. Keep compact labels visible and raw evidence in hover titles.
 
 ## 2026-05-08 2225 - Front-End Build Steward: Compact Terminal Commands
 
