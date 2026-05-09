@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:32 EDT
+Last updated: 2026-05-09 06:36 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0636 EDT - Front-End Build Steward: Approval Gate Density
+
+### What Changed
+
+- Browser-reviewed the active Ledger Approvals surface after the Automation
+  pass.
+- Tightened the Action Receipt Gate header, receipt stats, search/project/reset
+  controls, origin/status filters, groups, and permission preflights.
+- Restyled approval rows and the validation detail rail into compact receipt
+  blocks.
+- Kept pending, sensitive, preflight, blocked, selected-detail, and empty states
+  visible in the same operational surface.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed Approvals shows
+  receipt stats, filters, groups, preflights, empty approval list, and detail
+  rail compactly.
+
+### Front-End Steward Review
+
+- Approvals now reads as a hard-gated receipt surface. The user can see what is
+  pending, what is sensitive, what is blocked, and what still needs a selected
+  receipt without scanning a long policy page.
+
+### Known Risks
+
+- No non-empty approval queue was present in browser, so row state was reviewed
+  structurally from the existing markup plus the empty state.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Ledger with Tasks, Sessions, Outputs, or Memory, starting with the
+  noisiest visible surface.
 
 ## 2026-05-09 0632 - Front-End Build Steward: Automation Hygiene Density
 

@@ -126,14 +126,14 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </Button>
         </div>
 
-        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Approval receipt summary">
+        <div className="mt-2 grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Approval receipt summary">
           <ReceiptStat label="Pending" value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
           <ReceiptStat label="Sensitive" value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
           <ReceiptStat label="Preflights" value={String(preflightTotal)} tone={C.accent} />
           <ReceiptStat label="Blocked" value={String(blockedPreflights)} tone={blockedPreflights > 0 ? C.danger : C.textMuted} />
         </div>
 
-        <div className="mt-2 grid gap-2 lg:grid-cols-[1fr_auto_auto]">
+        <div className="mt-2 grid gap-1.5 lg:grid-cols-[1fr_auto_auto]">
           <label className="sr-only" htmlFor="approval-search">Search approval previews</label>
           <Input
             id="approval-search"
@@ -170,24 +170,24 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </Button>
         </div>
 
-        <div className="mt-2 flex flex-wrap gap-2" aria-label="Approval origin filters">
+        <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Approval origin filters">
           {origins.map((item) => (
             <FilterButton key={item.id} active={origin === item.id} label={item.label} onClick={() => setOrigin(item.id)} />
           ))}
         </div>
-        <div className="mt-2 flex flex-wrap gap-2" aria-label="Approval status filters">
+        <div className="mt-1.5 flex flex-wrap gap-1.5" aria-label="Approval status filters">
           {statuses.map((item) => (
             <FilterButton key={item.id} active={status === item.id} label={item.label} onClick={() => setStatus(item.id)} />
           ))}
         </div>
 
-        <div className="mt-2 rounded p-2.5" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="mt-2 rounded p-2" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mb-2 flex items-center justify-between gap-2">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Groups
               </div>
-              <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
                 Local previews only. No approval action.
               </div>
             </div>
@@ -206,7 +206,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {(groups.data?.groups ?? []).length === 0 ? (
-              <div className="text-xs" style={{ color: C.textMuted }}>No groups match these filters.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>No groups match these filters.</div>
             ) : (
               groups.data?.groups.map((group) => (
                 <Button
@@ -220,18 +220,18 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     setSelectedId(null);
                   }}
                   aria-label={`Filter approval previews by ${labelize(group.label)}`}
-                  className="h-auto min-w-44 justify-start rounded p-2 text-left"
+                  className="h-auto min-w-40 justify-start rounded p-1.5 text-left"
                   variant="secondary"
                 >
                   <span className="block w-full">
-                    <span className="block truncate text-xs font-semibold leading-snug" title={group.label}>
+                    <span className="block truncate text-[11px] font-semibold leading-snug" title={group.label}>
                       {labelize(group.label)}
                     </span>
-                    <span className="mt-2 flex flex-wrap gap-1">
+                    <span className="mt-1 flex flex-wrap gap-1">
                       <Chip label={`${group.count} previews`} tone={C.accent} />
                       {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                     </span>
-                    <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                    <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
                       {group.sampleIds.map((id) => `#${id}`).join(", ")}
                     </span>
                   </span>
@@ -244,7 +244,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         <div
           role="status"
           aria-live="polite"
-          className="mt-3 text-xs"
+          className="mt-2 text-[11px]"
           style={{ color: C.textMuted }}
         >
           {approvals.isLoading
@@ -252,13 +252,13 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             : `Showing ${items.length} ${status} preview${items.length === 1 ? "" : "s"}. Sensitive ${approvals.data?.summary.sensitive ?? 0}.`}
         </div>
 
-        <div className="mt-2 rounded p-2.5" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="mt-2 rounded p-2" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Permission Preflights
               </div>
-              <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+              <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
                 Local audit history. Policy evidence only.
               </div>
             </div>
@@ -268,16 +268,16 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
             </div>
           </div>
-          <div className="mt-2 grid gap-2">
+          <div className="mt-2 grid gap-1.5">
             {preflights.isLoading ? (
-              <div className="text-xs" style={{ color: C.textMuted }}>Reading local preflight records.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local preflight records.</div>
             ) : preflightItems.length === 0 ? (
-              <div className="text-xs" style={{ color: C.textMuted }}>No permission preflight records match these filters.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>No permission preflight records match these filters.</div>
             ) : (
               preflightItems.map((item) => (
                 <div
                   key={item.id}
-                  className="rounded p-2"
+                  className="rounded p-1.5"
                   style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}` }}
                 >
                   <div className="flex flex-wrap items-center gap-1">
@@ -310,7 +310,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
       </header>
 
       <div className="flex-1 grid gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px]" style={{ minHeight: 0 }}>
-        <section className="overflow-y-auto p-3" aria-label="Approval preview list">
+        <section className="overflow-y-auto p-2" aria-label="Approval preview list">
           {(approvals.data?.gates ?? []).map((gate) => (
             <div key={gate} className="mb-2 rounded px-2.5 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               {gate}
@@ -318,18 +318,18 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           ))}
 
           {items.length === 0 ? (
-            <div className="rounded p-3 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               No approval previews match these filters. Reset filters or stage a preview from Hedwig or Terminal Lab.
             </div>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-1.5">
               {items.map((item) => (
                 <Button
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   aria-label={`Inspect approval ${item.id}: ${labelize(item.actionType)}`}
-                  className="h-auto w-full justify-start rounded p-3 text-left"
+                  className="h-auto w-full justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
                     background: selected?.id === item.id ? C.surfaceRaised : C.surface,
@@ -338,7 +338,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   }}
                 >
                   <span className="block w-full">
-                    <span className="flex flex-wrap items-center gap-2">
+                    <span className="flex flex-wrap items-center gap-1">
                       <Chip label={`#${item.id}`} tone={C.textMuted} />
                       <Chip label={labelize(item.origin)} tone={C.accent} />
                       <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
@@ -346,10 +346,10 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                       {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
                     </span>
-                    <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>
+                    <span className="mt-1.5 block text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                       {labelize(item.actionType)}
                     </span>
-                    <span className="mt-1 block text-xs whitespace-normal line-clamp-2" style={{ color: C.textMuted }}>
+                    <span className="mt-1 block text-[11px] whitespace-normal line-clamp-2" style={{ color: C.textMuted }}>
                       {item.targetLabel
                         ? (
                             <span title={item.targetLabel}>
@@ -358,7 +358,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                           )
                         : item.reason ?? item.contextSummary ?? "No target label recorded."}
                     </span>
-                    <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                    <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
                       {formatTime(item.createdAt)}
                     </span>
                   </span>
@@ -368,13 +368,13 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           )}
         </section>
 
-        <aside className="overflow-y-auto p-3" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <aside className="overflow-y-auto p-2" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
           {!selected ? (
-            <div className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Select an approval preview to inspect validation notes.
             </div>
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Section title={`Approval #${selected.id}`} detail={labelize(selected.actionType)}>
                 <Meta label="Origin" value={labelize(selected.origin)} />
                 <Meta label="Requested By" value={selected.requestedByAgent ?? "unknown"} />
@@ -402,11 +402,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
 
               <Section title="Permission Preflight" detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>
                 {selected.permissionPreflight == null ? (
-                  <p className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+                  <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     No linked permission preflight record exists for this approval preview yet.
                   </p>
                 ) : (
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     <div className="flex flex-wrap gap-1">
                       <Chip label={`#${selected.permissionPreflight.id}`} tone={C.textMuted} />
                       <Chip
@@ -448,7 +448,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       ))}
                     </div>
                     {selected.permissionPreflight.modeEffect && (
-                      <p className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                      <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                         {selected.permissionPreflight.modeEffect}
                       </p>
                     )}
@@ -469,13 +469,13 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               </Section>
 
               <Section title="Reason" detail="local record">
-                <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: C.textSecondary }}>
+                <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textSecondary }}>
                   {selected.reason ?? "No reason recorded."}
                 </p>
               </Section>
 
               <Section title="Context" detail="local evidence">
-                <p className="text-xs leading-relaxed whitespace-pre-wrap" style={{ color: C.textMuted }}>
+                <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textMuted }}>
                   {selected.contextSummary ?? "No context summary recorded."}
                 </p>
               </Section>
@@ -503,11 +503,11 @@ function FilterButton({ active, label, onClick }: { active: boolean; label: stri
 
 function ReceiptStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
         {label}
       </div>
-      <div className="text-xs font-semibold mt-0.5" style={{ color: tone }}>
+      <div className="mt-0.5 text-[11px] font-semibold" style={{ color: tone }}>
         {value}
       </div>
     </div>
@@ -563,28 +563,28 @@ function AppSelect({
 
 function Section({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
   return (
-    <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</h3>
+    <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</h3>
         <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{detail}</span>
       </div>
-      <div className="grid gap-2">{children}</div>
+      <div className="grid gap-1.5">{children}</div>
     </section>
   );
 }
 
 function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div className="grid gap-0.5 min-w-0">
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug truncate" style={{ color: C.textSecondary }} title={title ?? value}>{value}</div>
+    <div className="grid min-w-0 grid-cols-[94px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+      <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="truncate" style={{ color: C.textSecondary }} title={title ?? value}>{value}</div>
     </div>
   );
 }
 
 function Note({ tone, text }: { tone: string; text: string }) {
   return (
-    <div className="rounded px-2 py-1.5 text-xs leading-relaxed" style={{ background: `${tone}14`, border: `1px solid ${tone}33`, color: C.textSecondary }}>
+    <div className="rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: `${tone}14`, border: `1px solid ${tone}33`, color: C.textSecondary }}>
       {text}
     </div>
   );
