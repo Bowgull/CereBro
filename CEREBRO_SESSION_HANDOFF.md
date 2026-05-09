@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:53 EDT
+Last updated: 2026-05-09 06:56 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0656 EDT - Front-End Build Steward: Ledger Overview Density
+
+### What Changed
+
+- Browser-reviewed the active Ledger Overview surface after the Runs and Tasks
+  pass.
+- Tightened the overview header, local receipt badge, proof-object cards, and
+  receipt rule panel.
+- Reduced padding and type scale so Overview matches the density rhythm now used
+  by Approvals, Outputs, Memory, Sessions, and Tasks.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- Initial `pnpm test -- server/cerebro-foundations.test.ts` hit
+  `SQLITE_BUSY` while the live dev server was writing to the same local DB.
+  Rerun passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed Ledger
+  Overview shows compact proof-object cards and receipt rules.
+
+### Front-End Steward Review
+
+- Ledger Overview now behaves like a command summary instead of a document
+  header. It is compact enough to scan before entering the detail surfaces.
+
+### Known Risks
+
+- Browser screenshot capture was avoided because recent screenshot attempts
+  timed out. This pass used DOM verification plus checks.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Start a full Ledger cross-surface polish pass, then move to the next noisiest
+  Workshop or Keep surface.
 
 ## 2026-05-09 0653 EDT - Front-End Build Steward: Ledger Runs And Tasks Density
 

@@ -968,25 +968,25 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   ];
 
   return (
-    <div className="h-full overflow-y-auto p-3" style={{ background: C.background }} aria-label="Ledger overview">
-      <div className="grid gap-3">
-        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
+      <div className="grid gap-2">
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              <h2 className="text-[12px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Ledger Overview
               </h2>
-              <p className="text-[11px] leading-relaxed mt-1 max-w-2xl" style={{ color: C.textMuted }}>
+              <p className="mt-1 max-w-2xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
                 Proof before summary. This surface gathers the local records that show what was asked, what ran, what needs approval, what was saved, and what CereBro thinks it knows.
               </p>
             </div>
-            <Badge variant="warning" className="px-2 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <Badge variant="warning" className="px-1.5 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
               local receipts
             </Badge>
           </div>
         </section>
 
-        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-5" aria-label="Ledger proof objects">
+        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-5" aria-label="Ledger proof objects">
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -995,7 +995,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               aria-label={`Open ${card.label}`}
               title={card.meta}
               variant="outline"
-              className="h-auto justify-start whitespace-normal p-2.5 text-left"
+              className="h-auto justify-start whitespace-normal p-2 text-left"
               style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
             >
               <span className="block w-full min-w-0">
@@ -1003,11 +1003,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   <span className="text-[10px] uppercase tracking-widest" style={{ color: card.tone }}>
                     {card.label}
                   </span>
-                  <span className="text-base font-semibold leading-none" style={{ color: C.textPrimary }}>
+                  <span className="text-[13px] font-semibold leading-none" style={{ color: C.textPrimary }}>
                     {card.value}
                   </span>
                 </span>
-                <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                <span className="mt-1 block text-[11px] leading-snug" style={{ color: C.textMuted }}>
                   {card.meta}
                 </span>
               </span>
@@ -1015,11 +1015,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           ))}
         </section>
 
-        <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             Receipt Rules
           </div>
-          <div className="grid gap-2 mt-2 md:grid-cols-3">
+          <div className="mt-2 grid gap-1.5 md:grid-cols-3">
             <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
             <LedgerRule title="Memory" body="Needs source, approval, and Oak status before truth." tone={C.accent} />
             <LedgerRule title="Output" body="Needs owner, destination, write policy, and artifact path." tone={C.gold} />
@@ -1032,11 +1032,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
 function LedgerRule({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
-    <div className="rounded px-2.5 py-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: tone }}>
         {title}
       </div>
-      <div className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
+      <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
         {body}
       </div>
     </div>
