@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:04 EDT
+Last updated: 2026-05-09 11:11 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1111 EDT - Terminal Lab Project Context Rail
+
+### What Changed
+
+- Connected Terminal Lab to Project Lab's read-only project overview.
+- Added a Project Context rail inside Terminal Lab.
+- The rail shows matched project, git status, push readiness, branch, upstream, dirty count, pending approvals, blocked terminal observations, reviewing terminal observations, next safe action, and execution boundary.
+- Context resolves from the selected observation cwd, selected task project name, current CereBro repo path, or the first known project fallback.
+- No command execution, git execution, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable after context compaction, so visual proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This follows the locked path: Project Lab as map, Terminal Lab as Aang's build-teaching lane.
+- Terminal Lab now teaches against project state instead of isolated command rows.
+- Push readiness remains advisory and explicit: Project Lab evidence only, executes git no, approval required yes.
+- The UI stays inside the existing Terminal Lab rail.
+
+### Known Risks
+
+- The rail uses Project Lab overview data, not a dedicated Terminal Lab project-context endpoint.
+- Browser DOM proof still needs the plugin once it is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Terminal Lab.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: use the Project Context rail to make Terminal Lab observations link more clearly to Workbench proof receipts, without executing commands or adding a new Code Lab surface. Verify in browser DOM when available, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1104 EDT - Build Plan Front-End Path Ordering
 

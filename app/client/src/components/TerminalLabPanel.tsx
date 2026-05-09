@@ -14,6 +14,40 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+type TerminalProjectContext = {
+  name: string;
+  localPath: string;
+  localExists: boolean;
+  nextSafeAction: string;
+  git: {
+    branch: string | null;
+    upstream: string | null;
+    dirty: boolean;
+    dirtyCount: number;
+    statusText: string;
+  };
+  activity: {
+    approvals: { pending: number };
+    terminalStatus: { total: number; blocked: number; reviewing: number };
+    hedwig: { needsReview: number };
+    sourceEvents: { sensitive: number };
+  };
+  pushReadiness: {
+    state: string;
+    label: string;
+    executesGit: boolean;
+    automationRequiresApproval: boolean;
+    evidence: {
+      branch: string | null;
+      upstream: string | null;
+      dirtyCount: number;
+      pendingApprovals: number;
+      blockedTerminal: number;
+      reviewingTerminal: number;
+    };
+  };
+};
+
 export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
@@ -33,6 +67,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const observations = trpc.terminalLab.observations.useQuery(observationFilter);
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
+  const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
   const preview = trpc.terminalLab.previewCommand.useMutation();
   const observeOutput = trpc.terminalLab.observeOutput.useMutation();
   const linkObservation = trpc.terminalLab.linkObservation.useMutation();
@@ -51,6 +86,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
   const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
   const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
+  const projectRows = projectOverview.data?.projects ?? [];
+  const contextPath = selectedObservation?.cwd ?? "/Users/lindsaybell/Desktop/CereBro";
+  const contextProject =
+    projectRows.find((project) => selectedTask?.projectName && project.name === selectedTask.projectName) ??
+    projectRows.find((project) => contextPath === project.localPath || contextPath.startsWith(`${project.localPath}/`)) ??
+    projectRows.find((project) => project.slug === "cerebro") ??
+    projectRows[0] ??
+    null;
   const teachingFrame = preview.data
     ? {
         title: "Aang reads this command preview.",
@@ -693,6 +736,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </section>
 
+            <ProjectContextRail
+              project={contextProject}
+              isLoading={projectOverview.isLoading}
+              contextLabel={selectedObservation ? `observation #${selectedObservation.id}` : selectedTask ? `task #${selectedTask.id}` : "current repo"}
+            />
+
             <form onSubmit={submitOutput} className="rounded p-1.5 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Observed Output" detail={selectedObservationId == null ? "select row" : `#${selectedObservationId}`} />
               <Textarea
@@ -849,6 +898,92 @@ function AangTeachingFrame({
   );
 }
 
+function ProjectContextRail({
+  project,
+  isLoading,
+  contextLabel,
+}: {
+  project: TerminalProjectContext | null;
+  isLoading: boolean;
+  contextLabel: string;
+}) {
+  if (isLoading) {
+    return (
+      <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <SectionTitle title="Project Context" detail="reading" />
+        <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+          Reading Project Lab evidence.
+        </div>
+      </section>
+    );
+  }
+
+  if (!project) {
+    return (
+      <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <SectionTitle title="Project Context" detail="none" />
+        <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+          No Project Lab context matched this command yet.
+        </div>
+      </section>
+    );
+  }
+
+  const pushTone = toneForPushState(project.pushReadiness.state);
+  const statusTone = project.localExists
+    ? project.git.dirty
+      ? C.danger
+      : C.success
+    : C.warning;
+
+  return (
+    <section className="rounded p-1.5" aria-label="Project Lab context" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <SectionTitle title="Project Context" detail={contextLabel} />
+      <div className="mt-2 flex flex-wrap gap-1">
+        <Chip label={project.name} tone={C.gold} />
+        <Chip label={project.localExists ? project.git.statusText : "missing"} tone={statusTone} />
+        <Chip label={project.pushReadiness.label} tone={pushTone} />
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-1">
+        <ContextDatum label="Branch" value={project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable"} />
+        <ContextDatum label="Upstream" value={project.pushReadiness.evidence.upstream ?? project.git.upstream ?? "none"} />
+        <ContextDatum label="Dirty" value={`${project.pushReadiness.evidence.dirtyCount} files`} tone={project.git.dirty ? C.danger : C.success} />
+        <ContextDatum label="Approvals" value={`${project.pushReadiness.evidence.pendingApprovals} pending`} tone={project.pushReadiness.evidence.pendingApprovals > 0 ? C.warning : C.success} />
+        <ContextDatum label="Blocked" value={`${project.pushReadiness.evidence.blockedTerminal} terminal`} tone={project.pushReadiness.evidence.blockedTerminal > 0 ? C.danger : C.textSecondary} />
+        <ContextDatum label="Reviewing" value={`${project.pushReadiness.evidence.reviewingTerminal} terminal`} tone={project.pushReadiness.evidence.reviewingTerminal > 0 ? C.warning : C.textSecondary} />
+      </div>
+
+      <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.success }}>
+          Next Safe Action
+        </div>
+        <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+          {project.nextSafeAction}
+        </div>
+      </div>
+
+      <div className="mt-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Project Lab evidence only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
+        Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
+      </div>
+    </section>
+  );
+}
+
+function ContextDatum({ label, value, tone = C.textSecondary }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="mt-0.5 truncate text-[10px]" title={value} style={{ color: tone }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
 function TeachingBlock({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
     <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -974,5 +1109,12 @@ function toneForRisk(risk: string) {
   if (risk === "destructive") return C.danger;
   if (risk === "mutating_or_external") return C.warning;
   if (risk === "read_only") return C.success;
+  return C.textMuted;
+}
+
+function toneForPushState(state: string) {
+  if (state === "needs_cleanup") return C.danger;
+  if (state === "hold_dirty" || state === "commit_locally") return C.warning;
+  if (state === "push_branch" || state === "open_pr") return C.success;
   return C.textMuted;
 }
