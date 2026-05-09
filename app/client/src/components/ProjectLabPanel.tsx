@@ -350,19 +350,33 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
+  const primaryStats = [
+    { label: "Local", value: String(data?.summary.local ?? 0), tone: C.accent, filter: "all" as const },
+    { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
+    { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
+    { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
+    { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
+  ];
+  const secondaryStats = [
+    { label: "Missing", value: String(data?.summary.missing ?? 0), tone: (data?.summary.missing ?? 0) > 0 ? C.warning : C.success, filter: "missing" as const },
+    { label: "Hedwig", value: String(data?.summary.hedwigProposals ?? 0), tone: (data?.summary.hedwigProposals ?? 0) > 0 ? C.accent : C.textSecondary, filter: "hedwig" as const },
+    { label: "Terminal", value: String(data?.summary.terminalObservations ?? 0), tone: (data?.summary.terminalObservations ?? 0) > 0 ? C.accent : C.textSecondary, filter: "terminal" as const },
+    { label: "Sources", value: String(data?.summary.sourceEvents ?? 0), tone: (data?.summary.sourceEvents ?? 0) > 0 ? C.accent : C.textSecondary, filter: "sources" as const },
+    { label: "Drafts", value: String(data?.summary.actionDrafts ?? 0), tone: (data?.summary.actionDrafts ?? 0) > 0 ? C.accent : C.textSecondary, filter: "drafts" as const },
+  ];
 
   return (
     <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between px-3 py-1.5 shrink-0"
+        className="flex items-center justify-between gap-3 px-3 py-2.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             Project Lab
             <span className="ml-2" style={{ color: C.textSecondary }}>{projects.length}</span>
           </div>
-          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
+          <div className="text-[11px] mt-1 truncate" style={{ color: C.textMuted }}>
             Read-only project intelligence for local repos, agent ownership, and next build direction.
           </div>
         </div>
@@ -371,22 +385,35 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 xl:grid-cols-10 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <StatusBlock label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
-        <StatusBlock label="Local Repos" value={String(data?.summary.local ?? 0)} tone={C.accent} onSelect={() => setProjectFilter("all")} />
-        <StatusBlock label="Dirty" value={String(data?.summary.dirty ?? 0)} tone={(data?.summary.dirty ?? 0) > 0 ? C.danger : C.success} onSelect={() => setProjectFilter("dirty")} />
-        <StatusBlock label="Missing" value={String(data?.summary.missing ?? 0)} tone={(data?.summary.missing ?? 0) > 0 ? C.warning : C.success} onSelect={() => setProjectFilter("missing")} />
-        <StatusBlock label="Approvals" value={String(data?.summary.pendingApprovals ?? 0)} tone={(data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success} onSelect={() => setProjectFilter("approvals")} />
-        <StatusBlock label="Hedwig" value={String(data?.summary.hedwigProposals ?? 0)} tone={(data?.summary.hedwigProposals ?? 0) > 0 ? C.accent : C.textSecondary} onSelect={() => setProjectFilter("hedwig")} />
-        <StatusBlock label="Terminal" value={String(data?.summary.terminalObservations ?? 0)} tone={(data?.summary.terminalObservations ?? 0) > 0 ? C.accent : C.textSecondary} onSelect={() => setProjectFilter("terminal")} />
-        <StatusBlock label="Sources" value={String(data?.summary.sourceEvents ?? 0)} tone={(data?.summary.sourceEvents ?? 0) > 0 ? C.accent : C.textSecondary} onSelect={() => setProjectFilter("sources")} />
-        <StatusBlock label="Drafts" value={String(data?.summary.actionDrafts ?? 0)} tone={(data?.summary.actionDrafts ?? 0) > 0 ? C.accent : C.textSecondary} onSelect={() => setProjectFilter("drafts")} />
-        <StatusBlock label="Scanned" value={formatScannedAt(data?.scannedAt)} tone={C.textSecondary} />
+      <div className="grid grid-cols-2 gap-1.5 px-3 py-2 shrink-0 md:grid-cols-5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        {primaryStats.map((stat) => (
+          <StatusBlock
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            tone={stat.tone}
+            onSelect={"filter" in stat && stat.filter ? () => setProjectFilter(stat.filter) : undefined}
+          />
+        ))}
       </div>
 
-      <div className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <ChipRow label="Intake" items={data?.intakeCategories ?? []} />
-        <ChipRow label="Modes" items={data?.projectModes ?? []} tone={C.accent} />
+      <div className="px-3 py-2 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="flex flex-wrap gap-1">
+          <Badge variant="secondary" className="uppercase">Mode {labelize(data?.mode ?? "read_only")}</Badge>
+          {secondaryStats.map((stat) => (
+            <Button
+              key={stat.label}
+              type="button"
+              onClick={() => setProjectFilter(stat.filter)}
+              aria-label={`Show ${stat.label} projects`}
+              className="h-6 px-2"
+              variant={projectFilter === stat.filter ? "default" : "secondary"}
+              size="sm"
+            >
+              {stat.label} <span style={{ color: stat.tone }}>{stat.value}</span>
+            </Button>
+          ))}
+        </div>
         <div className="flex items-center gap-2">
           <div className="text-[10px] uppercase tracking-wider shrink-0 w-14" style={{ color: C.textMuted }}>
             View
@@ -1532,8 +1559,9 @@ function StatusBlock({ label, value, tone, onSelect }: { label: string; value: s
         type="button"
         onClick={onSelect}
         aria-label={`Show ${label} project view`}
-        className="h-auto min-w-0 justify-start text-left"
-        variant="ghost"
+        className="h-auto min-w-0 justify-start rounded p-2 text-left"
+        variant="secondary"
+        style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
       >
         {content}
       </Button>
@@ -1542,10 +1570,11 @@ function StatusBlock({ label, value, tone, onSelect }: { label: string; value: s
 
   return (
     <div
-      className="min-w-0"
+      className="min-w-0 rounded p-2"
       role="status"
       aria-label={`${label}: ${labelize(value)}. Informational only.`}
       title={`${label}: ${labelize(value)}. Informational only.`}
+      style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
     >
       {content}
     </div>

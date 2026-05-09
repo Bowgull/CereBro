@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:08 EDT
+Last updated: 2026-05-09 00:11 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0011 - Front-End Build Steward: Project Lab Hierarchy
+
+### What Changed
+
+- Reshaped Project Lab's first viewport from 10 equal tiny metrics into five
+  primary status cards plus a compact secondary metrics strip.
+- Raised the Project Lab title hierarchy and gave metric controls consistent
+  CereBro card framing.
+- Removed the extra intake/mode chip rows from the first viewport so project
+  cards appear sooner.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` failed once on an optional filter type, then passed after fix.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Project Lab should now feel less like a metrics wall and more like a routed
+  work surface with clear primary signals.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Project cards and the detail inspector still need a deeper density pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Project Lab hierarchy below the fold: project cards, signal blocks,
+  draft actions, and detail inspector density.
 
 ## 2026-05-09 0008 - Front-End Build Steward: Remaining Route Frames
 
