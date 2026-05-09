@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:29 EDT
+Last updated: 2026-05-09 06:32 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0632 - Front-End Build Steward: Automation Hygiene Density
+
+### What Changed
+
+- Browser-reviewed the active Basement Automation surface after the Security
+  pass.
+- Tightened the Piccolo header, status receipts, rule cards, vault path block,
+  and hygiene finding rows.
+- Restyled automation posture into compact receipt cards.
+- Kept read-only, durable-write, cleanup, vault, and findings context visible
+  in one operational surface.
+
+### Files Touched
+
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed Automation shows
+  status, rules, vault path, and findings compactly.
+
+### Front-End Steward Review
+
+- Automation now reads as a Piccolo hygiene console. It shows what can be read,
+  what can be saved, and what remains approval-gated without turning the page
+  into a policy document.
+
+### Known Risks
+
+- The Save Report hard-gate dialog was not restyled in this slice.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Browser-review the full Basement zone and then move to active Ledger surfaces.
 
 ## 2026-05-09 0629 - Front-End Build Steward: Security Gate Density
 
