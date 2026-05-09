@@ -50,10 +50,15 @@ function DropdownMenuContent({
 }
 
 function DropdownMenuGroup({
+  className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
   return (
-    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+    <DropdownMenuPrimitive.Group
+      data-slot="dropdown-menu-group"
+      className={cn("py-0.5 [&:not(:first-child)]:mt-0.5 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-[#253041] [&:not(:first-child)]:pt-1", className)}
+      {...props}
+    />
   );
 }
 
@@ -72,7 +77,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded px-1.5 py-1 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 data-[inset]:pl-7 data-[variant=destructive]:text-[#EF6F6C] data-[variant=destructive]:focus:bg-[#7F1D1D] data-[variant=destructive]:focus:text-[#F4EFE3] data-[variant=destructive]:*:[svg]:!text-[#EF6F6C] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-[#B8C0CC]",
+        "relative flex min-h-6 cursor-default select-none items-center gap-2 rounded px-1.5 py-1 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 data-[inset]:pl-7 data-[variant=destructive]:text-[#EF6F6C] data-[variant=destructive]:focus:bg-[#7F1D1D] data-[variant=destructive]:focus:text-[#F4EFE3] data-[variant=destructive]:*:[svg]:!text-[#EF6F6C] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-[#B8C0CC]",
         className
       )}
       {...props}
@@ -90,7 +95,7 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded py-1 pr-1.5 pl-7 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex min-h-6 cursor-default select-none items-center gap-2 rounded py-1 pr-1.5 pl-7 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       checked={checked}
@@ -126,7 +131,7 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded py-1 pr-1.5 pl-7 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex min-h-6 cursor-default select-none items-center gap-2 rounded py-1 pr-1.5 pl-7 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[disabled]:pointer-events-none data-[disabled]:text-[#7E8898] data-[disabled]:opacity-70 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -209,7 +214,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-default select-none items-center gap-2 rounded px-1.5 py-1 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[state=open]:bg-[#2D5B8F] data-[state=open]:text-[#F4EFE3] data-[inset]:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-[#B8C0CC]",
+        "flex min-h-6 cursor-default select-none items-center gap-2 rounded px-1.5 py-1 text-[11px] leading-none text-[#F4EFE3] outline-none focus:bg-[#2D5B8F] focus:text-[#F4EFE3] data-[state=open]:bg-[#2D5B8F] data-[state=open]:text-[#F4EFE3] data-[inset]:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-[#B8C0CC]",
         className
       )}
       {...props}

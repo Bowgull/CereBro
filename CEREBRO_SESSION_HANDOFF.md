@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:18 EDT
+Last updated: 2026-05-09 12:34 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1234 EDT - Primitive Focus Density Pass
+
+### What Changed
+
+- Tightened shared UI primitives used by the receipt-loop surfaces.
+- Added shell-offset focus rings to buttons, badges, inputs, textareas, selects, tabs, dialogs, and drawers.
+- Strengthened disabled affordance on buttons, badges, inputs, textareas, and selects.
+- Made hard-gate dialogs visually louder with an amber ring while keeping the 8px max modal radius.
+- Added compact grouped-menu separation and minimum item height to dropdown and context menus.
+- Added table row focus-within state and bounded table-cell width for dense receipt and Ledger rows.
+- Kept backend semantics unchanged.
+
+### Files Touched
+
+- `app/client/src/components/ui/button.tsx`
+- `app/client/src/components/ui/card.tsx`
+- `app/client/src/components/ui/dialog.tsx`
+- `app/client/src/components/ui/drawer.tsx`
+- `app/client/src/components/ui/dropdown-menu.tsx`
+- `app/client/src/components/ui/context-menu.tsx`
+- `app/client/src/components/ui/input.tsx`
+- `app/client/src/components/ui/textarea.tsx`
+- `app/client/src/components/ui/select.tsx`
+- `app/client/src/components/ui/tabs.tsx`
+- `app/client/src/components/ui/badge.tsx`
+- `app/client/src/components/ui/table.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps the primitive layer within CereBro token language: dark shell surfaces, compact density, visible focus, destructive/risk states, disabled states, grouped menus, and hard-gate modal shape.
+- It does not add a new surface or change any route semantics.
+- It supports the locked path by improving Project Lab, Terminal Lab, Workbench, Ledger, and system panels through shared controls.
+
+### Known Risks
+
+- Browser visual verification still needs Browser Use when callable.
+- Table cell max width may expose places that need explicit truncation or wrapping in a later visual pass.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify primitive focus/density states when Browser Use is callable; if unavailable, continue by tightening receipt-loop surface layout where shared primitives now reveal overflow or weak state language. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1218 EDT - Design Law Receipt Alignment
 

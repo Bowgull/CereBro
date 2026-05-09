@@ -127,7 +127,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-hard-gate={gate}
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-2 rounded-md border border-[#334155] bg-[#181F2A] p-2 text-[#F4EFE3] shadow-[0_20px_58px_rgba(0,0,0,0.46)] duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_20px_58px_rgba(0,0,0,0.56)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:max-w-md",
+          "fixed top-[50%] left-[50%] z-50 grid max-h-[85vh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-2 overflow-auto rounded-md border border-[#334155] bg-[#181F2A] p-2 text-[#F4EFE3] shadow-[0_20px_58px_rgba(0,0,0,0.46)] outline-none duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:ring-2 data-[hard-gate=true]:ring-[#F6C177]/30 data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_20px_58px_rgba(0,0,0,0.56)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0E1116] sm:max-w-md",
           className
         )}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -137,7 +137,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-2 right-2 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute top-2 right-2 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0E1116] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>

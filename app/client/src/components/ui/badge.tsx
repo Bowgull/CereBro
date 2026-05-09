@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit max-w-full shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none outline-none transition-[border-color,color,box-shadow] aria-disabled:border-[#253041] aria-disabled:bg-[#151A23] aria-disabled:text-[#7E8898] aria-disabled:opacity-70 focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0E1116] aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 aria-invalid:ring-offset-1 aria-invalid:ring-offset-[#0E1116] [&>svg]:pointer-events-none [&>svg]:size-3 [&>span]:truncate",
   {
     variants: {
       variant: {

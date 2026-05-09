@@ -54,9 +54,9 @@ function Input({
       type={type}
       data-slot="input"
       className={cn(
-        "h-7 w-full min-w-0 rounded border border-[#334155] bg-[#151A23] px-2 py-1 text-[12px] text-[#F4EFE3] shadow-none outline-none transition-[border-color,box-shadow] selection:bg-[#6BA6FF] selection:text-[#0E1116] file:inline-flex file:h-5 file:border-0 file:bg-transparent file:text-[11px] file:font-medium file:text-[#B8C0CC] placeholder:text-[#7E8898] disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-[#253041] disabled:bg-[#151A23] disabled:text-[#7E8898] disabled:opacity-70",
-        "focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45",
-        "aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30",
+        "h-7 w-full min-w-0 rounded border border-[#334155] bg-[#151A23] px-2 py-1 text-[12px] text-[#F4EFE3] shadow-none outline-none transition-[border-color,box-shadow] selection:bg-[#6BA6FF] selection:text-[#0E1116] file:inline-flex file:h-5 file:border-0 file:bg-transparent file:text-[11px] file:font-medium file:text-[#B8C0CC] placeholder:text-[#7E8898] disabled:pointer-events-none disabled:cursor-not-allowed disabled:select-none disabled:border-[#253041] disabled:bg-[#151A23] disabled:text-[#7E8898] disabled:opacity-70",
+        "focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0E1116]",
+        "aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 aria-invalid:ring-offset-1 aria-invalid:ring-offset-[#0E1116]",
         className
       )}
       onCompositionStart={handleCompositionStart}
