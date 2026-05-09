@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:53 EDT
+Last updated: 2026-05-09 05:56 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0556 - Front-End Build Steward: Terminal Lab Right Rail
+
+### What Changed
+
+- Browser-reviewed Terminal Lab after the diagnostic draft pass.
+- Compact-restyled the right rail policy and live-link blocks into receipt
+  lines.
+- Reduced right rail panel padding and shortened output helper copy.
+- Kept observed output, approval previews, policy, and live links intact.
+- Added a local `RailLine` helper for compact rail receipts.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` first failed on a non-existent `borderStrong` token, then passed
+  after switching to the existing `C.border` token.
+- `pnpm test -- server/cerebro-foundations.test.ts` first failed on the
+  unrelated Raven manifest dirty state, then passed on rerun.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Terminal Lab's right rail now reads like compact policy and linkage receipts
+  instead of explanatory paragraphs.
+
+### Known Risks
+
+- The Raven/server worktree remains dirty and is not part of this frontend
+  commit.
+- Terminal Lab surface is now usable enough to move to the Research route next.
+
+### Next Front-End Slice
+
+- Move to the Research surface and apply the same routed surface density pass:
+  header hierarchy, first viewport compression, right rail clearance, and
+  composer-safe scrolling.
 
 ## 2026-05-09 0553 - Front-End Build Steward: Terminal Lab Diagnostic Drafts
 

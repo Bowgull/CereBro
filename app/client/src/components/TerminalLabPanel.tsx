@@ -632,23 +632,23 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             </section>
           </div>
 
-          <aside className="space-y-2.5 min-w-0">
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="space-y-2 min-w-0">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Policy" detail="locked" />
-              <div className="mt-2 space-y-1">
+              <div className="mt-2 grid gap-1">
                 {(data?.policies ?? []).map((policy) => (
-                  <div key={policy} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {policy}</div>
+                  <RailLine key={policy} text={policy} />
                 ))}
               </div>
             </section>
 
-            <form onSubmit={submitOutput} className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <form onSubmit={submitOutput} className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Observed Output" detail={selectedObservationId == null ? "select row" : `#${selectedObservationId}`} />
               <Textarea
                 value={outputText}
                 onChange={(event) => setOutputText(event.target.value)}
                 placeholder="Paste output from a command that was run through the normal approved path."
-                rows={5}
+                rows={4}
               />
               <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-2">
                 <Input
@@ -664,25 +664,25 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 </Button>
               </div>
               <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-                This saves a redacted local summary only. It does not execute commands or write outside the harness DB.
+                Saves a redacted local summary. No command execution.
               </div>
             </form>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Live Links" detail="local only" />
-              <div className="mt-2 space-y-1">
+              <div className="mt-2 grid gap-1">
                 {[
-                  "New previews can attach to selected tasks and sessions.",
-                  "Existing observations can be relinked with Link Selected.",
-                  "Observed output now surfaces Aang and Tony follow-up suggestions.",
-                  "Keep execution approval-gated through Codex, not autonomous UI buttons.",
+                  "Previews attach to selected tasks and sessions.",
+                  "Observations relink with Link Selected.",
+                  "Observed output surfaces Aang and Tony follow-ups.",
+                  "Execution stays approval-gated through Codex.",
                 ].map((item) => (
-                  <div key={item} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {item}</div>
+                  <RailLine key={item} text={item} />
                 ))}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
               <div className="mt-2 space-y-2">
                 {(terminalApprovalPreviews.data ?? []).length === 0 ? (
@@ -803,6 +803,15 @@ function ActionGroup({ label, children }: { label: string; children: React.React
       <div className="flex flex-wrap gap-1">
         {children}
       </div>
+    </div>
+  );
+}
+
+function RailLine({ text }: { text: string }) {
+  return (
+    <div className="grid grid-cols-[8px_minmax(0,1fr)] gap-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+      <span aria-hidden="true" className="mt-1 h-1.5 w-1.5 rounded-full" style={{ background: C.border }} />
+      <span>{text}</span>
     </div>
   );
 }
