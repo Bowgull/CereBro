@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:02 EDT
+Last updated: 2026-05-09 06:06 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0606 - Front-End Build Steward: Research Rail Receipts
+
+### What Changed
+
+- Browser-reviewed the Research route after the source-history grouping pass.
+- Compact-restyled Browser Ladder into receipt rows with stable marker and body
+  columns.
+- Compact-restyled Policy and approval gates into matching rail receipt rows.
+- Reduced right-rail padding so Research now matches the density pattern used by
+  Terminal Lab.
+
+### Files Touched
+
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed the Research
+  rail receipts render correctly.
+
+### Front-End Steward Review
+
+- Research now has the same compact rail grammar as Terminal Lab: status stays
+  visible, repeated text compresses, and policy is readable without feeling like
+  documentation pasted into the app.
+
+### Known Risks
+
+- Workbench has not had this route-density pass yet.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Move to Workbench and apply the same compact shell grammar to its primary
+  route surface.
 
 ## 2026-05-09 0602 - Front-End Build Steward: Research Source History Groups
 

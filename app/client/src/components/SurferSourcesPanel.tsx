@@ -293,35 +293,23 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />
-              <div className="space-y-1 mt-2">
+              <div className="mt-2 grid gap-1">
                 {(data?.ladder ?? []).map((step, index) => (
-                  <div key={step} className="grid grid-cols-[24px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
-                    <span style={{ color: C.textMuted }}>{index}</span>
-                    <span style={{ color: C.textSecondary }}>{step}</span>
-                  </div>
+                  <RailLine key={step} marker={String(index)} text={step} />
                 ))}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Policy" detail="approval-gated" />
-              <div className="space-y-2 mt-2">
+              <div className="mt-2 grid gap-1.5">
                 {data?.policy && Object.entries(data.policy).map(([key, value]) => (
-                  <div key={key}>
-                    <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                      {key.replace(/([A-Z])/g, " $1")}
-                    </div>
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.textSecondary }}>
-                      {value}
-                    </div>
-                  </div>
+                  <RailLine key={key} marker={key.replace(/([A-Z])/g, " $1")} text={String(value)} />
                 ))}
                 {preview.data?.gates.map((gate) => (
-                  <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
-                    {gate}
-                  </div>
+                  <RailLine key={gate} marker="gate" text={gate} tone={C.warning} />
                 ))}
               </div>
             </section>
@@ -425,6 +413,19 @@ function MiniBadge({ label, tone }: { label: string; tone: string }) {
     <Badge variant={variant} className="uppercase">
       {label.replace(/_/g, " ")}
     </Badge>
+  );
+}
+
+function RailLine({ marker, text, tone = C.textSecondary }: { marker: string; text: string; tone?: string }) {
+  return (
+    <div className="grid grid-cols-[44px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+      <span className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={marker}>
+        {marker}
+      </span>
+      <span style={{ color: tone }}>
+        {text}
+      </span>
+    </div>
   );
 }
 
