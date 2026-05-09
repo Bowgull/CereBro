@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:59 EDT
+Last updated: 2026-05-08 22:01 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2201 - Front-End Build Steward: Workbench Security Gate Link
+
+### What Changed
+
+- Added a `Security Gate` action to Workbench evidence details when an evidence
+  record has a `targetUri`.
+- The action opens Security Gate and pre-fills the target through local session
+  storage.
+- Wired Workbench's panel to shell navigation for the Security surface.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Evidence records with external targets can now move directly into a Spock
+  receipt without copying the target manually.
+- The handoff stays local-only. It does not browse, fetch, clone, install, or
+  execute.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add source/project receipt linking hints to the Security Gate detail output.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2159 - Front-End Build Steward: Surfer Security Gate Link
 

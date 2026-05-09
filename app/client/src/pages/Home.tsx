@@ -433,7 +433,7 @@ export default function Home() {
             {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} /></PanelHost>}
-            {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
             {nav === "model_tools" && <PanelHost><ModelToolsPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "security" && <PanelHost><SecurityGatePanel onClose={() => setNav("home")} /></PanelHost>}

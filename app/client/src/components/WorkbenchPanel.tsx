@@ -32,7 +32,7 @@ type TemporaryMediaPreview = {
   durationSec: number | null;
 };
 
-export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
+export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const plan = trpc.workbench.plan.useQuery();
   const projects = trpc.projectIntelligence.overview.useQuery();
   const linkOptions = trpc.workbench.linkOptions.useQuery();
@@ -925,6 +925,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
                   <EvidenceDetailPanel
                     detail={evidenceDetail.data}
                     loading={evidenceDetail.isLoading}
+                    onNavigate={onNavigate}
                     onCreateValidationNote={(input) => {
                       createValidationNote.mutate({
                         evidenceId: input.evidenceId,
@@ -975,6 +976,7 @@ export default function WorkbenchPanel({ onClose }: { onClose: () => void }) {
 function EvidenceDetailPanel({
   detail,
   loading,
+  onNavigate,
   onCreateValidationNote,
   isCreatingValidationNote,
   validationSavedId,
@@ -1067,6 +1069,7 @@ function EvidenceDetailPanel({
     | undefined;
   loading: boolean;
   onCreateValidationNote?: (input: { evidenceId: number; validatorAgent: ValidatorAgent; status: ValidationNoteStatus; note: string }) => void;
+  onNavigate?: (route: "security") => void;
   isCreatingValidationNote?: boolean;
   validationSavedId?: number | null;
   evidenceOptions?: Array<{
@@ -1133,6 +1136,15 @@ function EvidenceDetailPanel({
     ].some((value) => value.toLowerCase().includes(query));
   });
   const selectedComparison = compareWithId === "none" ? null : comparisonOptions.find((option) => option.id === compareWithId) ?? null;
+  function openSecurityGate() {
+    if (!item.targetUri || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem("cerebro:security-target", item.targetUri);
+    } catch {
+      // Ignore storage failure. The Security Gate form still opens.
+    }
+    onNavigate("security");
+  }
   return (
     <aside className="rounded p-3" aria-label="Workbench evidence detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="flex flex-wrap gap-1 mb-3">
@@ -1157,6 +1169,19 @@ function EvidenceDetailPanel({
         <Meta label="Command" value={item.command ?? (item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`)} />
         <Meta label="Artifact" value={item.artifactTitle ?? item.artifactPath ?? (item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)} />
         <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
+        {item.targetUri && (
+          <Button
+            type="button"
+            onClick={openSecurityGate}
+            disabled={!onNavigate}
+            variant="risk"
+            size="sm"
+            className="w-fit"
+            title={item.targetUri}
+          >
+            Security Gate
+          </Button>
+        )}
         <Meta label="Viewport" value={item.viewport ?? "none"} />
         <Meta label="Coordinates" value={item.coordinates ?? "none"} />
         <Meta label="Annotation" value={item.annotationText ?? "none"} />
