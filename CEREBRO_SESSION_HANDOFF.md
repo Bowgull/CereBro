@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 08:16 EDT
+Last updated: 2026-05-09 08:26 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0826 EDT - Front-End Build Steward: Project Push Readiness
+
+### What Changed
+
+- Added an advisory Push Readiness receipt to every Project Lab project card.
+- The receipt states when to hold dirty, commit locally, push branch, open PR, or clean up first.
+- The receipt shows why, what stays out, checks to run, suggested commit wording, and manual push commands.
+- Added a per-project automation toggle label that can be selected without executing git; manual push commands remain visible when automation is selected.
+- Browser DOM verified Project Lab cards, receipt expansion, manual commands, and automation-selected state at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed the Project Lab push receipt surface.
+
+### Front-End Steward Review
+
+- This is proposal-only UI. It does not stage, commit, push, open PRs, or mutate repos.
+- The card now exposes the same push timing judgment pattern used in this build session.
+- Automation selection is local UI state only until a later approved automation implementation exists.
+
+### Known Risks
+
+- The readiness heuristic is local and conservative. It does not yet know the actual latest check result per external project.
+- Manual commands are generic and require human review before use.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No git operation ran from CereBro.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Project Push Readiness. Next safe slice: promote Push Readiness from local UI heuristic into a Project Lab backend receipt that can include last check evidence, branch/upstream state, and explicit automation policy without executing git. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0816 EDT - Front-End Build Steward: Button Primitive Density
 
