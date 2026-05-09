@@ -43,7 +43,7 @@ const surfaceRules: RuleItem[] = [
 export default function UISystemPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="h-full flex flex-col overflow-hidden" style={{ background: C.background, color: C.textPrimary }}>
-      <header className="shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <header className="shrink-0 px-4 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -65,8 +65,8 @@ export default function UISystemPanel({ onClose }: { onClose: () => void }) {
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto p-5">
-        <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+      <div className="flex-1 overflow-auto p-3">
+        <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <RuleSection title="Frontend Law" items={foundations} />
           <RuleSection title="UX Spine" items={surfaceRules} />
 
@@ -77,11 +77,11 @@ export default function UISystemPanel({ onClose }: { onClose: () => void }) {
             <CardContent>
             <ol className="grid gap-2 m-0 p-0 list-none">
               {uxFlow.map((step, index) => (
-                <li key={step} className="grid grid-cols-[2rem_1fr] items-center gap-2 text-xs">
-                  <span className="text-center py-1" style={{ color: C.gold, border: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+                <li key={step} className="grid min-w-0 grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-2 text-xs">
+                  <span className="text-center py-1 font-mono" style={{ color: C.gold, border: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
                     {index + 1}
                   </span>
-                  <span style={{ color: C.textSecondary }}>{step}</span>
+                  <span className="min-w-0 truncate" style={{ color: C.textSecondary }}>{step}</span>
                 </li>
               ))}
             </ol>
@@ -91,7 +91,7 @@ export default function UISystemPanel({ onClose }: { onClose: () => void }) {
           <RuleSection title="Primitives" items={primitives} />
         </div>
 
-        <Card className="mt-4">
+        <Card className="mt-3">
           <CardHeader>
             <CardTitle>Build Gate</CardTitle>
           </CardHeader>
@@ -107,7 +107,7 @@ export default function UISystemPanel({ onClose }: { onClose: () => void }) {
               "What happens when it fails.",
               "Which rule did the UI follow.",
             ].map((item) => (
-              <div key={item} className="p-3" style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+              <div key={item} className="min-w-0 p-2" style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                 {item}
               </div>
             ))}
@@ -128,11 +128,11 @@ function RuleSection({ title, items }: { title: string; items: RuleItem[] }) {
       <CardContent>
       <div className="grid gap-2">
         {items.map(([label, body]) => (
-          <div key={label} className="grid grid-cols-[9rem_1fr] gap-3 text-xs">
+          <div key={label} className="grid min-w-0 gap-1 text-xs sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-3">
             <div className="font-bold uppercase" style={{ color: C.gold }}>
               {label}
             </div>
-            <div style={{ color: C.textSecondary }}>
+            <div className="min-w-0" style={{ color: C.textSecondary }}>
               {body}
             </div>
           </div>
