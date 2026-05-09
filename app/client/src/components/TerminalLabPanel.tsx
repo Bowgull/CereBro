@@ -202,20 +202,19 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between gap-3 px-3 py-2.5 shrink-0"
+        className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Terminal Lab
-          </div>
-          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
-            Proposal-only command explanation and approval gates. No shell execution.
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+              Terminal Lab
+            </div>
+            <Badge variant="warning" className="uppercase">Execution disabled</Badge>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
             <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
             <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "tony"}</Badge>
-            <Badge variant="warning" className="uppercase">Execution disabled</Badge>
             <Badge variant="secondary" className="uppercase">Support {(data?.supportAgents ?? ["aang"]).join(", ")}</Badge>
           </div>
         </div>
@@ -224,8 +223,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         </Button>
       </div>
 
-      <form onSubmit={submit} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
+      <form onSubmit={submit} className="px-2 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-1.5">
           <Input
             value={command}
             onChange={(event) => setCommand(event.target.value)}
@@ -238,7 +237,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             {preview.isPending ? "Reading" : "Preview"}
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
           <AppSelect
             label="Task Link"
             value={selectedTaskId || "none"}
@@ -264,8 +263,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             ]}
           />
         </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-          This panel classifies intent only. Commands still run through Codex with the normal approval path.
+        <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+          Intent classifier only. Commands still run through Codex approval.
           {(selectedTask || selectedSession) && (
             <span> New previews will attach to {selectedTask ? `task #${selectedTask.id}` : ""}{selectedTask && selectedSession ? " and " : ""}{selectedSession ? selectedSession.displayName : ""}.</span>
           )}
@@ -273,12 +272,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       </form>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-2.5 px-3 pt-3 pb-20">
-          <div className="space-y-2.5 min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-2 px-2 pt-2 pb-16">
+          <div className="space-y-2 min-w-0">
             {preview.data && (
               <section className="space-y-2">
                 <SectionTitle title="Command Preview" detail={preview.data.risk.replace(/_/g, " ")} />
-                <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex flex-wrap gap-1">
                     <Chip label={preview.data.risk.replace(/_/g, " ")} tone={toneForRisk(preview.data.risk)} />
                     <Chip label={`agent ${preview.data.suggestedAgent}`} tone={C.gold} />
@@ -287,12 +286,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                     <Chip label={`saved #${preview.data.observationId}`} tone={C.textSecondary} />
                   </div>
                   <div
-                    className="text-xs rounded px-2 py-1.5 overflow-x-auto"
+                    className="text-[11px] rounded px-2 py-1 overflow-x-auto"
                     style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                   >
                     <code>{preview.data.command}</code>
                   </div>
-                  <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                     {preview.data.explanation}
                   </div>
                   <Button
@@ -308,11 +307,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </Button>
                 </div>
 
-                <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <SectionTitle title="Gates" detail="before run" />
                   <div className="mt-2 space-y-1">
                     {preview.data.gates.map((gate) => (
-                      <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {gate}</div>
+                      <div key={gate} className="text-[10px] leading-snug" style={{ color: C.textMuted }}>- {gate}</div>
                     ))}
                   </div>
                 </div>
@@ -325,7 +324,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 return (
                   <section className="space-y-2">
                     <SectionTitle title="Tony Draft Preview" detail={draftPreview.risk.replace(/_/g, " ")} />
-                    <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="rounded p-2 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`from #${draftPreview.parentObservationId}`} tone={C.textMuted} />
                         <Chip label={`saved #${draftPreview.observationId}`} tone={C.textSecondary} />
@@ -333,12 +332,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                         <Chip label="no execution" tone={C.success} />
                       </div>
                       <div
-                        className="text-xs rounded px-2 py-1.5 overflow-x-auto"
+                        className="text-[11px] rounded px-2 py-1 overflow-x-auto"
                         style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
                       >
                         <code>{draftPreview.command}</code>
                       </div>
-                      <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                      <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                         {draftPreview.handoffNote}
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -370,7 +369,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 );
               })()}
             {previewDiagnosticDraft.data && !previewDiagnosticDraft.data.ok && (
-              <section className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.warning }}>
+              <section className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.warning }}>
                 {previewDiagnosticDraft.data.reason}
               </section>
             )}
@@ -379,12 +378,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               <SectionTitle title="Surfaces" detail="Terminal Lab V1" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {(data?.surfaces ?? []).map((surface) => (
-                  <div key={surface.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <div key={surface.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{surface.label}</div>
                       <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "live_preview" ? C.success : C.textMuted} />
                     </div>
-                    <div className="text-[11px] leading-relaxed mt-1" style={{ color: C.textMuted }}>
+                    <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
                       {surface.notes}
                     </div>
                   </div>
@@ -413,12 +412,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               </div>
               <div className="space-y-2">
                 {(observations.data ?? []).length === 0 ? (
-                  <div className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     {observationScope === "all" ? "No command previews recorded yet." : "No command previews match the selected link."}
                   </div>
                 ) : (
                   observations.data?.map((item) => (
-                    <div key={item.id} className="rounded p-2 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={item.id} className="rounded p-1.5 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`#${item.id}`} tone={C.textMuted} />
                         <Chip label={item.risk.replace(/_/g, " ")} tone={toneForRisk(item.risk)} />
@@ -448,7 +447,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       )}
                       {item.diagnosticParentId != null && (
                         <div className="text-[10px] leading-snug" style={{ color: C.gold }}>
-                          Tony diagnostic preview copied from observation #{item.diagnosticParentId}
+                          Tony diagnostic preview from observation #{item.diagnosticParentId}
                           {item.diagnosticRootId != null ? ` in chain root #${item.diagnosticRootId}` : ""}
                           {item.diagnosticDepth != null ? ` at depth ${item.diagnosticDepth}` : ""}. Still proposal-only; run only through Codex approval.
                         </div>
@@ -461,7 +460,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       {item.followUps.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
                           {item.followUps.map((followUp) => (
-                            <div key={`${item.id}-${followUp.agent}-${followUp.title}`} className="rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                            <div key={`${item.id}-${followUp.agent}-${followUp.title}`} className="rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                               <div className="flex items-center justify-between gap-2">
                                 <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: followUp.agent === "tony" ? C.gold : C.success }}>
                                   {followUp.agent}: {followUp.title}
@@ -475,8 +474,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       {item.diagnosticDrafts.length > 0 && (
                         <div className="space-y-1">
                           {item.diagnosticDrafts.map((draft) => (
-                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                              <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                              <div className="grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_auto]">
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
                                     <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
@@ -535,7 +534,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           ))}
                         </div>
                       )}
-                      <div className="grid gap-1.5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
+                      <div className="grid gap-1 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
                         <ActionGroup label="Review">
                           <Button
                             type="button"
@@ -632,8 +631,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             </section>
           </div>
 
-          <aside className="space-y-2 min-w-0">
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="space-y-1.5 min-w-0">
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Policy" detail="locked" />
               <div className="mt-2 grid gap-1">
                 {(data?.policies ?? []).map((policy) => (
@@ -642,7 +641,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </section>
 
-            <form onSubmit={submitOutput} className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <form onSubmit={submitOutput} className="rounded p-1.5 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Observed Output" detail={selectedObservationId == null ? "select row" : `#${selectedObservationId}`} />
               <Textarea
                 value={outputText}
@@ -650,7 +649,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 placeholder="Paste output from a command that was run through the normal approved path."
                 rows={4}
               />
-              <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-2">
+              <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-1.5">
                 <Input
                   value={exitCode}
                   onChange={(event) => setExitCode(event.target.value)}
@@ -663,12 +662,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   {observeOutput.isPending ? "Saving" : "Save Summary"}
                 </Button>
               </div>
-              <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+              <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
                 Saves a redacted local summary. No command execution.
               </div>
             </form>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Live Links" detail="local only" />
               <div className="mt-2 grid gap-1">
                 {[
@@ -682,7 +681,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </section>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
               <div className="mt-2 space-y-2">
                 {(terminalApprovalPreviews.data ?? []).length === 0 ? (
@@ -691,13 +690,13 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 ) : (
                   terminalApprovalPreviews.data?.map((approval) => (
-                    <div key={approval.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={approval.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`approval #${approval.id}`} tone={C.textMuted} />
                         <Chip label={approval.status} tone={C.warning} />
                         <Chip label={approval.actionType.replace(/_/g, " ")} tone={C.gold} />
                       </div>
-                      <div className="text-[11px] leading-snug mt-1 line-clamp-3" style={{ color: C.textMuted }} title={approval.reason ?? ""}>
+                      <div className="text-[10px] leading-snug mt-1 line-clamp-3" style={{ color: C.textMuted }} title={approval.reason ?? ""}>
                         {approval.reason}
                       </div>
                     </div>
