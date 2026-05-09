@@ -82,6 +82,9 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const tasks = list.data ?? [];
   const projectOptions = projects.data ?? [];
   const sessionOptions = sessions.data ?? [];
+  const openTasks = tasks.filter((task) => task.status === "open").length;
+  const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length;
+  const doneTasks = tasks.filter((task) => task.status === "done").length;
 
   return (
     <div
@@ -99,7 +102,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
               {tasks.length}
             </span>
           </div>
-          <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>
+          <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
             Tasks are proof objects. Status changes stay visible.
           </div>
         </div>
@@ -108,7 +111,13 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <form onSubmit={submit} className="flex gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <TaskStat label="Open" value={String(openTasks)} tone={openTasks > 0 ? C.warning : C.textMuted} />
+        <TaskStat label="Active" value={String(inProgressTasks)} tone={inProgressTasks > 0 ? C.accent : C.textMuted} />
+        <TaskStat label="Done" value={String(doneTasks)} tone={doneTasks > 0 ? C.success : C.textMuted} />
+      </div>
+
+      <form onSubmit={submit} className="grid grid-cols-[minmax(0,1fr)_160px_64px] gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -134,13 +143,18 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         </Select>
         <Button
           type="submit"
+          size="sm"
           disabled={!title.trim() || create.isPending}
         >
           Add
         </Button>
       </form>
 
-      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Task project filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         <FilterButton
           label="All"
           active={projectFilter === "all"}
@@ -158,7 +172,11 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           />
         ))}
       </div>
-      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Task run filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         <FilterButton
           label="All Runs"
           active={sessionFilter === "all"}
@@ -179,16 +197,16 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {list.isLoading ? (
-          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
         ) : tasks.length === 0 ? (
-          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>
+          <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             No tasks yet. Add one above.
           </div>
         ) : (
           tasks.map((t) => (
             <div
               key={t.id}
-              className="flex items-center gap-2 px-2.5 py-1.5"
+              className="flex items-center gap-1.5 px-2.5 py-1.5"
               style={{ borderBottom: `1px solid ${C.borderSoft}` }}
             >
               <Button
@@ -202,15 +220,15 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                 {STATUS_LABEL[t.status] ?? t.status}
               </Button>
               <div
-                className="flex-1 text-xs"
+                className="flex-1 text-[11px]"
                 style={{
                   color: t.status === "done" || t.status === "cancelled" ? C.textMuted : C.textPrimary,
                   textDecoration: t.status === "done" ? "line-through" : "none",
                 }}
               >
-                <div>{t.title}</div>
+                <div className="line-clamp-2">{t.title}</div>
                 {(t.projectId != null || t.sessionId != null) && (
-                  <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1">
                     {t.projectId != null && (
                       <span
                         className="text-[10px] uppercase tracking-wider truncate"
@@ -251,8 +269,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
               This removes a local task row from the Ledger work queue. Cancel keeps the record visible.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
-            <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.warning }}>
+          <div className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            <div className="mb-1 text-[10px] uppercase tracking-widest" style={{ color: C.warning }}>
               Target
             </div>
             <div style={{ color: C.textPrimary }}>{deleteGate?.title ?? "Unknown task"}</div>
@@ -313,6 +331,19 @@ function FilterButton({
         {count}
       </Badge>
     </Button>
+  );
+}
+
+function TaskStat({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="mt-0.5 text-[11px] font-semibold" style={{ color: tone }}>
+        {value}
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:48 EDT
+Last updated: 2026-05-09 06:53 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0653 EDT - Front-End Build Steward: Ledger Runs And Tasks Density
+
+### What Changed
+
+- Browser-reviewed the active Ledger Sessions and Tasks surfaces after the
+  Memory pass.
+- Tightened the Sessions table, stat receipts, empty/loading states, status
+  pills, project/path text, session ids, and inline edit row.
+- Added compact task status receipts for open, active, and done work.
+- Tightened the task create row, project filters, run filters, task rows,
+  long-task clamping, and destructive delete target block.
+
+### Files Touched
+
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- Initial `curl -I http://localhost:3002/` missed the dev server during a brief
+  connection gap; a retry returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed Sessions and
+  Tasks show compact ledger tables, stats, filters, create/edit controls, and
+  destructive controls.
+
+### Front-End Steward Review
+
+- Ledger now has a more consistent density rhythm across Approvals, Outputs,
+  Memory, Sessions, and Tasks. Runs and tasks show status receipts before the
+  row lists, then keep row actions small and explicit.
+
+### Known Risks
+
+- Browser screenshot capture was avoided because the prior Output slice saw
+  screenshot timeouts. This pass used DOM verification plus checks.
+- The Tasks surface currently shows a large number of repeated local test rows;
+  this slice improves density but does not clean test data.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Review the Ledger Overview surface and then do a full Ledger cross-surface
+  polish pass for remaining mismatch in headers, row density, and scroll lanes.
 
 ## 2026-05-09 0648 EDT - Front-End Build Steward: Memory Receipt Density
 
