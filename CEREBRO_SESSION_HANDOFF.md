@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:21 EDT
+Last updated: 2026-05-09 13:23 EDT
 
 ## Current North Star
 
@@ -20,6 +20,36 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1323 EDT - Gate Surface Boundary Pass
+
+### What Changed
+- Tightened Security Gate controls so Inspect is explicitly local string review and Record Receipt is explicitly local receipt creation.
+- Approval Dashboard reset now states it does not approve, reject, or change previews.
+- Approval group filters now state they filter local previews without running approval actions.
+- Approval-to-Security routes now state Approval Dashboard does not execute the target.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: visually inspect the Project Lab, Workbench, Terminal Lab, Approval, and Security gate density if Browser Use is callable, otherwise continue small boundary-label consistency on source/output/memory surfaces. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1321 EDT - Terminal Lab Teaching Boundary Pass
 

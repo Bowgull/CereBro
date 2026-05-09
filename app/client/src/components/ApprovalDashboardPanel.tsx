@@ -164,6 +164,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               setSelectedId(null);
             }}
             aria-label="Reset approval filters to pending local previews"
+            title="Reset approval filters. This does not approve, reject, or change previews."
             variant="outline"
           >
             Reset
@@ -220,6 +221,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     setSelectedId(null);
                   }}
                   aria-label={`Filter approval previews by ${labelize(group.label)}`}
+                  title={`Filter local approval previews by ${labelize(group.label)}. No approval action runs.`}
                   className="h-auto min-w-40 justify-start rounded p-1.5 text-left"
                   variant="secondary"
                 >
@@ -391,7 +393,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     variant="risk"
                     size="sm"
                     className="w-fit"
-                    title={selected.targetLabel}
+                    title="Open Security Gate for this approval target. Approval Dashboard does not execute it."
+                    aria-label={`Open Security Gate for approval ${selected.id}`}
                   >
                     Security Gate
                   </Button>
@@ -430,7 +433,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                         variant="risk"
                         size="sm"
                         className="w-fit"
-                        title={selected.permissionPreflight.targetSummary}
+                        title="Open Security Gate for this preflight target. Approval Dashboard does not execute it."
+                        aria-label={`Open Security Gate for permission preflight ${selected.permissionPreflight.id}`}
                       >
                         Security Gate
                       </Button>

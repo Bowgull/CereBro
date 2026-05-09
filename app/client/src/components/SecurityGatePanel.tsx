@@ -161,10 +161,23 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               Link known work when available. Standalone targets can remain unlinked.
             </div>
             <div className="flex flex-wrap gap-1.5">
-              <Button type="submit" disabled={!target.trim() || inspect.isPending} variant="secondary">
+              <Button
+                type="submit"
+                disabled={!target.trim() || inspect.isPending}
+                title={!target.trim() ? "Enter a target before inspecting." : "Inspect the target string locally. No browser, clone, install, download, or execution runs."}
+                aria-label="Inspect security target locally"
+                variant="secondary"
+              >
                 {inspect.isPending ? "Inspecting" : "Inspect"}
               </Button>
-              <Button type="button" disabled={!target.trim() || createReview.isPending} onClick={recordReceipt} variant="risk">
+              <Button
+                type="button"
+                disabled={!target.trim() || createReview.isPending}
+                onClick={recordReceipt}
+                title={!target.trim() ? "Enter a target before recording a security receipt." : "Record a local security receipt. External actions stay gated."}
+                aria-label="Record local security receipt"
+                variant="risk"
+              >
                 {createReview.isPending ? "Recording" : "Record Receipt"}
               </Button>
             </div>
