@@ -46,9 +46,59 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const createLearningProposal = trpc.terminalLab.createLearningProposalFromObservation.useMutation();
   const utils = trpc.useUtils();
   const data = plan.data;
+  const observationRows = observations.data ?? [];
   const selectedTask = tasks.data?.find((task) => String(task.id) === selectedTaskId);
   const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
   const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
+  const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
+  const teachingFrame = preview.data
+    ? {
+        title: "Aang reads this command preview.",
+        route: `Aang explains. Cortana routes ${preview.data.suggestedAgent}. Spock holds execution approval.`,
+        lesson: preview.data.explanation,
+        proves: preview.data.risk === "read_only"
+          ? "This can reveal local state when run through the approved command path."
+          : "This needs a clearer execution reason before it can become an approved action.",
+        next: preview.data.approvalRequiredToRun
+          ? "Inspect the gates, then use Security Gate or Approval if this command still matters."
+          : "Record the expected proof before running anything elsewhere.",
+        notYet: preview.data.gates,
+        tone: toneForRisk(preview.data.risk),
+      }
+    : selectedObservation
+      ? {
+          title: `Aang teaches observation #${selectedObservation.id}.`,
+          route: `Aang explains. Tony reads the follow-up. ${selectedObservation.risk === "read_only" ? "Spock watches the boundary." : "Spock gates execution."}`,
+          lesson: selectedObservation.outputSummary
+            ? selectedObservation.outputSummary
+            : selectedObservation.explanation ?? "No output has been attached yet. Paste approved command output to turn this into a lesson.",
+          proves: selectedObservation.exitCode === 0
+            ? "Exit 0 suggests the command completed, but the output still needs a concrete interpretation."
+            : selectedObservation.exitCode != null
+              ? `Exit ${selectedObservation.exitCode} means this needs review before Tony acts on it.`
+              : "No exit code has been recorded yet.",
+          next: selectedObservation.outputSummary
+            ? "Create a learning note or Tony follow-up if this result should shape the next build pass."
+            : "Attach observed output from an approved command run.",
+          notYet: [
+            "Do not rerun from Terminal Lab.",
+            "Do not treat this as proof until output or a check result is attached.",
+            "Do not push or mutate git from this panel.",
+          ],
+          tone: toneForRisk(selectedObservation.risk),
+        }
+      : {
+          title: "Aang is waiting for a command or observation.",
+          route: "Aang reads Build mode. Cortana keeps Terminal Lab proposal-only. Tony waits for a scoped command.",
+          lesson: "Paste a command to explain it before running it elsewhere, or select an observation to teach from existing output.",
+          proves: "Nothing is proven yet.",
+          next: "Preview a command, then link it to a task or session.",
+          notYet: [
+            "No command execution from Terminal Lab.",
+            "No external write, install, push, or destructive action without a gate.",
+          ],
+          tone: C.textMuted,
+        };
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -271,6 +321,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         </div>
       </form>
 
+      <AangTeachingFrame frame={teachingFrame} />
+
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-2 px-2 pt-2 pb-16">
           <div className="space-y-2 min-w-0">
@@ -411,12 +463,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 </div>
               </div>
               <div className="space-y-2">
-                {(observations.data ?? []).length === 0 ? (
+                {observationRows.length === 0 ? (
                   <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     {observationScope === "all" ? "No command previews recorded yet." : "No command previews match the selected link."}
                   </div>
                 ) : (
-                  observations.data?.map((item) => (
+                  observationRows.map((item) => (
                     <div key={item.id} className="rounded p-1.5 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`#${item.id}`} tone={C.textMuted} />
@@ -611,7 +663,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             variant={selectedObservationId === item.id ? "secondary" : "ghost"}
                             size="sm"
                           >
-                            Attach
+                            Teach
                           </Button>
                           <Button
                             type="button"
@@ -737,6 +789,76 @@ function Chip({ label, tone }: { label: string; tone: string }) {
     <Badge variant={variant} className="uppercase">
       {label}
     </Badge>
+  );
+}
+
+function AangTeachingFrame({
+  frame,
+}: {
+  frame: {
+    title: string;
+    route: string;
+    lesson: string;
+    proves: string;
+    next: string;
+    notYet: string[];
+    tone: string;
+  };
+}) {
+  return (
+    <section
+      className="shrink-0 px-2 py-1.5"
+      aria-label="Aang teaching frame"
+      style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+    >
+      <div className="grid gap-1.5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: frame.tone }}>
+              Aang Teaching
+            </div>
+            <Chip label="proposal only" tone={C.success} />
+          </div>
+          <div className="mt-1 text-[11px] font-semibold leading-snug" style={{ color: C.textPrimary }}>
+            {frame.title}
+          </div>
+          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+            {frame.route}
+          </div>
+        </div>
+
+        <TeachingBlock title="Lesson" body={frame.lesson} tone={C.gold} />
+        <TeachingBlock title="Proof" body={frame.proves} tone={C.accent} />
+      </div>
+      <div className="mt-1.5 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <TeachingBlock title="Next Safe Step" body={frame.next} tone={C.success} />
+        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.warning }}>
+            Not Yet
+          </div>
+          <ul className="mt-1 grid gap-0.5">
+            {frame.notYet.map((item) => (
+              <li key={item} className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TeachingBlock({ title, body, tone }: { title: string; body: string; tone: string }) {
+  return (
+    <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
+        {title}
+      </div>
+      <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+        {body}
+      </div>
+    </div>
   );
 }
 

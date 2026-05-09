@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 08:37 EDT
+Last updated: 2026-05-09 11:00 EDT
 
 ## Current North Star
 
@@ -21,19 +21,21 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
-## 2026-05-09 0837 EDT - Front-End Build Steward: Push Evidence Strip
+## 2026-05-09 1100 EDT - Front-End Build Steward: Terminal Lab Teaching Frame
 
 ### What Changed
 
-- Added a compact Project Lab Push Readiness evidence strip.
-- The strip shows branch, upstream, dirty count, last-check placeholder, approval gate, and whether the receipt executes git.
-- The strip renders from the backend `pushReadiness.evidence` receipt.
-- Manual push commands and the expanded receipt remain available.
-- Browser DOM verified the evidence strip at `http://localhost:3002/`.
+- Re-read the adjusted master build plan, frontend system, UX system, and skills/tools layer.
+- Clarified the path: no new Code Lab surface. Terminal Lab becomes Aang's teaching lane for code and command work.
+- Added an Aang Teaching frame inside Terminal Lab.
+- The frame explains the active command preview, selected observation, or empty state.
+- It shows route, lesson, proof, next safe step, and not-yet gates.
+- Renamed the observation action from Attach to Teach so Terminal Lab reads as a learning/build surface, not just a log sink.
+- Browser DOM verified Terminal Lab, Aang Teaching, Lesson, Proof, Next Safe Step, Not Yet, and proposal-only labels at `http://localhost:3002/`.
 
 ### Files Touched
 
-- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
 - `CEREBRO_SESSION_HANDOFF.md`
 
 ### Checks Run
@@ -42,32 +44,34 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `pnpm check` passed.
 - `pnpm test -- server/cerebro-foundations.test.ts` passed.
 - `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
-- In-app browser DOM review confirmed Branch, Upstream, Dirty, Check, Gate, Executes, approval, and not recorded labels.
+- In-app Browser Use plugin verified the Terminal Lab teaching frame.
 
 ### Front-End Steward Review
 
-- The card now exposes the proof behind the push recommendation without requiring the receipt to be expanded.
-- Last-check evidence is explicitly marked as not recorded instead of pretending a check history exists.
-- The strip keeps the no-git-execution boundary visible.
+- This follows the build plan path: Project Lab is the map, Terminal Lab is the teaching/build lane, Workbench is visual proof, Ledger is receipts.
+- No plugin UI was added.
+- No new Code Lab route was added.
+- Terminal Lab still does not execute commands.
 
 ### Known Risks
 
-- Last successful check evidence is not persisted per project yet.
-- Automation policy is advisory only. No scheduler-backed push automation exists.
+- The teaching frame is frontend-derived from existing preview and observation fields.
+- Backend command lesson receipts still need a future slice.
+- Project Lab and Workbench links are still adjacent surfaces, not deeply linked from each observation.
 - Existing Raven/docs/server edits remain unrelated and unstaged.
 
 ### Storage Impact
 
 - No schema change.
-- No app data was mutated.
-- No git operation ran from CereBro.
-- Test fixtures may write local SQLite rows during Vitest only.
+- No app data was mutated by the code change.
+- No command execution ran from Terminal Lab.
+- Browser Use was used only for localhost UI verification.
 - Obsidian received a dated handoff snapshot and session-history index entry.
 
 ### Next Starter Prompt
 
 ```text
-Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Push Evidence Strip. Next safe slice: add a read-only check history placeholder to Project Lab backend data so the evidence strip can distinguish not recorded, passed, failed, stale, and unknown without executing commands. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as the CereBro front-end building agent. Stay on the critical path: Keep-first UX, Project Lab as project map, Terminal Lab as Aang's teaching/build lane, Workbench as visual proof, Ledger as receipts. Next safe slice: connect Terminal Lab teaching frames to Project Lab context by showing selected project branch/dirty/push-readiness evidence in the Terminal Lab rail without executing commands or adding new primary surfaces. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
 ```
 
 ## 2026-05-09 0816 EDT - Front-End Build Steward: Button Primitive Density
