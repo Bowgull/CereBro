@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,11 @@ const statuses: Array<{ id: StatusFilter; label: string }> = [
 function labelize(value: string | null | undefined) {
   if (!value) return "unknown";
   return value.replace(/_/g, " ");
+}
+
+function receiptLabel(value: string | null | undefined) {
+  if (!value) return null;
+  return sourceDisplayName(value);
 }
 
 function formatTime(unixSec: number) {
@@ -273,7 +279,13 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                     {labelize(item.perceptionClass)} / {labelize(item.actionClass)}
                   </div>
                   <div className="mt-1 text-[11px] leading-snug line-clamp-2" style={{ color: C.textMuted }}>
-                    {item.targetSummary ?? (item.requiredApprovals.join(", ") || item.reasons[0] || "No target summary recorded.")}
+                    {item.targetSummary
+                      ? (
+                          <span title={item.targetSummary}>
+                            {receiptLabel(item.targetSummary)}
+                          </span>
+                        )
+                      : item.requiredApprovals.join(", ") || item.reasons[0] || "No target summary recorded."}
                   </div>
                 </div>
               ))
@@ -328,7 +340,13 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                       {labelize(item.actionType)}
                     </span>
                     <span className="mt-1 block text-xs whitespace-normal line-clamp-2" style={{ color: C.textMuted }}>
-                      {item.targetLabel ?? item.reason ?? item.contextSummary ?? "No target label recorded."}
+                      {item.targetLabel
+                        ? (
+                            <span title={item.targetLabel}>
+                              {receiptLabel(item.targetLabel)}
+                            </span>
+                          )
+                        : item.reason ?? item.contextSummary ?? "No target label recorded."}
                     </span>
                     <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
                       {formatTime(item.createdAt)}
@@ -352,6 +370,9 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                 <Meta label="Requested By" value={selected.requestedByAgent ?? "unknown"} />
                 <Meta label="Project" value={selected.projectName ?? "unlinked"} />
                 <Meta label="Target" value={`${selected.targetType ?? "unknown"} ${selected.targetId ?? ""}`.trim()} />
+                {selected.targetLabel && (
+                  <Meta label="Target Label" value={receiptLabel(selected.targetLabel) ?? "unknown"} title={selected.targetLabel} />
+                )}
                 <Meta label="Cost/Risk" value={labelize(selected.costRisk)} />
                 <Meta label="Permission Preflight" value={selected.permissionPreflightId == null ? "unlinked" : `#${selected.permissionPreflightId}`} />
               </Section>
@@ -371,6 +392,13 @@ export default function ApprovalDashboardPanel({ onClose }: { onClose: () => voi
                       />
                       <Chip label={`${labelize(selected.permissionPreflight.perceptionClass)} / ${labelize(selected.permissionPreflight.actionClass)}`} tone={C.accent} />
                     </div>
+                    {selected.permissionPreflight.targetSummary && (
+                      <Meta
+                        label="Target Summary"
+                        value={receiptLabel(selected.permissionPreflight.targetSummary) ?? "unknown"}
+                        title={selected.permissionPreflight.targetSummary}
+                      />
+                    )}
                     {selected.permissionPreflight.requiredApprovals.length > 0 && (
                       <div className="grid gap-1">
                         {selected.permissionPreflight.requiredApprovals.map((approval) => (
@@ -509,11 +537,11 @@ function Section({ title, detail, children }: { title: string; detail: string; c
   );
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
+function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <div className="grid gap-0.5">
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug" style={{ color: C.textSecondary }}>{value}</div>
+      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
   );
 }

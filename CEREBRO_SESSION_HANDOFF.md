@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:32 EDT
+Last updated: 2026-05-08 21:39 EDT
 
 ## Current North Star
 
@@ -20,6 +20,101 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2139 - Front-End Build Steward: Security Gate Surface
+
+### What Changed
+
+- Added `SecurityGatePanel` as a Basement surface for Spock receipts.
+- Wired Security Gate into the Basement nav.
+- Security Gate now supports:
+  - Local target inspection for URLs, GitHub repos, packages, files, and browser
+    targets.
+  - Local Spock security receipt creation.
+  - Recent append-only receipt list.
+  - Scanner plan display with compact source labels.
+  - Visible allowed, blocked, finding, and check groups.
+- The surface does not browse, clone, download, install, execute, or call
+  external services.
+
+### Files Touched
+
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Spock now has a visible Basement surface instead of being only router
+  machinery.
+- The user can create a local receipt before any Surfer/Tony action happens,
+  which matches the locked security posture.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Security scanner adapters remain planned, not wired executors.
+- The form currently records unlinked receipts. Project/source linking can come
+  next.
+
+### Next Front-End Slice
+
+- Add optional project/source selection to Security Gate receipt creation.
+- Then push a follow-up commit to the open draft PR.
+
+## 2026-05-08 2137 - Front-End Build Steward: Approval Receipt Labels
+
+### What Changed
+
+- Updated Approval Gate receipt labels:
+  - Permission preflight list rows now show compact target summaries when a
+    target summary exists.
+  - Approval preview cards now compact target labels when they are URL-like or
+    too dense for list display.
+  - Approval detail now shows target label evidence with the raw value preserved
+    in a tooltip.
+  - Linked permission preflight details now include compact target summary
+    evidence.
+- Updated the approvals router so linked preflight records expose
+  `targetSummary` to the approval detail panel.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/routers/approvals.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Approval Gate now follows the same receipt rule as Hedwig, Surfer, Project
+  Lab, Model Tools, and Workbench: dense lists show readable labels while raw
+  evidence remains inspectable.
+- This keeps approval review fast without hiding the underlying source/target
+  record.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Compact target labels use the shared source label helper, so non-URL strings
+  fall back to trimmed plain text.
+
+### Next Front-End Slice
+
+- Build the Security Gate client surface or wire its receipts into an existing
+  Basement surface.
+- Then push a follow-up commit to the open draft PR.
 
 ## 2026-05-08 2132 - Front-End Build Steward: Workbench Target Labels
 
@@ -7751,4 +7846,97 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_MODEL_ROUTER_BASELINE.md, and CEREBRO_FILE_LIFECYCLE_PLAN.md first. Continue Session 4 from the live Project Lab, command intake, Surfer Sources, prompt/tool handoff memory, Hedwig Capture Inbox, Hedwig-as-agent Keep slice, Terminal Lab, Approval Queue, first runtime use-spot/path-graph movement, Aang Companion policy shell, Workbench policy shell, the new global append-only learning law, the new general image-understanding requirement, the new global permission-mode direction, the new reasoning-router/model-tool opportunist direction, the new Reddit Intelligence source lane, and the expanded external reference rule fold-in: Uncodixfy is standing anti-generic UI judgment, Google Stitch is high-fidelity UI exploration only, v0.app is disposable React/Tailwind component scaffolding only, Docling is the preferred local document-intelligence candidate once an adapter exists, local-deep-research and ppt-master are strong adapter candidates after review, agent-harness repos feed Tony/Spock/Oak runbooks before runtime changes, Pixelle-Video and VoxCPM are parked media adapters, and Maigret/CloakBrowser are restricted by default. Project Intelligence currently has static read-only profiles, local git status, Batman strategy support, deterministic command-intake previews, explicit intake-to-task creation with project linking/project-name display, Tasks project filtering, Project Lab task rollups, Project Lab read-only Git inspector rows for dirty worktrees, Project Lab filtered-card score breakdown chips, Project Lab local signal-block drill-down into inspector queues, Project Lab worktree drill-down into the Git inspector, Project Lab recent-row drill-downs, capped-list disclosure, local inspector search, type chips, sort controls, Signals strip, Sources filter, Missing filter, Local Repos reset-to-All navigation, accessible summary/filter button labels, passive summary and empty-state accessibility labels, Local Inspector accessibility labels, card drill-down accessibility labels, distinct empty-state reset label, close/search accessibility labels, close-button type hygiene, region accessibility labels, status live-region semantics, non-interactive list semantics, busy-state semantics, Keep left-rail and shell accessibility labels, Next Safe Actions strip, Next reason chips, summary-count navigation, empty-filter state, and local action drafts that remain visible by profile slug before a linked harness project row exists, Terminal Lab/Hedwig local observation rollups, self/system improvement categories, a modular panel model, a Surfer source panel scaffold, a local-only Model Tools panel for capability proposals, eval notes, and route previews, a global permission-mode shell with append-only local mode events, advisory permission preflight checks, append-only permission preflight audit records, and a shared server permission-policy helper used by both the Permissions router and Workbench evidence records, a read-only local Approval Queue with status/origin/project/search filters, local grouping, deterministic Oak/Spock preflight notes, and read-only permission preflight audit visibility, a proposal-only Workbench shell with evidence surfaces/permission classes/append-only evidence record shape plus local Workbench evidence record create/list/filter/detail, linked permission preflight ids and preflight detail on evidence records, validation notes that record their own local permission preflight rows, local evidence grouping by project/kind/source/command/validation status, source/command/task/session/artifact picker labels, task/session/artifact grouping, and append-only validation history in the evidence inspector, a proposal-only Aang Companion shell policy with allowed local events/blocked actions/web-mock-first route plus live local event-count strip, approved one-URL public ingestion, first-pass saved-source trust/scrub metadata, Reddit marked as a first-class V1 human-signal source lane, Slack marked as required V1 Hedwig capture, Notion marked as the structured capture database, Obsidian session handoff snapshots/index notes are approved append-only standing closeout behavior, and global history/log/archive/index/note trails must append or version while canonical current-state summaries may update in place. CereBro must understand images as a general input type, not only creative assets or setup screenshots: the user should be able to drag in screenshots, UI states, account screens, app errors, artwork, mockups, diagrams, photos, charts, whiteboards, generated images, and other still images, then ask open-ended questions about them. Video starts with frame/key-frame understanding and annotation. The modular in-app workbench is now a locked product direction: CereBro should show live localhost previews, public browser views, screenshots, images, video/key frames, annotations, terminal/log output, validation notes, and before/after comparisons inside the app; these surfaces are user-visible and agent-readable evidence, not hidden background tools. Add a Codex-like global permission-mode control across all work, not just media: `Default permissions`, `Auto-review`, and `Full access`. Default reads explicit user-provided context and guides. Auto-review proactively inspects approved visible/local evidence and queues suggestions. Full access uses enabled tools in the session, while hard gates still require visible approval for payments, account permission grants, destructive commands, deleting/overwriting files, sending messages, publishing, uploading private media externally, saving sensitive screenshots to memory, installs, tokens/API keys, and sealed Raven/NSFW scope. Vault/Obsidian durable text writers now create timestamped versions on same-title filename collision instead of overwriting, Artifact Library labels its saves as durable history/draft/report trails rather than current-state overwrites, source saves now split current-state `sources` rows from append-only `source_events` provenance, and Surfer Sources displays recent source history events with local owner/scrubbed filters and richer event detail. Aang Companion Overlay is planned as a small always-on desktop surface and now has a proposal-only Keep policy panel for keeping tabs on CereBro: ambient idle presence, click/hotkey quick ask, short status bubbles, open-Keep routing, time-of-day reactions, and quiet lore-accurate idle loops such as goofy fidgeting, tiny airbending practice, sitting, breathing, balancing, and sleepy states. Aang remains an agent, not a pet in the roster. Cortana still routes requests, Hedwig still owns capture/reminders, and Piccolo still owns hygiene. Terminal Lab is a proposal-only panel/router that classifies commands, explains risk, records local preview observations, infers known project links from cwd, accepts manually pasted observed-output summaries with light redaction, can link observations to selected tasks/sessions, filters observations by selected task/session, surfaces deterministic Aang/Tony follow-up suggestions from observed output, surfaces read-only Tony diagnostic command drafts, can convert one of Tony's generated diagnostic drafts into a normal local Terminal Lab preview with parent/root/depth provenance, has copy/approval-note affordances for Tony diagnostic drafts, shows parent-observation provenance and a diagnostic-preview status label on saved diagnostic previews, includes explicit diagnostic evidence and expected-signal notes for Tony draft commands across port conflicts, missing modules/packages, TypeScript symbol errors, package-tool failures, git state, missing files, permission errors, and unclear non-zero exits, supports local observation detail/status transitions, can stage pending local approval-preview rows for command observations without approving or executing commands, can create normal local follow-up tasks from observations, can stage Aang learning-note memory proposals from observations, and never executes commands or writes durable memory directly. Reusable prompt/tool handoffs can be saved as approved vault artifacts, searched read-only, and surfaced in command intake for `prompt_reuse` requests with required reuse disclosure. CereBro must now grow this into a routing playbook tied to the Model/Tool Capability Registry: target model/tool, prompt style, example result, privacy constraints, free-tier sufficiency, eval notes, source URLs, and failure notes. Surfer should propose current models/tools/free tiers only with sources and date checked; Cortana routes; Batman risk-reviews; Spock/Oak validate; Piccolo tracks stale registry entries, cost/rate limits, and storage. Candidate gateway/eval paths include LiteLLM, OpenRouter, direct provider SDKs, a CereBro-native gateway, promptfoo, DeepEval, and custom Vitest fixtures, but do not install or connect any of them without approval. Hedwig has a proposal-only Inbox panel with Notion capture DB schema, Slack DM/capture-channel shape, approval gates, routing rules, local capture preview persistence, recent capture history, read-only triage proposals for saved captures into task/source/learning/reminder/message routes, an explicit `Create Local Task` action that links a capture to a normal local CereBro task without external writes, an explicit `Save Source` action that creates a local unfetched source record plus source event from a capture URL without browsing/fetching, an explicit `Create Reminder Proposal` action that creates a local reminder proposal without scheduling/notifying, an explicit `Create Message Draft` action that creates a local draft proposal without sending/posting, local proposal detail/status transitions for source/reminder/message proposals that remain metadata-only and do not approve external action, editable local review fields for priority/notes/approval scope/external target, and pending local approval-preview rows for source enrichment, Notion capture write, Slack capture read, reminder scheduling, and message sending without approving or executing those external actions. The Approval Queue reads those Hedwig and Terminal approval-preview rows across local surfaces, joins them back to project/task/source/command/capture metadata when available, and still cannot approve, reject, execute, fetch, send, schedule, or write. The Workbench panel defines preview/browser/media/annotation/terminal/validation/comparison surfaces, can create manual local append-only evidence records, filter/group/inspect evidence details, link sources/commands/tasks/sessions/artifacts, append validation notes, show validation history, and does not open tools; the Aang panel defines event policy, local mock controls, live local event counts, and in-app event routing buttons but starts no desktop process. Hedwig is now the 11th agent in router/Keep metadata with a split Crypts Messenger Roost, scaled PixelLab owl sprite, motion config, use-spots, council spot, and path-graph node, and KeepScene now loads directional textures, uses idle/hero/council use-spots for actual movement, swaps facing frames, keeps emotes attached to moving sprites, routes `walking-to-ceremony` through a first BFS path graph into Cortana's hub, and avoids restarting movement tweens when state refreshes do not change an agent state. Do not emphasize session handoffs as a big UI surface; they live in Obsidian. Start proposal-only or implement a small safe slice: continue auditing code surfaces for accidental overwrites of logs/history/notes, add current-state writer proposals only where truly needed, deepen Approval Queue drill-downs or grouping without adding action execution, build the web-only Aang Companion mock inside the Keep without desktop permissions, deepen Workbench task/session linking and validation status display while keeping validation append-only before wiring browser/media automation, prototype image drag/drop artifact intake as temporary-by-default, define the hosted/local vision adapter interface without sending images externally, define a Docling document-intake adapter plan with parser receipts before installing anything, extend Project Lab local action draft history with status/version trails or add explicit draft-to-task proposals without edits, retrieve and wire Hedwig's PixelLab idle-flutter animation frames if an exposed endpoint is available, replace temporary Hedwig directional derivatives with true PixelLab owl rotations, polish path-graph walking with stair/landing waypoints, revise/approve Hedwig schema details, add approved Notion capture writer only after approval, richer reusable prompt/tool handoff metadata and ranking, proposal-only Reddit Intelligence design, local-only Hedwig Reddit URL save previews, approved open-web search, richer source extraction/validation, project profile persistence, or session linkage. At closeout, update `CEREBRO_SESSION_HANDOFF.md`, save a unique timestamped Obsidian snapshot to `90_Archive/CereBro Session History/snapshots/`, and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md` without overwriting any prior snapshot/index entry. Do not write to Notion/Slack or edit external project repos without explicit approval, and do not move/delete existing vault or repo files.
+```
+
+## 2026-05-08 2134 EDT — Raven private boundary backend
+
+What changed:
+
+- Raven was explicitly prioritized by the user, with privacy as the main
+  constraint.
+- Added a backend-only Raven sealed module slice. No Keep frontend files were
+  touched because another agent is working that surface.
+- Added `raven_private_sessions` and `raven_private_events` tables to the
+  harness schema. Raven private data stays out of core memory, Notion,
+  Obsidian, Slack, source records, and normal outputs.
+- Added `app/server/routers/raven.ts` with:
+  - `status`
+  - `requestUnlock`
+  - `confirmUnlock`
+  - `addPrivateEvent`
+  - `recentEvents`
+  - `lock`
+- Wired the Raven router into `app/server/routers.ts`.
+- Added a foundation test proving the exact two-phrase unlock, private event
+  write, readback, and lock flow.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers.ts`
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+- `pnpm check`
+
+Known risks:
+
+- The Raven router is backend-only. There is no UI entry point yet.
+- Unlock state is local DB state. It is not a production auth boundary.
+- Adult media fetch, private browser sessions, source scanning, downloads,
+  generator calls, and external writes remain blocked.
+- The repo has a large dirty frontend worktree from other active work. Keep
+  future Raven frontend work isolated until that edit surface is clear.
+
+Storage impact:
+
+- Adds local libSQL tables for Raven private session metadata and private event
+  records.
+- Writes no Raven data to Obsidian or core CereBro memory.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and the Raven section in CereBro_V1_Full_Companion_Build_Docs.md first. Continue Raven from the backend-only private boundary slice. Do not touch Keep/frontend files until the other frontend agent's work is reconciled. Build the next safe Raven layer as local-only backend capability: active-session guard helpers, private preference categories, event redaction/scrub receipts, and an explicit bridge/export proposal shape that does not write core memory unless approved. Keep browser sessions, adult source scanning, media downloads, generator calls, Notion, Obsidian, Slack, and external model calls blocked.
+```
+
+## 2026-05-08 2137 EDT — Raven keep-building trigger
+
+What changed:
+
+- Added the Raven equivalent of the Tony `keep building` intake route.
+- While a Raven private session is active, command intake now treats
+  `keep building`, `' keep building`, and `’ keep building` as a Raven
+  continuation trigger.
+- The preview category becomes `raven_build`, `sealedModule` is `raven`, and
+  `trigger` is `keep_building`.
+- The route includes Raven, Spock, Oak, Batman, and Cortana. It keeps the
+  sealed-module gates explicit.
+
+Files touched in this slice:
+
+- `app/server/routers/commandIntake.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- The trigger depends on an active Raven private session. If Raven is locked,
+  `keep building` falls back to the normal project-build path.
+- This is still command-intake routing only. It does not create a frontend
+  Raven panel or execute work automatically.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/commandIntake.ts first. Continue Raven routing from the active-session `keep building` trigger. Keep the route backend-only unless the frontend agent's work is reconciled. Add local-only Raven preference categories, redaction receipts, and bridge/export proposals next. Keep browser sessions, source scanning, media downloads, generator calls, Notion, Obsidian, Slack, core-memory export, and external model calls blocked.
 ```

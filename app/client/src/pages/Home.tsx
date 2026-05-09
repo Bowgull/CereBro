@@ -17,6 +17,7 @@ import ApprovalDashboardPanel from "@/components/ApprovalDashboardPanel";
 import WorkbenchPanel from "@/components/WorkbenchPanel";
 import AangCompanionPanel from "@/components/AangCompanionPanel";
 import ModelToolsPanel from "@/components/ModelToolsPanel";
+import SecurityGatePanel from "@/components/SecurityGatePanel";
 import PermissionModeControl from "@/components/PermissionModeControl";
 import {
   DropdownMenu,
@@ -62,6 +63,7 @@ type NavId =
   | "workbench"
   | "companion"
   | "model_tools"
+  | "security"
   | "outputs"
   | "memory"
   | "basement"
@@ -115,6 +117,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
     { id: "basement", label: "Overview", meta: "Machine map" },
     { id: "settings", label: "Settings", meta: "Storage and app config" },
     { id: "model_tools", label: "Models", meta: "Capability proposals" },
+    { id: "security", label: "Security", meta: "Spock receipts" },
     { id: "automation", label: "Automation", meta: "Piccolo watchers" },
   ],
 };
@@ -433,6 +436,7 @@ export default function Home() {
             {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
             {nav === "model_tools" && <PanelHost><ModelToolsPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "security" && <PanelHost><SecurityGatePanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "outputs" && <PanelHost><ArtifactsPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "automation" && <PanelHost><PiccoloPanel onClose={() => setNav("home")} /></PanelHost>}
 
