@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:32 EDT
+Last updated: 2026-05-09 07:37 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0737 EDT - Front-End Build Steward: Form Primitive Density
+
+### What Changed
+
+- Tightened shared input defaults to compact 28px control height, smaller padding, visible focus rings, and preserved IME composition handling.
+- Tightened shared textarea defaults to compact padding and 64px minimum height while preserving invalid, focus, placeholder, and disabled states.
+- Tightened shared select defaults: smaller trigger heights, denser item rows, smaller content width, compact labels/separators, and matched icon sizes.
+- Tightened shared tabs defaults: smaller tab list, denser triggers, and preserved active, disabled, and focus-visible states.
+- Tightened shared badge defaults into compact uppercase status receipts with smaller padding.
+- Verified primitive usage across active front-end surfaces by source inventory; affected surfaces include Workbench, Design Review, Tasks, Memory, Security Gate, Hedwig, Terminal Lab, and the shell.
+
+### Files Touched
+
+- `app/client/src/components/ui/input.tsx`
+- `app/client/src/components/ui/textarea.tsx`
+- `app/client/src/components/ui/select.tsx`
+- `app/client/src/components/ui/tabs.tsx`
+- `app/client/src/components/ui/badge.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Form and status primitives now follow the compact CereBro density rule and stay within the 8px radius limit.
+- Focus-visible, invalid, destructive/risk-adjacent, and disabled states remain explicit.
+- Browser MCP did not expose a usable Playwright module in this resumed turn, so proof used source inventory, TypeScript, full check, targeted tests, and localhost health.
+
+### Known Risks
+
+- The select/menu visual state still needs live route sampling when browser automation is available again.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Form Primitive Density. Next safe slice: live-sample routes using inputs/selects/badges once browser automation is available, then patch active route-level spacing debt caused by the denser primitives. Verify in browser DOM when possible, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0732 EDT - Front-End Build Steward: Shared Primitive Density
 
