@@ -531,6 +531,7 @@ export default function Home() {
         onChange={setAskInput}
         mode={mode}
         onModeChange={setMode}
+        onNavigate={setNav}
         isClassifying={commandIntake.isPending}
         onSubmit={() => {
           const text = askInput.trim();
@@ -1544,15 +1545,26 @@ function ContextPanel({
 
 // ── Bottom command bar ──────────────────────────────────────────────────────
 function CommandBar({
-  value, onChange, mode, onModeChange, onSubmit, isClassifying,
+  value, onChange, mode, onModeChange, onNavigate, onSubmit, isClassifying,
 }: {
   value: string;
   onChange: (s: string) => void;
   mode: Mode;
   onModeChange: (m: Mode) => void;
+  onNavigate: (id: NavId) => void;
   onSubmit: () => void;
   isClassifying: boolean;
 }) {
+  const security = trpc.securityGate.recent.useQuery({ limit: 1 }, { refetchInterval: 10000 });
+  const latestReceipt = security.data?.items[0] ?? null;
+  const latestRiskTone = latestReceipt == null
+    ? C.textMuted
+    : latestReceipt.riskLevel === "blocked" || latestReceipt.riskLevel === "high"
+      ? C.danger
+      : latestReceipt.riskLevel === "medium"
+        ? C.warning
+        : C.success;
+
   return (
     <form
       onSubmit={(event) => {
@@ -1632,6 +1644,19 @@ function CommandBar({
           Preview only. Gates stay closed.
         </div>
       </div>
+
+      <Button
+        type="button"
+        onClick={() => onNavigate("security")}
+        aria-label="Open latest Security Gate receipt"
+        variant="outline"
+        size="sm"
+        className="hidden h-7 shrink-0 px-2 lg:block"
+        style={{ border: `1px solid ${C.borderSoft}`, color: latestRiskTone, background: C.surface }}
+        title={latestReceipt ? latestReceipt.targetUri : "No security receipts recorded"}
+      >
+        {latestReceipt ? `Spock ${latestReceipt.riskLevel}` : "Spock clear"}
+      </Button>
 
       <Button
         type="button"

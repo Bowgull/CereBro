@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:53 EDT
+Last updated: 2026-05-08 21:55 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2155 - Front-End Build Steward: Command Spock Chip
+
+### What Changed
+
+- Added a compact Spock security receipt chip to the command bar.
+- The chip shows the latest local security risk state:
+  - `Spock clear` when no receipts exist.
+  - `Spock low|medium|high|blocked` when receipts exist.
+- The chip opens the Security Gate surface.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Spock is now visible in the always-present command surface.
+- The signal is passive and local-only. It does not run scanners, browse,
+  fetch, clone, install, or execute.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add Security Gate source/project linking hints to Workbench and Surfer target
+  flows.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2153 - Front-End Build Steward: Command Security Affordance
 
