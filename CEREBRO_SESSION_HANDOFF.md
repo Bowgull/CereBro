@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:02 EDT
+Last updated: 2026-05-09 07:06 EDT
 
 ## Current North Star
 
@@ -20,6 +20,51 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0706 EDT - Front-End Build Steward: Hedwig Capture Density
+
+### What Changed
+
+- Browser-reviewed the active Keep Capture/Hedwig surface after the Aang pass.
+- Tightened the Hedwig header, status receipts, capture form, preview guidance,
+  main grid, local captures, triage blocks, Notion property cards, proposal
+  detail rail, Slack shape, approval gates, routing rules, reminder proposals,
+  and message drafts.
+- Kept the proposal-only posture visible while reducing large cards and long
+  helper text into compact receipt blocks.
+
+### Files Touched
+
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed Capture shows
+  compact status receipts, capture form, local captures, Notion database block,
+  proposal detail rail, and proposal lists.
+
+### Front-End Steward Review
+
+- Hedwig now reads as a capture console instead of a planning document. The
+  no-external-write rule stays present while the user can scan the working
+  surface faster.
+
+### Known Risks
+
+- This is a first density pass. Deeper proposal-detail interactions may still
+  need another focused polish pass after real captured data is present.
+- Browser screenshot capture was avoided because recent screenshot attempts
+  timed out. This pass used DOM verification plus checks.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Move through Workshop surfaces by current visible density debt, starting with
+  the surface open in the browser or Workbench if no surface is active.
 
 ## 2026-05-09 0702 EDT - Front-End Build Steward: Aang Companion Density
 

@@ -262,14 +262,14 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
+        className="flex items-center justify-between px-2.5 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             Hedwig Capture Inbox
           </div>
-          <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>
+          <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
             Proposal-only Slack and Notion capture schema. No external writes.
           </div>
         </div>
@@ -278,15 +278,15 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-4 py-3 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-2 gap-1.5 px-2.5 py-1.5 shrink-0 md:grid-cols-4" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
         <StatusBlock label="Owner" value={data?.ownerAgent ?? "hedwig"} tone={C.accent} />
         <StatusBlock label="Notion DB" value={data?.notionDatabase.proposedName ?? "Capture Inbox"} tone={C.gold} />
         <StatusBlock label="Slack" value={data?.slackProposal.recommendedShape.replace(/_/g, " ") ?? "proposal"} tone={C.warning} />
       </div>
 
-      <form onSubmit={submit} className="px-4 py-3 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px_auto] gap-2">
+      <form onSubmit={submit} className="space-y-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-[minmax(0,1fr)_160px_80px] gap-1.5">
           <Input
             value={text}
             onChange={(event) => setText(event.target.value)}
@@ -299,23 +299,24 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
           />
           <Button
             type="submit"
+            size="sm"
             disabled={!text.trim() || preview.isPending}
           >
             {preview.isPending ? "Reading" : "Preview"}
           </Button>
         </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+        <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
           Preview classifies the capture and shows the proposed Notion row. It does not save to Notion, read Slack, post Slack, or create tasks.
         </div>
       </form>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-3 p-4">
-          <div className="space-y-3 min-w-0">
+        <div className="grid grid-cols-1 gap-2 p-2 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0 space-y-2">
             {preview.data && (
-              <section className="space-y-2">
+              <section className="space-y-1.5">
                 <SectionTitle title="Capture Preview" detail={preview.data.captureType.replace(/_/g, " ")} />
-                <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="space-y-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex flex-wrap gap-1">
                     <Chip label={preview.data.status} tone={C.textSecondary} />
                     <Chip label={preview.data.captureType.replace(/_/g, " ")} tone={C.accent} />
@@ -323,17 +324,17 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     <Chip label={preview.data.sensitive ? "sensitive" : "not sensitive"} tone={preview.data.sensitive ? C.danger : C.success} />
                     <Chip label={`saved #${preview.data.observationId}`} tone={C.textSecondary} />
                   </div>
-                  <div className="text-sm font-semibold" style={{ color: C.textPrimary }}>
+                  <div className="text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                     {preview.data.title}
                   </div>
-                  <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     {preview.data.approvalNeeded}
                   </div>
                 </div>
 
-                <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <SectionTitle title="Proposed Notion Row" detail="no write" />
-                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="mt-1.5 grid grid-cols-1 gap-1.5 md:grid-cols-2">
                     {Object.entries(preview.data.proposedNotionRow).map(([key, value]) => (
                       <MetaBlock key={key} label={key} value={value == null ? "none" : String(value)} />
                     ))}
@@ -342,16 +343,16 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
               </section>
             )}
 
-            <section className="space-y-2">
+            <section className="space-y-1.5">
               <SectionTitle title="Local Captures" detail="preview history" />
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {(observations.data ?? []).length === 0 ? (
-                  <div className="rounded p-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     No local capture previews recorded yet.
                   </div>
                 ) : (
                   observations.data?.map((item) => (
-                    <div key={item.id} className="rounded p-2 space-y-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={item.id} className="space-y-1 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex flex-wrap gap-1">
                         <Chip label={`#${item.id}`} tone={C.textMuted} />
                         <Chip label={item.captureType.replace(/_/g, " ")} tone={C.accent} />
@@ -407,17 +408,17 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
             {triage.data?.found && (
               <section className="space-y-2">
                 <SectionTitle title="Triage Proposal" detail={triage.data.recommendedRoute.replace(/_/g, " ")} />
-                <div className="rounded p-3 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="space-y-1.5 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex flex-wrap gap-1">
                     <Chip label={triage.data.recommendedRoute.replace(/_/g, " ")} tone={C.accent} />
                     <Chip label={triage.data.proposedStatus} tone={C.textSecondary} />
                     <Chip label={triage.data.projectName ?? "no project"} tone={C.gold} />
                     <Chip label={triage.data.writesExternal ? "external write" : "local preview"} tone={C.success} />
                   </div>
-                  <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                     {triage.data.rationale}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                     <MetaBlock label="Task Draft" value={`${triage.data.taskDraft.agent}: ${triage.data.taskDraft.title}`} />
                     <MetaBlock label="Support" value={triage.data.supportAgents.join(", ")} />
                     {triage.data.sourceDraft && (
@@ -426,7 +427,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     {triage.data.reminderDraft && <MetaBlock label="Reminder" value={triage.data.reminderDraft.timingHint} />}
                     {triage.data.messageDraft && <MetaBlock label="Message" value="draft only; needs recipient" />}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     <Button
                       type="button"
                       onClick={createTaskFromTriage}
@@ -483,51 +484,51 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     )}
                   </div>
                   {createTask.data?.ok && createTask.data.task && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.success }}>
                       Created task #{createTask.data.task.id}. No external writes.
                     </div>
                   )}
                   {createTask.data && !createTask.data.ok && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
                       {createTask.data.reason}
                     </div>
                   )}
                   {saveSource.data?.ok && saveSource.data.source && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.success }}>
                       Saved source #{saveSource.data.source.id}. No fetch or external write.
                     </div>
                   )}
                   {saveSource.data && !saveSource.data.ok && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
                       {saveSource.data.reason}
                     </div>
                   )}
                   {createReminder.data?.ok && createReminder.data.reminder && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.success }}>
                       Created reminder proposal #{createReminder.data.reminder.id}. No scheduling or external writes.
                     </div>
                   )}
                   {createReminder.data && !createReminder.data.ok && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
                       {createReminder.data.reason}
                     </div>
                   )}
                   {createMessageDraft.data?.ok && createMessageDraft.data.draft && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.success }}>
                       Created message draft proposal #{createMessageDraft.data.draft.id}. No sending or external writes.
                     </div>
                   )}
                   {createMessageDraft.data && !createMessageDraft.data.ok && (
-                    <div className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
+                    <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
                       {createMessageDraft.data.reason}
                     </div>
                   )}
                 </div>
-                <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <SectionTitle title="Triage Gates" detail="no write" />
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-1.5 space-y-1">
                     {triage.data.gates.map((gate) => (
-                      <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {gate}</div>
+                      <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {gate}</div>
                     ))}
                   </div>
                 </div>
@@ -536,14 +537,14 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
 
             <section className="space-y-2">
               <SectionTitle title="Notion Capture Database" detail={data?.notionDatabase.envVar ?? "NOTION_CAPTURE_DATABASE_ID"} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 {(data?.notionDatabase.properties ?? []).map((property) => (
                   <div key={property.name} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex items-center justify-between gap-2">
-                      <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{property.name}</div>
+                      <div className="text-[11px] font-semibold" style={{ color: C.textPrimary }}>{property.name}</div>
                       <Chip label={property.type} tone={property.required ? C.warning : C.textMuted} />
                     </div>
-                    <div className="text-[11px] leading-relaxed mt-1" style={{ color: C.textMuted }}>
+                    <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
                       {property.notes}
                     </div>
                   </div>
@@ -552,12 +553,12 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
             </section>
           </div>
 
-          <aside className="space-y-3 min-w-0">
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="min-w-0 space-y-2">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Proposal Detail" detail={selectedProposal ? selectedProposal.kind : "select"} />
               <div className="mt-2">
                 {!selectedProposal ? (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     Select a source, reminder, or message proposal to inspect its local status and approval gates.
                   </div>
                 ) : proposalDetail.data?.found ? (
@@ -567,7 +568,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                       <Chip label={proposalDetail.data.item.status} tone={C.accent} />
                       <Chip label={proposalDetail.data.writesExternal ? "external write" : "local only"} tone={C.success} />
                     </div>
-                    <div className="text-xs font-semibold leading-snug" style={{ color: C.textPrimary }}>
+                    <div className="text-[11px] font-semibold leading-snug" style={{ color: C.textPrimary }}>
                       {proposalDetail.data.item.title}
                     </div>
                     {"timingHint" in proposalDetail.data.item && (
@@ -625,11 +626,11 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     {"lastReviewedAt" in proposalDetail.data.item && proposalDetail.data.item.lastReviewedAt && (
                       <MetaBlock label="Last Review" value={new Date(proposalDetail.data.item.lastReviewedAt * 1000).toLocaleString()} />
                     )}
-                    <div className="text-[11px] leading-relaxed max-h-28 overflow-y-auto" style={{ color: C.textMuted }}>
+                    <div className="max-h-24 overflow-y-auto text-[11px] leading-snug" style={{ color: C.textMuted }}>
                       {"rawText" in proposalDetail.data.item ? proposalDetail.data.item.rawText : ""}
                     </div>
                     {"reviewNotes" in proposalDetail.data.item && proposalDetail.data.item.reviewNotes && (
-                      <div className="rounded p-2 text-[11px] leading-relaxed" style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="rounded p-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}>
                         {proposalDetail.data.item.reviewNotes}
                       </div>
                     )}
@@ -650,9 +651,9 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         ));
                       })()}
                     </div>
-                    <div className="space-y-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="space-y-1.5 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <SectionTitle title="Review Fields" detail="local edit" />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                         <AppSelect
                           label="Priority"
                           value={reviewPriority}
@@ -691,7 +692,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           Needs local review before external sync/enrichment
                         </label>
                       )}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         <Button
                           type="button"
                           onClick={saveSelectedReview}
@@ -711,7 +712,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         </Button>
                       </div>
                       {createApprovalPreview.data?.ok && createApprovalPreview.data.approval && (
-                        <div className="text-[11px] leading-relaxed" style={{ color: C.success }}>
+                        <div className="text-[11px] leading-snug" style={{ color: C.success }}>
                           Staged pending approval #{createApprovalPreview.data.approval.id}. No external action approved or executed.
                         </div>
                       )}
@@ -719,7 +720,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     <div className="space-y-1">
                       <SectionTitle title="Approval Previews" detail="pending local" />
                       {(approvalPreviews.data ?? []).length === 0 ? (
-                        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                        <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                           No pending local approval previews for this proposal yet.
                         </div>
                       ) : (
@@ -739,56 +740,56 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     </div>
                     <div className="space-y-1">
                       {proposalDetail.data.gates.map((gate) => (
-                        <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                        <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                           - {gate}
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.warning }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
                     {proposalDetail.data?.gates[0] ?? "Loading proposal detail."}
                   </div>
                 )}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Slack Shape" detail={data?.slackProposal.recommendedShape.replace(/_/g, " ") ?? "proposal"} />
-              <div className="mt-2 space-y-2">
+              <div className="mt-1.5 space-y-1.5">
                 {(data?.slackProposal.options ?? []).map((option) => (
                   <div key={option.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                    <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{option.label}</div>
-                    <div className="text-[11px] leading-relaxed mt-1" style={{ color: C.textSecondary }}>{option.bestFor}</div>
-                    <div className="text-[11px] leading-relaxed mt-1" style={{ color: C.textMuted }}>{option.tradeoff}</div>
+                    <div className="text-[11px] font-semibold" style={{ color: C.textPrimary }}>{option.label}</div>
+                    <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{option.bestFor}</div>
+                    <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{option.tradeoff}</div>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Approval Gates" detail="required" />
-              <div className="mt-2 space-y-1">
+              <div className="mt-1.5 space-y-1">
                 {(data?.slackProposal.approvalGates ?? []).map((gate) => (
-                  <div key={gate} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {gate}</div>
+                  <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {gate}</div>
                 ))}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Routing Rules" detail="first pass" />
-              <div className="mt-2 space-y-1">
+              <div className="mt-1.5 space-y-1">
                 {(data?.routingRules ?? []).map((rule) => (
-                  <div key={rule} className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>- {rule}</div>
+                  <div key={rule} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {rule}</div>
                 ))}
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Reminder Proposals" detail="local" />
-              <div className="mt-2 space-y-2">
+              <div className="mt-1.5 space-y-1.5">
                 {(reminders.data ?? []).length === 0 ? (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     No local reminder proposals yet.
                   </div>
                 ) : (
@@ -800,7 +801,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         <Chip label={reminder.timingHint ?? "needs date"} tone={C.gold} />
                         <Chip label={reminder.reviewPriority ?? "normal"} tone={C.textSecondary} />
                       </div>
-                      <div className="text-xs font-semibold truncate mt-1" style={{ color: C.textPrimary }} title={reminder.title}>
+                      <div className="mt-1 truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={reminder.title}>
                         {reminder.title}
                       </div>
                       <div className="text-[11px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={reminder.approvalRequired}>
@@ -809,7 +810,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                       <Button
                         type="button"
                         onClick={() => setSelectedProposal({ kind: "reminder", id: reminder.id })}
-                        className="mt-2"
+                        className="mt-1.5"
                         variant={selectedProposal?.kind === "reminder" && selectedProposal.id === reminder.id ? "default" : "secondary"}
                         size="sm"
                       >
@@ -821,11 +822,11 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Message Drafts" detail="local" />
-              <div className="mt-2 space-y-2">
+              <div className="mt-1.5 space-y-1.5">
                 {(messageDrafts.data ?? []).length === 0 ? (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     No local message draft proposals yet.
                   </div>
                 ) : (
@@ -837,7 +838,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         <Chip label={draft.recipientHint ?? "needs recipient"} tone={C.gold} />
                         <Chip label={draft.reviewPriority ?? "normal"} tone={C.textSecondary} />
                       </div>
-                      <div className="text-xs font-semibold truncate mt-1" style={{ color: C.textPrimary }} title={draft.title}>
+                      <div className="mt-1 truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={draft.title}>
                         {draft.title}
                       </div>
                       <div className="text-[11px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={draft.approvalRequired}>
@@ -846,7 +847,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                       <Button
                         type="button"
                         onClick={() => setSelectedProposal({ kind: "message", id: draft.id })}
-                        className="mt-2"
+                        className="mt-1.5"
                         variant={selectedProposal?.kind === "message" && selectedProposal.id === draft.id ? "default" : "secondary"}
                         size="sm"
                       >
@@ -866,9 +867,9 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
 
 function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded p-2 min-w-0" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs font-semibold truncate mt-0.5" style={{ color: tone }} title={value}>{value}</div>
+      <div className="mt-0.5 truncate text-[11px] font-semibold" style={{ color: tone }} title={value}>{value}</div>
     </div>
   );
 }
@@ -876,7 +877,7 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
 function SectionTitle({ title, detail }: { title: string; detail: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>{detail}</div>
     </div>
   );
@@ -904,7 +905,7 @@ function Chip({ label, tone }: { label: string; tone: string }) {
 
 function MetaBlock({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div className="rounded p-2 min-w-0" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
       <div className="text-[11px] leading-snug truncate mt-0.5" style={{ color: C.textSecondary }} title={title ?? value}>{value}</div>
     </div>
@@ -926,7 +927,7 @@ function AppSelect({
     <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
       {label}
       <UiSelect value={value} onValueChange={onChange} aria-label={label}>
-        <SelectTrigger className="w-full normal-case">
+        <SelectTrigger size="sm" className="w-full normal-case">
           <SelectValue placeholder={label} />
         </SelectTrigger>
         <SelectContent>
