@@ -194,7 +194,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
             Ledger Output Library
             <span className="ml-2" style={{ color: C.textSecondary }}>{rows.length}</span>
           </div>
-          <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>
+          <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
             Artifact receipts for saved notes, outputs, messages, reports, and vault files. History accumulates.
           </div>
         </div>
@@ -203,13 +203,17 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <OutputStat label="Rows" value={String(rows.length)} tone={C.gold} />
         <OutputStat label="Write Policy" value={writeCopy.policy} tone={C.success} />
         <OutputStat label="Owner" value={writeCopy.ownerAgent} tone={C.accent} />
       </div>
 
-      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 flex-wrap" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Artifact kind filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         {KIND_OPTIONS.map((k) => {
           const active = kind === k;
           return (
@@ -217,7 +221,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
               type="button"
               key={k}
               onClick={() => setKind(k)}
-              className="whitespace-nowrap"
+              className="shrink-0 whitespace-nowrap"
               variant={active ? "secondary" : "ghost"}
               size="sm"
             >
@@ -226,7 +230,11 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           );
         })}
       </div>
-      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Artifact run filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         <FilterButton
           label="All Runs"
           active={sessionFilter === "all"}
@@ -245,8 +253,8 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={submit} className="px-2.5 py-1.5 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[170px_180px_minmax(0,1fr)_auto] gap-2">
+      <form onSubmit={submit} className="space-y-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="grid grid-cols-[145px_145px_minmax(0,1fr)_70px] gap-1.5">
           <AppSelect
             label="Artifact kind"
             value={writeKind}
@@ -272,19 +280,20 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           />
           <Button
             type="submit"
+            size="sm"
             disabled={!title.trim() || !body.trim() || isWriting}
           >
             {isWriting ? "Saving" : "Save"}
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_210px] gap-1.5">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder={writeCopy.body}
-            className="min-h-20"
+            className="min-h-16"
           />
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {writeKind === "obsidian_note" ? (
               <Input
                 value={obsidianSubdir}
@@ -298,14 +307,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                 placeholder={writeKind === "source_note" ? "Source URL or file path" : "Optional source/context URI"}
               />
             )}
-            <div className="text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
+            <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Owner: {writeCopy.ownerAgent}. {writePolicyCopy(writeCopy.policy)}
             </div>
-            <div className="text-[10px] leading-relaxed" style={{ color: C.textMuted }}>
+            <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               These controls save durable history/drafts/reports. Current-state updates need a separate explicit current-state writer.
             </div>
             {lastWrite && (
-              <div className="text-[10px] leading-relaxed" style={{ color: C.textSecondary }}>
+              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surfaceRaised, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                 {lastWrite}
               </div>
             )}
@@ -315,9 +324,9 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {artifacts.isLoading ? (
-          <div className="px-2.5 py-1.5 text-xs" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-2.5 py-1.5 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
         ) : rows.length === 0 ? (
-          <div className="px-2.5 py-1.5 text-xs leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="mx-2 my-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             No artifacts recorded for this filter yet. They appear as approved writes, Notion publishes,
             Obsidian notes, message drafts, and cleanup reports are saved.
           </div>
@@ -325,11 +334,11 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           rows.map((artifact) => (
               <div
                 key={artifact.id}
-                className="grid grid-cols-1 md:grid-cols-[160px_120px_minmax(0,1fr)_140px] gap-2 md:gap-2 px-2.5 py-1.5 items-start"
+                className="grid grid-cols-1 items-start gap-1.5 px-2.5 py-1.5 md:grid-cols-[150px_112px_minmax(0,1fr)_120px]"
                 style={{ borderBottom: `1px solid ${C.borderSoft}` }}
               >
                 <div>
-                  <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={artifact.title ?? undefined}>
+                  <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={artifact.title ?? undefined}>
                     {artifact.title ?? `Artifact ${artifact.id}`}
                   </div>
                   <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: C.textMuted }}>
@@ -350,7 +359,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs truncate" style={{ color: C.textSecondary }} title={artifact.storagePath}>
+                  <div className="truncate text-[11px]" style={{ color: C.textSecondary }} title={artifact.storagePath}>
                     {artifact.storageProvider}:{artifact.storagePath}
                   </div>
                   {artifact.sourceUri && (
@@ -409,11 +418,11 @@ function FilterButton({
 
 function OutputStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
         {label}
       </div>
-      <div className="text-xs font-semibold mt-0.5 truncate" style={{ color: tone }}>
+      <div className="mt-0.5 truncate text-[11px] font-semibold" style={{ color: tone }}>
         {value}
       </div>
     </div>
@@ -433,7 +442,7 @@ function AppSelect({
 }) {
   return (
     <UiSelect value={value} onValueChange={onChange} aria-label={label}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger size="sm" className="w-full">
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>
