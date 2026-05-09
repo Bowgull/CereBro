@@ -526,7 +526,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                     variant="risk"
                     size="sm"
                     className="w-fit"
-                    title={preview.data.command}
+                    title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target. Terminal Lab does not run it."}
+                    aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for command preview ${preview.data.observationId}`}
                   >
                     Security Gate
                   </Button>
@@ -732,6 +733,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                     type="button"
                                     onClick={() => previewTonyDraft(item.id, draft.command)}
                                     disabled={previewDiagnosticDraft.isPending}
+                                    title={previewDiagnosticDraft.isPending ? "Previewing Tony diagnostic draft." : "Preview Tony's diagnostic command as a saved observation. This does not run it."}
+                                    aria-label={`Preview Tony diagnostic draft from observation ${item.id}`}
                                     variant="risk"
                                     size="sm"
                                   >
@@ -862,6 +865,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => setSelectedObservationId(item.id)}
                             aria-label={`Teach from observation ${item.id}`}
+                            title="Show Aang's teaching frame for this observation."
                             variant={selectedObservationId === item.id ? "secondary" : "ghost"}
                             size="sm"
                           >
@@ -948,6 +952,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 <Button
                   type="submit"
                   disabled={selectedObservationId == null || !outputText.trim() || observeOutput.isPending}
+                  title={
+                    selectedObservationId == null
+                      ? "Select an observation before saving observed output."
+                      : !outputText.trim()
+                        ? "Paste approved command output before saving a local summary."
+                        : "Save a redacted local output summary. This does not run a command."
+                  }
+                  aria-label="Save observed output summary"
                 >
                   {observeOutput.isPending ? "Saving" : "Save Summary"}
                 </Button>

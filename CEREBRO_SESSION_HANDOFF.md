@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:20 EDT
+Last updated: 2026-05-09 13:21 EDT
 
 ## Current North Star
 
@@ -20,6 +20,35 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1321 EDT - Terminal Lab Teaching Boundary Pass
+
+### What Changed
+- Tightened Terminal Lab command preview routing so Security Gate states Terminal Lab does not run commands.
+- Tony diagnostic draft preview now states it saves a preview observation and does not execute the draft command.
+- Teach now states it opens Aang's teaching frame for the selected observation.
+- Observed output save now explains missing inputs and confirms it saves only a redacted local summary.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: inspect Terminal Lab observation row density or move to Approval/Security surfaces for boundary-label consistency. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1320 EDT - Workbench Receipt List Boundary Pass
 
