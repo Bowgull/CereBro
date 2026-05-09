@@ -713,6 +713,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           size="sm"
                           aria-pressed={autoPushArmed}
                           aria-label={`${autoPushArmed ? "Disable" : "Enable"} automatic push recommendation for ${project.name}`}
+                          title={autoPushArmed ? "Automatic recommendation is selected. Manual push remains visible and approval-gated." : "Manual push remains visible. No automation is selected."}
                           onClick={() => {
                             setAutoPushSlugs((current) => {
                               const next = new Set(current);
@@ -723,7 +724,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             setPushReceiptSlug(project.slug);
                           }}
                         >
-                          {autoPushArmed ? "Auto armed" : "Manual"}
+                          {autoPushArmed ? "Auto selected" : "Manual visible"}
                         </Button>
                         <Button
                           type="button"
@@ -732,12 +733,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           aria-label={`Open push readiness receipt for ${project.name}`}
                           onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         >
-                          Receipt
+                          Read
                         </Button>
                       </div>
                     </div>
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                      {autoPushArmed ? "Automation is selected for this project, but manual commands stay visible and execution still needs approval." : "Advisory only. Manual push stays visible."}
+                      {autoPushArmed ? "Automation is selected as a recommendation. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
                     </div>
                     <PushDecisionNote
                       stats={proofStats}
@@ -763,8 +764,16 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           <div className="mt-1 break-words" style={{ color: C.textSecondary }}>{pushReadiness.suggestedCommit}</div>
                         </div>
                         <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
-                            Manual Push
+                          <div className="flex flex-wrap items-center justify-between gap-1">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
+                              Manual Push
+                            </div>
+                            <Badge variant="warning" className="uppercase">
+                              <span className="min-w-0 truncate">preview only</span>
+                            </Badge>
+                          </div>
+                          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                            Copy or run these outside Project Lab after review. This panel never runs git.
                           </div>
                           <div className="mt-1 grid gap-0.5">
                             {pushReadiness.manualCommands.map((command) => (

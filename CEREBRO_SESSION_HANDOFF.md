@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:52 EDT
+Last updated: 2026-05-09 12:54 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1254 EDT - Project Lab Push Boundary Pass
+
+### What Changed
+
+- Tightened Project Lab push-context copy around manual push, automatic recommendation, and read-only state.
+- Changed the push mode button from `Manual` / `Auto armed` to `Manual visible` / `Auto selected`.
+- Added title text that explains automation is recommendation-only and approval-gated.
+- Renamed the push readiness button from `Receipt` to `Read` so it does not imply a new receipt is created.
+- Added a `preview only` badge and note to Manual Push commands: Project Lab never runs git.
+- Kept backend semantics and push readiness data unchanged.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps Project Lab as push context, not execution.
+- It preserves the user-approved idea that automatic push can be selectable while manual push remains visible.
+- It makes the no-git boundary visible in the same place the manual commands appear.
+- It does not add execution, routing, schema, storage, or backend behavior.
+
+### Known Risks
+
+- Browser visual verification still needs Browser Use when callable.
+- Other Project Lab action labels may need another density pass after visual review.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify Project Lab push boundary states when Browser Use is callable; if unavailable, continue with a small Project Lab or Workbench density pass only where it improves receipt bodies, push context, or manual approval clarity. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1252 EDT - Workbench Receipt Detail State Pass
 
