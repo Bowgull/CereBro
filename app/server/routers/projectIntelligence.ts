@@ -722,6 +722,95 @@ type ProjectOverviewItem = (typeof projectProfiles)[number] & {
   git: ReturnType<typeof parseStatus> & { remote: string | null };
 };
 
+type PushReadinessState = "hold_dirty" | "commit_locally" | "push_branch" | "open_pr" | "needs_cleanup";
+
+function pushReadinessForProject(project: ProjectOverviewItem) {
+  const blockers: string[] = [];
+  const why: string[] = [];
+  const staysOut: string[] = [];
+  const checks: string[] = [];
+
+  if (!project.localExists) blockers.push("Local checkout is missing.");
+  if (!project.git.branch) blockers.push("No branch is available.");
+  if (!project.git.remote) blockers.push("No origin remote is available.");
+  if (project.activity.approvals.pending > 0) blockers.push(`${project.activity.approvals.pending} pending approval${project.activity.approvals.pending === 1 ? "" : "s"}.`);
+  if (project.activity.terminalStatus.blocked > 0) blockers.push(`${project.activity.terminalStatus.blocked} blocked terminal observation${project.activity.terminalStatus.blocked === 1 ? "" : "s"}.`);
+  if (project.activity.terminalStatus.reviewing > 0) blockers.push(`${project.activity.terminalStatus.reviewing} terminal observation${project.activity.terminalStatus.reviewing === 1 ? "" : "s"} still reviewing.`);
+  if (project.activity.hedwig.needsReview > 0) blockers.push(`${project.activity.hedwig.needsReview} Hedwig capture${project.activity.hedwig.needsReview === 1 ? "" : "s"} need review.`);
+  if (project.activity.sourceEvents.sensitive > 0) blockers.push(`${project.activity.sourceEvents.sensitive} sensitive source event${project.activity.sourceEvents.sensitive === 1 ? "" : "s"} need review.`);
+
+  if (project.git.dirty) {
+    why.push(`${project.git.dirtyCount} local worktree change${project.git.dirtyCount === 1 ? "" : "s"} detected.`);
+    staysOut.push("Unrelated dirty files stay unstaged until the slice is scoped.");
+  } else {
+    why.push("Worktree is clean.");
+  }
+
+  if (project.tasks.inProgress > 0) why.push(`${project.tasks.inProgress} active task${project.tasks.inProgress === 1 ? "" : "s"} may still be mid-slice.`);
+  if (project.tasks.open > 0 && project.tasks.inProgress === 0) why.push(`${project.tasks.open} open task${project.tasks.open === 1 ? "" : "s"} remain.`);
+  if (project.git.upstream) why.push(`Upstream exists: ${project.git.upstream}.`);
+  if (!project.git.upstream && project.git.branch) why.push("Branch has no upstream yet.");
+
+  checks.push("Inspect `git status --short --branch`.");
+  checks.push("Stage only the coherent slice.");
+  checks.push("Run the project check command before commit.");
+  checks.push("Confirm no unrelated files are staged.");
+
+  let state: PushReadinessState = "hold_dirty";
+  if (blockers.length > 0) {
+    state = "needs_cleanup";
+  } else if (project.git.dirty) {
+    state = project.tasks.inProgress > 0 ? "hold_dirty" : "commit_locally";
+  } else if (project.git.branch && project.git.upstream) {
+    state = "push_branch";
+  } else if (project.git.branch) {
+    state = "open_pr";
+  }
+
+  const label: Record<PushReadinessState, string> = {
+    hold_dirty: "Hold dirty",
+    commit_locally: "Commit locally",
+    push_branch: "Push branch",
+    open_pr: "Open PR",
+    needs_cleanup: "Needs cleanup",
+  };
+  const branch = project.git.branch ?? "<branch>";
+
+  return {
+    state,
+    label: label[state],
+    automationAvailable: true,
+    automationDefault: "manual" as const,
+    automationRequiresApproval: true,
+    executesGit: false,
+    why: blockers.length > 0 ? blockers : why,
+    staysOut: staysOut.length > 0 ? staysOut : ["Nothing obvious, but verify the staged diff before commit."],
+    checks,
+    manualCommands: [
+      `cd ${project.localPath}`,
+      "git status --short --branch",
+      "git add <reviewed files>",
+      `git commit -m "<coherent slice>"`,
+      project.git.upstream ? "git push" : `git push -u origin ${branch}`,
+    ],
+    suggestedCommit: project.git.dirty ? "<short coherent slice>" : "No commit suggested while clean.",
+    evidence: {
+      branch: project.git.branch,
+      upstream: project.git.upstream,
+      remote: project.git.remote,
+      dirty: project.git.dirty,
+      dirtyCount: project.git.dirtyCount,
+      pendingApprovals: project.activity.approvals.pending,
+      blockedTerminal: project.activity.terminalStatus.blocked,
+      reviewingTerminal: project.activity.terminalStatus.reviewing,
+      hedwigNeedsReview: project.activity.hedwig.needsReview,
+      sensitiveSources: project.activity.sourceEvents.sensitive,
+      inProgressTasks: project.tasks.inProgress,
+      openTasks: project.tasks.open,
+    },
+  };
+}
+
 function nextSafeActionForProject(project: ProjectOverviewItem) {
   const { activity, tasks, git } = project;
   if (activity.approvals.pending > 0) {
@@ -1043,6 +1132,7 @@ export const projectIntelligenceRouter = router({
         return {
           ...project,
           nextSafeAction: nextSafeActionForProject(project),
+          pushReadiness: pushReadinessForProject(project),
         };
       }),
     );

@@ -1271,6 +1271,27 @@ describe("Project Lab proposal-only actions", () => {
     expect(waymark?.activity.actionDrafts.total).toBeGreaterThan(0);
     expect(waymark?.activity.actionDrafts.byActionKey.validation_pass).toBeGreaterThan(0);
   });
+
+  it("returns read-only push readiness receipts without executing git writes", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const overview = await caller.projectIntelligence.overview();
+    const cerebro = overview.projects.find((project) => project.slug === "cerebro");
+    expect(cerebro?.pushReadiness).toBeTruthy();
+    expect(cerebro?.pushReadiness.executesGit).toBe(false);
+    expect(cerebro?.pushReadiness.automationRequiresApproval).toBe(true);
+    expect(cerebro?.pushReadiness.automationDefault).toBe("manual");
+    expect(cerebro?.pushReadiness.manualCommands).toContain("git status --short --branch");
+    expect(cerebro?.pushReadiness.manualCommands.some((command) => command.startsWith("git push"))).toBe(true);
+    expect(cerebro?.pushReadiness.checks.join(" ")).toContain("coherent slice");
+    expect(cerebro?.pushReadiness.evidence.remote).toBeTruthy();
+    expect(typeof cerebro?.pushReadiness.evidence.dirtyCount).toBe("number");
+    expect(["hold_dirty", "commit_locally", "push_branch", "open_pr", "needs_cleanup"]).toContain(cerebro?.pushReadiness.state);
+  });
 });
 
 describe("Model/tool capability registry", () => {

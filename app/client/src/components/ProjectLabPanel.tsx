@@ -78,7 +78,6 @@ type ProjectViewFilter = "all" | "attention" | "approvals" | "hedwig" | "termina
 type InspectorQueue = "approvals" | "terminal" | "hedwig" | "sources" | "git" | "drafts" | "gates";
 type InspectorSort = "default" | "type" | "text";
 type DraftActionKey = "plan_next_slice" | "inspect_dirty_state" | "package_proof" | "validation_pass";
-type PushReadinessState = "hold_dirty" | "commit_locally" | "push_branch" | "open_pr" | "needs_cleanup";
 
 function projectSignalScore(project: {
   localExists?: boolean;
@@ -258,105 +257,6 @@ function preferredInspectorQueue(project: {
     if (project.git.dirty) return "git";
   }
   return "approvals";
-}
-
-function pushReadinessForProject(project: {
-  name: string;
-  localExists?: boolean;
-  localPath: string;
-  githubRepo: string;
-  git: {
-    branch: string | null;
-    upstream: string | null;
-    remote: string | null;
-    dirty: boolean;
-    dirtyCount: number;
-    statusText: string;
-  };
-  activity: {
-    approvals: { pending: number };
-    terminalStatus: { blocked: number; reviewing: number };
-    hedwig: { needsReview: number };
-    sourceEvents: { sensitive: number };
-  };
-  tasks: { inProgress: number; open: number };
-}) {
-  const blockers: string[] = [];
-  const why: string[] = [];
-  const staysOut: string[] = [];
-  const checks: string[] = [];
-
-  if (!project.localExists) blockers.push("Local checkout is missing.");
-  if (!project.git.branch) blockers.push("No branch is available.");
-  if (!project.git.remote) blockers.push("No origin remote is available.");
-  if (project.activity.approvals.pending > 0) blockers.push(`${project.activity.approvals.pending} pending approval${project.activity.approvals.pending === 1 ? "" : "s"}.`);
-  if (project.activity.terminalStatus.blocked > 0) blockers.push(`${project.activity.terminalStatus.blocked} blocked terminal observation${project.activity.terminalStatus.blocked === 1 ? "" : "s"}.`);
-  if (project.activity.terminalStatus.reviewing > 0) blockers.push(`${project.activity.terminalStatus.reviewing} terminal observation${project.activity.terminalStatus.reviewing === 1 ? "" : "s"} still reviewing.`);
-  if (project.activity.hedwig.needsReview > 0) blockers.push(`${project.activity.hedwig.needsReview} Hedwig capture${project.activity.hedwig.needsReview === 1 ? "" : "s"} need review.`);
-  if (project.activity.sourceEvents.sensitive > 0) blockers.push(`${project.activity.sourceEvents.sensitive} sensitive source event${project.activity.sourceEvents.sensitive === 1 ? "" : "s"} need review.`);
-
-  if (project.git.dirty) {
-    why.push(`${project.git.dirtyCount} local worktree change${project.git.dirtyCount === 1 ? "" : "s"} detected.`);
-    staysOut.push("Unrelated dirty files stay unstaged until the slice is scoped.");
-  } else {
-    why.push("Worktree is clean.");
-  }
-
-  if (project.tasks.inProgress > 0) why.push(`${project.tasks.inProgress} active task${project.tasks.inProgress === 1 ? "" : "s"} may still be mid-slice.`);
-  if (project.tasks.open > 0 && project.tasks.inProgress === 0) why.push(`${project.tasks.open} open task${project.tasks.open === 1 ? "" : "s"} remain.`);
-  if (project.git.upstream) why.push(`Upstream exists: ${project.git.upstream}.`);
-  if (!project.git.upstream && project.git.branch) why.push("Branch has no upstream yet.");
-
-  checks.push("Inspect `git status --short --branch`.");
-  checks.push("Stage only the coherent slice.");
-  checks.push("Run the project check command before commit.");
-  checks.push("Confirm no unrelated files are staged.");
-
-  let state: PushReadinessState = "hold_dirty";
-  if (blockers.length > 0) {
-    state = "needs_cleanup";
-  } else if (project.git.dirty) {
-    state = project.tasks.inProgress > 0 ? "hold_dirty" : "commit_locally";
-  } else if (project.git.branch && project.git.upstream) {
-    state = "push_branch";
-  } else if (project.git.branch) {
-    state = "open_pr";
-  }
-
-  const label: Record<PushReadinessState, string> = {
-    hold_dirty: "Hold dirty",
-    commit_locally: "Commit locally",
-    push_branch: "Push branch",
-    open_pr: "Open PR",
-    needs_cleanup: "Needs cleanup",
-  };
-  const tone: Record<PushReadinessState, string> = {
-    hold_dirty: C.warning,
-    commit_locally: C.accent,
-    push_branch: C.success,
-    open_pr: C.gold,
-    needs_cleanup: C.danger,
-  };
-
-  const branch = project.git.branch ?? "<branch>";
-  const manualCommands = [
-    `cd ${project.localPath}`,
-    "git status --short --branch",
-    "git add <reviewed files>",
-    `git commit -m "<coherent slice>"`,
-    project.git.upstream ? "git push" : `git push -u origin ${branch}`,
-  ];
-
-  return {
-    state,
-    label: label[state],
-    tone: tone[state],
-    why: blockers.length > 0 ? blockers : why,
-    staysOut: staysOut.length > 0 ? staysOut : ["Nothing obvious, but verify the staged diff before commit."],
-    checks,
-    manualCommands,
-    suggestedCommit: project.git.dirty ? "<short coherent slice>" : "No commit suggested while clean.",
-  };
 }
 
 export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
@@ -615,7 +515,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const reasons = attentionReasons(project);
               const rankScore = projectSignalScore(project, projectFilter);
               const scoreParts = signalBreakdown(project, projectFilter);
-              const pushReadiness = pushReadinessForProject(project);
+              const pushReadiness = project.pushReadiness;
+              const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
               const autoPushArmed = autoPushSlugs.has(project.slug);
               const pendingDraftForProject = pendingDraftTarget?.slug === project.slug ? pendingDraftTarget : null;
@@ -733,7 +634,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         aria-expanded={showPushReceipt}
                         aria-label={`Show push readiness receipt for ${project.name}`}
                         className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none"
-                        style={{ color: pushReadiness.tone, background: C.surface, borderColor: `${pushReadiness.tone}66` }}
+                        style={{ color: pushTone, background: C.surface, borderColor: `${pushTone}66` }}
                       >
                         Push Readiness
                         <span>{pushReadiness.label}</span>
@@ -773,7 +674,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                     {showPushReceipt && (
                       <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
-                        <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushReadiness.tone} />
+                        <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushTone} />
                         <PushReceiptBlock title="Stays Out" items={pushReadiness.staysOut} tone={C.warning} />
                         <PushReceiptBlock title="Checks" items={pushReadiness.checks} tone={C.accent} />
                         <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1844,6 +1745,14 @@ function PushReceiptBlock({ title, items, tone }: { title: string; items: readon
       </ul>
     </div>
   );
+}
+
+function toneForPushState(state: string) {
+  if (state === "needs_cleanup") return C.danger;
+  if (state === "hold_dirty") return C.warning;
+  if (state === "commit_locally") return C.accent;
+  if (state === "open_pr") return C.gold;
+  return C.success;
 }
 
 function ChipRow({
