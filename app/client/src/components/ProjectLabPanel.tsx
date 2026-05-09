@@ -700,6 +700,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         aria-expanded={showPushReceipt}
                         aria-label={`Show push readiness receipt for ${project.name}`}
+                        title="Read the git-state receipt. Project Lab does not run git."
                         className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none"
                         style={{ color: pushTone, background: C.surface, borderColor: `${pushTone}66` }}
                       >
@@ -731,6 +732,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           variant="secondary"
                           size="sm"
                           aria-label={`Open push readiness receipt for ${project.name}`}
+                          title="Open the push decision read. This is not a git action."
                           onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         >
                           Read
@@ -740,6 +742,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                       {autoPushArmed ? "Automation is selected as a recommendation. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
                     </div>
+                    <PushModeStrip autoSelected={autoPushArmed} />
                     <PushDecisionNote
                       stats={proofStats}
                       pushLabel={pushReadiness.label}
@@ -1740,6 +1743,39 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
         Project map signal only. Workbench has the body. Ledger has the audit trail.
+      </div>
+    </div>
+  );
+}
+
+function PushModeStrip({ autoSelected }: { autoSelected: boolean }) {
+  return (
+    <div className="mt-1 grid gap-1 sm:grid-cols-2" aria-label="Project push mode boundaries">
+      <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="flex flex-wrap items-center gap-1">
+          <Badge variant="warning" className="uppercase">
+            <span className="min-w-0 truncate">manual visible</span>
+          </Badge>
+          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+            approval gated
+          </span>
+        </div>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Commands stay readable. The card never runs them.
+        </div>
+      </div>
+      <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${autoSelected ? C.warning : C.borderSoft}` }}>
+        <div className="flex flex-wrap items-center gap-1">
+          <Badge variant={autoSelected ? "warning" : "secondary"} className="uppercase">
+            <span className="min-w-0 truncate">{autoSelected ? "auto selected" : "auto off"}</span>
+          </Badge>
+          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: autoSelected ? C.warning : C.textMuted }}>
+            recommendation only
+          </span>
+        </div>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Auto can propose timing. Approval still decides execution.
+        </div>
       </div>
     </div>
   );

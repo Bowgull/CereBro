@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:15 EDT
+Last updated: 2026-05-09 13:17 EDT
 
 ## Current North Star
 
@@ -20,6 +20,35 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1317 EDT - Project Lab Push Mode Boundary Pass
+
+### What Changed
+- Added a compact manual/auto push mode strip to each Project Lab card.
+- Manual push is now visibly separate as approval-gated and readable only.
+- Auto push is now visibly framed as a selected recommendation, not execution.
+- Added hover copy to push readiness controls stating Project Lab does not run git.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: inspect Project Lab card density in the open localhost tab when Browser Use is callable, then continue Workbench/Ledger receipt body clarity or Terminal Lab teaching-language polish. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1315 EDT - Ledger Receipt Action Boundary Pass
 
