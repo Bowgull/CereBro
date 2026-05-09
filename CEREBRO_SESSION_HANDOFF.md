@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:47 EDT
+Last updated: 2026-05-09 05:50 EDT
 
 ## Current North Star
 
@@ -20,6 +20,42 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0550 - Front-End Build Steward: Terminal Lab Action Groups
+
+### What Changed
+
+- Browser-reviewed Terminal Lab after the header-density pass.
+- Grouped observation action buttons into Review, Gate, Link, and Output lanes.
+- Shortened repeated button labels inside those groups while preserving the same
+  actions and gating behavior.
+- Added a compact local `ActionGroup` helper for Terminal Lab observation rows.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Terminal Lab observation rows now separate review, risk gates, linking, and
+  output capture instead of presenting every action as one flat button strip.
+
+### Known Risks
+
+- Diagnostic draft blocks are still dense.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Terminal Lab by compacting diagnostic draft blocks and the right rail.
 
 ## 2026-05-09 0547 - Front-End Build Steward: Terminal Lab Header Density
 

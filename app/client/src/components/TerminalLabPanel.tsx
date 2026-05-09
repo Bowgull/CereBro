@@ -529,87 +529,95 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           ))}
                         </div>
                       )}
-                      <div className="flex flex-wrap gap-1">
-                        <Button
-                          type="button"
-                          onClick={() => setSelectedObservationId(item.id)}
-                          variant={selectedObservationId === item.id ? "secondary" : "ghost"}
-                          size="sm"
-                        >
-                          Attach Output
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setObservationStatus(item.id, "reviewing")}
-                          disabled={updateObservationStatus.isPending || item.status === "reviewing"}
-                          variant={item.status === "reviewing" ? "secondary" : "ghost"}
-                          size="sm"
-                        >
-                          Review
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setObservationStatus(item.id, "blocked")}
-                          disabled={updateObservationStatus.isPending || item.status === "blocked"}
-                          variant="risk"
-                          size="sm"
-                        >
-                          Block
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => stageCommandApprovalPreview(item.id)}
-                          disabled={createApprovalPreview.isPending}
-                          variant="risk"
-                          size="sm"
-                        >
-                          Approval Preview
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => openSecurityGateForCommand(item.command)}
-                          disabled={!onNavigate}
-                          variant="risk"
-                          size="sm"
-                        >
-                          Security Gate
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => attachSelectedLinks(item.id)}
-                          disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
-                          variant="secondary"
-                          size="sm"
-                        >
-                          Link Selected
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => createFollowUpTask(item.id)}
-                          disabled={createTaskFromObservation.isPending || item.taskId != null}
-                          variant="secondary"
-                          size="sm"
-                        >
-                          Create Task
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => createLearningNote(item.id)}
-                          disabled={createLearningProposal.isPending}
-                          variant="secondary"
-                          size="sm"
-                        >
-                          Stage Learning Note
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setObservationStatus(item.id, "archived")}
-                          disabled={updateObservationStatus.isPending || item.status === "archived"}
-                          variant="ghost"
-                          size="sm"
-                        >
-                          Archive
-                        </Button>
+                      <div className="grid gap-1.5 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
+                        <ActionGroup label="Review">
+                          <Button
+                            type="button"
+                            onClick={() => setObservationStatus(item.id, "reviewing")}
+                            disabled={updateObservationStatus.isPending || item.status === "reviewing"}
+                            variant={item.status === "reviewing" ? "secondary" : "ghost"}
+                            size="sm"
+                          >
+                            Review
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => setObservationStatus(item.id, "blocked")}
+                            disabled={updateObservationStatus.isPending || item.status === "blocked"}
+                            variant="risk"
+                            size="sm"
+                          >
+                            Block
+                          </Button>
+                        </ActionGroup>
+                        <ActionGroup label="Gate">
+                          <Button
+                            type="button"
+                            onClick={() => stageCommandApprovalPreview(item.id)}
+                            disabled={createApprovalPreview.isPending}
+                            variant="risk"
+                            size="sm"
+                          >
+                            Approval
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => openSecurityGateForCommand(item.command)}
+                            disabled={!onNavigate}
+                            variant="risk"
+                            size="sm"
+                          >
+                            Security
+                          </Button>
+                        </ActionGroup>
+                        <ActionGroup label="Link">
+                          <Button
+                            type="button"
+                            onClick={() => attachSelectedLinks(item.id)}
+                            disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Selected
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => createFollowUpTask(item.id)}
+                            disabled={createTaskFromObservation.isPending || item.taskId != null}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Task
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => createLearningNote(item.id)}
+                            disabled={createLearningProposal.isPending}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Learning
+                          </Button>
+                        </ActionGroup>
+                        <ActionGroup label="Output">
+                          <Button
+                            type="button"
+                            onClick={() => setSelectedObservationId(item.id)}
+                            variant={selectedObservationId === item.id ? "secondary" : "ghost"}
+                            size="sm"
+                          >
+                            Attach
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => setObservationStatus(item.id, "archived")}
+                            disabled={updateObservationStatus.isPending || item.status === "archived"}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            Archive
+                          </Button>
+                        </ActionGroup>
                       </div>
                     </div>
                   ))
@@ -777,6 +785,19 @@ function CopyButton({
     >
       {active ? "Copied" : fallback ? "Loaded" : label}
     </Button>
+  );
+}
+
+function ActionGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0 rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="mb-1 text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {children}
+      </div>
+    </div>
   );
 }
 
