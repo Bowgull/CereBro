@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:47 EDT
+Last updated: 2026-05-08 23:51 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2351 - Front-End Build Steward: Compact Control Primitives
+
+### What Changed
+
+- Normalized stock `Switch`, `Toggle`, `ToggleGroup`, `RadioGroup`, `Slider`,
+  `Progress`, and `Accordion` primitives away from generic shadcn theme tokens.
+- Added CereBro shell tokens for dark surfaces, borders, focus rings, disabled
+  states, selected states, and slider/progress fills.
+- Tightened control density while keeping 8px max radius.
+
+### Files Touched
+
+- `app/client/src/components/ui/switch.tsx`
+- `app/client/src/components/ui/toggle.tsx`
+- `app/client/src/components/ui/toggle-group.tsx`
+- `app/client/src/components/ui/radio-group.tsx`
+- `app/client/src/components/ui/slider.tsx`
+- `app/client/src/components/ui/progress.tsx`
+- `app/client/src/components/ui/accordion.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Dormant stock controls now match the CereBro primitive baseline before they
+  become visible in future panels.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- These primitives are mostly future-facing; visible shell impact may be subtle
+  until the controls are used in live panels.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue the remaining stock primitive audit with navigation, popover,
+  hover-card, chart tooltip, pagination, and form helper surfaces.
 
 ## 2026-05-08 2347 - Front-End Build Steward: Compact Dormant Surfaces
 
