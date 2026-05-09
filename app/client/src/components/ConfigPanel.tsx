@@ -47,11 +47,11 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="h-full w-full overflow-hidden p-3"
+      style={{ background: C.background }}
     >
       <div
-        className="w-[680px] max-h-[85vh] overflow-y-auto rounded"
+        className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-md"
         style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.border}`, fontFamily: "'IBM Plex Mono', monospace" }}
       >
         {/* Header */}
@@ -75,7 +75,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
           </Button>
         </div>
 
-        <div className="p-3 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
           {/* Connection Status */}
           <section>
             <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>

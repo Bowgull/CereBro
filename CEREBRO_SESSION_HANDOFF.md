@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:01 EDT
+Last updated: 2026-05-09 00:04 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0004 - Front-End Build Steward: Full-Height Routed Panels
+
+### What Changed
+
+- Converted routed Ledger panels for Tasks, Memory, and Sessions from
+  half-height bottom drawers into full workspace surfaces.
+- Converted Settings/Config from a fixed modal overlay into an in-route,
+  full-height workspace panel.
+- Preserved existing behavior and close buttons.
+
+### Files Touched
+
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- Initial `curl -I http://localhost:3002/` failed because the app server was
+  temporarily down. After checking and removing an extra 3004 dev server,
+  `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Main nav routes now produce visibly different full surfaces instead of
+  looking like a small drawer layered over the Keep.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- The visible route layout should still get manual browser QA for overflow on
+  small screens.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue visible shell QA with Workbench, Terminal, Hedwig, Sources,
+  Approvals, and Aang panels. Prioritize hierarchy and obvious state clarity.
 
 ## 2026-05-09 0001 - Front-End Build Steward: Compact Sidebar Helpers
 

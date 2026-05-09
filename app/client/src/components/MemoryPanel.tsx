@@ -81,8 +81,8 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="absolute bottom-0 left-0 right-0 max-h-[55%] flex flex-col"
-      style={{ background: `${C.background}f5`, borderTop: `1px solid ${C.borderSoft}` }}
+      className="flex h-full flex-col overflow-hidden"
+      style={{ background: C.background, border: `1px solid ${C.borderSoft}` }}
     >
       <div
         className="flex items-center justify-between px-2.5 py-1.5 shrink-0"
