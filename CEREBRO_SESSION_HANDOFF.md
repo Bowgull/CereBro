@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:07 EDT
+Last updated: 2026-05-09 12:09 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1209 EDT - Ledger Receipt Route Language
+
+### What Changed
+
+- Tightened Ledger overview and shell copy to use receipt/body/audit language consistently.
+- Workshop blurb and Workbench surface metadata now say receipts and receipt body surface.
+- Ledger overview now says Receipt before summary and names Workbench body, Ledger audit trail, and Project Lab push context.
+- Ledger receipt card meta now says terminal receipts.
+- Workbench handoff notice from Ledger now says Workbench receipt.
+- Ledger object aria labels and selected receipt preview now use receipt/audit terms.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `rg` found no remaining stale Ledger strings for Evidence surface, Do the work with evidence, Proof read, terminal proof records, Ledger evidence receipt, recent evidence manually, Proof before summary, Ledger proof objects, Open Workbench, Selected evidence receipt preview, Receipt Rules, or `label: "Evidence"`.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps Ledger as the audit trail owner and makes the route to Workbench body and Project Lab push context clearer.
+- Workbench remains the receipt body owner. Project Lab remains the push context owner. Terminal Lab remains the teaching lane.
+- No data shape, route behavior, or execution behavior changed.
+- Manual push remains visible and separate. No hidden execution path was added.
+
+### Known Risks
+
+- Internal code names still use `evidence` because the router/database model is named that way.
+- Browser visual verification still needs the Browser Use plugin when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Ledger.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Ledger receipt route language when Browser Use is callable; if unavailable, audit the current receipt-loop surfaces for remaining user-facing `evidence/proof` wording and tighten only copy that does not rename API/model concepts. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1207 EDT - Workbench List Receipt Language
 

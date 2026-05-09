@@ -88,7 +88,7 @@ interface ZoneSurface {
 
 const ZONE_NAV_ITEMS: ZoneNavItem[] = [
   { zone: "keep", id: "home", label: "Keep", glyph: "◆", blurb: "Understand what is active." },
-  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: "Do the work with evidence." },
+  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: "Do the work with receipts." },
   { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: "Prove what happened." },
   { zone: "basement", id: "basement", label: "Basement", glyph: "⚙", blurb: "Configure the machine." },
 ];
@@ -100,13 +100,13 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
     { id: "inbox", label: "Capture", meta: "Hedwig intake" },
   ],
   workshop: [
-    { id: "workbench", label: "Workbench", meta: "Evidence surface" },
+    { id: "workbench", label: "Workbench", meta: "Receipt body surface" },
     { id: "projects", label: "Project Lab", meta: "Local project state" },
     { id: "terminal", label: "Terminal Lab", meta: "Command previews" },
     { id: "sources", label: "Research", meta: "Source review" },
   ],
   ledger: [
-    { id: "ledger", label: "Overview", meta: "Proof read" },
+    { id: "ledger", label: "Overview", meta: "Audit trail" },
     { id: "tasks", label: "Tasks", meta: "Work queue" },
     { id: "sessions", label: "Sessions", meta: "Run history" },
     { id: "approvals", label: "Approvals", meta: "Waiting gates" },
@@ -124,7 +124,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
 
 const ZONE_RECEIPTS: Record<ZoneId, string[]> = {
   keep: ["state", "route", "approval"],
-  workshop: ["evidence", "tools", "validation"],
+  workshop: ["receipts", "tools", "validation"],
   ledger: ["tasks", "sessions", "approvals", "outputs", "memory"],
   basement: ["permissions", "models", "storage"],
 };
@@ -726,8 +726,8 @@ function KeepHomeDock({
     target: NavId;
   }> = [
     {
-      label: "Evidence",
-      meta: "Open Workshop",
+      label: "Receipts",
+      meta: "Open Workbench",
       value: "Workbench",
       tone: C.accent,
       target: "workbench",
@@ -992,7 +992,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     {
       label: "Receipts",
       value: String(evidenceRows.length),
-      meta: `${terminalEvidenceCount} terminal proof records`,
+      meta: `${terminalEvidenceCount} terminal receipts`,
       target: "workbench" as NavId,
       tone: C.accentViolet,
     },
@@ -1015,11 +1015,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           kind: item.kind,
           query: item.targetUri ?? item.title,
           groupBy: "kind",
-          notice: `Showing Ledger evidence receipt #${item.id}.`,
+          notice: `Showing Workbench receipt #${item.id} from Ledger.`,
         }),
       );
     } catch {
-      // Workbench still opens; the user can inspect recent evidence manually.
+      // Workbench still opens; the user can inspect recent receipts manually.
     }
     onNavigate("workbench");
   }
@@ -1054,7 +1054,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 Ledger Overview
               </h2>
               <p className="mt-1 max-w-2xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                Proof before summary. This surface gathers the local records that show what was asked, what ran, what needs approval, what was saved, and what CereBro thinks it knows.
+                Receipt before summary. Workbench holds bodies. Ledger holds the audit trail. Project Lab reads push context.
               </p>
             </div>
             <Badge variant="warning" className="px-1.5 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -1063,7 +1063,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-6" aria-label="Ledger proof objects">
+        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-6" aria-label="Ledger receipt objects">
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -1103,7 +1103,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               variant="outline"
               size="sm"
             >
-              Open Workbench
+              Open Workbench Bodies
             </Button>
           </div>
           {workbenchEvidence.isLoading ? (
@@ -1149,7 +1149,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           )}
           {selectedEvidence && (
-            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Selected evidence receipt preview">
+            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Selected Workbench receipt preview">
               {ledgerFocusNotice && (
                 <div className="mb-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
                   <span className="min-w-0">{ledgerFocusNotice}</span>
@@ -1213,7 +1213,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Receipt Rules
+            Audit Rules
           </div>
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
             <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
