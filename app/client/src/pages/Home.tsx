@@ -933,6 +933,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const memoryRows = memory.data ?? [];
   const proposalRows = proposals.data ?? [];
   const evidenceRows = workbenchEvidence.data?.items ?? [];
+  const latestEvidenceRows = evidenceRows.slice(0, 4);
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
   const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
@@ -982,6 +983,24 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
   ];
 
+  function openWorkbenchEvidence(item: { id: number; kind: string; targetUri: string | null; title: string }) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "ledger",
+          kind: item.kind,
+          query: item.targetUri ?? item.title,
+          groupBy: "kind",
+          notice: `Showing Ledger evidence receipt #${item.id}.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can inspect recent evidence manually.
+    }
+    onNavigate("workbench");
+  }
+
   return (
     <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
       <div className="grid gap-2">
@@ -1028,6 +1047,64 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </span>
             </Button>
           ))}
+        </section>
+
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench evidence receipts">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Latest Evidence
+            </div>
+            <Button
+              type="button"
+              onClick={() => onNavigate("workbench")}
+              variant="outline"
+              size="sm"
+            >
+              Open Workbench
+            </Button>
+          </div>
+          {workbenchEvidence.isLoading ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              Reading local evidence receipts.
+            </div>
+          ) : latestEvidenceRows.length === 0 ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              No Workbench evidence receipts yet.
+            </div>
+          ) : (
+            <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
+              {latestEvidenceRows.map((item) => (
+                <Button
+                  key={item.id}
+                  type="button"
+                  onClick={() => openWorkbenchEvidence(item)}
+                  variant="secondary"
+                  className="h-auto justify-start rounded p-2 text-left"
+                  aria-label={`Open Workbench evidence receipt ${item.id}`}
+                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                >
+                  <span className="block w-full min-w-0">
+                    <span className="flex flex-wrap items-center gap-1">
+                      <Badge variant="secondary" className="uppercase">#{item.id}</Badge>
+                      <Badge variant={item.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
+                        {item.kind.replace(/_/g, " ")}
+                      </Badge>
+                      <Badge variant={item.validationStatus === "needs_review" ? "warning" : "success"} className="uppercase">
+                        {item.validationStatus.replace(/_/g, " ")}
+                      </Badge>
+                      {item.projectName && <Badge variant="warning" className="uppercase">{item.projectName}</Badge>}
+                    </span>
+                    <span className="mt-1 block truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={item.title}>
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block line-clamp-2 text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>
+                      {item.summary}
+                    </span>
+                  </span>
+                </Button>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>

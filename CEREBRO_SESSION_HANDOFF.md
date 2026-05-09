@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:24 EDT
+Last updated: 2026-05-09 11:27 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1127 EDT - Ledger Latest Evidence Receipts
+
+### What Changed
+
+- Added an inline Latest Evidence section to Ledger Overview.
+- Ledger now shows the newest four local Workbench evidence receipts.
+- Each receipt shows id, evidence kind, validation status, project name when available, title, and summary.
+- Clicking a receipt opens Workbench with an evidence filter handoff for that receipt.
+- The Evidence card remains as the count summary; the new section gives the user actual receipt rows to inspect.
+- No command execution, git execution, external write, durable memory write, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this tool set, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This follows the locked path: Workbench as proof and Ledger as receipts.
+- Ledger now shows proof rows, not only receipt counts.
+- Clicking a receipt keeps the action local and read-only; Workbench handles inspection.
+- The section stays compact and uses existing CereBro surfaces.
+
+### Known Risks
+
+- Ledger reads the latest 50 Workbench evidence records and displays the first four.
+- Receipt click uses temporary browser session state to stage the Workbench filter.
+- Visual browser proof still needs a plugin pass when Browser Use is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this flow.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: tighten the Ledger Latest Evidence rows with browser verification and, if needed, add a compact receipt detail preview without adding a new primary surface or executing commands. Verify in browser DOM when available, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1124 EDT - Workbench Proof Findability
 
