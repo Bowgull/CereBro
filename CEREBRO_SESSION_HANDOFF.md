@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:54 EDT
+Last updated: 2026-05-09 12:56 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1256 EDT - Terminal Lab Action Boundary Pass
+
+### What Changed
+
+- Added title and aria-label explanations to Terminal Lab observation action buttons.
+- Review, Block, Archive, Task, and link buttons now explain when their disabled state is already satisfied or missing a selected target.
+- Approval and Security buttons now state they create local approval preview or open Security Gate without running the command.
+- Workbench Body and Ledger Trail buttons now state the route boundary when unavailable and the receipt/audit target when available.
+- Kept Terminal Lab proposal-only. No command execution path was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This reinforces Terminal Lab as Aang's build-teaching lane, not an executor.
+- It makes approval, Security Gate, Workbench receipt body, and Ledger audit trail boundaries visible at the button level.
+- It does not add execution, routing, schema, storage, or backend behavior.
+
+### Known Risks
+
+- Browser visual verification still needs Browser Use when callable.
+- Button titles are helpful but not a replacement for a future visual QA pass.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify Terminal Lab action boundary states when Browser Use is callable; if unavailable, continue with a small Workbench or Ledger density pass that improves receipt body or audit-trail clarity without backend changes. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1254 EDT - Project Lab Push Boundary Pass
 

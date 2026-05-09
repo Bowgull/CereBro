@@ -779,6 +779,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => setObservationStatus(item.id, "reviewing")}
                             disabled={updateObservationStatus.isPending || item.status === "reviewing"}
+                            title={item.status === "reviewing" ? "This observation is already marked for review." : undefined}
+                            aria-label={item.status === "reviewing" ? "Observation already marked for review" : `Mark observation ${item.id} for review`}
                             variant={item.status === "reviewing" ? "secondary" : "ghost"}
                             size="sm"
                           >
@@ -788,6 +790,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => setObservationStatus(item.id, "blocked")}
                             disabled={updateObservationStatus.isPending || item.status === "blocked"}
+                            title={item.status === "blocked" ? "This observation is already blocked." : undefined}
+                            aria-label={item.status === "blocked" ? "Observation already blocked" : `Block observation ${item.id}`}
                             variant="risk"
                             size="sm"
                           >
@@ -799,6 +803,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => stageCommandApprovalPreview(item.id)}
                             disabled={createApprovalPreview.isPending}
+                            title={createApprovalPreview.isPending ? "Creating local approval preview." : "Create a local approval preview. This does not run the command."}
+                            aria-label={`Create local approval preview for observation ${item.id}`}
                             variant="risk"
                             size="sm"
                           >
@@ -808,6 +814,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => openSecurityGateForCommand(item.command)}
                             disabled={!onNavigate}
+                            title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target."}
+                            aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for observation ${item.id}`}
                             variant="risk"
                             size="sm"
                           >
@@ -819,6 +827,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => attachSelectedLinks(item.id)}
                             disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
+                            title={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking this observation." : undefined}
+                            aria-label={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking" : `Link selected task or session to observation ${item.id}`}
                             variant="secondary"
                             size="sm"
                           >
@@ -828,6 +838,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => createFollowUpTask(item.id)}
                             disabled={createTaskFromObservation.isPending || item.taskId != null}
+                            title={item.taskId != null ? "This observation is already linked to a task." : undefined}
+                            aria-label={item.taskId != null ? "Observation already linked to a task" : `Create follow-up task from observation ${item.id}`}
                             variant="secondary"
                             size="sm"
                           >
@@ -837,6 +849,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => createLearningNote(item.id)}
                             disabled={createLearningProposal.isPending}
+                            title={createLearningProposal.isPending ? "Creating local learning proposal." : "Create a local learning proposal from this observation."}
+                            aria-label={`Create learning proposal from observation ${item.id}`}
                             variant="secondary"
                             size="sm"
                           >
@@ -847,6 +861,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           <Button
                             type="button"
                             onClick={() => setSelectedObservationId(item.id)}
+                            aria-label={`Teach from observation ${item.id}`}
                             variant={selectedObservationId === item.id ? "secondary" : "ghost"}
                             size="sm"
                           >
@@ -856,6 +871,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => savedEvidence ? openWorkbenchProof(item.id, savedEvidence.id) : stageWorkbenchProof(item)}
                             disabled={!onNavigate}
+                            title={!onNavigate ? "Workbench route is not available from this panel state." : savedEvidence ? "Open the linked Workbench receipt body." : "Stage this observation as a local Workbench receipt."}
+                            aria-label={!onNavigate ? "Workbench route unavailable" : savedEvidence ? `Open Workbench receipt ${savedEvidence.id}` : `Save observation ${item.id} as Workbench receipt`}
                             variant="secondary"
                             size="sm"
                           >
@@ -866,6 +883,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                               type="button"
                               onClick={() => openLedgerReceipt(item.id, savedEvidence.id)}
                               disabled={!onNavigate}
+                              title={!onNavigate ? "Ledger route is not available from this panel state." : "Open the Ledger audit trail for this receipt."}
+                              aria-label={!onNavigate ? "Ledger route unavailable" : `Open Ledger trail for receipt ${savedEvidence.id}`}
                               variant="secondary"
                               size="sm"
                             >
@@ -876,6 +895,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             type="button"
                             onClick={() => setObservationStatus(item.id, "archived")}
                             disabled={updateObservationStatus.isPending || item.status === "archived"}
+                            title={item.status === "archived" ? "This observation is already archived." : undefined}
+                            aria-label={item.status === "archived" ? "Observation already archived" : `Archive observation ${item.id}`}
                             variant="ghost"
                             size="sm"
                           >
