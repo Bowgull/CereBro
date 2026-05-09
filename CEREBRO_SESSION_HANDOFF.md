@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:09 EDT
+Last updated: 2026-05-09 12:14 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1214 EDT - Receipt Language Surface Sweep
+
+### What Changed
+
+- Aligned user-facing copy across UI System, Design Review, Terminal Lab, Workbench, Project Lab, Tasks, Security Gate, Config, Model/Tools, and the Keep fortress map.
+- Replaced visible proof/evidence wording with receipt, receipt body, audit trail, build support, or push context where that matches the surface owner.
+- Kept internal `evidence` API, router, and model field names intact.
+- Kept Terminal Lab proposal-only and Project Lab read-only. No execution path was added.
+
+### Files Touched
+
+- `app/client/src/components/UISystemPanel.tsx`
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/lib/keepFortressMap.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `rg -n "\b(Evidence|evidence|Proof|proof)\b" app/client/src/components app/client/src/pages/Home.tsx app/client/src/lib` now shows only internal API/model identifiers, one diagnostic value key, and backend-shaped query names.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- Receipt language is now more consistent across the current front-end build path.
+- Workbench owns receipt bodies.
+- Ledger owns audit trail language.
+- Project Lab owns push context.
+- Terminal Lab teaches from observations and receipts without executing commands.
+
+### Known Risks
+
+- Internal code still uses `evidence` names until a deliberate data-model migration is approved.
+- Design Review still stores `proofSummary` internally because that is the existing field name.
+- Browser visual verification still needs Browser Use when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify the receipt language sweep when Browser Use is callable; if unavailable, continue by tightening layout density and focus/disabled states on the receipt-loop surfaces without changing backend semantics. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1209 EDT - Ledger Receipt Route Language
 

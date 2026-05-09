@@ -164,7 +164,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                   <div>
                     <h3 className="text-[11px] font-bold uppercase tracking-widest">Record Review</h3>
                     <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
-                      Local checklist. Link Workbench evidence when proof exists.
+                      Local checklist. Link a Workbench receipt when the body exists.
                     </p>
                   </div>
                   <Chip label="append only" tone={C.success} />
@@ -187,7 +187,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                       {REVIEW_STATUSES.map((item) => <SelectItem key={item} value={item}>{labelize(item)}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <Input value={targetLabel} onChange={(event) => setTargetLabel(event.target.value)} aria-label="Design review target label" placeholder="Target, such as Workbench evidence detail." />
+                  <Input value={targetLabel} onChange={(event) => setTargetLabel(event.target.value)} aria-label="Design review target label" placeholder="Target, such as Workbench receipt detail." />
                   <Select value={String(projectId)} onValueChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}>
                     <SelectTrigger aria-label="Design review project" className="w-full">
                       <SelectValue />
@@ -200,11 +200,11 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                     </SelectContent>
                   </Select>
                   <Select value={String(evidenceId)} onValueChange={(value) => setEvidenceId(value === "none" ? "none" : Number(value))}>
-                    <SelectTrigger aria-label="Linked Workbench evidence" className="w-full sm:col-span-2">
+                    <SelectTrigger aria-label="Linked Workbench receipt" className="w-full sm:col-span-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No evidence link</SelectItem>
+                      <SelectItem value="none">No receipt link</SelectItem>
                       {(evidencePicker.data?.items ?? []).map((item) => (
                         <SelectItem key={item.id} value={String(item.id)}>
                         #{item.id} {item.kind.replace(/_/g, " ")} {item.title}
@@ -231,7 +231,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                 </div>
 
                 <div className="mt-2 grid gap-1.5">
-                  <Textarea value={proofSummary} onChange={(event) => setProofSummary(event.target.value)} aria-label="Design review proof summary" placeholder="What was checked. Name the proof or say what proof is missing." rows={3} />
+                  <Textarea value={proofSummary} onChange={(event) => setProofSummary(event.target.value)} aria-label="Design review receipt summary" placeholder="What was checked. Name the receipt or say what receipt is missing." rows={3} />
                   <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                     <Textarea value={violations} onChange={(event) => setViolations(event.target.value)} aria-label="Design review violations" placeholder="Violations, one per line. Leave blank only if none were found." rows={3} />
                     <Textarea value={nextActions} onChange={(event) => setNextActions(event.target.value)} aria-label="Design review next actions" placeholder="Next actions, one per line. Required." rows={3} />
@@ -268,7 +268,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Reviews</h3>
                   <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
-                    Local design proof ledger.
+                    Local design receipt ledger.
                   </p>
                 </div>
                 <Chip label={`${reviews.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
@@ -286,7 +286,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                         <Chip label={labelize(review.targetType)} tone={C.accent} />
                         <Chip label={labelize(review.status)} tone={review.status === "blocked" ? C.danger : C.warning} />
                         <Chip label={review.checklistScore} tone={C.gold} />
-                        {review.evidenceId != null && <Chip label={`evidence #${review.evidenceId}`} tone={C.success} />}
+                        {review.evidenceId != null && <Chip label={`receipt #${review.evidenceId}`} tone={C.success} />}
                       </div>
                       <h4 className="mt-1.5 text-[11px] font-semibold" style={{ color: C.textPrimary }}>{review.targetLabel}</h4>
                       <p className="mt-1 max-h-[34px] overflow-hidden text-[11px] leading-snug" style={{ color: C.textMuted }}>{review.proofSummary}</p>
@@ -306,7 +306,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
               )}
               {evidencePicker.isLoading && (
                 <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-                  Reading Workbench evidence links.
+                  Reading Workbench receipt links.
                 </div>
               )}
             </aside>

@@ -204,7 +204,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               </div>
               <div className="flex gap-2">
                 <span style={{ color: C.accent }} className="shrink-0">›</span>
-                <span>Tool events map to agent state, route, evidence, and Ledger records.</span>
+                <span>Tool events map to agent state, route, receipts, and Ledger records.</span>
               </div>
               <div className="flex gap-2">
                 <span style={{ color: C.accent }} className="shrink-0">›</span>

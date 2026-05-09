@@ -6,7 +6,7 @@ type RuleItem = readonly [string, string];
 
 const foundations: RuleItem[] = [
   ["Shell", "Top bar, left rail, center surface, right context, bottom Ask Aang."],
-  ["Type", "Compact UI type. Monospace for ids, logs, paths, evidence, models."],
+  ["Type", "Compact UI type. Monospace for ids, logs, paths, receipts, models."],
   ["Color", "Dark neutrals. Gold receipts. Blue work. Violet routing. Amber review. Red blocked."],
   ["Shape", "Small radius. Borders carry structure. No card maze."],
   ["Motion", "Only state, route, drawer, approval, and comparison motion."],
@@ -17,7 +17,7 @@ const primitives: RuleItem[] = [
   ["Dropdowns", "Compact choices. Trigger shows current value. Risk changes use a gate."],
   ["Context menus", "Object actions only. Every action has a visible equivalent."],
   ["Drawers", "Preserve current work. Use for logs, council, comparison, media, source detail."],
-  ["Modals", "Hard gates only. Action, target, risk, evidence, receipt."],
+  ["Modals", "Hard gates only. Action, target, risk, receipt."],
   ["Tables", "Queues and ledgers. Status, owner, time, source visible."],
 ];
 
@@ -26,7 +26,7 @@ const uxFlow = [
   "Aang reads mode.",
   "Cortana routes.",
   "Owner agent works.",
-  "Evidence is attached.",
+  "Receipt body is attached.",
   "Approval gates risky action.",
   "Validator checks when needed.",
   "Output lands.",
@@ -35,8 +35,8 @@ const uxFlow = [
 
 const surfaceRules: RuleItem[] = [
   ["Keep", "Spatial spine. Agent addresses, status, route, council."],
-  ["Workshop", "Dense work. Preview, browser, terminal, evidence, annotation, comparison."],
-  ["Ledger", "Proof before summary. Route, evidence, approvals, commands, outputs."],
+  ["Workshop", "Dense work. Preview, browser, terminal, receipts, annotation, comparison."],
+  ["Ledger", "Receipt before summary. Route, audit trail, approvals, commands, outputs."],
   ["Settings", "Plain controls. Permissions, storage, models, integrations."],
 ];
 
@@ -98,7 +98,7 @@ export default function UISystemPanel({ onClose }: { onClose: () => void }) {
               "What mode is this.",
               "Which object changes.",
               "Which agent owns it.",
-              "What evidence is used.",
+              "What receipt is used.",
               "What approval can block it.",
               "Where the receipt lands.",
               "What happens when it fails.",

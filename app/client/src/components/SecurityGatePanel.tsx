@@ -169,7 +169,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               </Button>
             </div>
             <p className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
-              This creates local evidence only. Browser, clone, download, install, and execution stay gated.
+              This creates a local receipt only. Browser, clone, download, install, and execution stay gated.
             </p>
           </form>
 

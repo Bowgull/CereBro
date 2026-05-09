@@ -259,7 +259,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 Permission Preflights
               </div>
               <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
-                Local audit history. Policy evidence only.
+                Local audit history. Policy receipt only.
               </div>
             </div>
             <div className="flex flex-wrap justify-end gap-1">
@@ -474,7 +474,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 </p>
               </Section>
 
-              <Section title="Context" detail="local evidence">
+              <Section title="Context" detail="local receipt">
                 <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textMuted }}>
                   {selected.contextSummary ?? "No context summary recorded."}
                 </p>

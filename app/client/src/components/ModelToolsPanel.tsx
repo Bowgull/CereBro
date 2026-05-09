@@ -223,7 +223,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
             <MachineRule title="No Calls" body="Registry previews do not call providers, gateways, browsers, or local tools." tone={C.success} />
-            <MachineRule title="Source First" body="A source URL is evidence, not trust. Surfer and Oak still validate current claims." tone={C.warning} />
+            <MachineRule title="Source First" body="A source URL is a signal, not trust. Surfer and Oak still validate current claims." tone={C.warning} />
             <MachineRule title="Approval" body="External model/tool use needs a visible action receipt before it runs." tone={C.danger} />
           </div>
         </section>

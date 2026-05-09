@@ -162,14 +162,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 : "No exit code or Workbench receipt has been recorded yet.",
           next: selectedEvidence
             ? selectedEvidence.validationStatus === "needs_review"
-              ? "Open the Workbench body and add validation before treating this as build proof."
+              ? "Open the Workbench body and add validation before treating this as build support."
               : "Use the Workbench body and Ledger trail as the receipt path for the next build decision."
             : selectedObservation.outputSummary
               ? "Create a Workbench receipt, then add a learning note or Tony follow-up if this result should shape the next build pass."
               : "Attach observed output from an approved command run, then save a Workbench receipt.",
           notYet: [
             "Do not rerun from Terminal Lab.",
-            selectedEvidence ? "Do not treat this receipt as validated until its Workbench validation says so." : "Do not treat this as proof until a Workbench receipt exists.",
+            selectedEvidence ? "Do not treat this receipt as validated until its Workbench validation says so." : "Do not treat this as build support until a Workbench receipt exists.",
             "Do not push or mutate git from this panel.",
           ],
           tone: toneForRisk(selectedObservation.risk),
@@ -329,7 +329,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       `Status: ${observation.status}`,
       observation.exitCode == null ? null : `Exit: ${observation.exitCode}`,
       "",
-      "Staged from Terminal Lab. Saving in Workbench creates a local append-only evidence record. It does not execute the command.",
+      "Staged from Terminal Lab. Saving in Workbench creates a local append-only receipt body. It does not execute the command.",
     ].filter(Boolean).join("\n");
     try {
       window.sessionStorage.setItem(
@@ -349,7 +349,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         }),
       );
     } catch {
-      // Workbench will still open; the user can add the evidence manually.
+      // Workbench will still open; the user can add the receipt manually.
     }
     onNavigate("workbench");
   }
@@ -652,7 +652,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                         <Chip label={item.risk.replace(/_/g, " ")} tone={toneForRisk(item.risk)} />
                         <Chip label={item.suggestedAgent ?? "cortana"} tone={C.gold} />
                         <Chip label={item.status} tone={C.textSecondary} />
-                        {savedEvidence && <Chip label={`evidence #${savedEvidence.id}`} tone={C.success} />}
+                        {savedEvidence && <Chip label={`receipt #${savedEvidence.id}`} tone={C.success} />}
                         {item.diagnosticStatus && <Chip label={item.diagnosticStatus.replace(/_/g, " ")} tone={C.warning} />}
                         {item.diagnosticParentId != null && <Chip label={`from #${item.diagnosticParentId}`} tone={C.gold} />}
                         {item.diagnosticRootId != null && <Chip label={`root #${item.diagnosticRootId}`} tone={C.textSecondary} />}
@@ -759,7 +759,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 </div>
                               </div>
                               <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-1">
-                                <DiagnosticNote label="Evidence" value={draft.evidence} />
+                                <DiagnosticNote label="Receipt Need" value={draft.evidence} />
                                 <DiagnosticNote label="Expected" value={draft.expectedSignal} />
                               </div>
                               <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.warning }} title={draft.approvalGate}>
@@ -1078,7 +1078,7 @@ function ProjectContextRail({
       <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <SectionTitle title="Project Context" detail="reading" />
         <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-          Reading Project Lab evidence.
+          Reading Project Lab push context.
         </div>
       </section>
     );
@@ -1147,7 +1147,7 @@ function ProjectContextRail({
       </div>
 
       <div className="mt-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Project Lab evidence only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
+        Project Lab read only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
         Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
       </div>
     </section>

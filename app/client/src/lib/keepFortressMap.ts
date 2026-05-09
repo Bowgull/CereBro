@@ -182,8 +182,8 @@ export const KEEP_FORTRESS_MAP: KeepFortressMap = {
       agentSpot: spot(52, 9),
       callSpot: spot(58, 5),
       windowSlots: [spot(55, 6), spot(56, 6), spot(57, 6)],
-      propZones: [zone("review_plinth", "Review plinth", 49, 6, 4, 2), zone("proof_rail", "Proof rail", 47, 9, 8, 1)],
-      notes: "Elevated proof room with sightline to Cortana.",
+      propZones: [zone("review_plinth", "Review plinth", 49, 6, 4, 2), zone("proof_rail", "Receipt rail", 47, 9, 8, 1)],
+      notes: "Elevated receipt room with sightline to Cortana.",
     },
     {
       agentId: "tony",

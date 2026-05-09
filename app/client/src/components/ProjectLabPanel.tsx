@@ -377,7 +377,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
-    { label: "Proof", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
+    { label: "Receipts", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
     { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
 
@@ -679,7 +679,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Approvals" value={`${project.activity.approvals.pending} pending`} />
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
-                    <MetaBlock label="Proof" value={`${proofStats.total} receipts / ${proofStats.needsReview} review`} />
+                    <MetaBlock label="Receipts" value={`${proofStats.total} receipts / ${proofStats.needsReview} review`} />
                   </div>
 
                   <ProofStatusStrip stats={proofStats} />
@@ -812,7 +812,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       {([
                         ["plan_next_slice", "Plan slice"],
                         ["inspect_dirty_state", "Inspect state"],
-                        ["package_proof", "Package proof"],
+                        ["package_proof", "Package receipts"],
                         ["validation_pass", "Validate"],
                       ] as Array<[DraftActionKey, string]>).map(([actionKey, label]) => (
                         <Button
@@ -1756,9 +1756,9 @@ function PushDecisionNote({
     }
     if (stats.total === 0) {
       return {
-        label: "proof missing",
+        label: "receipts missing",
         tone: readyState ? C.warning : C.textMuted,
-        text: `No Workbench proof is linked yet. ${pushLabel} is only a git-state read until evidence exists.`,
+        text: `No Workbench receipt is linked yet. ${pushLabel} is only a git-state read until a receipt exists.`,
       };
     }
     if (stats.validated > 0 && readyState) {
@@ -1769,7 +1769,7 @@ function PushDecisionNote({
       };
     }
     return {
-      label: "proof present",
+      label: "receipts present",
       tone: C.accent,
       text: `${stats.total} receipt${stats.total === 1 ? "" : "s"} exist. Use Workbench for receipt bodies and Ledger for the audit trail.`,
     };

@@ -103,7 +103,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             </span>
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Tasks are proof objects. Status changes stay visible.
+            Tasks are Ledger objects. Status changes stay visible.
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">

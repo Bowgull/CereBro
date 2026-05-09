@@ -156,7 +156,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       const group = existing ?? {
         key: projectKey,
         projectId: item.projectId ?? null,
-        label: item.projectName ?? projectNames.get(item.projectId ?? null) ?? "Unlinked proof",
+        label: item.projectName ?? projectNames.get(item.projectId ?? null) ?? "Unlinked receipt",
         total: 0,
         terminal: 0,
         review: 0,
@@ -443,10 +443,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
                     Active Job
                   </div>
-                  <Chip label="manual proof" tone={C.warning} />
+                  <Chip label="manual receipt" tone={C.warning} />
                 </div>
                 <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
-                  Gather proof before summary.
+                  Gather receipt before summary.
                 </div>
                 <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
                   Pick a lane. Record the observation. Append a receipt.
@@ -496,12 +496,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </p>
             </section>
 
-            <section className="rounded p-2" aria-label="Project proof grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" aria-label="Project receipt grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Receipts</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Local proof state before push decisions.
+                    Local receipt state before push decisions.
                   </p>
                 </div>
                 <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
