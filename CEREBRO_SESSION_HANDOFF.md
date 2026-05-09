@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:32 EDT
+Last updated: 2026-05-08 22:34 EDT
 
 ## Current North Star
 
@@ -20,6 +20,76 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2234 - Front-End Build Steward: Compact Card Primitive
+
+### What Changed
+
+- Tightened the shared `Card` primitive density.
+- Reduced card gap, vertical padding, header/content/footer padding, and card
+  radius so card surfaces better match the compact CereBro shell.
+
+### Files Touched
+
+- `app/client/src/components/ui/card.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Shared card surfaces now align better with the compact density and 8px-max
+  radius rule.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue shared primitive review with dialog/drawer/menu grouping only if
+  visible drift remains. Otherwise move back to product surface composition.
+
+## 2026-05-08 2232 - Front-End Build Steward: Compact Approval Model Tool Rows
+
+### What Changed
+
+- Updated approval detail metadata rows so compact labels truncate instead of
+  re-wrapping into dense panels.
+- Updated model tool proposal rows so long tool names truncate with full names
+  in hover titles.
+
+### Files Touched
+
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Approval and model-tool surfaces now match the compact-label rule used across
+  the other dense work panels.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Reassess the normalization tranche against the UI primitive goals and move
+  back to primitives only if remaining shared-component drift is visible.
 
 ## 2026-05-08 2230 - Front-End Build Steward: Compact Config Secrets
 
