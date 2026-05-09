@@ -991,6 +991,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         "cerebro:workbench-filter",
         JSON.stringify({
           source: "ledger",
+          evidenceId: item.id,
           kind: item.kind,
           query: item.targetUri ?? item.title,
           groupBy: "kind",

@@ -319,13 +319,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     onNavigate("workbench");
   }
 
-  function openWorkbenchProof(observationId: number) {
+  function openWorkbenchProof(observationId: number, evidenceId: number) {
     if (!onNavigate) return;
     try {
       window.sessionStorage.setItem(
         "cerebro:workbench-filter",
         JSON.stringify({
           source: "terminal_lab",
+          evidenceId,
           kind: "terminal_output",
           query: `terminal_lab:observation:${observationId}`,
           groupBy: "command",
@@ -791,7 +792,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           </Button>
                           <Button
                             type="button"
-                            onClick={() => savedEvidence ? openWorkbenchProof(item.id) : stageWorkbenchProof(item)}
+                            onClick={() => savedEvidence ? openWorkbenchProof(item.id, savedEvidence.id) : stageWorkbenchProof(item)}
                             disabled={!onNavigate}
                             variant="secondary"
                             size="sm"
