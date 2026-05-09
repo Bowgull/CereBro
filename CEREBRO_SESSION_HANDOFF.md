@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:56 EDT
+Last updated: 2026-05-09 06:59 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0659 EDT - Front-End Build Steward: Zone Header Density
+
+### What Changed
+
+- Browser-reviewed the shared zone header after the Ledger Overview pass.
+- Tightened zone surface buttons from 32px to 28px high.
+- Matched the zone surface scroll lane to the compact Ledger filter lanes with
+  the same dark scrollbar treatment.
+- Reduced surface label type scale so the shell no longer feels heavier than
+  the normalized Ledger panels below it.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed the compact
+  Ledger zone header and surface tabs load.
+
+### Front-End Steward Review
+
+- The shared shell now has the same compact density as the normalized Ledger
+  panels. It reads as navigation, not another content block.
+
+### Known Risks
+
+- Browser screenshot capture was avoided because recent screenshot attempts
+  timed out. This pass used DOM verification plus checks.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Move to the next noisiest Workshop or Keep surface, starting with the one
+  currently visible in the browser.
 
 ## 2026-05-09 0656 EDT - Front-End Build Steward: Ledger Overview Density
 

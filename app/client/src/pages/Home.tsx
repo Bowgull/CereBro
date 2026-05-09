@@ -845,7 +845,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 
   return (
     <div
-      className="shrink-0 px-2.5 py-1.5 flex items-center gap-2 overflow-hidden"
+      className="flex shrink-0 items-center gap-1.5 overflow-hidden px-2.5 py-1.5"
       style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
     >
       <div className="hidden xl:flex min-w-[150px] items-center gap-2">
@@ -860,7 +860,12 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
         </div>
       </div>
 
-      <div className="flex-1 flex items-stretch gap-1 overflow-x-auto" role="group" aria-label={`${zoneItem.label} surfaces`}>
+      <div
+        className="flex flex-1 items-stretch gap-1 overflow-x-auto"
+        role="group"
+        aria-label={`${zoneItem.label} surfaces`}
+        style={{ scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         {surfaces.map((surface) => {
           const isActive = nav === surface.id;
           return (
@@ -870,7 +875,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
               onClick={() => onNavigate(surface.id)}
               aria-pressed={isActive}
               aria-label={`Open ${surface.label}`}
-              className="h-8 shrink-0 justify-start whitespace-normal px-2 text-left"
+              className="h-7 shrink-0 justify-start whitespace-normal px-2 text-left"
               variant={isActive ? "secondary" : "outline"}
               style={{
                 background: isActive ? C.surfaceRaised : C.surface,
@@ -880,10 +885,10 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
               title={surface.meta}
             >
               <span className="block min-w-0">
-                <span className="block text-[11px] font-semibold uppercase tracking-wider leading-none">
+                <span className="block text-[10px] font-semibold uppercase tracking-wider leading-none">
                   {surface.label}
                 </span>
-                <span className="hidden xl:block text-[10px] leading-none mt-1" style={{ color: C.textMuted }}>
+                <span className="mt-1 hidden text-[10px] leading-none xl:block" style={{ color: C.textMuted }}>
                   {surface.meta}
                 </span>
               </span>
