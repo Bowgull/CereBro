@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:04 EDT
+Last updated: 2026-05-09 00:06 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0006 - Front-End Build Steward: Routed Tool Surface Frames
+
+### What Changed
+
+- Added explicit full-height border framing and overflow control to Workbench,
+  Terminal Lab, Hedwig Inbox, Surfer Sources, Approval Dashboard, and Aang
+  Companion routed panels.
+- Standardized these visible tool routes with the full-height Ledger and
+  Settings surfaces from the prior slice.
+- Preserved existing panel behavior and local-only workflow copy.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Routed tool panels now read as deliberate workspace surfaces instead of
+  inheriting mixed framing from earlier overlay-era panels.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Manual browser QA should still inspect panel overflow and header height
+  across desktop and narrow widths.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue visible shell QA with Project Lab, Model Tools, Security Gate,
+  Output Library, Automation, and any remaining dormant routed panels.
 
 ## 2026-05-09 0004 - Front-End Build Steward: Full-Height Routed Panels
 
