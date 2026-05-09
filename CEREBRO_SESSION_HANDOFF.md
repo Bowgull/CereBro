@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:00 EDT
+Last updated: 2026-05-09 06:02 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0602 - Front-End Build Steward: Research Source History Groups
+
+### What Changed
+
+- Browser-reviewed Research after the route-density pass.
+- Grouped repeated source history events by event type, owner, display source,
+  and title.
+- Added grouped counts, so the 25 repeated Hedwig source-save events now read as
+  one grouped row instead of flooding the rail.
+- Capped the visible source-history rail to six grouped events with overflow
+  text.
+
+### Files Touched
+
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- The Research rail now exposes source-history signal without repeating the same
+  capture card over and over.
+
+### Known Risks
+
+- Browser Ladder and Policy still need the compact receipt treatment used on
+  Terminal Lab.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Finish Research right rail by compacting Browser Ladder and Policy into
+  receipt rows, then move on to Workbench.
 
 ## 2026-05-09 0600 - Front-End Build Steward: Research Route Density
 

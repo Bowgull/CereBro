@@ -37,6 +37,20 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   const savedSources = data?.savedSources ?? [];
   const sourceEvents = data?.recentSourceEvents ?? [];
   const cards = preview.data?.cards ?? [];
+  const sourceEventGroups = Array.from(
+    sourceEvents.reduce((groups, event) => {
+      const display = event.sourceDisplayName ?? (event.uri ? sourceDisplayName(event.uri) : "unlinked source");
+      const title = event.title ?? display;
+      const key = [event.eventType, event.ownerAgent ?? "unknown", display, title].join("::");
+      const current = groups.get(key);
+      if (current) {
+        current.count += 1;
+      } else {
+        groups.set(key, { event, display, title, count: 1 });
+      }
+      return groups;
+    }, new Map<string, { event: (typeof sourceEvents)[number]; display: string; title: string; count: number }>()).values(),
+  );
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -206,7 +220,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
 
           <aside className="space-y-2.5 min-w-0">
             <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Source History" detail={`${sourceEvents.length} events`} />
+              <SectionTitle title="Source History" detail={`${sourceEventGroups.length}/${sourceEvents.length} groups`} />
               <div className="flex flex-wrap gap-1 mt-2">
                 {(["all", "surfer", "hedwig"] as const).map((owner) => (
                   <Button
@@ -234,19 +248,22 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     No source history events recorded yet.
                   </div>
                 ) : (
-                  sourceEvents.slice(0, 8).map((event) => (
-                    <div key={event.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  sourceEventGroups.slice(0, 6).map(({ event, display, title, count }) => (
+                    <div key={`${event.id}-${count}`} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.textSecondary }}>
                           {event.eventType.replace(/_/g, " ")}
                         </div>
-                        <MiniBadge label={event.ownerAgent ?? "unknown"} tone={event.ownerAgent === "surfer" ? C.accent : C.gold} />
+                        <div className="flex items-center gap-1">
+                          {count > 1 && <MiniBadge label={`${count}x`} tone={C.textMuted} />}
+                          <MiniBadge label={event.ownerAgent ?? "unknown"} tone={event.ownerAgent === "surfer" ? C.accent : C.gold} />
+                        </div>
                       </div>
                       <div className="text-xs font-semibold truncate mt-1" style={{ color: C.textPrimary }} title={event.title ?? event.uri}>
-                        {event.title ?? event.sourceDisplayName ?? (event.uri ? sourceDisplayName(event.uri) : "source event")}
+                        {title}
                       </div>
                       <div className="text-[10px] leading-snug truncate mt-1" style={{ color: C.textMuted }} title={event.uri}>
-                        {event.sourceDisplayName ?? (event.uri ? sourceDisplayName(event.uri) : "unlinked source")}
+                        {display}
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {event.trustLevel && <MiniBadge label={event.trustLevel} tone={TRUST_TONES[event.trustLevel] ?? C.textMuted} />}
@@ -267,6 +284,11 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                       )}
                     </div>
                   ))
+                )}
+                {sourceEventGroups.length > 6 && (
+                  <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                    Showing 6 of {sourceEventGroups.length} grouped source events
+                  </div>
                 )}
               </div>
             </section>
