@@ -66,16 +66,24 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between px-3 py-1.5 shrink-0"
+        className="flex items-center justify-between gap-3 px-3 py-2.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Surfer Sources
+          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Research
             <span className="ml-2" style={{ color: C.textSecondary }}>{savedSources.length}</span>
           </div>
           <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
             Source cards, browser ladder, and approval-gated research previews.
+          </div>
+          <div className="mt-1 flex flex-wrap gap-1">
+            <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
+            <Badge variant={data?.browserEnabled ? "success" : "warning"} className="uppercase">Browser {data?.browserEnabled ? "enabled" : "locked"}</Badge>
+            <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "surfer"}</Badge>
+            <Badge variant="secondary" className="uppercase">
+              Trusted {savedSources.filter((source) => ["official", "primary", "high"].includes(source.trustLevel)).length}/{savedSources.length}
+            </Badge>
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm" className="shrink-0">
@@ -83,74 +91,69 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
-        <StatusBlock label="Browser" value={data?.browserEnabled ? "Enabled" : "Locked"} tone={data?.browserEnabled ? C.success : C.warning} />
-        <StatusBlock label="Owner" value={data?.ownerAgent ?? "surfer"} tone={C.accent} />
-        <StatusBlock label="Trusted" value={`${savedSources.filter((source) => ["official", "primary", "high"].includes(source.trustLevel)).length}/${savedSources.length}`} tone={C.textSecondary} />
+      <div className="grid grid-cols-1 gap-2 px-3 py-2 shrink-0 xl:grid-cols-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <form onSubmit={submit} className="space-y-1.5">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Ask Surfer what to find, compare, source, or preview."
+            />
+            <Button
+              type="submit"
+              disabled={!query.trim() || preview.isPending}
+            >
+              {preview.isPending ? "Reading" : "Preview"}
+            </Button>
+          </div>
+          <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+            Plan only. Surfer does not browse from this preview.
+          </div>
+        </form>
+
+        <form onSubmit={submitUrl} className="space-y-1.5">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <Input
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="Approved public URL to ingest as a source."
+            />
+            <Button
+              type="button"
+              disabled={!url.trim() || !onNavigate}
+              onClick={openSecurityGate}
+              variant="secondary"
+              title={url.trim() ? sourceDisplayName(url.trim()) : "Open Security Gate"}
+            >
+              Security
+            </Button>
+            <Button
+              type="submit"
+              disabled={!url.trim() || ingestUrl.isPending}
+              variant="risk"
+            >
+              {ingestUrl.isPending ? "Fetching" : "Ingest"}
+            </Button>
+          </div>
+          <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+            One approved public fetch. Use Spock for unfamiliar URLs.
+          </div>
+          {ingestUrl.data && (
+            <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
+              {ingestUrl.data.ok && ingestUrl.data.source
+                ? `Saved source: ${
+                    ingestUrl.data.source.title ??
+                    ingestUrl.data.source.sourceDisplayName ??
+                    sourceDisplayName(ingestUrl.data.source.uri)
+                  }`
+                : ingestUrl.data.reason ?? "URL ingestion failed."}
+            </div>
+          )}
+        </form>
       </div>
 
-      <form onSubmit={submit} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Ask Surfer what to find, compare, source, or preview."
-          />
-          <Button
-            type="submit"
-            disabled={!query.trim() || preview.isPending}
-          >
-            {preview.isPending ? "Reading" : "Preview"}
-          </Button>
-        </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-          This panel does not browse yet. It previews the research plan and approval gates before Surfer touches the web.
-        </div>
-      </form>
-
-      <form onSubmit={submitUrl} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_auto] gap-2">
-          <Input
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="Approved public URL to ingest as a source."
-          />
-          <Button
-            type="button"
-            disabled={!url.trim() || !onNavigate}
-            onClick={openSecurityGate}
-            variant="secondary"
-            title={url.trim() ? sourceDisplayName(url.trim()) : "Open Security Gate"}
-          >
-            Security Gate
-          </Button>
-          <Button
-            type="submit"
-            disabled={!url.trim() || ingestUrl.isPending}
-            variant="risk"
-          >
-            {ingestUrl.isPending ? "Fetching" : "Ingest URL"}
-          </Button>
-        </div>
-        <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-          Record a Spock receipt first when the URL is unfamiliar. Ingest URL approves one public fetch and source-library record.
-        </div>
-        {ingestUrl.data && (
-          <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
-            {ingestUrl.data.ok && ingestUrl.data.source
-              ? `Saved source: ${
-                  ingestUrl.data.source.title ??
-                  ingestUrl.data.source.sourceDisplayName ??
-                  sourceDisplayName(ingestUrl.data.source.uri)
-                }`
-              : ingestUrl.data.reason ?? "URL ingestion failed."}
-          </div>
-        )}
-      </form>
-
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-2.5 p-3">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-2.5 px-3 pt-3 pb-20">
           <div className="space-y-2.5 min-w-0">
             {preview.data && (
               <section className="space-y-2">
@@ -302,19 +305,6 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             </section>
           </aside>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0">
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-        {label}
-      </div>
-      <div className="text-xs font-semibold truncate" style={{ color: tone }} title={value}>
-        {value.replace(/_/g, " ")}
       </div>
     </div>
   );
