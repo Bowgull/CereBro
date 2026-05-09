@@ -411,10 +411,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </p>
             </section>
 
-            <section className="rounded p-3" aria-label="Create local Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex items-center justify-between gap-3 mb-3">
+            <section className="rounded p-2" aria-label="Create local Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Add Evidence</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Add Evidence</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                     Manual local record. Append-only. No capture.
                   </p>
@@ -422,7 +422,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Chip label="local db" tone={C.success} />
               </div>
 
-              <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)]">
+              <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4">
                 <AppSelect
                   label="Evidence kind"
                   value={kind}
@@ -448,6 +448,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="Evidence title."
                   aria-label="Evidence title"
+                  className="xl:col-span-3"
                 />
                 <AppSelect
                   label="Project link"
@@ -466,6 +467,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   onChange={(event) => setTargetUri(event.target.value)}
                   placeholder="Optional target URL, file path, artifact id, or panel."
                   aria-label="Evidence target"
+                  className="xl:col-span-3"
                 />
                 <AppSelect
                   label="Task link"
@@ -577,18 +579,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   onChange={(event) => setAnnotationText(event.target.value)}
                   placeholder="Annotation note, optional."
                   aria-label="Evidence annotation text"
-                  className="md:col-span-2"
+                  className="col-span-2"
                 />
                 <Textarea
                   value={summary}
                   onChange={(event) => setSummary(event.target.value)}
                   placeholder="What is visible, what matters, and which agent should care."
                   aria-label="Evidence summary"
-                  className="md:col-span-2"
+                  className="col-span-2 xl:col-span-4"
                 />
               </div>
               <div
-                className="mt-3 rounded p-3"
+                className="mt-2 rounded p-2"
                 aria-label="Temporary media intake"
                 onDragOver={(event) => {
                   event.preventDefault();
@@ -599,17 +601,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 }}
                 style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                       Temporary Media
                     </h4>
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: C.textMuted }}>
+                    <p className="mt-0.5 text-[11px] leading-snug" style={{ color: C.textMuted }}>
                       Browser-memory preview. No upload. No vault save. No vision model.
                     </p>
                   </div>
                   <label
-                    className="inline-flex cursor-pointer items-center rounded px-3 py-2 text-xs font-semibold uppercase tracking-wider"
+                    className="inline-flex cursor-pointer items-center rounded px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider"
                     style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
                     Choose Media
@@ -626,7 +628,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </label>
                 </div>
                 {temporaryMedia ? (
-                  <div className="mt-3 grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
+                  <div className="mt-2 grid gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
                     <div
                       className="relative overflow-hidden rounded"
                       role="button"
@@ -689,7 +691,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         {temporaryMedia.durationSec != null && <Chip label={`${formatSeconds(temporaryMedia.durationSec)} duration`} tone={C.textMuted} />}
                         <Chip label="temporary" tone={C.warning} />
                       </div>
-                      <div className="text-xs leading-relaxed break-words" style={{ color: C.textSecondary }}>
+                      <div className="text-[11px] leading-snug break-words" style={{ color: C.textSecondary }}>
                         {temporaryMedia.name}
                       </div>
                       {temporaryMedia.kind === "video" && (
@@ -701,7 +703,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           aria-label="Video frame time in seconds"
                         />
                       )}
-                      <div className="text-xs leading-relaxed" style={{ color: C.textMuted }}>
+                      <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                         Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
                       </div>
                       <Button
@@ -717,12 +719,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3 rounded px-3 py-3 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div className="mt-2 rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.
                   </div>
                 )}
               </div>
-              <div className="mt-3 flex items-center justify-between gap-3">
+              <div className="mt-2 flex items-center justify-between gap-2">
                 <label className="flex items-center gap-2 text-xs" style={{ color: C.textMuted }}>
                   <Checkbox
                     checked={sensitive}
@@ -731,7 +733,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   />
                   Sensitive
                 </label>
-                <div role="status" aria-live="polite" className="text-xs flex-1" style={{ color: C.textMuted }}>
+                <div role="status" aria-live="polite" className="flex-1 text-[11px]" style={{ color: C.textMuted }}>
                   {createEvidence.data?.ok ? `Saved evidence #${createEvidence.data.evidence.id}. No external action.` : "Evidence records append. They do not replace earlier notes."}
                 </div>
                 <Button

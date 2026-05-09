@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:12 EDT
+Last updated: 2026-05-09 06:15 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0615 - Front-End Build Steward: Workbench Add Evidence Density
+
+### What Changed
+
+- Browser-reviewed the Workbench Add Evidence editor after the surface receipt
+  pass.
+- Changed Add Evidence from a long two-track ladder into compact paired rows at
+  the current browser width.
+- Kept required evidence title and summary visible while compressing optional
+  project, task, session, source, command, artifact, permission, viewport, and
+  coordinate fields.
+- Tightened Temporary Media, sensitive status, and save controls into the same
+  editor viewport.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed the Add Evidence
+  editor renders as a compact work form without overlap.
+
+### Front-End Steward Review
+
+- Add Evidence now behaves like a dense operating tool instead of a tall intake
+  questionnaire. The required content, metadata, temporary media guard, and save
+  state are visible together.
+
+### Known Risks
+
+- Recent Evidence and evidence detail still need density passes.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Compact Recent Evidence filters, evidence groups, and record rows.
 
 ## 2026-05-09 0612 - Front-End Build Steward: Workbench Surface Receipts
 
