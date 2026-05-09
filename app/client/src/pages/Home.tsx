@@ -1111,8 +1111,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               Reading local Workbench receipts.
             </div>
           ) : latestEvidenceRows.length === 0 ? (
-            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No Workbench receipts yet.
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              No Workbench receipts yet. Open Workbench Bodies and save the first local receipt.
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">

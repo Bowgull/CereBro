@@ -511,8 +511,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   Reading local receipt records.
                 </div>
               ) : projectProofGroups.length === 0 ? (
-                <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  No project receipts exist yet.
+                <div className="rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  No project receipts exist yet. Save a local receipt, then link it to a project before using it for push context.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2 xl:grid-cols-3">
@@ -1083,8 +1083,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
               ))}
               {(evidence.data?.items ?? []).length === 0 ? (
-                <div className="rounded px-3 py-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  No Workbench receipts yet.
+                <div className="rounded px-3 py-3 text-xs leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  No Workbench receipts yet. Pick a lane above, name the observation, then save a local receipt.
                 </div>
               ) : (
                 <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">

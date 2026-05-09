@@ -625,20 +625,24 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                     active={observationScope === "selectedTask"}
                     disabled={!selectedTaskId}
                     label="Task"
+                    disabledReason="Select a task link before filtering observations by task."
                     onClick={() => setObservationScope("selectedTask")}
                   />
                   <ScopeButton
                     active={observationScope === "selectedSession"}
                     disabled={!selectedSessionId}
                     label="Session"
+                    disabledReason="Select a session link before filtering observations by session."
                     onClick={() => setObservationScope("selectedSession")}
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 {observationRows.length === 0 ? (
-                  <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                    {observationScope === "all" ? "No command previews recorded yet." : "No command previews match the selected link."}
+                  <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    {observationScope === "all"
+                      ? "No command previews recorded yet. Paste a command, preview it, then save the receipt body in Workbench."
+                      : "No command previews match the selected link. Switch to All or select a different task or session."}
                   </div>
                 ) : (
                   observationRows.map((item) => (
@@ -1089,7 +1093,7 @@ function ProjectContextRail({
       <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <SectionTitle title="Project Context" detail="none" />
         <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-          No Project Lab context matched this command yet.
+          No Project Lab context matched this command yet. Link the observation to a project, task, or session before treating it as push context.
         </div>
       </section>
     );
@@ -1267,11 +1271,13 @@ function DiagnosticNote({ label, value }: { label: string; value: string }) {
 function ScopeButton({
   active,
   disabled,
+  disabledReason,
   label,
   onClick,
 }: {
   active: boolean;
   disabled?: boolean;
+  disabledReason?: string;
   label: string;
   onClick: () => void;
 }) {
@@ -1280,6 +1286,8 @@ function ScopeButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
+      title={disabled ? disabledReason : undefined}
+      aria-label={disabled ? disabledReason : label}
       variant={active ? "secondary" : "ghost"}
       size="sm"
     >
