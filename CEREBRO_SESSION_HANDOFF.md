@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:55 EDT
+Last updated: 2026-05-08 23:58 EDT
 
 ## Current North Star
 
@@ -20,6 +20,47 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2358 - Front-End Build Steward: Compact Form Helpers
+
+### What Changed
+
+- Normalized `InputGroup`, `Item`, `Kbd`, `Breadcrumb`, and `Calendar`
+  primitives away from generic shadcn theme tokens.
+- Applied CereBro dark shell surfaces, compact text, visible focus rings,
+  disabled/error states, and 8px max radius.
+- Kept `Sidebar` out of this slice because it is broad and variable-driven.
+
+### Files Touched
+
+- `app/client/src/components/ui/input-group.tsx`
+- `app/client/src/components/ui/item.tsx`
+- `app/client/src/components/ui/kbd.tsx`
+- `app/client/src/components/ui/breadcrumb.tsx`
+- `app/client/src/components/ui/calendar.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Form-adjacent helpers no longer pull light/default shadcn colors into future
+  CereBro panels.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- `Sidebar` still needs a separate scoped pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Normalize `Sidebar` and the remaining stock primitives with CSS-variable
+  surfaces, then run a global token scan for leftover stock theme classes.
 
 ## 2026-05-08 2355 - Front-End Build Steward: Compact Overlay Helpers
 
