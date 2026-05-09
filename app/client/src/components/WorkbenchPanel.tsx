@@ -934,6 +934,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   type="button"
                   onClick={submitEvidence}
                   disabled={!title.trim() || !summary.trim() || createEvidence.isPending}
+                  title={!title.trim() || !summary.trim() ? "Add a title and summary before saving a local receipt." : "Save a local receipt. No capture or external action runs."}
                   aria-label="Save local Workbench receipt"
                 >
                   {createEvidence.isPending ? "Saving" : "Save Local Receipt"}
@@ -1393,7 +1394,8 @@ function EvidenceDetailPanel({
             variant="risk"
             size="sm"
             className="w-fit"
-            title={item.targetUri}
+            title="Open Security Gate for this target. Workbench does not browse, clone, install, or execute."
+            aria-label={`Open Security Gate for receipt ${item.id}`}
           >
             Security Gate
           </Button>
@@ -1588,7 +1590,13 @@ function EvidenceDetailPanel({
             <Button
               type="button"
               disabled={compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim() || isCreatingComparison}
-              title={compareWithId === "none" ? "Choose a second local receipt before appending a comparison." : undefined}
+              title={
+                compareWithId === "none"
+                  ? "Choose a second local receipt before appending a comparison."
+                  : !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim()
+                    ? "Add a title, summary, and result before appending the comparison."
+                    : "Append a new before/after receipt. The original receipts are not overwritten."
+              }
               onClick={() => {
                 if (compareWithId === "none" || !comparisonTitle.trim() || !comparisonSummary.trim() || !comparisonResult.trim()) return;
                 onCreateComparison?.({
@@ -1606,7 +1614,7 @@ function EvidenceDetailPanel({
               aria-label="Append local before/after receipt comparison"
               size="sm"
             >
-              {isCreatingComparison ? "Saving" : "Append"}
+              {isCreatingComparison ? "Saving" : "Append Comparison"}
             </Button>
           </div>
         </div>
@@ -1649,7 +1657,7 @@ function EvidenceDetailPanel({
             <Button
               type="button"
               disabled={!validationNote.trim() || isCreatingValidationNote}
-              title={!validationNote.trim() ? "Write a validation note before appending it." : undefined}
+              title={!validationNote.trim() ? "Write a validation note before appending it." : "Append a validation receipt. The original receipt is not overwritten."}
               onClick={() => {
                 if (!validationNote.trim()) return;
                 onCreateValidationNote?.({
@@ -1663,7 +1671,7 @@ function EvidenceDetailPanel({
               aria-label="Append local validation note"
               size="sm"
             >
-              {isCreatingValidationNote ? "Saving" : "Append"}
+              {isCreatingValidationNote ? "Saving" : "Append Validation"}
             </Button>
           </div>
         </div>
