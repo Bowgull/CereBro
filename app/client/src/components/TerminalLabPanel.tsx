@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -435,14 +436,15 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                         {item.exitCode != null && <Chip label={`exit ${item.exitCode}`} tone={item.exitCode === 0 ? C.success : C.warning} />}
                       </div>
                       <div
-                        className="text-[11px] rounded px-2 py-1 overflow-x-auto"
+                        className="text-[11px] rounded px-2 py-1 truncate"
                         style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                        title={item.command}
                       >
-                        <code>{item.command}</code>
+                        <code>{compactCommandLabel(item.command)}</code>
                       </div>
                       {item.cwd && (
                         <div className="text-[10px] truncate" style={{ color: C.textMuted }} title={item.cwd}>
-                          {item.cwd}
+                          {compactPathLabel(item.cwd)}
                         </div>
                       )}
                       {item.diagnosticParentId != null && (
@@ -481,8 +483,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 </div>
                                 <Chip label="suggested only" tone={C.warning} />
                               </div>
-                              <div className="text-[11px] rounded px-2 py-1 mt-1 overflow-x-auto" style={{ background: C.background, color: C.textPrimary }}>
-                                <code>{draft.command}</code>
+                              <div className="text-[11px] rounded px-2 py-1 mt-1 truncate" style={{ background: C.background, color: C.textPrimary }} title={draft.command}>
+                                <code>{compactCommandLabel(draft.command)}</code>
                               </div>
                               <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>{draft.reason}</div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-1 mt-1">

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:24 EDT
+Last updated: 2026-05-08 22:25 EDT
 
 ## Current North Star
 
@@ -20,6 +20,43 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2225 - Front-End Build Steward: Compact Terminal Commands
+
+### What Changed
+
+- Added `compactCommandLabel` for dense command display.
+- Updated Terminal Lab observation history and Tony diagnostic draft rows so
+  long commands truncate cleanly instead of forcing horizontal row noise.
+- Updated Terminal Lab cwd display to use compact path labels.
+- Kept full command and cwd evidence in hover titles.
+
+### Files Touched
+
+- `app/client/src/lib/displayLabels.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Terminal Lab keeps focused command previews readable while dense history rows
+  use compact labels. Execution evidence remains accessible on hover.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue command/path cleanup in Workbench and Project Lab detail rows where
+  raw command evidence can still overwhelm compact surfaces.
 
 ## 2026-05-08 2224 - Front-End Build Steward: Compact Path Labels
 

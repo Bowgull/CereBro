@@ -22,3 +22,10 @@ export function compactPathLabel(path: string, maxLength = 64): string {
 
   return `...${label.slice(-(maxLength - 3))}`;
 }
+
+export function compactCommandLabel(command: string, maxLength = 96): string {
+  const normalized = command.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+
+  return `${normalized.slice(0, Math.max(0, maxLength - 1))}...`;
+}
