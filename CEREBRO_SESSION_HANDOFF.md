@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:29 EDT
+Last updated: 2026-05-09 13:31 EDT
 
 ## Current North Star
 
@@ -20,6 +20,40 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1331 EDT - Basement Registry Boundary Pass
+
+### What Changed
+- Tightened Model Tools capability rows so inspection is labeled as local proposal review with no provider/tool call.
+- Model/tool proposal creation now states it creates a local proposal only.
+- Eval note recording now states it records a local note and does not call providers.
+- Aang Companion local state controls now state they are local preview state only and do not change notification channels.
+- Aang event navigation now states it opens a local read and does not trigger notifications.
+- Config bridge copy buttons now state they copy secrets/commands and do not run commands.
+- Skills Manager intentionally deferred because it writes skill files and needs its own hard-gate pass.
+
+### Files Touched
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` first run hit transient `SQLITE_BUSY`; immediate rerun passed 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+- Skills Manager still needs a dedicated hard-gate and destructive-action pass before it is treated as normalized.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: hard-gate Skills Manager create/update/delete actions because that surface writes skill files, then visually inspect main surface density when Browser Use is callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1329 EDT - Hedwig Local Proposal Boundary Pass
 

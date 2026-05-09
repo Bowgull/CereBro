@@ -73,6 +73,8 @@ export default function AangCompanionPanel({
                     type="button"
                     onClick={() => setLocalState(state)}
                     aria-pressed={localState === state}
+                    title={`Set local companion preview state to ${state}. This does not change notification channels.`}
+                    aria-label={`Set local Aang Companion preview state to ${state}`}
                     variant={localState === state ? "secondary" : "outline"}
                     size="sm"
                     className="h-7 px-2"
@@ -110,6 +112,7 @@ export default function AangCompanionPanel({
                     type="button"
                     onClick={() => onNavigate?.(event.route as CompanionRoute)}
                     aria-label={`Open ${event.route} for ${event.label}`}
+                    title={`Open ${event.route} as a local read. Aang Companion does not trigger notifications.`}
                     variant="outline"
                     className="h-auto justify-start whitespace-normal p-2 text-left"
                     style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}

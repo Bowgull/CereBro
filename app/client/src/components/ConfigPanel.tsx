@@ -123,6 +123,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                   variant="outline"
                   size="sm"
                   className="shrink-0"
+                  title="Copy the local bridge API key. Treat it like a secret."
+                  aria-label="Copy local bridge API key"
                   style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                 >
                   {copied === "key" ? "Copied" : "Copy"}
@@ -149,6 +151,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                     variant="outline"
                     size="sm"
                     className="shrink-0"
+                    title="Copy the bridge download command. This button does not run it."
+                    aria-label="Copy bridge download command"
                     style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
                     {copied === "download" ? "Copied" : "Copy"}
@@ -168,6 +172,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                     variant="outline"
                     size="sm"
                     className="shrink-0"
+                    title="Copy the local bridge command. This button does not run it."
+                    aria-label="Copy local bridge run command"
                     style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                   >
                     {copied === "cmd" ? "Copied" : "Copy"}

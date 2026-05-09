@@ -266,6 +266,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                   onClick={() => setSelectedCapabilityId(item.id)}
                   aria-label={`Inspect model tool capability ${item.id}`}
                   aria-pressed={selectedCapability?.id === item.id}
+                  title={`Inspect local model/tool proposal ${item.id}. No provider or tool call runs.`}
                   variant="outline"
                   className="h-auto justify-start whitespace-normal p-2 text-left"
                   role="listitem"
@@ -326,7 +327,13 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             <Textarea value={sourceUris} onChange={(event) => setSourceUris(event.target.value)} aria-label="Model tool source URLs" placeholder="Source URLs. Required before trust, but still not verified here." rows={2} />
             <Textarea value={strengths} onChange={(event) => setStrengths(event.target.value)} aria-label="Model tool strengths" placeholder="Strengths." rows={2} />
             <Textarea value={weaknesses} onChange={(event) => setWeaknesses(event.target.value)} aria-label="Model tool weaknesses" placeholder="Weaknesses or failure risks." rows={2} />
-            <Button type="submit" disabled={!provider.trim() || !toolName.trim() || createCapability.isPending} aria-label="Create local model tool proposal" className="w-full">
+            <Button
+              type="submit"
+              disabled={!provider.trim() || !toolName.trim() || createCapability.isPending}
+              title={!provider.trim() || !toolName.trim() ? "Enter provider and tool name before creating a local proposal." : "Create a local model/tool proposal. No provider or tool call runs."}
+              aria-label="Create local model tool proposal"
+              className="w-full"
+            >
               {createCapability.isPending ? "Recording" : "Create Proposal"}
             </Button>
           </form>
@@ -337,7 +344,13 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             <AppSelect label="Eval outcome" value={evalOutcome} onChange={(value) => setEvalOutcome(value as typeof evalOutcome)} options={EVAL_OUTCOMES} />
             <Textarea value={evalSummary} onChange={(event) => setEvalSummary(event.target.value)} aria-label="Model tool eval summary" placeholder="What was checked or blocked." rows={4} />
             <Textarea value={evalNotes} onChange={(event) => setEvalNotes(event.target.value)} aria-label="Model tool validation notes" placeholder="Validation notes. No provider call is made." rows={3} />
-            <Button type="submit" disabled={!evalSummary.trim() || recordEval.isPending} aria-label="Record local model tool eval note" className="w-full">
+            <Button
+              type="submit"
+              disabled={!evalSummary.trim() || recordEval.isPending}
+              title={!evalSummary.trim() ? "Enter an eval summary before recording the local note." : "Record a local eval note. No provider call is made."}
+              aria-label="Record local model tool eval note"
+              className="w-full"
+            >
               {recordEval.isPending ? "Recording" : "Record Eval Note"}
             </Button>
             <div className="grid max-h-52 gap-1.5 overflow-y-auto" aria-label="Recent model tool eval notes">
