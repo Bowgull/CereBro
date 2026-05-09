@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:55 EDT
+Last updated: 2026-05-08 21:59 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2159 - Front-End Build Steward: Surfer Security Gate Link
+
+### What Changed
+
+- Added a `Security Gate` action to Surfer's approved URL intake row.
+- The action opens Security Gate and pre-fills the current URL through local
+  session storage.
+- Updated Surfer's URL intake copy so unfamiliar URLs route through a Spock
+  receipt before public ingestion.
+- Wired Surfer's panel to the shell navigation for the Security surface.
+
+### Files Touched
+
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Surfer can now hand unfamiliar URLs to Spock before source ingestion.
+- This keeps browser/source work visibly approval-gated instead of relying on
+  explanatory copy alone.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add Workbench target-to-Security Gate prefill for evidence records with
+  `targetUri`.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2155 - Front-End Build Steward: Command Spock Chip
 
@@ -8210,4 +8250,102 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, app/server/routers/raven.ts, and app/server/routers/approvals.ts first. Continue Raven from approval visibility and scrub classes. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add read-only Raven proposal detail receipts with linked scrub receipt + approval preview, add cancellation reason/history, and optionally add frontend filter support for Raven in ApprovalDashboardPanel only after checking the other frontend agent's work. Do not approve, export, browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2156 EDT — Raven proposal detail and history
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven_bridge_export_history` as an append-only local history table for
+  bridge export proposal state changes.
+- Added `raven.bridgeProposalDetail` to return a private read-only receipt:
+  - proposal
+  - linked scrub receipt
+  - linked source event
+  - linked approval preview
+  - linked permission preflight
+  - proposal history
+- `raven.updateBridgeProposalStatus` now accepts an optional reason and writes
+  a history row.
+- Cancelling or rejecting a Raven bridge proposal also marks its pending local
+  approval preview as `cancelled` or `rejected`. This is still local metadata,
+  not export approval.
+- Cleaned scrub receipt event text so finding labels render plainly.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Approval Queue frontend still has not been touched. Raven is backend-visible
+  in the queue route, but the panel may need filter UI support after frontend
+  reconciliation.
+- History is append-only for proposal state changes from this point forward.
+  Proposals created before this slice may not have creation history rows.
+
+Storage impact:
+
+- Adds `raven_bridge_export_history` to local libSQL.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from proposal detail and history. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add read-only private preference rollups and recommendation seed summaries derived only from raven_private_preferences/events, with no external sources, browser, media, generators, Notion, Obsidian, Slack, or core memory export.
+```
+
+## 2026-05-08 2159 EDT — Raven private preference rollups
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven.preferenceRollup`.
+- Rollups are derived only from `raven_private_preferences`.
+- Each category returns total signals, total weight, confidence, top signals,
+  avoid signals, and latest timestamp.
+- Added local recommendation seed summaries from private preference rollups.
+  These are hints only. They do not fetch media, browse, call a model, or write
+  anywhere.
+- Expanded the Raven foundation test to cover positive signals, avoid signals,
+  recommendation seed source labels, and no-external-action gates.
+
+Files touched in this slice:
+
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Rollups are simple deterministic summaries. They do not yet account for
+  decay, contradiction, or source trust.
+- Recommendation seeds are not recommendations. They are private local prompts
+  for a future Raven ranker.
+
+Storage impact:
+
+- No schema change.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from private preference rollups. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add contradiction/decay metadata to read-only rollups or create a local-only recommendation candidate draft table that stores no media and uses only Raven private preference/event metadata. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```

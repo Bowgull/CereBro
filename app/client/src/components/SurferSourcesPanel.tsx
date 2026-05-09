@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ const TRUST_TONES: Record<string, string> = {
   unknown: C.textMuted,
 };
 
-export default function SurferSourcesPanel({ onClose }: { onClose: () => void }) {
+export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [query, setQuery] = useState("");
   const [url, setUrl] = useState("");
   const [eventOwner, setEventOwner] = useState<"all" | "surfer" | "hedwig">("all");
@@ -49,6 +50,17 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
     const trimmed = url.trim();
     if (!trimmed || ingestUrl.isPending) return;
     ingestUrl.mutate({ url: trimmed, approved: true });
+  }
+
+  function openSecurityGate() {
+    const trimmed = url.trim();
+    if (!trimmed || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem("cerebro:security-target", trimmed);
+    } catch {
+      // Ignore storage failure. The Security Gate form still opens.
+    }
+    onNavigate("security");
   }
 
   return (
@@ -98,12 +110,21 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
       </form>
 
       <form onSubmit={submitUrl} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_auto] gap-2">
           <Input
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Approved public URL to ingest as a source."
           />
+          <Button
+            type="button"
+            disabled={!url.trim() || !onNavigate}
+            onClick={openSecurityGate}
+            variant="secondary"
+            title={url.trim() ? sourceDisplayName(url.trim()) : "Open Security Gate"}
+          >
+            Security Gate
+          </Button>
           <Button
             type="submit"
             disabled={!url.trim() || ingestUrl.isPending}
@@ -113,7 +134,7 @@ export default function SurferSourcesPanel({ onClose }: { onClose: () => void })
           </Button>
         </div>
         <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-          Clicking Ingest URL approves one public fetch and source-library record. No private, logged-in, crawler, or screenshot action runs here.
+          Record a Spock receipt first when the URL is unfamiliar. Ingest URL approves one public fetch and source-library record.
         </div>
         {ingestUrl.data && (
           <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
