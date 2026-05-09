@@ -1004,6 +1004,26 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("workbench");
   }
 
+  function openProjectPushContext(item: { id: number; projectId: number | null; projectName: string | null }) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "ledger",
+          evidenceId: item.id,
+          projectId: item.projectId,
+          projectName: item.projectName,
+          notice: item.projectName
+            ? `Ledger receipt #${item.id} opened ${item.projectName} push context.`
+            : `Ledger receipt #${item.id} has no linked project.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the user can inspect project push context manually.
+    }
+    onNavigate("projects");
+  }
+
   return (
     <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
       <div className="grid gap-2">
@@ -1130,6 +1150,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   size="sm"
                 >
                   Open Receipt
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => openProjectPushContext(selectedEvidence)}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Project Push Context
                 </Button>
               </div>
               <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">

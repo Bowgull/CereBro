@@ -78,6 +78,13 @@ type ProjectViewFilter = "all" | "attention" | "approvals" | "hedwig" | "termina
 type InspectorQueue = "approvals" | "terminal" | "hedwig" | "sources" | "git" | "drafts" | "gates";
 type InspectorSort = "default" | "type" | "text";
 type DraftActionKey = "plan_next_slice" | "inspect_dirty_state" | "package_proof" | "validation_pass";
+type ProjectLabFocusDraft = {
+  source?: string;
+  projectId?: number | null;
+  projectName?: string | null;
+  evidenceId?: number;
+  notice?: string;
+};
 
 function projectSignalScore(project: {
   localExists?: boolean;
@@ -265,6 +272,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [inspectorQueue, setInspectorQueue] = useState<InspectorQueue>("approvals");
   const [pushReceiptSlug, setPushReceiptSlug] = useState<string | null>(null);
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
+  const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
   const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 100 }, { refetchInterval: 10000 });
   const utils = trpc.useUtils();
@@ -372,6 +380,38 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Proof", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
     { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
+
+  useEffect(() => {
+    if (projects.length === 0) return;
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:project-lab-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:project-lab-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as ProjectLabFocusDraft;
+      const focusedProject = projects.find((project) => {
+        if (draft.projectId != null && project.tasks.projectId === draft.projectId) return true;
+        if (draft.projectName && project.name === draft.projectName) return true;
+        return false;
+      });
+      setProjectFilter("all");
+      if (focusedProject) {
+        setSelectedSlug(focusedProject.slug);
+        setPushReceiptSlug(focusedProject.slug);
+        setInspectorQueue("git");
+        setLedgerFocusNotice(draft.notice ?? `Ledger opened ${focusedProject.name} push context.`);
+      } else {
+        setLedgerFocusNotice(draft.notice ?? "Ledger opened Project Lab, but the receipt is not linked to a tracked project.");
+      }
+    } catch {
+      setLedgerFocusNotice("Ledger focus could not be read. Use Project Lab filters.");
+    }
+  }, [projects]);
+
   return (
     <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
@@ -442,6 +482,14 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </div>
+        {ledgerFocusNotice && (
+          <div className="flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+            <span className="min-w-0">{ledgerFocusNotice}</span>
+            <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusNotice(null)} aria-label="Dismiss Ledger focus notice">
+              Dismiss
+            </Button>
+          </div>
+        )}
         {nextSafeProjects.length > 0 && (
           <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-1.5">
             <div className="text-[10px] uppercase tracking-wider pt-1" style={{ color: C.textMuted }}>
