@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:36 EDT
+Last updated: 2026-05-09 11:39 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1139 EDT - Workbench Project Proof Grouping
+
+### What Changed
+
+- Added a Project Proof band inside Workbench.
+- The band reads the latest local Workbench evidence receipts and groups them by project.
+- Each project group shows total receipts, terminal receipts, records needing review, validated records, and latest receipt id/title.
+- Clicking a project proof group filters Recent Evidence to that project and sets grouping back to Project.
+- This is read-only proof navigation. It does not run commands, push git, open browsers, fetch sources, or create a new lab.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `pnpm check` from repo root failed because `/Users/lindsaybell/Desktop/CereBro` has no root package manifest. The app package check was run instead.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This follows the locked path: Workbench as proof, Ledger as receipts, Project Lab as map.
+- It supports the future push-to-GitHub UI by making project proof state visible before push decisions.
+- Manual push remains separate. Auto-push remains a later approval-gated option, not behavior here.
+- Terminal Lab stays the code/build teaching lane. No new Code Lab surface was added.
+
+### Known Risks
+
+- Project Proof uses the latest 100 Workbench evidence records, not a server-side aggregate endpoint.
+- The band is visual proof navigation only. Push readiness logic still lives in Project Lab until a later slice.
+- Browser visual verification still needs the Browser Use plugin when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Workbench.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Workbench Project Proof and Project Lab proof strips when Browser Use is callable; if unavailable, continue proof-loop work by adding read-only push-decision language to the Project Lab card that points at Workbench/Ledger proof without executing git. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1136 EDT - Project Lab Workbench Proof Signals
 

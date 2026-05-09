@@ -73,6 +73,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     projectId: filterProjectId === "all" ? undefined : filterProjectId,
     query: filterQuery.trim() || undefined,
   });
+  const projectProofEvidence = trpc.workbench.evidence.useQuery({
+    limit: 100,
+  });
   const utils = trpc.useUtils();
   const createEvidence = trpc.workbench.createEvidence.useMutation({
     onSuccess: () => utils.workbench.evidence.invalidate(),
@@ -127,6 +130,59 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
   );
+  const projectProofGroups = useMemo(() => {
+    const projectNames = new Map(
+      projectOptions.map((project) => [project.tasks.projectId, project.name] as const),
+    );
+    const groups = new Map<
+      string,
+      {
+        key: string;
+        projectId: number | null;
+        label: string;
+        total: number;
+        terminal: number;
+        review: number;
+        validated: number;
+        latestId: number;
+        latestTitle: string;
+        latestAt: number;
+      }
+    >();
+
+    for (const item of projectProofEvidence.data?.items ?? []) {
+      const projectKey = item.projectId == null ? "unlinked" : String(item.projectId);
+      const existing = groups.get(projectKey);
+      const group = existing ?? {
+        key: projectKey,
+        projectId: item.projectId ?? null,
+        label: item.projectName ?? projectNames.get(item.projectId ?? null) ?? "Unlinked proof",
+        total: 0,
+        terminal: 0,
+        review: 0,
+        validated: 0,
+        latestId: item.id,
+        latestTitle: item.title,
+        latestAt: item.createdAt,
+      };
+      group.total += 1;
+      if (item.kind === "terminal_output") group.terminal += 1;
+      if (item.validationStatus === "needs_review") group.review += 1;
+      if (item.validationStatus === "looks_consistent" || item.validationStatus === "validated_for_local_use") {
+        group.validated += 1;
+      }
+      if (item.createdAt >= group.latestAt) {
+        group.latestId = item.id;
+        group.latestTitle = item.title;
+        group.latestAt = item.createdAt;
+      }
+      groups.set(projectKey, group);
+    }
+
+    return [...groups.values()]
+      .sort((a, b) => b.total - a.total || b.latestAt - a.latestAt)
+      .slice(0, 6);
+  }, [projectOptions, projectProofEvidence.data?.items]);
   const workbenchLanes = [
     {
       label: "Preview",
@@ -438,6 +494,64 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               <p className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                 {data.summary}
               </p>
+            </section>
+
+            <section className="rounded p-2" aria-label="Project proof grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Proof</h3>
+                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+                    Local receipt grouping. Use this before push decisions.
+                  </p>
+                </div>
+                <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
+              </div>
+              {projectProofEvidence.isLoading ? (
+                <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  Reading local proof records.
+                </div>
+              ) : projectProofGroups.length === 0 ? (
+                <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  No project proof exists yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2 xl:grid-cols-3">
+                  {projectProofGroups.map((group) => (
+                    <Button
+                      key={group.key}
+                      type="button"
+                      variant="secondary"
+                      className="h-auto justify-start rounded p-2 text-left"
+                      onClick={() => {
+                        setFilterProjectId(group.projectId == null ? "all" : group.projectId);
+                        setFilterKind("all");
+                        setFilterQuery("");
+                        setGroupBy("project");
+                      }}
+                      aria-label={`Open Workbench proof for ${group.label}`}
+                      style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                    >
+                      <span className="block w-full">
+                        <span className="flex items-start justify-between gap-2">
+                          <span className="text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }}>
+                            {group.label}
+                          </span>
+                          <Chip label={`#${group.latestId}`} tone={C.textMuted} />
+                        </span>
+                        <span className="mt-1 flex flex-wrap gap-1">
+                          <Chip label={`${group.total} receipts`} tone={C.accent} />
+                          <Chip label={`${group.terminal} terminal`} tone={C.warning} />
+                          <Chip label={`${group.review} review`} tone={group.review > 0 ? C.danger : C.textMuted} />
+                          <Chip label={`${group.validated} validated`} tone={group.validated > 0 ? C.success : C.textMuted} />
+                        </span>
+                        <span className="mt-1 block truncate text-[11px]" style={{ color: C.textMuted }} title={group.latestTitle}>
+                          Latest: {group.latestTitle}
+                        </span>
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
