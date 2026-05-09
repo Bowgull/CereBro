@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:28 EDT
+Last updated: 2026-05-09 07:32 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0732 EDT - Front-End Build Steward: Shared Primitive Density
+
+### What Changed
+
+- Tightened hard-gate dialog defaults: smaller body padding, tighter footer, compact title/description, and narrower max width.
+- Tightened drawer defaults: smaller handle, header/footer padding, compact title/description.
+- Tightened dropdown and context menu defaults: smaller item height, compact menu width, grouped labels, and preserved destructive styling.
+- Tightened table defaults: smaller header height, cell padding, and captions.
+- Browser DOM verified the Tools dropdown and Clear Visible Sessions hard gate at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/components/ui/dialog.tsx`
+- `app/client/src/components/ui/drawer.tsx`
+- `app/client/src/components/ui/dropdown-menu.tsx`
+- `app/client/src/components/ui/context-menu.tsx`
+- `app/client/src/components/ui/table.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed Tools dropdown and Clear Visible Sessions hard gate still render.
+
+### Front-End Steward Review
+
+- Menu and hard-gate primitives now follow CereBro compact density and semantic destructive styling.
+- Drawer, context menu, and table primitives were normalized for active-surface reuse.
+- Drawer and context menu primitives were TypeScript-verified but not directly exercised by a visible current route in this slice.
+- Screenshot capture remains unstable in the in-app browser, so visual proof used DOM shape plus localhost health.
+
+### Known Risks
+
+- This was a primitive styling pass. It does not change dialog, drawer, menu, or table behavior.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Shared Primitive Density. Next safe slice: inspect remaining visible shared primitives and route chrome for regressions after dialog/menu/table normalization, then patch only active surface debt. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0728 EDT - Front-End Build Steward: Automation And Card Density
 

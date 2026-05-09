@@ -63,7 +63,7 @@ function DrawerContent({
         )}
         {...props}
       >
-        <div className="mx-auto mt-3 hidden h-1.5 w-20 shrink-0 rounded bg-[#334155] group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+        <div className="mx-auto mt-2 hidden h-1 w-16 shrink-0 rounded bg-[#334155] group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
@@ -75,7 +75,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="drawer-header"
       className={cn(
-        "flex flex-col gap-1 border-b border-[#253041] p-3 text-left",
+        "flex flex-col gap-1 border-b border-[#253041] p-2 text-left",
         className
       )}
       {...props}
@@ -87,7 +87,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("mt-auto flex flex-col gap-2 border-t border-[#253041] p-3", className)}
+      className={cn("mt-auto flex flex-col gap-1.5 border-t border-[#253041] p-2", className)}
       {...props}
     />
   );
@@ -100,7 +100,7 @@ function DrawerTitle({
   return (
     <DrawerPrimitive.Title
       data-slot="drawer-title"
-      className={cn("text-[13px] font-semibold leading-none text-[#F4EFE3]", className)}
+      className={cn("text-[12px] font-semibold uppercase leading-none tracking-wider text-[#F4EFE3]", className)}
       {...props}
     />
   );
@@ -113,7 +113,7 @@ function DrawerDescription({
   return (
     <DrawerPrimitive.Description
       data-slot="drawer-description"
-      className={cn("text-[12px] leading-snug text-[#B8C0CC]", className)}
+      className={cn("text-[11px] leading-snug text-[#B8C0CC]", className)}
       {...props}
     />
   );

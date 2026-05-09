@@ -127,7 +127,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-hard-gate={gate}
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-3 rounded-md border border-[#334155] bg-[#181F2A] p-3 text-[#F4EFE3] shadow-[0_24px_70px_rgba(0,0,0,0.48)] duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_24px_70px_rgba(0,0,0,0.58)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-2 rounded-md border border-[#334155] bg-[#181F2A] p-2 text-[#F4EFE3] shadow-[0_20px_58px_rgba(0,0,0,0.46)] duration-200 data-[hard-gate=true]:border-[#F6C177] data-[hard-gate=true]:bg-[#151A23] data-[hard-gate=true]:shadow-[0_0_0_1px_rgba(246,193,119,0.20),0_20px_58px_rgba(0,0,0,0.56)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:max-w-md",
           className
         )}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -137,7 +137,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-2.5 right-2.5 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute top-2 right-2 rounded border border-transparent p-1 text-[#7E8898] opacity-85 transition-colors hover:border-[#334155] hover:bg-[#202A38] hover:text-[#F4EFE3] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>
@@ -163,7 +163,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 border-t border-[#253041] pt-3 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-1.5 border-t border-[#253041] pt-2 sm:flex-row sm:justify-end",
         className
       )}
       {...props}
@@ -178,7 +178,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-[14px] font-semibold leading-none text-[#F4EFE3]", className)}
+      className={cn("text-[12px] font-semibold uppercase leading-none tracking-wider text-[#F4EFE3]", className)}
       {...props}
     />
   );
@@ -191,7 +191,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-[12px] leading-snug text-[#B8C0CC]", className)}
+      className={cn("text-[11px] leading-snug text-[#B8C0CC]", className)}
       {...props}
     />
   );
