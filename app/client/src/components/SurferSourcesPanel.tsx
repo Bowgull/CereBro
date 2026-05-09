@@ -80,20 +80,19 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between gap-3 px-3 py-2.5 shrink-0"
+        className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Research
-            <span className="ml-2" style={{ color: C.textSecondary }}>{savedSources.length}</span>
-          </div>
-          <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
-            Source cards, browser ladder, and approval-gated research previews.
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+              Research
+            </div>
+            <Badge variant={data?.browserEnabled ? "success" : "warning"} className="uppercase">Browser {data?.browserEnabled ? "enabled" : "locked"}</Badge>
+            <Badge variant="secondary" className="uppercase">{savedSources.length} sources</Badge>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
             <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
-            <Badge variant={data?.browserEnabled ? "success" : "warning"} className="uppercase">Browser {data?.browserEnabled ? "enabled" : "locked"}</Badge>
             <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "surfer"}</Badge>
             <Badge variant="secondary" className="uppercase">
               Trusted {savedSources.filter((source) => ["official", "primary", "high"].includes(source.trustLevel)).length}/{savedSources.length}
@@ -105,9 +104,9 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 px-3 py-2 shrink-0 xl:grid-cols-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-1 gap-1.5 px-2 py-1.5 shrink-0 xl:grid-cols-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <form onSubmit={submit} className="space-y-1.5">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -120,13 +119,13 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               {preview.isPending ? "Reading" : "Preview"}
             </Button>
           </div>
-          <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
             Plan only. Surfer does not browse from this preview.
           </div>
         </form>
 
         <form onSubmit={submitUrl} className="space-y-1.5">
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+          <div className="grid grid-cols-1 gap-1.5 md:grid-cols-[minmax(0,1fr)_auto_auto]">
             <Input
               value={url}
               onChange={(event) => setUrl(event.target.value)}
@@ -149,11 +148,11 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               {ingestUrl.isPending ? "Fetching" : "Ingest"}
             </Button>
           </div>
-          <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+          <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
             One approved public fetch. Use Spock for unfamiliar URLs.
           </div>
           {ingestUrl.data && (
-            <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
+            <div className="text-[10px] leading-snug break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
               {ingestUrl.data.ok && ingestUrl.data.source
                 ? `Saved source: ${
                     ingestUrl.data.source.title ??
@@ -167,8 +166,8 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-2.5 px-3 pt-3 pb-20">
-          <div className="space-y-2.5 min-w-0">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-2 px-2 pt-2 pb-16">
+          <div className="space-y-2 min-w-0">
             {preview.data && (
               <section className="space-y-2">
                 <SectionTitle title="Research Preview" detail={preview.data.taskType.replace(/_/g, " ")} />
@@ -183,7 +182,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     requiredApproval={card.requiredApproval}
                   />
                 ))}
-                <div className="text-xs leading-relaxed rounded p-2" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="text-[11px] leading-snug rounded p-1.5" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   {preview.data.nextStep}
                 </div>
               </section>
@@ -192,10 +191,10 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             <section className="space-y-2">
               <SectionTitle title="Saved Sources" detail={savedSources.length ? `${savedSources.length} records` : "empty"} />
               {panel.isLoading ? (
-                <div className="text-xs" style={{ color: C.textMuted }}>Reading source library.</div>
+                <div className="text-[11px]" style={{ color: C.textMuted }}>Reading source library.</div>
               ) : savedSources.length === 0 ? (
-                <div className="text-xs leading-relaxed rounded p-3" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  No saved source records yet. Surfer will use this space for source cards once public browsing and source saves are approved.
+                <div className="text-[11px] leading-snug rounded p-2" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  No saved source records yet. Approved public sources will appear here.
                 </div>
               ) : (
                 savedSources.map((source) => (
@@ -218,8 +217,8 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             </section>
           </div>
 
-          <aside className="space-y-2.5 min-w-0">
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="space-y-1.5 min-w-0">
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Source History" detail={`${sourceEventGroups.length}/${sourceEvents.length} groups`} />
               <div className="flex flex-wrap gap-1 mt-2">
                 {(["all", "surfer", "hedwig"] as const).map((owner) => (
@@ -242,14 +241,14 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                   Scrubbed
                 </Button>
               </div>
-              <div className="space-y-2 mt-2">
+              <div className="space-y-1.5 mt-2">
                 {sourceEvents.length === 0 ? (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                  <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
                     No source history events recorded yet.
                   </div>
                 ) : (
                   sourceEventGroups.slice(0, 6).map(({ event, display, title, count }) => (
-                    <div key={`${event.id}-${count}`} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={`${event.id}-${count}`} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.textSecondary }}>
                           {event.eventType.replace(/_/g, " ")}
@@ -265,7 +264,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                       <div className="text-[10px] leading-snug truncate mt-1" style={{ color: C.textMuted }} title={event.uri}>
                         {display}
                       </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-1">
                         {event.trustLevel && <MiniBadge label={event.trustLevel} tone={TRUST_TONES[event.trustLevel] ?? C.textMuted} />}
                         {event.freshnessStatus && <MiniBadge label={event.freshnessStatus} tone={C.textMuted} />}
                         {event.sourceLabel && <MiniBadge label={event.sourceLabel} tone={C.textMuted} />}
@@ -273,12 +272,12 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                         {event.sensitiveDataFlag && <MiniBadge label="scrubbed" tone={C.warning} />}
                       </div>
                       {event.summary && (
-                        <div className="text-[11px] leading-snug mt-2 line-clamp-3" style={{ color: C.textSecondary }} title={event.summary}>
+                        <div className="text-[10px] leading-snug mt-1 line-clamp-3" style={{ color: C.textSecondary }} title={event.summary}>
                           {event.summary}
                         </div>
                       )}
                       {(event.trustNotes || event.scrubNotes) && (
-                        <div className="text-[10px] leading-snug mt-2" style={{ color: C.textMuted }}>
+                        <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
                           {event.trustNotes ?? event.scrubNotes}
                         </div>
                       )}
@@ -293,7 +292,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />
               <div className="mt-2 grid gap-1">
                 {(data?.ladder ?? []).map((step, index) => (
@@ -302,7 +301,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Policy" detail="approval-gated" />
               <div className="mt-2 grid gap-1.5">
                 {data?.policy && Object.entries(data.policy).map(([key, value]) => (
@@ -359,10 +358,10 @@ function SourceCard({
   sourceUri?: string;
 }) {
   return (
-    <article className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <div className="flex items-start justify-between gap-3 mb-2">
+    <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="min-w-0">
-          <div className="text-sm font-semibold truncate" style={{ color: C.textPrimary }} title={title}>
+          <div className="text-[12px] font-semibold truncate" style={{ color: C.textPrimary }} title={title}>
             {title}
           </div>
           <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: C.textMuted }}>
@@ -374,23 +373,23 @@ function SourceCard({
         </Badge>
       </div>
       {(freshnessStatus || wordCount != null || sensitiveDataFlag) && (
-        <div className="flex flex-wrap gap-1 mb-2">
+        <div className="flex flex-wrap gap-1 mb-1.5">
           {freshnessStatus && <MiniBadge label={freshnessStatus} tone={freshnessStatus === "fresh" || freshnessStatus === "recent" ? C.success : C.warning} />}
           {wordCount != null && <MiniBadge label={`${wordCount} words`} tone={C.textMuted} />}
           {sensitiveDataFlag && <MiniBadge label="scrubbed" tone={C.warning} />}
         </div>
       )}
-      <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+      <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
         {preview}
       </div>
-      <div className="text-[11px] leading-relaxed mt-2 truncate" style={{ color: C.textMuted }} title={sourceUri ?? whyItMatters}>
+      <div className="text-[10px] leading-snug mt-1.5 truncate" style={{ color: C.textMuted }} title={sourceUri ?? whyItMatters}>
         {whyItMatters}
       </div>
-      <div className="text-[11px] leading-relaxed mt-2" style={{ color: C.warning }}>
+      <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.warning }}>
         {requiredApproval}
       </div>
       {scrubNotes && (
-        <div className="text-[11px] leading-relaxed mt-2" style={{ color: C.textMuted }}>
+        <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
           {scrubNotes}
         </div>
       )}
@@ -418,7 +417,7 @@ function MiniBadge({ label, tone }: { label: string; tone: string }) {
 
 function RailLine({ marker, text, tone = C.textSecondary }: { marker: string; text: string; tone?: string }) {
   return (
-    <div className="grid grid-cols-[44px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
+    <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-1.5 text-[10px] leading-snug">
       <span className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={marker}>
         {marker}
       </span>

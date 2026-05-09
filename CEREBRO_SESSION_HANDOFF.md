@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:11 EDT
+Last updated: 2026-05-09 07:15 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0715 EDT - Front-End Build Steward: Research Density
+
+### What Changed
+
+- Browser-reviewed the active Workshop Research surface.
+- Tightened the Research header into compact source and browser-lock receipts.
+- Compressed the Surfer preview form, approved URL gate form, helper copy, main grid, saved source cards, source history groups, browser ladder, and policy rail.
+- Kept browser/source behavior unchanged. Research remains approval-gated and browser-locked unless app data says otherwise.
+
+### Files Touched
+
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed Workshop Research renders compact browser-lock receipt, source count, saved source cards, source history, browser ladder, and policy rail.
+
+### Front-End Steward Review
+
+- Research now fits the same dense Workshop grammar as Terminal Lab.
+- The browser lock and Security Gate path stay visible before any ingest action.
+- Screenshot capture remains unstable in the in-app browser, so visual proof used DOM shape plus localhost health.
+
+### Known Risks
+
+- This was a density-only pass. It does not add fetch, crawl, or source approval behavior.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No source fetch, Notion, Slack, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Research Density. Next safe slice: inspect Project Lab for remaining dense-workbench debt, especially filters, inspector rail, and draft-plan receipts. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0711 EDT - Front-End Build Steward: Terminal Lab Density
 
