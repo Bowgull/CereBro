@@ -999,8 +999,8 @@ function Chip({ label, tone }: { label: string; tone: string }) {
             : "secondary";
 
   return (
-    <Badge variant={variant} className="uppercase">
-      {label}
+    <Badge variant={variant} className="uppercase" title={label}>
+      <span className="min-w-0 truncate">{label}</span>
     </Badge>
   );
 }

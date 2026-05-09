@@ -1724,10 +1724,10 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
         <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
           Workbench Receipts
         </span>
-        <Badge variant={stats.total > 0 ? "default" : "secondary"} className="uppercase">{stats.total} receipts</Badge>
-        <Badge variant={stats.terminal > 0 ? "warning" : "secondary"} className="uppercase">{stats.terminal} terminal</Badge>
-        <Badge variant={stats.needsReview > 0 ? "warning" : "secondary"} className="uppercase">{stats.needsReview} review</Badge>
-        <Badge variant={stats.validated > 0 ? "success" : "secondary"} className="uppercase">{stats.validated} validated</Badge>
+        <Badge variant={stats.total > 0 ? "default" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.total} receipts</span></Badge>
+        <Badge variant={stats.terminal > 0 ? "warning" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.terminal} terminal</span></Badge>
+        <Badge variant={stats.needsReview > 0 ? "warning" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.needsReview} review</span></Badge>
+        <Badge variant={stats.validated > 0 ? "success" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.validated} validated</span></Badge>
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
         Project map signal only. Workbench has the body. Ledger has the audit trail.
@@ -1778,8 +1778,8 @@ function PushDecisionNote({
   return (
     <div className="mt-1 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${decision.tone}55` }}>
       <div className="flex flex-wrap items-center gap-1">
-        <Badge variant={decision.label === "supported" ? "success" : decision.label === "hold" ? "warning" : "secondary"} className="uppercase">
-          {decision.label}
+        <Badge variant={decision.label === "supported" ? "success" : decision.label === "hold" ? "warning" : "secondary"} className="uppercase" title={decision.label}>
+          <span className="min-w-0 truncate">{decision.label}</span>
         </Badge>
         <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: decision.tone }}>
           Push Decision Read
@@ -1975,8 +1975,8 @@ function ChipRow({
       </div>
       <div className="flex flex-wrap gap-1 min-w-0">
         {items.map((item) => (
-          <Badge key={item} variant={badgeVariantForTone(tone)} className="uppercase">
-            {labelize(item)}
+          <Badge key={item} variant={badgeVariantForTone(tone)} className="uppercase" title={labelize(item)}>
+            <span className="min-w-0 truncate">{labelize(item)}</span>
           </Badge>
         ))}
       </div>

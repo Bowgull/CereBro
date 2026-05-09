@@ -1128,14 +1128,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 >
                   <span className="block w-full min-w-0">
                     <span className="flex flex-wrap items-center gap-1">
-                      <Badge variant="secondary" className="uppercase">#{item.id}</Badge>
+                      <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">#{item.id}</span></Badge>
                       <Badge variant={item.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
-                        {item.kind.replace(/_/g, " ")}
+                        <span className="min-w-0 truncate">{item.kind.replace(/_/g, " ")}</span>
                       </Badge>
                       <Badge variant={item.validationStatus === "needs_review" ? "warning" : "success"} className="uppercase">
-                        {item.validationStatus.replace(/_/g, " ")}
+                        <span className="min-w-0 truncate">{item.validationStatus.replace(/_/g, " ")}</span>
                       </Badge>
-                      {item.projectName && <Badge variant="warning" className="uppercase">{item.projectName}</Badge>}
+                      {item.projectName && <Badge variant="warning" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
                     </span>
                     <span className="mt-1 block truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={item.title}>
                       {item.title}
@@ -1160,15 +1160,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               )}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1">
-                  <Badge variant="secondary" className="uppercase">receipt #{selectedEvidence.id}</Badge>
+                  <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">receipt #{selectedEvidence.id}</span></Badge>
                   <Badge variant={selectedEvidence.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
-                    {selectedEvidence.kind.replace(/_/g, " ")}
+                    <span className="min-w-0 truncate">{selectedEvidence.kind.replace(/_/g, " ")}</span>
                   </Badge>
                   <Badge variant={selectedEvidence.sensitive ? "destructive" : "success"} className="uppercase">
-                    {selectedEvidence.sensitive ? "sensitive" : "local"}
+                    <span className="min-w-0 truncate">{selectedEvidence.sensitive ? "sensitive" : "local"}</span>
                   </Badge>
                   {selectedEvidence.commandObservationId != null && (
-                    <Badge variant="warning" className="uppercase">terminal #{selectedEvidence.commandObservationId}</Badge>
+                    <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">terminal #{selectedEvidence.commandObservationId}</span></Badge>
                   )}
                 </div>
                 <Button
@@ -1558,7 +1558,7 @@ function PreviewChip({ label, tone }: { label: string; tone: string }) {
       className="px-1.5 py-0.5"
       style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
     >
-      {label}
+      <span className="min-w-0 truncate">{label}</span>
     </Badge>
   );
 }

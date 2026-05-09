@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:34 EDT
+Last updated: 2026-05-09 12:37 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1237 EDT - Receipt Chip Overflow Pass
+
+### What Changed
+
+- Wrapped receipt-loop badge labels in truncating spans so the tightened Badge primitive can constrain long labels.
+- Updated Workbench and Terminal Lab local `Chip` helpers.
+- Updated Project Lab receipt status badges, push decision label, and chip rows.
+- Updated Ledger receipt preview badges and shell preview chips in `Home.tsx`.
+- Kept backend semantics and internal `evidence` API names unchanged.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This finishes the local surface cleanup created by the shared Badge primitive change.
+- Long project, session, kind, status, and receipt labels now have title text and truncate inside their badges.
+- This supports dense receipt rows without changing data shape, routing, execution, or storage.
+
+### Known Risks
+
+- Browser visual verification still needs Browser Use when callable.
+- Other non-critical panels may still pass raw Badge text; this slice only touched the active receipt-loop path.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: visually verify primitive and badge truncation states when Browser Use is callable; if unavailable, continue by tightening receipt-loop surface empty/loading/disabled states without changing backend semantics. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1234 EDT - Primitive Focus Density Pass
 
