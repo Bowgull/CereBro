@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:17 EDT
+Last updated: 2026-05-08 23:19 EDT
 
 ## Current North Star
 
@@ -20,6 +20,43 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2319 - Front-End Build Steward: Compact Tooltip Skeleton Primitives
+
+### What Changed
+
+- Normalized `Tooltip` to CereBro dark shell tokens with compact padding,
+  8px max radius, soft border, and matching arrow fill.
+- Normalized `Skeleton` away from generic accent fill to a muted dark shell
+  loading surface.
+
+### Files Touched
+
+- `app/client/src/components/ui/tooltip.tsx`
+- `app/client/src/components/ui/skeleton.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- App-wide hover help and loading placeholders now match the compact CereBro
+  shell instead of stock inverted UI colors.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue referenced primitive normalization. Candidate areas: `alert`,
+  `sheet`, `command`, or `menubar`, depending on what is actually reachable
+  from the current Keep shell.
 
 ## 2026-05-08 2317 - Front-End Build Steward: Compact Alert Empty Primitives
 
