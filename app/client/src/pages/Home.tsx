@@ -1045,8 +1045,12 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const connection = trpc.agents.connectionStatus.useQuery(undefined, { refetchInterval: 10000 });
   const modelPolicy = trpc.modelTools.policy.useQuery();
   const piccolo = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
+  const security = trpc.securityGate.recent.useQuery({ limit: 20 }, { refetchInterval: 10000 });
   const status = connection.data;
   const hygiene = piccolo.data;
+  const securityRows = security.data?.items ?? [];
+  const riskyReceipts = securityRows.filter((item) => item.riskLevel === "high" || item.riskLevel === "blocked").length;
+  const latestRisk = securityRows[0]?.riskLevel ?? "none";
 
   const cards = [
     {
@@ -1062,6 +1066,13 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       meta: "Capability registry",
       target: "model_tools" as NavId,
       tone: C.accent,
+    },
+    {
+      label: "Security",
+      value: riskyReceipts > 0 ? `${riskyReceipts} risk` : latestRisk,
+      meta: `${securityRows.length} Spock receipt${securityRows.length === 1 ? "" : "s"}`,
+      target: "security" as NavId,
+      tone: riskyReceipts > 0 ? C.danger : securityRows.length > 0 ? C.success : C.textMuted,
     },
     {
       label: "Automation",
@@ -1091,7 +1102,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid gap-2 md:grid-cols-3" aria-label="Basement configuration map">
+        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" aria-label="Basement configuration map">
           {cards.map((card) => (
             <Button
               key={card.label}

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:45 EDT
+Last updated: 2026-05-08 21:51 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2151 - Front-End Build Steward: Basement Security Indicator
+
+### What Changed
+
+- Added Security Gate status to the Basement overview cards.
+- Basement now shows:
+  - Recent Spock receipt count.
+  - Latest risk state when receipts exist.
+  - Risk count when high or blocked receipts exist.
+- The Security card opens the Security Gate surface.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Spock is now visible from the Basement overview, not hidden one click deeper.
+- Security state reads as a machine posture signal instead of another loose
+  panel.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- The indicator is read-only and uses the latest 20 local receipts.
+- Existing Raven edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add a Keep/Workshop security affordance for pasted links and repo targets.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2145 - Front-End Build Steward: Security Gate Link Receipts
 
