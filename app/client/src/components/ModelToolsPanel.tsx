@@ -203,7 +203,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-5" aria-label="Model registry status">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-5" aria-label="Model registry status">
           <StatusBlock label="Mode" value={policyData?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <StatusBlock label="External calls" value={policyData?.callsExternalModels ? "yes" : "no"} tone={policyData?.callsExternalModels ? C.danger : C.success} />
           <StatusBlock label="Untested" value={String(registryCounts.untested)} tone={registryCounts.untested ? C.warning : C.success} />
@@ -231,7 +231,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
         <section className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
           <div className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Registry" detail={`${rows.length} local proposals`} />
-            <div className="grid gap-1.5 md:grid-cols-[1fr_auto_auto]">
+            <div className="grid gap-1.5 md:grid-cols-[minmax(0,1fr)_150px_150px]">
               <Input
                 value={providerFilter}
                 onChange={(event) => setProviderFilter(event.target.value)}
@@ -317,7 +317,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
             <SectionTitle title="Propose" detail="local only" />
             <Input value={provider} onChange={(event) => setProvider(event.target.value)} aria-label="Model tool provider" placeholder="Provider or tool owner." />
             <Input value={toolName} onChange={(event) => setToolName(event.target.value)} aria-label="Model tool name" placeholder="Model or tool name." />
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               <AppSelect label="Capability kind" value={newKind} onChange={(value) => setNewKind(value as CapabilityKind)} options={CAPABILITY_KINDS} />
               <AppSelect label="Access method" value={accessMethod} onChange={(value) => setAccessMethod(value as typeof accessMethod)} options={ACCESS_METHODS} />
               <AppSelect label="Privacy class" value={privacyClass} onChange={(value) => setPrivacyClass(value as PrivacyClass)} options={PRIVACY_CLASSES} />

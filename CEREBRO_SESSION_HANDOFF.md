@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:43 EDT
+Last updated: 2026-05-09 07:46 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0746 EDT - Front-End Build Steward: Responsive Grid Surfaces
+
+### What Changed
+
+- Patched remaining active fixed grid surfaces after the compact primitive and form passes.
+- Updated Workbench evidence lanes, surface cards, permission cards, and evidence group cards to stack first, then expand at `sm` and `xl`.
+- Updated Security Gate posture, linked target controls, receipt links, and receipt lists to avoid forced two-column compression.
+- Updated Approval Dashboard summary and filter rail to use explicit responsive tracks.
+- Updated Model Registry status blocks, filter rail, and proposal select grid to respect compact controls on narrow panels.
+- Browser DOM verified Workbench, Security Gate, Model Registry, and Approval Dashboard at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed changed route surfaces still render.
+
+### Front-End Steward Review
+
+- This completes the obvious fixed-grid fallout from the shared primitive normalization pass.
+- The shell now lets compact controls breathe on narrow panels before returning to dense dashboard layouts.
+- Screenshot capture still times out, so visual proof used DOM state plus localhost health.
+
+### Known Risks
+
+- This pass changes layout only. It does not alter approval, security, model registry, or evidence behavior.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Responsive Grid Surfaces. Next safe slice: inspect the shell, command bar, and developer tools menu for remaining density/radius/focus regressions after primitive normalization. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0743 EDT - Front-End Build Steward: Responsive Form Surfaces
 

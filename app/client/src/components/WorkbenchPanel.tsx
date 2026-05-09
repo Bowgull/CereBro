@@ -309,8 +309,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </div>
         ) : (
           <div className="grid gap-2">
-            <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
-              <div className="col-span-2 rounded p-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
+              <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
                     Active Job
@@ -368,7 +368,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </p>
             </section>
 
-            <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Workbench surfaces">
+            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
               {data.surfaces.map((surface) => (
                 <article key={surface.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <div className="flex items-start justify-between gap-1.5">
@@ -390,7 +390,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
             </section>
 
-            <section className="grid grid-cols-2 gap-1.5" aria-label="Workbench permissions">
+            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2" aria-label="Workbench permissions">
               {data.permissionModel.map((item) => (
                 <article key={item.class} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: C.textPrimary }}>
@@ -845,7 +845,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     No groups match the current filters.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
                     {evidenceGroups.data?.groups.map((group) => (
                       <Button
                         key={group.key}

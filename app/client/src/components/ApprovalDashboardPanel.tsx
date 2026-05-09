@@ -126,14 +126,14 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-1.5 xl:grid-cols-4" aria-label="Approval receipt summary">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Approval receipt summary">
           <ReceiptStat label="Pending" value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
           <ReceiptStat label="Sensitive" value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
           <ReceiptStat label="Preflights" value={String(preflightTotal)} tone={C.accent} />
           <ReceiptStat label="Blocked" value={String(blockedPreflights)} tone={blockedPreflights > 0 ? C.danger : C.textMuted} />
         </div>
 
-        <div className="mt-2 grid gap-1.5 lg:grid-cols-[1fr_auto_auto]">
+        <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_180px_auto]">
           <label className="sr-only" htmlFor="approval-search">Search approval previews</label>
           <Input
             id="approval-search"

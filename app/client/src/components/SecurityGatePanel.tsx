@@ -111,7 +111,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
           </Button>
         </div>
 
-        <div className="mt-1.5 grid grid-cols-2 gap-1 xl:grid-cols-4" aria-label="Security gate posture">
+        <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4" aria-label="Security gate posture">
           <Stat label="Mode" value={plan.data?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <Stat label="Owner" value={plan.data?.ownerAgent ?? "spock"} tone={C.accent} />
           <Stat label="Receipts" value={String(recent.data?.items.length ?? 0)} tone={C.gold} />
@@ -129,7 +129,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               aria-label="Security target"
               placeholder="URL, GitHub repo, package, file, or site."
             />
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               <AppSelect
                 label="Project link"
                 value={String(projectId)}
@@ -185,7 +185,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 {receiptSourceTitle && <Chip label={receiptSourceTitle} tone={C.accent} />}
                 {!receiptSourceTitle && receiptSourceUri && <Chip label={sourceDisplayName(receiptSourceUri)} tone={C.accent} />}
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <Meta label="Project Link" value={receiptProjectName ?? "unlinked"} />
                 <Meta
                   label="Source Link"
@@ -193,7 +193,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   title={receiptSourceUri ?? undefined}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
                 <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
                 <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
                 <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
