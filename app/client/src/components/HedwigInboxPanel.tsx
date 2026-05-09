@@ -420,7 +420,9 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <MetaBlock label="Task Draft" value={`${triage.data.taskDraft.agent}: ${triage.data.taskDraft.title}`} />
                     <MetaBlock label="Support" value={triage.data.supportAgents.join(", ")} />
-                    {triage.data.sourceDraft && <MetaBlock label="Source Draft" value={triage.data.sourceDraft.uri} />}
+                    {triage.data.sourceDraft && (
+                      <MetaBlock label="Source Draft" value={sourceDisplayName(triage.data.sourceDraft.uri)} title={triage.data.sourceDraft.uri} />
+                    )}
                     {triage.data.reminderDraft && <MetaBlock label="Reminder" value={triage.data.reminderDraft.timingHint} />}
                     {triage.data.messageDraft && <MetaBlock label="Message" value="draft only; needs recipient" />}
                   </div>
@@ -599,7 +601,11 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                       <MetaBlock label="Approval Scope" value={proposalDetail.data.item.approvalScope} />
                     )}
                     {"proposedExternalTarget" in proposalDetail.data.item && proposalDetail.data.item.proposedExternalTarget && (
-                      <MetaBlock label="External Target" value={proposalDetail.data.item.proposedExternalTarget} />
+                      <MetaBlock
+                        label="External Target"
+                        value={sourceDisplayName(proposalDetail.data.item.proposedExternalTarget)}
+                        title={proposalDetail.data.item.proposedExternalTarget}
+                      />
                     )}
                     {"proposedExternalTarget" in proposalDetail.data.item && proposalDetail.data.item.proposedExternalTarget && (
                       <Button

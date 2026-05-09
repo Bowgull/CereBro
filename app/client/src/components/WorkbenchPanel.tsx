@@ -514,7 +514,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     { value: "none", label: "No source link" },
                     ...(linkOptions.data?.sources ?? []).map((source) => ({
                       value: String(source.id),
-                      label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${source.title ?? source.uri}`,
+                      label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
+                        source.title ?? sourceDisplayName(source.uri)
+                      }`,
                     })),
                   ]}
                 />

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:20 EDT
+Last updated: 2026-05-08 22:22 EDT
 
 ## Current North Star
 
@@ -20,6 +20,42 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2222 - Front-End Build Steward: Workbench Hedwig Source Labels
+
+### What Changed
+
+- Updated Workbench source-link dropdown labels so URI fallbacks use compact
+  source labels.
+- Updated Hedwig triage source drafts and proposal external targets so visible
+  values use compact labels with full target evidence in hover titles.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Workbench and Hedwig now match the same evidence-display rule as Surfer:
+  compact source labels on the surface, full target evidence available on hover.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue compacting dense labels in Terminal Lab, Sessions, and project path
+  displays where raw paths or commands cause avoidable visual noise.
 
 ## 2026-05-08 2220 - Front-End Build Steward: Surfer Project Source Labels
 
