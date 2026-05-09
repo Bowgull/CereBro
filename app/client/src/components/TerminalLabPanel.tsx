@@ -19,6 +19,9 @@ type TerminalProjectContext = {
   localPath: string;
   localExists: boolean;
   nextSafeAction: string;
+  tasks: {
+    projectId: number | null;
+  };
   git: {
     branch: string | null;
     upstream: string | null;
@@ -72,6 +75,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     { kind: "terminal_output", limit: 50 },
     { refetchInterval: 10000 },
   );
+  const workbenchReceipts = trpc.workbench.evidence.useQuery(
+    { limit: 100 },
+    { refetchInterval: 10000 },
+  );
   const preview = trpc.terminalLab.previewCommand.useMutation();
   const observeOutput = trpc.terminalLab.observeOutput.useMutation();
   const linkObservation = trpc.terminalLab.linkObservation.useMutation();
@@ -104,6 +111,23 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     projectRows.find((project) => project.slug === "cerebro") ??
     projectRows[0] ??
     null;
+  const contextReceiptStats = (() => {
+    const projectId = contextProject?.tasks.projectId;
+    if (projectId == null) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
+    return (workbenchReceipts.data?.items ?? []).reduce(
+      (stats, item) => {
+        if (item.projectId !== projectId) return stats;
+        stats.total += 1;
+        if (item.kind === "terminal_output") stats.terminal += 1;
+        if (item.validationStatus === "needs_review") stats.needsReview += 1;
+        if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") {
+          stats.validated += 1;
+        }
+        return stats;
+      },
+      { total: 0, terminal: 0, needsReview: 0, validated: 0 },
+    );
+  })();
   const teachingFrame = preview.data
     ? {
         title: "Aang reads this command preview.",
@@ -879,6 +903,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               project={contextProject}
               isLoading={projectOverview.isLoading}
               contextLabel={selectedObservation ? `observation #${selectedObservation.id}` : selectedTask ? `task #${selectedTask.id}` : "current repo"}
+              receiptStats={contextReceiptStats}
             />
 
             <form onSubmit={submitOutput} className="rounded p-1.5 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1041,10 +1066,12 @@ function ProjectContextRail({
   project,
   isLoading,
   contextLabel,
+  receiptStats,
 }: {
   project: TerminalProjectContext | null;
   isLoading: boolean;
   contextLabel: string;
+  receiptStats: { total: number; terminal: number; needsReview: number; validated: number };
 }) {
   if (isLoading) {
     return (
@@ -1091,6 +1118,23 @@ function ProjectContextRail({
         <ContextDatum label="Approvals" value={`${project.pushReadiness.evidence.pendingApprovals} pending`} tone={project.pushReadiness.evidence.pendingApprovals > 0 ? C.warning : C.success} />
         <ContextDatum label="Blocked" value={`${project.pushReadiness.evidence.blockedTerminal} terminal`} tone={project.pushReadiness.evidence.blockedTerminal > 0 ? C.danger : C.textSecondary} />
         <ContextDatum label="Reviewing" value={`${project.pushReadiness.evidence.reviewingTerminal} terminal`} tone={project.pushReadiness.evidence.reviewingTerminal > 0 ? C.warning : C.textSecondary} />
+      </div>
+
+      <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted }}>
+            Workbench Receipts
+          </div>
+          <Chip label={`${receiptStats.total} total`} tone={receiptStats.total > 0 ? C.accent : C.textMuted} />
+        </div>
+        <div className="mt-1 grid grid-cols-3 gap-1">
+          <ContextDatum label="Terminal" value={String(receiptStats.terminal)} tone={receiptStats.terminal > 0 ? C.warning : C.textSecondary} />
+          <ContextDatum label="Review" value={String(receiptStats.needsReview)} tone={receiptStats.needsReview > 0 ? C.danger : C.textSecondary} />
+          <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
+        </div>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
+        </div>
       </div>
 
       <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>

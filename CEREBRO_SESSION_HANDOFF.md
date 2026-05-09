@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:56 EDT
+Last updated: 2026-05-09 11:59 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1159 EDT - Terminal Project Receipt Summary
+
+### What Changed
+
+- Added Workbench receipt summary state to Terminal Lab's Project Context rail.
+- The rail now shows project-level receipt totals, terminal receipts, receipts needing review, and validated receipts.
+- The rail repeats the ownership rule: Workbench has the body, Ledger has the audit trail, Project Lab reads push context.
+- The summary is read-only and derived from existing Workbench receipt data.
+- This does not run commands, stage files, commit, push, or alter app data.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This lets Aang read project proof state while staying inside Terminal Lab's teaching lane.
+- Workbench remains the receipt body owner. Ledger remains the audit trail owner. Project Lab remains the push context owner.
+- Terminal Lab remains proposal-only and does not execute commands.
+- Manual push remains visible and separate. No hidden execution path was added.
+
+### Known Risks
+
+- The rail uses the latest 100 Workbench receipts as a client-side summary.
+- Browser visual verification still needs the Browser Use plugin when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Terminal Lab.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Terminal Lab Project Context receipt summary when Browser Use is callable; if unavailable, continue by tightening Aang teaching copy so command observations use Workbench body / Ledger trail / Project push context language consistently. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1156 EDT - Terminal To Ledger Receipt Trail
 
