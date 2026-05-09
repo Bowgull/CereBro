@@ -96,11 +96,25 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
               <span className="ml-2" style={{ color: C.warning }}>{proposals.length} proposed</span>
             )}
           </div>
-          <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>
+          <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
             Memory entries need source, approval, and Oak status before they become truth.
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <Button type="button" onClick={onClose} variant="outline" size="sm">
+          Close
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <MemoryStat label="Saved" value={String(entries.length)} tone={C.gold} />
+        <MemoryStat label="Trusted" value={String(trusted)} tone={C.success} />
+        <MemoryStat label="Proposed" value={String(proposals.length)} tone={proposals.length > 0 ? C.warning : C.textMuted} />
+      </div>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Memory kind filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
           {(["all", ...KINDS] as const).map((k) => {
             const active = filter === k;
             return (
@@ -108,6 +122,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                 type="button"
                 key={k}
                 onClick={() => setFilter(k)}
+                className="shrink-0"
                 variant={active ? "secondary" : "ghost"}
                 size="sm"
               >
@@ -119,20 +134,14 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search."
-            className="ml-2 w-36"
+            className="ml-auto w-44 shrink-0"
           />
-          <Button type="button" onClick={onClose} variant="outline" size="sm" className="ml-2">
-            Close
-          </Button>
-        </div>
       </div>
-
-      <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <MemoryStat label="Saved" value={String(entries.length)} tone={C.gold} />
-        <MemoryStat label="Trusted" value={String(trusted)} tone={C.success} />
-        <MemoryStat label="Proposed" value={String(proposals.length)} tone={proposals.length > 0 ? C.warning : C.textMuted} />
-      </div>
-      <div className="flex items-center gap-1 px-2.5 py-1.5 shrink-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div
+        className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
+        aria-label="Memory run filters"
+        style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+      >
         <FilterButton
           label="All Runs"
           active={sessionFilter === "all"}
@@ -154,7 +163,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={submit} className="flex gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="grid grid-cols-[120px_145px_minmax(0,1fr)_140px_76px] gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <AppSelect
           label="Memory proposal kind"
           value={kind}
@@ -187,6 +196,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         />
         <Button
           type="submit"
+          size="sm"
           disabled={!body.trim() || propose.isPending}
         >
           Propose
@@ -196,12 +206,12 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
       <div className="flex-1 overflow-y-auto">
         {proposals.length > 0 && (
           <div style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-            <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest" style={{ color: C.warning, background: C.surface }}>
+            <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.warning, background: C.surface }}>
               Proposed
             </div>
             {proposals.map((p) => (
-              <div key={p.id} className="px-2.5 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-                <div className="flex items-center gap-2 mb-1">
+              <div key={p.id} className="px-2.5 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+                <div className="mb-1 flex items-center gap-1">
                   <Badge variant="warning" className="uppercase">
                     {p.status}
                   </Badge>
@@ -214,7 +224,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                     Oak: {p.oakStatus}
                   </span>
                 </div>
-                <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+                <div className="line-clamp-3 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                   {p.body}
                 </div>
               </div>
@@ -222,9 +232,9 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
         {list.isLoading ? (
-          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
         ) : entries.length === 0 ? (
-          <div className="px-3 py-2 text-xs" style={{ color: C.textMuted }}>
+          <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             No entries. Memory grows as you save facts, notes, references, and feedback.
           </div>
         ) : (
@@ -234,7 +244,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
               className="px-2.5 py-1.5"
               style={{ borderBottom: `1px solid ${C.borderSoft}` }}
             >
-              <div className="flex items-center gap-2 mb-1">
+              <div className="mb-1 flex items-center gap-1">
                 <Badge variant={badgeVariant(m.kind)} className="uppercase">
                   {m.kind}
                 </Badge>
@@ -261,7 +271,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   Delete
                 </Button>
               </div>
-              <div className="text-xs leading-relaxed" style={{ color: C.textPrimary }}>
+              <div className="line-clamp-3 text-[11px] leading-snug" style={{ color: C.textPrimary }}>
                 {m.body}
               </div>
             </div>
@@ -346,11 +356,11 @@ function FilterButton({
 
 function MemoryStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
         {label}
       </div>
-      <div className="text-xs font-semibold mt-0.5" style={{ color: tone }}>
+      <div className="mt-0.5 text-[11px] font-semibold" style={{ color: tone }}>
         {value}
       </div>
     </div>
@@ -370,7 +380,7 @@ function AppSelect({
 }) {
   return (
     <UiSelect value={value} onValueChange={onChange} aria-label={label}>
-      <SelectTrigger className="w-36">
+      <SelectTrigger size="sm" className="w-full">
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>

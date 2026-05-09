@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:43 EDT
+Last updated: 2026-05-09 06:48 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0648 EDT - Front-End Build Steward: Memory Receipt Density
+
+### What Changed
+
+- Browser-reviewed the active Ledger Memory surface after the Output pass.
+- Moved memory kind filters and search out of the header into a compact receipt
+  lane.
+- Tightened run filters, proposal form, receipt stats, proposed rows, saved
+  memory rows, empty state, and destructive delete affordance spacing.
+- Clamped long proposal and memory bodies so repeated Terminal QA receipts do
+  not dominate the first viewport.
+
+### Files Touched
+
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review of `http://localhost:3002/` confirmed Memory shows
+  compact kind filters, run filters, proposal controls, proposed receipts, and
+  saved receipts.
+
+### Front-End Steward Review
+
+- Memory now reads as a knowledge receipt ledger. Filters, search, proposal
+  staging, Oak status, and destructive delete controls are visible without
+  letting long note bodies consume the surface.
+
+### Known Risks
+
+- Browser screenshot capture had timed out on the previous Output slice, so this
+  pass used DOM verification rather than another screenshot attempt.
+- Existing Raven/docs/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Ledger with Sessions or Tasks, then review the full Ledger zone for
+  remaining cross-surface density mismatches.
 
 ## 2026-05-09 0643 EDT - Front-End Build Steward: Output Library Density
 
