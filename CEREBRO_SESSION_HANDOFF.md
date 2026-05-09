@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:28 EDT
+Last updated: 2026-05-08 22:30 EDT
 
 ## Current North Star
 
@@ -20,6 +20,42 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2230 - Front-End Build Steward: Compact Config Secrets
+
+### What Changed
+
+- Updated ConfigPanel machine status values with hover titles for full evidence.
+- Compact-displayed the bridge API key so the full secret is not exposed in the
+  visible panel. Copy still copies the exact key.
+- Compact-displayed local bridge setup commands while preserving exact copy
+  behavior.
+
+### Files Touched
+
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Basement Configuration no longer lets long command strings or full secrets
+  dominate the dense setup panel.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue the final dense-display cleanup pass in approval and model-tool
+  surfaces, then reassess whether this normalization tranche is complete.
 
 ## 2026-05-08 2228 - Front-End Build Steward: Compact Workbench Project Commands
 

@@ -5,6 +5,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { compactCommandLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Button } from "@/components/ui/button";
 
@@ -39,6 +40,9 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
 
   const bridgeCommand = bridgeData?.apiKey
     ? `CLAUDE_DUNGEON_SERVER=${serverUrl} CLAUDE_DUNGEON_API_KEY=${bridgeData.apiKey} node claude-dungeon-bridge.mjs`
+    : "Loading...";
+  const bridgeKeyLabel = bridgeData?.apiKey
+    ? `${bridgeData.apiKey.slice(0, 8)}...${bridgeData.apiKey.slice(-6)}`
     : "Loading...";
 
   return (
@@ -91,7 +95,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                   </span>
                   <div className="min-w-0">
                     <div className="text-xs" style={{ color: C.textMuted }}>{item.label}</div>
-                    <div className="truncate text-xs" style={{ color: C.textPrimary }}>{item.value}</div>
+                    <div className="truncate text-xs" style={{ color: C.textPrimary }} title={item.value}>{item.value}</div>
                   </div>
                 </div>
               ))}
@@ -110,8 +114,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div className="text-xs animate-pulse" style={{ color: C.textMuted }}>Generating key.</div>
             ) : (
               <div className="flex items-center gap-2">
-                <code className="flex-1 px-2.5 py-1.5 text-xs rounded font-mono break-all" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.gold }}>
-                  {bridgeData?.apiKey || "Loading..."}
+                <code className="flex-1 px-2.5 py-1.5 text-xs rounded font-mono truncate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.gold }}>
+                  {bridgeKeyLabel}
                 </code>
                 <Button
                   type="button"
@@ -136,8 +140,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>1. Download the bridge script.</div>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
-                    curl -O {serverUrl}/bridge/claude-dungeon-bridge.mjs
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }} title={`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`}>
+                    {compactCommandLabel(`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`)}
                   </code>
                   <Button
                     type="button"
@@ -155,8 +159,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>2. Run the bridge with Node 22.</div>
                 <div className="flex items-start gap-2">
-                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded break-all leading-relaxed" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
-                    {bridgeCommand}
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate leading-relaxed" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
+                    {compactCommandLabel(bridgeCommand)}
                   </code>
                   <Button
                     type="button"
