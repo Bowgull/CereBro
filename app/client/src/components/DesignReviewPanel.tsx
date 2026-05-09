@@ -223,6 +223,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                           checked={checked.includes(item.key)}
                           onCheckedChange={() => toggleChecklist(item.key)}
                           aria-label={`Toggle ${item.label}`}
+                          title={`Toggle local design checklist item: ${item.label}`}
                         />
                         {item.label}
                       </label>
@@ -246,6 +247,11 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                     type="button"
                     onClick={submitReview}
                     disabled={!targetLabel.trim() || !proofSummary.trim() || lines(nextActions).length === 0 || createReview.isPending}
+                    title={
+                      !targetLabel.trim() || !proofSummary.trim() || lines(nextActions).length === 0
+                        ? "Add target, summary, and next actions before saving the local design review."
+                        : "Save a local design review receipt. This does not patch code or open tools."
+                    }
                     aria-label="Save local design review"
                     variant="default"
                   >

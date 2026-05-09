@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:33 EDT
+Last updated: 2026-05-09 13:36 EDT
 
 ## Current North Star
 
@@ -20,6 +20,34 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1336 EDT - Design Review Boundary Pass
+
+### What Changed
+- Tightened Design Review checklist controls so each toggle is labeled as a local design checklist item.
+- Save Review now states required fields when disabled and states it saves a local design review receipt without patching code or opening tools.
+- Confirmed the gate list renders one line per gate.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/DesignReviewPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: visual density and copy audit across the main front-end spine, then use Browser Use if callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1333 EDT - Skills Manager File Boundary Pass
 
