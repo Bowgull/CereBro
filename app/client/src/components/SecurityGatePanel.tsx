@@ -6,6 +6,13 @@ import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function labelize(value: string | null | undefined) {
   if (!value) return "unknown";
@@ -28,11 +35,27 @@ function formatTime(unixSec: number) {
   });
 }
 
+function linkedProjectName(receipt: object) {
+  return "projectName" in receipt && typeof receipt.projectName === "string" ? receipt.projectName : null;
+}
+
+function linkedSourceTitle(receipt: object) {
+  return "sourceTitle" in receipt && typeof receipt.sourceTitle === "string" ? receipt.sourceTitle : null;
+}
+
+function linkedSourceUri(receipt: object) {
+  return "sourceUri" in receipt && typeof receipt.sourceUri === "string" ? receipt.sourceUri : null;
+}
+
 export default function SecurityGatePanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [target, setTarget] = useState("");
+  const [projectId, setProjectId] = useState<number | "none">("none");
+  const [sourceId, setSourceId] = useState<number | "none">("none");
   const plan = trpc.securityGate.plan.useQuery();
   const recent = trpc.securityGate.recent.useQuery({ limit: 12 });
+  const projects = trpc.projectIntelligence.overview.useQuery();
+  const linkOptions = trpc.workbench.linkOptions.useQuery();
   const inspect = trpc.securityGate.inspectTarget.useMutation();
   const createReview = trpc.securityGate.createReview.useMutation({
     onSuccess: () => {
@@ -41,6 +64,9 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
   });
 
   const receipt = createReview.data?.review ?? inspect.data?.receipt ?? null;
+  const receiptProjectName = receipt ? linkedProjectName(receipt) : null;
+  const receiptSourceTitle = receipt ? linkedSourceTitle(receipt) : null;
+  const receiptSourceUri = receipt ? linkedSourceUri(receipt) : null;
 
   function inspectTarget(event: FormEvent) {
     event.preventDefault();
@@ -52,7 +78,11 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
   function recordReceipt() {
     const trimmed = target.trim();
     if (!trimmed || createReview.isPending) return;
-    createReview.mutate({ target: trimmed });
+    createReview.mutate({
+      target: trimmed,
+      projectId: projectId === "none" ? undefined : projectId,
+      sourceId: sourceId === "none" ? undefined : sourceId,
+    });
   }
 
   return (
@@ -88,6 +118,34 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               aria-label="Security target"
               placeholder="URL, GitHub repo, package, file, or site."
             />
+            <div className="grid gap-2 md:grid-cols-2">
+              <AppSelect
+                label="Project link"
+                value={String(projectId)}
+                onChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}
+                options={[
+                  { value: "none", label: "No project link" },
+                  ...(projects.data?.projects ?? [])
+                    .filter((project) => project.tasks.projectId != null)
+                    .map((project) => ({
+                      value: String(project.tasks.projectId),
+                      label: project.name,
+                    })),
+                ]}
+              />
+              <AppSelect
+                label="Source link"
+                value={String(sourceId)}
+                onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
+                options={[
+                  { value: "none", label: "No source link" },
+                  ...(linkOptions.data?.sources ?? []).map((source) => ({
+                    value: String(source.id),
+                    label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.title ?? sourceDisplayName(source.uri)}`,
+                  })),
+                ]}
+              />
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={!target.trim() || inspect.isPending} variant="secondary">
                 {inspect.isPending ? "Inspecting" : "Inspect"}
@@ -108,6 +166,11 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                 <Chip label={labelize(receipt.riskLevel)} tone={riskTone(receipt.riskLevel)} />
               </div>
               <Meta label="Target" value={sourceDisplayName(receipt.targetUri)} title={receipt.targetUri} />
+              <div className="flex flex-wrap gap-1">
+                {receiptProjectName && <Chip label={receiptProjectName} tone={C.gold} />}
+                {receiptSourceTitle && <Chip label={receiptSourceTitle} tone={C.accent} />}
+                {!receiptSourceTitle && receiptSourceUri && <Chip label={sourceDisplayName(receiptSourceUri)} tone={C.accent} />}
+              </div>
               <div className="grid gap-2 md:grid-cols-2">
                 <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
                 <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
@@ -150,11 +213,17 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   <Chip label={`#${item.id}`} tone={C.textMuted} />
                   <Chip label={labelize(item.targetKind)} tone={C.accent} />
                   <Chip label={labelize(item.riskLevel)} tone={riskTone(item.riskLevel)} />
+                  {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                   {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={C.warning} />}
                 </div>
                 <div className="mt-1 text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={item.targetUri}>
                   {sourceDisplayName(item.targetUri)}
                 </div>
+                {(item.sourceTitle || item.sourceUri) && (
+                  <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.sourceUri ?? undefined}>
+                    Source: {item.sourceTitle ?? sourceDisplayName(item.sourceUri ?? "")}
+                  </div>
+                )}
                 <div className="mt-1 text-[11px]" style={{ color: C.textMuted }}>{formatTime(item.createdAt)}</div>
               </article>
             ))
@@ -194,6 +263,36 @@ function Meta({ label, value, title }: { label: string; value: string; title?: s
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
       <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
     </div>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  return (
+    <label className="grid gap-1 text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+      {label}
+      <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+        <SelectTrigger className="w-full normal-case">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={`${option.value}-${option.label}`} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </UiSelect>
+    </label>
   );
 }
 

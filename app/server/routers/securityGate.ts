@@ -253,7 +253,10 @@ function rowToSecurityReview(row: Record<string, unknown>) {
     browserPolicy: JSON.parse(String(row.browser_policy_json)) as ReturnType<typeof browserPolicyFor>,
     permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
     sourceId: row.source_id == null ? null : Number(row.source_id),
+    sourceTitle: row.source_title == null ? null : String(row.source_title),
+    sourceUri: row.source_uri == null ? null : String(row.source_uri),
     projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
     createdAt: Number(row.created_at),
   };
 }
@@ -346,6 +349,19 @@ export const securityGateRouter = router({
         ],
       });
       const row = result.rows[0];
+      const joined = row
+        ? await db.execute({
+            sql: `
+              SELECT srr.*, src.title AS source_title, src.uri AS source_uri, p.name AS project_name
+              FROM security_review_records srr
+              LEFT JOIN sources src ON src.id = srr.source_id
+              LEFT JOIN projects p ON p.id = srr.project_id
+              WHERE srr.id = ?
+              LIMIT 1
+            `,
+            args: [Number(row.id)],
+          })
+        : null;
       return {
         ok: Boolean(row),
         appendOnly: true,
@@ -354,7 +370,7 @@ export const securityGateRouter = router({
         clonesRepo: false,
         downloadsFile: false,
         executesCommand: false,
-        review: row ? rowToSecurityReview(row) : null,
+        review: joined?.rows[0] ? rowToSecurityReview(joined.rows[0]) : row ? rowToSecurityReview(row) : null,
         permissionPreflightId: Number(preflight.row.id),
         gates: [
           "Recorded one local Spock security receipt.",
@@ -370,9 +386,11 @@ export const securityGateRouter = router({
       const db = await getCerebroDb();
       const rows = await db.execute({
         sql: `
-          SELECT *
-          FROM security_review_records
-          ORDER BY created_at DESC, id DESC
+          SELECT srr.*, src.title AS source_title, src.uri AS source_uri, p.name AS project_name
+          FROM security_review_records srr
+          LEFT JOIN sources src ON src.id = srr.source_id
+          LEFT JOIN projects p ON p.id = srr.project_id
+          ORDER BY srr.created_at DESC, srr.id DESC
           LIMIT ?
         `,
         args: [input?.limit ?? 20],

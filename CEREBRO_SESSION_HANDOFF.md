@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 21:39 EDT
+Last updated: 2026-05-08 21:45 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2145 - Front-End Build Steward: Security Gate Link Receipts
+
+### What Changed
+
+- Added optional project and source selectors to Security Gate receipt creation.
+- Security Gate now passes `projectId` and `sourceId` into local Spock receipt
+  records when selected.
+- Updated recent security receipts to return linked project/source labels.
+- Updated the Security Gate UI so recent receipts and active recorded receipts
+  show linked project/source context.
+
+### Files Touched
+
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `app/server/routers/securityGate.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Spock receipts no longer have to float as unlinked risk notes.
+- Source/project context stays visible in the receipt list without opening a
+  target or fetching anything.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Security scanner adapters remain planned, not wired executors.
+- Two Raven intake files were already modified in the worktree and were left
+  untouched by this slice.
+
+### Next Front-End Slice
+
+- Add a compact Security Gate receipt count or latest-risk indicator to the
+  Basement overview.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2139 - Front-End Build Steward: Security Gate Surface
 
@@ -7939,4 +7981,58 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/commandIntake.ts first. Continue Raven routing from the active-session `keep building` trigger. Keep the route backend-only unless the frontend agent's work is reconciled. Add local-only Raven preference categories, redaction receipts, and bridge/export proposals next. Keep browser sessions, source scanning, media downloads, generator calls, Notion, Obsidian, Slack, core-memory export, and external model calls blocked.
+```
+
+## 2026-05-08 2145 EDT — Raven private preference and bridge proposal layer
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added local-only Raven private preference records.
+- Added local-only Raven scrub receipts with SHA-256 source hashes, scrubbed
+  bodies, and finding labels. The receipt stores redacted text and does not
+  export anything.
+- Added local-only Raven bridge export proposals. These are proposal records
+  only. They require explicit user approval before any core memory, Obsidian,
+  Notion, Slack, task, or artifact write.
+- Added Raven router endpoints:
+  - `preferenceCategories`
+  - `addPreference`
+  - `scrubPrivateText`
+  - `proposeBridgeExport`
+- Expanded the Raven foundation test to cover preference capture, scrubbed
+  sensitive text, and proposal-only bridge export behavior.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Scrubbing is deterministic and simple. It catches common emails, phone
+  numbers, URLs, local user paths, and secret-like key/value strings, but it is
+  not a full privacy classifier.
+- Bridge proposals do not yet have status transitions or approval queue
+  surfacing.
+- No frontend Raven surface exists yet.
+
+Storage impact:
+
+- Adds `raven_private_preferences`, `raven_scrub_receipts`, and
+  `raven_bridge_export_proposals` to local libSQL.
+- Does not write Raven private data to core memory, Obsidian, Notion, Slack, or
+  external systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from the private preference and bridge proposal layer. Keep it backend-only unless the frontend worktree is reconciled. Add proposal status transitions, Approval Queue read-only visibility for Raven bridge exports, and stronger scrub classifications next. Do not approve, export, browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```
