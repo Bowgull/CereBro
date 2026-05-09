@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 08:32 EDT
+Last updated: 2026-05-09 08:37 EDT
 
 ## Current North Star
 
@@ -21,22 +21,19 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
-## 2026-05-09 0832 EDT - Front-End Build Steward: Backend Push Readiness Receipt
+## 2026-05-09 0837 EDT - Front-End Build Steward: Push Evidence Strip
 
 ### What Changed
 
-- Promoted Project Lab Push Readiness from a local UI heuristic into a backend `projectIntelligence.overview` receipt.
-- Each project now receives `pushReadiness` with state, label, why, stays-out, checks, manual commands, suggested commit text, automation policy, and evidence.
-- The receipt explicitly reports `executesGit: false`, `automationDefault: manual`, and `automationRequiresApproval: true`.
-- Project cards now render the backend receipt instead of recalculating push timing in the client.
-- Added foundation coverage for read-only push readiness receipts and branch/remote evidence.
-- Browser DOM verified the Project Lab push receipt at `http://localhost:3002/`.
+- Added a compact Project Lab Push Readiness evidence strip.
+- The strip shows branch, upstream, dirty count, last-check placeholder, approval gate, and whether the receipt executes git.
+- The strip renders from the backend `pushReadiness.evidence` receipt.
+- Manual push commands and the expanded receipt remain available.
+- Browser DOM verified the evidence strip at `http://localhost:3002/`.
 
 ### Files Touched
 
-- `app/server/routers/projectIntelligence.ts`
 - `app/client/src/components/ProjectLabPanel.tsx`
-- `app/server/cerebro-foundations.test.ts`
 - `CEREBRO_SESSION_HANDOFF.md`
 
 ### Checks Run
@@ -45,13 +42,13 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `pnpm check` passed.
 - `pnpm test -- server/cerebro-foundations.test.ts` passed.
 - `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
-- In-app browser DOM review confirmed the Project Lab push receipt and expanded manual commands.
+- In-app browser DOM review confirmed Branch, Upstream, Dirty, Check, Gate, Executes, approval, and not recorded labels.
 
 ### Front-End Steward Review
 
-- This is still proposal-only. It does not stage, commit, push, open PRs, or mutate repos.
-- The server now owns push timing judgment so CereBro can reason consistently across project cards and future automation surfaces.
-- Manual push remains visible even when automation policy is shown.
+- The card now exposes the proof behind the push recommendation without requiring the receipt to be expanded.
+- Last-check evidence is explicitly marked as not recorded instead of pretending a check history exists.
+- The strip keeps the no-git-execution boundary visible.
 
 ### Known Risks
 
@@ -70,7 +67,7 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 ### Next Starter Prompt
 
 ```text
-Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Backend Push Readiness Receipt. Next safe slice: add a compact Project Lab evidence strip that shows the backend push receipt evidence, last known check status placeholder, and approval requirement without increasing card height too much. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Push Evidence Strip. Next safe slice: add a read-only check history placeholder to Project Lab backend data so the evidence strip can distinguish not recorded, passed, failed, stale, and unknown without executing commands. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
 ```
 
 ## 2026-05-09 0816 EDT - Front-End Build Steward: Button Primitive Density

@@ -672,6 +672,13 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                       {autoPushArmed ? "Automation is selected for this project, but manual commands stay visible and execution still needs approval." : "Advisory only. Manual push stays visible."}
                     </div>
+                    <PushEvidenceStrip
+                      branch={pushReadiness.evidence.branch}
+                      upstream={pushReadiness.evidence.upstream}
+                      dirtyCount={pushReadiness.evidence.dirtyCount}
+                      approvalRequired={pushReadiness.automationRequiresApproval}
+                      executesGit={pushReadiness.executesGit}
+                    />
                     {showPushReceipt && (
                       <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
                         <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushTone} />
@@ -1726,6 +1733,48 @@ function RecentList({
           </Button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function PushEvidenceStrip({
+  branch,
+  upstream,
+  dirtyCount,
+  approvalRequired,
+  executesGit,
+}: {
+  branch: string | null;
+  upstream: string | null;
+  dirtyCount: number;
+  approvalRequired: boolean;
+  executesGit: boolean;
+}) {
+  const items = [
+    { label: "Branch", value: branch ?? "unavailable", tone: branch ? C.textSecondary : C.warning },
+    { label: "Upstream", value: upstream ?? "none", tone: upstream ? C.textSecondary : C.gold },
+    { label: "Dirty", value: `${dirtyCount}`, tone: dirtyCount > 0 ? C.warning : C.success },
+    { label: "Check", value: "not recorded", tone: C.textMuted },
+    { label: "Gate", value: approvalRequired ? "approval" : "open", tone: approvalRequired ? C.accent : C.success },
+    { label: "Executes", value: executesGit ? "yes" : "no", tone: executesGit ? C.danger : C.success },
+  ];
+
+  return (
+    <div className="mt-1 grid grid-cols-2 gap-1 md:grid-cols-3">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="min-w-0 rounded px-1.5 py-1"
+          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        >
+          <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: item.tone }}>
+            {item.label}
+          </div>
+          <div className="mt-0.5 truncate text-[10px] leading-tight" title={item.value} style={{ color: C.textSecondary }}>
+            {item.value}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
