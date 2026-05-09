@@ -202,27 +202,26 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-center justify-between px-3 py-1.5 shrink-0"
+        className="flex items-center justify-between gap-3 px-3 py-2.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             Terminal Lab
           </div>
           <div className="text-[11px] mt-0.5 truncate" style={{ color: C.textMuted }}>
             Proposal-only command explanation and approval gates. No shell execution.
           </div>
+          <div className="mt-1 flex flex-wrap gap-1">
+            <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
+            <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "tony"}</Badge>
+            <Badge variant="warning" className="uppercase">Execution disabled</Badge>
+            <Badge variant="secondary" className="uppercase">Support {(data?.supportAgents ?? ["aang"]).join(", ")}</Badge>
+          </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm" className="shrink-0">
           Close
         </Button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
-        <StatusBlock label="Owner" value={data?.ownerAgent ?? "tony"} tone={C.accent} />
-        <StatusBlock label="Support" value={(data?.supportAgents ?? ["aang"]).join(", ")} tone={C.gold} />
-        <StatusBlock label="Execution" value="disabled" tone={C.warning} />
       </div>
 
       <form onSubmit={submit} className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -274,7 +273,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       </form>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-2.5 p-3">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-2.5 px-3 pt-3 pb-20">
           <div className="space-y-2.5 min-w-0">
             {preview.data && (
               <section className="space-y-2">
@@ -695,15 +694,6 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="rounded p-2 min-w-0" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs font-semibold truncate mt-0.5" style={{ color: tone }} title={value}>{value}</div>
     </div>
   );
 }

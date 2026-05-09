@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:44 EDT
+Last updated: 2026-05-09 05:47 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0547 - Front-End Build Steward: Terminal Lab Header Density
+
+### What Changed
+
+- Browser-reviewed Terminal Lab in the in-app browser on `localhost:3002`.
+- Moved mode, owner, support, and execution state from a separate status-card
+  row into compact header badges.
+- Raised the Terminal Lab header hierarchy to match the active routed surfaces.
+- Added bottom scroll clearance so the fixed route composer does not cover the
+  lower right rail or observation list.
+- Removed the now-unused local `StatusBlock` helper.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Terminal Lab now gets to the command preview form and observation surface
+  faster, while keeping the no-execution state visible in the header.
+
+### Known Risks
+
+- Observation cards remain dense and need a dedicated action-row pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue Terminal Lab by compacting observation action rows and diagnostic
+  draft blocks.
 
 ## 2026-05-09 0544 - Front-End Build Steward: Project Lab Next Rank
 
