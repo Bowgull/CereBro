@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1071,7 +1072,7 @@ function ProjectDetailInspector({
         fields: [
           ["Event Type", labelize(item.eventType)],
           ["Title", item.title ?? "untitled"],
-          ["Source", item.sourceDisplayName ?? item.uri ?? "not recorded"],
+          ["Source", item.sourceDisplayName ?? (item.uri ? sourceDisplayName(item.uri) : "not recorded")],
           ["Trust Level", item.trustLevel ?? "unknown"],
           ["Sensitive", item.sensitive ? "yes" : "no"],
           ["Created", compactTime(item.createdAt)],

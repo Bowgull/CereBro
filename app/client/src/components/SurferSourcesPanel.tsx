@@ -139,8 +139,12 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
         {ingestUrl.data && (
           <div className="text-[11px] leading-relaxed break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
             {ingestUrl.data.ok && ingestUrl.data.source
-              ? `Saved source: ${ingestUrl.data.source.title ?? ingestUrl.data.source.sourceDisplayName ?? ingestUrl.data.source.uri}`
-                : ingestUrl.data.reason ?? "URL ingestion failed."}
+              ? `Saved source: ${
+                  ingestUrl.data.source.title ??
+                  ingestUrl.data.source.sourceDisplayName ??
+                  sourceDisplayName(ingestUrl.data.source.uri)
+                }`
+              : ingestUrl.data.reason ?? "URL ingestion failed."}
           </div>
         )}
       </form>
@@ -187,7 +191,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     wordCount={source.wordCount ?? null}
                     sensitiveDataFlag={source.sensitiveDataFlag}
                     preview={source.summary ?? "Saved source record without summary."}
-                    whyItMatters={source.sourceDisplayName ?? source.uri}
+                    whyItMatters={source.sourceDisplayName ?? sourceDisplayName(source.uri)}
                     sourceUri={source.uri}
                     requiredApproval={source.trustNotes ?? "Already saved in the Source Library."}
                     scrubNotes={source.scrubNotes ?? undefined}
@@ -236,10 +240,10 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                         <MiniBadge label={event.ownerAgent ?? "unknown"} tone={event.ownerAgent === "surfer" ? C.accent : C.gold} />
                       </div>
                       <div className="text-xs font-semibold truncate mt-1" style={{ color: C.textPrimary }} title={event.title ?? event.uri}>
-                        {event.title ?? event.uri}
+                        {event.title ?? event.sourceDisplayName ?? (event.uri ? sourceDisplayName(event.uri) : "source event")}
                       </div>
                       <div className="text-[10px] leading-snug truncate mt-1" style={{ color: C.textMuted }} title={event.uri}>
-                        {event.sourceDisplayName ?? event.uri}
+                        {event.sourceDisplayName ?? (event.uri ? sourceDisplayName(event.uri) : "unlinked source")}
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {event.trustLevel && <MiniBadge label={event.trustLevel} tone={TRUST_TONES[event.trustLevel] ?? C.textMuted} />}
@@ -379,7 +383,7 @@ function SourceCard({
       <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
         {preview}
       </div>
-      <div className="text-[11px] leading-relaxed mt-2 break-all" style={{ color: C.textMuted }} title={sourceUri}>
+      <div className="text-[11px] leading-relaxed mt-2 truncate" style={{ color: C.textMuted }} title={sourceUri ?? whyItMatters}>
         {whyItMatters}
       </div>
       <div className="text-[11px] leading-relaxed mt-2" style={{ color: C.warning }}>

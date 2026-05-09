@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:17 EDT
+Last updated: 2026-05-08 22:20 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2220 - Front-End Build Steward: Surfer Project Source Labels
+
+### What Changed
+
+- Updated Surfer URL ingest feedback, saved-source cards, and source history
+  rows to use compact source labels instead of raw URI fallbacks.
+- Updated Project Lab source event fields to use the shared compact source
+  label helper.
+- Kept full URI evidence in hover titles where the UI already carries it.
+
+### Files Touched
+
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Surfer and Project Lab now follow the same dense source-label pattern as the
+  Output Library: compact visible labels, raw evidence available on hover.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue the same normalization pass across remaining dense work surfaces,
+  looking for raw IDs, raw paths, and long evidence strings that should be
+  compact labels with hover evidence.
 
 ## 2026-05-08 2217 - Front-End Build Steward: Artifact Source Label Fallback
 
