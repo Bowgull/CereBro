@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:03 EDT
+Last updated: 2026-05-08 22:05 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2205 - Front-End Build Steward: Terminal Security Gate Link
+
+### What Changed
+
+- Added `Security Gate` actions to Terminal Lab:
+  - Command preview detail.
+  - Recent command observation rows.
+- The action opens Security Gate and pre-fills the command string through local
+  session storage.
+- Wired Terminal Lab to shell navigation for the Security surface.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Commands can now move to Spock inspection before a run is even implied.
+- This keeps Terminal Lab proposal-only while making the security receipt path
+  visible at the risky moment.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Add approval-detail affordances for linked Security Gate receipts.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2203 - Front-End Build Steward: Security Gate Link Detail
 
@@ -8474,4 +8513,47 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from local recommendation candidates. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add contradiction and decay metadata to preference rollups and candidate drafting, using only local Raven private preference/event metadata. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2204 EDT — Raven contradiction and decay metadata
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added computed `contradictionState` to Raven preference rollups.
+- Added computed `decayBucket` and `decayedWeight` to Raven preference rollups.
+- Recommendation seed summaries now carry contradiction and decay metadata.
+- Recommendation candidate rationale now includes contradiction and decay
+  labels.
+- Expanded the Raven foundation test with a mixed positive/avoid signal so the
+  contradiction path is covered.
+
+Files touched in this slice:
+
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm check`
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+
+Known risks:
+
+- Decay is based on broad age buckets: fresh, stable, stale. It is deliberately
+  simple and local.
+- Contradiction is category-level only. It detects mixed positive and negative
+  signals in the same category, not semantic opposites.
+
+Storage impact:
+
+- No schema change.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from contradiction and decay metadata. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add local-only candidate detail receipts with linked source preferences and rollup context, then add status history for recommendation candidates. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```

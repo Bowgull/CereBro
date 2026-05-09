@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
+export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -158,6 +158,16 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
     );
   }
 
+  function openSecurityGateForCommand(targetCommand: string) {
+    if (!targetCommand.trim() || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem("cerebro:security-target", targetCommand.trim());
+    } catch {
+      // Ignore storage failure. The Security Gate form still opens.
+    }
+    onNavigate("security");
+  }
+
   async function copyTonyDraft(key: string, value: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -285,6 +295,17 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
                   <div className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
                     {preview.data.explanation}
                   </div>
+                  <Button
+                    type="button"
+                    onClick={() => openSecurityGateForCommand(preview.data.command)}
+                    disabled={!onNavigate}
+                    variant="risk"
+                    size="sm"
+                    className="w-fit"
+                    title={preview.data.command}
+                  >
+                    Security Gate
+                  </Button>
                 </div>
 
                 <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -542,6 +563,15 @@ export default function TerminalLabPanel({ onClose }: { onClose: () => void }) {
                           size="sm"
                         >
                           Approval Preview
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => openSecurityGateForCommand(item.command)}
+                          disabled={!onNavigate}
+                          variant="risk"
+                          size="sm"
+                        >
+                          Security Gate
                         </Button>
                         <Button
                           type="button"

@@ -431,7 +431,7 @@ export default function Home() {
             {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
-            {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} /></PanelHost>}
+            {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "workbench" && <PanelHost><WorkbenchPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "companion" && <PanelHost><AangCompanionPanel onClose={() => setNav("home")} onNavigate={(route) => setNav(route)} /></PanelHost>}
