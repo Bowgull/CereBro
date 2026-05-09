@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:06 EDT
+Last updated: 2026-05-09 06:09 EDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0609 - Front-End Build Steward: Workbench Header Density
+
+### What Changed
+
+- Browser-reviewed Workbench in the in-app browser after the Research rail pass.
+- Changed the Workbench lane selector from four full-width stacked cards into a
+  compact two-column selector at the current browser width.
+- Tightened the active-job block and added a small manual-proof receipt badge.
+- Compressed the route safety summary into a smaller receipt block.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed the Workbench
+  first viewport now shows all four evidence lanes plus the safety receipt.
+
+### Front-End Steward Review
+
+- Workbench no longer burns the first viewport on one setup card and four
+  stacked lane buttons. The route now exposes the work choices and safety state
+  immediately.
+
+### Known Risks
+
+- Workbench surfaces, permissions, Add Evidence, Recent Evidence, and evidence
+  detail still need their own density passes.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Compact the Workbench surfaces and permission blocks into receipt rows, then
+  move into the Add Evidence editor.
 
 ## 2026-05-09 0606 - Front-End Build Steward: Research Rail Receipts
 

@@ -305,17 +305,20 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             Loading workbench plan.
           </div>
         ) : (
-          <div className="grid gap-3">
-            <section className="grid gap-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
-              <div className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-                  Active Job
+          <div className="grid gap-2">
+            <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
+              <div className="col-span-2 rounded p-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Active Job
+                  </div>
+                  <Chip label="manual proof" tone={C.warning} />
                 </div>
                 <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
                   Gather proof before summary.
                 </div>
-                <p className="text-xs leading-relaxed mt-2" style={{ color: C.textMuted }}>
-                  Pick a lane, record the observation, then append evidence. Nothing opens external tools from here.
+                <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
+                  Pick a lane. Record the observation. Append evidence.
                 </p>
               </div>
 
@@ -325,7 +328,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   type="button"
                   onClick={() => stageLane(lane)}
                   aria-label={`Stage ${lane.label} evidence`}
-                  className="h-auto justify-start rounded p-2.5 text-left"
+                  className="h-auto justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
                     background: kind === lane.kind ? C.surfaceRaised : C.surface,
@@ -342,7 +345,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         {lane.agent}
                       </span>
                     </span>
-                    <span className="block text-[11px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+                    <span className="block text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
                       {lane.meta}
                     </span>
                   </span>
@@ -350,14 +353,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
             </section>
 
-            <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex flex-wrap gap-2 mb-3">
+            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex flex-wrap gap-1 mb-2">
                 <Chip label={data.mode.replace(/_/g, " ")} tone={C.warning} />
                 <Chip label={data.opensBrowser ? "browser opens" : "no browser"} tone={C.success} />
                 <Chip label={data.capturesMedia ? "media capture" : "no media capture"} tone={C.success} />
                 <Chip label={data.writesExternal ? "external writes" : "no external writes"} tone={C.success} />
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
+              <p className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                 {data.summary}
               </p>
             </section>
