@@ -1,10 +1,5 @@
-/**
- * StatsPanel Component
- * Displays overall statistics and metrics
- * Design: Pixel punk style with neon borders
- */
-
-import React from 'react';
+import React from "react";
+import { cerebroColors as C } from "@/lib/keepConfig";
 
 interface StatsPanelProps {
   totalAgents: number;
@@ -19,31 +14,29 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({
   totalCost,
   activeAgents,
 }) => {
+  const stats = [
+    { label: "Agents", value: totalAgents.toLocaleString(), tone: C.success },
+    { label: "Active", value: activeAgents.toLocaleString(), tone: C.accent },
+    { label: "Tokens", value: totalTokens.toLocaleString(), tone: C.accent },
+    { label: "Cost", value: `$${totalCost.toFixed(4)}`, tone: C.gold },
+  ];
+
   return (
-    <div className="grid grid-cols-2 gap-3 p-4">
-      {/* Total Agents */}
-      <div className="pixel-panel p-3">
-        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">AGENTS</p>
-        <p className="text-2xl font-bold neon-glow-green">{totalAgents}</p>
-      </div>
-
-      {/* Active Agents */}
-      <div className="pixel-panel-purple p-3">
-        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">ACTIVE</p>
-        <p className="text-2xl font-bold neon-glow-purple">{activeAgents}</p>
-      </div>
-
-      {/* Total Tokens */}
-      <div className="pixel-panel-blue p-3">
-        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">TOKENS</p>
-        <p className="text-2xl font-bold neon-glow-blue">{totalTokens.toLocaleString()}</p>
-      </div>
-
-      {/* Total Cost */}
-      <div className="pixel-panel p-3">
-        <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">COST</p>
-        <p className="text-2xl font-bold text-accent">${totalCost.toFixed(4)}</p>
-      </div>
+    <div className="grid grid-cols-2 gap-2 p-3">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="min-w-0 rounded p-2"
+          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        >
+          <p className="mb-1 truncate text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+            {stat.label}
+          </p>
+          <p className="truncate font-mono text-lg font-semibold leading-none" style={{ color: stat.tone }} title={stat.value}>
+            {stat.value}
+          </p>
+        </div>
+      ))}
     </div>
   );
 };

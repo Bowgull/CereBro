@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:42 EDT
+Last updated: 2026-05-08 22:44 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2244 - Front-End Build Steward: Compact Stats Surface
+
+### What Changed
+
+- Reworked `StatsPanel` away from old pixel-neon panel classes.
+- Applied CereBro shell tokens, compact padding, 8px radius, and bordered dark
+  surfaces.
+- Added `min-w-0`, truncation, and monospace metric values so compact stats do
+  not widen their container.
+
+### Files Touched
+
+- `app/client/src/components/StatsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Stats now belongs to the dark control shell instead of the older neon island
+  styling.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- `StatsPanel` appears currently unreferenced, but it is normalized for reuse.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue visible surface normalization. `SessionsPanel` is already compact,
+  so the next useful pass is likely another legacy-styled panel or a dense table
+  overflow sweep.
 
 ## 2026-05-08 2242 - Front-End Build Steward: Compact UI System Surface
 
