@@ -691,6 +691,11 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                       {autoPushArmed ? "Automation is selected for this project, but manual commands stay visible and execution still needs approval." : "Advisory only. Manual push stays visible."}
                     </div>
+                    <PushDecisionNote
+                      stats={proofStats}
+                      pushLabel={pushReadiness.label}
+                      pushState={pushReadiness.state}
+                    />
                     <PushEvidenceStrip
                       branch={pushReadiness.evidence.branch}
                       upstream={pushReadiness.evidence.upstream}
@@ -1678,6 +1683,62 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
         Project map signal only. Open Workbench or Ledger for the receipt body.
+      </div>
+    </div>
+  );
+}
+
+function PushDecisionNote({
+  stats,
+  pushLabel,
+  pushState,
+}: {
+  stats: { total: number; terminal: number; needsReview: number; validated: number };
+  pushLabel: string;
+  pushState: string;
+}) {
+  const readyState = pushState === "push_branch" || pushState === "open_pr" || pushState === "commit_locally";
+  const decision = (() => {
+    if (stats.needsReview > 0) {
+      return {
+        label: "hold",
+        tone: C.warning,
+        text: `${stats.needsReview} Workbench receipt${stats.needsReview === 1 ? "" : "s"} need review. Check Workbench or Ledger before commit.`,
+      };
+    }
+    if (stats.total === 0) {
+      return {
+        label: "proof missing",
+        tone: readyState ? C.warning : C.textMuted,
+        text: `No Workbench proof is linked yet. ${pushLabel} is only a git-state read until evidence exists.`,
+      };
+    }
+    if (stats.validated > 0 && readyState) {
+      return {
+        label: "supported",
+        tone: C.success,
+        text: `${stats.validated} validated receipt${stats.validated === 1 ? "" : "s"} support ${pushLabel.toLowerCase()}. Review the staged diff before pushing.`,
+      };
+    }
+    return {
+      label: "proof present",
+      tone: C.accent,
+      text: `${stats.total} receipt${stats.total === 1 ? "" : "s"} exist. Use Workbench for receipt bodies and Ledger for the audit trail.`,
+    };
+  })();
+
+  return (
+    <div className="mt-1 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${decision.tone}55` }}>
+      <div className="flex flex-wrap items-center gap-1">
+        <Badge variant={decision.label === "supported" ? "success" : decision.label === "hold" ? "warning" : "secondary"} className="uppercase">
+          {decision.label}
+        </Badge>
+        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: decision.tone }}>
+          Push Decision Read
+        </span>
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
+        {decision.text}
       </div>
     </div>
   );
