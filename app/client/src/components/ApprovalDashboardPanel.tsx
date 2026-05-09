@@ -575,9 +575,9 @@ function Section({ title, detail, children }: { title: string; detail: string; c
 
 function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <div className="grid gap-0.5">
+    <div className="grid gap-0.5 min-w-0">
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{label}</div>
-      <div className="text-xs leading-snug break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
+      <div className="text-xs leading-snug truncate" style={{ color: C.textSecondary }} title={title ?? value}>{value}</div>
     </div>
   );
 }

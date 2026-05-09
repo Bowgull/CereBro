@@ -278,7 +278,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                     <span className="flex items-start justify-between gap-3">
                       <span className="min-w-0">
                         <span className="block truncate text-xs font-bold uppercase tracking-widest">{item.provider}</span>
-                        <span className="mt-1 block break-words text-xs font-semibold">{item.toolName}</span>
+                        <span className="mt-1 block truncate text-xs font-semibold" title={item.toolName}>{item.toolName}</span>
                       </span>
                       <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
                     </span>
