@@ -282,6 +282,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
             type="submit"
             size="sm"
             disabled={!title.trim() || !body.trim() || isWriting}
+            title={
+              !title.trim() || !body.trim()
+                ? "Add a title and body before saving an output receipt."
+                : writeKind === "obsidian_note"
+                  ? "Write a local Obsidian note and record the output receipt."
+                  : "Write a local vault artifact and record the output receipt."
+            }
+            aria-label={writeKind === "obsidian_note" ? "Save local Obsidian note" : "Save local vault artifact"}
           >
             {isWriting ? "Saving" : "Save"}
           </Button>

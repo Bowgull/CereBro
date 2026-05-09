@@ -198,6 +198,8 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           type="submit"
           size="sm"
           disabled={!body.trim() || propose.isPending}
+          title={!body.trim() ? "Enter a memory proposal before staging it." : "Stage a local memory proposal for review. It is not canonical memory yet."}
+          aria-label="Propose local memory receipt"
         >
           Propose
         </Button>
@@ -266,7 +268,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   variant="destructive"
                   size="sm"
                   aria-label={`Delete memory entry ${m.body.slice(0, 80)}`}
-                  title="Delete memory entry"
+                  title="Open the hard-gate confirmation before deleting this local memory receipt."
                 >
                   Delete
                 </Button>
@@ -299,6 +301,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
             <Button
               type="button"
               onClick={() => setDeleteGate(null)}
+              title="Keep the memory receipt visible."
               variant="ghost"
             >
               Cancel
@@ -313,6 +316,8 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   { onSuccess: () => setDeleteGate(null) },
                 );
               }}
+              title="Permanently delete this local memory receipt after confirmation."
+              aria-label="Confirm delete memory receipt"
               variant="destructive"
             >
               {del.isPending ? "Deleting" : "Delete Receipt"}

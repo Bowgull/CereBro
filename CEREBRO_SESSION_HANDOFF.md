@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:23 EDT
+Last updated: 2026-05-09 13:25 EDT
 
 ## Current North Star
 
@@ -20,6 +20,38 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1325 EDT - Source Output Memory Boundary Pass
+
+### What Changed
+- Tightened Surfer source actions so research preview states no browsing and source ingest states one approved public fetch.
+- Security route from Surfer now says it opens Security Gate before ingest.
+- Output save now states whether it writes an Obsidian note or vault artifact and records the output receipt.
+- Memory proposal now states it stages a local proposal, not canonical memory.
+- Memory delete now opens and confirms through the hard-gate language.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: visual density and wording pass across the main front-end spine, or tighten task/session panels for receipt-boundary consistency. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1323 EDT - Gate Surface Boundary Pass
 

@@ -115,6 +115,8 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             <Button
               type="submit"
               disabled={!query.trim() || preview.isPending}
+              title={!query.trim() ? "Enter a research question before previewing." : "Preview a research plan. Surfer does not browse from this action."}
+              aria-label="Preview Surfer research plan"
             >
               {preview.isPending ? "Reading" : "Preview"}
             </Button>
@@ -136,13 +138,16 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               disabled={!url.trim() || !onNavigate}
               onClick={openSecurityGate}
               variant="secondary"
-              title={url.trim() ? sourceDisplayName(url.trim()) : "Open Security Gate"}
+              title={url.trim() ? "Open Security Gate for this URL before ingest." : "Enter a URL before opening Security Gate."}
+              aria-label="Open Security Gate for source URL"
             >
               Security
             </Button>
             <Button
               type="submit"
               disabled={!url.trim() || ingestUrl.isPending}
+              title={!url.trim() ? "Enter an approved public URL before ingest." : "Fetch one approved public URL into the Source Library."}
+              aria-label="Ingest approved public URL"
               variant="risk"
             >
               {ingestUrl.isPending ? "Fetching" : "Ingest"}
