@@ -1,6 +1,6 @@
 # CereBro Frontend System
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 This is the canonical frontend system for CereBro V1.
 
@@ -18,7 +18,7 @@ The user should always know:
 
 - what mode CereBro read
 - which agent owns the work
-- what evidence is being used
+- what receipt or source is being used
 - what needs approval
 - what changed
 - where the receipt lives
@@ -29,7 +29,7 @@ External UI generators are sketch lanes, not frontend law.
 - Stitch can explore high-fidelity screen directions.
 - v0 can draft React/Tailwind component shapes.
 - Accepted ideas are rebuilt in CereBro's components, tokens, and copy voice.
-- Screenshot proof decides. The generator does not.
+- Screenshot receipt decides. The generator does not.
 
 ## Shell
 
@@ -39,7 +39,7 @@ The app uses one primary shell:
 top bar: mode, permission, connection, global actions
 left rail: main surfaces
 center: Keep, Workshop, Ledger, or active tool
-right rail: context, evidence, active agent
+right rail: context, receipt or source, active agent
 bottom bar: Ask Aang and attachments
 modal: hard gates only
 ```
@@ -48,7 +48,7 @@ Rules:
 
 - The Keep is the home surface.
 - The Workshop is the dense work surface.
-- The Ledger is proof and history.
+- The Ledger is audit trail and history.
 - Settings, permissions, storage, model routing, and adapter state stay visible only when relevant.
 - Do not make separate dashboards for concepts that belong in the same shell.
 
@@ -59,7 +59,7 @@ Use compact type.
 Default:
 
 - system sans for normal product UI
-- monospace for terminal, ids, hashes, source paths, logs, model names, command output, and evidence metadata
+- monospace for terminal, ids, hashes, source paths, logs, model names, command output, and receipt metadata
 
 Scale:
 
@@ -76,7 +76,7 @@ Rules:
 - No display type inside panels.
 - Line length stays short in side rails.
 - Long paths and ids use monospace and wrap or truncate with visible title text.
-- Text must never overlap controls, status chips, or proof records.
+- Text must never overlap controls, status chips, or receipt records.
 
 ## Color
 
@@ -145,7 +145,7 @@ Examples:
 Preview
 Attach
 Route to Gojo
-Record evidence
+Record receipt
 Block action
 Reset filters
 ```
@@ -159,7 +159,7 @@ Rules:
 - Placeholder text names the action.
 - Attachments show temporary vs saved state.
 - Search inputs say what they search.
-- Textareas should preserve line breaks for notes, receipts, and evidence.
+- Textareas should preserve line breaks for notes, receipts, and source details.
 - Empty required fields block submission and name the missing field.
 - The system must not hide submitted context inside a toast.
 
@@ -180,7 +180,7 @@ Rules:
 
 Use context menus only on objects with local actions:
 
-- evidence record
+- receipt record
 - source row
 - artifact
 - annotation
@@ -201,7 +201,7 @@ Right rail:
 
 - active agent
 - current route
-- evidence
+- receipt
 - selected object
 - permission state
 
@@ -235,7 +235,7 @@ title
 status or route
 filters or controls
 primary content
-evidence or receipt footer
+receipt footer
 ```
 
 Rules:
@@ -303,7 +303,7 @@ Rules:
 - Body lists action, target, data involved, risk, and receipt location.
 - Buttons are explicit.
 - Escape and close do not approve.
-- The user can inspect evidence before deciding.
+- The user can inspect the receipt body or source before deciding.
 
 ## Toasts
 
@@ -319,7 +319,7 @@ Rules:
 Examples:
 
 ```text
-Evidence recorded.
+Receipt recorded.
 Scan failed. Check the source URL.
 Approval saved.
 ```
@@ -331,7 +331,7 @@ Empty states say what is missing and what to do.
 Examples:
 
 ```text
-No evidence selected. Pick a screenshot, source row, command, or artifact.
+No receipt selected. Pick a screenshot, source row, command, or artifact.
 No approvals match these filters. Reset filters or change status.
 No source rows yet. Capture a URL, file, note, or GitHub repo.
 ```
@@ -354,7 +354,7 @@ Not allowed:
 - decorative shimmer
 - random hover motion
 - motion that hides text
-- motion that makes proof hard to read
+- motion that makes receipts hard to read
 
 Respect reduced motion.
 
@@ -398,4 +398,4 @@ Before shipping a frontend slice:
 5. Inspect the current component.
 6. Patch with existing tokens.
 7. Screenshot or preview.
-8. Record evidence in the handoff.
+8. Record receipts and inspected sources in the handoff.

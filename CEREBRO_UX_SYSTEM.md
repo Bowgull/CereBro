@@ -1,6 +1,6 @@
 # CereBro UX System
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 This is the V1 UX operating manual.
 
@@ -13,7 +13,7 @@ CereBro is a local-controlled AI operating layer.
 The UX is not chat with extras. It is a visible chain:
 
 ```text
-Ask Aang -> mode read -> Cortana route -> agent work -> evidence -> validation -> output -> ledger
+Ask Aang -> mode read -> Cortana route -> agent work -> receipt body -> validation -> output -> ledger
 ```
 
 The system shows its read. The user can correct it. The record stays visible.
@@ -39,12 +39,12 @@ Primary UX objects:
 - route
 - task
 - agent
-- evidence
+- receipt body
 - approval
 - source
 - artifact
 - memory
-- receipt
+- ledger receipt
 - output
 
 Every major flow creates or updates at least one of these objects.
@@ -114,17 +114,17 @@ The main flow:
 3. User can correct the read.
 4. Cortana routes the work.
 5. Owner agent starts.
-6. Evidence is selected or requested.
+6. A receipt body or source is selected or requested.
 7. Work proceeds locally when safe.
 8. Risky action pauses for approval.
 9. Validator checks output when needed.
 10. Output lands in the right surface.
-11. Ledger records the route, evidence, result, and next action.
+11. Ledger records the route, receipt, result, and next action.
 
 Acceptance:
 
 - the user sees the route
-- the user sees proof
+- the user sees the receipt
 - the user sees the next action
 - the user can stop or correct the work
 
@@ -165,12 +165,12 @@ Surfaces:
 - source rows
 - artifact view
 - before and after comparison
-- evidence ledger
+- receipt ledger
 
 Rules:
 
-- user can point at evidence
-- agents can inspect the same evidence
+- user can point at a receipt body or source
+- agents can inspect the same receipt body or source
 - annotations carry coordinates
 - visual findings connect back to code or output
 - terminal commands show command, owner, approval state, and result
@@ -178,14 +178,14 @@ Rules:
 
 ## Ledger UX
 
-The Ledger is proof before summary.
+The Ledger is receipt before summary.
 
 It records:
 
 - request
 - mode read
 - route
-- evidence
+- receipt
 - approvals
 - commands
 - sources
@@ -196,7 +196,7 @@ It records:
 
 Rules:
 
-- summary does not replace proof
+- summary does not replace receipts
 - every external action has a receipt
 - every memory write has source and approval status
 - every artifact has path, owner, and project link
@@ -222,7 +222,7 @@ Gate must show:
 - data involved
 - agent requesting it
 - risk class
-- evidence inspected
+- receipt inspected
 - allowed actions
 - blocked actions
 - receipt location
@@ -232,7 +232,7 @@ Buttons:
 ```text
 Approve once
 Block
-Inspect evidence
+Inspect receipt
 Change route
 ```
 
@@ -250,11 +250,11 @@ Rules:
 - Browser isolation state must be visible when active.
 - Risky target detail stays inspectable after the decision.
 
-## Evidence UX
+## Receipt UX
 
-Evidence is first-class.
+Receipts are first-class.
 
-Evidence can be:
+Receipt bodies can be:
 
 - screenshot
 - image
@@ -269,11 +269,11 @@ Evidence can be:
 
 Rules:
 
-- evidence shows source, owner, time, route, and privacy class when known
+- receipts show source, owner, time, route, and privacy class when known
 - temporary media is marked temporary
-- saved evidence gets a receipt
-- agents cite the evidence they used
-- no output claims inspection without evidence
+- saved receipt bodies create Ledger records
+- agents cite the receipt or source they used
+- no output claims inspection without a receipt or source
 
 ## Memory UX
 
@@ -331,7 +331,7 @@ Council view shows:
 - reason
 - agents present
 - current speaker
-- evidence
+- receipt
 - disagreement
 - Cortana decision
 - next action
@@ -348,7 +348,7 @@ Blocked states must show:
 - what is blocked
 - why
 - who owns it
-- what evidence is missing
+- what receipt or source is missing
 - what user action can unblock it
 - what CereBro can do without approval
 
@@ -468,7 +468,7 @@ Minimum V1 keyboard:
 - move between rails
 - close non-destructive overlays
 - submit forms intentionally
-- inspect selected evidence
+- inspect selected receipt
 
 Rules:
 
@@ -487,7 +487,7 @@ Current debt:
 - command intake preview is a start, not the full route receipt
 - panel states are inconsistent
 - approval queue records previews but does not yet perform approvals
-- design review records proof but does not yet enforce proof gates
+- design review records receipt state but does not yet enforce receipt gates
 
 ## Build Rule
 
@@ -496,7 +496,7 @@ Before adding a feature, answer:
 1. What user mode is this.
 2. Which object does it create or update.
 3. Which agent owns it.
-4. What evidence is used.
+4. What receipt or source is used.
 5. What approval can block it.
 6. Where the receipt lands.
 7. What happens when it fails.

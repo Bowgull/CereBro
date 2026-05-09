@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 12:14 EDT
+Last updated: 2026-05-09 12:18 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1218 EDT - Design Law Receipt Alignment
+
+### What Changed
+
+- Updated `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, and `CEREBRO_UX_SYSTEM.md` so future front-end passes inherit receipt-body, source, and audit-trail language.
+- Removed visible `proof/evidence` wording from the active front-end law docs.
+- Clarified that Workbench owns receipt bodies, Ledger owns audit trail, and inspected sources remain distinct from receipts.
+- Did not touch backend API names, data model names, or runtime behavior.
+
+### Files Touched
+
+- `DESIGN.md`
+- `CEREBRO_FRONTEND_SYSTEM.md`
+- `CEREBRO_UX_SYSTEM.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `rg -n "\b(evidence|Evidence|proof|Proof)\b" DESIGN.md CEREBRO_FRONTEND_SYSTEM.md CEREBRO_UX_SYSTEM.md` returned no matches.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. 4 files, 42 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser Use was still not callable in this context, so visual DOM proof remains pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This reduces future drift by aligning the law files with the visible receipt-loop UI.
+- It preserves the approved build path: Project Lab as map, Terminal Lab as teaching lane, Workbench as receipt body, Ledger as audit trail.
+- It keeps source inspection separate from receipt creation.
+- No plugin surface, Code Lab surface, or backend runtime path was added.
+
+### Known Risks
+
+- `CEREBRO_MASTER_BUILD_PLAN.md` still contains historical `proof/evidence` wording in many places. It was not rewritten in this slice because it mixes current law, build history, and long-range plan language.
+- Internal app code still uses `evidence` names until a deliberate model migration is approved.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write was added.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, and CEREBRO_SESSION_HANDOFF.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as receipt body -> Ledger as audit trail. Next safe slice: tighten shared primitive density/focus/disabled/risk states where the receipt-loop surfaces use button, card, dialog, drawer, dropdown-menu, context-menu, input, textarea, select, tabs, badge, and table. Keep backend semantics unchanged. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1214 EDT - Receipt Language Surface Sweep
 

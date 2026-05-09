@@ -1,6 +1,6 @@
 # CereBro Design.md
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Purpose
 
@@ -29,7 +29,7 @@ Critical external references:
 - v0.app: disposable React/Tailwind component scaffolding. Use it for panels,
   forms, tables, drawers, and empty states only after constraints are written.
 - Docling: local document understanding candidate for source intake,
-  evidence extraction, and RAG-ready document conversion. Use it when PDFs,
+  source extraction, and RAG-ready document conversion. Use it when PDFs,
   DOCX, PPTX, XLSX, HTML, images, transcripts, tables, or scanned pages need
   structured parsing.
 
@@ -45,7 +45,7 @@ The UI should answer one question at a time:
 
 - What does CereBro think I am doing.
 - Which agent has it.
-- What evidence is being used.
+- What receipt or source is being used.
 - What will happen next.
 - What needs approval.
 - What changed.
@@ -57,7 +57,7 @@ Use:
 - dark cinematic surfaces
 - pixel-art Keep as the brand anchor
 - clear workbench panels
-- visible evidence
+- visible receipts
 - calm status color
 - compact information density
 - purposeful motion
@@ -129,7 +129,7 @@ Use monospace for:
 - ids
 - hashes
 - model names
-- evidence metadata
+- receipt metadata
 
 Type should be compact and readable. Do not scale font size with viewport width.
 Do not use display type inside dense work panels.
@@ -141,7 +141,7 @@ Core shell:
 ```text
 Left navigation
 Center Keep or Workshop
-Right context and evidence
+Right context and receipt
 Bottom command or log strip
 Modal only for hard gates
 ```
@@ -160,13 +160,13 @@ Workshop mode:
 - Dense, practical panels.
 - Browser, preview, terminal, media, source, and annotation surfaces can sit
   side by side.
-- Evidence records must show coordinates, source path, frame time, command,
+- Receipt records must show coordinates, source path, frame time, command,
   task, project, session, and agent route when known.
 
 Ledger mode:
 
 - Timeline first.
-- Proof before summary.
+- Receipt before summary.
 - Show source rows, artifact ids, memory ids, and approval records.
 
 Settings mode:
@@ -214,7 +214,7 @@ Generated UI drafts:
   simplifying them first.
 - Do not accept default shadcn dashboard rhythm when the product needs a Keep,
   Workshop, Ledger, or Settings surface.
-- Every generated UI idea must answer the active user question, show proof,
+- Every generated UI idea must answer the active user question, show receipt,
   show route, or reduce a real control burden.
 
 Empty states:
@@ -226,7 +226,7 @@ Empty states:
 Example:
 
 ```text
-No evidence selected. Pick a screenshot, source row, command, or artifact.
+No receipt selected. Pick a screenshot, source row, command, or artifact.
 ```
 
 ## Motion
@@ -248,7 +248,7 @@ Not allowed:
 - random hover transforms
 - fake background energy
 - motion that moves text under the cursor
-- animation that hides status or proof
+- animation that hides status or receipts
 
 Respect reduced-motion settings.
 
@@ -278,7 +278,7 @@ Use the project voice from `AGENTS.md`.
 Good:
 
 ```text
-Aang reads Build mode. Cortana routed Tony. Spock is waiting on proof.
+Aang reads Build mode. Cortana routed Tony. Spock is waiting on the receipt.
 ```
 
 Bad:
@@ -294,7 +294,7 @@ Every material UI change follows this order:
 1. Read the renderer and touched components.
 2. Inventory existing assets and tokens.
 3. If using Stitch or v0, write the constraints first: user question, data,
-   proof, route, tokens, forbidden patterns, and target surface.
+   receipt, route, tokens, forbidden patterns, and target surface.
 4. State the achievable scope.
 5. Build the smallest complete slice.
 6. Run the app or relevant checks.
@@ -310,7 +310,7 @@ Before delivery, check:
 - Did I reject the default AI move when it appeared.
 - Did I use real project tokens.
 - Did I make the Keep or workbench clearer.
-- Did I hide proof behind summary.
+- Did I hide receipts behind summary.
 - Did I use fake charts, fake data, or fake activity.
 - Did I add a card because I had no layout idea.
 - Did I add a gradient because I had no asset.
