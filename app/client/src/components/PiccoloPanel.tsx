@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,11 +122,17 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
       {data?.vault.vaultDir && (
         <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
           <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Vault Path</div>
-          <div className="text-xs break-all" style={{ color: C.textSecondary }}>{data.vault.vaultDir}</div>
+          <div className="text-xs truncate" style={{ color: C.textSecondary }} title={data.vault.vaultDir}>
+            {compactPathLabel(data.vault.vaultDir)}
+          </div>
           {saveReport.data && (
-            <div className="text-[10px] mt-1 break-all" style={{ color: saveReport.data.ok ? C.success : C.warning }}>
-              {saveReport.data.ok
-                ? `Saved cleanup report: ${saveReport.data.relativePath}`
+            <div
+              className="text-[10px] mt-1 truncate"
+              style={{ color: saveReport.data.ok ? C.success : C.warning }}
+              title={saveReport.data.ok ? saveReport.data.relativePath : saveReport.data.reason ?? undefined}
+            >
+              {saveReport.data.ok && saveReport.data.relativePath
+                ? `Saved cleanup report: ${compactPathLabel(saveReport.data.relativePath)}`
                 : saveReport.data.reason ?? "Cleanup report save failed."}
             </div>
           )}

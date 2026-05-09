@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,8 +112,8 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
                         )}
                         {s.projectName ?? "—"}
                         {s.projectPath && (
-                          <div className="text-xs truncate max-w-[260px]" style={{ color: C.textMuted }}>
-                            {s.projectPath}
+                          <div className="text-xs truncate max-w-[260px]" style={{ color: C.textMuted }} title={s.projectPath}>
+                            {compactPathLabel(s.projectPath)}
                           </div>
                         )}
                       </td>

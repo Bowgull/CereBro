@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { sourceDisplayName } from "@/lib/displayLabels";
+import { compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -577,8 +577,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
                       Local Path
                     </div>
-                    <div className="text-xs break-all" style={{ color: project.localExists ? C.textSecondary : C.warning }}>
-                      {project.localPath}
+                    <div className="text-xs truncate" style={{ color: project.localExists ? C.textSecondary : C.warning }} title={project.localPath}>
+                      {compactPathLabel(project.localPath)}
                     </div>
                   </div>
 
@@ -871,10 +871,11 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             <span
                               key={change}
                               role="listitem"
-                              className="block text-[11px] leading-snug break-all px-2 py-1 rounded"
+                              className="block text-[11px] leading-snug truncate px-2 py-1 rounded"
                               style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                              title={change}
                             >
-                              {change}
+                              {compactPathLabel(change)}
                             </span>
                           ))}
                         </span>

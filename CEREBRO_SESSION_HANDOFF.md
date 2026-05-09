@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:22 EDT
+Last updated: 2026-05-08 22:24 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2224 - Front-End Build Steward: Compact Path Labels
+
+### What Changed
+
+- Added `compactPathLabel` for dense path display.
+- Updated Sessions project paths, Piccolo vault/report paths, Handoff Archive
+  candidate paths, and Project Lab local/worktree paths to show compact labels.
+- Kept full path evidence in hover titles.
+
+### Files Touched
+
+- `app/client/src/lib/displayLabels.ts`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/PiccoloPanel.tsx`
+- `app/client/src/components/HandoffArchivePanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed after tightening a nullable Piccolo report path.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Long local paths no longer dominate dense rows. The UI now shows the useful
+  tail while preserving the full path as evidence on hover.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue into Terminal Lab command rows and remaining project detail fields,
+  keeping commands readable without hiding execution evidence.
 
 ## 2026-05-08 2222 - Front-End Build Steward: Workbench Hedwig Source Labels
 

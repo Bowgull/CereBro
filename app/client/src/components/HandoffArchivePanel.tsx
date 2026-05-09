@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import { compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,8 +76,8 @@ export default function HandoffArchivePanel({ onClose }: { onClose: () => void }
                       <div className="text-sm font-semibold truncate" style={{ color: C.textPrimary }} title={candidate.title}>
                         {candidate.title}
                       </div>
-                      <div className="text-[11px] mt-1 break-all" style={{ color: C.textMuted }}>
-                        {candidate.relativePath}
+                      <div className="text-[11px] mt-1 truncate" style={{ color: C.textMuted }} title={candidate.relativePath}>
+                        {compactPathLabel(candidate.relativePath)}
                       </div>
                     </div>
                     <Badge variant="secondary" className="shrink-0" style={{ color: C.textMuted }}>
