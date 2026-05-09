@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:21 EDT
+Last updated: 2026-05-08 23:24 EDT
 
 ## Current North Star
 
@@ -20,6 +20,47 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2324 - Front-End Build Steward: Compact Command Menubar Primitives
+
+### What Changed
+
+- Normalized `Command` and `CommandDialog` internals to compact CereBro shell
+  colors, smaller input/list rows, token separators, and muted shortcuts.
+- Normalized `Menubar` root, triggers, content panes, submenus, labels, items,
+  selected states, destructive states, separators, and shortcuts.
+- Preserved existing Radix/cmdk behavior.
+
+### Files Touched
+
+- `app/client/src/components/ui/command.tsx`
+- `app/client/src/components/ui/menubar.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Command palettes and menu bars now follow CereBro menu grouping rules:
+  compact rows, muted group labels, visible focus, dark shell surfaces, and
+  explicit destructive styling.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- `command` and `menubar` are not currently imported by app surfaces, but they
+  are now normalized before reuse.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue referenced primitive normalization or switch back to visible
+  surfaces. `navigation-menu` and `calendar` remain stock, but neither appears
+  reachable from the current shell.
 
 ## 2026-05-08 2321 - Front-End Build Steward: Compact Alert Sheet Primitives
 
