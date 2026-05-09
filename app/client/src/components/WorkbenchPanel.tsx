@@ -210,7 +210,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     },
     {
       label: "Compare",
-      meta: "Before and after proof",
+      meta: "Before and after receipt comparison",
       kind: "before_after" as EvidenceKind,
       agent: "gojo",
       permission: "validation" as PermissionClass,
@@ -222,7 +222,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     setKind(lane.kind);
     setRouteAgent(lane.agent);
     setPermissionClass(lane.permission);
-    setTitle((current) => current.trim() || `${lane.label} evidence`);
+    setTitle((current) => current.trim() || `${lane.label} receipt`);
     setSummary((current) => current.trim() || `${lane.meta}. Add the concrete observation, source, and receipt before saving.`);
   }
 
@@ -256,9 +256,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setCommandObservationId(draft.commandObservationId == null ? "none" : draft.commandObservationId);
       setFilterKind(draft.kind === "terminal_output" ? "terminal_output" : "all");
       setGroupBy(draft.commandObservationId == null ? "project" : "command");
-      setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench proof draft. Review it, then save local evidence." : "Workbench proof draft staged. Review it, then save local evidence.");
+      setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench receipt draft. Review it, then save a local receipt." : "Workbench receipt draft staged. Review it, then save a local receipt.");
     } catch {
-      setStagedDraftNotice("Workbench draft could not be read. Add the evidence manually.");
+      setStagedDraftNotice("Workbench draft could not be read. Add the receipt manually.");
     }
   }, []);
 
@@ -277,9 +277,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
       if (draft.query) setFilterQuery(draft.query);
       if (draft.groupBy) setGroupBy(draft.groupBy);
-      setStagedDraftNotice(draft.notice ?? "Workbench evidence filter staged.");
+      setStagedDraftNotice(draft.notice ?? "Workbench receipt filter staged.");
     } catch {
-      setStagedDraftNotice("Workbench filter could not be read. Use the evidence search.");
+      setStagedDraftNotice("Workbench filter could not be read. Use receipt search.");
     }
   }, []);
 
@@ -315,7 +315,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       `Type: ${preview.type}.`,
       `Size: ${formatBytes(preview.size)}.`,
       mediaKind === "video" ? "Use the frame-time field to record the frame being reviewed." : "Image review records visible notes only.",
-      "The media bytes are only previewed in this browser session. Saving evidence stores metadata and notes only.",
+      "The media bytes are only previewed in this browser session. Saving a receipt stores metadata and notes only.",
     ].join("\n"));
   }
 
@@ -412,7 +412,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
             <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Shared evidence surface for user and agents.
+              Shared receipt surface for user and agents.
             </p>
           </div>
           <Button
@@ -426,7 +426,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </Button>
         </div>
         <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-          {plan.isLoading ? "Reading Workbench state." : "Local evidence only. Browser, media tools, and external writes stay gated."}
+          {plan.isLoading ? "Reading Workbench state." : "Local receipts only. Browser, media tools, and external writes stay gated."}
         </div>
       </header>
 
@@ -437,7 +437,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </div>
         ) : (
           <div className="grid gap-2">
-            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench evidence lanes">
+            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench receipt lanes">
               <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
@@ -449,7 +449,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   Gather proof before summary.
                 </div>
                 <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
-                  Pick a lane. Record the observation. Append evidence.
+                  Pick a lane. Record the observation. Append a receipt.
                 </p>
               </div>
 
@@ -458,7 +458,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   key={lane.label}
                   type="button"
                   onClick={() => stageLane(lane)}
-                  aria-label={`Stage ${lane.label} evidence`}
+                  aria-label={`Stage ${lane.label} receipt`}
                   className="h-auto justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
@@ -589,7 +589,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             </section>
 
             <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2">Evidence Record</h3>
+              <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2">Receipt Shape</h3>
               <div className="flex flex-wrap gap-1 mb-2">
                 {data.evidenceRecordShape.required.map((field) => (
                   <Chip key={field} label={field.replace(/_/g, " ")} tone={C.accent} />
@@ -600,10 +600,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </p>
             </section>
 
-            <section className="rounded p-2" aria-label="Create local Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Add Evidence</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Add Receipt</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                     Manual local record. Append-only. No capture.
                   </p>
@@ -618,7 +618,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
               <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
                 <AppSelect
-                  label="Evidence kind"
+                  label="Receipt kind"
                   value={kind}
                   onChange={(value) => {
                     const nextKind = value as EvidenceKind;
@@ -640,8 +640,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Evidence title."
-                  aria-label="Evidence title"
+                  placeholder="Receipt title."
+                  aria-label="Receipt title"
                   className="xl:col-span-3"
                 />
                 <AppSelect
@@ -660,7 +660,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   value={targetUri}
                   onChange={(event) => setTargetUri(event.target.value)}
                   placeholder="Optional target URL, file path, artifact id, or panel."
-                  aria-label="Evidence target"
+                  aria-label="Receipt target"
                   className="xl:col-span-3"
                 />
                 <AppSelect
@@ -760,26 +760,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   value={viewport}
                   onChange={(event) => setViewport(event.target.value)}
                   placeholder="Viewport, such as 1440x900."
-                  aria-label="Evidence viewport"
+                  aria-label="Receipt viewport"
                 />
                 <Input
                   value={coordinates}
                   onChange={(event) => setCoordinates(event.target.value)}
                   placeholder="Coordinates, such as x=120 y=80 w=300 h=140."
-                  aria-label="Evidence coordinates"
+                  aria-label="Receipt coordinates"
                 />
                 <Input
                   value={annotationText}
                   onChange={(event) => setAnnotationText(event.target.value)}
                   placeholder="Annotation note, optional."
-                  aria-label="Evidence annotation text"
+                  aria-label="Receipt annotation text"
                   className="sm:col-span-2"
                 />
                 <Textarea
                   value={summary}
                   onChange={(event) => setSummary(event.target.value)}
                   placeholder="What is visible, what matters, and which agent should care."
-                  aria-label="Evidence summary"
+                  aria-label="Receipt summary"
                   className="sm:col-span-2 xl:col-span-4"
                 />
               </div>
@@ -923,30 +923,30 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <Checkbox
                     checked={sensitive}
                     onCheckedChange={(checked) => setSensitive(checked === true)}
-                    aria-label="Mark evidence as sensitive"
+                    aria-label="Mark receipt as sensitive"
                   />
                   Sensitive
                 </label>
                 <div role="status" aria-live="polite" className="flex-1 text-[11px]" style={{ color: C.textMuted }}>
-                  {createEvidence.data?.ok ? `Saved evidence #${createEvidence.data.evidence.id}. No external action.` : "Evidence records append. They do not replace earlier notes."}
+                  {createEvidence.data?.ok ? `Saved receipt #${createEvidence.data.evidence.id}. No external action.` : "Receipts append. They do not replace earlier notes."}
                 </div>
                 <Button
                   type="button"
                   onClick={submitEvidence}
                   disabled={!title.trim() || !summary.trim() || createEvidence.isPending}
-                  aria-label="Save local Workbench evidence"
+                  aria-label="Save local Workbench receipt"
                 >
-                  {createEvidence.isPending ? "Saving" : "Save Local Evidence"}
+                  {createEvidence.isPending ? "Saving" : "Save Local Receipt"}
                 </Button>
               </div>
             </section>
 
-            <section className="rounded p-2" aria-label="Recent Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" aria-label="Recent Workbench receipts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Evidence</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Receipts</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Filter and inspect local records.
+                    Filter and inspect local receipts.
                   </p>
                 </div>
                 <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
@@ -955,8 +955,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
-                  placeholder="Search evidence."
-                  aria-label="Search Workbench evidence"
+                  placeholder="Search receipts."
+                  aria-label="Search Workbench receipts"
                   className="sm:col-span-2 xl:col-span-1"
                 />
                 <AppSelect
@@ -993,25 +993,25 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     setFilterKind("all");
                     setFilterProjectId("all");
                   }}
-                  aria-label="Reset Workbench evidence filters"
+                  aria-label="Reset Workbench receipt filters"
                   variant="secondary"
                   size="sm"
                 >
                   Reset
                 </Button>
               </div>
-              <div className="mb-2 rounded p-2" aria-label="Workbench evidence groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 rounded p-2" aria-label="Workbench receipt groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                      Evidence Groups
+                      Receipt Groups
                     </h4>
                     <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                       Local grouping. No source fetch. No command run.
                     </p>
                   </div>
                   <AppSelect
-                    label="Group evidence"
+                    label="Group receipts"
                     value={groupBy}
                     onChange={(value) => setGroupBy(value as EvidenceGroupBy)}
                     options={[
@@ -1055,7 +1055,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             setFilterQuery(group.key === "unlinked" ? "" : group.label);
                           }
                         }}
-                        aria-label={`Filter Workbench evidence by ${group.label}`}
+                        aria-label={`Filter Workbench receipts by ${group.label}`}
                         className="h-auto justify-start rounded p-1.5 text-left"
                         variant="secondary"
                       >
@@ -1064,7 +1064,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             {group.label}
                           </span>
                           <span className="mt-1 flex flex-wrap gap-1">
-                            <Chip label={`${group.count} records`} tone={C.accent} />
+                            <Chip label={`${group.count} receipts`} tone={C.accent} />
                             <Chip label={`${group.validationNotes} validations`} tone={C.warning} />
                             {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                           </span>
@@ -1084,7 +1084,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
               {(evidence.data?.items ?? []).length === 0 ? (
                 <div className="rounded px-3 py-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  No Workbench evidence records yet.
+                  No Workbench receipts yet.
                 </div>
               ) : (
                 <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -1094,7 +1094,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       key={item.id}
                       type="button"
                       onClick={() => setSelectedEvidenceId(item.id)}
-                      aria-label={`Inspect Workbench evidence ${item.id}`}
+                      aria-label={`Inspect Workbench receipt ${item.id}`}
                       className="h-auto justify-start rounded p-2 text-left"
                       variant="secondary"
                       style={{
