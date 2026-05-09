@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
+export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [text, setText] = useState("");
   const [sourceLabel, setSourceLabel] = useState("slack:proposal");
   const [selectedProposal, setSelectedProposal] = useState<{
@@ -144,6 +144,16 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
         },
       },
     );
+  }
+
+  function openSecurityGate(target: string | null | undefined) {
+    if (!target?.trim() || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem("cerebro:security-target", target.trim());
+    } catch {
+      // Ignore storage failure. The Security Gate form still opens.
+    }
+    onNavigate("security");
   }
 
   function invalidateHedwigProposalViews() {
@@ -377,6 +387,17 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                           Source Detail
                         </Button>
                       )}
+                      {item.sourceUri && (
+                        <Button
+                          type="button"
+                          onClick={() => openSecurityGate(item.sourceUri)}
+                          disabled={!onNavigate}
+                          variant="risk"
+                          size="sm"
+                        >
+                          Security Gate
+                        </Button>
+                      )}
                     </div>
                   ))
                 )}
@@ -412,6 +433,19 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                     >
                       {createTask.isPending ? "Creating" : "Create Local Task"}
                     </Button>
+                    {triage.data.found && triage.data.sourceDraft && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          if (triage.data?.found) openSecurityGate(triage.data.sourceDraft?.uri);
+                        }}
+                        disabled={!onNavigate}
+                        variant="risk"
+                        size="sm"
+                      >
+                        Security Gate
+                      </Button>
+                    )}
                     {triage.data.sourceDraft && (
                       <Button
                         type="button"
@@ -543,6 +577,21 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                     {"sourceUri" in proposalDetail.data.item && proposalDetail.data.item.sourceUri && (
                       <MetaBlock label="Source" value={sourceDisplayName(proposalDetail.data.item.sourceUri)} title={proposalDetail.data.item.sourceUri} />
                     )}
+                    {"sourceUri" in proposalDetail.data.item && proposalDetail.data.item.sourceUri && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const item = proposalDetail.data?.item;
+                          if (item && "sourceUri" in item) openSecurityGate(item.sourceUri);
+                        }}
+                        disabled={!onNavigate}
+                        variant="risk"
+                        size="sm"
+                        className="w-fit"
+                      >
+                        Security Gate
+                      </Button>
+                    )}
                     {"reviewPriority" in proposalDetail.data.item && (
                       <MetaBlock label="Review Priority" value={proposalDetail.data.item.reviewPriority ?? "normal"} />
                     )}
@@ -551,6 +600,21 @@ export default function HedwigInboxPanel({ onClose }: { onClose: () => void }) {
                     )}
                     {"proposedExternalTarget" in proposalDetail.data.item && proposalDetail.data.item.proposedExternalTarget && (
                       <MetaBlock label="External Target" value={proposalDetail.data.item.proposedExternalTarget} />
+                    )}
+                    {"proposedExternalTarget" in proposalDetail.data.item && proposalDetail.data.item.proposedExternalTarget && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const item = proposalDetail.data?.item;
+                          if (item && "proposedExternalTarget" in item) openSecurityGate(item.proposedExternalTarget);
+                        }}
+                        disabled={!onNavigate}
+                        variant="risk"
+                        size="sm"
+                        className="w-fit"
+                      >
+                        Security Gate
+                      </Button>
                     )}
                     {"lastReviewedAt" in proposalDetail.data.item && proposalDetail.data.item.lastReviewedAt && (
                       <MetaBlock label="Last Review" value={new Date(proposalDetail.data.item.lastReviewedAt * 1000).toLocaleString()} />

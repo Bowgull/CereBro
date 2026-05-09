@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:08 EDT
+Last updated: 2026-05-08 22:10 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2210 - Front-End Build Steward: Hedwig Security Gate Link
+
+### What Changed
+
+- Added `Security Gate` actions to Hedwig:
+  - Local capture rows with a `sourceUri`.
+  - Triage proposals with a source draft URI.
+  - Proposal detail source URI fields.
+  - Proposal detail external target fields.
+- The action opens Security Gate and pre-fills the target through local session
+  storage.
+- Wired Hedwig to shell navigation for the Security surface.
+
+### Files Touched
+
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Hedwig capture and proposal flows now have a visible path to Spock before
+  external source work or target review proceeds.
+- This closes the biggest remaining source-intake gap in the security receipt
+  flow.
+
+### Known Risks
+
+- Browser screenshot capture was not available in this turn.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Re-run a focused source/target affordance audit and clean up remaining raw
+  labels that need compacting.
+- Then push this follow-up to the open draft PR.
 
 ## 2026-05-08 2208 - Front-End Build Steward: Approval Security Gate Link
 
@@ -8688,4 +8731,55 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from candidate queue summary. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add a local-only Raven review action planner that suggests deterministic next actions for candidates based on status, contradiction, decay, and confidence. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
+```
+
+## 2026-05-08 2210 EDT — Raven candidate review planner
+
+What changed:
+
+- Continued from the shorthand `'` keep-building trigger.
+- Added `raven.recommendationCandidateReviewPlan`.
+- The review planner returns deterministic local suggestions per candidate
+  based on status, contradiction state, decay bucket, and confidence.
+- Possible actions include:
+  - `leave_closed`
+  - `hold_for_future_private_review`
+  - `ask_private_clarifying_question`
+  - `refresh_private_preference`
+  - `queue_private_preview`
+  - `collect_one_more_signal`
+  - `keep_as_low_confidence_draft`
+- Expanded the Raven foundation test to cover kept candidates and mixed
+  contradiction candidates in the planner.
+
+Files touched in this slice:
+
+- `app/server/routers/raven.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm vitest run server/cerebro-foundations.test.ts`
+- `pnpm check` was attempted but blocked by unrelated frontend type errors in
+  `app/client/src/components/HedwigInboxPanel.tsx`. That surface belongs to
+  the active frontend lane and was not touched.
+
+Known risks:
+
+- Planner actions are local suggestions only. They do not execute, approve,
+  export, fetch, browse, generate, or write externally.
+- Typecheck cannot be used as a global green signal until the active frontend
+  lane fixes the Hedwig panel errors.
+
+Storage impact:
+
+- No schema change.
+- No Raven data is exported to core memory, Obsidian, Notion, Slack, browser,
+  external model providers, or media systems.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from candidate review planner. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add local-only review-note capture for candidate planner decisions, with append-only history and no external writes. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```
