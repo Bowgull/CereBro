@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 00:14 EDT
+Last updated: 2026-05-09 05:36 EDT
 
 ## Current North Star
 
@@ -20,6 +20,48 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0536 - Front-End Build Steward: Project Inspector Density
+
+### What Changed
+
+- Tightened the Project Lab inspector shell from a tall explanatory panel into
+  a compact local workbench strip.
+- Changed queue controls into a count-bearing grid so approvals, terminal,
+  Hedwig, sources, git, drafts, and gates scan as one rail.
+- Combined search, type filters, sort controls, read-only status, and reset into
+  one compact toolbar.
+- Reduced inspector padding and fixed the detail column alignment.
+- Restarted the dev server after localhost was down; `localhost:3002` is serving
+  again.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` first failed because the dev server was not
+  running, then passed after `pnpm dev` restarted on port 3002.
+
+### Front-End Steward Review
+
+- Opening a Project Lab card should now expose a denser inspector with clearer
+  queue selection and less instructional copy.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Detail row cards still deserve a final text wrapping pass after visual review.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Browser-review Project Lab in the running app, then tune row wrapping, empty
+  states, and any inspector overflow issues that show up visually.
 
 ## 2026-05-09 0014 - Front-End Build Steward: Project Card Density
 

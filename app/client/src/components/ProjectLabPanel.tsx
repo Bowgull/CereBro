@@ -1196,8 +1196,8 @@ function ProjectDetailInspector({
   ];
 
   return (
-    <section className="shrink-0 px-4 py-3" aria-label={`${projectName} Local Inspector`} aria-busy={isLoading} style={{ background: C.surface, borderBottom: `1px solid ${C.borderSoft}` }}>
-      <div className="flex items-start justify-between gap-3">
+    <section className="shrink-0 px-3 py-2" aria-label={`${projectName} Local Inspector`} aria-busy={isLoading} style={{ background: C.surface, borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
             Local Inspector
@@ -1211,15 +1211,11 @@ function ProjectDetailInspector({
         </Button>
       </div>
 
-      <div className="mt-2 text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-        Read-only local queues. This view does not approve actions, run commands, browse/search, fetch sources, write to Notion/Slack, or touch external repos.
-      </div>
-
       {isLoading ? (
-        <div className="mt-3 text-xs" style={{ color: C.textMuted }}>Reading local queue details.</div>
+        <div className="mt-2 text-xs" style={{ color: C.textMuted }}>Reading local queue details.</div>
       ) : (
-        <div className="mt-3">
-          <div className="flex flex-wrap gap-1">
+        <div className="mt-2">
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 xl:grid-cols-7">
             {queues.map((queue) => (
               <Button
                 key={queue.id}
@@ -1235,16 +1231,15 @@ function ProjectDetailInspector({
                 }}
                 variant={activeQueue === queue.id ? "default" : "secondary"}
                 size="sm"
+                className="justify-between"
               >
-                {queue.label} {queue.items.length}
+                <span>{queue.label}</span>
+                <span className="ml-2" style={{ color: activeQueue === queue.id ? undefined : C.textMuted }}>{queue.items.length}</span>
               </Button>
             ))}
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
-            <div className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
-              Search
-            </div>
+          <div className="mt-2 grid grid-cols-1 gap-1.5 xl:grid-cols-[minmax(180px,1fr)_minmax(0,2fr)_auto] xl:items-center">
             <Input
               type="search"
               aria-label={`Search ${active.label} inspector rows`}
@@ -1256,29 +1251,8 @@ function ProjectDetailInspector({
               placeholder={`Filter ${active.label.toLowerCase()} rows`}
               className="min-w-0 flex-1"
             />
-            {filterActive && (
-              <Button
-                type="button"
-                aria-label="Reset inspector filters"
-                onClick={() => {
-                  setInspectorSearch("");
-                  setInspectorLabelFilter(null);
-                  setSelectedItemId(null);
-                }}
-                variant="ghost"
-                size="sm"
-              >
-                Reset
-              </Button>
-            )}
-          </div>
-
-          {labelFilters.length > 1 && (
-            <div className="mt-2 flex items-center gap-2">
-              <div className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
-                Type
-              </div>
-              <div className="flex flex-wrap gap-1 min-w-0">
+            <div className="flex flex-wrap gap-1 min-w-0">
+              {labelFilters.length > 1 && (
                 <Button
                   type="button"
                   aria-pressed={inspectorLabelFilter == null}
@@ -1292,7 +1266,8 @@ function ProjectDetailInspector({
                 >
                   All {active.items.length}
                 </Button>
-                {labelFilters.map(([label, count]) => (
+              )}
+              {labelFilters.length > 1 && labelFilters.map(([label, count]) => (
                   <Button
                     type="button"
                     key={label}
@@ -1307,16 +1282,7 @@ function ProjectDetailInspector({
                   >
                     {labelize(label)} {count}
                   </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-2 flex items-center gap-2">
-            <div className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.textMuted }}>
-              Sort
-            </div>
-            <div className="flex flex-wrap gap-1 min-w-0">
+              ))}
               {sortOptions.map((option) => (
                 <Button
                   type="button"
@@ -1334,9 +1300,29 @@ function ProjectDetailInspector({
                 </Button>
               ))}
             </div>
+            <div className="flex items-center justify-between gap-2 xl:justify-end">
+              <span className="text-[10px] uppercase tracking-wider" style={{ color: C.success }}>
+                read-only
+              </span>
+              {filterActive && (
+                <Button
+                  type="button"
+                  aria-label="Reset inspector filters"
+                  onClick={() => {
+                    setInspectorSearch("");
+                    setInspectorLabelFilter(null);
+                    setSelectedItemId(null);
+                  }}
+                  variant="ghost"
+                  size="sm"
+                >
+                  Reset
+                </Button>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.95fr)] gap-2 mt-2">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] gap-2 mt-2">
             <DetailColumn
               title={active.label}
               empty={active.empty}
@@ -1345,7 +1331,7 @@ function ProjectDetailInspector({
               filterActive={filterActive}
               filterLabel={filterLabel}
               selectedId={selectedItem?.id ?? null}
-          onSelect={setSelectedItemId}
+              onSelect={setSelectedItemId}
             />
             <DetailPreview
               item={selectedItem}
