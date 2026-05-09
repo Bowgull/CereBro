@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:15 EDT
+Last updated: 2026-05-09 07:20 EDT
 
 ## Current North Star
 
@@ -20,6 +20,52 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0720 EDT - Front-End Build Steward: Project Lab Density
+
+### What Changed
+
+- Browser-reviewed the active Workshop Project Lab surface and local inspector.
+- Tightened the Project Lab header into compact project-count and read-only mode receipts.
+- Compressed primary stat blocks, filter rail, next-safe-action row, project cards, draft-action receipts, activity blocks, and worktree change blocks.
+- Tightened the local inspector header, queue controls, filter row, detail list, metadata preview, and draft-note box.
+- Kept Project Lab read-only. Drafts still append local proposal records only.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed Project Lab renders compact receipts, stat blocks, project cards, draft-action controls, and Declyne local inspector.
+
+### Front-End Steward Review
+
+- Project Lab now matches the denser Workshop treatment used by Terminal Lab and Research.
+- Read-only and proposal-only states stay visible before any draft or repo-adjacent action.
+- Screenshot capture remains unstable in the in-app browser, so visual proof used DOM shape plus localhost health.
+
+### Known Risks
+
+- This was a density-only pass. It does not add new project intelligence behavior or create any drafts.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No project action draft was created during this slice.
+- No Notion, Slack, external model, source fetch, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Project Lab Density. Next safe slice: review the Workshop surfaces together in browser DOM, then move to remaining Basement or shared primitive debt if no obvious Workshop density issue remains. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0715 EDT - Front-End Build Steward: Research Density
 
