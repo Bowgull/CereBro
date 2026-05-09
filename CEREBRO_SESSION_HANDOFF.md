@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 08:14 EDT
+Last updated: 2026-05-09 08:16 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0816 EDT - Front-End Build Steward: Button Primitive Density
+
+### What Changed
+
+- Tightened the shared Button primitive to compact CereBro density.
+- Reduced default button height to 28px, small buttons to 24px, and icon buttons by one step.
+- Replaced the roomier `rounded-md` default with a compact `rounded` radius while staying under the 8px rule.
+- Reduced text and icon sizing to match the already-normalized input, select, badge, menu, and shell controls.
+- Browser DOM verified shell buttons, command bar actions, Tools menu, and Clear Visible Sessions hard gate at `http://localhost:3002/`.
+
+### Files Touched
+
+- `app/client/src/components/ui/button.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed button-heavy shell and hard-gate controls still render.
+
+### Front-End Steward Review
+
+- Button density now matches the rest of the normalized shared primitives.
+- Destructive, risk, disabled, focus-visible, and invalid states remain explicit.
+- Screenshot capture still times out, so visual proof used DOM state plus localhost health.
+
+### Known Risks
+
+- This is a shared primitive change with broad visual reach.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Button Primitive Density. Next safe slice: inspect route surfaces for button fallout, especially small action clusters in Hedwig, Terminal Lab, Project Lab, and Tasks. Patch only visible spacing issues caused by the compact button primitive. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0814 EDT - Front-End Build Steward: Shell Density Pass
 

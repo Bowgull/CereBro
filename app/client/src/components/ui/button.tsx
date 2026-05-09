@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-[12px] font-medium leading-none transition-[background-color,border-color,color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-[#253041] disabled:bg-[#151A23] disabled:text-[#7E8898] disabled:opacity-70 aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border text-[11px] font-medium leading-none transition-[background-color,border-color,color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-[#253041] disabled:bg-[#151A23] disabled:text-[#7E8898] disabled:opacity-70 aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
@@ -24,12 +24,12 @@ const buttonVariants = cva(
         link: "border-transparent bg-transparent px-0 text-[#6BA6FF] underline-offset-4 hover:text-[#F4EFE3] hover:underline",
       },
       size: {
-        default: "h-8 px-3 py-2 has-[>svg]:px-2.5",
-        sm: "h-7 gap-1.5 rounded px-2.5 has-[>svg]:px-2",
-        lg: "h-9 px-4 has-[>svg]:px-3",
-        icon: "size-8",
-        "icon-sm": "size-7",
-        "icon-lg": "size-9",
+        default: "h-7 px-2.5 py-1 has-[>svg]:px-2",
+        sm: "h-6 rounded px-2 has-[>svg]:px-1.5",
+        lg: "h-8 px-3 has-[>svg]:px-2.5",
+        icon: "size-7",
+        "icon-sm": "size-6",
+        "icon-lg": "size-8",
       },
     },
     defaultVariants: {
