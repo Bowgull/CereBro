@@ -809,16 +809,16 @@ function StubView({ title, phase }: { title: string; phase: string }) {
   return (
     <div className="h-full w-full flex items-center justify-center p-8">
       <div
-        className="max-w-md w-full p-6 rounded"
+        className="max-w-md w-full p-3 rounded"
         style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
       >
         <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.warning }}>
           Stub
         </div>
-        <div className="text-lg font-semibold mb-2" style={{ color: C.textPrimary }}>
+        <div className="text-[13px] font-semibold mb-2" style={{ color: C.textPrimary }}>
           {title}
         </div>
-        <div className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
+        <div className="text-[12px] leading-snug" style={{ color: C.textSecondary }}>
           This canonical section is in the spec but not yet wired. Slated for {phase}.
         </div>
       </div>

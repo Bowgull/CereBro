@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 23:24 EDT
+Last updated: 2026-05-08 23:45 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2345 - Front-End Build Steward: Compact Fallback Surfaces
+
+### What Changed
+
+- Reworked `ErrorBoundary` into a compact CereBro dark-shell error surface with
+  token danger state, smaller stack trace panel, and compact reload action.
+- Reworked the `NotFound` route from a light marketing-style card into a compact
+  CereBro shell card with token warning state and direct return copy.
+- Tightened the `Home` stub surface padding and copy scale.
+
+### Files Touched
+
+- `app/client/src/components/ErrorBoundary.tsx`
+- `app/client/src/pages/NotFound.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Error, not-found, and stub fallback surfaces now match the rest of the Keep
+  shell instead of breaking into light or stock UI treatment.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue visible surfaces first. Dormant primitives can wait unless they are
+  about to be used by the Keep shell.
 
 ## 2026-05-08 2324 - Front-End Build Steward: Compact Command Menubar Primitives
 

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { cerebroColors as C } from "@/lib/keepConfig";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,17 +26,24 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
+        <div className="flex min-h-screen items-center justify-center p-4" style={{ background: C.background }}>
+          <div
+            className="flex w-full max-w-2xl flex-col items-center rounded-md p-4"
+            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+          >
             <AlertTriangle
-              size={48}
-              className="text-destructive mb-6 flex-shrink-0"
+              size={32}
+              className="mb-3 flex-shrink-0"
+              style={{ color: C.danger }}
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+            <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-widest">Unexpected Error</h2>
 
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
+            <div
+              className="mb-4 w-full overflow-auto rounded p-3"
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+            >
+              <pre className="whitespace-break-spaces font-mono text-[11px]" style={{ color: C.textMuted }}>
                 {this.state.error?.stack}
               </pre>
             </div>
