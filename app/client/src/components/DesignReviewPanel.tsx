@@ -119,15 +119,15 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4" aria-label="Design review workspace">
+      <main className="flex-1 overflow-y-auto p-3" aria-label="Design review workspace">
         {!planData ? (
-          <div className="rounded p-4 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+          <div className="rounded p-3 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             Loading design review policy.
           </div>
         ) : (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
-            <div className="grid gap-4 content-start">
-              <section className="rounded p-4" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="grid gap-3 content-start">
+              <section className="rounded p-3" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-2 mb-3">
                   <Chip label={planData.mode.replace(/_/g, " ")} tone={C.warning} />
                   <Chip label={planData.ownerAgent} tone={C.accent} />
@@ -159,7 +159,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                 </div>
               </section>
 
-              <section className="rounded p-4" aria-label="Create design review" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <section className="rounded p-3" aria-label="Create design review" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-widest">Record Review</h3>
@@ -261,7 +261,7 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
               </section>
             </div>
 
-            <aside className="rounded p-4 h-fit xl:sticky xl:top-4" aria-label="Recent design reviews" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <aside className="rounded p-3 h-fit xl:sticky xl:top-3" aria-label="Recent design reviews" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest">Recent Reviews</h3>
