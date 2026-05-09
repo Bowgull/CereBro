@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:27 EDT
+Last updated: 2026-05-09 11:29 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1129 EDT - Ledger Evidence Detail Preview
+
+### What Changed
+
+- Added a compact selected-receipt preview to Ledger Latest Evidence.
+- Latest Evidence rows now select a receipt locally instead of immediately leaving Ledger.
+- The preview shows receipt id, kind, sensitive/local state, linked terminal observation, title, summary, project, route, validation status, and target.
+- Added a separate Open Receipt action that opens Workbench with the existing evidence filter handoff.
+- No command execution, git execution, external write, durable memory write, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this tool set, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This keeps Ledger as proof before summary.
+- Receipt inspection is now local to Ledger, with Workbench available only when deeper inspection is needed.
+- The preview stays compact and uses existing Workbench evidence data.
+- The flow remains read-only and local.
+
+### Known Risks
+
+- Ledger still reads the latest 50 Workbench evidence records and previews from that local set.
+- Visual browser proof still needs a plugin pass when Browser Use is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this flow.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: when Browser Use is callable, visually verify Ledger Evidence rows and receipt preview in localhost, then tighten spacing/copy only if the screenshot shows problems. If Browser Use remains unavailable, continue the next critical-path front-end slice from Project Lab -> Terminal Lab -> Workbench -> Ledger without adding a new primary surface or executing commands.
+```
 
 ## 2026-05-09 1127 EDT - Ledger Latest Evidence Receipts
 

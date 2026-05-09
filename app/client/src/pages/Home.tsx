@@ -914,6 +914,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 }
 
 function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
   const approvals = trpc.approvals.list.useQuery({
@@ -934,6 +935,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const proposalRows = proposals.data ?? [];
   const evidenceRows = workbenchEvidence.data?.items ?? [];
   const latestEvidenceRows = evidenceRows.slice(0, 4);
+  const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
   const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
@@ -1077,10 +1079,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 <Button
                   key={item.id}
                   type="button"
-                  onClick={() => openWorkbenchEvidence(item)}
+                  onClick={() => setSelectedEvidenceId(item.id)}
                   variant="secondary"
                   className="h-auto justify-start rounded p-2 text-left"
-                  aria-label={`Open Workbench evidence receipt ${item.id}`}
+                  aria-label={`Preview Workbench evidence receipt ${item.id}`}
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                 >
                   <span className="block w-full min-w-0">
@@ -1103,6 +1105,48 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   </span>
                 </Button>
               ))}
+            </div>
+          )}
+          {selectedEvidence && (
+            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Selected evidence receipt preview">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  <Badge variant="secondary" className="uppercase">receipt #{selectedEvidence.id}</Badge>
+                  <Badge variant={selectedEvidence.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
+                    {selectedEvidence.kind.replace(/_/g, " ")}
+                  </Badge>
+                  <Badge variant={selectedEvidence.sensitive ? "destructive" : "success"} className="uppercase">
+                    {selectedEvidence.sensitive ? "sensitive" : "local"}
+                  </Badge>
+                  {selectedEvidence.commandObservationId != null && (
+                    <Badge variant="warning" className="uppercase">terminal #{selectedEvidence.commandObservationId}</Badge>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => openWorkbenchEvidence(selectedEvidence)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Open Receipt
+                </Button>
+              </div>
+              <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">
+                <div className="min-w-0">
+                  <div className="truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={selectedEvidence.title}>
+                    {selectedEvidence.title}
+                  </div>
+                  <div className="mt-1 line-clamp-3 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {selectedEvidence.summary}
+                  </div>
+                </div>
+                <div className="grid gap-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                  <span>Project: {selectedEvidence.projectName ?? "unlinked"}</span>
+                  <span>Route: {selectedEvidence.routeAgent ?? "unrouted"}</span>
+                  <span>Status: {selectedEvidence.validationStatus.replace(/_/g, " ")}</span>
+                  <span>Target: {selectedEvidence.targetUri ?? "none"}</span>
+                </div>
+              </div>
             </div>
           )}
         </section>
