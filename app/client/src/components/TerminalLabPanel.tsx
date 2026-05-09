@@ -138,7 +138,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           : "This needs a clearer execution reason before it can become an approved action.",
         next: preview.data.approvalRequiredToRun
           ? "Inspect the gates, then use Security Gate or Approval if this command still matters."
-          : "Record the expected proof before running anything elsewhere.",
+          : "Record the expected Workbench receipt before running anything elsewhere.",
         notYet: preview.data.gates,
         tone: toneForRisk(preview.data.risk),
       }
@@ -151,25 +151,25 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             : selectedObservation.explanation ?? "No output has been attached yet. Paste approved command output to turn this into a lesson.",
           proves: selectedObservation.exitCode === 0
             ? selectedEvidence
-              ? `Workbench evidence #${selectedEvidence.id} is saved with ${selectedEvidence.validationStatus.replace(/_/g, " ")} status.`
-              : "Exit 0 suggests the command completed, but the output still needs a concrete Workbench proof receipt."
+              ? `Workbench receipt #${selectedEvidence.id} is saved with ${selectedEvidence.validationStatus.replace(/_/g, " ")} validation.`
+              : "Exit 0 suggests the command completed, but the output still needs a concrete Workbench receipt body."
             : selectedObservation.exitCode != null
               ? selectedEvidence
-                ? `Exit ${selectedObservation.exitCode} is linked to Workbench evidence #${selectedEvidence.id}; review the receipt before Tony acts on it.`
-                : `Exit ${selectedObservation.exitCode} means this needs review and a Workbench proof receipt before Tony acts on it.`
+                ? `Exit ${selectedObservation.exitCode} is linked to Workbench receipt #${selectedEvidence.id}; check the Ledger trail before Tony acts on it.`
+                : `Exit ${selectedObservation.exitCode} means this needs review and a Workbench receipt before Tony acts on it.`
               : selectedEvidence
-                ? `Workbench evidence #${selectedEvidence.id} exists, but no exit code is recorded here.`
-                : "No exit code or Workbench proof receipt has been recorded yet.",
+                ? `Workbench receipt #${selectedEvidence.id} exists, but no exit code is recorded here.`
+                : "No exit code or Workbench receipt has been recorded yet.",
           next: selectedEvidence
             ? selectedEvidence.validationStatus === "needs_review"
-              ? "Open the Workbench receipt and add validation before treating this as build proof."
-              : "Use this Workbench receipt as the proof link for the next build decision."
+              ? "Open the Workbench body and add validation before treating this as build proof."
+              : "Use the Workbench body and Ledger trail as the receipt path for the next build decision."
             : selectedObservation.outputSummary
-              ? "Create Workbench proof, then add a learning note or Tony follow-up if this result should shape the next build pass."
-              : "Attach observed output from an approved command run, then save a Workbench proof receipt.",
+              ? "Create a Workbench receipt, then add a learning note or Tony follow-up if this result should shape the next build pass."
+              : "Attach observed output from an approved command run, then save a Workbench receipt.",
           notYet: [
             "Do not rerun from Terminal Lab.",
-            selectedEvidence ? "Do not treat this receipt as validated until its Workbench status says so." : "Do not treat this as proof until a Workbench receipt exists.",
+            selectedEvidence ? "Do not treat this receipt as validated until its Workbench validation says so." : "Do not treat this as proof until a Workbench receipt exists.",
             "Do not push or mutate git from this panel.",
           ],
           tone: toneForRisk(selectedObservation.risk),
@@ -321,7 +321,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   }) {
     if (!onNavigate) return;
     const summary = [
-      observation.outputSummary || observation.explanation || "Terminal observation needs a concrete proof summary.",
+      observation.outputSummary || observation.explanation || "Terminal observation needs a concrete receipt summary.",
       "",
       `Command: ${observation.command}`,
       observation.cwd ? `Working directory: ${observation.cwd}` : null,
@@ -337,7 +337,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         JSON.stringify({
           source: "terminal_lab",
           kind: "terminal_output",
-          title: `Terminal proof #${observation.id}`,
+          title: `Terminal receipt #${observation.id}`,
           summary,
           targetUri: `terminal_lab:observation:${observation.id}`,
           routeAgent: "tony",
@@ -365,7 +365,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           kind: "terminal_output",
           query: `terminal_lab:observation:${observationId}`,
           groupBy: "command",
-          notice: `Showing Workbench proof for Terminal Lab observation #${observationId}.`,
+          notice: `Showing Workbench receipt for Terminal Lab observation #${observationId}.`,
         }),
       );
     } catch {
@@ -1041,7 +1041,7 @@ function AangTeachingFrame({
         </div>
 
         <TeachingBlock title="Lesson" body={frame.lesson} tone={C.gold} />
-        <TeachingBlock title="Proof" body={frame.proves} tone={C.accent} />
+        <TeachingBlock title="Receipt" body={frame.proves} tone={C.accent} />
       </div>
       <div className="mt-1.5 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <TeachingBlock title="Next Safe Step" body={frame.next} tone={C.success} />
