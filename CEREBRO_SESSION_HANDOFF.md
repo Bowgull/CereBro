@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 06:15 EDT
+Last updated: 2026-05-09 06:17 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0617 - Front-End Build Steward: Workbench Recent Evidence Density
+
+### What Changed
+
+- Browser-reviewed Recent Evidence after the Add Evidence density pass.
+- Tightened the filter row, group panel, gate receipts, and record stack.
+- Capped visible evidence records to 12 and added an overflow count so the
+  surface reads as a queue instead of a full log dump.
+- Compressed record summaries to two short lines with target metadata kept
+  visible when present.
+
+### Files Touched
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser review of `http://localhost:3002/` confirmed Recent Evidence
+  renders compact filters, groups, records, and overflow state.
+
+### Front-End Steward Review
+
+- Recent Evidence now behaves like a triage queue. It shows current scope,
+  grouping, safety gates, a bounded row set, and the next filtering action.
+
+### Known Risks
+
+- Evidence detail still needs its own density pass.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Compact the Workbench evidence detail panel, validation history, comparison
+  history, and append controls.
 
 ## 2026-05-09 0615 - Front-End Build Steward: Workbench Add Evidence Density
 

@@ -98,6 +98,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
   const data = plan.data;
+  const evidenceItems = evidence.data?.items ?? [];
+  const visibleEvidenceItems = evidenceItems.slice(0, 12);
+  const hiddenEvidenceCount = Math.max(0, evidenceItems.length - visibleEvidenceItems.length);
   const projectOptions = useMemo(
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
@@ -747,22 +750,23 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             </section>
 
-            <section className="rounded p-3" aria-label="Recent Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex items-center justify-between gap-3 mb-3">
+            <section className="rounded p-2" aria-label="Recent Workbench evidence" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest">Recent Evidence</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Evidence</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
                     Filter and inspect local records.
                   </p>
                 </div>
                 <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
               </div>
-              <div className="grid gap-2 mb-3 md:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
+              <div className="mb-2 grid grid-cols-2 gap-1.5 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
                 <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
                   placeholder="Search evidence."
                   aria-label="Search Workbench evidence"
+                  className="col-span-2 xl:col-span-1"
                 />
                 <AppSelect
                   label="Filter kind"
@@ -800,12 +804,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   }}
                   aria-label="Reset Workbench evidence filters"
                   variant="secondary"
+                  size="sm"
                 >
                   Reset
                 </Button>
               </div>
-              <div className="mb-3 rounded p-3" aria-label="Workbench evidence groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                <div className="flex items-center justify-between gap-3 mb-2">
+              <div className="mb-2 rounded p-2" aria-label="Workbench evidence groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="mb-2 flex items-center justify-between gap-2">
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                       Evidence Groups
@@ -836,11 +841,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 ))}
                 {(evidenceGroups.data?.groups ?? []).length === 0 ? (
-                  <div className="rounded px-2 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                     No groups match the current filters.
                   </div>
                 ) : (
-                  <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-3">
                     {evidenceGroups.data?.groups.map((group) => (
                       <Button
                         key={group.key}
@@ -860,19 +865,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           }
                         }}
                         aria-label={`Filter Workbench evidence by ${group.label}`}
-                        className="h-auto justify-start rounded p-2 text-left"
+                        className="h-auto justify-start rounded p-1.5 text-left"
                         variant="secondary"
                       >
                         <span className="block">
-                          <span className="block text-xs font-semibold leading-snug break-words">
+                          <span className="block text-[11px] font-semibold leading-snug break-words">
                             {group.label}
                           </span>
-                          <span className="mt-2 flex flex-wrap gap-1">
+                          <span className="mt-1 flex flex-wrap gap-1">
                             <Chip label={`${group.count} records`} tone={C.accent} />
                             <Chip label={`${group.validationNotes} validations`} tone={C.warning} />
                             {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                           </span>
-                          <span className="mt-2 block text-[11px]" style={{ color: C.textMuted }}>
+                          <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
                             Sample: {group.sampleIds.map((id) => `#${id}`).join(", ")}
                           </span>
                         </span>
@@ -891,15 +896,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   No Workbench evidence records yet.
                 </div>
               ) : (
-                <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
-                  <div className="grid gap-2">
-                    {evidence.data?.items.map((item) => (
+                <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
+                  <div className="grid gap-1.5">
+                    {visibleEvidenceItems.map((item) => (
                     <Button
                       key={item.id}
                       type="button"
                       onClick={() => setSelectedEvidenceId(item.id)}
                       aria-label={`Inspect Workbench evidence ${item.id}`}
-                      className="h-auto justify-start rounded p-2.5 text-left"
+                      className="h-auto justify-start rounded p-2 text-left"
                       variant="secondary"
                       style={{
                         background: selectedEvidenceId === item.id ? C.surfaceRaised : C.surfaceMuted,
@@ -919,15 +924,20 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                         </span>
                         <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</span>
-                        <span className="mt-1 block text-xs leading-relaxed whitespace-normal" style={{ color: C.textMuted }}>{item.summary}</span>
+                        <span className="mt-1 block max-h-[34px] overflow-hidden text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>{item.summary}</span>
                         {item.targetUri && (
-                          <span className="mt-2 block text-[11px] truncate" style={{ color: C.textMuted }} title={item.targetUri}>
+                          <span className="mt-1 block text-[11px] truncate" style={{ color: C.textMuted }} title={item.targetUri}>
                             Target: {sourceDisplayName(item.targetUri)}
                           </span>
                         )}
                       </span>
                     </Button>
                     ))}
+                    {hiddenEvidenceCount > 0 && (
+                      <div className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                        {hiddenEvidenceCount} more records match. Narrow the filters to inspect them.
+                      </div>
+                    )}
                   </div>
                   <EvidenceDetailPanel
                     detail={evidenceDetail.data}
