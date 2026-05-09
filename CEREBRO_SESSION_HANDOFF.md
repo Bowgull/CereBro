@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:11 EDT
+Last updated: 2026-05-09 11:15 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1115 EDT - Terminal To Workbench Proof Draft
+
+### What Changed
+
+- Added a Proof action to Terminal Lab observations.
+- Proof stages a Workbench draft in browser session storage and navigates to Workbench.
+- Workbench now reads staged drafts, fills the existing Add Evidence form, links the command observation, filters to terminal evidence, and shows a visible draft notice.
+- The user still presses Save Local Evidence. No hidden Workbench evidence write happens from Terminal Lab.
+- No command execution, git execution, browser capture, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this tool set, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This follows the locked path: Terminal Lab teaches, Workbench holds visual and validation proof.
+- The handoff is explicit and manual. Terminal Lab stages context. Workbench saves only after user action.
+- The receipt shape stays local, append-only, and agent-readable.
+- No new primary surface was introduced.
+
+### Known Risks
+
+- Draft transfer uses browser session storage, which is appropriate for a temporary handoff but not durable history.
+- Visual browser proof still needs a plugin pass when Browser Use is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data is mutated until the user presses Save Local Evidence in Workbench.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this flow.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: make Workbench saved terminal evidence easier to find from Ledger or Terminal Lab without executing commands, adding a new Code Lab surface, or writing external memory. Verify in browser DOM when available, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1111 EDT - Terminal Lab Project Context Rail
 

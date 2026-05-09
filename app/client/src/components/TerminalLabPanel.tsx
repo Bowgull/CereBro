@@ -48,7 +48,7 @@ type TerminalProjectContext = {
   };
 };
 
-export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
+export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security" | "workbench") => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -260,6 +260,54 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       // Ignore storage failure. The Security Gate form still opens.
     }
     onNavigate("security");
+  }
+
+  function stageWorkbenchProof(observation: {
+    id: number;
+    projectId: number | null;
+    taskId: number | null;
+    sessionId: number | null;
+    command: string;
+    cwd: string | null;
+    risk: string;
+    status: string;
+    outputSummary: string | null;
+    explanation: string | null;
+    exitCode: number | null;
+  }) {
+    if (!onNavigate) return;
+    const summary = [
+      observation.outputSummary || observation.explanation || "Terminal observation needs a concrete proof summary.",
+      "",
+      `Command: ${observation.command}`,
+      observation.cwd ? `Working directory: ${observation.cwd}` : null,
+      `Risk: ${observation.risk.replace(/_/g, " ")}`,
+      `Status: ${observation.status}`,
+      observation.exitCode == null ? null : `Exit: ${observation.exitCode}`,
+      "",
+      "Staged from Terminal Lab. Saving in Workbench creates a local append-only evidence record. It does not execute the command.",
+    ].filter(Boolean).join("\n");
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-draft",
+        JSON.stringify({
+          source: "terminal_lab",
+          kind: "terminal_output",
+          title: `Terminal proof #${observation.id}`,
+          summary,
+          targetUri: `terminal_lab:observation:${observation.id}`,
+          routeAgent: "tony",
+          permissionClass: "manual_note",
+          projectId: observation.projectId,
+          taskId: observation.taskId,
+          sessionId: observation.sessionId,
+          commandObservationId: observation.id,
+        }),
+      );
+    } catch {
+      // Workbench will still open; the user can add the evidence manually.
+    }
+    onNavigate("workbench");
   }
 
   async function copyTonyDraft(key: string, value: string) {
@@ -707,6 +755,15 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             size="sm"
                           >
                             Teach
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => stageWorkbenchProof(item)}
+                            disabled={!onNavigate}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Proof
                           </Button>
                           <Button
                             type="button"

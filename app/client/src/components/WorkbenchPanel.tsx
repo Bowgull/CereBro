@@ -22,6 +22,19 @@ type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
 type EvidenceGroupBy = "project" | "task" | "session" | "kind" | "source" | "command" | "artifact" | "validation_status";
 type SelectOption = { value: string; label: string };
+type WorkbenchDraft = {
+  source?: string;
+  kind?: EvidenceKind;
+  title?: string;
+  summary?: string;
+  targetUri?: string | null;
+  routeAgent?: string | null;
+  permissionClass?: PermissionClass;
+  projectId?: number | null;
+  taskId?: number | null;
+  sessionId?: number | null;
+  commandObservationId?: number | null;
+};
 
 type TemporaryMediaPreview = {
   name: string;
@@ -94,6 +107,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
+  const [stagedDraftNotice, setStagedDraftNotice] = useState<string | null>(null);
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
@@ -154,6 +168,35 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       if (url) URL.revokeObjectURL(url);
     };
   }, [temporaryMedia?.url]);
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:workbench-draft");
+      if (raw) window.sessionStorage.removeItem("cerebro:workbench-draft");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as WorkbenchDraft;
+      if (draft.kind && draft.kind !== "all") setKind(draft.kind);
+      if (draft.title) setTitle(draft.title);
+      if (draft.summary) setSummary(draft.summary);
+      setTargetUri(draft.targetUri ?? "");
+      setRouteAgent(draft.routeAgent ?? "tony");
+      setPermissionClass(draft.permissionClass ?? "manual_note");
+      setProjectId(draft.projectId == null ? "none" : draft.projectId);
+      setTaskId(draft.taskId == null ? "none" : draft.taskId);
+      setSessionId(draft.sessionId == null ? "none" : draft.sessionId);
+      setCommandObservationId(draft.commandObservationId == null ? "none" : draft.commandObservationId);
+      setFilterKind(draft.kind === "terminal_output" ? "terminal_output" : "all");
+      setGroupBy(draft.commandObservationId == null ? "project" : "command");
+      setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench proof draft. Review it, then save local evidence." : "Workbench proof draft staged. Review it, then save local evidence.");
+    } catch {
+      setStagedDraftNotice("Workbench draft could not be read. Add the evidence manually.");
+    }
+  }, []);
 
   function clearTemporaryMedia() {
     if (temporaryMedia) URL.revokeObjectURL(temporaryMedia.url);
@@ -424,6 +467,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
                 <Chip label="local db" tone={C.success} />
               </div>
+              {stagedDraftNotice && (
+                <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+                  <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>Draft staged.</span> {stagedDraftNotice}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
                 <AppSelect
