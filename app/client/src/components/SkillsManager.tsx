@@ -73,26 +73,26 @@ function ItemEditor({ initialContent, onSave, onCancel, title }: AgentEditorProp
   const [content, setContent] = useState(initialContent || DEFAULT_AGENT_TEMPLATE);
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#0d0d1a] border-2 border-[#4B0082] rounded-lg w-full max-w-3xl flex flex-col font-mono text-white" style={{ maxHeight: "90vh" }}>
-        <div className="flex items-center justify-between p-4 border-b border-[#4B0082] bg-[#1a0a2e]">
-          <h3 className="text-[#FFD700] font-bold text-sm uppercase tracking-widest">{title}</h3>
+      <div className="w-full max-w-3xl flex flex-col font-mono" style={{ maxHeight: "90vh", background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
+        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}>
+          <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.gold }}>{title}</h3>
           <Button type="button" onClick={onCancel} aria-label="Close editor" variant="ghost" size="icon-sm">
             <X size={18} />
           </Button>
         </div>
-        <div className="flex-1 p-4 overflow-hidden flex flex-col gap-3">
-          <div className="text-xs text-gray-400 bg-[#1a1a2e] border border-[#333366] rounded p-2">
-            <strong className="text-[#88AAFF]">Format:</strong> YAML frontmatter between <code>---</code> markers, then Markdown system prompt.
+        <div className="flex-1 p-3 overflow-hidden flex flex-col gap-3">
+          <div className="text-xs rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            <strong style={{ color: C.accent }}>Format:</strong> YAML frontmatter between <code>---</code> markers, then Markdown system prompt.
           </div>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1 min-h-80 font-mono text-xs text-[#00FF88]"
-            style={{ minHeight: "320px" }}
+            className="flex-1 min-h-80 font-mono text-xs"
+            style={{ minHeight: "320px", color: C.success }}
             spellCheck={false}
           />
         </div>
-        <div className="flex gap-2 p-4 border-t border-[#4B0082] bg-[#1a0a2e]">
+        <div className="flex gap-2 p-3" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
           <Button
             type="button"
             onClick={() => onSave(content)}
@@ -243,12 +243,12 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
   return (
     <>
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-40 p-4">
-        <div className="bg-[#0d0d1a] border-2 border-[#4B0082] rounded-lg w-full max-w-4xl flex flex-col font-mono text-white" style={{ maxHeight: "90vh" }}>
+        <div className="w-full max-w-4xl flex flex-col font-mono" style={{ maxHeight: "90vh", background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#4B0082] bg-[#1a0a2e]">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}>
             <div>
-              <h2 className="text-[#FFD700] font-bold text-lg">⚔️ Claude Code Manager</h2>
-              <p className="text-xs text-gray-400 mt-0.5">{pathInfo}</p>
+              <h2 className="font-bold text-sm uppercase tracking-widest" style={{ color: C.gold }}>Claude Code Manager</h2>
+              <p className="text-xs mt-0.5" style={{ color: C.textMuted }}>{pathInfo}</p>
             </div>
             <Button type="button" onClick={onClose} aria-label="Close Claude Code Manager" variant="ghost" size="icon-sm">
               <X size={20} />
@@ -256,13 +256,13 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
           </div>
 
           {/* Tab Bar */}
-          <div className="flex border-b border-[#4B0082]">
+          <div className="flex" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
             <Button
               type="button"
               onClick={() => setActiveTab("agents")}
               variant={activeTab === "agents" ? "secondary" : "ghost"}
-              className="h-auto rounded-none border-b-2 px-6 py-3"
-              style={{ borderBottomColor: activeTab === "agents" ? "#FFD700" : "transparent", color: activeTab === "agents" ? "#FFD700" : C.textMuted }}
+              className="h-auto rounded-none border-b-2 px-4 py-2.5"
+              style={{ borderBottomColor: activeTab === "agents" ? C.gold : "transparent", color: activeTab === "agents" ? C.gold : C.textMuted }}
             >
               <Bot size={14} /> Agents
             </Button>
@@ -270,15 +270,15 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
               type="button"
               onClick={() => setActiveTab("skills")}
               variant={activeTab === "skills" ? "secondary" : "ghost"}
-              className="h-auto rounded-none border-b-2 px-6 py-3"
-              style={{ borderBottomColor: activeTab === "skills" ? "#FFD700" : "transparent", color: activeTab === "skills" ? "#FFD700" : C.textMuted }}
+              className="h-auto rounded-none border-b-2 px-4 py-2.5"
+              style={{ borderBottomColor: activeTab === "skills" ? C.gold : "transparent", color: activeTab === "skills" ? C.gold : C.textMuted }}
             >
               <Zap size={14} /> Skills
             </Button>
           </div>
 
           {/* Scope Selector */}
-          <div className="flex items-center gap-4 px-4 py-3 border-b border-[#4B0082]/30 bg-black/30">
+          <div className="flex items-center gap-3 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surfaceMuted }}>
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -347,61 +347,63 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
 
           {/* New Item Name Input */}
           {showEditor && !editingItem && (
-            <div className="px-4 py-2 bg-black/50 border-b border-[#4B0082]/20 flex items-center gap-2">
-              <span className="text-gray-400 text-xs">Name:</span>
+            <div className="px-3 py-2 flex items-center gap-2" style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}>
+              <span className="text-xs" style={{ color: C.textMuted }}>Name:</span>
               <Input
                 type="text"
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
                 placeholder={activeTab === "agents" ? "my-agent" : "my-skill"}
-                className="h-7 w-48 font-mono text-xs text-[#00FF88]"
+                className="h-7 w-48 font-mono text-xs"
+                style={{ color: C.success }}
                 autoFocus
                 onKeyDown={(e) => e.key === "Escape" && setShowEditor(false)}
               />
-              <span className="text-gray-600 text-xs">.md</span>
+              <span className="text-xs" style={{ color: C.textMuted }}>.md</span>
             </div>
           )}
 
           {/* Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {scope === "project" && !selectedProject && (
-              <div className="flex items-center gap-2 text-yellow-600 text-xs p-4 bg-yellow-900/20 rounded border border-yellow-700/30">
+              <div className="flex items-center gap-2 text-xs p-3 rounded" style={{ color: C.warning, background: `${C.warning}14`, border: `1px solid ${C.warning}44` }}>
                 <AlertCircle size={14} />
                 No project selected. Start Claude Code in a project to see it here.
               </div>
             )}
 
             {currentItems.length === 0 && !isLoading && (
-              <div className="text-center py-12">
-                <div className="text-4xl mb-3">{activeTab === "agents" ? "🤖" : "⚡"}</div>
-                <p className="text-gray-500 text-xs uppercase">
+              <div className="grid place-items-center gap-2 py-10 text-center">
+                {activeTab === "agents" ? <Bot size={22} style={{ color: C.textMuted }} /> : <Zap size={22} style={{ color: C.textMuted }} />}
+                <p className="text-xs uppercase tracking-widest" style={{ color: C.textMuted }}>
                   No {activeTab} found in {scope} scope
                 </p>
-                <p className="text-gray-600 text-xs mt-1">{pathInfo}</p>
+                <p className="text-xs" style={{ color: C.textMuted }}>{pathInfo}</p>
               </div>
             )}
 
             {currentItems.map((item: any) => (
               <div
                 key={item.name}
-                className="bg-black/40 border border-[#333366] rounded-lg overflow-hidden hover:border-[#4B0082]/50 transition-colors"
+                className="overflow-hidden rounded transition-colors"
+                style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
               >
                 <div
-                  className="flex items-center justify-between p-3 cursor-pointer"
+                  className="flex items-center justify-between p-2.5 cursor-pointer"
                   onClick={() => setExpandedItem(expandedItem === item.name ? null : item.name)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-[#FFD700] text-sm">{activeTab === "agents" ? "🤖" : "⚡"}</span>
+                    {activeTab === "agents" ? <Bot size={14} style={{ color: C.gold }} /> : <Zap size={14} style={{ color: C.gold }} />}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[#00FF88] text-sm font-bold">{item.name}</span>
+                        <span className="text-sm font-bold truncate" style={{ color: C.success }}>{item.name}</span>
                         {item.model && (
-                          <span className="text-gray-600 text-xs bg-[#1a1a2e] px-1.5 py-0.5 rounded">{item.model}</span>
+                          <span className="text-xs px-1.5 py-0.5 rounded" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>{item.model}</span>
                         )}
                       </div>
-                      <p className="text-gray-500 text-xs truncate mt-0.5">{item.description || "No description"}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: C.textMuted }}>{item.description || "No description"}</p>
                       {item.tools && (
-                        <p className="text-blue-500 text-xs mt-0.5">Tools: {item.tools}</p>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: C.accent }}>Tools: {item.tools}</p>
                       )}
                     </div>
                   </div>
@@ -437,19 +439,19 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
                       <Trash2 size={13} />
                     </Button>
                     {expandedItem === item.name
-                      ? <ChevronDown size={14} className="text-gray-500" />
-                      : <ChevronRight size={14} className="text-gray-500" />
+                      ? <ChevronDown size={14} style={{ color: C.textMuted }} />
+                      : <ChevronRight size={14} style={{ color: C.textMuted }} />
                     }
                   </div>
                 </div>
 
                 {expandedItem === item.name && (
-                  <div className="border-t border-[#333366]/50 p-3">
-                    <pre className="text-[#00FF88]/70 text-xs overflow-x-auto whitespace-pre-wrap bg-black/50 p-3 rounded max-h-48 overflow-y-auto">
+                  <div className="p-2.5" style={{ borderTop: `1px solid ${C.borderSoft}` }}>
+                    <pre className="text-xs overflow-x-auto whitespace-pre-wrap p-2 rounded max-h-48 overflow-y-auto" style={{ color: C.success, background: C.backgroundSoft, border: `1px solid ${C.borderSoft}` }}>
                       {item.content}
                     </pre>
-                    <p className="text-gray-600 text-xs mt-2">
-                      📁 {item.agentPath || item.skillPath}
+                    <p className="text-xs mt-2 truncate" style={{ color: C.textMuted }} title={item.agentPath || item.skillPath}>
+                      {item.agentPath || item.skillPath}
                     </p>
                   </div>
                 )}

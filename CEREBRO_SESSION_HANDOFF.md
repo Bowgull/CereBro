@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-08 22:44 EDT
+Last updated: 2026-05-08 22:47 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-08 2247 - Front-End Build Steward: Compact Skills Manager Shell
+
+### What Changed
+
+- Replaced hard-coded purple/neon `SkillsManager` shells with CereBro surface,
+  border, text, gold, accent, success, and warning tokens.
+- Compactly restyled the manager modal, editor modal, tab bar, scope selector,
+  new-item row, empty state, item rows, expanded code preview, and warning row.
+- Replaced visible emoji markers with the existing lucide `Bot` and `Zap`
+  icons while preserving behavior.
+
+### Files Touched
+
+- `app/client/src/components/SkillsManager.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+
+- Claude Code Manager now belongs to the dark CereBro shell instead of looking
+  like a separate purple tool.
+
+### Known Risks
+
+- Browser screenshot capture was not available.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue the visible-surface sweep. Remaining candidates include
+  `PixelOffice`, `ManusDialog`, or primitive outliers such as `alert-dialog`
+  and `empty`.
 
 ## 2026-05-08 2244 - Front-End Build Steward: Compact Stats Surface
 
