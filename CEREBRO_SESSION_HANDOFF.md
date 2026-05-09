@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:38 EDT
+Last updated: 2026-05-09 05:40 EDT
 
 ## Current North Star
 
@@ -20,6 +20,44 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0540 - Front-End Build Steward: Project Lab Filter Rail
+
+### What Changed
+
+- Browser-reviewed Project Lab after the previous clearance pass.
+- Collapsed the duplicated secondary stats and view-filter rows into one compact
+  filter rail.
+- Moved active sort/readout and attention signals into one status row.
+- Kept next safe actions visible while reducing the height of the pre-card
+  control area.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Project Lab now starts project cards higher on the screen and avoids repeating
+  the same filter controls in two adjacent rows.
+
+### Known Risks
+
+- Signal buttons are still visually dense at high counts.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue browser-led tuning on Project Lab next-action cards and project row
+  wrapping, then move to Terminal Lab if the Project Lab surface holds.
 
 ## 2026-05-09 0538 - Front-End Build Steward: Project Lab Browser Clearance
 

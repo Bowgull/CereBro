@@ -357,14 +357,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
     { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
-  const secondaryStats = [
-    { label: "Missing", value: String(data?.summary.missing ?? 0), tone: (data?.summary.missing ?? 0) > 0 ? C.warning : C.success, filter: "missing" as const },
-    { label: "Hedwig", value: String(data?.summary.hedwigProposals ?? 0), tone: (data?.summary.hedwigProposals ?? 0) > 0 ? C.accent : C.textSecondary, filter: "hedwig" as const },
-    { label: "Terminal", value: String(data?.summary.terminalObservations ?? 0), tone: (data?.summary.terminalObservations ?? 0) > 0 ? C.accent : C.textSecondary, filter: "terminal" as const },
-    { label: "Sources", value: String(data?.summary.sourceEvents ?? 0), tone: (data?.summary.sourceEvents ?? 0) > 0 ? C.accent : C.textSecondary, filter: "sources" as const },
-    { label: "Drafts", value: String(data?.summary.actionDrafts ?? 0), tone: (data?.summary.actionDrafts ?? 0) > 0 ? C.accent : C.textSecondary, filter: "drafts" as const },
-  ];
-
   return (
     <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
@@ -397,52 +389,30 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <div className="px-3 py-2 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="flex flex-wrap gap-1">
+      <div className="px-3 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="flex flex-wrap items-center gap-1">
           <Badge variant="secondary" className="uppercase">Mode {labelize(data?.mode ?? "read_only")}</Badge>
-          {secondaryStats.map((stat) => (
+          {projectFilters.map((filter) => (
             <Button
-              key={stat.label}
+              key={filter.id}
               type="button"
-              onClick={() => setProjectFilter(stat.filter)}
-              aria-label={`Show ${stat.label} projects`}
-              className="h-6 px-2"
-              variant={projectFilter === stat.filter ? "default" : "secondary"}
+              onClick={() => setProjectFilter(filter.id)}
+              aria-pressed={projectFilter === filter.id}
+              aria-label={`Show ${filter.label} projects`}
+              variant={projectFilter === filter.id ? "default" : "secondary"}
               size="sm"
             >
-              {stat.label} <span style={{ color: stat.tone }}>{stat.value}</span>
+              {filter.label} {filter.count}
             </Button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-[10px] uppercase tracking-wider shrink-0 w-14" style={{ color: C.textMuted }}>
-            View
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-wider" role="status" aria-live="polite" style={{ color: C.textMuted }}>
+            {filterSortLabel(projectFilter)} · {viewSummary(topProject?.name ?? null, topScore, filteredProjects.length, projects.length, projectFilter)}
           </div>
-          <div className="flex flex-wrap gap-1 min-w-0">
-            {projectFilters.map((filter) => (
-              <Button
-                key={filter.id}
-                type="button"
-                onClick={() => setProjectFilter(filter.id)}
-                aria-pressed={projectFilter === filter.id}
-                aria-label={`Show ${filter.label} projects`}
-                variant={projectFilter === filter.id ? "default" : "secondary"}
-                size="sm"
-              >
-                {filter.label} {filter.count}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <div className="pl-16 text-[10px] uppercase tracking-wider" role="status" aria-live="polite" style={{ color: C.textMuted }}>
-          {filterSortLabel(projectFilter)} · {viewSummary(topProject?.name ?? null, topScore, filteredProjects.length, projects.length, projectFilter)}
-        </div>
-        {attentionSignals.length > 0 && (
-          <div className="flex items-center gap-2">
-            <div className="text-[10px] uppercase tracking-wider shrink-0 w-14" style={{ color: C.textMuted }}>
-              Signals
-            </div>
-            <div className="flex flex-wrap gap-1 min-w-0">
+          {attentionSignals.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1 min-w-0">
+              <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Signals</span>
               {attentionSignals.map((signal) => (
                 <Button
                   key={`${signal.label}-${signal.id}`}
@@ -456,14 +426,14 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                 </Button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
         {nextSafeProjects.length > 0 && (
-          <div className="flex items-start gap-2">
-            <div className="text-[10px] uppercase tracking-wider shrink-0 w-14 pt-1" style={{ color: C.textMuted }}>
+          <div className="grid grid-cols-[44px_minmax(0,1fr)] gap-2">
+            <div className="text-[10px] uppercase tracking-wider pt-1" style={{ color: C.textMuted }}>
               Next
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 min-w-0 flex-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 min-w-0">
               {nextSafeProjects.map(({ project, score }) => (
                 <Button
                   key={project.slug}
