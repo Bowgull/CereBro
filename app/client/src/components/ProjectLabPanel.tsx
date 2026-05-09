@@ -433,8 +433,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             <div className="text-[10px] uppercase tracking-wider pt-1" style={{ color: C.textMuted }}>
               Next
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 min-w-0">
-              {nextSafeProjects.map(({ project, score }) => (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1.5 min-w-0">
+              {nextSafeProjects.map(({ project }, nextIndex) => (
                 <Button
                   key={project.slug}
                   type="button"
@@ -443,7 +443,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     setInspectorQueue(preferredInspectorQueue(project, "attention"));
                     setSelectedSlug(project.slug);
                   }}
-                  className="h-auto min-w-0 justify-start rounded px-2 py-1 text-left"
+                  className="h-auto min-w-0 justify-start rounded p-2 text-left"
                   variant="secondary"
                 >
                   <span className="block min-w-0 w-full">
@@ -451,14 +451,18 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       <span className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.accent }} title={project.name}>
                         {project.name}
                       </span>
-                      <span className="text-[10px] uppercase tracking-wider shrink-0" style={{ color: C.warning }}>
-                        {score}
+                      <span
+                        className="rounded px-1.5 py-0.5 text-[10px] font-semibold leading-none shrink-0"
+                        aria-label={`Attention rank ${nextIndex + 1}`}
+                        style={{ color: C.warning, background: `${C.warning}14`, border: `1px solid ${C.warning}33` }}
+                      >
+                        #{nextIndex + 1}
                       </span>
                     </span>
-                    <span className="block text-[11px] leading-snug truncate" title={project.nextSafeAction}>
+                    <span className="mt-1 block text-[11px] leading-snug line-clamp-2" title={project.nextSafeAction}>
                       {project.nextSafeAction}
                     </span>
-                    <span className="flex flex-wrap gap-1 mt-1">
+                    <span className="flex flex-wrap gap-1 mt-1.5">
                       {attentionReasons(project).slice(0, 3).map((reason) => (
                         <Badge key={reason} variant="secondary" className="uppercase">
                           {reason}
