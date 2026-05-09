@@ -78,19 +78,19 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
       <div
-        className="flex items-start justify-between gap-3 px-3 py-2 shrink-0"
+        className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
         style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
       >
-        <div>
-          <div className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Basement Automation Hygiene
-            <span className="ml-2" style={{ color: C.textSecondary }}>{findings.length}</span>
-          </div>
-          <div className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-            Piccolo scans storage drift, cleanup candidates, and vault health. Cleanup stays approval-gated.
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+              Automation Hygiene
+            </div>
+            <Badge variant="secondary" className="uppercase">{findings.length} findings</Badge>
+            <Badge variant="secondary" className="uppercase">Mode {data?.mode ?? "read_only"}</Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             type="button"
             variant="risk"
@@ -200,7 +200,7 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
 
 function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="min-w-0 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
         {label}
       </div>
@@ -213,8 +213,8 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
 
 function RuleCard({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
+    <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: tone }}>{title}</div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{body}</div>
     </div>
   );

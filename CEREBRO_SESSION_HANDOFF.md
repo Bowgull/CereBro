@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 07:24 EDT
+Last updated: 2026-05-09 07:28 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0728 EDT - Front-End Build Steward: Automation And Card Density
+
+### What Changed
+
+- Browser-reviewed Basement Automation.
+- Tightened Piccolo Automation header into compact findings and read-only mode receipts.
+- Reduced Automation status blocks and rule cards to the current Basement density.
+- Normalized the shared Card primitive toward CereBro density: smaller gap, tighter padding, compact titles, and lighter shell shadow.
+- Tightened the UI System panel so the frontend law reads as a compact rule surface instead of roomy card scaffolding.
+
+### Files Touched
+
+- `app/client/src/components/PiccoloPanel.tsx`
+- `app/client/src/components/UISystemPanel.tsx`
+- `app/client/src/components/ui/card.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser DOM review confirmed Basement Automation compact receipts, status blocks, rule cards, vault path, and findings.
+
+### Front-End Steward Review
+
+- Automation now fits the compact Basement machine-control treatment.
+- Card primitive defaults are closer to CereBro density and still stay within the 8px radius rule.
+- UI System was not reachable from the current Tools menu path during browser review; primitive changes were verified through active Basement card usage and TypeScript.
+- Screenshot capture remains unstable in the in-app browser, so visual proof used DOM shape plus localhost health.
+
+### Known Risks
+
+- This was a density-only pass. It does not save Piccolo reports or change automation behavior.
+- Existing Raven/docs/server edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No Piccolo report was saved during this slice.
+- No Notion, Slack, browser-source intake, external model, vault artifact write, or core memory write.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, and AGENTS.md. Continue the CereBro front-end build steward pass from Automation And Card Density. Next safe slice: inspect shared primitives still listed as debt, especially drawer/dialog/menu/table, then patch only the primitive debt that is actively used by visible CereBro surfaces. Verify in browser DOM, run pnpm check, run pnpm test -- server/cerebro-foundations.test.ts, curl localhost:3002, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 0724 EDT - Front-End Build Steward: Basement Security Density
 
