@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import KeepScene from "@/components/KeepScene";
 import KeepFortressBlueprint from "@/components/KeepFortressBlueprint";
 import EstablishingShot from "@/components/EstablishingShot";
@@ -915,6 +915,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 
 function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
+  const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
   const approvals = trpc.approvals.list.useQuery({
@@ -939,6 +940,25 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
   const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
+
+  useEffect(() => {
+    if (workbenchEvidence.isLoading) return;
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:ledger-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:ledger-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; notice?: string };
+      if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
+      setLedgerFocusNotice(draft.notice ?? "Ledger opened a focused receipt.");
+    } catch {
+      setLedgerFocusNotice("Ledger focus could not be read. Select a receipt manually.");
+    }
+  }, [workbenchEvidence.isLoading]);
 
   const cards = [
     {
@@ -1130,6 +1150,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           )}
           {selectedEvidence && (
             <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Selected evidence receipt preview">
+              {ledgerFocusNotice && (
+                <div className="mb-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+                  <span className="min-w-0">{ledgerFocusNotice}</span>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusNotice(null)} aria-label="Dismiss Ledger focus notice">
+                    Dismiss
+                  </Button>
+                </div>
+              )}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1">
                   <Badge variant="secondary" className="uppercase">receipt #{selectedEvidence.id}</Badge>

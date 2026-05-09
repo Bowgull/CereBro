@@ -48,7 +48,7 @@ type TerminalProjectContext = {
   };
 };
 
-export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security" | "workbench") => void }) {
+export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security" | "workbench" | "ledger") => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -350,6 +350,24 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     onNavigate("workbench");
   }
 
+  function openLedgerReceipt(observationId: number, evidenceId: number) {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:ledger-focus",
+        JSON.stringify({
+          source: "terminal_lab",
+          evidenceId,
+          observationId,
+          notice: `Ledger opened Workbench receipt #${evidenceId} from Terminal Lab observation #${observationId}.`,
+        }),
+      );
+    } catch {
+      // Ledger still opens; the user can select the receipt manually.
+    }
+    onNavigate("ledger");
+  }
+
   async function copyTonyDraft(key: string, value: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -647,7 +665,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       )}
                       {savedEvidence && (
                         <div className="text-[10px] leading-snug" style={{ color: savedEvidence.validationStatus === "needs_review" ? C.warning : C.success }}>
-                          Workbench proof #{savedEvidence.id}: {savedEvidence.validationStatus.replace(/_/g, " ")}. Use Open Proof for the exact receipt.
+                          Workbench receipt #{savedEvidence.id}: {savedEvidence.validationStatus.replace(/_/g, " ")}. Open Workbench for the body or Ledger for the audit trail.
                         </div>
                       )}
                       {item.followUps.length > 0 && (
@@ -813,8 +831,19 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             variant="secondary"
                             size="sm"
                           >
-                            {savedEvidence ? "Open Proof" : "Proof"}
+                            {savedEvidence ? "Workbench Body" : "Save Receipt"}
                           </Button>
+                          {savedEvidence && (
+                            <Button
+                              type="button"
+                              onClick={() => openLedgerReceipt(item.id, savedEvidence.id)}
+                              disabled={!onNavigate}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Ledger Trail
+                            </Button>
+                          )}
                           <Button
                             type="button"
                             onClick={() => setObservationStatus(item.id, "archived")}

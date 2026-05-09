@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:53 EDT
+Last updated: 2026-05-09 11:56 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1156 EDT - Terminal To Ledger Receipt Trail
+
+### What Changed
+
+- Added a Ledger Trail action to Terminal Lab observations that already have saved Workbench receipts.
+- Terminal Lab now labels saved terminal proof as Workbench receipt/body language instead of generic proof language.
+- Ledger reads a temporary Terminal Lab focus receipt and selects the exact Workbench receipt preview.
+- Ledger shows a dismissible focus notice explaining which Terminal Lab observation opened the receipt.
+- This is read-only navigation. It does not run commands, stage files, commit, push, or alter app data.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this context, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This closes the read-only path from Terminal Lab command observation to Workbench receipt body and Ledger audit trail.
+- Terminal Lab remains proposal-only and teaching-oriented.
+- Ledger remains the audit trail owner. Workbench remains the receipt body owner.
+- Manual push remains visible and separate. No hidden execution path was added.
+
+### Known Risks
+
+- The Ledger focus handoff uses temporary `sessionStorage`, not durable state.
+- If the receipt is outside Ledger's latest 50 Workbench receipt query, the selected id may not be present in the preview list.
+- Browser visual verification still needs the Browser Use plugin when callable.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from Terminal Lab or Ledger.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: visually verify Terminal Lab -> Ledger Trail and Ledger focus receipt behavior when Browser Use is callable; if unavailable, continue by adding read-only receipt status summaries to Terminal Lab's Project Context rail without executing commands. Run app checks, update handoff, archive to Obsidian, commit, and push.
+```
 
 ## 2026-05-09 1153 EDT - Receipt Language Alignment
 
