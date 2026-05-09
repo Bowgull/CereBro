@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 05:36 EDT
+Last updated: 2026-05-09 05:38 EDT
 
 ## Current North Star
 
@@ -20,6 +20,43 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 0538 - Front-End Build Steward: Project Lab Browser Clearance
+
+### What Changed
+
+- Browser-reviewed Project Lab in the in-app browser on `localhost:3002`.
+- Confirmed the card hierarchy and inspector density changes are visible in the
+  running app.
+- Added bottom scroll clearance to the Project Lab card grid so the fixed route
+  composer no longer covers the end of the card surface.
+
+### Files Touched
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- In-app browser reload of `http://localhost:3002/` succeeded.
+
+### Front-End Steward Review
+
+- Project Lab now has visible card and inspector changes, and the route has
+  breathing room above the persistent bottom composer.
+
+### Known Risks
+
+- The project card body is still information-heavy by design.
+- Existing Raven/server edits in the worktree were left untouched.
+
+### Next Front-End Slice
+
+- Continue browser-led tuning on Project Lab row wrapping and the persistent
+  top filter/next-action area.
 
 ## 2026-05-09 0536 - Front-End Build Steward: Project Inspector Density
 

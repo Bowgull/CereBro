@@ -534,7 +534,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             onSelectFilter={setProjectFilter}
           />
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5 p-3">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2.5 px-3 pt-3 pb-20">
             {filteredProjects.map((project, index) => {
               const statusTone = toneForStatus(project.git.statusText, project.localExists);
               const reasons = attentionReasons(project);
