@@ -995,6 +995,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     setFilterProjectId("all");
                   }}
                   aria-label="Reset Workbench receipt filters"
+                  title="Clear receipt filters. This does not delete or change receipts."
                   variant="secondary"
                   size="sm"
                 >
@@ -1057,6 +1058,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           }
                         }}
                         aria-label={`Filter Workbench receipts by ${group.label}`}
+                        title={`Filter local Workbench receipts by ${group.label}. No source fetch or command runs.`}
                         className="h-auto justify-start rounded p-1.5 text-left"
                         variant="secondary"
                       >
@@ -1096,6 +1098,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       type="button"
                       onClick={() => setSelectedEvidenceId(item.id)}
                       aria-label={`Inspect Workbench receipt ${item.id}`}
+                      title={`Open receipt #${item.id} body in Workbench. No external action runs.`}
                       className="h-auto justify-start rounded p-2 text-left"
                       variant="secondary"
                       style={{
@@ -1114,6 +1117,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           {item.mediaKind && <Chip label={item.mediaKind.replace(/_/g, " ")} tone={C.accent} />}
                           {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
                           {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
+                          <Chip label="opens body only" tone={C.textMuted} />
                         </span>
                         <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</span>
                         <span className="mt-1 block max-h-[34px] overflow-hidden text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>{item.summary}</span>

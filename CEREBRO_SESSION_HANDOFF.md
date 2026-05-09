@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:19 EDT
+Last updated: 2026-05-09 13:20 EDT
 
 ## Current North Star
 
@@ -20,6 +20,35 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1320 EDT - Workbench Receipt List Boundary Pass
+
+### What Changed
+- Tightened Workbench receipt list controls so scan-view actions show their boundaries.
+- Reset filters now states it clears filters without changing receipts.
+- Receipt group buttons now state they filter local receipts without fetching sources or running commands.
+- Receipt rows now state they open only the local receipt body and show an `opens body only` marker.
+- Backend semantics unchanged.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` (42 tests passed)
+- `curl -I --max-time 5 http://localhost:3002/` (200 OK)
+
+### Known Risks
+- Browser Use is still not callable in this session, so visual DOM proof remains pending in the open localhost tab.
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+
+### Storage Impact
+- Added a new append-only Obsidian handoff snapshot and index entry.
+
+### Next Session Starter
+Continue as CereBro front-end building agent. Stay on the front-end critical path. Next best slice: move to Terminal Lab teaching-language boundaries or inspect Workbench density visually when Browser Use is callable. Do not create a Code Lab. Terminal Lab remains the build teaching lane.
 
 ## 2026-05-09 1319 EDT - Workbench Receipt Action Label Pass
 
