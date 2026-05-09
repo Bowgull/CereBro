@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 11:31 EDT
+Last updated: 2026-05-09 11:33 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-09 1133 EDT - Terminal Teaching Uses Workbench Proof Status
+
+### What Changed
+
+- Terminal Lab teaching now reads saved Workbench terminal evidence for the selected observation.
+- Aang's Proof and Next Safe Step fields now name the Workbench evidence id and validation status when a saved receipt exists.
+- Observation rows now show a compact Workbench proof line with receipt id and validation status.
+- Missing proof now says a Workbench receipt is still needed instead of treating output alone as enough.
+- No command execution, git execution, external write, durable memory write, backend agent runtime, or new Code Lab surface was added.
+
+### Files Touched
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm check` passed.
+- `pnpm test -- server/cerebro-foundations.test.ts` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Browser plugin inspection was not callable in this tool set, so visual DOM proof is pending in the open localhost tab.
+
+### Front-End Steward Review
+
+- This closes the proof loop back into Aang's teaching layer.
+- Terminal Lab can now distinguish output, proof receipt, and validation status.
+- The flow remains read-only and local.
+- Workbench remains the proof owner; Terminal Lab only reflects its receipt state.
+
+### Known Risks
+
+- Terminal Lab reads the latest 50 terminal-output evidence records. A dedicated lookup endpoint may be cleaner later.
+- Visual browser proof still needs a plugin pass when Browser Use is callable again.
+- Existing Raven/server/docs edits remain unrelated and unstaged.
+
+### Storage Impact
+
+- No schema change.
+- No app data was mutated by the code change.
+- No command, git, browser-source, external model, connector, Notion, Slack, or memory write ran from this flow.
+- Obsidian received a dated handoff snapshot and session-history index entry.
+
+### Next Starter Prompt
+
+```text
+Read CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_PROJECT_INTELLIGENCE_PLAN.md, CEREBRO_SESSION_HANDOFF.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, and CEREBRO_UX_SYSTEM.md. Continue as CereBro's front-end building agent. Stay on the locked path: Keep-first UX spine -> Project Lab as map -> Terminal Lab as Aang's build-teaching lane -> Workbench as visual proof -> Ledger as receipts. Next safe slice: bring Workbench proof counts/status into Project Lab context or Ledger grouping, without adding a new primary surface or executing commands.
+```
 
 ## 2026-05-09 1131 EDT - Exact Workbench Receipt Selection
 

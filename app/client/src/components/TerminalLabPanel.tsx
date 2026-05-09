@@ -95,6 +95,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       .filter((item) => item.commandObservationId != null)
       .map((item) => [item.commandObservationId!, item]),
   );
+  const selectedEvidence = selectedObservation ? evidenceByObservationId.get(selectedObservation.id) ?? null : null;
   const projectRows = projectOverview.data?.projects ?? [];
   const contextPath = selectedObservation?.cwd ?? "/Users/lindsaybell/Desktop/CereBro";
   const contextProject =
@@ -125,16 +126,26 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             ? selectedObservation.outputSummary
             : selectedObservation.explanation ?? "No output has been attached yet. Paste approved command output to turn this into a lesson.",
           proves: selectedObservation.exitCode === 0
-            ? "Exit 0 suggests the command completed, but the output still needs a concrete interpretation."
+            ? selectedEvidence
+              ? `Workbench evidence #${selectedEvidence.id} is saved with ${selectedEvidence.validationStatus.replace(/_/g, " ")} status.`
+              : "Exit 0 suggests the command completed, but the output still needs a concrete Workbench proof receipt."
             : selectedObservation.exitCode != null
-              ? `Exit ${selectedObservation.exitCode} means this needs review before Tony acts on it.`
-              : "No exit code has been recorded yet.",
-          next: selectedObservation.outputSummary
-            ? "Create a learning note or Tony follow-up if this result should shape the next build pass."
-            : "Attach observed output from an approved command run.",
+              ? selectedEvidence
+                ? `Exit ${selectedObservation.exitCode} is linked to Workbench evidence #${selectedEvidence.id}; review the receipt before Tony acts on it.`
+                : `Exit ${selectedObservation.exitCode} means this needs review and a Workbench proof receipt before Tony acts on it.`
+              : selectedEvidence
+                ? `Workbench evidence #${selectedEvidence.id} exists, but no exit code is recorded here.`
+                : "No exit code or Workbench proof receipt has been recorded yet.",
+          next: selectedEvidence
+            ? selectedEvidence.validationStatus === "needs_review"
+              ? "Open the Workbench receipt and add validation before treating this as build proof."
+              : "Use this Workbench receipt as the proof link for the next build decision."
+            : selectedObservation.outputSummary
+              ? "Create Workbench proof, then add a learning note or Tony follow-up if this result should shape the next build pass."
+              : "Attach observed output from an approved command run, then save a Workbench proof receipt.",
           notYet: [
             "Do not rerun from Terminal Lab.",
-            "Do not treat this as proof until output or a check result is attached.",
+            selectedEvidence ? "Do not treat this receipt as validated until its Workbench status says so." : "Do not treat this as proof until a Workbench receipt exists.",
             "Do not push or mutate git from this panel.",
           ],
           tone: toneForRisk(selectedObservation.risk),
@@ -632,6 +643,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       {item.outputSummary && (
                         <div className="text-[11px] leading-snug line-clamp-2" style={{ color: C.textMuted }} title={item.outputSummary}>
                           {item.outputSummary}
+                        </div>
+                      )}
+                      {savedEvidence && (
+                        <div className="text-[10px] leading-snug" style={{ color: savedEvidence.validationStatus === "needs_review" ? C.warning : C.success }}>
+                          Workbench proof #{savedEvidence.id}: {savedEvidence.validationStatus.replace(/_/g, " ")}. Use Open Proof for the exact receipt.
                         </div>
                       )}
                       {item.followUps.length > 0 && (
