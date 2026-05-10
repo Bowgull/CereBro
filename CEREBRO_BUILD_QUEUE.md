@@ -1,0 +1,233 @@
+# CereBro Build Queue
+
+Last updated: 2026-05-10
+
+This file is the lead agent's active queue.
+
+Workers may read this file. Workers do not edit it unless the lead assigns that
+specific job.
+
+## Current Build Mode
+
+Lead plus workers.
+
+Default worker set:
+
+- Frontend worker
+- Backend worker
+- Knowledge worker
+- QA worker when a read-only review is needed
+
+Default block size: 2 to 4 hours.
+
+Default stop point: useful shape, failing check, product gate, context bloat, or
+cross-lane conflict.
+
+## Standing Order
+
+Build in this order:
+
+1. Keep-first UX spine.
+2. Project Lab as map.
+3. Terminal Lab as Aang's build-teaching lane.
+4. Workbench as visual proof.
+5. Ledger as receipts.
+6. Model and Tool Registry as basement capability map.
+7. Backend agent runtime after the visible loop is coherent.
+8. Animation, companion overlay, and walkthrough last.
+
+Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
+
+## Active Stop Rules
+
+Stop and ask when:
+
+- product direction changes
+- a new primary surface is proposed
+- a worker needs to cross lane ownership
+- external credentials, paid services, package installs, clone/build/run of
+  third-party repos, model downloads, or account setup are needed
+- a destructive action, push, deployment, or storage migration is proposed
+- Raven boundaries are involved
+- context bloat makes a summary and clear better than continuing
+
+## Now
+
+### Lead
+
+- Keep worker system controlled by this queue.
+- Integrate worker findings into one next block.
+- Preserve existing unrelated dirty worktree files.
+- Update handoff and Obsidian archive at the end of real build blocks.
+
+### Frontend Worker
+
+Next block:
+
+- Build the Keep-first visible chain:
+  `Ask Aang -> mode read -> Cortana route -> owner -> receipt -> approval -> next action`.
+- Keep Scene and Blueprint as views. Do not replace the Phaser Keep.
+- Make the right rail carry active agent, route, receipt status, permission
+  state, and next action.
+- Keep the route plain: Project Lab -> Terminal Lab -> Workbench -> Ledger.
+- Tighten only the UI that helps the user see what CereBro thinks, who owns the
+  work, what receipt exists, and what needs approval.
+
+Candidate owned files:
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/LedgerPanel.tsx`
+
+Checks:
+
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app check`
+- browser or localhost proof when callable
+
+### Backend Worker
+
+Next block:
+
+- Build local-only Aang to Cortana route receipt support.
+- Start with preview state and receipt fields before mutations.
+- No model call, browser action, command execution, or external write.
+
+Candidate owned files:
+
+- `app/server/runtime/intake.ts`
+- `app/server/runtime/agentRuntime.ts`
+- `app/server/runtime/modelToolResolver.ts`
+- `app/server/runtime/runtimeTypes.ts`
+- `app/server/routers/runtime.ts`
+- `app/server/routers/commandIntake.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/cerebro-foundations.test.ts`
+
+Checks:
+
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app test -- runtime`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts`
+
+### Knowledge Worker
+
+Next block:
+
+- Build the backend-only knowledge contract layer first.
+- Centralize artifact kinds, lifecycle states, retention rules, Obsidian lanes,
+  RAG metadata fields, and project bridge paths.
+- Do not build the vector provider yet.
+- Do not write the real vault, Obsidian, Notion, Slack, or Drive during tests.
+
+Candidate owned files:
+
+- `app/server/knowledge/contracts.ts`
+- `app/server/integrations/vault.ts`
+- `app/server/routers/artifacts.ts`
+- `app/server/cerebro-foundations.test.ts`
+
+Checks:
+
+- `pnpm -C app exec tsc --noEmit --pretty false`
+- `pnpm -C app test -- server/cerebro-foundations.test.ts`
+- `pnpm -C app check`
+
+## Next Blocks
+
+### Block A: Frontend Receipt Loop
+
+Goal:
+
+- The user can see mode read, route, receipt body, validation, output, and next
+  safe action without guessing.
+
+Expected shape:
+
+- Project Lab card says dirty state, branch, push readiness, manual push, and
+  optional auto policy.
+- Terminal Lab explains command observations and suggested next command without
+  executing.
+- Workbench owns the receipt body and visual proof.
+- Ledger owns the audit trail.
+
+### Block B: Backend Receipt Contracts
+
+Goal:
+
+- Backend read models return the fields the frontend needs for the visible loop.
+- `runtime.previewRoute` returns Aang read, confidence, category, project,
+  Cortana route, owner/support agents, permission class, model/tool proposals,
+  approval gates, and next action.
+- `runtime.commitRoute` appends local route records only.
+
+Expected shape:
+
+- no hidden execution
+- no external writes
+- no command run from UI
+- tests cover state names and receipt boundaries
+- risky repo, install, command, browser, package, download, or URL requests route
+  through Spock before Tony can act
+
+### Block C: Storage And Obsidian Setup
+
+Goal:
+
+- CereBro can show where outputs, handoffs, source notes, project bridge notes,
+  GitHub source notes, RAG-ready notes, and archive snapshots belong.
+
+Expected shape:
+
+- vault configured or visibly missing
+- Obsidian archive path visible
+- project bridge expectation visible
+- RAG-ready note fields documented and test-backed when code exists
+- GitHub helper paths match:
+  `10_Projects/<Project>/<Project>.md`,
+  `20_Knowledge/Sources/GitHub/<Project> Repository Source.md`,
+  `00_Atlas/GitHub Project Map.md`, and
+  `20_Knowledge/Sources/GitHub/GitHub Sources.md`
+- archive snapshots stay `archive_only` for normal RAG
+
+### Block D: Model And Tool Registry
+
+Goal:
+
+- Connected tools are readable capability proposals, not product sprawl.
+
+Expected shape:
+
+- Nano Banana-style vision, PixelLab, GitHub, Notion, Browser Use, Hugging Face,
+  and future tools appear as capability records
+- each record shows allowed actions, approval gates, storage impact, and owner
+- no plugin becomes a primary CereBro feature just because it is connected
+
+### Block E: Agent Runtime Skeleton
+
+Goal:
+
+- Aang reads intent. Cortana routes. Agents produce receipts. Spock gates risk.
+
+Expected shape:
+
+- route proposal first
+- approval gate before risky work
+- receipt before summary
+- validation before durable output when needed
+
+## Blocked Or Needs User
+
+- Exact Drive or Obsidian vault root if not configured in env.
+- Slack account/channel setup.
+- Turso cloud setup if local SQLite is no longer enough.
+- Any external service credentials.
+- Any push, deployment, PR, or account setup not already approved in-session.
+
+## Done Today
+
+- Worker system designed as lead plus lane workers.
+- Worker ownership rules added.
+- Active build queue added.
