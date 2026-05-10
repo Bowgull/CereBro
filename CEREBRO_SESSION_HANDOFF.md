@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-09 13:36 EDT
+Last updated: 2026-05-10 0646 EDT
 
 ## Current North Star
 
@@ -20,6 +20,36 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-10 0646 EDT - Foundation Critical Path Reconciliation
+
+### What Changed
+- Reconciled `CEREBRO_SESSION_HANDOFF.md` back to the current committed handoff body after the worktree copy had drifted backward to an older session state.
+- Added a hard current critical path gate to the master build plan so future workers do not treat the full roadmap as equal priority.
+- Updated the active build queue so lead and workers start from the same foundation rule: handoff integrity first, then the visible CereBro loop.
+- Preserved unrelated dirty backend, Raven, reference, and output files.
+
+### Files Touched
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- Pending in this session: `git diff --check`.
+- App checks are not required for documentation-only changes unless a linked app file changes later in the same pass.
+
+### Known Risks
+- Existing unrelated dirty backend/Raven/reference files remain untouched and unstaged.
+- `outputs/` remains untracked and was not inspected or staged.
+- The critical path gate is now documented, but it still needs to be enforced during every worker assignment.
+
+### Storage Impact
+- This pass updates repo planning and handoff docs only.
+- An append-only Obsidian handoff snapshot and session-history index entry should be written after verification.
+- No app data, Notion, Slack, Drive artifacts, source records, memory, browser state, or external service was mutated.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue as CereBro lead build agent. Enforce the current critical path gate: handoff integrity first, then Keep-first visible loop, then Project Lab, Terminal Lab, Workbench, Ledger, knowledge contracts, backend route receipts, and only then broader runtime. Preserve unrelated dirty files.
 
 ## 2026-05-09 1336 EDT - Design Review Boundary Pass
 

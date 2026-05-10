@@ -73,6 +73,32 @@ Current front-end build path:
    visible Project Lab -> Terminal Lab -> Workbench -> Ledger loop is coherent.
    The backend agent should consume the visible receipts, not replace them.
 
+Current critical path gate:
+
+1. **Handoff integrity.** `CEREBRO_SESSION_HANDOFF.md`,
+   `CEREBRO_BUILD_QUEUE.md`, and the Obsidian session archive must agree on the
+   active next slice before a worker starts.
+2. **Keep-first visible loop.** The first screen must show Aang's mode read,
+   Cortana's route, owner agent, receipt state, approval state, and next action.
+3. **Project Lab as the project map.** Project cards must show branch, dirty
+   state, push readiness, risks, manual push, optional auto policy, and next
+   safe action without executing git.
+4. **Terminal Lab as teaching lane.** Terminal Lab explains commands, failures,
+   checks, next safe commands, Tony handoffs, and Spock gates. No separate Code
+   Lab.
+5. **Workbench as receipt body.** Localhost preview, screenshots, annotations,
+   before/after comparisons, and validation bodies live here.
+6. **Ledger as audit trail.** Ledger records route, receipt body links,
+   approvals, commands, artifacts, validation, memory writes, and next actions.
+7. **Knowledge contracts before knowledge automation.** Centralize artifact
+   kinds, lifecycle states, retention rules, Obsidian lanes, RAG metadata, and
+   GitHub/project bridge paths before Source Library or RAG automation expands.
+8. **Backend route receipts before agent execution.** Build local-only Aang to
+   Cortana route receipt support before model calls, browser actions, command
+   execution, or external writes.
+
+Worker rule: if a proposed task does not serve one of the gates above, it waits.
+
 Core defaults:
 
 - Cloud-backed, not cloud-blind.

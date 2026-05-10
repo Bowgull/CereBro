@@ -27,16 +27,20 @@ cross-lane conflict.
 
 Build in this order:
 
-1. Keep-first UX spine.
-2. Project Lab as map.
-3. Terminal Lab as Aang's build-teaching lane.
-4. Workbench as visual proof.
-5. Ledger as receipts.
-6. Model and Tool Registry as basement capability map.
-7. Backend agent runtime after the visible loop is coherent.
-8. Animation, companion overlay, and walkthrough last.
+1. Handoff integrity.
+2. Keep-first visible loop.
+3. Project Lab as map.
+4. Terminal Lab as Aang's build-teaching lane.
+5. Workbench as receipt body and visual proof.
+6. Ledger as receipts and audit trail.
+7. Knowledge contracts before knowledge automation.
+8. Backend route receipts before agent execution.
+9. Model and Tool Registry as basement capability map.
+10. Animation, companion overlay, and walkthrough last.
 
 Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
+
+If a proposed task does not serve this order, it waits.
 
 ## Active Stop Rules
 
@@ -56,6 +60,8 @@ Stop and ask when:
 ### Lead
 
 - Keep worker system controlled by this queue.
+- Keep `CEREBRO_SESSION_HANDOFF.md`, this queue, and the Obsidian session
+  archive aligned before assigning build workers.
 - Integrate worker findings into one next block.
 - Preserve existing unrelated dirty worktree files.
 - Update handoff and Obsidian archive at the end of real build blocks.
