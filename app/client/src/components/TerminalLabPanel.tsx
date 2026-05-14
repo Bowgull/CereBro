@@ -51,7 +51,7 @@ type TerminalProjectContext = {
   };
 };
 
-export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security" | "workbench" | "ledger") => void }) {
+export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "projects" | "security" | "workbench" | "ledger") => void }) {
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -933,6 +933,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               isLoading={projectOverview.isLoading}
               contextLabel={selectedObservation ? `observation #${selectedObservation.id}` : selectedTask ? `task #${selectedTask.id}` : "current repo"}
               receiptStats={contextReceiptStats}
+              onNavigate={onNavigate}
             />
 
             <form onSubmit={submitOutput} className="rounded p-1.5 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1104,11 +1105,13 @@ function ProjectContextRail({
   isLoading,
   contextLabel,
   receiptStats,
+  onNavigate,
 }: {
   project: TerminalProjectContext | null;
   isLoading: boolean;
   contextLabel: string;
   receiptStats: { total: number; terminal: number; needsReview: number; validated: number };
+  onNavigate?: (route: "projects" | "workbench" | "ledger") => void;
 }) {
   if (isLoading) {
     return (
@@ -1138,23 +1141,29 @@ function ProjectContextRail({
       ? C.danger
       : C.success
     : C.warning;
+  const receiptTone = receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
+  const mapRead = [
+    { label: "Branch", value: project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable", tone: project.git.branch ? C.textSecondary : C.warning },
+    { label: "Dirty", value: project.git.dirty ? `${project.git.dirtyCount} local` : "clean", tone: project.git.dirty ? C.danger : C.success },
+    { label: "Push", value: project.pushReadiness.label, tone: pushTone },
+    { label: "Receipts", value: `${receiptStats.total} / ${receiptStats.needsReview} review`, tone: receiptTone },
+    { label: "Manual", value: "proposal only", tone: C.gold },
+    { label: "Executes", value: project.pushReadiness.executesGit ? "yes" : "no", tone: project.pushReadiness.executesGit ? C.danger : C.success },
+  ];
 
   return (
     <section className="rounded p-1.5" aria-label="Project Lab context" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <SectionTitle title="Project Context" detail={contextLabel} />
+      <SectionTitle title="Terminal Map Read" detail={contextLabel} />
       <div className="mt-2 flex flex-wrap gap-1">
         <Chip label={project.name} tone={C.gold} />
         <Chip label={project.localExists ? project.git.statusText : "missing"} tone={statusTone} />
         <Chip label={project.pushReadiness.label} tone={pushTone} />
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-1">
-        <ContextDatum label="Branch" value={project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable"} />
-        <ContextDatum label="Upstream" value={project.pushReadiness.evidence.upstream ?? project.git.upstream ?? "none"} />
-        <ContextDatum label="Dirty" value={`${project.pushReadiness.evidence.dirtyCount} files`} tone={project.git.dirty ? C.danger : C.success} />
-        <ContextDatum label="Approvals" value={`${project.pushReadiness.evidence.pendingApprovals} pending`} tone={project.pushReadiness.evidence.pendingApprovals > 0 ? C.warning : C.success} />
-        <ContextDatum label="Blocked" value={`${project.pushReadiness.evidence.blockedTerminal} terminal`} tone={project.pushReadiness.evidence.blockedTerminal > 0 ? C.danger : C.textSecondary} />
-        <ContextDatum label="Reviewing" value={`${project.pushReadiness.evidence.reviewingTerminal} terminal`} tone={project.pushReadiness.evidence.reviewingTerminal > 0 ? C.warning : C.textSecondary} />
+      <div className="mt-2 grid grid-cols-2 gap-1 md:grid-cols-3">
+        {mapRead.map((item) => (
+          <ContextDatum key={item.label} label={item.label} value={item.value} tone={item.tone} />
+        ))}
       </div>
 
       <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -1175,6 +1184,15 @@ function ProjectContextRail({
       </div>
 
       <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+          Manual Command Boundary
+        </div>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Terminal Lab explains and records. Commands run elsewhere through approval. Project Lab reads state. Workbench stores the body. Ledger audits it.
+        </div>
+      </div>
+
+      <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.success }}>
           Next Safe Action
         </div>
@@ -1187,6 +1205,19 @@ function ProjectContextRail({
         Project Lab read only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
         Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
       </div>
+      {onNavigate && (
+        <div className="mt-2 grid grid-cols-3 gap-1">
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
+            Project
+          </Button>
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench receipt bodies">
+            Workbench
+          </Button>
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger audit trail">
+            Ledger
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

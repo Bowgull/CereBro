@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1610 EDT
+Last updated: 2026-05-14 1614 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1614 EDT - Terminal Map Read Pass
+
+### What Changed
+- Updated Terminal Lab's Project Context rail into a Terminal Map Read that mirrors the Project Lab map shape.
+- The rail now shows branch, dirty state, push readiness, Workbench receipt state, manual command boundary, execution state, and next safe action together.
+- Added Project, Workbench, and Ledger route buttons in Terminal Lab's context rail.
+- Kept Terminal Lab proposal-only. No command execution was added.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. Vitest also ran related server files and reported 42 tests passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Terminal Lab visible-loop rail plus handoff/archive.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- This connects Terminal Lab back to Project Lab, Workbench, and Ledger without adding execution.
+- No new Code Lab was added. Terminal Lab remains Aang's build-teaching lane.
+- No external action, command execution, provider call, browser automation, git action, Notion write, Slack write, or memory write was added.
+
+### Known Risks
+- Visual browser inspection through the in-app browser was not callable in this tool set. Computer Use was blocked from controlling Codex, and Playwright is not installed in the app workspace.
+- The Terminal context rail is denser than before and needs browser QA for wrapping.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and `CEREBRO_BUILD_QUEUE.md` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 30%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 40%.
+- Backend/runtime: 12%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Next visible-loop slice: Workbench as receipt body. Make Workbench first read clearly show source/body, validation, linked project, Ledger audit route, and next safe action without adding external execution.
 
 ## 2026-05-14 1610 EDT - Long Pass Cleanliness Protocol
 
