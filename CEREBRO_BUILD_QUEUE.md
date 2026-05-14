@@ -2,14 +2,14 @@
 
 Last updated: 2026-05-14
 
-This file is the lead agent's active queue.
+This file is CereBro Prime's active queue.
 
 Workers may read this file. Workers do not edit it unless the lead assigns that
 specific job.
 
 ## Current Build Mode
 
-Lead plus workers.
+CereBro Prime plus workers.
 
 Default worker set:
 
@@ -62,21 +62,22 @@ Stop and ask when:
 
 ### 2026-05-14 Active Worker Topology
 
-- Lead/integrator: this chat. Owns merge order, checks, percentages, handoff,
+- Prime/integrator: this chat. Owns merge order, checks, percentages, handoff,
   Obsidian archive, commit, and push.
-- Backend Runtime Worker: owns runtime route receipt contract improvements only.
-- Frontend Worker: owns Runtime Route Receipt to Workbench/Ledger staging only.
-- Knowledge Worker: read-only audit of archive/storage rules for this pass.
+- Backend Worker: owns runtime, permission, receipt, and test contracts.
+- Frontend Worker: owns one visible-loop UI slice with explicit file ownership.
+- Knowledge Planning Worker: read-only docs, storage/source, and Obsidian audit.
+- Knowledge Implementation Worker: assigned docs, storage/source, or Obsidian
+  implementation only after Prime names exact files.
 - QA Worker: waits when thread capacity is full; lead performs minimal local QA.
 
 Current integration order:
 
-1. Backend route receipt draft fields.
-2. Frontend Workbench draft and Ledger focus buttons.
-3. Knowledge/archive audit findings.
-4. Verification, handoff, Obsidian, commit, push.
+1. Worker findings.
+2. Prime-selected implementation slice.
+3. Verification, handoff, Obsidian, commit, push.
 
-### Lead
+### Prime
 
 - Keep worker system controlled by this queue.
 - Keep `CEREBRO_SESSION_HANDOFF.md`, this queue, and the Obsidian session
@@ -92,11 +93,11 @@ Current integration order:
 
 Next block:
 
-- Connect Runtime Route Receipt to Workbench and Ledger without auto-saving.
-- Workbench button stages a local draft in session storage.
-- Ledger button sets a local focus notice in session storage.
-- Keep the route plain: Ask Aang -> Runtime Route Receipt -> Workbench/Ledger.
+- Inspect the current visible loop and recommend one safe UI slice.
+- Favor hidden machinery, compact receipts, obvious next action, and fast AI OS
+  feel.
 - Do not create a new surface.
+- Do not touch backend unless Prime assigns exact files.
 
 Candidate owned files:
 
@@ -116,19 +117,20 @@ Checks:
 
 Next block:
 
-- Improve `runtime.previewRoute` only where needed for Workbench draft and
-  Ledger focus data.
-- Keep route receipts preview-only unless the lead assigns commit/persist later.
+- Inspect current dirty backend/Raven files and report what can safely move into
+  CereBro core without mixing quarantined Raven work.
+- Keep route receipts and approval previews explicit and preview-only unless
+  Prime assigns a mutation.
 - No model call, browser action, command execution, DB write, or external write.
 
-Candidate owned files:
+Candidate owned files when assigned:
 
-- `app/server/runtime/intake.ts`
-- `app/server/runtime/agentRuntime.ts`
-- `app/server/runtime/modelToolResolver.ts`
-- `app/server/runtime/runtimeTypes.ts`
 - `app/server/routers/runtime.ts`
+- `app/server/routers/modelTools.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/permissionPolicy.ts`
 - `app/server/runtime.routeReceipt.test.ts`
+- `app/server/modelTools.localFirst.test.ts`
 
 Checks:
 
@@ -136,28 +138,37 @@ Checks:
 - `pnpm -C app test -- runtime`
 - `pnpm -C app test -- server/cerebro-foundations.test.ts`
 
-### Knowledge Worker
+### Knowledge Planning Worker
 
 Next block:
 
-- Build the backend-only knowledge contract layer first.
-- Centralize artifact kinds, lifecycle states, retention rules, Obsidian lanes,
-  RAG metadata fields, and project bridge paths.
+- Keep the master plan, build queue, worker orchestration, handoff, and Obsidian
+  archive aligned with the actual build.
+- Recommend planning corrections before broad implementation.
+- Keep archive snapshots append-only.
 - Do not build the vector provider yet.
-- Do not write the real vault, Obsidian, Notion, Slack, or Drive during tests.
+- Do not write Notion, Slack, Drive, or external project repos without approval.
+
+### Knowledge Implementation Worker
+
+Next block:
+
+- Wait until Prime assigns exact docs, storage contracts, or Obsidian files.
+- Do not run as the default knowledge lane.
+- Do not update handoff snapshots or the session archive unless Prime explicitly
+  assigns that closeout task.
 
 Candidate owned files:
 
-- `app/server/knowledge/contracts.ts`
-- `app/server/integrations/vault.ts`
-- `app/server/routers/artifacts.ts`
-- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_WORKER_ORCHESTRATION.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session archive snapshots and index
 
 Checks:
 
-- `pnpm -C app exec tsc --noEmit --pretty false`
-- `pnpm -C app test -- server/cerebro-foundations.test.ts`
-- `pnpm -C app check`
+- Markdown consistency read
+- Handoff snapshot and index append
 
 ## Next Blocks
 

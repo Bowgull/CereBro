@@ -380,6 +380,16 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Receipts", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
     { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
+  const receiptChainStats = evidenceRows.reduce(
+    (stats, item) => {
+      stats.total += 1;
+      if (item.kind === "terminal_output") stats.terminal += 1;
+      if (item.validationStatus === "needs_review") stats.needsReview += 1;
+      if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") stats.validated += 1;
+      return stats;
+    },
+    { total: 0, terminal: 0, needsReview: 0, validated: 0 },
+  );
 
   useEffect(() => {
     if (projects.length === 0) return;
@@ -490,6 +500,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </Button>
           </div>
         )}
+        <ProjectReceiptChainStrip
+          stats={receiptChainStats}
+          projectCount={projects.length}
+          topProjectName={topProject?.name ?? null}
+          topPushLabel={topProject?.pushReadiness.label ?? null}
+        />
         {nextSafeProjects.length > 0 && (
           <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-1.5">
             <div className="text-[10px] uppercase tracking-wider pt-1" style={{ color: C.textMuted }}>
@@ -727,8 +743,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           variant={autoPushArmed ? "risk" : "outline"}
                           size="sm"
                           aria-pressed={autoPushArmed}
-                          aria-label={`${autoPushArmed ? "Disable" : "Enable"} automatic push recommendation for ${project.name}`}
-                          title={autoPushArmed ? "Automatic recommendation is selected. Manual push remains visible and approval-gated." : "Manual push remains visible. No automation is selected."}
+                          aria-label={`${autoPushArmed ? "Disable" : "Enable"} assisted push recommendation for ${project.name}`}
+                          title={autoPushArmed ? "Assisted recommendation is selected. Manual push remains visible and approval-gated." : "Manual push remains visible. Assisted recommendation is off."}
                           onClick={() => {
                             setAutoPushSlugs((current) => {
                               const next = new Set(current);
@@ -739,7 +755,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             setPushReceiptSlug(project.slug);
                           }}
                         >
-                          {autoPushArmed ? "Policy: propose auto" : "Policy: manual"}
+                          {autoPushArmed ? "Policy: assisted" : "Policy: manual"}
                         </Button>
                         <Button
                           type="button"
@@ -754,7 +770,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       </div>
                     </div>
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                      {autoPushArmed ? "Automation is selected as a recommendation. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
+                      {autoPushArmed ? "Assisted recommendation is selected. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
                     </div>
                     <PushModeStrip autoSelected={autoPushArmed} />
                     <ManualPushLine commands={pushReadiness.manualCommands} />
@@ -1774,7 +1790,7 @@ function ProjectMapRead({
     { label: "Risk", value: riskFlags[0] ?? "none flagged", tone: riskTone },
     { label: "Receipt", value: `${receiptStats.total} Workbench / ${receiptStats.needsReview} review`, tone: receiptTone },
     { label: "Manual", value: "visible, gated", tone: C.gold },
-    { label: "Auto", value: autoSelected ? "recommendation selected" : "off", tone: autoSelected ? C.warning : C.textMuted },
+    { label: "Assist", value: autoSelected ? "recommendation selected" : "off", tone: autoSelected ? C.warning : C.textMuted },
   ];
 
   return (
@@ -1873,6 +1889,57 @@ function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number;
   );
 }
 
+function ProjectReceiptChainStrip({
+  stats,
+  projectCount,
+  topProjectName,
+  topPushLabel,
+}: {
+  stats: { total: number; terminal: number; needsReview: number; validated: number };
+  projectCount: number;
+  topProjectName: string | null;
+  topPushLabel: string | null;
+}) {
+  const receiptTone = stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
+  const steps = [
+    {
+      label: "Terminal proof",
+      value: stats.terminal > 0 ? `${stats.terminal} command receipt${stats.terminal === 1 ? "" : "s"}` : "no command receipts",
+      tone: stats.terminal > 0 ? C.gold : C.textMuted,
+    },
+    {
+      label: "Workbench body",
+      value: `${stats.total} receipts / ${stats.needsReview} review`,
+      tone: receiptTone,
+    },
+    {
+      label: "Project context",
+      value: topProjectName == null ? `${projectCount} projects read` : `${topProjectName}: ${topPushLabel ?? "push context"}`,
+      tone: topProjectName == null ? C.textMuted : C.accent,
+    },
+  ];
+
+  return (
+    <section className="rounded p-1.5" aria-label="Project Lab receipt chain" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="grid gap-1 md:grid-cols-3">
+        {steps.map((step) => (
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
+              {step.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={step.value} style={{ color: C.textSecondary }}>
+              {step.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Project Lab reads context only. Workbench has the body. Terminal has the command observation.
+      </div>
+    </section>
+  );
+}
+
 function PushModeStrip({ autoSelected }: { autoSelected: boolean }) {
   return (
     <div className="mt-1 grid gap-1 sm:grid-cols-2" aria-label="Project push mode boundaries">
@@ -1892,14 +1959,14 @@ function PushModeStrip({ autoSelected }: { autoSelected: boolean }) {
       <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${autoSelected ? C.warning : C.borderSoft}` }}>
         <div className="flex flex-wrap items-center gap-1">
           <Badge variant={autoSelected ? "warning" : "secondary"} className="uppercase">
-            <span className="min-w-0 truncate">{autoSelected ? "propose auto" : "manual policy"}</span>
+            <span className="min-w-0 truncate">{autoSelected ? "assisted" : "manual policy"}</span>
           </Badge>
           <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: autoSelected ? C.warning : C.textMuted }}>
             recommendation only
           </span>
         </div>
         <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-          Auto can propose timing. Approval still decides execution.
+          Assisted timing is a read. Approval still decides execution.
         </div>
       </div>
     </div>

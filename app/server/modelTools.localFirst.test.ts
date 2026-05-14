@@ -89,5 +89,17 @@ describe("Model Tools local-first routing policy", () => {
     expect(result.approval?.targetType).toBe("model_tool_ollama_status_check");
     expect(result.approval?.contextSummary).toContain("Allowed commands: command -v ollama, ollama --version, ollama list");
     expect(result.gates.join(" ")).toContain("No command was executed.");
+
+    const previews = await caller.modelTools.ollamaStatusApprovalPreviews({ limit: 10 });
+    expect(previews.mode).toBe("read_only");
+    expect(previews.executesCommands).toBe(false);
+    expect(previews.installsDependencies).toBe(false);
+    expect(previews.pullsModels).toBe(false);
+    expect(previews.callsLocalModels).toBe(false);
+    expect(previews.items.map((item) => item.id)).toContain(result.approval?.id);
+    const preview = previews.items.find((item) => item.id === result.approval?.id);
+    expect(preview?.status).toBe("pending");
+    expect(preview?.costRisk).toBe("local_read_only_command_review");
+    expect(preview?.permissionPreflightId).toBe(result.approval?.permissionPreflightId);
   });
 });

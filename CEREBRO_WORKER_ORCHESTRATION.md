@@ -37,10 +37,11 @@ slices. The lead keeps the total build path coherent.
 This is the approved build method until the user changes it.
 
 ```text
-This chat = Lead / Frontend Integrator
+This chat = CereBro Prime / Lead Integrator
 Backend Runtime Worker = route, permission, receipt, and test contracts
 Frontend Worker = one visible-loop UI slice with explicit file ownership
-Knowledge Worker = read-only or assigned storage/source/Obsidian slice
+Knowledge Planning Worker = read-only storage/source/Obsidian/doc audit
+Knowledge Implementation Worker = assigned storage/source/Obsidian/doc slice
 QA Worker = read-only review when thread capacity allows
 ```
 
@@ -55,7 +56,7 @@ Do not exceed 3 active workers unless the user explicitly asks and the thread
 limit allows it. If the fourth worker cannot be spawned, QA waits and the lead
 does a minimal local verification pass.
 
-The lead integrates in this order:
+Prime integrates in this order:
 
 1. Backend contract.
 2. Frontend surface.
@@ -63,7 +64,13 @@ The lead integrates in this order:
 4. QA findings.
 5. Checks, handoff, Obsidian, commit, push.
 
-Workers do not update percentages. The lead updates percentages once per pass.
+Workers do not update percentages. Prime updates percentages once per pass.
+
+Prime is allowed to implement small integration slices directly when a worker
+would create more coordination overhead than value. Use workers for broad
+audits, independent surfaces, backend/frontend/doc splits, and review passes.
+Do not use workers for every small UI string, one-file bridge, or test-only
+contract.
 
 ## Long Pass Protocol
 
@@ -115,7 +122,7 @@ Rules:
 
 ## Lead Contract
 
-The lead agent must:
+Prime must:
 
 - read `AGENTS.md`, `DESIGN.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
   `CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_FRONTEND_SYSTEM.md`, and
@@ -131,7 +138,7 @@ The lead agent must:
 - write the dated Obsidian archive snapshot and append the index entry
 - commit and push only when the block has useful shape
 
-The lead is the only agent that stages, commits, pushes, or updates the final
+Prime is the only agent that stages, commits, pushes, or updates the final
 session archive unless the user explicitly changes that rule.
 
 ## Worker Contract
@@ -234,9 +241,25 @@ Rules:
 - Raven remains sealed. Do not mix Raven data into CereBro memory, UI, Obsidian,
   Notion, Slack, or source library.
 
-### Knowledge Worker
+### Knowledge Planning Worker
 
-Owns storage, source, archive, Obsidian, Notion, Drive vault, and RAG readiness.
+Owns read-only storage, source, archive, Obsidian, Notion, Drive vault, and RAG
+readiness analysis.
+
+Outputs:
+
+- planning corrections
+- storage/source risk notes
+- archive and append-only checks
+- exact docs or code files Prime should assign next
+
+Does not edit files unless Prime reassigns the lane as Knowledge
+Implementation.
+
+### Knowledge Implementation Worker
+
+Owns assigned storage, source, archive, Obsidian, Notion, Drive vault, and RAG
+readiness implementation.
 
 Primary files:
 
@@ -266,6 +289,8 @@ Rules:
 - Archive snapshots do not enter normal RAG.
 - Every durable note needs provenance, status, privacy class, and retrieval
   status when it becomes RAG-ready.
+- Prime must name whether the active knowledge lane is Planning or
+  Implementation before the worker starts.
 
 ### QA Worker
 
@@ -378,10 +403,22 @@ Rules:
 Return changed files, checks run, risks, and exact next step.
 ```
 
-### Knowledge Worker Prompt
+### Knowledge Planning Worker Prompt
 
 ```text
-You are a CereBro Knowledge Worker. Read AGENTS.md,
+You are a CereBro Knowledge Planning Worker. Read AGENTS.md,
+CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_FILE_LIFECYCLE_PLAN.md,
+CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md, and
+CEREBRO_SESSION_HANDOFF.md.
+
+Do not edit files. Return planning corrections, storage/source risks, and exact
+files Prime should assign next.
+```
+
+### Knowledge Implementation Worker Prompt
+
+```text
+You are a CereBro Knowledge Implementation Worker. Read AGENTS.md,
 CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_FILE_LIFECYCLE_PLAN.md,
 CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md, and
 CEREBRO_SESSION_HANDOFF.md.
@@ -389,7 +426,7 @@ CEREBRO_SESSION_HANDOFF.md.
 You are not alone in the codebase. Do not revert edits made by others.
 Work only inside the assigned docs, storage, or vault files. Do not stage,
 commit, push, or update the session handoff unless explicitly assigned by the
-lead.
+Prime.
 
 Assigned slice:
 [slice]

@@ -495,6 +495,13 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       </form>
 
       <AangTeachingFrame frame={teachingFrame} />
+      <TerminalReceiptChainStrip
+        observationId={selectedObservation?.id ?? preview.data?.observationId ?? null}
+        receiptId={selectedEvidence?.id ?? null}
+        receiptStatus={selectedEvidence?.validationStatus ?? null}
+        projectName={contextProject?.name ?? null}
+        pushLabel={contextProject?.pushReadiness.label ?? null}
+      />
 
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-2 px-2 pt-2 pb-16">
@@ -1095,6 +1102,59 @@ function AangTeachingFrame({
             ))}
           </ul>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function TerminalReceiptChainStrip({
+  observationId,
+  receiptId,
+  receiptStatus,
+  projectName,
+  pushLabel,
+}: {
+  observationId: number | null;
+  receiptId: number | null;
+  receiptStatus: string | null;
+  projectName: string | null;
+  pushLabel: string | null;
+}) {
+  const receiptTone = receiptId == null ? C.warning : receiptStatus === "needs_review" ? C.warning : C.success;
+  const steps = [
+    {
+      label: "Terminal explains",
+      value: observationId == null ? "no observation selected" : `observation #${observationId}`,
+      tone: observationId == null ? C.textMuted : C.gold,
+    },
+    {
+      label: "Workbench body",
+      value: receiptId == null ? "receipt not saved" : `receipt #${receiptId} ${receiptStatus?.replace(/_/g, " ") ?? "recorded"}`,
+      tone: receiptTone,
+    },
+    {
+      label: "Project read",
+      value: projectName == null ? "no project match" : `${projectName}: ${pushLabel ?? "push context reading"}`,
+      tone: projectName == null ? C.textMuted : C.accent,
+    },
+  ];
+
+  return (
+    <section className="shrink-0 px-2 py-1.5" aria-label="Terminal to Workbench receipt chain" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <div className="grid gap-1 md:grid-cols-3">
+        {steps.map((step) => (
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
+              {step.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={step.value} style={{ color: C.textSecondary }}>
+              {step.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Proof path: explain here. Save the body in Workbench. Read project context before any git decision.
       </div>
     </section>
   );

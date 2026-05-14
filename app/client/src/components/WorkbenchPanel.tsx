@@ -120,6 +120,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
   const [stagedDraftNotice, setStagedDraftNotice] = useState<string | null>(null);
+  const [stagedDraftChain, setStagedDraftChain] = useState<WorkbenchDraft | null>(null);
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
@@ -257,6 +258,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setCommandObservationId(draft.commandObservationId == null ? "none" : draft.commandObservationId);
       setFilterKind(draft.kind === "terminal_output" ? "terminal_output" : "all");
       setGroupBy(draft.commandObservationId == null ? "project" : "command");
+      setStagedDraftChain(draft);
       setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench receipt draft. Review it, then save a local receipt." : "Workbench receipt draft staged. Review it, then save a local receipt.");
     } catch {
       setStagedDraftNotice("Workbench draft could not be read. Add the receipt manually.");
@@ -496,6 +498,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 {data.summary}
               </p>
             </section>
+
+            <WorkbenchReceiptChainStrip
+              draft={stagedDraftChain}
+              selectedEvidenceId={selectedEvidenceId}
+              selectedEvidence={evidenceDetail.data?.found ? evidenceDetail.data.evidence : null}
+              projectLabel={
+                projectId !== "none"
+                  ? projectOptions.find((project) => project.tasks.projectId === projectId)?.name ?? "linked project"
+                  : null
+              }
+            />
 
             <section className="rounded p-2" aria-label="Project receipt grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
@@ -1184,6 +1197,70 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
         )}
       </main>
     </div>
+  );
+}
+
+function WorkbenchReceiptChainStrip({
+  draft,
+  selectedEvidenceId,
+  selectedEvidence,
+  projectLabel,
+}: {
+  draft: WorkbenchDraft | null;
+  selectedEvidenceId: number | null;
+  selectedEvidence: {
+    id: number;
+    title: string;
+    projectName: string | null;
+    commandObservationId: number | null;
+    validationStatus: string;
+  } | null;
+  projectLabel: string | null;
+}) {
+  const commandObservationId = selectedEvidence?.commandObservationId ?? draft?.commandObservationId ?? null;
+  const evidenceId = selectedEvidence?.id ?? selectedEvidenceId;
+  const linkedProject = selectedEvidence?.projectName ?? projectLabel ?? (draft?.projectId == null ? null : "linked project");
+  const validationStatus = selectedEvidence?.validationStatus ?? null;
+  const steps = [
+    {
+      label: "Terminal explains",
+      value: commandObservationId == null ? "no command link" : `observation #${commandObservationId}`,
+      tone: commandObservationId == null ? C.textMuted : C.gold,
+    },
+    {
+      label: "Workbench stores",
+      value: evidenceId == null
+        ? draft
+          ? "draft body staged"
+          : "select or save a receipt"
+        : `receipt #${evidenceId} ${validationStatus?.replace(/_/g, " ") ?? "open"}`,
+      tone: evidenceId == null ? draft ? C.warning : C.textMuted : validationStatus === "needs_review" ? C.warning : C.success,
+    },
+    {
+      label: "Project Lab reads",
+      value: linkedProject ?? "project not linked",
+      tone: linkedProject ? C.accent : C.warning,
+    },
+  ];
+
+  return (
+    <section className="rounded p-1.5" aria-label="Workbench receipt chain" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="grid gap-1 md:grid-cols-3">
+        {steps.map((step) => (
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
+              {step.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={step.value} style={{ color: C.textSecondary }}>
+              {step.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Body lives here. Ledger audits it. Project Lab reads the linked project and push context.
+      </div>
+    </section>
   );
 }
 

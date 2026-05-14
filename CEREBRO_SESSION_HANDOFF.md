@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1920 EDT
+Last updated: 2026-05-14 1932 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1932 EDT - Prime Worker Operating Model Pass
+
+### What Changed
+- Switched this chat into CereBro Prime mode in practice: Prime owns priority, integration, checks, percentages, handoff, Obsidian archive, commit, and push.
+- Dispatched three read-only workers:
+  - Frontend Worker recommended the Terminal to Workbench proof path as the best next visible-loop slice.
+  - Backend Worker confirmed the Model Tools approval origin filter is blocked until dirty Raven approval-router work is resolved.
+  - Knowledge Worker confirmed Prime plus lane workers is the durable build model and recommended splitting Knowledge Planning from Knowledge Implementation.
+- Dispatched one bounded Frontend Coding Worker for the Terminal to Workbench proof path.
+- Added compact receipt-chain strips to Terminal Lab, Workbench, and Project Lab.
+- Terminal now shows observation -> Workbench body -> project push read.
+- Workbench now shows command link -> staged/saved receipt body -> linked project.
+- Project Lab now shows terminal receipt count -> Workbench receipt state -> project context.
+- Changed project push copy from auto-push language to assisted recommendation language.
+- Updated worker orchestration docs so this chat is CereBro Prime and Knowledge is split into Planning vs Implementation.
+- Added the Prime plus workers rule to the master build plan.
+- Hardened the Model Tools local-first test so `ollamaStatusApprovalPreviews` proves read-only/no-command/no-install/no-pull behavior.
+
+### Files Touched
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_WORKER_ORCHESTRATION.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Frontend Coding Worker ran `pnpm -C app exec tsc --noEmit --pretty false`.
+- Prime ran `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`. 3 files. 7 tests passed.
+- Prime ran `pnpm -C app check`. Passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_MASTER_BUILD_PLAN.md CEREBRO_WORKER_ORCHESTRATION.md CEREBRO_BUILD_QUEUE.md app/server/modelTools.localFirst.test.ts app/client/src/components/TerminalLabPanel.tsx app/client/src/components/WorkbenchPanel.tsx app/client/src/components/ProjectLabPanel.tsx` passed.
+- Visual browser inspection was attempted, but the available desktop automation tool cannot inspect the Codex app window in this session.
+
+### Cleanliness Read
+- Current slice: Prime worker operating model, Model Tools test hardening, and Terminal -> Workbench -> Project Lab proof path.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven/backend track.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: Model Tools approval origin filter remains deferred because `app/server/routers/approvals.ts` already contains unstaged Raven approval-router changes.
+- No Ollama status command, install, pull, model call, vector index, external escalation, browser action, command execution, approval action, git execution from UI, or storage migration ran.
+
+### Front-End Steward Review
+- This is the right method now: Prime integrates, workers inspect/build bounded lanes, and only Prime ships.
+- The visible loop is stronger: Terminal explains, Workbench holds proof, Project Lab reads project context.
+- The machine stays hidden until needed. The receipt chain is visible without adding a new surface.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 61%.
+- Backend/runtime: 29%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in CereBro Prime mode. Start by classifying dirty files. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: visually inspect the Terminal -> Workbench -> Project Lab receipt chain in localhost if browser tooling is callable, then either tighten the Approval Queue receipt chain frontend-only or wait until the Raven approval-router batch is resolved before adding a Model Tools approval origin. Do not run Ollama status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 1920 EDT - Model Tools Approval Queue Bridge Pass
 

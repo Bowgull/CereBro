@@ -37,6 +37,12 @@ Current build instruction:
   Workshop, agent, memory, permission, and receipt model.
 - Build autonomy in stages. First make the work visible and recoverable. Then
   move repeated, proven steps into CereBro itself.
+- Build sessions use the CereBro Prime model. This chat acts as Prime:
+  product architect, integrator, checker, archivist, and commit owner. Workers
+  handle bounded frontend, backend, knowledge, or QA lanes with explicit file
+  ownership. Prime decides what ships, updates percentages once per pass, and
+  keeps Raven quarantined unless a scrubbed bridge contract is explicitly
+  assigned.
 - Tony should read this plan before continuing build passes.
 
 Current build-session plugin rule:
