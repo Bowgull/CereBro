@@ -290,6 +290,26 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>Install Status Check</div>
+                  <div className="mt-1" style={{ color: C.textSecondary }}>{policyData.ollamaSetupPlan.installStatusCheck.approvalGate}</div>
+                </div>
+                <Badge label={labelize(policyData.ollamaSetupPlan.installStatusCheck.status)} tone={C.warning} />
+              </div>
+              <div className="mt-2 grid gap-1.5 md:grid-cols-3">
+                <StatusList title="Allowed" items={policyData.ollamaSetupPlan.installStatusCheck.allowedCommands} tone={C.success} />
+                <StatusList title="Forbidden" items={policyData.ollamaSetupPlan.installStatusCheck.forbiddenCommands} tone={C.danger} />
+                <StatusList title="Receipt" items={policyData.ollamaSetupPlan.installStatusCheck.receiptFields} tone={C.accent} />
+              </div>
+              <div className="mt-2 grid gap-1.5 md:grid-cols-2">
+                <Field label="If missing" value={policyData.ollamaSetupPlan.installStatusCheck.nextStateIfMissing} />
+                <Field label="If present" value={policyData.ollamaSetupPlan.installStatusCheck.nextStateIfPresent} />
+              </div>
+              <div className="mt-2" style={{ color: C.textMuted }}>{policyData.ollamaSetupPlan.installStatusCheck.noActionTaken}</div>
+            </div>
+
             <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
               <ModelBatch title="First Approval Batch" items={policyData.ollamaSetupPlan.firstApprovalBatch} />
               <ModelBatch title="Stretch Candidates" items={policyData.ollamaSetupPlan.stretchCandidates} />
@@ -576,6 +596,21 @@ function ModelBatch({
               <Field label="Use" value={item.use} />
               <Field label="Avoid" value={item.avoid} />
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StatusList({ title, items, tone }: { title: string; items: readonly string[]; tone: string }) {
+  return (
+    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
+      <div className="mt-1 grid gap-1">
+        {items.map((item) => (
+          <div key={item} className="break-words text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+            {item}
           </div>
         ))}
       </div>

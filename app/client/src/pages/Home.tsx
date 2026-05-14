@@ -1413,6 +1413,33 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               ))}
             </div>
 
+            <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+                    Install Status Check
+                  </div>
+                  <Badge variant="warning" className="px-1.5 py-0.5" style={{ color: C.warning, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    {ollamaSetup.installStatusCheck.status.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+                <div className="mt-1" style={{ color: C.textSecondary }}>{ollamaSetup.installStatusCheck.approvalGate}</div>
+                <div className="mt-1" style={{ color: C.textMuted }}>{ollamaSetup.installStatusCheck.noActionTaken}</div>
+              </div>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="font-semibold uppercase tracking-wider" style={{ color: C.accent }}>
+                  Receipt Fields
+                </div>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {ollamaSetup.installStatusCheck.receiptFields.map((field) => (
+                    <Badge key={field} variant="secondary" className="px-1.5 py-0.5" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      {field.replace(/_/g, " ")}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="mt-2 flex flex-wrap gap-1">
               {ollamaSetup.firstApprovalBatch.map((item) => (
                 <Badge key={item.model} variant="secondary" className="px-1.5 py-0.5" style={{ color: C.accent, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>

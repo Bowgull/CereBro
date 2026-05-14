@@ -63,5 +63,14 @@ describe("Model Tools local-first routing policy", () => {
       "Run Local Eval",
     ]);
     expect(policy.ollamaSetupPlan.nextApprovalSteps.every((item) => item.runsFromPolicy === false)).toBe(true);
+    expect(policy.ollamaSetupPlan.installStatusCheck.status).toBe("not_run");
+    expect(policy.ollamaSetupPlan.installStatusCheck.allowedCommands).toEqual([
+      "command -v ollama",
+      "ollama --version",
+      "ollama list",
+    ]);
+    expect(policy.ollamaSetupPlan.installStatusCheck.forbiddenCommands).toContain("ollama pull");
+    expect(policy.ollamaSetupPlan.installStatusCheck.receiptFields).toContain("no_install_or_pull_confirmation");
+    expect(policy.ollamaSetupPlan.installStatusCheck.noActionTaken).toContain("No status command has run");
   });
 });

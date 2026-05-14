@@ -291,3 +291,6 @@ Expected shape:
   no-action receipt. No install or model pull runs from the panel.
 - Basement Overview now shows the Ollama setup receipt directly: status, next
   approval steps, first-batch model chips, and a link into Model Details.
+- Model Tools and Basement Overview now expose the Ollama install-status check
+  draft: allowed read-only commands, forbidden install/pull/run actions, receipt
+  fields, and no-action status.
