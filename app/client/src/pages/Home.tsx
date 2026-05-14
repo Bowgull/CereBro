@@ -168,7 +168,7 @@ export default function Home() {
   const [askInput, setAskInput] = useState("");
   const [showSkillsManager, setShowSkillsManager] = useState(false);
   const [showLog, setShowLog] = useState(false);
-  const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
+  const [isContextPanelOpen, setIsContextPanelOpen] = useState(true);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
 
@@ -490,9 +490,11 @@ export default function Home() {
             <ContextPanel
               agent={activeAgent}
               mode={mode}
+              nav={nav}
               heroes={heroes}
               selectedHeroId={selectedHeroId}
               onSelectHero={setSelectedHeroId}
+              onNavigate={setNav}
               connMode={connMode}
             />
           </aside>
@@ -1426,8 +1428,8 @@ function IntakePreview({
       >
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <PreviewChip label={result.mode.replace(/_/g, " ")} tone={C.textSecondary} />
-            <PreviewChip label={result.category.replace(/_/g, " ")} tone={C.accent} />
+            <PreviewChip label={`Aang read: ${result.mode.replace(/_/g, " ")}`} tone={C.gold} />
+            <PreviewChip label={`Mode: ${result.category.replace(/_/g, " ")}`} tone={C.accent} />
             {result.project && <PreviewChip label={result.project.label} tone={C.gold} />}
             {result.projectMode && <PreviewChip label={result.projectMode} tone={C.success} />}
           </div>
@@ -1438,6 +1440,12 @@ function IntakePreview({
             {result.routeChain.map((step, index) => (
               <PreviewChip key={`${step}-${index}`} label={`${index + 1}. ${step}`} tone={index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary} />
             ))}
+          </div>
+          <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-4" aria-label="Route receipt summary">
+            <PreviewField label="Cortana Route" value={result.routeChain[1] ?? "route preview"} tone={C.accentViolet} />
+            <PreviewField label="Owner" value={result.taskDraft.agent} tone={C.accent} />
+            <PreviewField label="Receipt" value="Workbench body. Ledger audit." tone={C.gold} />
+            <PreviewField label="Approval" value={result.permissionGates[0] ?? "No gate listed"} tone={C.warning} />
           </div>
           {result.promptHandoffSuggestions.length > 0 && (
             <div className="mt-2 space-y-1">
@@ -1470,7 +1478,15 @@ function IntakePreview({
 
         <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-            Agents
+            Owner And Support
+          </div>
+          <div className="rounded px-2 py-1.5 mb-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.accent }}>
+              Owner
+            </div>
+            <div className="text-[12px] font-semibold mt-0.5" style={{ color: C.textPrimary }}>
+              {result.taskDraft.agent}
+            </div>
           </div>
           <div className="flex flex-wrap gap-1">
             {result.agents.map((agent) => (
@@ -1504,10 +1520,10 @@ function IntakePreview({
         <div className="flex items-start justify-between gap-2">
           <div className="hidden xl:block max-w-sm">
             <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-              Gates
+              Next Action
             </div>
             <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-              {result.permissionGates[0]}
+              {result.nextStep}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -1581,17 +1597,37 @@ function PreviewChip({ label, tone }: { label: string; tone: string }) {
   );
 }
 
+function PreviewField({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="min-w-0 rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-wider" style={{ color: tone }}>
+        {label}
+      </div>
+      <div className="truncate text-[11px] mt-0.5" style={{ color: C.textSecondary }} title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
 // ── Right context panel ─────────────────────────────────────────────────────
 function ContextPanel({
-  agent, mode, heroes, selectedHeroId, onSelectHero, connMode,
+  agent, mode, nav, heroes, selectedHeroId, onSelectHero, onNavigate, connMode,
 }: {
   agent: { id: string; name: string; chamber: string; role: string; floor: string; defaultModelClass: string; escalationModelClass?: string; skills: string[]; toolScope: string[] } | undefined;
   mode: Mode;
+  nav: NavId;
   heroes: Array<{ id: number; name: string; level: number; state: string; heroClass: string }>;
   selectedHeroId: number | null;
   onSelectHero: (id: number | null) => void;
+  onNavigate: (id: NavId) => void;
   connMode: "demo" | "live";
 }) {
+  const route = MODE_ROUTES[mode];
+  const owner = route[2] ?? "Cortana";
+  const activeSurface = activeSurfaceLabel(nav);
+  const nextAction = nextActionForSurface(nav, heroes.length, mode);
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Active Agent */}
@@ -1629,8 +1665,8 @@ function ContextPanel({
       <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Mode</div>
-            <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{mode.toUpperCase()}</div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Aang Read</div>
+            <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{MODE_LABELS[mode]}</div>
           </div>
           <div>
             <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Model</div>
@@ -1639,6 +1675,22 @@ function ContextPanel({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Visible Chain
+          </div>
+          <Badge variant="violet" className="px-1.5 py-0.5" style={{ background: C.surfaceMuted, color: C.accentViolet, border: `1px solid ${C.borderSoft}` }}>
+            {activeSurface}
+          </Badge>
+        </div>
+        <RailRow label="Aang" value={`Reads ${MODE_LABELS[mode]} mode`} tone={C.gold} />
+        <RailRow label="Cortana" value={`Routes ${owner}`} tone={C.accentViolet} />
+        <RailRow label="Owner" value={owner} tone={C.accent} />
+        <RailRow label="Receipt" value="Workbench body. Ledger audit." tone={C.gold} />
+        <RailRow label="Approval" value="Spock gates external or risky action." tone={C.warning} />
       </div>
 
       {/* Tool Permissions */}
@@ -1747,14 +1799,65 @@ function ContextPanel({
       {/* Next Actions */}
       <div className="px-2.5 py-1.5 shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Next Actions
+          Next Action
         </div>
-        <div className="text-xs" style={{ color: C.textMuted }}>
-          Wired in Phase 6.
+        <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+          {nextAction}
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-1">
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
+            Project
+          </Button>
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench receipt body">
+            Workbench
+          </Button>
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger audit trail">
+            Ledger
+          </Button>
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("approvals")} aria-label="Open approval gates">
+            Gates
+          </Button>
         </div>
       </div>
     </div>
   );
+}
+
+function RailRow({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded px-2 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-wider" style={{ color: tone }}>
+        {label}
+      </div>
+      <div className="min-w-0 truncate text-[11px]" style={{ color: C.textSecondary }} title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function activeSurfaceLabel(nav: NavId) {
+  for (const surfaces of Object.values(ZONE_SURFACES)) {
+    const found = surfaces.find((surface) => surface.id === nav);
+    if (found) return found.label;
+  }
+  return "Keep";
+}
+
+function nextActionForSurface(nav: NavId, activeSessionCount: number, mode: Mode) {
+  if (nav === "home") {
+    return activeSessionCount > 0
+      ? "Open Project Lab to inspect active work and push readiness."
+      : "Ask Aang or open Project Lab. No action runs from the Keep alone.";
+  }
+  if (nav === "projects") return "Check branch, dirty state, risks, receipts, and manual push readiness.";
+  if (nav === "terminal") return "Use Terminal Lab for command teaching. Suggested commands stay proposal-only.";
+  if (nav === "workbench") return "Attach or inspect the receipt body before Ledger summary or push decisions.";
+  if (nav === "ledger") return "Read receipts first. Open Workbench for bodies or Project Lab for push context.";
+  if (nav === "approvals") return "Review gates. Approval changes risk state but does not run hidden work.";
+  if (nav === "security") return "Record Spock receipt before browser, clone, install, download, or execution.";
+  if (mode === "explore") return "Review source lane and keep Reddit as signal, not sole proof.";
+  return "Keep the route visible. Use Workbench for proof and Ledger for the audit trail.";
 }
 
 // ── Bottom command bar ──────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-10 0646 EDT
+Last updated: 2026-05-14 1548 EDT
 
 ## Current North Star
 
@@ -20,6 +20,51 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1548 EDT - Keep Visible Chain Pass
+
+### What Changed
+- Opened the right context rail by default so the first screen shows the route context instead of hiding it behind the Context button.
+- Added a visible chain block to the context rail: Aang read, Cortana route, owner, receipt, approval, and next action.
+- Replaced the old `Wired in Phase 6` rail placeholder with surface-specific next actions and direct buttons to Project Lab, Workbench, Ledger, and Approvals.
+- Tightened the Ask Aang intake preview so it names Aang read, mode, Cortana route, owner, receipt, approval, and next action using existing preview data.
+- Used one read-only frontend QA worker to inspect `Home.tsx` and confirm the shortest useful first-screen changes.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. Vitest also ran related server files and reported 42 tests passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK` after starting the dev server.
+
+### Front-End Steward Review
+- This keeps the Keep as the first surface and makes the visible loop readable before any backend runtime work.
+- No new Code Lab was added. Terminal Lab remains the build-teaching lane.
+- No external action, command execution, provider call, browser automation, git action, Notion write, Slack write, or memory write was added.
+
+### Known Risks
+- Visual browser inspection through the in-app browser was not callable in this tool set. Computer Use was blocked from controlling Codex, and Playwright is not installed in the app workspace.
+- The context rail now opens by default and may squeeze the Keep on smaller widths; the user can still hide it.
+- Existing unrelated backend/Raven/reference files, `CEREBRO_BUILD_QUEUE.md`, and `outputs/` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 28%.
+- Foundation/docs/planning: 83%.
+- Frontend visible loop: 36%.
+- Backend/runtime: 12%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the Keep-first visible loop. Next safe slice: visually inspect the opened context rail and Ask Aang intake preview in the browser; if acceptable, move to Project Lab as map and make the project card first read match branch, dirty state, push readiness, risk, receipt, manual push, and optional auto policy.
 
 ## 2026-05-10 0646 EDT - Foundation Critical Path Reconciliation
 
