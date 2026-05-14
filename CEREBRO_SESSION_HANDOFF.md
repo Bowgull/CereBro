@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1751 EDT
+Last updated: 2026-05-14 1758 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1758 EDT - Model Tool Creative Lane Policy Pass
+
+### What Changed
+- Added proposal-only creative tool lanes to `modelTools.policy`.
+- Gojo now has a normal creative ComfyUI lane that can enter CereBro only after approval.
+- Raven now has a separate private ComfyUI lane that cannot enter normal CereBro memory, RAG, Workbench, Ledger, galleries, or vault routes unless the user approves a scrubbed bridge summary.
+- Added RealESRGAN as a local upscale lane with source-file and output-path approval.
+- Added free cloud burst as an optional public/scrubbed-only lane with no paid-trial or private Raven use.
+- Surfaced these lanes inside the existing Basement Model Registry instead of creating a new tool wall.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.creativeLanes.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/modelTools.creativeLanes.test.ts --pool=forks --fileParallelism=false` failed first as expected, then passed.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/modelTools.ts app/server/modelTools.creativeLanes.test.ts app/client/src/components/ModelToolsPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Model Tools creative lane policy and visible registry section.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no ComfyUI, RealESRGAN, cloud model, gateway, account, token, model weight, browser fetch, or install action was run.
+
+### Front-End Steward Review
+- This keeps machinery low. The UI shows lane policy, not a new product area.
+- The Raven boundary is now visible and hard to accidentally cross.
+- Gojo and Raven can eventually use similar creative infrastructure without sharing outputs or memory.
+
+### Completion Read
+- Overall: 39%.
+- Foundation/docs/planning: 89%.
+- Frontend visible loop: 54%.
+- Backend/runtime: 22%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the build spine. Start by classifying the dirty worktree. Next slice: connect Model Tools capability proposals to the route receipt preview so Aang can explain when a tool is only a proposal, when it needs approval, and when it is blocked.
 
 ## 2026-05-14 1751 EDT - Workbench Knowledge Route Context Pass
 

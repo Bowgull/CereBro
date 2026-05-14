@@ -271,3 +271,6 @@ Expected shape:
   GitHub source note, archive-only history, and the write approval gate.
 - Workbench receipt bodies now show linked project knowledge route context when
   a receipt belongs to a project, without creating durable notes.
+- Model Tools now exposes creative capability lanes for Gojo ComfyUI, Raven
+  private ComfyUI, RealESRGAN upscale, and free cloud burst tools. All lanes are
+  proposal-only, approval-gated, and separated by privacy boundary.

@@ -228,6 +228,41 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
+        <section className="rounded p-2" aria-label="Creative tool lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Creative Lanes" detail="proposal only" />
+          <div className="mt-2 grid gap-1.5 lg:grid-cols-4">
+            {(policyData?.creativeLanes ?? []).map((lane) => (
+              <div
+                key={lane.id}
+                className="rounded p-2 text-[11px] leading-snug"
+                style={{
+                  background: C.surfaceMuted,
+                  border: `1px solid ${lane.privacyLane === "sealed_private" ? C.danger : C.borderSoft}`,
+                }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-bold uppercase tracking-widest" title={lane.label}>{lane.label}</div>
+                    <div className="mt-0.5 truncate" style={{ color: C.textMuted }} title={`${lane.ownerAgent}. ${lane.tool}.`}>
+                      {lane.ownerAgent}. {lane.tool}.
+                    </div>
+                  </div>
+                  <Badge label={labelize(lane.installStatus)} tone={lane.installStatus === "not_installed" ? C.warning : C.textSecondary} />
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <Badge label={labelize(lane.privacyLane)} tone={lane.privacyLane === "sealed_private" ? C.danger : C.success} />
+                  <Badge label={labelize(lane.accessMethod)} tone={C.textSecondary} />
+                </div>
+                <div className="mt-2 space-y-1">
+                  <Field label="Gate" value={lane.approvalGate} />
+                  <Field label="Output" value={lane.outputBoundary} />
+                  <Field label="Memory" value={lane.memoryPolicy} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
           <div className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Registry" detail={`${rows.length} local proposals`} />
