@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1632 EDT
+Last updated: 2026-05-14 1635 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1635 EDT - Ask Aang Dead Preview Cleanup Pass
+
+### What Changed
+- Removed the unused `IntakePreview` component from `Home.tsx`.
+- Removed the old security helper functions that only existed for the retired intake preview.
+- Confirmed the shell no longer references `IntakePreview`, `commandIntake.preview`, `securityTargetFor`, or `securityLabel`.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed: 2 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `rg -n "IntakePreview|commandIntake\\.preview|securityTargetFor|securityLabel" app/client/src/pages/Home.tsx` returned no matches.
+
+### Cleanliness Read
+- Current slice: Ask Aang dead preview cleanup plus handoff/archive.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- Ask Aang now has one route preview surface instead of two.
+- The UI reads cleaner and there is less dead code hiding old behavior.
+- No browser, command, git, Slack, Notion, memory, model, provider, or external action was added.
+
+### Known Risks
+- Runtime route receipt still needs browser visual QA for compact/mobile wrapping.
+- The route classifier is deterministic and intentionally simple.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and `CEREBRO_BUILD_QUEUE.md` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 33%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 48%.
+- Backend/runtime: 16%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Next slice: make the route receipt available to Workbench as a staged receipt draft without auto-saving, then add Ledger focus from the runtime route receipt.
 
 ## 2026-05-14 1632 EDT - Ask Aang Runtime Route Unification Pass
 
