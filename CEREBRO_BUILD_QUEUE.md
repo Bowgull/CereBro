@@ -286,3 +286,6 @@ Expected shape:
 - Runtime route receipts now include model-lane guidance so Ask Aang can show
   when local Ollama is the fast first path and when Codex/frontier escalation
   needs approval.
+- Model Tools now shows the Ollama setup readiness plan: first approval batch,
+  stretch candidates, blocked first installs, test procedure, storage rule, and
+  no-action receipt. No install or model pull runs from the panel.

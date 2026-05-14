@@ -265,6 +265,47 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
           </div>
         </section>
 
+        {policyData?.ollamaSetupPlan && (
+          <section className="rounded p-2" aria-label="Ollama setup readiness" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <SectionTitle title="Ollama Setup" detail={labelize(policyData.ollamaSetupPlan.status)} />
+            <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="flex flex-wrap gap-1">
+                  <Badge label={labelize(policyData.ollamaSetupPlan.executionMode)} tone={C.warning} />
+                  <Badge label="no install ran" tone={C.success} />
+                </div>
+                <div className="mt-2 space-y-1">
+                  <Field label="Hardware" value={policyData.ollamaSetupPlan.hardwareStance} />
+                  <Field label="Storage" value={policyData.ollamaSetupPlan.storageRule} />
+                  <Field label="UI" value={policyData.ollamaSetupPlan.uiRule} />
+                </div>
+              </div>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>No Action Taken</div>
+                <div className="mt-1 grid gap-1">
+                  {policyData.ollamaSetupPlan.noActionTaken.map((item) => (
+                    <div key={item}>{item}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
+              <ModelBatch title="First Approval Batch" items={policyData.ollamaSetupPlan.firstApprovalBatch} />
+              <ModelBatch title="Stretch Candidates" items={policyData.ollamaSetupPlan.stretchCandidates} />
+            </div>
+
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.danger }}>Do Not Start With</div>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {policyData.ollamaSetupPlan.blockedFirstInstalls.map((item) => (
+                  <Badge key={item} label={item} tone={C.danger} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="rounded p-2" aria-label="Creative tool lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Creative Lanes" detail="proposal only" />
           <div className="mt-2 grid gap-1.5 lg:grid-cols-4">
@@ -509,6 +550,35 @@ function MachineRule({ title, body, tone }: { title: string; body: string; tone:
     <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{body}</div>
+    </div>
+  );
+}
+
+function ModelBatch({
+  title,
+  items,
+}: {
+  title: string;
+  items: ReadonlyArray<{ model: string; modelClass: string; expectedSize: string; use: string; avoid: string }>;
+}) {
+  return (
+    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
+      <div className="mt-1 grid gap-1.5">
+        {items.map((item) => (
+          <div key={item.model} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="flex flex-wrap items-center gap-1">
+              <Badge label={item.model} tone={C.gold} />
+              <Badge label={labelize(item.modelClass)} tone={C.accent} />
+              <Badge label={item.expectedSize} tone={C.textSecondary} />
+            </div>
+            <div className="mt-1 grid gap-1">
+              <Field label="Use" value={item.use} />
+              <Field label="Avoid" value={item.avoid} />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

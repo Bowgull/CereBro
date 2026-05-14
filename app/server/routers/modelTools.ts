@@ -160,6 +160,69 @@ const localModelLanes = [
   },
 ] as const;
 
+const ollamaSetupPlan = {
+  status: "not_started",
+  executionMode: "approval_required",
+  hardwareStance: "M2 with 8GB RAM means small models only. Speed and memory pressure must be measured on this Mac.",
+  storageRule: "Mac is the workbench, not the warehouse. Keep model pulls deliberately small until storage pressure and vault routing are proven.",
+  uiRule: "Basement shows install status, model shortlist, and test results. Keep and Ask Aang show only route receipts.",
+  firstApprovalBatch: [
+    {
+      model: "all-minilm:22m",
+      modelClass: "embedding",
+      expectedSize: "46MB",
+      use: "First semantic-search smoke test.",
+      avoid: "Long documents and nuanced retrieval.",
+    },
+    {
+      model: "gemma3:1b",
+      modelClass: "lightweight_formatter",
+      expectedSize: "815MB",
+      use: "Rewrites, short summaries, learning-card drafts, and source-card drafts.",
+      avoid: "Hard reasoning, large code work, and critical validation.",
+    },
+  ],
+  stretchCandidates: [
+    {
+      model: "qwen3:1.7b",
+      modelClass: "local_reasoner",
+      expectedSize: "1.4GB",
+      use: "Light planning and simple code explanations if the first chat model is fast enough.",
+      avoid: "Multi-file implementation and architecture decisions.",
+    },
+    {
+      model: "llama3.2:3b",
+      modelClass: "local_reasoner",
+      expectedSize: "2.0GB",
+      use: "Instruction-following trial if memory pressure stays acceptable.",
+      avoid: "Always-on background use on 8GB RAM.",
+    },
+  ],
+  blockedFirstInstalls: [
+    "7B+ chat/coding models",
+    "12B/14B/27B/70B models",
+    "multiple redundant chat models",
+    "local image/video generation stacks",
+    "Raven generation models",
+  ],
+  testProcedure: [
+    "Confirm Ollama is installed.",
+    "Run a health prompt.",
+    "Run a formatting prompt.",
+    "Run a short summary prompt.",
+    "Run one light reasoning prompt.",
+    "Record rough latency, quality, stability, disk impact, and memory pressure.",
+    "Mark a model as tested only after the result is recorded.",
+  ],
+  noActionTaken: [
+    "No Ollama install ran.",
+    "No model was pulled.",
+    "No local model was called.",
+    "No vector index was created.",
+    "No background inference was enabled.",
+  ],
+} as const;
+
 function rowToCapability(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -335,6 +398,7 @@ export const modelToolsRouter = router({
       "Ollama stays on the core local-first path, but install, pulls, deletes, and background inference still need approval.",
       "Raven outputs stay outside normal CereBro memory, RAG, galleries, Workbench, Ledger, and vault lanes unless the user approves a scrubbed bridge summary.",
     ],
+    ollamaSetupPlan,
     localModelLanes,
     creativeLanes,
   })),

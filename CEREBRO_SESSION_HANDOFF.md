@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1842 EDT
+Last updated: 2026-05-14 1850 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1850 EDT - Ollama Setup Readiness Plan Pass
+
+### What Changed
+- Kept Raven implementation out of this chat. Raven/backend/reference files remain quarantined for the separate Raven chat.
+- Added `ollamaSetupPlan` to `modelTools.policy`.
+- The setup plan records not-started status, approval-required execution mode, M2/8GB hardware stance, storage rule, Basement-only UI rule, first approval batch, stretch candidates, blocked first installs, test procedure, and no-action receipt.
+- Added a compact Ollama Setup readiness block to `ModelToolsPanel`.
+- The panel now shows the first safe local model batch: `all-minilm:22m` and `gemma3:1b`.
+- Stretch candidates are visible but not first installs: `qwen3:1.7b` and `llama3.2:3b`.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --fileParallelism=false` failed first as expected, then passed.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed: 6 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/modelTools.ts app/server/modelTools.localFirst.test.ts app/client/src/components/ModelToolsPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Ollama setup readiness policy and Basement display.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven chat.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no Ollama install, model pull, model call, vector index, background inference, external escalation, browser action, command, or storage migration ran.
+
+### Front-End Steward Review
+- This keeps machinery hidden but inspectable. The daily flow only sees route receipts. Basement carries the install plan.
+- This keeps speed honest. Small local models first, measured tests before trust, no giant models first.
+- This keeps user control. Every install, pull, delete, vector index, or background inference remains approval-gated.
+
+### Completion Read
+- Overall: 42%.
+- Foundation/docs/planning: 90%.
+- Frontend visible loop: 57%.
+- Backend/runtime: 26%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue CereBro core only. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: add a read-only Ollama install-status check proposal or continue collapsing Basement model/tool receipts into the visible route loop without installing anything.
 
 ## 2026-05-14 1842 EDT - Runtime Model Lane Receipt Pass
 
