@@ -257,3 +257,7 @@ Expected shape:
 - Worker system designed as lead plus lane workers.
 - Worker ownership rules added.
 - Active build queue added.
+- Sundesk Obsidian repair closed: build handoffs belong under
+  `90_Archive/Sundesk Build History/snapshots/`; the project bridge stays at
+  `10_Projects/Sundesk/Sundesk.md`; the wrong root `Sundesk` lane should not
+  be recreated.

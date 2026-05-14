@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1657 EDT
+Last updated: 2026-05-14 1702 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1702 EDT - Sundesk Archive Drift Cleanup
+
+### What Changed
+- Verified the canonical Sundesk project bridge exists at `10_Projects/Sundesk/Sundesk.md`.
+- Verified the canonical Sundesk build history index exists at `90_Archive/Sundesk Build History/Sundesk Build History.md`.
+- Removed the empty wrong root vault lane at `Sundesk/`.
+- Moved the Sundesk repair note out of the active `Now` queue and into `Done Today` so CereBro does not treat it as current build work.
+
+### Files Touched
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian vault: removed empty `Sundesk/` directory.
+- Obsidian archive: wrote dated CereBro handoff snapshot and appended the session-history index.
+
+### Checks Run
+- `rmdir` removed only the empty wrong root `Sundesk/` lane.
+- `sed` verified the canonical Sundesk bridge note.
+- `sed` verified the canonical Sundesk build-history index.
+- `test ! -e .../obsidian-vault/Sundesk` confirmed the wrong root lane is absent.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md` passed.
+
+### Cleanliness Read
+- Current slice: Sundesk archive drift cleanup and handoff/archive record.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no Sundesk source checkout was found under the searched local paths; the Obsidian bridge points to `Bowgull/Sundesk`.
+
+### Completion Read
+- Overall: 34%.
+- Foundation/docs/planning: 87%.
+- Frontend visible loop: 50%.
+- Backend/runtime: 18%.
+- Knowledge/storage/source: 25%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the worker-led CereBro build path. Start by classifying the dirty worktree, then verify the Runtime Route Receipt to Workbench draft flow in browser when callable.
 
 ## 2026-05-14 1657 EDT - Worker Topology Route Draft Pass
 
@@ -9503,6 +9542,12 @@ Begin Session 4 after user clarification:
   permanent system note for the vault doctrine: visual beauty is comprehension,
   active projects need bridge notes, graph colors are path-based, and history
   should not be moved/deleted just to make the graph prettier.
+- 2026-05-10 Sundesk Obsidian repair: the Sundesk repo `AGENTS.md` had drifted
+  back to the root `Sundesk/Build History` lane. Fixed it to use
+  `90_Archive/Sundesk Build History/snapshots/`, merged the misplaced Sundesk
+  snapshot links into the canonical Sundesk Build History index, moved the
+  misplaced snapshots into `90_Archive`, and removed the empty wrong root lane.
+  Sundesk remains connected through `10_Projects/Sundesk/Sundesk.md`.
 - 2026-05-07 Reddit direction: CereBro should use Reddit heavily as a trusted
   human-signal source: real user reports, niche community expertise, trend
   radar, product complaints, screenshots, videos, links, and community
