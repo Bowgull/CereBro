@@ -26,6 +26,7 @@ import { permissionsRouter } from "./routers/permissions";
 import { designReviewRouter } from "./routers/designReview";
 import { securityGateRouter } from "./routers/securityGate";
 import { ravenRouter } from "./routers/raven";
+import { runtimeRouter } from "./routers/runtime";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -54,6 +55,7 @@ export const appRouter = router({
   designReview: designReviewRouter,
   securityGate: securityGateRouter,
   raven: ravenRouter,
+  runtime: runtimeRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

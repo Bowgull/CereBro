@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1620 EDT
+Last updated: 2026-05-14 1628 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1628 EDT - Runtime Route Receipt Preview Pass
+
+### What Changed
+- Added `runtime.previewRoute` as a local-only Aang -> Cortana route receipt preview.
+- The route preview returns Aang read, Cortana route, owner/support agents, project, permission class, model/tool proposal, approval gates, Workbench body target, Ledger audit target, and next action.
+- Added a visible Runtime Route Receipt strip above the Ask Aang bar.
+- The strip links to Workbench and Ledger without creating tasks, receipts, memory, browser actions, commands, git actions, Slack writes, Notion writes, model calls, or external provider calls.
+- Added focused route receipt tests.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/routers.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed: 2 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- app/server/routers/runtime.ts app/server/routers.ts app/server/runtime.routeReceipt.test.ts app/client/src/pages/Home.tsx` passed.
+
+### Cleanliness Read
+- Current slice: runtime route receipt backend contract, shell visibility, focused tests, handoff/archive.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- This moves the visible loop from static UI promises into a backend contract.
+- Aang reads. Cortana routes. Workbench owns the receipt body. Ledger owns the audit. Nothing acts yet.
+- No new Code Lab was added. Terminal Lab remains the build-teaching lane.
+
+### Known Risks
+- The old `commandIntake.preview` and new `runtime.previewRoute` currently run side by side, so route copy may duplicate until the next pass unifies the UI around the runtime contract.
+- The route classifier is deterministic and intentionally simple. It is a route receipt preview, not a model router.
+- Visual browser inspection through the in-app browser was not callable in this tool set.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and `CEREBRO_BUILD_QUEUE.md` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 32%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 45%.
+- Backend/runtime: 15%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Next slice: unify Ask Aang around `runtime.previewRoute`, reduce duplicate route preview UI, and connect Create Task to the route receipt fields without adding execution.
 
 ## 2026-05-14 1620 EDT - Workbench Ledger Receipt Body Pass
 

@@ -180,6 +180,7 @@ export default function Home() {
   const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, { refetchInterval: 5000 });
   const { data: agentRoster } = trpc.keep.agents.useQuery();
   const commandIntake = trpc.commandIntake.preview.useMutation();
+  const routePreview = trpc.runtime.previewRoute.useMutation();
   const utils = trpc.useUtils();
   const createTask = trpc.tasks.create.useMutation({
     onSuccess: () => utils.tasks.list.invalidate(),
@@ -502,10 +503,20 @@ export default function Home() {
       </div>
 
       {/* ── Bottom command bar — "Ask Aang…" ──────────────────────────── */}
+      {routePreview.data && (
+        <RuntimeRouteReceipt
+          result={routePreview.data}
+          onDismiss={() => routePreview.reset()}
+          onNavigate={setNav}
+        />
+      )}
       {commandIntake.data && (
         <IntakePreview
           result={commandIntake.data}
-          onDismiss={() => commandIntake.reset()}
+          onDismiss={() => {
+            commandIntake.reset();
+            routePreview.reset();
+          }}
           isCreatingTask={createTask.isPending}
           taskCreated={Boolean(createTask.data)}
           onNavigate={setNav}
@@ -535,10 +546,11 @@ export default function Home() {
         mode={mode}
         onModeChange={setMode}
         onNavigate={setNav}
-        isClassifying={commandIntake.isPending}
+        isClassifying={commandIntake.isPending || routePreview.isPending}
         onSubmit={() => {
           const text = askInput.trim();
-          if (!text || commandIntake.isPending) return;
+          if (!text || commandIntake.isPending || routePreview.isPending) return;
+          routePreview.mutate({ text, mode });
           commandIntake.mutate({ text, mode });
         }}
       />
@@ -1613,6 +1625,84 @@ function securityLabel(target: string) {
   } catch {
     return target.slice(0, 80);
   }
+}
+
+function RuntimeRouteReceipt({
+  result,
+  onDismiss,
+  onNavigate,
+}: {
+  result: {
+    category: string;
+    confidence: string;
+    aangRead: string;
+    cortanaRoute: string[];
+    project: { slug: string; label: string; localPath: string } | null;
+    ownerAgent: string;
+    supportAgents: string[];
+    permissionClass: string;
+    modelProposal: { modelClass: string; approvalRequired: boolean; dataLeavingMachine: boolean };
+    toolProposal: { actionClass: string; perceptionClass: string; externalTarget: boolean; approvalRequired: boolean };
+    approvalGates: string[];
+    receipt: { kind: string; bodyTarget: string; auditTarget: string; validationTarget: string; summary: string };
+    nextAction: string;
+    gates: string[];
+  };
+  onDismiss: () => void;
+  onNavigate: (id: NavId) => void;
+}) {
+  const routePreviewFields = [
+    { label: "Aang", value: result.aangRead, tone: C.gold },
+    { label: "Cortana", value: result.cortanaRoute.join(" -> "), tone: C.accentViolet },
+    { label: "Owner", value: result.ownerAgent, tone: C.accent },
+    { label: "Receipt", value: `${result.receipt.bodyTarget} body. ${result.receipt.auditTarget} audit.`, tone: C.gold },
+    { label: "Approval", value: result.approvalGates[0] ?? "No gate listed", tone: result.toolProposal.approvalRequired ? C.warning : C.success },
+    { label: "Next", value: result.nextAction, tone: C.textSecondary },
+  ];
+
+  return (
+    <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
+      <section className="rounded p-2" aria-label="Runtime route receipt preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1">
+              <PreviewChip label="runtime preview" tone={C.gold} />
+              <PreviewChip label={result.category.replace(/_/g, " ")} tone={C.accent} />
+              <PreviewChip label={`${result.confidence} confidence`} tone={result.confidence === "high" ? C.success : C.warning} />
+              {result.project && <PreviewChip label={result.project.label} tone={C.gold} />}
+              <PreviewChip label={result.permissionClass.replace(/_/g, " ")} tone={C.textSecondary} />
+            </div>
+            <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+              {result.receipt.summary}
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench route receipt body">
+              Workbench
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger route receipt audit">
+              Ledger
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">
+              Dismiss
+            </Button>
+          </div>
+        </div>
+        <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
+          {routePreviewFields.map((field) => (
+            <PreviewField key={field.label} label={field.label} value={field.value} tone={field.tone} />
+          ))}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1" aria-label="Runtime route gates">
+          <PreviewChip label={`model ${result.modelProposal.modelClass}`} tone={C.textSecondary} />
+          <PreviewChip label={`tool ${result.toolProposal.actionClass}`} tone={C.textSecondary} />
+          <PreviewChip label={result.toolProposal.approvalRequired ? "approval required" : "local only"} tone={result.toolProposal.approvalRequired ? C.warning : C.success} />
+          <PreviewChip label={result.modelProposal.dataLeavingMachine ? "data leaves machine" : "no data leaves machine"} tone={result.modelProposal.dataLeavingMachine ? C.danger : C.success} />
+          <PreviewChip label={result.gates[0]} tone={C.textMuted} />
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function PreviewChip({ label, tone }: { label: string; tone: string }) {
