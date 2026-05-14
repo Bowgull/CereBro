@@ -314,3 +314,6 @@ Expected shape:
 - Dev-server visual proof is cleaner: Express/Vite middleware now honors the
   no-HMR local setup, so Playwright no longer sees Vite websocket errors on
   `localhost:3002`.
+- Approval Queue now shows a compact receipt chain on selected previews:
+  origin, target, preflight, next safe surface, and Security Gate jump.
+- Local Playwright inspection output is ignored through `.gitignore`.

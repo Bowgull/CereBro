@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1938 EDT
+Last updated: 2026-05-14 1947 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1947 EDT - Approval Queue Receipt Chain Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Added `.playwright-cli/` to `.gitignore` so local browser inspection artifacts stay out of git status.
+- Added a selected-preview Receipt Chain to the Approval Queue.
+- The chain shows origin, target, permission preflight, next safe surface, and a Security Gate jump.
+- Next surface routing is frontend-only and points to Model Tools, Terminal Lab, Sources, Capture Inbox, Project Lab, or Workbench from the existing approval shape.
+- The Approval Queue still does not approve, reject, execute commands, run Ollama checks, browse, push, or write externally.
+- Raven, backend, and reference changes remain quarantined.
+
+### Files Touched
+- `.gitignore`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Playwright snapshot on `http://localhost:3002/` confirmed the Approval Queue Receipt Chain is visible with Model Tools and Security Gate jumps.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- .gitignore app/client/src/components/ApprovalDashboardPanel.tsx CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Approval Queue selected-preview receipt chain and Playwright output hygiene.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven/backend track.
+- Generated/local: `.playwright-cli/` is ignored as local inspection output.
+- Blocked: Model Tools approval origin backend filter remains deferred because `app/server/routers/approvals.ts` already contains unstaged Raven approval-router changes.
+- No command was executed from CereBro UI, no git action from UI, no Ollama status command, install, pull, model call, vector index, external escalation, approval action, or storage migration ran.
+
+### Front-End Steward Review
+- The Approval Queue now reads like a route chain, not a detail pile.
+- The machinery is still visible, but it is compact and tied to the next safe surface.
+- This is the correct visible-loop direction for a fast AI OS: receipt first, action later.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 62%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in CereBro Prime mode. Start by classifying dirty files. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: wait for the Raven approval-router batch before touching approval backend origin filters, or continue a frontend-only Workbench/Ledger proof refinement. Do not run Ollama status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 1938 EDT - Dev Server HMR Console Cleanup Pass
 

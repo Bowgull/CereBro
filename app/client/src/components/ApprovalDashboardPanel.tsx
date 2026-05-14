@@ -16,6 +16,7 @@ import {
 type OriginFilter = "all" | "hedwig" | "terminal" | "project_lab" | "source" | "other";
 type StatusFilter = "pending" | "approved" | "rejected" | "cancelled";
 type GroupFilter = "origin" | "project" | "action_type" | "status" | "risk";
+type ApprovalRoute = "security" | "terminal" | "workbench" | "projects" | "sources" | "inbox" | "model_tools";
 type SelectOption = { value: string; label: string };
 
 const origins: Array<{ id: OriginFilter; label: string }> = [
@@ -53,7 +54,7 @@ function formatTime(unixSec: number) {
   });
 }
 
-export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
+export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: ApprovalRoute) => void }) {
   const [origin, setOrigin] = useState<OriginFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("pending");
   const [query, setQuery] = useState("");
@@ -377,6 +378,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             </div>
           ) : (
             <div className="grid gap-2">
+              <ApprovalReceiptChain selected={selected} onNavigate={onNavigate} onOpenSecurity={openSecurityGate} />
               <Section title={`Approval #${selected.id}`} detail={labelize(selected.actionType)}>
                 <Meta label="Origin" value={labelize(selected.origin)} />
                 <Meta label="Requested By" value={selected.requestedByAgent ?? "unknown"} />
@@ -515,6 +517,156 @@ function ReceiptStat({ label, value, tone }: { label: string; value: string; ton
         {value}
       </div>
     </div>
+  );
+}
+
+type ApprovalChainItem = {
+  id: number;
+  origin: string;
+  actionType: string;
+  targetType: string | null;
+  requestedByAgent: string | null;
+  projectName: string | null;
+  targetLabel: string | null;
+  permissionPreflightId: number | null;
+  permissionPreflight: {
+    decision: string | null;
+    approvalRequired: boolean;
+    targetSummary: string | null;
+  } | null;
+  costRisk: string | null;
+};
+
+function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route: ApprovalRoute | null; reason: string } {
+  if (item.targetType === "model_tool_ollama_status_check" || item.actionType.includes("ollama") || item.actionType.includes("model")) {
+    return {
+      label: "Model Tools",
+      route: "model_tools",
+      reason: "Review capability setup. The queue does not run the check.",
+    };
+  }
+  if (item.targetType === "command_observation" || item.actionType.startsWith("terminal_")) {
+    return {
+      label: "Terminal Lab",
+      route: "terminal",
+      reason: "Review command context. Workbench holds the receipt body.",
+    };
+  }
+  if (item.targetType === "source_event" || item.actionType.includes("source")) {
+    return {
+      label: "Sources",
+      route: "sources",
+      reason: "Review source context before browser, fetch, or enrichment work.",
+    };
+  }
+  if (item.requestedByAgent === "hedwig" || item.targetType === "capture_observation") {
+    return {
+      label: "Capture Inbox",
+      route: "inbox",
+      reason: "Review capture context before external writes or reminders.",
+    };
+  }
+  if (item.projectName || item.targetType === "task" || item.targetType === "project") {
+    return {
+      label: "Project Lab",
+      route: "projects",
+      reason: "Review project state, receipts, and push context.",
+    };
+  }
+  return {
+    label: "Workbench",
+    route: "workbench",
+    reason: "Review receipt body before any summary or action.",
+  };
+}
+
+function ApprovalReceiptChain({
+  selected,
+  onNavigate,
+  onOpenSecurity,
+}: {
+  selected: ApprovalChainItem;
+  onNavigate?: (route: ApprovalRoute) => void;
+  onOpenSecurity: (target: string | null | undefined) => void;
+}) {
+  const nextSurface = nextSurfaceForApproval(selected);
+  const preflightTone = selected.permissionPreflight == null
+    ? C.warning
+    : selected.permissionPreflight.decision === "blocked_by_hard_gate"
+      ? C.danger
+      : selected.permissionPreflight.approvalRequired
+        ? C.warning
+        : C.accent;
+  const securityTarget = selected.permissionPreflight?.targetSummary ?? selected.targetLabel;
+  const steps = [
+    {
+      label: "Origin",
+      value: `${labelize(selected.origin)} / ${selected.requestedByAgent ?? "unknown"}`,
+      tone: C.accent,
+    },
+    {
+      label: "Target",
+      value: selected.targetLabel
+        ? receiptLabel(selected.targetLabel) ?? selected.targetLabel
+        : labelize(selected.targetType),
+      tone: selected.targetType ? C.gold : C.textMuted,
+    },
+    {
+      label: "Preflight",
+      value: selected.permissionPreflightId == null
+        ? "unlinked"
+        : `#${selected.permissionPreflightId} ${labelize(selected.permissionPreflight?.decision)}`,
+      tone: preflightTone,
+    },
+    {
+      label: "Next Surface",
+      value: nextSurface.label,
+      tone: C.success,
+    },
+  ];
+
+  return (
+    <Section title="Receipt Chain" detail="review path">
+      <div className="grid gap-1 sm:grid-cols-2">
+        {steps.map((step) => (
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
+              {step.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={step.value} style={{ color: C.textSecondary }}>
+              {step.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+        {nextSurface.reason}
+      </p>
+      <div className="flex flex-wrap gap-1">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => nextSurface.route && onNavigate?.(nextSurface.route)}
+          disabled={!nextSurface.route || !onNavigate}
+          title={`Open ${nextSurface.label}. Approval Queue does not approve or execute it.`}
+          aria-label={`Open ${nextSurface.label} for approval ${selected.id}`}
+        >
+          Open {nextSurface.label}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="risk"
+          onClick={() => onOpenSecurity(securityTarget)}
+          disabled={!securityTarget || !onNavigate}
+          title="Open Security Gate for this receipt target. Approval Queue does not execute it."
+          aria-label={`Open Security Gate for approval ${selected.id}`}
+        >
+          Security Gate
+        </Button>
+      </div>
+    </Section>
   );
 }
 
