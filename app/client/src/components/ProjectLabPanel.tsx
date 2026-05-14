@@ -694,6 +694,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     nextSafeAction={project.nextSafeAction}
                   />
 
+                  <KnowledgeRouteStrip route={project.knowledgeRoute} />
+
                   <ProofStatusStrip stats={proofStats} />
 
                   <div className="mt-2">
@@ -1799,6 +1801,53 @@ function ProjectMapRead({
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
         Next safe action: <span style={{ color: C.textSecondary }}>{nextSafeAction}</span>
+      </div>
+    </section>
+  );
+}
+
+function KnowledgeRouteStrip({
+  route,
+}: {
+  route: {
+    projectBridgePath: string;
+    repositorySourcePath: string;
+    archiveRetrieval: string;
+    writesExternalSystems: boolean;
+    approvalGate: string;
+  };
+}) {
+  const items = [
+    { label: "Bridge", value: route.projectBridgePath, tone: C.success },
+    { label: "Source", value: route.repositorySourcePath, tone: C.accent },
+    { label: "Archive", value: route.archiveRetrieval.replace(/_/g, " "), tone: C.warning },
+    { label: "Writes", value: route.writesExternalSystems ? "enabled" : "approval gated", tone: route.writesExternalSystems ? C.danger : C.gold },
+  ];
+
+  return (
+    <section className="mt-2 rounded p-1.5" aria-label="Project knowledge route" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+          Knowledge Route
+        </div>
+        <Badge variant="secondary" className="uppercase">
+          <span className="min-w-0 truncate">read only</span>
+        </Badge>
+      </div>
+      <div className="mt-1 grid grid-cols-2 gap-1 xl:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: item.tone }}>
+              {item.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={item.value} style={{ color: C.textSecondary }}>
+              {item.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        {route.approvalGate}
       </div>
     </section>
   );

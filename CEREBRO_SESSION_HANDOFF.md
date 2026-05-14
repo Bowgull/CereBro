@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1721 EDT
+Last updated: 2026-05-14 1725 EDT
 
 ## Current North Star
 
@@ -20,6 +20,52 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1725 EDT - Project Lab Knowledge Route Pass
+
+### What Changed
+- Added a read-only `knowledgeRoute` object to each Project Intelligence overview/detail project.
+- The route names the project bridge note, GitHub repository source note, GitHub map/index paths, archive lane, archive-only retrieval, and explicit write gate.
+- Added a compact Knowledge Route strip to each Project Lab card.
+- Added a targeted mutation guard test proving Project Intelligence route reads do not write artifacts, approvals, or memory entries.
+- Updated `CEREBRO_BUILD_QUEUE.md` with this Block C progress.
+
+### Files Touched
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/projectIntelligence.knowledgeRoute.test.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/projectIntelligence.knowledgeRoute.test.ts server/knowledge/contracts.test.ts --pool=forks --fileParallelism=false` passed: 5 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/projectIntelligence.ts app/server/projectIntelligence.knowledgeRoute.test.ts app/client/src/components/ProjectLabPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Project Lab read-only knowledge route and backend route contract.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: visual browser screenshot was not available through the current tool set; localhost responded with 200.
+
+### Front-End Steward Review
+- This keeps the Sundesk lesson: the card shows where knowledge goes without exposing a storage console.
+- Project Lab now connects push readiness and knowledge routing on the same project card.
+- No Obsidian, vault, Notion, Slack, Drive, memory, git, or browser write was added.
+
+### Completion Read
+- Overall: 37%.
+- Foundation/docs/planning: 89%.
+- Frontend visible loop: 52%.
+- Backend/runtime: 20%.
+- Knowledge/storage/source: 33%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the build spine. Start by classifying the dirty worktree. Next slice: make Workbench receipts show project knowledge route context when a project is linked, still without creating durable notes.
 
 ## 2026-05-14 1721 EDT - Piccolo Storage Contract Receipt Pass
 

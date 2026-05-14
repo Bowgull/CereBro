@@ -4,6 +4,12 @@ import { promisify } from "util";
 import { z } from "zod";
 import { getCerebroDb } from "../cerebroDb";
 import { sourceDisplayName } from "../displayLabels";
+import {
+  GITHUB_PROJECT_MAP_PATH,
+  GITHUB_SOURCES_INDEX_PATH,
+  githubProjectBridgePath,
+  githubRepositorySourcePath,
+} from "../knowledge/contracts";
 import { publicProcedure, router } from "../_core/trpc";
 import { sessionDisplayName } from "./sessions";
 
@@ -811,6 +817,21 @@ function pushReadinessForProject(project: ProjectOverviewItem) {
   };
 }
 
+function knowledgeRouteForProject(project: (typeof projectProfiles)[number]) {
+  return {
+    mode: "read_only" as const,
+    projectBridgePath: githubProjectBridgePath(project.name),
+    repositorySourcePath: githubRepositorySourcePath(project.name),
+    projectMapPath: GITHUB_PROJECT_MAP_PATH,
+    sourcesIndexPath: GITHUB_SOURCES_INDEX_PATH,
+    normalRagLane: "10_Projects + 20_Knowledge/Sources" as const,
+    archiveLane: "90_Archive" as const,
+    archiveRetrieval: "archive_only" as const,
+    writesExternalSystems: false,
+    approvalGate: "Creating or updating bridge/source notes requires an explicit write approval.",
+  };
+}
+
 function nextSafeActionForProject(project: ProjectOverviewItem) {
   const { activity, tasks, git } = project;
   if (activity.approvals.pending > 0) {
@@ -996,6 +1017,7 @@ async function projectDetailForSlug(slug: string) {
       project: profile,
       projectId: null,
       git,
+      knowledgeRoute: knowledgeRouteForProject(profile),
       actionDrafts: await actionDraftRowsForProject(null, slug),
     };
   }
@@ -1074,6 +1096,7 @@ async function projectDetailForSlug(slug: string) {
     project: profile,
     projectId: tasks.projectId,
     git,
+    knowledgeRoute: knowledgeRouteForProject(profile),
     gates: [
       "Project Lab detail is local metadata only.",
       "Approval rows shown here are pending local previews, not approved actions.",
@@ -1133,6 +1156,7 @@ export const projectIntelligenceRouter = router({
           ...project,
           nextSafeAction: nextSafeActionForProject(project),
           pushReadiness: pushReadinessForProject(project),
+          knowledgeRoute: knowledgeRouteForProject(profile),
         };
       }),
     );

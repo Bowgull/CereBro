@@ -267,3 +267,5 @@ Expected shape:
 - Piccolo now exposes the storage contract as a read-only receipt in Automation
   Hygiene. It shows contract counts, Obsidian lane rules, and project bridge
   paths without writing to the vault or creating cleanup actions.
+- Project Lab now shows each tracked project's knowledge route: bridge note,
+  GitHub source note, archive-only history, and the write approval gate.
