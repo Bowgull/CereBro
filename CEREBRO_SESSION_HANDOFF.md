@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1709 EDT
+Last updated: 2026-05-14 1721 EDT
 
 ## Current North Star
 
@@ -20,6 +20,52 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1721 EDT - Piccolo Storage Contract Receipt Pass
+
+### What Changed
+- Added `piccolo.storageContractReceipt` as a read-only backend receipt for the storage contract.
+- The receipt reports artifact kind count, lifecycle states, retention rules, vault folders, Obsidian lanes, vault text targets, RAG metadata fields, and GitHub project bridge paths.
+- Added the storage contract strip to `PiccoloPanel` inside Automation Hygiene instead of creating a new surface.
+- Added a targeted mutation guard test proving the receipt does not write artifacts, cleanup candidates, or approvals.
+- Updated `CEREBRO_BUILD_QUEUE.md` with this Block C progress.
+
+### Files Touched
+- `app/server/routers/piccolo.ts`
+- `app/server/piccolo.storageContract.test.ts`
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/piccolo.storageContract.test.ts server/knowledge/contracts.test.ts --pool=forks --fileParallelism=false` passed: 5 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/piccolo.ts app/server/piccolo.storageContract.test.ts app/client/src/components/PiccoloPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Piccolo read-only storage contract receipt and Automation Hygiene UI.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: visual browser screenshot was not available through the current tool set; localhost responded with 200.
+
+### Front-End Steward Review
+- This follows the Sundesk lesson: show the useful read, hide the machinery.
+- No new nav item, plugin wall, model console, or storage dashboard was added.
+- The UI now says where knowledge goes without offering unsafe write controls.
+
+### Completion Read
+- Overall: 36%.
+- Foundation/docs/planning: 88%.
+- Frontend visible loop: 51%.
+- Backend/runtime: 19%.
+- Knowledge/storage/source: 31%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue Block C. Start by classifying the dirty worktree. Next slice: add a compact Project Lab storage/push readiness readout that uses the same contract language and keeps all writes approval-gated.
 
 ## 2026-05-14 1709 EDT - Knowledge Contract Source Of Truth Pass
 

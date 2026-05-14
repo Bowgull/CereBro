@@ -3,6 +3,20 @@ import path from "path";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb } from "../cerebroDb";
 import { getObsidianStatus, getVaultLayout, getVaultStatus } from "../integrations/vault";
+import {
+  ARTIFACT_KINDS,
+  ARTIFACT_LIFECYCLE_STATES,
+  GITHUB_PROJECT_MAP_PATH,
+  GITHUB_REPOSITORY_SOURCE_PATH,
+  GITHUB_SOURCES_INDEX_PATH,
+  OBSIDIAN_KNOWLEDGE_ROUTES,
+  OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+  RETENTION_RULES,
+  VAULT_LAYOUT,
+  VAULT_TEXT_TARGETS,
+  githubProjectBridgePath,
+  githubRepositorySourcePath,
+} from "../knowledge/contracts";
 
 type Severity = "info" | "warning" | "action_required";
 
@@ -64,6 +78,48 @@ async function getArtifactCounts(): Promise<{
 }
 
 export const piccoloRouter = router({
+  storageContractReceipt: publicProcedure.query(async () => {
+    const [vault, obsidian] = await Promise.all([getVaultStatus(), getObsidianStatus()]);
+    const archiveRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "archive");
+
+    return {
+      mode: "read_only" as const,
+      ownerAgent: "piccolo" as const,
+      supportAgents: ["oak", "spock"] as const,
+      writesExternalSystems: false,
+      vault,
+      obsidian,
+      counts: {
+        artifactKinds: ARTIFACT_KINDS.length,
+        lifecycleStates: ARTIFACT_LIFECYCLE_STATES.length,
+        retentionRules: RETENTION_RULES.length,
+        vaultFolders: VAULT_LAYOUT.length,
+        obsidianLanes: OBSIDIAN_KNOWLEDGE_ROUTES.length,
+        vaultTextTargets: Object.keys(VAULT_TEXT_TARGETS).length,
+      },
+      rules: [
+        "Artifacts need kind, lifecycle state, storage provider, storage path, and retention rule.",
+        "Obsidian archive lanes are archive-only for normal RAG.",
+        "Project bridge notes are the entry point for active project knowledge.",
+        "Real vault, Obsidian, Notion, Slack, Drive, and cleanup writes require approval.",
+      ],
+      obsidianContract: {
+        routes: OBSIDIAN_KNOWLEDGE_ROUTES,
+        retrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+        archiveRoute,
+      },
+      githubProjectPaths: {
+        bridgeExample: githubProjectBridgePath("Sundesk"),
+        sourceExample: githubRepositorySourcePath("Sundesk"),
+        bridgeTemplate: "10_Projects/<Project>/<Project>.md",
+        sourceTemplate: GITHUB_REPOSITORY_SOURCE_PATH,
+        mapPath: GITHUB_PROJECT_MAP_PATH,
+        sourcesIndexPath: GITHUB_SOURCES_INDEX_PATH,
+      },
+      nextAction: "Expose this as a Keep receipt before adding any storage automation.",
+    };
+  }),
+
   hygieneReport: publicProcedure.query(async () => {
     const [vault, obsidian, counts] = await Promise.all([
       getVaultStatus(),

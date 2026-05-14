@@ -264,3 +264,6 @@ Expected shape:
 - Block C knowledge contract layer started: artifact kinds, lifecycle states,
   retention rules, vault layout, Obsidian lanes, RAG metadata fields, and
   GitHub bridge paths now have one backend source of truth.
+- Piccolo now exposes the storage contract as a read-only receipt in Automation
+  Hygiene. It shows contract counts, Obsidian lane rules, and project bridge
+  paths without writing to the vault or creating cleanup actions.

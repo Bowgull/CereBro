@@ -17,6 +17,7 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [saveGateOpen, setSaveGateOpen] = useState(false);
   const report = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
+  const contract = trpc.piccolo.storageContractReceipt.useQuery(undefined, { refetchInterval: 30000 });
   const saveReport = trpc.artifacts.writeTextToVault.useMutation({
     onSuccess: () => {
       setSaveGateOpen(false);
@@ -25,6 +26,7 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   });
   const data = report.data;
   const findings = data?.findings ?? [];
+  const contractData = contract.data;
 
   function handleSaveReport() {
     if (!data) return;
@@ -121,6 +123,68 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
         <RuleCard title="Cleanup" body="Cleanup proposals remain proposals until an action receipt is approved." tone={C.danger} />
       </div>
 
+      <div className="grid gap-1.5 px-2 py-1.5 shrink-0 xl:grid-cols-[0.9fr_1.2fr_1.1fr]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.gold }}>
+              Storage Contract
+            </div>
+            <Badge variant="secondary" className="uppercase">
+              {contractData?.mode ?? "read_only"}
+            </Badge>
+          </div>
+          <div className="mt-1 grid grid-cols-3 gap-1">
+            <MiniMetric label="Kinds" value={String(contractData?.counts.artifactKinds ?? 0)} />
+            <MiniMetric label="States" value={String(contractData?.counts.lifecycleStates ?? 0)} />
+            <MiniMetric label="Rules" value={String(contractData?.counts.retentionRules ?? 0)} />
+          </div>
+          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+            Piccolo reports. Oak validates knowledge shape. Spock gates writes.
+          </div>
+        </div>
+
+        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.accent }}>
+            Obsidian Lanes
+          </div>
+          <div className="mt-1 grid grid-cols-2 gap-1">
+            {(contractData?.obsidianContract.routes ?? []).map((route) => (
+              <div key={route.key} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: route.retrievalDefault === "archive_only" ? C.warning : C.textSecondary }} title={route.relativePath}>
+                  {route.relativePath}
+                </div>
+                <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+                  {route.retrievalDefault.replace(/_/g, " ")}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.success }}>
+            Project Bridge
+          </div>
+          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+            Active projects enter memory through a bridge note, not a raw code dump.
+          </div>
+          <div
+            className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            title={contractData?.githubProjectPaths.bridgeExample}
+          >
+            {contractData?.githubProjectPaths.bridgeExample ?? "10_Projects/<Project>/<Project>.md"}
+          </div>
+          <div
+            className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
+            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
+            title={contractData?.githubProjectPaths.sourceExample}
+          >
+            {contractData?.githubProjectPaths.sourceExample ?? "20_Knowledge/Sources/GitHub/<Project> Repository Source.md"}
+          </div>
+        </div>
+      </div>
+
       {data?.vault.vaultDir && (
         <div className="px-2 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
           <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Vault Path</div>
@@ -214,6 +278,19 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
         {label}
       </div>
       <div className="text-[11px] font-semibold truncate" style={{ color: tone }} title={value}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
         {value}
       </div>
     </div>
