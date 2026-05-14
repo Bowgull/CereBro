@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1836 EDT
+Last updated: 2026-05-14 1842 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1842 EDT - Runtime Model Lane Receipt Pass
+
+### What Changed
+- Added model-lane guidance to `runtime.previewRoute`.
+- Quick/private text routes now point at `ollama_local_fast_lane` with provider, status, install need, reason, and no-data-leaves-machine receipt.
+- Build/design/security routes now point at `frontier_or_codex_escalation` only as an approval-required lane when local may not be strong enough.
+- Workbench route drafts now carry `modelLane` metadata.
+- Ledger focus drafts now include `modelLaneId` in audit filters.
+- Ask Aang route preview now shows the model lane, provider, status, data boundary, and short user-facing summary.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` failed first as expected, then passed.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --fileParallelism=false` passed: 5 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/runtime.ts app/server/runtime.routeReceipt.test.ts app/client/src/pages/Home.tsx` passed.
+
+### Cleanliness Read
+- Current slice: runtime route receipt model-lane guidance and Ask Aang preview display.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no Ollama install, model pull, model call, external escalation, command, browser action, git action, Slack write, Notion write, memory write, or provider call ran.
+
+### Front-End Steward Review
+- This hides machinery correctly: the user sees the route decision, not a provider console.
+- Local-first speed is now part of the visible loop. Aang can show local Ollama as the first path for small private work.
+- External escalation is visible as a gated route, not an automatic assumption.
+
+### Completion Read
+- Overall: 41%.
+- Foundation/docs/planning: 90%.
+- Frontend visible loop: 56%.
+- Backend/runtime: 25%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the build spine. Start by classifying the dirty worktree. Next slice: reconcile the quarantined Raven/backend batch or add the Ollama install-status read model, depending on whether the dirty batch blocks safe progress.
 
 ## 2026-05-14 1836 EDT - Local First Ollama Policy Correction Pass
 

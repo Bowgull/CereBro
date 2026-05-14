@@ -82,6 +82,7 @@ describe("runtime route receipt preview", () => {
       ownerAgent: "tony",
       category: "project_build",
       projectSlug: "cerebro",
+      modelLaneId: "frontier_or_codex_escalation",
       bodyTarget: "workbench",
     });
     expect(preview.ledgerFocusDraft.focusSummary).toContain("tony");
@@ -111,5 +112,37 @@ describe("runtime route receipt preview", () => {
     expect(preview.approvalGates).toContain("external target approval");
     expect(preview.approvalGates).toContain("public-browser approval");
     expect(preview.nextAction).toContain("Ask approval before browser/source capture");
+  });
+
+  it("shows local-first model lane guidance before any model call", async () => {
+    const caller = createCaller();
+
+    const quickPreview = await caller.runtime.previewRoute({
+      text: "summarize this private CereBro source note",
+      mode: "quick",
+    });
+
+    expect(quickPreview.modelProposal.modelClass).toBe("local_summary");
+    expect(quickPreview.modelProposal.laneId).toBe("ollama_local_fast_lane");
+    expect(quickPreview.modelProposal.provider).toBe("Ollama");
+    expect(quickPreview.modelProposal.approvalRequired).toBe(false);
+    expect(quickPreview.modelProposal.dataLeavingMachine).toBe(false);
+    expect(quickPreview.modelProposal.installRequired).toBe(true);
+    expect(quickPreview.modelProposal.status).toBe("not_verified_no_install");
+    expect(quickPreview.modelProposal.reason).toContain("fast local-first");
+    expect(quickPreview.workbenchReceiptDraft.modelLane?.laneId).toBe("ollama_local_fast_lane");
+    expect(quickPreview.ledgerFocusDraft.auditFilters.modelLaneId).toBe("ollama_local_fast_lane");
+    expect(quickPreview.gates.join(" ")).toContain("No Ollama install");
+
+    const buildPreview = await caller.runtime.previewRoute({
+      text: "implement the next CereBro frontend build slice",
+      mode: "build",
+    });
+
+    expect(buildPreview.modelProposal.laneId).toBe("frontier_or_codex_escalation");
+    expect(buildPreview.modelProposal.approvalRequired).toBe(true);
+    expect(buildPreview.modelProposal.dataLeavingMachine).toBe(true);
+    expect(buildPreview.modelProposal.reason).toContain("local lane may not be strong enough");
+    expect(buildPreview.approvalGates).toContain("external model escalation approval");
   });
 });

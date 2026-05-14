@@ -283,3 +283,6 @@ Expected shape:
 - Model Tools now exposes the fast local-first Ollama path: local summary,
   lightweight routing, small private work, and embedding smoke tests are core
   router lanes, while installs and model pulls remain approval-gated.
+- Runtime route receipts now include model-lane guidance so Ask Aang can show
+  when local Ollama is the fast first path and when Codex/frontier escalation
+  needs approval.

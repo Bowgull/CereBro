@@ -1411,7 +1411,17 @@ function RuntimeRouteReceipt({
     ownerAgent: string;
     supportAgents: string[];
     permissionClass: string;
-    modelProposal: { modelClass: string; approvalRequired: boolean; dataLeavingMachine: boolean };
+    modelProposal: {
+      modelClass: string;
+      laneId: string;
+      provider: string;
+      status: string;
+      approvalRequired: boolean;
+      dataLeavingMachine: boolean;
+      installRequired: boolean;
+      reason: string;
+      userFacingSummary: string;
+    };
     toolProposal: { actionClass: string; perceptionClass: string; externalTarget: boolean; approvalRequired: boolean };
     approvalGates: string[];
     receipt: { kind: string; bodyTarget: string; auditTarget: string; validationTarget: string; summary: string };
@@ -1431,6 +1441,13 @@ function RuntimeRouteReceipt({
       routeChain: string[];
       gates: string[];
       nextAction: string;
+      modelLane?: {
+        laneId: string;
+        provider: string;
+        modelClass: string;
+        status: string;
+        reason: string;
+      };
     };
     ledgerFocusDraft: {
       kind: string;
@@ -1443,6 +1460,7 @@ function RuntimeRouteReceipt({
         ownerAgent: string;
         category: string;
         projectSlug: string | null;
+        modelLaneId?: string;
         bodyTarget: string;
       };
       focusSummary: string;
@@ -1492,6 +1510,7 @@ function RuntimeRouteReceipt({
           routeChain: draft.routeChain,
           gates: draft.gates,
           nextAction: draft.nextAction,
+          modelLane: draft.modelLane,
           notice: "Runtime route receipt staged as a Workbench draft. Review before saving.",
         }),
       );
@@ -1566,10 +1585,18 @@ function RuntimeRouteReceipt({
         </div>
         <div className="mt-2 flex flex-wrap gap-1" aria-label="Runtime route gates">
           <PreviewChip label={`model ${result.modelProposal.modelClass}`} tone={C.textSecondary} />
+          <PreviewChip label={result.modelProposal.provider} tone={C.gold} />
+          <PreviewChip label={result.modelProposal.status.replace(/_/g, " ")} tone={result.modelProposal.approvalRequired ? C.warning : C.success} />
           <PreviewChip label={`tool ${result.toolProposal.actionClass}`} tone={C.textSecondary} />
           <PreviewChip label={result.toolProposal.approvalRequired ? "approval required" : "local only"} tone={result.toolProposal.approvalRequired ? C.warning : C.success} />
           <PreviewChip label={result.modelProposal.dataLeavingMachine ? "data leaves machine" : "no data leaves machine"} tone={result.modelProposal.dataLeavingMachine ? C.danger : C.success} />
           <PreviewChip label={result.gates[0]} tone={C.textMuted} />
+        </div>
+        <div className="mt-2 rounded px-2 py-1 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <span className="font-semibold uppercase tracking-wider" style={{ color: result.modelProposal.approvalRequired ? C.warning : C.success }}>
+            {result.modelProposal.laneId.replace(/_/g, " ")}
+          </span>{" "}
+          {result.modelProposal.userFacingSummary}
         </div>
       </section>
     </div>

@@ -133,6 +133,43 @@ function modelProposalFor(ownerAgent: string, category: RouteCategory) {
   return "local_reasoner";
 }
 
+function modelLaneProposalFor(ownerAgent: string, category: RouteCategory) {
+  const modelClass = modelProposalFor(ownerAgent, category);
+  const needsExternalEscalation =
+    category === "project_build" ||
+    category === "project_ship" ||
+    category === "project_design" ||
+    category === "security_review";
+
+  if (needsExternalEscalation) {
+    return {
+      ownerAgent,
+      modelClass,
+      laneId: "frontier_or_codex_escalation",
+      provider: "Codex/frontier lane",
+      status: "approval_required",
+      approvalRequired: true,
+      dataLeavingMachine: true,
+      installRequired: false,
+      reason: "This task may need multi-file or high-stakes reasoning where the small local lane may not be strong enough.",
+      userFacingSummary: "Use local planning first. Escalate only with approval if quality or task size needs it.",
+    };
+  }
+
+  return {
+    ownerAgent,
+    modelClass,
+    laneId: "ollama_local_fast_lane",
+    provider: "Ollama",
+    status: "not_verified_no_install",
+    approvalRequired: false,
+    dataLeavingMachine: false,
+    installRequired: true,
+    reason: "fast local-first lane for small private text work once Ollama is installed and tested.",
+    userFacingSummary: "Aang can route this to the local lane first. No install, pull, or model call runs from preview.",
+  };
+}
+
 function nextActionFor(category: RouteCategory, ownerAgent: string) {
   if (category === "security_review") return "Open Security Gate and record a Spock receipt before browsing or execution.";
   if (category === "research") return "Ask approval before browser/source capture. Save source cards before memory.";
@@ -173,9 +210,11 @@ export const runtimeRouter = router({
         persistsMemory: permission.persistsMemory,
       });
       const routeChain = ["Aang reads mode", "Cortana routes", `${ownerAgent} owns`, ...supportAgents.map((agent) => `${agent} supports`)];
+      const modelProposal = modelLaneProposalFor(ownerAgent, category);
       const approvalGates = preflight.requiredApprovals.length > 0
         ? preflight.requiredApprovals
         : ["No external action from route preview."];
+      if (modelProposal.approvalRequired) approvalGates.push("external model escalation approval");
       const receiptSummary = `${routeChain.join(" -> ")}. ${nextActionFor(category, ownerAgent)}`;
       const projectSlug = project?.slug ?? null;
 
@@ -195,10 +234,7 @@ export const runtimeRouter = router({
         supportAgents,
         permissionClass: permission.permissionClass,
         modelProposal: {
-          ownerAgent,
-          modelClass: modelProposalFor(ownerAgent, category),
-          approvalRequired: false,
-          dataLeavingMachine: false,
+          ...modelProposal,
         },
         toolProposal: {
           actionClass: permission.actionClass,
@@ -232,6 +268,13 @@ export const runtimeRouter = router({
           routeChain,
           gates: approvalGates,
           nextAction: nextActionFor(category, ownerAgent),
+          modelLane: {
+            laneId: modelProposal.laneId,
+            provider: modelProposal.provider,
+            modelClass: modelProposal.modelClass,
+            status: modelProposal.status,
+            reason: modelProposal.reason,
+          },
         },
         ledgerFocusDraft: {
           kind: "route_preview_audit_focus",
@@ -244,6 +287,7 @@ export const runtimeRouter = router({
             ownerAgent,
             category,
             projectSlug,
+            modelLaneId: modelProposal.laneId,
             bodyTarget: "workbench",
           },
           focusSummary: `Focus Ledger on ${ownerAgent} ${category.replace(/_/g, " ")} route preview. No audit row is saved.`,
@@ -257,6 +301,7 @@ export const runtimeRouter = router({
         nextAction: nextActionFor(category, ownerAgent),
         gates: [
           "Preview only. No model call, browser action, command, git action, Slack write, Notion write, memory write, or external provider call runs.",
+          "No Ollama install, local model pull, external model call, or provider escalation runs from route preview.",
           preflight.modeEffect,
           ...preflight.reasons,
         ],
