@@ -943,6 +943,24 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
   const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
+  const selectedAuditRead = selectedEvidence
+    ? [
+        { label: "Body", value: `Workbench #${selectedEvidence.id}`, tone: C.gold },
+        { label: "Project", value: selectedEvidence.projectName ?? "unlinked", tone: selectedEvidence.projectName ? C.success : C.warning },
+        { label: "Validation", value: selectedEvidence.validationStatus.replace(/_/g, " "), tone: selectedEvidence.validationStatus === "needs_review" ? C.warning : C.success },
+        { label: "Route", value: selectedEvidence.routeAgent ?? "unrouted", tone: selectedEvidence.routeAgent ? C.accent : C.warning },
+        {
+          label: "Next",
+          value:
+            selectedEvidence.validationStatus === "needs_review"
+              ? "Open Workbench Body and append validation."
+              : selectedEvidence.projectName
+                ? "Open Project Push Context before git."
+                : "Link a project before push context.",
+          tone: C.textSecondary,
+        },
+      ]
+    : [];
 
   useEffect(() => {
     if (workbenchEvidence.isLoading) return;
@@ -1208,6 +1226,18 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 <span className="min-w-0">
                   Receipt path: Workbench holds the body. Ledger holds the audit trail. Project Lab reads push context.
                 </span>
+              </div>
+              <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-5" aria-label="Selected receipt audit read">
+                {selectedAuditRead.map((item) => (
+                  <div key={item.label} className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                      {item.label}
+                    </div>
+                    <div className="mt-0.5 line-clamp-2 text-[11px] leading-snug" style={{ color: item.tone }} title={item.value}>
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div className="min-w-0">

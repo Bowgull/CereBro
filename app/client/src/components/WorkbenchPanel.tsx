@@ -21,6 +21,7 @@ type PermissionClass = "manual_note" | "media_review" | "annotation" | "validati
 type ValidatorAgent = "oak" | "spock";
 type ValidationNoteStatus = "needs_review" | "looks_consistent" | "blocked" | "validated_for_local_use";
 type EvidenceGroupBy = "project" | "task" | "session" | "kind" | "source" | "command" | "artifact" | "validation_status";
+type WorkbenchRoute = "projects" | "security" | "ledger";
 type SelectOption = { value: string; label: string };
 type WorkbenchDraft = {
   source?: string;
@@ -53,7 +54,7 @@ type TemporaryMediaPreview = {
   durationSec: number | null;
 };
 
-export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
+export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: WorkbenchRoute) => void }) {
   const plan = trpc.workbench.plan.useQuery();
   const projects = trpc.projectIntelligence.overview.useQuery();
   const linkOptions = trpc.workbench.linkOptions.useQuery();
@@ -1282,7 +1283,7 @@ function EvidenceDetailPanel({
     | undefined;
   loading: boolean;
   onCreateValidationNote?: (input: { evidenceId: number; validatorAgent: ValidatorAgent; status: ValidationNoteStatus; note: string }) => void;
-  onNavigate?: (route: "security") => void;
+  onNavigate?: (route: WorkbenchRoute) => void;
   isCreatingValidationNote?: boolean;
   validationSavedId?: number | null;
   evidenceOptions?: Array<{
@@ -1358,6 +1359,62 @@ function EvidenceDetailPanel({
     }
     onNavigate("security");
   }
+  function openLedgerAudit() {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:ledger-focus",
+        JSON.stringify({
+          source: "workbench",
+          evidenceId: item.id,
+          notice: `Ledger opened Workbench receipt #${item.id}.`,
+        }),
+      );
+    } catch {
+      // Ledger still opens; the user can select the receipt manually.
+    }
+    onNavigate("ledger");
+  }
+  function openProjectContext() {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "workbench",
+          evidenceId: item.id,
+          projectName: item.projectName,
+          notice: item.projectName
+            ? `Workbench receipt #${item.id} opened ${item.projectName} project context.`
+            : `Workbench receipt #${item.id} has no linked project.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the user can inspect project context manually.
+    }
+    onNavigate("projects");
+  }
+  const sourceLabel = item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`);
+  const projectLabel = item.projectName ?? "unlinked";
+  const validationLabel =
+    detail.validationHistory.length > 0
+      ? `${detail.validationHistory.length} notes`
+      : item.validationStatus.replace(/_/g, " ");
+  const ledgerLabel = `receipt #${item.id}`;
+  const nextAction =
+    item.validationStatus === "needs_review"
+      ? "Append validation before treating this as checked."
+      : item.projectName
+        ? "Open Ledger or Project Lab before push decisions."
+        : "Link a project before using this for push context.";
+  const proofRead = [
+    { label: "Body", value: item.title, tone: C.textPrimary },
+    { label: "Source", value: sourceLabel, tone: item.sourceId == null && !item.sourceUri ? C.warning : C.accent },
+    { label: "Project", value: projectLabel, tone: item.projectName ? C.success : C.warning },
+    { label: "Validation", value: validationLabel, tone: item.validationStatus === "needs_review" ? C.warning : C.success },
+    { label: "Ledger", value: ledgerLabel, tone: C.gold },
+    { label: "Next", value: nextAction, tone: C.textSecondary },
+  ];
   return (
     <aside className="rounded p-2" aria-label="Workbench receipt body" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="mb-2 flex flex-wrap gap-1">
@@ -1368,6 +1425,41 @@ function EvidenceDetailPanel({
       </div>
       <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
       <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.summary}</p>
+      <div className="mt-2 rounded p-2" aria-label="Workbench proof read" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Receipt Body Read
+          </h4>
+          <Chip label="local proof" tone={C.gold} />
+        </div>
+        <div className="grid gap-1 sm:grid-cols-2">
+          {proofRead.map((entry) => (
+            <Meta key={entry.label} label={entry.label} value={entry.value} tone={entry.tone} />
+          ))}
+        </div>
+        {onNavigate && (
+          <div className="mt-2 grid grid-cols-3 gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openLedgerAudit} aria-label={`Open Ledger audit for receipt ${item.id}`}>
+              Ledger
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openProjectContext} aria-label={`Open Project Lab context for receipt ${item.id}`}>
+              Project
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={item.targetUri ? "risk" : "outline"}
+              className="h-7 px-2"
+              onClick={openSecurityGate}
+              disabled={!item.targetUri}
+              aria-label={`Open Security Gate for receipt ${item.id}`}
+              title={item.targetUri ? "Open Security Gate for this receipt target." : "This receipt has no target URI."}
+            >
+              Security
+            </Button>
+          </div>
+        )}
+      </div>
       <div className="mt-2 grid gap-1">
         <Meta label="Owner" value={item.ownerAgent} />
         <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
@@ -1714,11 +1806,11 @@ function formatSeconds(value: number) {
   return `${minutes}m ${seconds.toFixed(1)}s`;
 }
 
-function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
+function Meta({ label, value, title, tone = C.textSecondary }: { label: string; value: string; title?: string; tone?: string }) {
   return (
     <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
       <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
-      <div className="break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
+      <div className="break-words" style={{ color: tone }} title={title}>{value}</div>
     </div>
   );
 }

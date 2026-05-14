@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1614 EDT
+Last updated: 2026-05-14 1620 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1620 EDT - Workbench Ledger Receipt Body Pass
+
+### What Changed
+- Added a Receipt Body Read to Workbench receipt detail.
+- Workbench now shows body, source, project link, validation state, Ledger receipt id, and next safe action before the long metadata list.
+- Added Workbench route buttons for Ledger, Project, and Security. They set the same local focus receipts used by the rest of the visible loop.
+- Added a selected receipt audit read to Ledger: body, project, validation, route, and next action.
+- Kept Workbench and Ledger local/read-only. No browser action, git action, external write, schema change, or command execution was added.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. Vitest also ran related server files and reported 42 tests passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Workbench receipt body read plus Ledger audit read.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- This completes the visible loop shape for Project Lab -> Terminal Lab -> Workbench -> Ledger at the UI contract level.
+- Workbench owns the receipt body. Ledger owns the audit trail. Project Lab reads push context. Terminal Lab remains proposal-only.
+- No new Code Lab was added.
+
+### Known Risks
+- Visual browser inspection through the in-app browser was not callable in this tool set. Computer Use was blocked from controlling Codex, and Playwright is not installed in the app workspace.
+- The new Workbench and Ledger compact grids need mobile wrapping review in the browser.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and `CEREBRO_BUILD_QUEUE.md` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 31%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 43%.
+- Backend/runtime: 12%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Next visible-loop slice: backend route receipts before agent execution. Build local-only Aang -> Cortana route receipt support that the UI can display before any model, browser, git, Slack, Notion, or command action runs.
 
 ## 2026-05-14 1614 EDT - Terminal Map Read Pass
 
