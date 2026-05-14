@@ -56,5 +56,12 @@ describe("Model Tools local-first routing policy", () => {
     expect(policy.ollamaSetupPlan.testProcedure).toContain("Run a health prompt.");
     expect(policy.ollamaSetupPlan.storageRule).toContain("Mac is the workbench");
     expect(policy.ollamaSetupPlan.uiRule).toContain("Basement");
+    expect(policy.ollamaSetupPlan.nextApprovalSteps.map((item) => item.label)).toEqual([
+      "Check Install Status",
+      "Install Ollama",
+      "Pull First Batch",
+      "Run Local Eval",
+    ]);
+    expect(policy.ollamaSetupPlan.nextApprovalSteps.every((item) => item.runsFromPolicy === false)).toBe(true);
   });
 });

@@ -1299,6 +1299,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const securityRows = security.data?.items ?? [];
   const riskyReceipts = securityRows.filter((item) => item.riskLevel === "high" || item.riskLevel === "blocked").length;
   const latestRisk = securityRows[0]?.riskLevel ?? "none";
+  const ollamaSetup = modelPolicy.data?.ollamaSetupPlan;
 
   const cards = [
     {
@@ -1378,6 +1379,52 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </Button>
           ))}
         </section>
+
+        {ollamaSetup && (
+          <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Ollama setup receipt">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  Ollama Setup Receipt
+                </div>
+                <p className="mt-1 max-w-2xl text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                  Fast local-first lane. Nothing runs from this overview. Install, pulls, and evals need approval.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="warning" className="px-1.5 py-0.5" style={{ color: C.warning, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  {ollamaSetup.status.replace(/_/g, " ")}
+                </Badge>
+                <Badge variant="secondary" className="px-1.5 py-0.5" style={{ color: C.success, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  no install ran
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mt-2 grid gap-1.5 lg:grid-cols-4">
+              {ollamaSetup.nextApprovalSteps.map((step) => (
+                <div key={step.label} className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+                    {step.label}
+                  </div>
+                  <div className="mt-1" style={{ color: C.textSecondary }}>{step.gate}</div>
+                  <div className="mt-1" style={{ color: C.textMuted }}>{step.receipt}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1">
+              {ollamaSetup.firstApprovalBatch.map((item) => (
+                <Badge key={item.model} variant="secondary" className="px-1.5 py-0.5" style={{ color: C.accent, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  {item.model}
+                </Badge>
+              ))}
+              <Button type="button" size="sm" variant="outline" onClick={() => onNavigate("model_tools")} aria-label="Open Model Tools for Ollama setup details">
+                Open Model Details
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>

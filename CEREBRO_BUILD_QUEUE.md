@@ -289,3 +289,5 @@ Expected shape:
 - Model Tools now shows the Ollama setup readiness plan: first approval batch,
   stretch candidates, blocked first installs, test procedure, storage rule, and
   no-action receipt. No install or model pull runs from the panel.
+- Basement Overview now shows the Ollama setup receipt directly: status, next
+  approval steps, first-batch model chips, and a link into Model Details.

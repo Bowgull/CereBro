@@ -214,6 +214,32 @@ const ollamaSetupPlan = {
     "Record rough latency, quality, stability, disk impact, and memory pressure.",
     "Mark a model as tested only after the result is recorded.",
   ],
+  nextApprovalSteps: [
+    {
+      label: "Check Install Status",
+      gate: "Read-only command check may run after user approval.",
+      receipt: "Record PATH/version/list status. No install or pull.",
+      runsFromPolicy: false,
+    },
+    {
+      label: "Install Ollama",
+      gate: "Explicit install approval required.",
+      receipt: "Record installer path, version, disk impact, and CLI link status.",
+      runsFromPolicy: false,
+    },
+    {
+      label: "Pull First Batch",
+      gate: "Explicit model-pull approval required for each model.",
+      receipt: "Pull only all-minilm:22m and gemma3:1b first. Record disk impact.",
+      runsFromPolicy: false,
+    },
+    {
+      label: "Run Local Eval",
+      gate: "Explicit local eval approval required.",
+      receipt: "Record health, formatting, summary, light reasoning, latency, quality, and stability.",
+      runsFromPolicy: false,
+    },
+  ],
   noActionTaken: [
     "No Ollama install ran.",
     "No model was pulled.",
