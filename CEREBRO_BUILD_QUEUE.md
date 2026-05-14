@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-10
+Last updated: 2026-05-14
 
 This file is the lead agent's active queue.
 
@@ -60,6 +60,22 @@ Stop and ask when:
 
 ## Now
 
+### 2026-05-14 Active Worker Topology
+
+- Lead/integrator: this chat. Owns merge order, checks, percentages, handoff,
+  Obsidian archive, commit, and push.
+- Backend Runtime Worker: owns runtime route receipt contract improvements only.
+- Frontend Worker: owns Runtime Route Receipt to Workbench/Ledger staging only.
+- Knowledge Worker: read-only audit of archive/storage rules for this pass.
+- QA Worker: waits when thread capacity is full; lead performs minimal local QA.
+
+Current integration order:
+
+1. Backend route receipt draft fields.
+2. Frontend Workbench draft and Ledger focus buttons.
+3. Knowledge/archive audit findings.
+4. Verification, handoff, Obsidian, commit, push.
+
 ### Lead
 
 - Keep worker system controlled by this queue.
@@ -76,14 +92,11 @@ Stop and ask when:
 
 Next block:
 
-- Build the Keep-first visible chain:
-  `Ask Aang -> mode read -> Cortana route -> owner -> receipt -> approval -> next action`.
-- Keep Scene and Blueprint as views. Do not replace the Phaser Keep.
-- Make the right rail carry active agent, route, receipt status, permission
-  state, and next action.
-- Keep the route plain: Project Lab -> Terminal Lab -> Workbench -> Ledger.
-- Tighten only the UI that helps the user see what CereBro thinks, who owns the
-  work, what receipt exists, and what needs approval.
+- Connect Runtime Route Receipt to Workbench and Ledger without auto-saving.
+- Workbench button stages a local draft in session storage.
+- Ledger button sets a local focus notice in session storage.
+- Keep the route plain: Ask Aang -> Runtime Route Receipt -> Workbench/Ledger.
+- Do not create a new surface.
 
 Candidate owned files:
 
@@ -103,9 +116,10 @@ Checks:
 
 Next block:
 
-- Build local-only Aang to Cortana route receipt support.
-- Start with preview state and receipt fields before mutations.
-- No model call, browser action, command execution, or external write.
+- Improve `runtime.previewRoute` only where needed for Workbench draft and
+  Ledger focus data.
+- Keep route receipts preview-only unless the lead assigns commit/persist later.
+- No model call, browser action, command execution, DB write, or external write.
 
 Candidate owned files:
 
@@ -114,9 +128,7 @@ Candidate owned files:
 - `app/server/runtime/modelToolResolver.ts`
 - `app/server/runtime/runtimeTypes.ts`
 - `app/server/routers/runtime.ts`
-- `app/server/routers/commandIntake.ts`
-- `app/server/cerebroDb.ts`
-- `app/server/cerebro-foundations.test.ts`
+- `app/server/runtime.routeReceipt.test.ts`
 
 Checks:
 
@@ -173,7 +185,9 @@ Goal:
 - `runtime.previewRoute` returns Aang read, confidence, category, project,
   Cortana route, owner/support agents, permission class, model/tool proposals,
   approval gates, and next action.
-- `runtime.commitRoute` appends local route records only.
+- Next: route preview returns Workbench draft and Ledger focus payloads.
+- Later: `runtime.commitRoute` appends local route records only after UI proves
+  the preview shape.
 
 Expected shape:
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1635 EDT
+Last updated: 2026-05-14 1657 EDT
 
 ## Current North Star
 
@@ -20,6 +20,71 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1657 EDT - Worker Topology Route Draft Pass
+
+### What Changed
+- Set the active build method in `CEREBRO_WORKER_ORCHESTRATION.md`: this chat is Lead / Frontend Integrator; workers own backend runtime, frontend slices, knowledge/storage, and QA when capacity allows.
+- Updated `CEREBRO_BUILD_QUEUE.md` with the active worker topology, integration order, and current route receipt slice.
+- Dispatched three workers:
+  - Backend Runtime Worker added `workbenchReceiptDraft` and `ledgerFocusDraft` to `runtime.previewRoute`.
+  - Frontend Worker connected Runtime Route Receipt buttons to staged Workbench and Ledger session-storage payloads.
+  - Knowledge Worker audited Obsidian/archive compliance and confirmed the queue needed updating.
+- Lead integrated the backend draft fields into the frontend so Home uses the richer backend payload instead of rebuilding smaller local payloads.
+
+### Files Touched
+- `CEREBRO_WORKER_ORCHESTRATION.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed: 2 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_WORKER_ORCHESTRATION.md CEREBRO_BUILD_QUEUE.md app/client/src/pages/Home.tsx app/server/routers/runtime.ts app/server/runtime.routeReceipt.test.ts` passed.
+
+### Worker Findings
+- Backend worker: route drafts are preview-only and do not write DB rows.
+- Frontend worker: Workbench and Ledger are staged through `sessionStorage`; no save call was added.
+- Knowledge worker: handoff/archive rules are being followed; snapshots are growing large because each snapshot copies the accumulated handoff.
+- QA worker was not spawned because the thread limit was reached. Lead ran local verification instead.
+
+### Cleanliness Read
+- Current slice: worker topology docs plus route receipt Workbench/Ledger draft handoff.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- This is the better build method now in practice: lead integrates, workers own lanes, and the route receipt loop gets backend and frontend work without mixing files.
+- Runtime Route Receipt now leads to Workbench as staged body and Ledger as audit focus.
+- No browser, command, git, Slack, Notion, memory, model, provider, DB write, or external action was added.
+
+### Known Risks
+- Browser visual QA still needs to inspect the Runtime Route Receipt strip and Workbench draft intake.
+- Handoff snapshots are append-only but large. Next knowledge/storage slice should address storage pressure without breaking history.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and some non-current dirty files remain unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Workbench and Ledger use browser session storage only until the user clicks a save/create action.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 34%.
+- Foundation/docs/planning: 86%.
+- Frontend visible loop: 50%.
+- Backend/runtime: 18%.
+- Knowledge/storage/source: 25%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with lead plus worker lanes. Start by classifying the dirty worktree. Next slice: verify the Runtime Route Receipt to Workbench draft flow in browser when callable, then begin Block C storage contracts: artifact kinds, lifecycle states, retention rules, Obsidian lanes, RAG metadata fields, project bridge paths, and archive-only status without real vault writes in tests.
 
 ## 2026-05-14 1635 EDT - Ask Aang Dead Preview Cleanup Pass
 

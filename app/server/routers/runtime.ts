@@ -176,6 +176,8 @@ export const runtimeRouter = router({
       const approvalGates = preflight.requiredApprovals.length > 0
         ? preflight.requiredApprovals
         : ["No external action from route preview."];
+      const receiptSummary = `${routeChain.join(" -> ")}. ${nextActionFor(category, ownerAgent)}`;
+      const projectSlug = project?.slug ?? null;
 
       return {
         mode: "proposal_only" as const,
@@ -212,7 +214,39 @@ export const runtimeRouter = router({
           bodyTarget: "workbench",
           auditTarget: "ledger",
           validationTarget: supportAgents.includes("oak") ? "oak" : supportAgents.includes("spock") ? "spock" : "none",
-          summary: `${routeChain.join(" -> ")}. ${nextActionFor(category, ownerAgent)}`,
+          summary: receiptSummary,
+        },
+        workbenchReceiptDraft: {
+          kind: "route_preview",
+          stage: "staged",
+          saveTarget: "workbench",
+          autosave: false,
+          ownerAgent,
+          routeAgent: "cortana",
+          category,
+          permissionClass: permission.permissionClass,
+          projectSlug,
+          projectName: project?.label ?? null,
+          projectPath: project?.localPath ?? null,
+          summary: receiptSummary,
+          routeChain,
+          gates: approvalGates,
+          nextAction: nextActionFor(category, ownerAgent),
+        },
+        ledgerFocusDraft: {
+          kind: "route_preview_audit_focus",
+          focusTarget: "ledger",
+          autosave: false,
+          ownerAgent,
+          category,
+          projectSlug,
+          auditFilters: {
+            ownerAgent,
+            category,
+            projectSlug,
+            bodyTarget: "workbench",
+          },
+          focusSummary: `Focus Ledger on ${ownerAgent} ${category.replace(/_/g, " ")} route preview. No audit row is saved.`,
         },
         taskDraft: {
           title: taskTitleFor(input.text, category, project?.label ?? null),

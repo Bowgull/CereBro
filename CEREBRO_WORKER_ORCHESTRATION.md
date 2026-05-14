@@ -32,6 +32,39 @@ Safe concurrency:
 Do not run workers as independent product owners. Workers execute assigned
 slices. The lead keeps the total build path coherent.
 
+## Active Topology
+
+This is the approved build method until the user changes it.
+
+```text
+This chat = Lead / Frontend Integrator
+Backend Runtime Worker = route, permission, receipt, and test contracts
+Frontend Worker = one visible-loop UI slice with explicit file ownership
+Knowledge Worker = read-only or assigned storage/source/Obsidian slice
+QA Worker = read-only review when thread capacity allows
+```
+
+Default concurrency:
+
+- 1 lead
+- 1 frontend coding worker
+- 1 backend coding worker
+- 1 knowledge or QA read-only worker
+
+Do not exceed 3 active workers unless the user explicitly asks and the thread
+limit allows it. If the fourth worker cannot be spawned, QA waits and the lead
+does a minimal local verification pass.
+
+The lead integrates in this order:
+
+1. Backend contract.
+2. Frontend surface.
+3. Knowledge/archive update.
+4. QA findings.
+5. Checks, handoff, Obsidian, commit, push.
+
+Workers do not update percentages. The lead updates percentages once per pass.
+
 ## Long Pass Protocol
 
 Longer passes are allowed when the scope is coherent and the worktree can stay

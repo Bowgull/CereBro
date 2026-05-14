@@ -1415,6 +1415,38 @@ function RuntimeRouteReceipt({
     toolProposal: { actionClass: string; perceptionClass: string; externalTarget: boolean; approvalRequired: boolean };
     approvalGates: string[];
     receipt: { kind: string; bodyTarget: string; auditTarget: string; validationTarget: string; summary: string };
+    workbenchReceiptDraft: {
+      kind: string;
+      stage: string;
+      saveTarget: string;
+      autosave: boolean;
+      ownerAgent: string;
+      routeAgent: string;
+      category: string;
+      permissionClass: string;
+      projectSlug: string | null;
+      projectName: string | null;
+      projectPath: string | null;
+      summary: string;
+      routeChain: string[];
+      gates: string[];
+      nextAction: string;
+    };
+    ledgerFocusDraft: {
+      kind: string;
+      focusTarget: string;
+      autosave: boolean;
+      ownerAgent: string;
+      category: string;
+      projectSlug: string | null;
+      auditFilters: {
+        ownerAgent: string;
+        category: string;
+        projectSlug: string | null;
+        bodyTarget: string;
+      };
+      focusSummary: string;
+    };
     taskDraft: { title: string; agent: string; projectName: string | null; projectPath: string | null };
     nextAction: string;
     gates: string[];
@@ -1433,6 +1465,59 @@ function RuntimeRouteReceipt({
     { label: "Approval", value: result.approvalGates[0] ?? "No gate listed", tone: result.toolProposal.approvalRequired ? C.warning : C.success },
     { label: "Next", value: result.nextAction, tone: C.textSecondary },
   ];
+
+  function workbenchPermissionClass(permissionClass: string) {
+    if (permissionClass === "public_browser") return "public_browser";
+    if (permissionClass === "local_preview") return "local_preview";
+    if (permissionClass === "media_review") return "media_review";
+    if (permissionClass === "annotation") return "annotation";
+    if (permissionClass === "validation") return "validation";
+    return "manual_note";
+  }
+
+  function openWorkbenchRouteDraft() {
+    try {
+      const draft = result.workbenchReceiptDraft;
+      window.sessionStorage.setItem(
+        "cerebro:workbench-draft",
+        JSON.stringify({
+          kind: "manual_note",
+          source: "runtime_route",
+          routeKind: draft.kind,
+          title: result.taskDraft.title,
+          summary: draft.summary,
+          routeAgent: draft.ownerAgent,
+          permissionClass: workbenchPermissionClass(draft.permissionClass),
+          targetUri: draft.projectPath,
+          routeChain: draft.routeChain,
+          gates: draft.gates,
+          nextAction: draft.nextAction,
+          notice: "Runtime route receipt staged as a Workbench draft. Review before saving.",
+        }),
+      );
+    } catch {
+      // Workbench still opens; no receipt is saved automatically.
+    }
+    onNavigate("workbench");
+  }
+
+  function openLedgerRouteFocus() {
+    try {
+      const focus = result.ledgerFocusDraft;
+      window.sessionStorage.setItem(
+        "cerebro:ledger-focus",
+        JSON.stringify({
+          source: "runtime_route",
+          focusKind: focus.kind,
+          filters: focus.auditFilters,
+          notice: focus.focusSummary,
+        }),
+      );
+    } catch {
+      // Ledger still opens; the user can inspect recent receipts manually.
+    }
+    onNavigate("ledger");
+  }
 
   return (
     <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
@@ -1463,10 +1548,10 @@ function RuntimeRouteReceipt({
             >
               {taskCreated ? "Task Saved" : isCreatingTask ? "Saving" : "Create Task"}
             </Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench route receipt body">
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openWorkbenchRouteDraft} aria-label="Stage route receipt draft in Workbench">
               Workbench
             </Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger route receipt audit">
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openLedgerRouteFocus} aria-label="Open Ledger focused on route preview">
               Ledger
             </Button>
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">

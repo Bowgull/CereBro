@@ -16,11 +16,37 @@ async function countRows(table: string) {
   return Number(result.rows[0]?.count ?? 0);
 }
 
+const previewMutationTables = [
+  "tasks",
+  "sessions",
+  "memory_entries",
+  "memory_proposals",
+  "outputs",
+  "validations",
+  "approvals",
+  "tool_calls",
+  "command_observations",
+  "capture_observations",
+  "reminder_proposals",
+  "message_draft_proposals",
+  "sources",
+  "source_events",
+  "workbench_evidence_records",
+  "permission_preflight_records",
+] as const;
+
+async function countPreviewMutationRows() {
+  const counts = new Map<string, number>();
+  for (const table of previewMutationTables) {
+    counts.set(table, await countRows(table));
+  }
+  return counts;
+}
+
 describe("runtime route receipt preview", () => {
-  it("returns a local-only Aang to Cortana receipt without mutating task or evidence history", async () => {
+  it("returns a local-only Aang to Cortana receipt draft without mutating history", async () => {
     const caller = createCaller();
-    const taskCountBefore = await countRows("tasks");
-    const evidenceCountBefore = await countRows("workbench_evidence_records");
+    const rowCountsBefore = await countPreviewMutationRows();
 
     const preview = await caller.runtime.previewRoute({
       text: "keep building CereBro front end",
@@ -41,13 +67,32 @@ describe("runtime route receipt preview", () => {
     expect(preview.receipt.kind).toBe("route_preview");
     expect(preview.receipt.bodyTarget).toBe("workbench");
     expect(preview.receipt.auditTarget).toBe("ledger");
+    expect(preview.workbenchReceiptDraft.kind).toBe("route_preview");
+    expect(preview.workbenchReceiptDraft.stage).toBe("staged");
+    expect(preview.workbenchReceiptDraft.saveTarget).toBe("workbench");
+    expect(preview.workbenchReceiptDraft.autosave).toBe(false);
+    expect(preview.workbenchReceiptDraft.summary).toBe(preview.receipt.summary);
+    expect(preview.workbenchReceiptDraft.routeChain).toEqual(preview.cortanaRoute);
+    expect(preview.workbenchReceiptDraft.gates).toContain("No external action from route preview.");
+    expect(preview.ledgerFocusDraft.kind).toBe("route_preview_audit_focus");
+    expect(preview.ledgerFocusDraft.focusTarget).toBe("ledger");
+    expect(preview.ledgerFocusDraft.autosave).toBe(false);
+    expect(preview.ledgerFocusDraft.projectSlug).toBe("cerebro");
+    expect(preview.ledgerFocusDraft.auditFilters).toEqual({
+      ownerAgent: "tony",
+      category: "project_build",
+      projectSlug: "cerebro",
+      bodyTarget: "workbench",
+    });
+    expect(preview.ledgerFocusDraft.focusSummary).toContain("tony");
     expect(preview.taskDraft.agent).toBe("tony");
     expect(preview.taskDraft.projectName).toBe("CereBro");
     expect(preview.taskDraft.title).toContain("project build");
     expect(preview.gates.join(" ")).toContain("No model call");
 
-    expect(await countRows("tasks")).toBe(taskCountBefore);
-    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore);
+    for (const table of previewMutationTables) {
+      expect(await countRows(table)).toBe(rowCountsBefore.get(table));
+    }
   });
 
   it("keeps public research behind approval gates", async () => {
