@@ -67,7 +67,7 @@ function toneForPrivacy(value: string) {
   return C.textMuted;
 }
 
-export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
+export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "approvals") => void }) {
   const utils = trpc.useUtils();
   const [kind, setKind] = useState<CapabilityKind | "all">("all");
   const [evalStatus, setEvalStatus] = useState<EvalStatusFilter>("all");
@@ -332,6 +332,17 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                   aria-label="Stage Ollama status check approval preview"
                 >
                   {createOllamaStatusApproval.isPending ? "Staging" : "Stage Approval Preview"}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onNavigate?.("approvals")}
+                  disabled={!onNavigate}
+                  title="Open the local Approval Queue. This does not approve or execute the status check."
+                  aria-label="Open Approval Queue for Ollama status approval previews"
+                >
+                  Open Approval Queue
                 </Button>
                 <Badge label={`pending ${ollamaStatusApprovals.data?.items.filter((item) => item.status === "pending").length ?? 0}`} tone={C.warning} />
               </div>

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1914 EDT
+Last updated: 2026-05-14 1920 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1920 EDT - Model Tools Approval Queue Bridge Pass
+
+### What Changed
+- Kept Raven quarantined in the separate Raven chat. No Raven files were touched.
+- Added an `Open Approval Queue` control beside the Ollama status approval-preview button in `ModelToolsPanel`.
+- Passed the app navigation handler into `ModelToolsPanel` from `Home`.
+- Updated the Approval Queue empty state so Model Tools is named as a valid preview staging source.
+- Avoided editing `app/server/routers/approvals.ts` because it already contains unstaged Raven queue changes. The model-tools origin map should wait until that backend batch is resolved or staged cleanly.
+
+### Files Touched
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `git diff --check -- app/client/src/components/ModelToolsPanel.tsx app/client/src/pages/Home.tsx app/client/src/components/ApprovalDashboardPanel.tsx` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/client/src/components/ModelToolsPanel.tsx app/client/src/pages/Home.tsx app/client/src/components/ApprovalDashboardPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Model Tools to Approval Queue bridge.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven chat.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no Ollama status command, install, pull, model call, vector index, external escalation, browser action, command execution, approval action, or storage migration ran.
+
+### Front-End Steward Review
+- This is the safer next move because the user can now follow the receipt from where it is created to where it is reviewed.
+- The Approval Queue still does not approve or execute anything.
+- The backend origin filter for Model Tools is intentionally deferred until the existing dirty Raven approval-router work can be handled without mixing commits.
+
+### Completion Read
+- Overall: 44%.
+- Foundation/docs/planning: 90%.
+- Frontend visible loop: 60%.
+- Backend/runtime: 29%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue CereBro core only. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: visually inspect the Model Details to Approval Queue bridge in localhost, then add the Model Tools approval origin filter only after the dirty Raven approval-router batch is resolved or can be staged separately. Do not run the Ollama status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 1914 EDT - Ollama Status Approval Preview Pass
 

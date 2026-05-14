@@ -321,7 +321,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
 
           {items.length === 0 ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No approval previews match these filters. Reset filters or stage a preview from Hedwig or Terminal Lab.
+              No approval previews match these filters. Reset filters or stage a preview from Hedwig, Terminal Lab, Project Lab, Sources, or Model Tools.
             </div>
           ) : (
             <div className="grid gap-1.5">

@@ -297,3 +297,6 @@ Expected shape:
 - Model Tools can now stage a local approval preview for the Ollama
   install-status check. It records approval/preflight metadata only and still
   runs no command, install, pull, model call, or background process.
+- Model Details now links staged Ollama status previews directly to the Approval
+  Queue, and the Approval Queue empty state now names Model Tools as a staging
+  source.
