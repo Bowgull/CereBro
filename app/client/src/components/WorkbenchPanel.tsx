@@ -1279,6 +1279,14 @@ function EvidenceDetailPanel({
           permissionPreflightId: number | null;
           createdAt: number;
         }>;
+        knowledgeRoute: {
+          projectBridgePath: string;
+          repositorySourcePath: string;
+          archiveLane: string;
+          archiveRetrieval: string;
+          writesExternalSystems: boolean;
+          approvalGate: string;
+        } | null;
       }
     | undefined;
   loading: boolean;
@@ -1460,6 +1468,29 @@ function EvidenceDetailPanel({
           </div>
         )}
       </div>
+      {detail.knowledgeRoute && (
+        <div className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Knowledge Route
+            </h4>
+            <Chip label="read only" tone={C.gold} />
+          </div>
+          <div className="grid gap-1">
+            <Meta label="Bridge" value={detail.knowledgeRoute.projectBridgePath} tone={C.success} />
+            <Meta label="Source" value={detail.knowledgeRoute.repositorySourcePath} tone={C.accent} />
+            <Meta label="Archive" value={`${detail.knowledgeRoute.archiveLane} / ${detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")}`} tone={C.warning} />
+            <Meta
+              label="Writes"
+              value={detail.knowledgeRoute.writesExternalSystems ? "enabled" : "approval gated"}
+              tone={detail.knowledgeRoute.writesExternalSystems ? C.danger : C.gold}
+            />
+          </div>
+          <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+            {detail.knowledgeRoute.approvalGate}
+          </div>
+        </div>
+      )}
       <div className="mt-2 grid gap-1">
         <Meta label="Owner" value={item.ownerAgent} />
         <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />

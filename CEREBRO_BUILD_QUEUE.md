@@ -269,3 +269,5 @@ Expected shape:
   paths without writing to the vault or creating cleanup actions.
 - Project Lab now shows each tracked project's knowledge route: bridge note,
   GitHub source note, archive-only history, and the write approval gate.
+- Workbench receipt bodies now show linked project knowledge route context when
+  a receipt belongs to a project, without creating durable notes.

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1725 EDT
+Last updated: 2026-05-14 1751 EDT
 
 ## Current North Star
 
@@ -20,6 +20,51 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1751 EDT - Workbench Knowledge Route Context Pass
+
+### What Changed
+- Added project knowledge route context to `workbench.evidenceDetail` when a receipt is linked to a project.
+- Workbench receipt bodies now show project bridge path, repository source path, archive-only lane, write status, and write approval gate.
+- Added a targeted mutation guard test proving the Workbench detail route read does not write artifacts, approvals, or memory entries.
+- Updated `CEREBRO_BUILD_QUEUE.md` with this Block C progress.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/workbench.knowledgeRoute.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbench.knowledgeRoute.test.ts server/knowledge/contracts.test.ts --pool=forks --fileParallelism=false` passed: 5 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/workbench.ts app/server/workbench.knowledgeRoute.test.ts app/client/src/components/WorkbenchPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Workbench read-only knowledge route context.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: visual browser screenshot was not available through the current tool set; localhost responded with 200.
+
+### Front-End Steward Review
+- Workbench now shows knowledge destination where it matters: on the receipt body.
+- No new UI surface was added.
+- No Obsidian, vault, Notion, Slack, Drive, memory, git, browser, or source write was added.
+
+### Completion Read
+- Overall: 38%.
+- Foundation/docs/planning: 89%.
+- Frontend visible loop: 53%.
+- Backend/runtime: 21%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the build spine. Start by classifying the dirty worktree. Next slice: begin Model and Tool Registry as basement capability proposals, keeping ComfyUI/Gojo/Raven separated by privacy lanes and no installs.
 
 ## 2026-05-14 1725 EDT - Project Lab Knowledge Route Pass
 

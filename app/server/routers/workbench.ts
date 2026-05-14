@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb } from "../cerebroDb";
+import {
+  GITHUB_PROJECT_MAP_PATH,
+  GITHUB_SOURCES_INDEX_PATH,
+  githubProjectBridgePath,
+  githubRepositorySourcePath,
+} from "../knowledge/contracts";
 import { type PerceptionClass, recordPermissionPreflight } from "../permissionPolicy";
 import { sessionDisplayName } from "./sessions";
 
@@ -73,6 +79,21 @@ function rowToEvidence(row: Record<string, unknown>) {
     command: row.command == null ? null : String(row.command),
     artifactTitle: row.artifact_title == null ? null : String(row.artifact_title),
     artifactPath: row.storage_path == null ? null : String(row.storage_path),
+  };
+}
+
+function projectKnowledgeRoute(projectName: string | null) {
+  if (!projectName) return null;
+  return {
+    mode: "read_only" as const,
+    projectBridgePath: githubProjectBridgePath(projectName),
+    repositorySourcePath: githubRepositorySourcePath(projectName),
+    projectMapPath: GITHUB_PROJECT_MAP_PATH,
+    sourcesIndexPath: GITHUB_SOURCES_INDEX_PATH,
+    archiveLane: "90_Archive" as const,
+    archiveRetrieval: "archive_only" as const,
+    writesExternalSystems: false,
+    approvalGate: "Creating or updating bridge/source notes requires an explicit write approval.",
   };
 }
 
@@ -602,6 +623,7 @@ export const workbenchRouter = router({
         opensBrowser: false,
         capturesMedia: false,
         evidence: rowToEvidence(row),
+        knowledgeRoute: projectKnowledgeRoute(row.project_name == null ? null : String(row.project_name)),
         permissionPreflight: row.permission_preflight_id == null ? null : {
           id: Number(row.permission_preflight_id),
           mode: row.preflight_mode == null ? null : String(row.preflight_mode),
