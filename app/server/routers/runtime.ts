@@ -142,6 +142,13 @@ function nextActionFor(category: RouteCategory, ownerAgent: string) {
   return `${ownerAgent} can draft locally. Any action still needs its matching gate.`;
 }
 
+function taskTitleFor(text: string, category: RouteCategory, projectLabel: string | null) {
+  const prefix = projectLabel ? `${projectLabel}: ` : "";
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  const shortText = cleaned.length > 120 ? `${cleaned.slice(0, 117)}...` : cleaned;
+  return `${prefix}${category.replace(/_/g, " ")} - ${shortText}`;
+}
+
 export const runtimeRouter = router({
   previewRoute: publicProcedure
     .input(
@@ -206,6 +213,12 @@ export const runtimeRouter = router({
           auditTarget: "ledger",
           validationTarget: supportAgents.includes("oak") ? "oak" : supportAgents.includes("spock") ? "spock" : "none",
           summary: `${routeChain.join(" -> ")}. ${nextActionFor(category, ownerAgent)}`,
+        },
+        taskDraft: {
+          title: taskTitleFor(input.text, category, project?.label ?? null),
+          agent: ownerAgent,
+          projectName: project?.label ?? null,
+          projectPath: project?.localPath ?? null,
         },
         nextAction: nextActionFor(category, ownerAgent),
         gates: [

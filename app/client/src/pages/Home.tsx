@@ -179,7 +179,6 @@ export default function Home() {
 
   const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, { refetchInterval: 5000 });
   const { data: agentRoster } = trpc.keep.agents.useQuery();
-  const commandIntake = trpc.commandIntake.preview.useMutation();
   const routePreview = trpc.runtime.previewRoute.useMutation();
   const utils = trpc.useUtils();
   const createTask = trpc.tasks.create.useMutation({
@@ -508,20 +507,10 @@ export default function Home() {
           result={routePreview.data}
           onDismiss={() => routePreview.reset()}
           onNavigate={setNav}
-        />
-      )}
-      {commandIntake.data && (
-        <IntakePreview
-          result={commandIntake.data}
-          onDismiss={() => {
-            commandIntake.reset();
-            routePreview.reset();
-          }}
           isCreatingTask={createTask.isPending}
           taskCreated={Boolean(createTask.data)}
-          onNavigate={setNav}
           onCreateTask={() => {
-            const draft = commandIntake.data?.taskDraft;
+            const draft = routePreview.data?.taskDraft;
             if (!draft || createTask.isPending) return;
             createTask.mutate(
               {
@@ -546,12 +535,11 @@ export default function Home() {
         mode={mode}
         onModeChange={setMode}
         onNavigate={setNav}
-        isClassifying={commandIntake.isPending || routePreview.isPending}
+        isClassifying={routePreview.isPending}
         onSubmit={() => {
           const text = askInput.trim();
-          if (!text || commandIntake.isPending || routePreview.isPending) return;
+          if (!text || routePreview.isPending) return;
           routePreview.mutate({ text, mode });
-          commandIntake.mutate({ text, mode });
         }}
       />
 
@@ -1631,6 +1619,9 @@ function RuntimeRouteReceipt({
   result,
   onDismiss,
   onNavigate,
+  onCreateTask,
+  isCreatingTask,
+  taskCreated,
 }: {
   result: {
     category: string;
@@ -1645,11 +1636,15 @@ function RuntimeRouteReceipt({
     toolProposal: { actionClass: string; perceptionClass: string; externalTarget: boolean; approvalRequired: boolean };
     approvalGates: string[];
     receipt: { kind: string; bodyTarget: string; auditTarget: string; validationTarget: string; summary: string };
+    taskDraft: { title: string; agent: string; projectName: string | null; projectPath: string | null };
     nextAction: string;
     gates: string[];
   };
   onDismiss: () => void;
   onNavigate: (id: NavId) => void;
+  onCreateTask: () => void;
+  isCreatingTask: boolean;
+  taskCreated: boolean;
 }) {
   const routePreviewFields = [
     { label: "Aang", value: result.aangRead, tone: C.gold },
@@ -1677,6 +1672,18 @@ function RuntimeRouteReceipt({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant={taskCreated ? "secondary" : "default"}
+              className="h-7 px-2"
+              onClick={onCreateTask}
+              disabled={isCreatingTask}
+              aria-label={taskCreated ? "Task saved from route receipt" : isCreatingTask ? "Saving route task" : `Create task: ${result.taskDraft.title}`}
+              title={result.taskDraft.title}
+            >
+              {taskCreated ? "Task Saved" : isCreatingTask ? "Saving" : "Create Task"}
+            </Button>
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench route receipt body">
               Workbench
             </Button>

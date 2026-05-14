@@ -41,6 +41,9 @@ describe("runtime route receipt preview", () => {
     expect(preview.receipt.kind).toBe("route_preview");
     expect(preview.receipt.bodyTarget).toBe("workbench");
     expect(preview.receipt.auditTarget).toBe("ledger");
+    expect(preview.taskDraft.agent).toBe("tony");
+    expect(preview.taskDraft.projectName).toBe("CereBro");
+    expect(preview.taskDraft.title).toContain("project build");
     expect(preview.gates.join(" ")).toContain("No model call");
 
     expect(await countRows("tasks")).toBe(taskCountBefore);

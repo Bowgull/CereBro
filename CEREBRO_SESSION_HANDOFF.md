@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1628 EDT
+Last updated: 2026-05-14 1632 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1632 EDT - Ask Aang Runtime Route Unification Pass
+
+### What Changed
+- Ask Aang now uses `runtime.previewRoute` as the single visible route receipt source.
+- Removed the duplicate live call to the older `commandIntake.preview` path from the shell submit flow.
+- Runtime route receipts now include a task draft.
+- The visible Runtime Route Receipt strip can create a task directly from the Aang -> Cortana route receipt.
+- Kept the path preview-only. Task creation is the only user-triggered mutation and still uses the existing local Tasks router.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed: 2 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Ask Aang route preview unification, task draft connection, focused tests, handoff/archive.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: browser visual QA is still unavailable from this tool set.
+
+### Front-End Steward Review
+- The bottom command path is now simpler: Ask Aang -> runtime route receipt -> optional local task.
+- Workbench and Ledger remain visible next stops for receipt body and audit.
+- No browser, command, git, Slack, Notion, memory, model, provider, or external action was added.
+
+### Known Risks
+- The old `IntakePreview` component still exists in `Home.tsx` but is no longer called. It can be deleted in a cleanup pass after confirming no hidden dependency.
+- The route classifier is deterministic and intentionally simple.
+- Visual browser inspection through the in-app browser was not callable in this tool set.
+- Existing unrelated backend/Raven/reference files, an older Sundesk note in docs, and `CEREBRO_BUILD_QUEUE.md` remain dirty and unstaged.
+
+### Storage Impact
+- No schema changed.
+- Optional Create Task writes only to the existing local Tasks table after user click.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 33%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 47%.
+- Backend/runtime: 16%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Next slice: remove the unused `IntakePreview` dead code if safe, then make the route receipt available to Workbench as a staged receipt draft without auto-saving.
 
 ## 2026-05-14 1628 EDT - Runtime Route Receipt Preview Pass
 
