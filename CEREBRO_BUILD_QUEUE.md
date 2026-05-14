@@ -261,3 +261,6 @@ Expected shape:
   `90_Archive/Sundesk Build History/snapshots/`; the project bridge stays at
   `10_Projects/Sundesk/Sundesk.md`; the wrong root `Sundesk` lane should not
   be recreated.
+- Block C knowledge contract layer started: artifact kinds, lifecycle states,
+  retention rules, vault layout, Obsidian lanes, RAG metadata fields, and
+  GitHub bridge paths now have one backend source of truth.

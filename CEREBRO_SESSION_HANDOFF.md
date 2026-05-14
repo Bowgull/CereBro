@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1702 EDT
+Last updated: 2026-05-14 1709 EDT
 
 ## Current North Star
 
@@ -20,6 +20,52 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1709 EDT - Knowledge Contract Source Of Truth Pass
+
+### What Changed
+- Added `app/server/knowledge/contracts.ts` as the backend source of truth for artifact kinds, lifecycle states, storage providers, retention rules, vault layout, Obsidian lanes, RAG metadata fields, and GitHub project bridge paths.
+- Updated `app/server/integrations/vault.ts` to read vault and Obsidian route contracts from the centralized knowledge contract layer.
+- Updated `app/server/routers/artifacts.ts` to read artifact schemas, vault text targets, default lifecycle state, and default retention rules from the same contract layer.
+- Added targeted tests for the knowledge contract.
+- Updated `CEREBRO_BUILD_QUEUE.md` so Block C progress is visible.
+
+### Files Touched
+- `app/server/knowledge/contracts.ts`
+- `app/server/knowledge/contracts.test.ts`
+- `app/server/integrations/vault.ts`
+- `app/server/routers/artifacts.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/knowledge/contracts.test.ts --pool=forks --fileParallelism=false` passed: 4 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- Pending: final `git diff --check` before commit.
+
+### Cleanliness Read
+- Current slice: backend knowledge contracts plus narrow router imports.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no real vault, Obsidian, Notion, Slack, Drive, or vector writes were added.
+
+### Front-End Steward Review
+- This was a backend foundation slice for the visible storage contract.
+- The UI did not change yet.
+- The next UI move is to expose the storage contract as a readable Piccolo/Oak receipt instead of hiding it in docs.
+
+### Completion Read
+- Overall: 35%.
+- Foundation/docs/planning: 88%.
+- Frontend visible loop: 50%.
+- Backend/runtime: 19%.
+- Knowledge/storage/source: 29%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue Block C. Start by classifying the dirty worktree. Next slice: add a read-only storage contract receipt to the backend/router layer and surface it in the Keep without writing to the real vault.
 
 ## 2026-05-14 1702 EDT - Sundesk Archive Drift Cleanup
 

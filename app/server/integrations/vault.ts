@@ -13,17 +13,19 @@
  */
 import fs from "fs/promises";
 import path from "path";
+import {
+  OBSIDIAN_KNOWLEDGE_ROUTES,
+  VAULT_LAYOUT,
+  type ObsidianKnowledgeRoute,
+  type VaultLayoutEntry,
+} from "../knowledge/contracts";
+
+export { OBSIDIAN_RETRIEVAL_METADATA_FIELDS } from "../knowledge/contracts";
 
 export interface VaultStatus {
   configured: boolean;
   vaultDir: string | null;
   exists: boolean;
-}
-
-export interface VaultLayoutEntry {
-  key: string;
-  relativePath: string;
-  purpose: string;
 }
 
 export interface ObsidianStatus {
@@ -32,83 +34,6 @@ export interface ObsidianStatus {
   exists: boolean;
   source: "env" | "vault-default" | "none";
 }
-
-export interface ObsidianKnowledgeRoute {
-  key: string;
-  relativePath: string;
-  purpose: string;
-  retrievalDefault: "include_index" | "include_when_validated" | "archive_only" | "exclude";
-}
-
-export const VAULT_LAYOUT: VaultLayoutEntry[] = [
-  { key: "inboxCaptures", relativePath: "00_Inbox/captures", purpose: "Unsorted quick captures." },
-  { key: "inboxDroppedFiles", relativePath: "00_Inbox/dropped-files", purpose: "User-dropped files waiting for routing." },
-  { key: "projects", relativePath: "01_Projects", purpose: "Project/client-scoped workspaces." },
-  { key: "sources", relativePath: "02_Sources", purpose: "Saved source captures and provenance." },
-  { key: "outputDrafts", relativePath: "03_Outputs/drafts", purpose: "Draft outputs before review." },
-  { key: "outputReview", relativePath: "03_Outputs/review", purpose: "Outputs awaiting approval or validation." },
-  { key: "outputPublished", relativePath: "03_Outputs/published", purpose: "Approved durable outputs." },
-  { key: "creativeImages", relativePath: "04_Creative/images", purpose: "Image prompts, drafts, finals, and rejected variants." },
-  { key: "creativeVideo", relativePath: "04_Creative/video", purpose: "Video scripts, previews, renders, and exports." },
-  { key: "code", relativePath: "05_Code", purpose: "Code handoffs, diffs, QA reports, and release notes." },
-  { key: "messages", relativePath: "06_Messages", purpose: "Drafts, sent items, follow-ups, and archives." },
-  { key: "obsidian", relativePath: "07_Knowledge/obsidian-vault", purpose: "Durable Markdown knowledge vault." },
-  { key: "markdownExports", relativePath: "07_Knowledge/markdown-exports", purpose: "Markdown exports outside the live Obsidian vault." },
-  { key: "systemLogs", relativePath: "08_System/logs", purpose: "System logs and operational records." },
-  { key: "modelTests", relativePath: "08_System/model-tests", purpose: "Local model test notes and metrics." },
-  { key: "cleanupReports", relativePath: "08_System/cleanup-reports", purpose: "Piccolo scan reports." },
-  { key: "temp", relativePath: "09_Temp", purpose: "Regenerable scratch files and previews." },
-  { key: "archive", relativePath: "99_Archive", purpose: "Approved archived material." },
-  { key: "trashStaging", relativePath: "99_Trash_Staging", purpose: "Review zone before any approved deletion." },
-];
-
-export const OBSIDIAN_KNOWLEDGE_ROUTES: ObsidianKnowledgeRoute[] = [
-  {
-    key: "atlas",
-    relativePath: "00_Atlas",
-    purpose: "Human entry points, vault maps, and navigation notes.",
-    retrievalDefault: "include_index",
-  },
-  {
-    key: "projects",
-    relativePath: "10_Projects",
-    purpose: "Project bridge notes. Every active project routes through one bridge.",
-    retrievalDefault: "include_when_validated",
-  },
-  {
-    key: "knowledge",
-    relativePath: "20_Knowledge",
-    purpose: "Current decisions, sources, learning, playbooks, reviews, operations, and capture syntheses.",
-    retrievalDefault: "include_when_validated",
-  },
-  {
-    key: "media",
-    relativePath: "60_Media",
-    purpose: "Indexes and notes about media artifacts. Heavy files stay in Drive.",
-    retrievalDefault: "include_index",
-  },
-  {
-    key: "templates",
-    relativePath: "80_Templates",
-    purpose: "Reusable note templates with RAG metadata fields.",
-    retrievalDefault: "include_index",
-  },
-  {
-    key: "archive",
-    relativePath: "90_Archive",
-    purpose: "Append-only session and build history. Searchable by humans, excluded from normal retrieval.",
-    retrievalDefault: "archive_only",
-  },
-];
-
-export const OBSIDIAN_RETRIEVAL_METADATA_FIELDS = [
-  "canonical_status",
-  "retrieval_status",
-  "llm_summary",
-  "source_ids",
-  "related_notes",
-  "privacy_class",
-] as const;
 
 export async function getVaultStatus(): Promise<VaultStatus> {
   const vaultDir = process.env.CEREBRO_VAULT_DIR ?? null;
