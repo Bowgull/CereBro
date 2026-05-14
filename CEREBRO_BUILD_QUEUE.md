@@ -317,3 +317,6 @@ Expected shape:
 - Approval Queue now shows a compact receipt chain on selected previews:
   origin, target, preflight, next safe surface, and Security Gate jump.
 - Local Playwright inspection output is ignored through `.gitignore`.
+- Workbench now follows the low-machinery rule more closely: surfaces,
+  permissions, receipt shape, and gates live behind one `Workbench Rules`
+  disclosure instead of occupying the primary work flow.

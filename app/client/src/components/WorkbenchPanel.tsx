@@ -487,18 +487,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               ))}
             </section>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex flex-wrap gap-1 mb-2">
-                <Chip label={data.mode.replace(/_/g, " ")} tone={C.warning} />
-                <Chip label={data.opensBrowser ? "browser opens" : "no browser"} tone={C.success} />
-                <Chip label={data.capturesMedia ? "media capture" : "no media capture"} tone={C.success} />
-                <Chip label={data.writesExternal ? "external writes" : "no external writes"} tone={C.success} />
-              </div>
-              <p className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
-                {data.summary}
-              </p>
-            </section>
-
             <WorkbenchReceiptChainStrip
               draft={stagedDraftChain}
               selectedEvidenceId={selectedEvidenceId}
@@ -566,52 +554,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   ))}
                 </div>
               )}
-            </section>
-
-            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
-              {data.surfaces.map((surface) => (
-                <article key={surface.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <div className="flex items-start justify-between gap-1.5">
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest leading-snug" style={{ color: C.textPrimary }}>{surface.label}</h3>
-                    <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "partially_live" ? C.accent : C.textMuted} />
-                  </div>
-                  <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
-                    {surface.ownerAgent}
-                  </div>
-                  <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    {surface.permission}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {surface.records.slice(0, 5).map((record) => (
-                      <Chip key={record} label={record.replace(/_/g, " ")} tone={C.textMuted} />
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </section>
-
-            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2" aria-label="Workbench permissions">
-              {data.permissionModel.map((item) => (
-                <article key={item.class} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: C.textPrimary }}>
-                    {item.class.replace(/_/g, " ")}
-                  </h3>
-                  <List title="Allowed" tone={C.success} items={item.allowed} />
-                  <List title="Blocked" tone={C.danger} items={item.blocked} />
-                </article>
-              ))}
-            </section>
-
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2">Receipt Shape</h3>
-              <div className="flex flex-wrap gap-1 mb-2">
-                {data.evidenceRecordShape.required.map((field) => (
-                  <Chip key={field} label={field.replace(/_/g, " ")} tone={C.accent} />
-                ))}
-              </div>
-              <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                {data.evidenceRecordShape.note}
-              </p>
             </section>
 
             <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -956,6 +898,79 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             </section>
 
+            <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Workbench Rules
+              </summary>
+              <div className="mt-2 grid gap-2">
+                <section className="rounded p-2" aria-label="Workbench plan summary" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    <Chip label={data.mode.replace(/_/g, " ")} tone={C.warning} />
+                    <Chip label={data.opensBrowser ? "browser opens" : "no browser"} tone={C.success} />
+                    <Chip label={data.capturesMedia ? "media capture" : "no media capture"} tone={C.success} />
+                    <Chip label={data.writesExternal ? "external writes" : "no external writes"} tone={C.success} />
+                  </div>
+                  <p className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+                    {data.summary}
+                  </p>
+                </section>
+
+                <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Workbench surfaces">
+                  {data.surfaces.map((surface) => (
+                    <article key={surface.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="flex items-start justify-between gap-1.5">
+                        <h3 className="text-[11px] font-bold uppercase tracking-widest leading-snug" style={{ color: C.textPrimary }}>{surface.label}</h3>
+                        <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "partially_live" ? C.accent : C.textMuted} />
+                      </div>
+                      <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
+                        {surface.ownerAgent}
+                      </div>
+                      <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                        {surface.permission}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {surface.records.slice(0, 5).map((record) => (
+                          <Chip key={record} label={record.replace(/_/g, " ")} tone={C.textMuted} />
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                </section>
+
+                <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2" aria-label="Workbench permissions">
+                  {data.permissionModel.map((item) => (
+                    <article key={item.class} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                      <h3 className="text-[11px] font-bold uppercase tracking-widest mb-1.5" style={{ color: C.textPrimary }}>
+                        {item.class.replace(/_/g, " ")}
+                      </h3>
+                      <List title="Allowed" tone={C.success} items={item.allowed} />
+                      <List title="Blocked" tone={C.danger} items={item.blocked} />
+                    </article>
+                  ))}
+                </section>
+
+                <section className="rounded p-2" aria-label="Workbench receipt shape" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2">Receipt Shape</h3>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {data.evidenceRecordShape.required.map((field) => (
+                      <Chip key={field} label={field.replace(/_/g, " ")} tone={C.accent} />
+                    ))}
+                  </div>
+                  <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {data.evidenceRecordShape.note}
+                  </p>
+                </section>
+
+                <section className="grid gap-1.5" aria-label="Workbench gates">
+                  {data.gates.map((gate) => (
+                    <div key={gate} className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                      {gate}
+                    </div>
+                  ))}
+                </section>
+              </div>
+            </details>
+
             <section className="rounded p-2" aria-label="Recent Workbench receipts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
@@ -1186,13 +1201,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               )}
             </section>
 
-            <section className="grid gap-2" aria-label="Workbench gates">
-              {data.gates.map((gate) => (
-                <div key={gate} className="rounded px-3 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  {gate}
-                </div>
-              ))}
-            </section>
           </div>
         )}
       </main>
