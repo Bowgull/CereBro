@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1548 EDT
+Last updated: 2026-05-14 1554 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1554 EDT - Project Lab Map Read Pass
+
+### What Changed
+- Added a compact Project Map Read strip to each Project Lab card.
+- The strip shows branch, dirty state/count, push readiness, first risk, Workbench receipt state, manual push policy, optional auto proposal policy, and next safe action.
+- Kept Project Lab read-only. The card still does not execute git.
+- Kept manual push visible even when the detailed push receipt is collapsed.
+- Renamed the auto toggle copy from an armed-sounding state to `Policy: manual` / `Policy: propose auto`.
+- Used one read-only frontend QA worker to inspect Project Lab and fold in the policy/manual-push refinements.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app test -- server/cerebro-foundations.test.ts` passed. Vitest also ran related server files and reported 42 tests passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Front-End Steward Review
+- This advances Project Lab as the map without adding backend behavior.
+- Branch, dirty state, push readiness, risk, receipt, manual push, auto policy, and next action now appear together before the detailed push receipt.
+- No new Code Lab was added. Terminal Lab remains the build-teaching lane.
+- No external action, command execution, provider call, browser automation, git action, Notion write, Slack write, or memory write was added.
+
+### Known Risks
+- Visual browser inspection through the in-app browser was not callable in this tool set. Computer Use was blocked from controlling Codex, and Playwright is not installed in the app workspace.
+- Project cards are dense. The new strip helps first scan, but browser QA is still needed to check laptop/mobile wrapping.
+- Existing unrelated backend/Raven/reference files, `CEREBRO_BUILD_QUEUE.md`, and `outputs/` remain dirty and unstaged.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 29%.
+- Foundation/docs/planning: 83%.
+- Frontend visible loop: 38%.
+- Backend/runtime: 12%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the visible loop. Next safe slice: visually inspect the Project Map Read and opened context rail in browser if callable; otherwise continue Terminal Lab as Aang's build-teaching lane by making command observations connect to the same Project Map Read, Workbench receipt body, and Ledger audit trail without executing commands.
 
 ## 2026-05-14 1548 EDT - Keep Visible Chain Pass
 

@@ -682,6 +682,18 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Receipts" value={`${proofStats.total} receipts / ${proofStats.needsReview} review`} />
                   </div>
 
+                  <ProjectMapRead
+                    branch={project.git.branch}
+                    dirty={project.git.dirty}
+                    dirtyCount={project.git.dirtyCount}
+                    pushLabel={pushReadiness.label}
+                    pushState={pushReadiness.state}
+                    riskFlags={project.riskFlags}
+                    receiptStats={proofStats}
+                    autoSelected={autoPushArmed}
+                    nextSafeAction={project.nextSafeAction}
+                  />
+
                   <ProofStatusStrip stats={proofStats} />
 
                   <div className="mt-2">
@@ -725,7 +737,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                             setPushReceiptSlug(project.slug);
                           }}
                         >
-                          {autoPushArmed ? "Auto selected" : "Manual visible"}
+                          {autoPushArmed ? "Policy: propose auto" : "Policy: manual"}
                         </Button>
                         <Button
                           type="button"
@@ -743,6 +755,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       {autoPushArmed ? "Automation is selected as a recommendation. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
                     </div>
                     <PushModeStrip autoSelected={autoPushArmed} />
+                    <ManualPushLine commands={pushReadiness.manualCommands} />
                     <PushDecisionNote
                       stats={proofStats}
                       pushLabel={pushReadiness.label}
@@ -1728,6 +1741,69 @@ function MetaBlock({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ProjectMapRead({
+  branch,
+  dirty,
+  dirtyCount,
+  pushLabel,
+  pushState,
+  riskFlags,
+  receiptStats,
+  autoSelected,
+  nextSafeAction,
+}: {
+  branch: string | null;
+  dirty: boolean;
+  dirtyCount: number;
+  pushLabel: string;
+  pushState: string;
+  riskFlags: readonly string[];
+  receiptStats: { total: number; terminal: number; needsReview: number; validated: number };
+  autoSelected: boolean;
+  nextSafeAction: string;
+}) {
+  const pushTone = toneForPushState(pushState);
+  const receiptTone = receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
+  const riskTone = riskFlags.length > 0 ? C.warning : C.success;
+  const rows = [
+    { label: "Branch", value: branch ?? "unavailable", tone: branch ? C.textSecondary : C.warning },
+    { label: "Dirty", value: dirty ? `${dirtyCount} local change${dirtyCount === 1 ? "" : "s"}` : "clean", tone: dirty ? C.danger : C.success },
+    { label: "Push", value: pushLabel, tone: pushTone },
+    { label: "Risk", value: riskFlags[0] ?? "none flagged", tone: riskTone },
+    { label: "Receipt", value: `${receiptStats.total} Workbench / ${receiptStats.needsReview} review`, tone: receiptTone },
+    { label: "Manual", value: "visible, gated", tone: C.gold },
+    { label: "Auto", value: autoSelected ? "recommendation selected" : "off", tone: autoSelected ? C.warning : C.textMuted },
+  ];
+
+  return (
+    <section className="mt-2 rounded p-1.5" aria-label="Project map read" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.accent }}>
+          Project Map Read
+        </div>
+        <Badge variant="secondary" className="uppercase">
+          <span className="min-w-0 truncate">no git execution</span>
+        </Badge>
+      </div>
+      <div className="mt-1 grid grid-cols-2 gap-1 md:grid-cols-4 xl:grid-cols-7">
+        {rows.map((row) => (
+          <div key={row.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: row.tone }}>
+              {row.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={row.value} style={{ color: C.textSecondary }}>
+              {row.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        Next safe action: <span style={{ color: C.textSecondary }}>{nextSafeAction}</span>
+      </div>
+    </section>
+  );
+}
+
 function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number; needsReview: number; validated: number } }) {
   const tone = stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
   return (
@@ -1767,7 +1843,7 @@ function PushModeStrip({ autoSelected }: { autoSelected: boolean }) {
       <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${autoSelected ? C.warning : C.borderSoft}` }}>
         <div className="flex flex-wrap items-center gap-1">
           <Badge variant={autoSelected ? "warning" : "secondary"} className="uppercase">
-            <span className="min-w-0 truncate">{autoSelected ? "auto selected" : "auto off"}</span>
+            <span className="min-w-0 truncate">{autoSelected ? "propose auto" : "manual policy"}</span>
           </Badge>
           <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: autoSelected ? C.warning : C.textMuted }}>
             recommendation only
@@ -1776,6 +1852,25 @@ function PushModeStrip({ autoSelected }: { autoSelected: boolean }) {
         <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
           Auto can propose timing. Approval still decides execution.
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ManualPushLine({ commands }: { commands: readonly string[] }) {
+  const preview = commands.slice(0, 3).map(compactCommandLabel).join(" -> ");
+  return (
+    <div className="mt-1 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex flex-wrap items-center gap-1">
+        <Badge variant="warning" className="uppercase">
+          <span className="min-w-0 truncate">manual push visible</span>
+        </Badge>
+        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
+          approval gated
+        </span>
+      </div>
+      <div className="mt-1 truncate text-[10px] leading-snug" style={{ color: C.textMuted }} title={commands.join(" -> ")}>
+        {preview || "git review -> commit -> push"}
       </div>
     </div>
   );
