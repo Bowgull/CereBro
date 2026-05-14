@@ -106,6 +106,7 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
     capabilityId: selectedCapabilityId ?? undefined,
     limit: 80,
   });
+  const ollamaStatusApprovals = trpc.modelTools.ollamaStatusApprovalPreviews.useQuery({ limit: 5 });
   const routePreview = trpc.modelTools.routePreview.useQuery({
     taskKind: routeTask.trim() || "general routing preview",
     modality: routeModality.trim() || undefined,
@@ -131,6 +132,18 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
       setEvalSummary("");
       setEvalNotes("");
       utils.modelTools.evals.invalidate();
+    },
+  });
+  const createOllamaStatusApproval = trpc.modelTools.createOllamaStatusApprovalPreview.useMutation({
+    onSuccess: (result) => {
+      setLastWrite(
+        result.approval
+          ? `Staged Ollama status approval preview ${result.approval.id}.`
+          : "Ollama status approval preview did not return a record.",
+      );
+      utils.modelTools.ollamaStatusApprovalPreviews.invalidate();
+      utils.approvals.list.invalidate();
+      utils.approvals.permissionPreflights.invalidate();
     },
   });
 
@@ -308,6 +321,33 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
                 <Field label="If present" value={policyData.ollamaSetupPlan.installStatusCheck.nextStateIfPresent} />
               </div>
               <div className="mt-2" style={{ color: C.textMuted }}>{policyData.ollamaSetupPlan.installStatusCheck.noActionTaken}</div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => createOllamaStatusApproval.mutate({ reason: "User-visible approval preview for Ollama install-status check. No command runs from this button." })}
+                  disabled={createOllamaStatusApproval.isPending}
+                  title="Stage a local approval preview. This does not run command -v, ollama --version, ollama list, install, or pull."
+                  aria-label="Stage Ollama status check approval preview"
+                >
+                  {createOllamaStatusApproval.isPending ? "Staging" : "Stage Approval Preview"}
+                </Button>
+                <Badge label={`pending ${ollamaStatusApprovals.data?.items.filter((item) => item.status === "pending").length ?? 0}`} tone={C.warning} />
+              </div>
+              <div className="mt-2 grid gap-1">
+                {(ollamaStatusApprovals.data?.items ?? []).length === 0 ? (
+                  <div style={{ color: C.textMuted }}>No local approval previews staged for this check.</div>
+                ) : ollamaStatusApprovals.data?.items.map((item) => (
+                  <div key={item.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Approval #{item.id}</span>
+                      <Badge label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textSecondary} />
+                    </div>
+                    <div className="mt-1" style={{ color: C.textMuted }}>{item.reason ?? "Local approval preview only."}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="mt-2 grid gap-1.5 lg:grid-cols-2">

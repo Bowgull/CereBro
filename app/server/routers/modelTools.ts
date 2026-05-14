@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getCerebroDb } from "../cerebroDb";
+import { recordPermissionPreflight } from "../permissionPolicy";
 import { publicProcedure, router } from "../_core/trpc";
 
 const capabilityKinds = [
@@ -329,6 +330,25 @@ function rowToEval(row: Record<string, unknown>) {
     evaluatorAgent: String(row.evaluator_agent),
     validationNotes: row.validation_notes == null ? null : String(row.validation_notes),
     privacyNotes: row.privacy_notes == null ? null : String(row.privacy_notes),
+    createdAt: Number(row.created_at),
+  };
+}
+
+function rowToApprovalPreview(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    actionType: String(row.action_type),
+    targetType: row.target_type == null ? null : String(row.target_type),
+    targetId: row.target_id == null ? null : Number(row.target_id),
+    requestedByAgent: row.requested_by_agent == null ? null : String(row.requested_by_agent),
+    status: String(row.status),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    sensitiveDataFlag: Boolean(row.sensitive_data_flag),
+    costRisk: row.cost_risk == null ? null : String(row.cost_risk),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
     createdAt: Number(row.created_at),
   };
 }
@@ -697,4 +717,107 @@ export const modelToolsRouter = router({
       }),
     )
     .query(({ input }) => routePlanForTask(input)),
+
+  createOllamaStatusApprovalPreview: publicProcedure
+    .input(
+      z
+        .object({
+          reason: z.string().max(1000).optional(),
+        })
+        .optional(),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const statusCheck = ollamaSetupPlan.installStatusCheck;
+      const contextSummary = [
+        "Ollama install-status check proposal.",
+        `Allowed commands: ${statusCheck.allowedCommands.join(", ")}`,
+        `Forbidden actions: ${statusCheck.forbiddenCommands.join(", ")}`,
+        `Receipt fields: ${statusCheck.receiptFields.join(", ")}`,
+        statusCheck.noActionTaken,
+      ].join("\n");
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "terminal_logs",
+        actionClass: "command_execution",
+        requestedByAgent: "spock",
+        targetSummary: "Ollama install-status check. Read-only PATH/version/list inspection.",
+        additionalReasons: [
+          "Model Tools approval previews are local metadata only.",
+          "This preview does not run the status command.",
+          "Install, pull, run, serve, and remove actions remain forbidden from this preview.",
+        ],
+      });
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'ollama_status_read_only_check', 'model_tool_ollama_status_check', NULL, 'spock', 'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          input?.reason ?? "Local approval preview for Ollama install-status check. This does not run a command.",
+          contextSummary,
+          "local_read_only_command_review",
+          Number(preflight.row.id),
+        ],
+      });
+      const row = result.rows[0];
+      return {
+        ok: Boolean(row),
+        appendOnly: true as const,
+        writesExternal: false,
+        executesCommands: false,
+        installsDependencies: false,
+        pullsModels: false,
+        callsLocalModels: false,
+        approval: row ? rowToApprovalPreview(row) : null,
+        gates: [
+          "This is a pending local approval preview only.",
+          "Recorded one local permission preflight audit row.",
+          "No command was executed.",
+          "No install, pull, model call, background server, vector index, browser action, external call, or storage write ran.",
+        ],
+      };
+    }),
+
+  ollamaStatusApprovalPreviews: publicProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().min(1).max(50).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT id, task_id, action_type, target_type, target_id,
+                 requested_by_agent, status, reason, context_summary,
+                 sensitive_data_flag, cost_risk, permission_preflight_id,
+                 decided_at, created_at
+          FROM approvals
+          WHERE target_type = 'model_tool_ollama_status_check'
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args: [input?.limit ?? 5],
+      });
+
+      return {
+        mode: "read_only" as const,
+        writesExternal: false,
+        executesCommands: false,
+        installsDependencies: false,
+        pullsModels: false,
+        callsLocalModels: false,
+        items: result.rows.map(rowToApprovalPreview),
+      };
+    }),
 });

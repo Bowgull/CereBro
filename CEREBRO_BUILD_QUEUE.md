@@ -294,3 +294,6 @@ Expected shape:
 - Model Tools and Basement Overview now expose the Ollama install-status check
   draft: allowed read-only commands, forbidden install/pull/run actions, receipt
   fields, and no-action status.
+- Model Tools can now stage a local approval preview for the Ollama
+  install-status check. It records approval/preflight metadata only and still
+  runs no command, install, pull, model call, or background process.

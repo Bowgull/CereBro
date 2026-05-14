@@ -73,4 +73,21 @@ describe("Model Tools local-first routing policy", () => {
     expect(policy.ollamaSetupPlan.installStatusCheck.receiptFields).toContain("no_install_or_pull_confirmation");
     expect(policy.ollamaSetupPlan.installStatusCheck.noActionTaken).toContain("No status command has run");
   });
+
+  it("stages the Ollama status check as a local approval preview without running it", async () => {
+    const caller = createCaller();
+    const result = await caller.modelTools.createOllamaStatusApprovalPreview({
+      reason: "Test approval preview only.",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.executesCommands).toBe(false);
+    expect(result.installsDependencies).toBe(false);
+    expect(result.pullsModels).toBe(false);
+    expect(result.callsLocalModels).toBe(false);
+    expect(result.approval?.actionType).toBe("ollama_status_read_only_check");
+    expect(result.approval?.targetType).toBe("model_tool_ollama_status_check");
+    expect(result.approval?.contextSummary).toContain("Allowed commands: command -v ollama, ollama --version, ollama list");
+    expect(result.gates.join(" ")).toContain("No command was executed.");
+  });
 });

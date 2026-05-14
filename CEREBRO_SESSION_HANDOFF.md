@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1909 EDT
+Last updated: 2026-05-14 1914 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1914 EDT - Ollama Status Approval Preview Pass
+
+### What Changed
+- Kept Raven quarantined in the separate Raven chat. No Raven files were touched.
+- Added a Model Tools mutation that stages a pending local approval preview for the Ollama install-status check.
+- The mutation also records one local permission preflight audit row.
+- The preview is metadata only: no command execution, install, model pull, model call, background process, vector index, browser action, external call, or storage migration.
+- Added a read-only query for recent Ollama status approval previews.
+- Added a compact `Stage Approval Preview` control and recent-preview list to `ModelToolsPanel`.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --fileParallelism=false` passed. 3 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/modelTools.ts app/server/modelTools.localFirst.test.ts app/client/src/components/ModelToolsPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Ollama status approval preview.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven chat.
+- Generated/local: ignored `outputs/` stays out of status.
+- Local DB note: the targeted mutation test creates append-only local approval/preflight rows. This is expected for this route and does not approve or execute anything.
+- Blocked: no Ollama status command, install, pull, model call, vector index, external escalation, browser action, command execution, or storage migration ran.
+
+### Front-End Steward Review
+- This is the right next step because it makes the future check explicit before it can run.
+- The button sits in Model Details, not the Keep front door.
+- The approval queue can now show the readiness request as a receipt, not a hidden command.
+
+### Completion Read
+- Overall: 44%.
+- Foundation/docs/planning: 90%.
+- Frontend visible loop: 59%.
+- Backend/runtime: 29%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue CereBro core only. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: either visually inspect the new Model Details approval preview in localhost, or continue Keep/Workshop/Ledger hierarchy polish. Do not run the Ollama status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 1909 EDT - Ollama Status Check Receipt Draft Pass
 
