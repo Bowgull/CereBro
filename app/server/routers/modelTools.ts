@@ -125,6 +125,41 @@ const creativeLanes = [
   },
 ] as const;
 
+const localModelLanes = [
+  {
+    id: "ollama_local_fast_lane",
+    label: "Ollama Local Fast Lane",
+    ownerAgent: "cortana",
+    tool: "Ollama",
+    modelClass: "local_summary",
+    status: "proposal_only",
+    installStatus: "not_verified",
+    accessMethod: "local",
+    privacyClass: "local_private",
+    speedClass: "fast_when_small",
+    defaultUse: "Private summaries, labels, source cards, learning-note drafts, route drafts, and light reasoning.",
+    avoidFor: "Large coding tasks, long-context architecture, critical validation, and anything that needs frontier quality.",
+    approvalGate: "Spock approval before install, model pull, model deletion, or background local inference.",
+    uiRule: "Visible in Basement only. Aang and Cortana may cite the lane in receipts without showing model settings on the Keep.",
+  },
+  {
+    id: "local_embedding_smoke_lane",
+    label: "Local Embedding Smoke Lane",
+    ownerAgent: "oak",
+    tool: "Ollama",
+    modelClass: "embedding",
+    status: "proposal_only",
+    installStatus: "not_verified",
+    accessMethod: "local",
+    privacyClass: "local_private",
+    speedClass: "fast_when_small",
+    defaultUse: "Small semantic-search smoke tests and retrieval experiments before a cloud vector lane is selected.",
+    avoidFor: "Full vault indexing, heavy source archives, or background jobs that would fill local storage.",
+    approvalGate: "Approval before install, model pull, vector index creation, or durable storage writes.",
+    uiRule: "Visible in Basement and storage receipts only. Normal users see search quality and source citations, not embedding plumbing.",
+  },
+] as const;
+
 function rowToCapability(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -201,13 +236,16 @@ function routePlanForTask(input: {
   const needsVision = modality.includes("image") || modality.includes("video") || kind.includes("vision") || kind.includes("screenshot");
   const needsCode = kind.includes("code") || kind.includes("implementation") || kind.includes("debug");
   const needsCurrentSources = kind.includes("research") || kind.includes("current") || kind.includes("source");
+  const localSmallText = !needsVision && !needsCode && !input.requiresFrontier;
 
   const lanes = [
     {
-      lane: "local_or_private_first",
-      reason: "Use this when data is private, sensitive, or the task is lightweight enough for local summary/formatting.",
+      lane: localSmallText ? "ollama_local_fast_lane" : "local_or_private_first",
+      reason: localSmallText
+        ? "Use the fast local-first Ollama lane for private or lightweight text work once installed and tested."
+        : "Use this when data is private, sensitive, or the task is lightweight enough for local summary/formatting.",
       approvalLevel: privacyClass === "local_private" ? "none" : "confirm_each_use",
-      status: "available_policy_only",
+      status: localSmallText ? "not_verified_no_install" : "available_policy_only",
     },
   ];
 
@@ -243,7 +281,7 @@ function routePlanForTask(input: {
     modality: input.modality ?? "text",
     privacyClass,
     routeStatus: "proposal_only",
-    recommendedLane: input.requiresFrontier ? "frontier_reasoning_candidate" : lanes[0]?.lane ?? "local_or_private_first",
+    recommendedLane: input.requiresFrontier ? "frontier_reasoning_candidate" : lanes[0]?.lane ?? "ollama_local_fast_lane",
     approvalGate: approvalForPrivacy(privacyClass),
     lanes,
     validationPlan: [
@@ -254,6 +292,7 @@ function routePlanForTask(input: {
     ],
     noActionTaken: [
       "No external model or tool was called.",
+      "No Ollama install, local model pull, or local model call was made.",
       "No gateway dependency was installed.",
       "No browser/search/fetch was used.",
       "No account, token, payment, or provider setup was touched.",
@@ -268,6 +307,8 @@ export const modelToolsRouter = router({
     callsExternalModels: false,
     installsDependencies: false,
     browsesOrFetches: false,
+    routingStance: "Fast local-first, not local-only. Use Ollama/local lanes when possible, then escalate only when quality or size requires it.",
+    speedStance: "Instant shell, rule-based previews, small local models for small jobs, and visible background work for anything slow.",
     registryStatus: "local_proposal_records_only",
     gatewayCandidates: ["CereBro-native gateway", "LiteLLM", "OpenRouter", "direct provider SDKs"],
     registryShape: {
@@ -291,8 +332,10 @@ export const modelToolsRouter = router({
       "Cortana routes, Batman risk-reviews, Spock/Oak validate, and Piccolo watches cost/rate-limit/staleness.",
       "External model/tool use requires visible approval and a summary of data leaving the machine.",
       "No model/tool becomes a recommended default without an eval or an explicit untested label.",
+      "Ollama stays on the core local-first path, but install, pulls, deletes, and background inference still need approval.",
       "Raven outputs stay outside normal CereBro memory, RAG, galleries, Workbench, Ledger, and vault lanes unless the user approves a scrubbed bridge summary.",
     ],
+    localModelLanes,
     creativeLanes,
   })),
 

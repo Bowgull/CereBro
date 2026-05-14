@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1758 EDT
+Last updated: 2026-05-14 1836 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1836 EDT - Local First Ollama Policy Correction Pass
+
+### What Changed
+- Corrected the Model Tools policy to make Ollama/local models part of the core fast local-first router path.
+- Added `localModelLanes` to `modelTools.policy` for the Ollama local fast lane and local embedding smoke lane.
+- Updated route preview so small private text work recommends `ollama_local_fast_lane` while still doing no install, pull, model call, or background inference.
+- Added visible speed stance and routing stance to the Basement Model Registry.
+- Added a compact Local Model Lanes section to `ModelToolsPanel` so local AI power is visible in Basement without becoming front-door clutter.
+- Updated `CEREBRO_BUILD_QUEUE.md` so future passes do not treat Ollama as optional decoration.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --fileParallelism=false` failed first as expected, then passed.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --fileParallelism=false` passed: 2 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md app/server/routers/modelTools.ts app/server/modelTools.localFirst.test.ts app/client/src/components/ModelToolsPanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: local-first model policy and Basement visibility.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: ignored `outputs/` stays out of status.
+- Blocked: no Ollama install, model pull, model call, gateway, cloud provider, account, token, browser fetch, or storage migration ran.
+
+### Front-End Steward Review
+- This keeps CereBro fast: instant shell, rule-based previews, small local lanes for small jobs, and visible background work for slow jobs.
+- This hides machinery correctly: Ollama status lives in Basement, while Ask Aang and Cortana only show the route receipt when it matters.
+- This corrects the drift: local models are core to CereBro's identity, but model installs and pulls stay gated.
+
+### Completion Read
+- Overall: 40%.
+- Foundation/docs/planning: 90%.
+- Frontend visible loop: 55%.
+- Backend/runtime: 23%.
+- Knowledge/storage/source: 35%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue the build spine. Start by classifying the dirty worktree. Next slice: connect route receipts to Model Tools lanes so Aang can say when local Ollama is recommended, when external escalation is needed, and what approval is required.
 
 ## 2026-05-14 1758 EDT - Model Tool Creative Lane Policy Pass
 

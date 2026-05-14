@@ -222,9 +222,46 @@ export default function ModelToolsPanel({ onClose }: { onClose: () => void }) {
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
-            <MachineRule title="No Calls" body="Registry previews do not call providers, gateways, browsers, or local tools." tone={C.success} />
+            <MachineRule title="Fast Shell" body={policyData?.speedStance ?? "Instant shell. Route first. Run slow work in visible background lanes."} tone={C.success} />
             <MachineRule title="Source First" body="A source URL is a signal, not trust. Surfer and Oak still validate current claims." tone={C.warning} />
             <MachineRule title="Approval" body="External model/tool use needs a visible action receipt before it runs." tone={C.danger} />
+          </div>
+        </section>
+
+        <section className="rounded p-2" aria-label="Local model lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Local Model Lanes" detail="fast local first" />
+          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            {policyData?.routingStance ?? "Use local lanes first when they are fast and strong enough. Escalate only with approval."}
+          </div>
+          <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
+            {(policyData?.localModelLanes ?? []).map((lane) => (
+              <div
+                key={lane.id}
+                className="rounded p-2 text-[11px] leading-snug"
+                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-bold uppercase tracking-widest" title={lane.label}>{lane.label}</div>
+                    <div className="mt-0.5 truncate" style={{ color: C.textMuted }} title={`${lane.ownerAgent}. ${lane.tool}. ${lane.modelClass}.`}>
+                      {lane.ownerAgent}. {lane.tool}. {labelize(lane.modelClass)}.
+                    </div>
+                  </div>
+                  <Badge label={labelize(lane.installStatus)} tone={lane.installStatus === "not_verified" ? C.warning : C.success} />
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <Badge label={labelize(lane.speedClass)} tone={C.success} />
+                  <Badge label={labelize(lane.privacyClass)} tone={toneForPrivacy(lane.privacyClass)} />
+                  <Badge label={labelize(lane.status)} tone={C.textSecondary} />
+                </div>
+                <div className="mt-2 space-y-1">
+                  <Field label="Use" value={lane.defaultUse} />
+                  <Field label="Avoid" value={lane.avoidFor} />
+                  <Field label="Gate" value={lane.approvalGate} />
+                  <Field label="UI" value={lane.uiRule} />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

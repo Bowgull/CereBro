@@ -223,13 +223,19 @@ Expected shape:
 Goal:
 
 - Connected tools are readable capability proposals, not product sprawl.
+- Ollama/local models are part of the core fast local-first router path, not an
+  optional decoration.
 
 Expected shape:
 
+- Ollama install status, approved tiny local model shortlist, speed, quality,
+  disk impact, and eval result are visible in Basement.
 - Nano Banana-style vision, PixelLab, GitHub, Notion, Browser Use, Hugging Face,
   and future tools appear as capability records
 - each record shows allowed actions, approval gates, storage impact, and owner
 - no plugin becomes a primary CereBro feature just because it is connected
+- installs, model pulls, deletes, provider calls, and background inference stay
+  approval-gated
 
 ### Block E: Agent Runtime Skeleton
 
@@ -274,3 +280,6 @@ Expected shape:
 - Model Tools now exposes creative capability lanes for Gojo ComfyUI, Raven
   private ComfyUI, RealESRGAN upscale, and free cloud burst tools. All lanes are
   proposal-only, approval-gated, and separated by privacy boundary.
+- Model Tools now exposes the fast local-first Ollama path: local summary,
+  lightweight routing, small private work, and embedding smoke tests are core
+  router lanes, while installs and model pulls remain approval-gated.
