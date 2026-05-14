@@ -1,6 +1,6 @@
 # CereBro Worker Orchestration
 
-Last updated: 2026-05-10
+Last updated: 2026-05-14
 
 ## Purpose
 
@@ -31,6 +31,54 @@ Safe concurrency:
 
 Do not run workers as independent product owners. Workers execute assigned
 slices. The lead keeps the total build path coherent.
+
+## Long Pass Protocol
+
+Longer passes are allowed when the scope is coherent and the worktree can stay
+clean.
+
+Default long pass shape:
+
+```text
+1 lead + 1 coding worker + 1 read-only QA worker
+```
+
+Use 2 to 4 hours by default. Use 4 to 6 hours only when:
+
+- the task is on the current critical path
+- file ownership is explicit
+- unrelated dirty files are quarantined
+- checks are known and runnable
+- no external credentials, paid services, destructive action, deployment, or
+  broad product decision is required
+
+Long passes must end with one of these outcomes:
+
+- commit and push a coherent slice
+- stop on a failing check with the failure recorded
+- stop on a product or permission gate
+- summarize and clear when context is getting heavy
+
+Do not keep coding through context bloat.
+
+## Clean Worktree Protocol
+
+Before each pass, the lead classifies `git status --short` into:
+
+- **current slice**: files this pass owns
+- **quarantine**: unrelated dirty files left untouched
+- **generated/local**: temp outputs that should be ignored or moved to the vault
+- **blocked**: files that need user decision before staging
+
+Rules:
+
+- Stage only the current slice.
+- Do not mix Raven/backend/reference drift into frontend visible-loop commits.
+- Do not stage generated files from `outputs/`; generated deliverables belong in
+  the Drive vault unless explicitly approved for the repo.
+- If a dirty file is useful but outside the current slice, record it as
+  quarantine and continue.
+- If a dirty file blocks the current slice, stop and ask.
 
 ## Lead Contract
 
@@ -360,4 +408,3 @@ Before a block is called complete:
 - Obsidian session index appended
 - commit uses one plain sentence
 - push happens only after the block has useful shape
-

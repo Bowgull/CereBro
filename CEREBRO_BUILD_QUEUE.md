@@ -20,8 +20,11 @@ Default worker set:
 
 Default block size: 2 to 4 hours.
 
-Default stop point: useful shape, failing check, product gate, context bloat, or
-cross-lane conflict.
+Long block size: 4 to 6 hours when the slice is coherent, file ownership is
+clean, and checks are known.
+
+Default stop point: useful shape, failing check, product gate, context bloat,
+cross-lane conflict, or dirty-worktree ambiguity.
 
 ## Standing Order
 
@@ -62,6 +65,9 @@ Stop and ask when:
 - Keep worker system controlled by this queue.
 - Keep `CEREBRO_SESSION_HANDOFF.md`, this queue, and the Obsidian session
   archive aligned before assigning build workers.
+- Start every longer pass by classifying dirty files as current slice,
+  quarantine, generated/local, or blocked.
+- Stage only current-slice files.
 - Integrate worker findings into one next block.
 - Preserve existing unrelated dirty worktree files.
 - Update handoff and Obsidian archive at the end of real build blocks.

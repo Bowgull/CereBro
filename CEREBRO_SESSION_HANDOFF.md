@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1554 EDT
+Last updated: 2026-05-14 1610 EDT
 
 ## Current North Star
 
@@ -20,6 +20,50 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1610 EDT - Long Pass Cleanliness Protocol
+
+### What Changed
+- Added a Long Pass Protocol to the worker orchestration file so CereBro can safely run 2-4 hour default blocks and 4-6 hour blocks when ownership and checks are clean.
+- Added a Clean Worktree Protocol that classifies dirty files as current slice, quarantine, generated/local, or blocked before each longer pass.
+- Updated the active build queue so the lead must classify dirty files before assigning workers and stage only the current slice.
+- Added `outputs/` to `.gitignore` because local generated previews should not keep appearing as repo work. Durable generated deliverables belong in the Drive vault unless explicitly approved for the repo.
+
+### Files Touched
+- `.gitignore`
+- `CEREBRO_WORKER_ORCHESTRATION.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Pending in this session: `git diff --check`.
+- App checks are not required for documentation and ignore-file changes.
+
+### Cleanliness Read
+- Current slice: long-pass rules, clean-worktree rules, `outputs/` ignore.
+- Quarantine: existing Raven/backend/reference changes remain untouched.
+- Generated/local: `outputs/` contains local PixelLab preview files and is now ignored.
+- Blocked: no current-slice blocker.
+
+### Known Risks
+- The quarantined Raven/backend batch is large and still needs its own review or commit decision.
+- `CEREBRO_BUILD_QUEUE.md` and `CEREBRO_SESSION_HANDOFF.md` also contain an older Sundesk Obsidian repair note that is unrelated to this pass and should stay unstaged unless explicitly handled.
+
+### Storage Impact
+- No app data or schema changed.
+- Obsidian should receive a dated handoff snapshot and session-history index entry for this pass.
+
+### Completion Read
+- Overall: 29%.
+- Foundation/docs/planning: 84%.
+- Frontend visible loop: 38%.
+- Backend/runtime: 12%.
+- Knowledge/storage/source: 24%.
+- Creative/freelance/watch: 8%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue with longer safe passes. Start by classifying the dirty worktree. Keep Raven/backend/reference drift quarantined unless the pass explicitly owns it. Next visible-loop slice: Terminal Lab as Aang's build-teaching lane connected to Project Map Read, Workbench receipt body, and Ledger audit trail without executing commands.
 
 ## 2026-05-14 1554 EDT - Project Lab Map Read Pass
 
