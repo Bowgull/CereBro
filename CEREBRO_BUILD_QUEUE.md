@@ -311,3 +311,6 @@ Expected shape:
 - Model Details now links staged Ollama status previews directly to the Approval
   Queue, and the Approval Queue empty state now names Model Tools as a staging
   source.
+- Dev-server visual proof is cleaner: Express/Vite middleware now honors the
+  no-HMR local setup, so Playwright no longer sees Vite websocket errors on
+  `localhost:3002`.

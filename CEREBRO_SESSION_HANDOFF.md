@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 1932 EDT
+Last updated: 2026-05-14 1938 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 1938 EDT - Dev Server HMR Console Cleanup Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Used Playwright CLI to inspect `localhost:3002`.
+- Verified the Terminal -> Workbench -> Project Lab receipt chain appears in Workbench, Terminal Lab, and Project Lab snapshots.
+- Found Vite dev-server websocket errors in browser console.
+- Fixed `app/server/_core/vite.ts` so the Vite middleware honors the existing no-HMR development setup instead of overriding HMR back on.
+- Reopened `localhost:3002` with Playwright and confirmed the Vite websocket errors are gone. Only the normal React DevTools info message remains.
+
+### Files Touched
+- `app/server/_core/vite.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `command -v npx` passed for Playwright CLI prerequisites.
+- `"$HOME/.codex/skills/playwright/scripts/playwright_cli.sh" open http://localhost:3002 --headed` loaded the app.
+- Playwright snapshots confirmed receipt-chain regions on Workbench, Terminal Lab, and Project Lab.
+- First Playwright console pass showed Vite HMR websocket errors.
+- Second Playwright console pass showed no Vite HMR websocket errors.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/server/_core/vite.ts CEREBRO_SESSION_HANDOFF.md CEREBRO_BUILD_QUEUE.md` passed.
+
+### Cleanliness Read
+- Current slice: dev-server HMR console cleanup and visual proof record.
+- Quarantine: existing Raven/backend/reference changes remain untouched and are owned by the separate Raven/backend track.
+- Generated/local: Playwright wrote `.playwright-cli/` inspection artifacts. They remain untracked local tool output and are not staged.
+- Blocked: Model Tools approval origin filter remains deferred because `app/server/routers/approvals.ts` already contains unstaged Raven approval-router changes.
+- No command was executed from CereBro UI, no git action from UI, no Ollama status command, install, pull, model call, vector index, external escalation, approval action, or storage migration ran.
+
+### Front-End Steward Review
+- This pass improves trust in visual proof. The app now loads without dev-console HMR error noise.
+- The receipt chain is visible in the three intended Workshop surfaces.
+- This does not change product behavior beyond removing broken dev HMR wiring.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 61%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_WORKER_ORCHESTRATION.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`, `CEREBRO_MODEL_ROUTER_BASELINE.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in CereBro Prime mode. Start by classifying dirty files. Keep Raven implementation quarantined because Raven is being built in a separate chat. Next slice: tighten the Approval Queue receipt chain frontend-only, or wait until the Raven approval-router batch is resolved before adding a Model Tools approval origin. Do not run Ollama status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 1932 EDT - Prime Worker Operating Model Pass
 
