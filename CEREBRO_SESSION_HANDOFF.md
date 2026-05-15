@@ -16270,3 +16270,88 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and app/server/routers/raven.ts first. Continue Raven from candidate review planner. Keep backend-only unless the frontend worktree is reconciled. Next safe slice: add local-only review-note capture for candidate planner decisions, with append-only history and no external writes. Do not browse, fetch adult sources, download media, call generators, write Notion/Obsidian/Slack, or write core memory.
 ```
+
+## 2026-05-14 2223 EDT — runtime route records Ledger read
+
+Overall completion after this pass:
+
+- Overall: 52%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 83%
+- Backend/runtime: 35%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Continued the CereBro frontend/build critical path after the local route
+  commit record slice.
+- Added `runtime.routeRecords` so the frontend can read recent local route
+  records without reaching into raw DB tables.
+- Added parsed route-record fields for Ledger use:
+  - Aang read
+  - mode
+  - category
+  - owner and support agents
+  - project link
+  - route chain
+  - approval gates
+  - model/tool proposal JSON as parsed objects
+  - Workbench receipt draft
+  - Ledger focus draft
+  - task draft
+  - next action
+  - created timestamp
+- Added a compact `Recent Route Reads` section to the Ledger overview.
+- Added a `Routes` count card to Ledger.
+- Kept route records separate from Workbench evidence bodies.
+- Kept the surface local-only. The read model does not run work, call models,
+  open browsers, execute commands, or write externally.
+
+Files touched in this slice:
+
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red test:
+  `CEREBRO_DB_URL=file:./cerebro-route-test.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`
+  failed as expected with `No procedure found on path "runtime,routeRecords"`.
+- Green test:
+  `CEREBRO_DB_URL=file:./cerebro-route-test.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`
+  passed, 5 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed after replacing an
+  invalid color token with `C.border`.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-route-test-$$.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 3 files and 32 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/pages/Home.tsx app/server/routers/runtime.ts app/server/runtime.routeReceipt.test.ts`
+  passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened `http://localhost:3002`, clicked Ledger, and verified the
+  `Recent Route Reads` section rendered with route rows.
+
+Known risks:
+
+- The route record read model is backend and Ledger overview only. The Ask Aang
+  command bar still previews routes but does not yet expose a visible save-route
+  button.
+- The live local DB already has route records from local testing/manual commit
+  calls. That is acceptable because the records are local audit rows.
+
+Storage impact:
+
+- No new schema change in this slice. It reads the existing
+  `runtime_route_records` table.
+- No Obsidian, Notion, Slack, Drive, browser, command, model, or external
+  provider write happens from `routeRecords`.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and app/server/routers/runtime.ts first. Continue CereBro on the main build path. Next safe slice: add a visible save-route affordance to Ask Aang that calls runtime.commitRoute only after preview, then refreshes Ledger route reads. Keep it local-only. Do not run routed work, create tasks, save Workbench evidence, call models, open browsers, execute commands, or write externally from the save-route action.
+```

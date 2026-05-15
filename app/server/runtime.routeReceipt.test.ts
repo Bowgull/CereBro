@@ -174,4 +174,33 @@ describe("runtime route receipt preview", () => {
       expect(await countRows(table)).toBe(rowCountsBefore.get(table));
     }
   });
+
+  it("lists committed route records as parsed Ledger audit reads", async () => {
+    const caller = createCaller();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+
+    const records = await caller.runtime.routeRecords({
+      limit: 5,
+      projectSlug: "cerebro",
+      ownerAgent: "tony",
+    });
+
+    expect(records.items[0]?.id).toBe(committed.record.id);
+    expect(records.items[0]?.originalText).toBe("keep building CereBro front end");
+    expect(records.items[0]?.mode).toBe("build");
+    expect(records.items[0]?.category).toBe("project_build");
+    expect(records.items[0]?.ownerAgent).toBe("tony");
+    expect(records.items[0]?.supportAgents).toContain("spock");
+    expect(records.items[0]?.projectSlug).toBe("cerebro");
+    expect(records.items[0]?.routeChain[0]).toBe("Aang reads mode");
+    expect(records.items[0]?.approvalGates).toContain("No external action from route preview.");
+    expect(records.items[0]?.workbenchReceiptDraft.autosave).toBe(false);
+    expect(records.items[0]?.ledgerFocusDraft.autosave).toBe(false);
+    expect(records.items[0]?.taskDraft.agent).toBe("tony");
+    expect(records.items[0]?.createdAt).toBeGreaterThan(0);
+  });
 });

@@ -23,6 +23,41 @@ const routeCategories = [
 type RuntimeMode = (typeof runtimeModes)[number];
 type RouteCategory = (typeof routeCategories)[number];
 
+function parseJsonField<T>(value: unknown, fallback: T): T {
+  if (typeof value !== "string") return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function mapRouteRecordRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    originalText: String(row.original_text ?? ""),
+    mode: String(row.mode ?? "quick") as RuntimeMode,
+    category: String(row.category ?? "quick_answer") as RouteCategory,
+    confidence: String(row.confidence ?? "medium"),
+    aangRead: String(row.aang_read ?? ""),
+    ownerAgent: String(row.owner_agent ?? "aang"),
+    supportAgents: parseJsonField<string[]>(row.support_agents_json, []),
+    projectSlug: row.project_slug == null ? null : String(row.project_slug),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    projectPath: row.project_path == null ? null : String(row.project_path),
+    permissionClass: String(row.permission_class ?? "local_note"),
+    routeChain: parseJsonField<string[]>(row.route_chain_json, []),
+    approvalGates: parseJsonField<string[]>(row.approval_gates_json, []),
+    modelProposal: parseJsonField<Record<string, unknown>>(row.model_proposal_json, {}),
+    toolProposal: parseJsonField<Record<string, unknown>>(row.tool_proposal_json, {}),
+    workbenchReceiptDraft: parseJsonField<Record<string, unknown>>(row.workbench_draft_json, {}),
+    ledgerFocusDraft: parseJsonField<Record<string, unknown>>(row.ledger_focus_json, {}),
+    taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
+    nextAction: String(row.next_action ?? ""),
+    createdAt: Number(row.created_at ?? 0),
+  };
+}
+
 const projectHints = [
   { slug: "cerebro", label: "CereBro", localPath: "/Users/lindsaybell/Desktop/CereBro", aliases: ["cerebro", "keep", "aang", "cortana", "terminal lab", "workbench", "ledger"] },
   { slug: "declyne", label: "Declyne", localPath: "/Users/lindsaybell/Developer/Declyne", aliases: ["declyne", "plaid", "finance", "budget", "bank"] },
@@ -302,6 +337,43 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
 }
 
 export const runtimeRouter = router({
+  routeRecords: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(50).default(10),
+        projectSlug: z.string().min(1).max(80).optional(),
+        ownerAgent: z.string().min(1).max(80).optional(),
+      }).optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where: string[] = [];
+      const args: Array<string | number> = [];
+      if (input?.projectSlug) {
+        where.push("project_slug = ?");
+        args.push(input.projectSlug);
+      }
+      if (input?.ownerAgent) {
+        where.push("owner_agent = ?");
+        args.push(input.ownerAgent);
+      }
+      args.push(input?.limit ?? 10);
+
+      const result = await db.execute({
+        sql: `
+          SELECT *
+          FROM runtime_route_records
+          ${where.length > 0 ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+
+      return {
+        items: result.rows.map((row) => mapRouteRecordRow(row as Record<string, unknown>)),
+      };
+    }),
   previewRoute: publicProcedure
     .input(
       z.object({

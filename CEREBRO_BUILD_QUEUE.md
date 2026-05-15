@@ -114,6 +114,9 @@ Recent Prime slices:
 - 2026-05-14 2217 EDT: added local-only `runtime.commitRoute` and
   `runtime_route_records`. Route preview remains non-mutating; commit writes one
   local route record only.
+- 2026-05-14 2223 EDT: added `runtime.routeRecords` read model and a compact
+  Ledger `Recent Route Reads` strip. Route records are parsed for UI use, stay
+  local-only, and remain separate from Workbench evidence bodies.
 
 ### Frontend Worker
 
@@ -230,6 +233,9 @@ Goal:
 - Done first pass: `runtime.commitRoute` appends one local route record and
   does not run routed work, create tasks, save Workbench evidence, or write
   externally.
+- Done second pass: `runtime.routeRecords` lists recent local route records with
+  parsed route chain, gates, model/tool proposal, Workbench draft, Ledger focus
+  draft, task draft, next action, owner, project, and timestamp.
 
 Expected shape:
 
@@ -398,3 +404,6 @@ Expected shape:
 - Model Tools now keeps registry, selected capability detail, and route preview
   visible while Ollama status internals, model batches, proposal form, eval
   form, and gates live behind closed details.
+- Runtime route records now have a backend read model and a compact Ledger
+  overview section. Ledger shows recent Aang to Cortana route reads without raw
+  JSON or hidden execution.

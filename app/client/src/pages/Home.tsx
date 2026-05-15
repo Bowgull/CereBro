@@ -937,6 +937,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const memory = trpc.memory.list.useQuery({});
   const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
   const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 50 });
+  const routeRecords = trpc.runtime.routeRecords.useQuery({ limit: 6 });
 
   const taskRows = tasks.data ?? [];
   const sessionRows = sessions.data ?? [];
@@ -945,7 +946,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const memoryRows = memory.data ?? [];
   const proposalRows = proposals.data ?? [];
   const evidenceRows = workbenchEvidence.data?.items ?? [];
+  const routeRows = routeRecords.data?.items ?? [];
   const latestEvidenceRows = evidenceRows.slice(0, 4);
+  const latestRouteRows = routeRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
@@ -1025,6 +1028,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: C.accentViolet,
     },
     {
+      label: "Routes",
+      value: String(routeRows.length),
+      meta: "Aang to Cortana reads",
+      target: "ledger" as NavId,
+      tone: C.accent,
+    },
+    {
       label: "Memory",
       value: String(memoryRows.length),
       meta: `${proposalRows.length} proposed`,
@@ -1089,7 +1099,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 gap-1.5 xl:grid-cols-6" aria-label="Ledger receipt objects">
+        <section className="grid grid-cols-2 gap-1.5 lg:grid-cols-4 xl:grid-cols-7" aria-label="Ledger receipt objects">
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -1116,6 +1126,50 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </span>
             </Button>
           ))}
+        </section>
+
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Recent route records">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Recent Route Reads
+            </div>
+            <Badge variant="secondary" className="uppercase">local only</Badge>
+          </div>
+          {routeRecords.isLoading ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              Reading local route records.
+            </div>
+          ) : latestRouteRows.length === 0 ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              No route records yet. Ask Aang to read a request, then save the route before work starts.
+            </div>
+          ) : (
+            <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
+              {latestRouteRows.map((item) => (
+                <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">route #{item.id}</span></Badge>
+                    <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
+                    <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
+                    {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
+                    {item.originalText}
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[11px] leading-snug" style={{ color: C.textMuted }} title={item.nextAction}>
+                    {item.nextAction}
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] leading-none" style={{ color: C.textMuted }}>
+                    <span>Aang read</span>
+                    <span style={{ color: C.border }}>/</span>
+                    <span>{item.mode}</span>
+                    <span style={{ color: C.border }}>/</span>
+                    <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench receipts">
