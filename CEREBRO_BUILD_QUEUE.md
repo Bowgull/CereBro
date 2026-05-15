@@ -159,12 +159,14 @@ Recent Prime slices:
 - 2026-05-15 1935 EDT: simplified Approval Queue default read by hiding groups
   and permission checks behind disclosures and removing raw ids from default
   approval cards.
+- 2026-05-15 1937 EDT: simplified Artifacts into Saved Outputs; raw storage
+  path, retention, and owner now sit behind per-output details.
 
 ### Frontend Worker
 
 Next block:
 
-- Take one high-noise surface pass, starting with Artifacts or Workbench.
+- Take one high-noise surface pass, starting with Workbench.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -494,3 +496,5 @@ Expected shape:
   label reads instead of full session ledger rows.
 - Approval Queue now shows waiting decisions first; grouping and permission
   check machinery sit behind closed disclosures.
+- Artifacts now reads as Saved Outputs first; raw storage path, retention, and
+  owner proof sit behind per-output details.

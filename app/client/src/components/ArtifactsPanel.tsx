@@ -115,6 +115,14 @@ function writePolicyCopy(policy: WritePolicy): string {
   return "History save: same-title saves create timestamped versions.";
 }
 
+function destinationLabel(provider: string, path: string): string {
+  if (provider === "vault") return "Vault";
+  if (provider === "local") return path.startsWith("memory_entries:") ? "Memory" : "Local";
+  if (provider === "notion") return "Notion";
+  if (provider === "obsidian") return "Obsidian";
+  return provider.replace(/_/g, " ");
+}
+
 export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [kind, setKind] = useState<KindFilter>("all");
@@ -195,11 +203,11 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Ledger Output Library
+            Saved Outputs
             <span className="ml-2" style={{ color: C.textSecondary }}>{rows.length}</span>
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Artifact receipts for saved notes, outputs, messages, reports, and vault files. History accumulates.
+            Notes, drafts, reports, prompts, and saved files. Details keep the storage proof.
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">
@@ -208,9 +216,9 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <OutputStat label="Rows" value={String(rows.length)} tone={C.gold} />
-        <OutputStat label="Write Policy" value={writeCopy.policy} tone={C.success} />
-        <OutputStat label="Owner" value={writeCopy.ownerAgent} tone={C.accent} />
+        <OutputStat label="Saved" value={String(rows.length)} tone={C.gold} />
+        <OutputStat label="Writing" value={WRITE_KIND_COPY[writeKind].label} tone={C.success} />
+        <OutputStat label="Trail" value={writeCopy.policy} tone={C.accent} />
       </div>
 
       <div
@@ -344,56 +352,59 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           <div className="px-2.5 py-1.5 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
         ) : rows.length === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            No artifacts recorded for this filter yet. They appear as approved writes, Notion publishes,
-            Obsidian notes, message drafts, and cleanup reports are saved.
+            No saved outputs match this filter. Save a note, draft, report, prompt, or file receipt.
           </div>
         ) : (
           rows.map((artifact) => (
               <div
                 key={artifact.id}
-                className="grid grid-cols-1 items-start gap-1.5 px-2.5 py-1.5 md:grid-cols-[150px_112px_minmax(0,1fr)_120px]"
+                className="grid grid-cols-1 items-start gap-1.5 px-2.5 py-1.5 md:grid-cols-[minmax(0,1fr)_118px_150px_86px]"
                 style={{ borderBottom: `1px solid ${C.borderSoft}` }}
               >
-                <div>
-                  <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={artifact.title ?? undefined}>
+                <div className="min-w-0">
+                  <div className="truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={artifact.title ?? undefined}>
                     {artifact.title ?? `Artifact ${artifact.id}`}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: C.textMuted }}>
-                    {artifact.kind.replace(/_/g, " ")}
-                  </div>
-                  {artifact.sessionDisplayName && (
-                    <Badge variant="outline" className="mt-1 max-w-full uppercase" title={artifact.sessionDisplayName}>
-                      {artifact.sessionDisplayName}
+                  <div className="mt-1 flex flex-wrap items-center gap-1">
+                    <Badge variant="secondary" className="uppercase">
+                      {artifact.kind.replace(/_/g, " ")}
                     </Badge>
-                  )}
+                    {artifact.sessionDisplayName && (
+                      <Badge variant="outline" className="max-w-full uppercase" title={artifact.sessionDisplayName}>
+                        {artifact.sessionDisplayName}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Badge variant={badgeVariant(artifact.lifecycleState)} className="uppercase">
                     {artifact.lifecycleState.replace(/_/g, " ")}
                   </Badge>
-                  <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>
-                    {artifact.retentionRule.replace(/_/g, " ")}
-                  </div>
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate text-[11px]" style={{ color: C.textSecondary }} title={artifact.storagePath}>
-                    {artifact.storageProvider}:{artifact.storagePath}
+                  <div className="truncate text-[11px] font-semibold" style={{ color: C.textSecondary }} title={artifact.storagePath}>
+                    {destinationLabel(artifact.storageProvider, artifact.storagePath)}
                   </div>
                   {artifact.sourceUri && (
                     <div className="text-[10px] truncate mt-0.5" style={{ color: C.textMuted }} title={artifact.sourceUri}>
                       Source: {artifact.sourceDisplayName ?? sourceDisplayName(artifact.sourceUri)}
                     </div>
                   )}
+                  <details className="mt-1">
+                    <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+                      Output Details
+                    </summary>
+                    <div className="mt-1 grid gap-1 rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                      <span className="truncate" title={artifact.storagePath}>Path: {artifact.storageProvider}:{artifact.storagePath}</span>
+                      <span>Keep: {artifact.retentionRule.replace(/_/g, " ")}</span>
+                      <span>Owner: {artifact.ownerAgent ?? "unassigned"}</span>
+                    </div>
+                  </details>
                 </div>
                 <div className="md:text-right">
                   <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
                     {formatRelative(artifact.createdAt)}
                   </div>
-                  {artifact.ownerAgent && (
-                    <div className="text-[10px] mt-0.5" style={{ color: C.textMuted }}>
-                      {artifact.ownerAgent}
-                    </div>
-                  )}
                 </div>
               </div>
             ))

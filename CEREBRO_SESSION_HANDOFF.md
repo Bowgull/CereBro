@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1935 EDT
+Last updated: 2026-05-15 1937 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1937 EDT - Artifacts Saved Outputs Low-Machinery Pass
+
+### What Changed
+- Simplified the Artifacts/Output Library default read.
+- Renamed the surface to `Saved Outputs`.
+- Changed summary stats from rows/write-policy/owner to saved/writing/trail.
+- Default output rows now show title, kind, run link, state, destination,
+  source, and time.
+- Moved raw storage path, retention rule, and owner agent behind per-row
+  `Output Details`.
+- Changed the empty state to ask for a saved note, draft, report, prompt, or
+  file receipt instead of describing warehouse artifact plumbing.
+
+### Files Touched
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Artifacts visible-shell low-machinery pass.
+- No backend behavior, DB schema, external write, model call, package install,
+  browser action from CereBro, command execution from CereBro, storage
+  migration, or Raven boundary changed.
+
+### Front-End Steward Review
+- This addresses the worker audit that Artifacts read like warehouse inventory.
+- Storage proof remains available, but the first read is now saved outputs.
+
+### Completion Read
+- Overall: 58%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 42%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: simplify the
+next high-noise visible surface, likely Workbench, or take the Project Lab
+DB-only/cached git status read-model split.
 
 ## 2026-05-15 1935 EDT - Approval Queue Low-Machinery Pass
 
