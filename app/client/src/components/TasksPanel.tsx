@@ -34,7 +34,7 @@ const NEXT_STATUS: Record<string, "open" | "in_progress" | "done" | "cancelled">
   cancelled: "open",
 };
 
-const TASK_RENDER_STEP = 80;
+const TASK_PAGE_STEP = 80;
 
 export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
@@ -47,24 +47,26 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           ...(projectFilter === "all" ? {} : { projectId: projectFilter }),
           ...(sessionFilter === "all" ? {} : { sessionId: sessionFilter }),
         };
-  const list = trpc.tasks.list.useQuery(listFilters);
   const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 10000 });
   const create = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
+      utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
     },
   });
   const setStatus = trpc.tasks.setStatus.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
+      utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
     },
   });
   const del = trpc.tasks.delete.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
+      utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
     },
   });
@@ -73,7 +75,13 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const [deleteGate, setDeleteGate] = useState<{ id: number; title: string } | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<number | null>(null);
   const [focusNotice, setFocusNotice] = useState<string | null>(null);
-  const [visibleLimit, setVisibleLimit] = useState(TASK_RENDER_STEP);
+  const [visibleLimit, setVisibleLimit] = useState(TASK_PAGE_STEP);
+  const queueInput = {
+    ...listFilters,
+    limit: visibleLimit,
+    focusedTaskId: focusedTaskId ?? undefined,
+  };
+  const queue = trpc.tasks.workQueue.useQuery(queueInput);
 
   useEffect(() => {
     let raw: string | null = null;
@@ -94,7 +102,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   }, []);
 
   useEffect(() => {
-    setVisibleLimit(TASK_RENDER_STEP);
+    setVisibleLimit(TASK_PAGE_STEP);
   }, [projectFilter, sessionFilter, focusedTaskId]);
 
   function submit(e: React.FormEvent) {
@@ -106,20 +114,15 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
     setTitle("");
   }
 
-  const tasks = list.data ?? [];
+  const tasks = queue.data?.items ?? [];
   const projectOptions = projects.data ?? [];
   const sessionOptions = sessions.data ?? [];
-  const openTasks = tasks.filter((task) => task.status === "open").length;
-  const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length;
-  const doneTasks = tasks.filter((task) => task.status === "done").length;
-  const focusedTask = focusedTaskId == null ? null : tasks.find((task) => task.id === focusedTaskId) ?? null;
-  const visibleTasks = focusedTask
-    ? [
-        focusedTask,
-        ...tasks.filter((task) => task.id !== focusedTask.id).slice(0, Math.max(visibleLimit - 1, 0)),
-      ]
-    : tasks.slice(0, visibleLimit);
-  const hasMoreTasks = visibleTasks.length < tasks.length;
+  const totalTasks = queue.data?.total ?? 0;
+  const openTasks = queue.data?.statusCounts.open ?? 0;
+  const inProgressTasks = queue.data?.statusCounts.inProgress ?? 0;
+  const doneTasks = queue.data?.statusCounts.done ?? 0;
+  const focusedTaskPinned = queue.data?.focusedTaskPinned ?? false;
+  const hasMoreTasks = queue.data?.page.hasMore ?? false;
 
   return (
     <div
@@ -134,7 +137,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             Ledger Work Queue
             <span className="ml-2" style={{ color: C.textSecondary }}>
-              {tasks.length}
+              {totalTasks}
             </span>
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
@@ -217,7 +220,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         <FilterButton
           label="All Runs"
           active={sessionFilter === "all"}
-          count={tasks.length}
+          count={totalTasks}
           onClick={() => setSessionFilter("all")}
         />
         {sessionOptions.map((session) => (
@@ -225,7 +228,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             key={session.id}
             label={session.title || `Run #${session.id}`}
             active={sessionFilter === session.id}
-            count={tasks.filter((task) => task.sessionId === session.id).length}
+            count={sessionFilter === session.id ? totalTasks : undefined}
             title={session.displayName}
             onClick={() => setSessionFilter(session.id)}
           />
@@ -249,9 +252,9 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        {list.isLoading ? (
+        {queue.isLoading ? (
           <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
-        ) : tasks.length === 0 ? (
+        ) : totalTasks === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
             No tasks yet. Add one above.
           </div>
@@ -259,11 +262,11 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           <>
             <div className="flex items-center justify-between gap-2 px-2.5 py-1 text-[10px] uppercase tracking-widest" style={{ borderBottom: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               <span>
-                Showing {visibleTasks.length} of {tasks.length}
+                Showing {tasks.length} of {totalTasks}
               </span>
-              {focusedTask && <span style={{ color: C.gold }}>Focused task pinned</span>}
+              {focusedTaskPinned && <span style={{ color: C.gold }}>Focused task pinned</span>}
             </div>
-            {visibleTasks.map((t) => (
+            {tasks.map((t) => (
               <div
                 key={t.id}
                 className="flex items-center gap-1.5 px-2.5 py-1.5"
@@ -326,7 +329,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             {hasMoreTasks && (
               <Button
                 type="button"
-                onClick={() => setVisibleLimit((current) => current + TASK_RENDER_STEP)}
+                onClick={() => setVisibleLimit((current) => current + TASK_PAGE_STEP)}
                 variant="outline"
                 className="m-2 w-[calc(100%-1rem)]"
                 size="sm"
@@ -394,7 +397,7 @@ function FilterButton({
 }: {
   label: string;
   active: boolean;
-  count: number;
+  count?: number;
   title?: string;
   onClick: () => void;
 }) {
@@ -408,9 +411,11 @@ function FilterButton({
       title={title}
     >
       {label}
-      <Badge variant={active ? "default" : "secondary"} className="ml-1">
-        {count}
-      </Badge>
+      {count !== undefined && (
+        <Badge variant={active ? "default" : "secondary"} className="ml-1">
+          {count}
+        </Badge>
+      )}
     </Button>
   );
 }

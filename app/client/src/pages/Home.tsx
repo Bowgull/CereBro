@@ -189,7 +189,10 @@ export default function Home() {
     onSuccess: () => utils.runtime.routeRecords.invalidate(),
   });
   const createTask = trpc.tasks.create.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+    onSuccess: () => {
+      utils.tasks.list.invalidate();
+      utils.tasks.workQueue.invalidate();
+    },
   });
 
   // Active agent for the right rail. Default Cortana (orchestrator).
@@ -960,6 +963,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onSuccess: () => {
       utils.runtime.routeRecords.invalidate();
       utils.tasks.list.invalidate();
+      utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
     },
   });

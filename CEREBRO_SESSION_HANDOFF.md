@@ -16764,3 +16764,82 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: reduce task payload and filter noise by adding backend pagination or a task read model that supports focused task lookup without loading the whole local task table. Keep full counts visible. Do not add task execution or automation.
 ```
+
+## 2026-05-15 0815 EDT — Task work queue read model handoff
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 89%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a coupled backend read-model plus TasksPanel wiring
+  slice.
+
+What changed:
+
+- Added `tasks.workQueue`.
+- `tasks.workQueue` is read-only and returns:
+  - limited task rows,
+  - full filtered total,
+  - status counts,
+  - paging metadata,
+  - focused task pinning when a route-created task is outside the first page.
+- `TasksPanel` now reads `tasks.workQueue` instead of loading the whole
+  `tasks.list` table.
+- The visible surface still shows total task count, open count, active count,
+  done count, project filters, and `Show 80 More`.
+- Route-created task focus still opens Tasks and pins the focused task.
+- Mutations that create, update, or delete tasks now invalidate the work queue
+  cache as well as existing task caches.
+- This remains UI/data-read work only. It does not run tasks, commands, browser
+  actions, model calls, Workbench evidence writes, memory writes, git actions,
+  Slack writes, Notion writes, or external provider calls.
+
+Files touched in this slice:
+
+- `app/server/routers/tasks.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red phase: `pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  failed as expected with `No procedure found on path "tasks,workQueue"`.
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-task-workqueue-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Ledger > Tasks, and
+  confirmed the work queue shows `Showing 80 of 1759` with `Show 80 More`.
+
+Known risks:
+
+- Session filter chips still repeat similar run names. The count noise is
+  reduced, but the filter lane still needs grouping or a compact menu.
+- `tasks.list` remains available and still returns the full list for older
+  surfaces. Ledger Overview and Terminal Lab still use it.
+- The first live test run created six `Paged queue` rows in the local app DB.
+  They were removed before close.
+
+Storage impact:
+
+- No schema change.
+- No intended durable app data created.
+- Removed six local test rows created by this pass.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: move Ledger Overview task counting and Terminal Lab task selection toward lighter read models so the old full `tasks.list` query is not used by high-traffic surfaces. Keep the UI compact and do not add execution.
+```

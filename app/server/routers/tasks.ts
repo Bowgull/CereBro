@@ -12,6 +12,12 @@ import { sessionDisplayName } from "./sessions";
 const TASK_STATUSES = ["open", "in_progress", "done", "cancelled"] as const;
 const statusSchema = z.enum(TASK_STATUSES);
 
+type TaskListFilter = {
+  status?: TaskStatus;
+  projectId?: number;
+  sessionId?: number;
+};
+
 function rowToTask(r: Record<string, unknown>): TaskRow {
   const task = {
     id: Number(r.id),
@@ -76,6 +82,60 @@ async function getTaskById(id: number): Promise<TaskRow | null> {
   return row ? rowToTask(row) : null;
 }
 
+function taskWhere(input: TaskListFilter | undefined) {
+  const where: string[] = [];
+  const args: (string | number)[] = [];
+  if (input?.status) {
+    where.push("t.status = ?");
+    args.push(input.status);
+  }
+  if (input?.projectId !== undefined) {
+    where.push("t.project_id = ?");
+    args.push(input.projectId);
+  }
+  if (input?.sessionId !== undefined) {
+    where.push("t.session_id = ?");
+    args.push(input.sessionId);
+  }
+  return { where, args };
+}
+
+const taskSelectSql = `
+  SELECT
+    t.id,
+    t.project_id,
+    t.session_id,
+    p.name AS project_name,
+    p.path AS project_path,
+    s.claude_session_id AS session_claude_session_id,
+    s.title AS session_title,
+    s.hero_class AS session_hero_class,
+    s.started_at AS session_started_at,
+    s.ended_at AS session_ended_at,
+    sp.name AS session_project_name,
+    t.title,
+    t.status,
+    t.agent,
+    t.created_at,
+    t.updated_at
+  FROM tasks t
+  LEFT JOIN projects p ON p.id = t.project_id
+  LEFT JOIN sessions s ON s.id = t.session_id
+  LEFT JOIN projects sp ON sp.id = s.project_id
+`;
+
+const taskOrderSql = `
+  ORDER BY
+    CASE t.status
+      WHEN 'in_progress' THEN 0
+      WHEN 'open' THEN 1
+      WHEN 'done' THEN 2
+      WHEN 'cancelled' THEN 3
+    END,
+    t.updated_at DESC,
+    t.id DESC
+`;
+
 export const tasksRouter = router({
   projects: publicProcedure.query(async () => {
     const db = await getCerebroDb();
@@ -116,54 +176,103 @@ export const tasksRouter = router({
     )
     .query(async ({ input }) => {
       const db = await getCerebroDb();
-      const where: string[] = [];
-      const args: (string | number)[] = [];
-      if (input?.status) {
-        where.push("t.status = ?");
-        args.push(input.status);
-      }
-      if (input?.projectId !== undefined) {
-        where.push("t.project_id = ?");
-        args.push(input.projectId);
-      }
-      if (input?.sessionId !== undefined) {
-        where.push("t.session_id = ?");
-        args.push(input.sessionId);
-      }
+      const { where, args } = taskWhere(input);
       const sql = `
-        SELECT
-          t.id,
-          t.project_id,
-          t.session_id,
-          p.name AS project_name,
-          p.path AS project_path,
-          s.claude_session_id AS session_claude_session_id,
-          s.title AS session_title,
-          s.hero_class AS session_hero_class,
-          s.started_at AS session_started_at,
-          s.ended_at AS session_ended_at,
-          sp.name AS session_project_name,
-          t.title,
-          t.status,
-          t.agent,
-          t.created_at,
-          t.updated_at
-        FROM tasks t
-        LEFT JOIN projects p ON p.id = t.project_id
-        LEFT JOIN sessions s ON s.id = t.session_id
-        LEFT JOIN projects sp ON sp.id = s.project_id
+        ${taskSelectSql}
         ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-        ORDER BY
-          CASE t.status
-            WHEN 'in_progress' THEN 0
-            WHEN 'open' THEN 1
-            WHEN 'done' THEN 2
-            WHEN 'cancelled' THEN 3
-          END,
-          t.updated_at DESC
+        ${taskOrderSql}
       `;
       const result = await db.execute({ sql, args });
       return result.rows.map(rowToTask);
+    }),
+
+  workQueue: publicProcedure
+    .input(
+      z
+        .object({
+          status: statusSchema.optional(),
+          projectId: z.number().int().optional(),
+          sessionId: z.number().int().optional(),
+          limit: z.number().int().min(1).max(200).default(80),
+          offset: z.number().int().min(0).default(0),
+          focusedTaskId: z.number().int().min(1).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const { where, args } = taskWhere(input);
+      const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+      const limit = input?.limit ?? 80;
+      const offset = input?.offset ?? 0;
+
+      const counts = await db.execute({
+        sql: `
+          SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN t.status = 'open' THEN 1 ELSE 0 END) AS open_count,
+            SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress_count,
+            SUM(CASE WHEN t.status = 'done' THEN 1 ELSE 0 END) AS done_count,
+            SUM(CASE WHEN t.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count
+          FROM tasks t
+          ${whereSql}
+        `,
+        args,
+      });
+      const countRow = counts.rows[0] ?? {};
+      const total = Number(countRow.total ?? 0);
+
+      const page = await db.execute({
+        sql: `
+          ${taskSelectSql}
+          ${whereSql}
+          ${taskOrderSql}
+          LIMIT ? OFFSET ?
+        `,
+        args: [...args, limit, offset],
+      });
+      const pageItems = page.rows.map(rowToTask);
+      let items = pageItems;
+      let focusedTaskPinned = false;
+
+      if (input?.focusedTaskId != null && !pageItems.some((task) => task.id === input.focusedTaskId)) {
+        const focusedWhere = [...where, "t.id = ?"];
+        const focused = await db.execute({
+          sql: `
+            ${taskSelectSql}
+            WHERE ${focusedWhere.join(" AND ")}
+            LIMIT 1
+          `,
+          args: [...args, input.focusedTaskId],
+        });
+        const focusedRow = focused.rows[0];
+        if (focusedRow) {
+          items = [rowToTask(focusedRow), ...pageItems];
+          focusedTaskPinned = true;
+        }
+      } else if (input?.focusedTaskId != null) {
+        focusedTaskPinned = pageItems.some((task) => task.id === input.focusedTaskId);
+      }
+
+      return {
+        mode: "read_only" as const,
+        items,
+        total,
+        statusCounts: {
+          open: Number(countRow.open_count ?? 0),
+          inProgress: Number(countRow.in_progress_count ?? 0),
+          done: Number(countRow.done_count ?? 0),
+          cancelled: Number(countRow.cancelled_count ?? 0),
+        },
+        page: {
+          limit,
+          offset,
+          returned: items.length,
+          baseReturned: pageItems.length,
+          hasMore: offset + pageItems.length < total,
+        },
+        focusedTaskPinned,
+      };
     }),
 
   create: publicProcedure

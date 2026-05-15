@@ -2862,6 +2862,41 @@ describe("Hedwig capture planning", () => {
 });
 
 describe("Terminal Lab planning", () => {
+  it("reads a paged task work queue while pinning the focused task", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+    const stamp = Date.now();
+    const older = await caller.tasks.create({
+      title: `Paged queue older ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    const newer = await caller.tasks.create({
+      title: `Paged queue newer ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+
+    const queue = await caller.tasks.workQueue({
+      limit: 1,
+      focusedTaskId: older.id,
+    });
+
+    expect(queue.mode).toBe("read_only");
+    expect(queue.items.map((item) => item.id)).toContain(older.id);
+    expect(queue.items.map((item) => item.id)).toContain(newer.id);
+    expect(queue.total).toBeGreaterThanOrEqual(2);
+    expect(queue.statusCounts.open).toBeGreaterThanOrEqual(2);
+    expect(queue.page.limit).toBe(1);
+    expect(queue.page.returned).toBe(queue.items.length);
+    expect(queue.focusedTaskPinned).toBe(true);
+  });
+
   it("previews commands without executing them", async () => {
     const caller = appRouter.createCaller({
       user: null,

@@ -134,6 +134,9 @@ Recent Prime slices:
 - 2026-05-15 0752 EDT: capped the Tasks visible DOM to 80 rows at a time,
   added `Show 80 More`, and pinned route-focused tasks into the visible set so
   the focused receipt stays inspectable without dumping the full task pile.
+- 2026-05-15 0815 EDT: added `tasks.workQueue`, a paged read-only Tasks read
+  model with full status counts and focused task pinning. `TasksPanel` now uses
+  this read model instead of fetching the whole task table.
 
 ### Frontend Worker
 
