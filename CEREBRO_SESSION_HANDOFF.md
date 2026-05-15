@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2206 EDT
+Last updated: 2026-05-14 2217 EDT
 
 ## Current North Star
 
@@ -20,6 +20,73 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2217 EDT - Runtime Route Commit Record Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Used TDD for the backend route-record slice.
+- Added `runtime_route_records`, an append-only local table for committed route
+  receipts.
+- Refactored `runtime.previewRoute` through a shared route-preview builder so
+  preview and commit use the same deterministic Aang -> Cortana receipt shape.
+- Added `runtime.commitRoute`.
+- `runtime.commitRoute` writes exactly one local route record and returns the
+  committed route receipt.
+- The commit does not create a task, save Workbench evidence, create approval
+  rows, write memory, run commands, open a browser, call a model, install
+  Ollama, pull a model, push git, write Notion/Slack/Obsidian, or call an
+  external provider.
+- Updated `CEREBRO_BUILD_QUEUE.md` so Block B records this first commit-route
+  pass.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` failed because `runtime_route_records` did not exist.
+- Green phase: `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 4 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 31 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `git diff --check -- app/server/cerebroDb.ts app/server/routers/runtime.ts app/server/runtime.routeReceipt.test.ts` passed.
+
+### Cleanliness Read
+- Current slice: backend route receipt contract.
+- This is the first local route-record write boundary after the browser proof
+  for preview -> Workbench draft -> Ledger focus.
+- Generated/local: no tracked generated files.
+- Residual risk: `runtime_route_records` is backend-only for now. The UI still
+  uses preview staging, not commit.
+
+### Front-End Steward Review
+- No new UI surface was added.
+- This protects the low-machinery flow: the user can keep seeing a preview
+  first, and the backend now has a local-only commit point when the UI is ready
+  to expose it.
+
+### Completion Read
+- Overall: 51%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 82%.
+- Backend/runtime: 34%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start by classifying dirty files. Next best path: add a
+small UI affordance to commit a runtime route record only after the route
+preview is visible, or add a read model for recent `runtime_route_records` so
+Ledger can show route commits separately from Workbench evidence.
 
 ## 2026-05-14 2206 EDT - Unused Handoff Panel Cleanup
 

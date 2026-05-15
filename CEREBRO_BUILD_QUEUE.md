@@ -111,6 +111,9 @@ Recent Prime slices:
   Aang stages a Workbench draft and focuses Ledger without autosaving.
 - 2026-05-14 2206 EDT: deleted unused `HandoffArchivePanel.tsx`. The real
   handoff archive remains the repo handoff plus append-only Obsidian snapshots.
+- 2026-05-14 2217 EDT: added local-only `runtime.commitRoute` and
+  `runtime_route_records`. Route preview remains non-mutating; commit writes one
+  local route record only.
 
 ### Frontend Worker
 
@@ -224,6 +227,9 @@ Goal:
   opens Ledger with a focus notice. No receipt or audit row is autosaved.
 - Later: `runtime.commitRoute` appends local route records only after UI proves
   the preview shape.
+- Done first pass: `runtime.commitRoute` appends one local route record and
+  does not run routed work, create tasks, save Workbench evidence, or write
+  externally.
 
 Expected shape:
 

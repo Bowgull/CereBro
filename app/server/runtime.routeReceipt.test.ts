@@ -33,6 +33,7 @@ const previewMutationTables = [
   "source_events",
   "workbench_evidence_records",
   "permission_preflight_records",
+  "runtime_route_records",
 ] as const;
 
 async function countPreviewMutationRows() {
@@ -144,5 +145,33 @@ describe("runtime route receipt preview", () => {
     expect(buildPreview.modelProposal.dataLeavingMachine).toBe(true);
     expect(buildPreview.modelProposal.reason).toContain("local lane may not be strong enough");
     expect(buildPreview.approvalGates).toContain("external model escalation approval");
+  });
+
+  it("commits a local route record without running the routed work", async () => {
+    const caller = createCaller();
+    const rowCountsBefore = await countPreviewMutationRows();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+
+    expect(committed.mode).toBe("local_route_record");
+    expect(committed.writesExternal).toBe(false);
+    expect(committed.runsCommand).toBe(false);
+    expect(committed.opensBrowser).toBe(false);
+    expect(committed.callsModel).toBe(false);
+    expect(committed.record.id).toBeGreaterThan(0);
+    expect(committed.record.category).toBe("project_build");
+    expect(committed.record.ownerAgent).toBe("tony");
+    expect(committed.record.projectSlug).toBe("cerebro");
+    expect(committed.record.workbenchReceiptDraft.autosave).toBe(false);
+    expect(committed.record.ledgerFocusDraft.autosave).toBe(false);
+    expect(committed.nextAction).toContain("Workbench receipt");
+
+    expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
+    for (const table of previewMutationTables.filter((table) => table !== "runtime_route_records")) {
+      expect(await countRows(table)).toBe(rowCountsBefore.get(table));
+    }
   });
 });
