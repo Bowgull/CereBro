@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1944 EDT
+Last updated: 2026-05-15 1946 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1946 EDT - Skills Manager Manual Refresh Pass
+
+### What Changed
+- Removed 3 second polling from the Claude Code Manager agents/skills drawer.
+- Gated agents and skills reads by active tab and selected scope.
+- Added a 60 second stale window and disabled window-focus/reconnect refetches
+  for local file reads.
+- Kept manual Refresh and mutation refreshes as the explicit read path.
+- Added a compact status line: `Reading local files.` or `Manual refresh. No
+  polling.`
+- Cleaned touched toast copy to plain status strings with periods.
+
+### Files Touched
+- `app/client/src/components/SkillsManager.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `rg -n "refetchInterval: 3000|created!|updated!|deleted!" app/client/src/components/SkillsManager.tsx` returned no matches.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Skills Manager local-file read polling reduction.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git operation from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-component polling fix.
+
+### Front-End Steward Review
+- The drawer now shows the read contract directly instead of silently polling
+  the filesystem.
+- This supports fast AI OS behavior without adding a new surface.
+
+### Completion Read
+- Overall: 59%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 43%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: compact
+approval queue read model, or another polling/read-model split if visible
+surfaces are still doing broad reads.
 
 ## 2026-05-15 1944 EDT - Project Lab Cached Git Status Read Model
 

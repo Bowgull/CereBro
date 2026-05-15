@@ -165,14 +165,16 @@ Recent Prime slices:
   receipt grouping, and read gates now sit behind closed disclosures.
 - 2026-05-15 1944 EDT: added cached read-only Project Lab git status and moved
   overview/detail reads onto the shared cache.
+- 2026-05-15 1946 EDT: removed Skills Manager 3 second polling; agent/skill
+  file reads are now active-tab, active-scope, manual-refresh reads.
 
 ### Frontend Worker
 
 Next block:
 
 - Take one high-noise surface pass only if the next surface still shows
-  machinery first. Otherwise move to skill-manager polling reduction or the
-  compact approval queue read model.
+  machinery first. Otherwise move to the compact approval queue read model or
+  another broad-read reduction.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -200,8 +202,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  skill-manager polling reduction, compact approval queue reads, then deeper
-  Project Lab DB-only summary if the cached git split is still too heavy.
+  compact approval queue reads, then deeper Project Lab DB-only summary if the
+  cached git split is still too heavy.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -509,3 +511,5 @@ Expected shape:
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.
+- Skills Manager now reads local agent/skill files only for the active
+  tab/scope and uses manual refresh instead of 3 second polling.

@@ -62,6 +62,12 @@ Write your skill instructions here. Claude will follow these when the skill is i
 - Step 2: ...
 `;
 
+const LOCAL_FILE_READ_QUERY_OPTIONS = {
+  staleTime: 60_000,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+} as const;
+
 interface AgentEditorProps {
   initialContent?: string;
   onSave: (content: string) => void;
@@ -132,68 +138,80 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // ── Agents Queries ──────────────────────────────────────────────────────────
-  const globalAgents = trpc.agents.globalAgents.useQuery(undefined, { refetchInterval: 3000 });
+  const globalAgents = trpc.agents.globalAgents.useQuery(undefined, {
+    ...LOCAL_FILE_READ_QUERY_OPTIONS,
+    enabled: activeTab === "agents" && scope === "global",
+  });
   const projectAgents = trpc.agents.projectAgents.useQuery(
     { projectPath: selectedProject },
-    { enabled: scope === "project" && !!selectedProject, refetchInterval: 3000 }
+    {
+      ...LOCAL_FILE_READ_QUERY_OPTIONS,
+      enabled: activeTab === "agents" && scope === "project" && !!selectedProject,
+    },
   );
 
   // ── Skills Queries ──────────────────────────────────────────────────────────
-  const globalSkills = trpc.agents.globalSkills.useQuery(undefined, { refetchInterval: 3000 });
+  const globalSkills = trpc.agents.globalSkills.useQuery(undefined, {
+    ...LOCAL_FILE_READ_QUERY_OPTIONS,
+    enabled: activeTab === "skills" && scope === "global",
+  });
   const projectSkills = trpc.agents.projectSkills.useQuery(
     { projectPath: selectedProject },
-    { enabled: scope === "project" && !!selectedProject, refetchInterval: 3000 }
+    {
+      ...LOCAL_FILE_READ_QUERY_OPTIONS,
+      enabled: activeTab === "skills" && scope === "project" && !!selectedProject,
+    },
   );
 
   // ── Agent Mutations ─────────────────────────────────────────────────────────
   const createGlobalAgent = trpc.agents.createGlobalAgent.useMutation({
-    onSuccess: () => { globalAgents.refetch(); toast.success("Agent created!"); setShowEditor(false); setNewItemName(""); },
+    onSuccess: () => { globalAgents.refetch(); toast.success("Agent created."); setShowEditor(false); setNewItemName(""); },
     onError: (e) => toast.error(e.message),
   });
   const updateGlobalAgent = trpc.agents.updateGlobalAgent.useMutation({
-    onSuccess: () => { globalAgents.refetch(); toast.success("Agent updated!"); setShowEditor(false); setEditingItem(null); },
+    onSuccess: () => { globalAgents.refetch(); toast.success("Agent updated."); setShowEditor(false); setEditingItem(null); },
     onError: (e) => toast.error(e.message),
   });
   const deleteGlobalAgent = trpc.agents.deleteGlobalAgent.useMutation({
-    onSuccess: () => { globalAgents.refetch(); toast.success("Agent deleted!"); },
+    onSuccess: () => { globalAgents.refetch(); toast.success("Agent deleted."); },
     onError: (e) => toast.error(e.message),
   });
   const createProjectAgent = trpc.agents.createProjectAgent.useMutation({
-    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent created!"); setShowEditor(false); setNewItemName(""); },
+    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent created."); setShowEditor(false); setNewItemName(""); },
     onError: (e) => toast.error(e.message),
   });
   const updateProjectAgent = trpc.agents.updateProjectAgent.useMutation({
-    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent updated!"); setShowEditor(false); setEditingItem(null); },
+    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent updated."); setShowEditor(false); setEditingItem(null); },
     onError: (e) => toast.error(e.message),
   });
   const deleteProjectAgent = trpc.agents.deleteProjectAgent.useMutation({
-    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent deleted!"); },
+    onSuccess: () => { projectAgents.refetch(); toast.success("Project agent deleted."); },
     onError: (e) => toast.error(e.message),
   });
 
   // ── Skill Mutations ─────────────────────────────────────────────────────────
   const createGlobalSkill = trpc.agents.createGlobalSkill.useMutation({
-    onSuccess: () => { globalSkills.refetch(); toast.success("Skill created!"); setShowEditor(false); setNewItemName(""); },
+    onSuccess: () => { globalSkills.refetch(); toast.success("Skill created."); setShowEditor(false); setNewItemName(""); },
     onError: (e) => toast.error(e.message),
   });
   const updateGlobalSkill = trpc.agents.updateGlobalSkill.useMutation({
-    onSuccess: () => { globalSkills.refetch(); toast.success("Skill updated!"); setShowEditor(false); setEditingItem(null); },
+    onSuccess: () => { globalSkills.refetch(); toast.success("Skill updated."); setShowEditor(false); setEditingItem(null); },
     onError: (e) => toast.error(e.message),
   });
   const deleteGlobalSkill = trpc.agents.deleteGlobalSkill.useMutation({
-    onSuccess: () => { globalSkills.refetch(); toast.success("Skill deleted!"); },
+    onSuccess: () => { globalSkills.refetch(); toast.success("Skill deleted."); },
     onError: (e) => toast.error(e.message),
   });
   const createProjectSkill = trpc.agents.createProjectSkill.useMutation({
-    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill created!"); setShowEditor(false); setNewItemName(""); },
+    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill created."); setShowEditor(false); setNewItemName(""); },
     onError: (e) => toast.error(e.message),
   });
   const updateProjectSkill = trpc.agents.updateProjectSkill.useMutation({
-    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill updated!"); setShowEditor(false); setEditingItem(null); },
+    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill updated."); setShowEditor(false); setEditingItem(null); },
     onError: (e) => toast.error(e.message),
   });
   const deleteProjectSkill = trpc.agents.deleteProjectSkill.useMutation({
-    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill deleted!"); },
+    onSuccess: () => { projectSkills.refetch(); toast.success("Project skill deleted."); },
     onError: (e) => toast.error(e.message),
   });
 
@@ -243,6 +261,8 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
     ? (scope === "global" ? "~/.claude/agents/<name>.md" : `<project>/.claude/agents/<name>.md`)
     : (scope === "global" ? "~/.claude/skills/<name>/SKILL.md" : `<project>/.claude/skills/<name>/SKILL.md`);
 
+  const readStatus = isLoading ? "Reading local files." : "Manual refresh. No polling.";
+
   return (
     <>
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-40 p-4">
@@ -252,6 +272,9 @@ export default function SkillsManager({ onClose, projects }: SkillsManagerProps)
             <div>
               <h2 className="font-bold text-sm uppercase tracking-widest" style={{ color: C.gold }}>Claude Code Manager</h2>
               <p className="text-xs mt-0.5" style={{ color: C.textMuted }}>{pathInfo}</p>
+              <p className="text-[11px] mt-0.5" role="status" aria-live="polite" style={{ color: C.textMuted }}>
+                {readStatus}
+              </p>
             </div>
             <Button type="button" onClick={onClose} aria-label="Close Claude Code Manager" variant="ghost" size="icon-sm">
               <X size={20} />
