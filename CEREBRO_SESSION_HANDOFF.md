@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2032 EDT
+Last updated: 2026-05-14 2039 EDT
 
 ## Current North Star
 
@@ -20,6 +20,80 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2039 EDT - Project Lab Inspector Consolidation Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Used one read-only frontend worker to confirm the next safe critical-path
+  slice. Worker recommended Project Lab inspector consolidation.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `ProjectLabPanel` so project cards stop rendering duplicate support
+  disclosures and recent lists.
+- Removed card-level `Project Details`, `Draft Actions`, and `Activity Details`.
+- Removed duplicate knowledge-route, proof-strip, and recent-list helper
+  components that were only serving those card disclosures.
+- Kept push readiness, push decision, activity signal buttons, next safe action,
+  and dirty worktree inspector CTA visible.
+- Draft note handling remains in the Local Inspector. No local draft creation
+  controls remain on the default card.
+- No backend behavior changed. No project action, git action, approval
+  execution, command execution, browser action, Ollama command, install, pull,
+  model call, vector index, external write, or storage migration ran.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Playwright reloaded `http://localhost:3002/`, opened Workshop, opened Project
+  Lab, and confirmed the removed `Project Details`, `Draft Actions`, and
+  `Activity Details` labels no longer appear while Push Details and inspector
+  CTAs remain.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/ProjectLabPanel.tsx` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Project Lab inspector consolidation.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` stays ignored as local inspection output.
+- Blocked: Backend receipt contracts remain deferred because
+  `app/server/routers/approvals.ts` already contains unstaged Raven
+  approval-router changes.
+
+### Front-End Steward Review
+- Project Lab now behaves more like a map and less like five tiny dashboards.
+- The card shows the daily read first.
+- Supporting evidence moves through Inspect, activity buttons, Workbench, or
+  Ledger instead of duplicating on every card.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 69%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Next safe slice: inspect whether Local Inspector needs a calmer
+first-read header or whether Project Lab can pause and the frontend track should
+move to Terminal Lab command-teaching polish. Switch to backend receipt
+contracts only after the Raven backend batch is resolved. Do not run Ollama
+status commands until the user explicitly approves the real check.
 
 ## 2026-05-14 2032 EDT - Project Card Supporting Detail Pass
 

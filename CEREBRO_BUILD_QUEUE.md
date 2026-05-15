@@ -336,3 +336,6 @@ Expected shape:
   queues, and dirty file lists behind `Project Details`, `Draft Actions`,
   `Activity Details`, or the inspector instead of showing every supporting row
   on the default card.
+- Project Lab card support detail is now consolidated into the Local Inspector
+  path. The default card no longer renders `Project Details`, `Draft Actions`,
+  `Activity Details`, duplicate recent lists, or first-five dirty file lists.

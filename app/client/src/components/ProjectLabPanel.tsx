@@ -77,7 +77,6 @@ function attentionReasons(project: {
 type ProjectViewFilter = "all" | "attention" | "approvals" | "hedwig" | "terminal" | "sources" | "drafts" | "dirty" | "missing";
 type InspectorQueue = "approvals" | "terminal" | "hedwig" | "sources" | "git" | "drafts" | "gates";
 type InspectorSort = "default" | "type" | "text";
-type DraftActionKey = "plan_next_slice" | "inspect_dirty_state" | "package_proof" | "validation_pass";
 type ProjectLabFocusDraft = {
   source?: string;
   projectId?: number | null;
@@ -276,21 +275,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
   const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 100 }, { refetchInterval: 10000 });
   const utils = trpc.useUtils();
-  const [pendingDraftTarget, setPendingDraftTarget] = useState<{ slug: string; actionKey: DraftActionKey } | null>(null);
-  const [lastDraftNotice, setLastDraftNotice] = useState<{ slug: string; id: number } | null>(null);
   const [lastDraftNoteNotice, setLastDraftNoteNotice] = useState<{ draftId: number; noteId: number } | null>(null);
-  const createActionDraft = trpc.projectIntelligence.createActionDraft.useMutation({
-    onMutate: (variables) => {
-      setPendingDraftTarget({ slug: variables.slug, actionKey: variables.actionKey });
-      setLastDraftNotice(null);
-    },
-    onSuccess: (result, variables) => {
-      if (result.ok) setLastDraftNotice({ slug: variables.slug, id: result.draft.id });
-      utils.projectIntelligence.detail.invalidate({ slug: variables.slug });
-      utils.projectIntelligence.overview.invalidate();
-    },
-    onSettled: () => setPendingDraftTarget(null),
-  });
   const appendActionDraftNote = trpc.projectIntelligence.appendActionDraftNote.useMutation({
     onMutate: () => {
       setLastDraftNoteNotice(null);
@@ -607,8 +592,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
               const autoPushArmed = autoPushSlugs.has(project.slug);
-              const pendingDraftForProject = pendingDraftTarget?.slug === project.slug ? pendingDraftTarget : null;
-              const lastDraftForProject = lastDraftNotice?.slug === project.slug ? lastDraftNotice : null;
               const proofStats = project.tasks.projectId == null
                 ? { total: 0, terminal: 0, needsReview: 0, validated: 0 }
                 : evidenceByProjectId.get(project.tasks.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 };
@@ -720,16 +703,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     autoSelected={autoPushArmed}
                     nextSafeAction={project.nextSafeAction}
                   />
-
-                  <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                    <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                      Project Details
-                    </summary>
-                    <div className="mt-1.5 grid gap-1.5">
-                      <KnowledgeRouteStrip route={project.knowledgeRoute} />
-                      <ProofStatusStrip stats={proofStats} />
-                    </div>
-                  </details>
 
                   <div className="mt-2">
                     <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
@@ -868,48 +841,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
 
-                  <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                    <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                      Draft Actions
-                    </summary>
-                    <div className="mt-1 flex items-center justify-between gap-2">
-                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Local plans only</span>
-                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.success }}>proposal only</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {([
-                        ["plan_next_slice", "Plan slice"],
-                        ["inspect_dirty_state", "Inspect state"],
-                        ["package_proof", "Package receipts"],
-                        ["validation_pass", "Validate"],
-                      ] as Array<[DraftActionKey, string]>).map(([actionKey, label]) => (
-                        <Button
-                          key={actionKey}
-                          type="button"
-                          disabled={createActionDraft.isPending}
-                          aria-label={`Create local draft action for ${project.name}: ${label}`}
-                          onClick={() => {
-                            createActionDraft.mutate({ slug: project.slug, actionKey });
-                            setInspectorQueue("drafts");
-                            setSelectedSlug(project.slug);
-                          }}
-                          className="h-auto justify-start rounded text-left"
-                          variant="secondary"
-                          size="sm"
-                        >
-                          {label}
-                        </Button>
-                      ))}
-                    </div>
-                    <div role="status" aria-live="polite" className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                      {pendingDraftForProject
-                        ? `Creating ${labelize(pendingDraftForProject.actionKey)} draft locally. No task or repo action is running.`
-                        : lastDraftForProject
-                          ? `Created local draft #${lastDraftForProject.id}. No task was created and no repo was edited.`
-                          : "Drafts append local plans. They do not create tasks or edit repos."}
-                    </div>
-                  </details>
-
                   <div className="mt-2 grid grid-cols-2 gap-1 xl:grid-cols-5">
                     {activitySignals.map((signal) => (
                       <Button
@@ -940,148 +871,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       </Button>
                     ))}
                   </div>
-
-                  {(project.tasks.recent.length > 0 || project.activity.recentCommands.length > 0 || project.activity.recentCaptures.length > 0 || project.activity.approvals.recent.length > 0 || project.activity.sourceEvents.recent.length > 0) && (
-                    <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                      <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                        Activity Details
-                      </summary>
-                      {project.tasks.recent.length > 0 && (
-                        <div className="mt-1.5">
-                          <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-                            Current Tasks
-                          </div>
-                          <div className="space-y-1" role="list" aria-label={`${project.name} current tasks`}>
-                            {project.tasks.recent.slice(0, 3).map((task) => (
-                              <div
-                                key={task.id}
-                                role="listitem"
-                                className="grid grid-cols-[64px_minmax(0,1fr)] gap-1.5 text-[11px] leading-snug px-1.5 py-1 rounded"
-                                style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}
-                              >
-                                <span className="uppercase tracking-wider truncate" style={{ color: task.status === "in_progress" ? C.accent : C.textMuted }}>
-                                  {task.status.replace(/_/g, " ")}
-                                </span>
-                                <span className="truncate" title={task.title}>
-                                  {task.title}
-                                  {task.sessionId != null && (
-                                    <span
-                                      className="ml-1 uppercase tracking-wider"
-                                      style={{ color: C.textMuted }}
-                                      title={task.sessionDisplayName ?? undefined}
-                                    >
-                                      {task.sessionDisplayName ?? `Run #${task.sessionId}`}
-                                    </span>
-                                  )}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {(project.activity.recentCommands.length > 0 || project.activity.recentCaptures.length > 0) && (
-                        <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                          {project.activity.recentCommands.length > 0 && (
-                            <div>
-                              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-                                Terminal Observations
-                              </div>
-                              <div className="space-y-1">
-                                {project.activity.recentCommands.map((item) => (
-                                  <Button
-                                    type="button"
-                                    key={item.id}
-                                    aria-label={`Inspect Terminal observation for ${project.name}: ${item.command}`}
-                                    onClick={() => {
-                                      setInspectorQueue("terminal");
-                                      setSelectedSlug(project.slug);
-                                    }}
-                                    className="h-auto w-full min-w-0 justify-start rounded text-left"
-                                    variant="secondary"
-                                    size="sm"
-                                  >
-                                    <span className="min-w-0 truncate">
-                                      <Badge variant={item.risk === "read_only" ? "success" : "warning"} className="mr-1 uppercase">
-                                        {labelize(item.risk)}
-                                      </Badge>
-                                      <span className="truncate" title={item.command}>{compactCommandLabel(item.command)}</span>
-                                    </span>
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {project.activity.recentCaptures.length > 0 && (
-                            <div>
-                              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-                                Hedwig Captures
-                              </div>
-                              <div className="space-y-1">
-                                {project.activity.recentCaptures.map((item) => (
-                                  <Button
-                                    type="button"
-                                    key={item.id}
-                                    aria-label={`Inspect Hedwig capture for ${project.name}: ${item.title}`}
-                                    onClick={() => {
-                                      setInspectorQueue("hedwig");
-                                      setSelectedSlug(project.slug);
-                                    }}
-                                    className="h-auto w-full min-w-0 justify-start rounded text-left"
-                                    variant="secondary"
-                                    size="sm"
-                                  >
-                                    <span className="min-w-0 truncate">
-                                      <Badge variant={item.sensitive ? "destructive" : "default"} className="mr-1 uppercase">
-                                        {labelize(item.status)}
-                                      </Badge>
-                                      <span className="truncate" title={item.title}>{labelize(item.captureType)}: {item.title}</span>
-                                    </span>
-                                  </Button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {(project.activity.approvals.recent.length > 0 || project.activity.sourceEvents.recent.length > 0) && (
-                        <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                          {project.activity.approvals.recent.length > 0 && (
-                            <RecentList
-                              title="Approval Queue"
-                              onSelect={() => {
-                                setInspectorQueue("approvals");
-                                setSelectedSlug(project.slug);
-                              }}
-                              items={project.activity.approvals.recent.map((item) => ({
-                                id: item.id,
-                                label: labelize(item.actionType),
-                                text: item.requestedByAgent ? `by ${AGENT_LABELS[item.requestedByAgent] ?? item.requestedByAgent}` : item.targetType ?? "local approval",
-                                tone: item.sensitive ? C.danger : C.warning,
-                              }))}
-                            />
-                          )}
-                          {project.activity.sourceEvents.recent.length > 0 && (
-                            <RecentList
-                              title="Source Events"
-                              onSelect={() => {
-                                setInspectorQueue("sources");
-                                setSelectedSlug(project.slug);
-                              }}
-                              items={project.activity.sourceEvents.recent.map((item) => ({
-                                id: item.id,
-                                label: labelize(item.eventType),
-                                text: item.title ?? item.sourceDisplayName ?? item.trustLevel ?? "source event",
-                                tone: item.sensitive ? C.danger : C.accent,
-                              }))}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </details>
-                  )}
 
                   {project.git.dirty && (
                     <Button
@@ -1844,73 +1633,6 @@ function ProjectMapRead({
   );
 }
 
-function KnowledgeRouteStrip({
-  route,
-}: {
-  route: {
-    projectBridgePath: string;
-    repositorySourcePath: string;
-    archiveRetrieval: string;
-    writesExternalSystems: boolean;
-    approvalGate: string;
-  };
-}) {
-  const items = [
-    { label: "Bridge", value: route.projectBridgePath, tone: C.success },
-    { label: "Source", value: route.repositorySourcePath, tone: C.accent },
-    { label: "Archive", value: route.archiveRetrieval.replace(/_/g, " "), tone: C.warning },
-    { label: "Writes", value: route.writesExternalSystems ? "enabled" : "approval gated", tone: route.writesExternalSystems ? C.danger : C.gold },
-  ];
-
-  return (
-    <section className="mt-2 rounded p-1.5" aria-label="Project knowledge route" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
-        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
-          Knowledge Route
-        </div>
-        <Badge variant="secondary" className="uppercase">
-          <span className="min-w-0 truncate">read only</span>
-        </Badge>
-      </div>
-      <div className="mt-1 grid grid-cols-2 gap-1 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: item.tone }}>
-              {item.label}
-            </div>
-            <div className="mt-0.5 truncate text-[10px] leading-tight" title={item.value} style={{ color: C.textSecondary }}>
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        {route.approvalGate}
-      </div>
-    </section>
-  );
-}
-
-function ProofStatusStrip({ stats }: { stats: { total: number; terminal: number; needsReview: number; validated: number } }) {
-  const tone = stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
-  return (
-    <div className="mt-2 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="flex flex-wrap items-center gap-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
-          Workbench Receipts
-        </span>
-        <Badge variant={stats.total > 0 ? "default" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.total} receipts</span></Badge>
-        <Badge variant={stats.terminal > 0 ? "warning" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.terminal} terminal</span></Badge>
-        <Badge variant={stats.needsReview > 0 ? "warning" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.needsReview} review</span></Badge>
-        <Badge variant={stats.validated > 0 ? "success" : "secondary"} className="uppercase"><span className="min-w-0 truncate">{stats.validated} validated</span></Badge>
-      </div>
-      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Project map signal only. Workbench has the body. Ledger has the audit trail.
-      </div>
-    </div>
-  );
-}
-
 function ProjectReceiptChainStrip({
   stats,
   projectCount,
@@ -2119,45 +1841,6 @@ function EmptyProjectFilter({
             ))}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function RecentList({
-  title,
-  items,
-  onSelect,
-}: {
-  title: string;
-  items: Array<{ id: number; label: string; text: string; tone: string }>;
-  onSelect?: () => void;
-}) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
-        {title}
-      </div>
-      <div className="space-y-1">
-        {items.map((item) => (
-          <Button
-            type="button"
-            key={item.id}
-            onClick={onSelect}
-            aria-label={`Inspect ${title}: ${item.label} ${item.text}`}
-            className="h-auto w-full justify-start rounded px-1.5 py-1 text-left"
-            variant="secondary"
-          >
-            <span className="grid w-full grid-cols-[82px_minmax(0,1fr)] gap-1.5 text-[10px] leading-snug">
-              <span className="uppercase tracking-wider truncate" style={{ color: item.tone }} title={item.label}>
-                {item.label}
-              </span>
-              <span className="truncate" title={item.text}>
-                {item.text}
-              </span>
-            </span>
-          </Button>
-        ))}
       </div>
     </div>
   );
