@@ -1576,11 +1576,11 @@ function EvidenceDetailPanel({
         )}
       </div>
       {detail.knowledgeRoute && (
-        <div className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Knowledge Route
-            </h4>
+        <details className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Knowledge Route
+          </summary>
+          <div className="mt-2 flex flex-wrap gap-1">
             <Chip label="read only" tone={C.gold} />
           </div>
           <div className="grid gap-1">
@@ -1596,68 +1596,73 @@ function EvidenceDetailPanel({
           <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
             {detail.knowledgeRoute.approvalGate}
           </div>
-        </div>
+        </details>
       )}
-      <div className="mt-2 grid gap-1">
-        <Meta label="Owner" value={item.ownerAgent} />
-        <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
-        <Meta label="Project" value={item.projectName ?? "unlinked"} />
-        <Meta label="Task" value={item.taskTitle ?? (item.taskId == null ? "unlinked" : `Task #${item.taskId}`)} />
-        <Meta label="Session" value={item.sessionDisplayName ?? (item.sessionId == null ? "unlinked" : `Run #${item.sessionId}`)} />
-        <Meta
-          label="Source"
-          value={item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)}
-          title={item.sourceUri ?? undefined}
-        />
-        <Meta
-          label="Command"
-          value={item.command ? compactCommandLabel(item.command) : item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`}
-          title={item.command ?? undefined}
-        />
-        <Meta
-          label="Artifact"
-          value={item.artifactTitle ?? (item.artifactPath ? compactPathLabel(item.artifactPath) : item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)}
-          title={item.artifactPath ?? undefined}
-        />
-        <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
-        {item.targetUri && (
-          <Button
-            type="button"
-            onClick={openSecurityGate}
-            disabled={!onNavigate}
-            variant="risk"
-            size="sm"
-            className="w-fit"
-            title="Open Security Gate for this target. Workbench does not browse, clone, install, or execute."
-            aria-label={`Open Security Gate for receipt ${item.id}`}
-          >
-            Security Gate
-          </Button>
-        )}
-        <Meta label="Viewport" value={item.viewport ?? "none"} />
-        <Meta label="Coordinates" value={item.coordinates ?? "none"} />
-        <Meta label="Annotation" value={item.annotationText ?? "none"} />
-        <Meta label="Media Name" value={item.mediaName ?? "none"} />
-        <Meta label="Media Kind" value={item.mediaKind == null ? "none" : item.mediaKind.replace(/_/g, " ")} />
-        <Meta label="Media Type" value={item.mediaMimeType ?? "none"} />
-        <Meta label="Media Size" value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
-        <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
-        <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
-        <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
-        <Meta label="Before Receipt" value={item.beforeEvidenceId == null ? "none" : `Receipt #${item.beforeEvidenceId}`} />
-        <Meta label="After Receipt" value={item.afterEvidenceId == null ? "none" : `Receipt #${item.afterEvidenceId}`} />
-        <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
-      </div>
-      <div className="mt-2 rounded p-2" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+          Receipt Metadata
+        </summary>
+        <div className="mt-2 grid gap-1">
+          <Meta label="Owner" value={item.ownerAgent} />
+          <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
+          <Meta label="Project" value={item.projectName ?? "unlinked"} />
+          <Meta label="Task" value={item.taskTitle ?? (item.taskId == null ? "unlinked" : `Task #${item.taskId}`)} />
+          <Meta label="Session" value={item.sessionDisplayName ?? (item.sessionId == null ? "unlinked" : `Run #${item.sessionId}`)} />
+          <Meta
+            label="Source"
+            value={item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)}
+            title={item.sourceUri ?? undefined}
+          />
+          <Meta
+            label="Command"
+            value={item.command ? compactCommandLabel(item.command) : item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`}
+            title={item.command ?? undefined}
+          />
+          <Meta
+            label="Artifact"
+            value={item.artifactTitle ?? (item.artifactPath ? compactPathLabel(item.artifactPath) : item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)}
+            title={item.artifactPath ?? undefined}
+          />
+          <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
+          {item.targetUri && (
+            <Button
+              type="button"
+              onClick={openSecurityGate}
+              disabled={!onNavigate}
+              variant="risk"
+              size="sm"
+              className="w-fit"
+              title="Open Security Gate for this target. Workbench does not browse, clone, install, or execute."
+              aria-label={`Open Security Gate for receipt ${item.id}`}
+            >
+              Security Gate
+            </Button>
+          )}
+          <Meta label="Viewport" value={item.viewport ?? "none"} />
+          <Meta label="Coordinates" value={item.coordinates ?? "none"} />
+          <Meta label="Annotation" value={item.annotationText ?? "none"} />
+          <Meta label="Media Name" value={item.mediaName ?? "none"} />
+          <Meta label="Media Kind" value={item.mediaKind == null ? "none" : item.mediaKind.replace(/_/g, " ")} />
+          <Meta label="Media Type" value={item.mediaMimeType ?? "none"} />
+          <Meta label="Media Size" value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
+          <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
+          <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
+          <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
+          <Meta label="Before Receipt" value={item.beforeEvidenceId == null ? "none" : `Receipt #${item.beforeEvidenceId}`} />
+          <Meta label="After Receipt" value={item.afterEvidenceId == null ? "none" : `Receipt #${item.afterEvidenceId}`} />
+          <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
+        </div>
+      </details>
+      <details className="mt-2 rounded p-2" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Permission Preflight
-        </h4>
+        </summary>
         {detail.permissionPreflight == null ? (
-          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+          <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No linked permission preflight exists for this receipt. Run Security Gate when the target, source, command, or package needs risk review.
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="mt-2 grid gap-2">
             <div className="flex flex-wrap gap-1">
               <Chip label={`preflight #${detail.permissionPreflight.id}`} tone={C.textMuted} />
               {detail.permissionPreflight.mode && <Chip label={detail.permissionPreflight.mode.replace(/_/g, " ")} tone={C.gold} />}
@@ -1679,24 +1684,31 @@ function EvidenceDetailPanel({
             </ul>
           </div>
         )}
-      </div>
-      <div className="mt-2 grid gap-1.5">
-        {detail.gates.map((gate) => (
-          <div key={gate} className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            {gate}
+      </details>
+      {detail.gates.length > 0 && (
+        <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Receipt Gates
+          </summary>
+          <div className="mt-2 grid gap-1.5">
+            {detail.gates.map((gate) => (
+              <div key={gate} className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                {gate}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+        </details>
+      )}
+      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Validation Trail
-        </h4>
+        </summary>
         {detail.validationHistory.length === 0 ? (
-          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+          <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No validation notes yet. Append a local validation note before treating this receipt as checked.
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="mt-2 grid gap-2">
             {detail.validationHistory.map((entry) => (
               <article key={entry.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-1">
@@ -1712,17 +1724,17 @@ function EvidenceDetailPanel({
             ))}
           </div>
         )}
-      </div>
-      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+      </details>
+      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Comparison Trail
-        </h4>
+        </summary>
         {detail.comparisonHistory.length === 0 ? (
-          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+          <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
             No before/after comparisons include this receipt yet. Pick another local receipt below to append a comparison.
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="mt-2 grid gap-2">
             {detail.comparisonHistory.map((entry) => (
               <article key={entry.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex flex-wrap gap-1">
@@ -1742,12 +1754,12 @@ function EvidenceDetailPanel({
             ))}
           </div>
         )}
-      </div>
-      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+      </details>
+      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Append Before/After Receipt
-        </h4>
-        <div className="grid gap-2">
+        </summary>
+        <div className="mt-2 grid gap-2">
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px]">
             <Input
               value={pickerQuery}
@@ -1852,12 +1864,12 @@ function EvidenceDetailPanel({
             </Button>
           </div>
         </div>
-      </div>
-      <div className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-        <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+      </details>
+      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Append Validation Receipt
-        </h4>
-        <div className="grid gap-2">
+        </summary>
+        <div className="mt-2 grid gap-2">
           <AppSelect
             label="Validator agent"
             value={validatorAgent}
@@ -1909,7 +1921,7 @@ function EvidenceDetailPanel({
             </Button>
           </div>
         </div>
-      </div>
+      </details>
     </aside>
   );
 }

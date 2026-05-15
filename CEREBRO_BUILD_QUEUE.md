@@ -352,3 +352,7 @@ Expected shape:
 - Workbench Add Receipt now keeps receipt kind, title, summary, save status, and
   save action visible while optional links, metadata, sensitive flag, and
   temporary media intake live behind closed details.
+- Workbench selected receipt detail now keeps the body read and next actions
+  visible while knowledge route, metadata, permission preflight, gates,
+  validation trail, comparison trail, and append forms live behind closed
+  details.
