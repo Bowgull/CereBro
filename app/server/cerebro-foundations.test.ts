@@ -3057,6 +3057,58 @@ describe("Terminal Lab planning", () => {
     expect(groupedArtifacts.map((item) => item.title)).not.toContain(`Outside artifact ${stamp}`);
   });
 
+  it("returns compact recent sessions ordered by last seen", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+    const stamp = Date.now();
+    const projectTask = await caller.tasks.create({
+      title: `Recent sessions project ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    const db = await getCerebroDb();
+    const older = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class, last_seen_at, ended_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-recent-sessions-older-${stamp}`, projectTask.projectId, "Older recent run", "tony", 10, 20],
+    });
+    const newer = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class, last_seen_at)
+        VALUES (?, ?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-recent-sessions-newer-${stamp}`, projectTask.projectId, "Newer recent run", "tony", 30],
+    });
+    const olderId = Number(older.rows[0]!.id);
+    const newerId = Number(newer.rows[0]!.id);
+
+    const recent = await caller.sessions.recent({ limit: 10 });
+    expect(recent.mode).toBe("read_only");
+    expect(recent.items.map((item) => item.id)).toContain(olderId);
+    expect(recent.items.map((item) => item.id)).toContain(newerId);
+    expect(recent.items.findIndex((item) => item.id === newerId)).toBeLessThan(
+      recent.items.findIndex((item) => item.id === olderId),
+    );
+    expect(recent.items.find((item) => item.id === newerId)?.displayName).toBe("Newer recent run");
+
+    const activeOnly = await caller.sessions.recent({ activeOnly: true, limit: 10 });
+    expect(activeOnly.items.map((item) => item.id)).toContain(newerId);
+    expect(activeOnly.items.map((item) => item.id)).not.toContain(olderId);
+
+    const index = await db.execute({
+      sql: `SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_sessions_last_seen' LIMIT 1`,
+    });
+    expect(index.rows[0]?.name).toBe("idx_sessions_last_seen");
+  });
+
   it("returns a compact Ledger overview read model", async () => {
     const caller = appRouter.createCaller({
       user: null,

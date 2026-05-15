@@ -42,8 +42,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const [projectFilter, setProjectFilter] = useState<number | "all">("all");
   const [sessionFilter, setSessionFilter] = useState<string>("all");
   const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
-  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 10000 });
-  const rawSessionOptions = sessions.data ?? [];
+  const sessions = trpc.sessions.recent.useQuery({ limit: 25 }, { refetchInterval: 10000 });
+  const rawSessionOptions = sessions.data?.items ?? [];
   const sessionOptions = disambiguateSessionOptions(rawSessionOptions);
   const sessionFilterGroups = groupSessionFilters(rawSessionOptions);
   const selectedSessionGroup = sessionFilter === "all"

@@ -28,6 +28,7 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
   const updateLedger = trpc.sessions.updateLedger.useMutation({
     onSuccess: () => {
       utils.sessions.list.invalidate();
+      utils.sessions.recent.invalidate();
       utils.tasks.list.invalidate();
     },
   });

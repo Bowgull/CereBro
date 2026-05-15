@@ -54,7 +54,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
     sessionIds: selectedSessionIds,
     limit: 100,
   });
-  const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.recent.useQuery({ limit: 50 }, { refetchInterval: 10000 });
   const propose = trpc.memory.propose.useMutation({
     onSuccess: () => utils.memory.proposals.invalidate(),
   });
@@ -79,8 +79,8 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
 
   const entries = list.data ?? [];
   const proposals = proposalsQuery.data ?? [];
-  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
-  const sessionFilters = groupSessionFilters(sessions.data ?? []);
+  const sessionOptions = disambiguateSessionOptions(sessions.data?.items ?? []);
+  const sessionFilters = groupSessionFilters(sessions.data?.items ?? []);
   const trusted = entries.filter((entry) => entry.kind === "fact" || entry.kind === "reference").length;
 
   return (

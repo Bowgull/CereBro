@@ -76,7 +76,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     { limit: 80, focusedTaskId: selectedTaskNumber },
     { refetchInterval: 10000 },
   );
-  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
+  const sessions = trpc.sessions.recent.useQuery({ limit: 25 }, { refetchInterval: 5000 });
   const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
   const terminalEvidence = trpc.workbench.evidenceSummary.useQuery(
     { kind: "terminal_output", latestLimit: 50 },
@@ -101,7 +101,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const data = plan.data;
   const observationRows = observations.data ?? [];
   const taskOptions = tasks.data?.items ?? [];
-  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
+  const sessionOptions = disambiguateSessionOptions(sessions.data?.items ?? []);
   const normalizedTaskLinkQuery = taskLinkQuery.trim().toLowerCase();
   const normalizedSessionLinkQuery = sessionLinkQuery.trim().toLowerCase();
   const visibleTaskOptions = normalizedTaskLinkQuery

@@ -153,6 +153,9 @@ Recent Prime slices:
 - 2026-05-15 1930 EDT: added `workbench.evidenceSummary` and switched Project
   Lab plus Terminal Lab receipt stats away from full Workbench evidence row
   reads.
+- 2026-05-15 1933 EDT: added `sessions.recent`, indexed
+  `sessions.last_seen_at`, and switched dropdown/filter surfaces off full
+  `sessions.list` where notes are not needed.
 
 ### Frontend Worker
 
@@ -186,9 +189,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  DB-only `projectIntelligence.summary` plus cached `gitStatus`,
-  `sessions.recent` and `sessions.summary`, skill-manager polling reduction,
-  then compact approval queue reads.
+  DB-only `projectIntelligence.summary` plus cached `gitStatus`, skill-manager
+  polling reduction, then compact approval queue reads.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -485,3 +487,5 @@ Expected shape:
   read calls from React.
 - Project Lab and Terminal Lab now use compact Workbench evidence summaries for
   receipt stats instead of full receipt row reads.
+- Tasks, Terminal Lab, Memory, and Artifacts now use compact recent session
+  label reads instead of full session ledger rows.

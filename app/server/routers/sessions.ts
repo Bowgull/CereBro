@@ -45,6 +45,23 @@ function rowToSession(r: Record<string, unknown>): SessionRow {
   };
 }
 
+function rowToRecentSession(r: Record<string, unknown>) {
+  const session = {
+    id: Number(r.id),
+    projectId: r.project_id == null ? null : Number(r.project_id),
+    title: r.title == null ? null : String(r.title),
+    projectName: r.project_name == null ? null : String(r.project_name),
+    heroClass: r.hero_class == null ? null : String(r.hero_class),
+    startedAt: Number(r.started_at),
+    lastSeenAt: Number(r.last_seen_at),
+    endedAt: r.ended_at == null ? null : Number(r.ended_at),
+  };
+  return {
+    ...session,
+    displayName: sessionDisplayName(session),
+  };
+}
+
 export const sessionsRouter = router({
   list: publicProcedure
     .input(
@@ -76,6 +93,50 @@ export const sessionsRouter = router({
         args: [limit],
       });
       return result.rows.map(rowToSession);
+    }),
+
+  recent: publicProcedure
+    .input(
+      z
+        .object({
+          activeOnly: z.boolean().optional(),
+          limit: z.number().int().min(1).max(100).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where: string[] = [];
+      if (input?.activeOnly) where.push("s.ended_at IS NULL");
+      const limit = input?.limit ?? 50;
+      const result = await db.execute({
+        sql: `
+          SELECT
+            s.id,
+            s.project_id,
+            s.title,
+            s.hero_class,
+            s.started_at,
+            s.last_seen_at,
+            s.ended_at,
+            p.name AS project_name
+          FROM sessions s
+          LEFT JOIN projects p ON p.id = s.project_id
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY s.last_seen_at DESC, s.id DESC
+          LIMIT ?
+        `,
+        args: [limit],
+      });
+      const items = result.rows.map(rowToRecentSession);
+      return {
+        mode: "read_only" as const,
+        items,
+        summary: {
+          total: items.length,
+          active: items.filter((session) => session.endedAt == null).length,
+        },
+      };
     }),
 
   updateLedger: publicProcedure

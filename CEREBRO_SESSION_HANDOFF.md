@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1930 EDT
+Last updated: 2026-05-15 1933 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1933 EDT - Compact Recent Sessions Read Model
+
+### What Changed
+- Added `sessions.recent`, a compact read-only recent-session label model.
+- Added `idx_sessions_last_seen` so recent session reads match their sort path.
+- Switched Tasks, Terminal Lab, Memory, and Artifacts session dropdown/filter
+  reads from full `sessions.list` to `sessions.recent`.
+- Kept SessionsPanel on full `sessions.list` because it edits titles and notes.
+- SessionsPanel now invalidates `sessions.recent` after title/note edits so
+  dropdown labels refresh.
+- Added a regression test for recent-session ordering, active-only filtering,
+  display labels, and the new index.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/sessions.ts`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL=file:/tmp/cerebro-sessions-recent-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 29 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: recent-session read-model compaction.
+- No external write, model call, package install, browser action from CereBro,
+  command execution from CereBro, storage migration, or Raven boundary changed.
+- Full session history remains available in SessionsPanel.
+
+### Front-End Steward Review
+- Dropdown and filter surfaces now ask for compact recent labels instead of full
+  session ledger rows.
+- This reduces background polling weight while keeping visible behavior the
+  same.
+
+### Completion Read
+- Overall: 58%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 94%.
+- Backend/runtime: 42%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: either split
+Project Lab DB-only summary from cached git status, reduce skill-manager
+polling, or simplify Approval Queue as the highest-noise visible surface.
 
 ## 2026-05-15 1930 EDT - Workbench Evidence Summary Read Model
 

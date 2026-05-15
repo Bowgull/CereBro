@@ -133,7 +133,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
     sessionIds: selectedSessionIds,
     limit: 200,
   });
-  const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.recent.useQuery({ limit: 50 }, { refetchInterval: 10000 });
   const writeVault = trpc.artifacts.writeTextToVault.useMutation({
     onSuccess: () => utils.artifacts.list.invalidate(),
   });
@@ -142,8 +142,8 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   });
 
   const rows = artifacts.data ?? [];
-  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
-  const sessionFilters = groupSessionFilters(sessions.data ?? []);
+  const sessionOptions = disambiguateSessionOptions(sessions.data?.items ?? []);
+  const sessionFilters = groupSessionFilters(sessions.data?.items ?? []);
   const isWriting = writeVault.isPending || writeObsidian.isPending;
   const writeCopy = WRITE_KIND_COPY[writeKind];
 

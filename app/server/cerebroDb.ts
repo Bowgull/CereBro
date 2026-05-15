@@ -54,6 +54,7 @@ async function ensureSchema(client: Client): Promise<void> {
        )`,
       `CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project_id)`,
       `CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_sessions_last_seen ON sessions(last_seen_at DESC)`,
       `CREATE TABLE IF NOT EXISTS memory_entries (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          kind TEXT NOT NULL DEFAULT 'note',
