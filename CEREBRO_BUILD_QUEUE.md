@@ -344,3 +344,6 @@ Expected shape:
 - Terminal Lab observation cards now keep command, output, receipt, and teaching
   context visible while follow-ups, Tony diagnostics, gates, links, and archive
   controls live behind per-row `Observation Actions`.
+- Terminal Lab right rail now keeps Terminal Map Read and Next Safe Action
+  visible while receipt counts and command-boundary policy live behind
+  `Receipt Details` and `Command Boundary`.

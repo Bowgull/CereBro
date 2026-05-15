@@ -1241,32 +1241,6 @@ function ProjectContextRail({
       </div>
 
       <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted }}>
-            Workbench Receipts
-          </div>
-          <Chip label={`${receiptStats.total} total`} tone={receiptStats.total > 0 ? C.accent : C.textMuted} />
-        </div>
-        <div className="mt-1 grid grid-cols-3 gap-1">
-          <ContextDatum label="Terminal" value={String(receiptStats.terminal)} tone={receiptStats.terminal > 0 ? C.warning : C.textSecondary} />
-          <ContextDatum label="Review" value={String(receiptStats.needsReview)} tone={receiptStats.needsReview > 0 ? C.danger : C.textSecondary} />
-          <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
-        </div>
-        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-          Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
-        </div>
-      </div>
-
-      <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.gold }}>
-          Manual Command Boundary
-        </div>
-        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-          Terminal Lab explains and records. Commands run elsewhere through approval. Project Lab reads state. Workbench stores the body. Ledger audits it.
-        </div>
-      </div>
-
-      <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
         <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.success }}>
           Next Safe Action
         </div>
@@ -1275,10 +1249,40 @@ function ProjectContextRail({
         </div>
       </div>
 
-      <div className="mt-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Project Lab read only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
-        Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
-      </div>
+      <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+          Receipt Details
+        </summary>
+        <div className="mt-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted }}>
+              Workbench Receipts
+            </div>
+            <Chip label={`${receiptStats.total} total`} tone={receiptStats.total > 0 ? C.accent : C.textMuted} />
+          </div>
+          <div className="mt-1 grid grid-cols-3 gap-1">
+            <ContextDatum label="Terminal" value={String(receiptStats.terminal)} tone={receiptStats.terminal > 0 ? C.warning : C.textSecondary} />
+            <ContextDatum label="Review" value={String(receiptStats.needsReview)} tone={receiptStats.needsReview > 0 ? C.danger : C.textSecondary} />
+            <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
+          </div>
+          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+            Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
+          </div>
+        </div>
+      </details>
+
+      <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+          Command Boundary
+        </summary>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Terminal Lab explains and records. Commands run elsewhere through approval. Project Lab reads state. Workbench stores the body. Ledger audits it.
+        </div>
+        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          Project Lab read only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
+          Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
+        </div>
+      </details>
       {onNavigate && (
         <div className="mt-2 grid grid-cols-3 gap-1">
           <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
