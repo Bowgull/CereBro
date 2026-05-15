@@ -120,6 +120,9 @@ Recent Prime slices:
 - 2026-05-14 2253 EDT: added a visible `Save Route` action to the Ask Aang
   route preview. It calls `runtime.commitRoute`, refreshes Ledger routes, and
   changes to the saved route id without running routed work.
+- 2026-05-14 2312 EDT: added `Stage Body` on saved Ledger route reads. It
+  carries the route draft into Workbench as a local draft only; the user still
+  has to press Save Local Receipt to append evidence.
 
 ### Frontend Worker
 
@@ -414,3 +417,6 @@ Expected shape:
   writes one local route record, disables the save button with the route id, and
   refreshes Ledger route reads. It does not create a task, save Workbench
   evidence, run a command, call a model, open a browser, or write externally.
+- Saved Ledger route reads now expose `Stage Body`. It moves the saved route
+  into Workbench's Add Receipt form as a draft, preserves review-before-save,
+  and still avoids hidden execution or evidence writes.

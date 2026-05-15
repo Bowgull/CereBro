@@ -16422,3 +16422,70 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: decide whether saved route records should offer one visible next action in Ledger, such as Stage Workbench Body or Create Task, while keeping all actions separate and explicit. Keep the low-machinery rule: no raw JSON, no hidden execution, and no external writes.
 ```
+
+## 2026-05-14 2312 EDT — Ledger route Stage Body action
+
+Overall completion after this pass:
+
+- Overall: 53%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 85%
+- Backend/runtime: 35%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Continued from the saved route action.
+- Added a compact `Stage Body` action to each saved route read in Ledger.
+- `Stage Body` copies the saved route's Workbench draft into the Workbench Add
+  Receipt form.
+- The Workbench form receives:
+  - route record id
+  - route title
+  - route summary
+  - owner agent
+  - project path when available
+  - route chain
+  - gates
+  - next action
+  - model lane metadata
+- Workbench shows it as a staged draft and still requires the user to press
+  `Save Local Receipt` before an evidence row is appended.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `git diff --check -- app/client/src/pages/Home.tsx` passed.
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-route-stage-body-test-$$.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 3 files and 32 tests.
+- Playwright opened `http://localhost:3002`, clicked Ledger, confirmed
+  `Stage Body` appeared on route rows, clicked `Stage Body` for route #3, and
+  confirmed Workbench opened with the route title and summary staged in Add
+  Receipt.
+
+Known risks:
+
+- This is UI-only routing from saved route record to Workbench draft.
+- It does not create a task. That remains separate.
+- It does not append Workbench evidence until the user presses
+  `Save Local Receipt`.
+
+Storage impact:
+
+- No schema change.
+- No external write.
+- No new local DB row from `Stage Body` by itself.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: add the matching explicit Create Task action for saved route records in Ledger, or tighten Workbench staged route metadata if that is the smaller safer move. Keep route, task, Workbench evidence, command, browser, and model actions separate and visible.
+```

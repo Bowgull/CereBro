@@ -1098,6 +1098,42 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("projects");
   }
 
+  function openRouteWorkbenchDraft(item: {
+    id: number;
+    originalText: string;
+    workbenchReceiptDraft: Record<string, unknown>;
+    taskDraft: Record<string, unknown>;
+  }) {
+    const draft = item.workbenchReceiptDraft;
+    const taskDraft = item.taskDraft;
+    const routeChain = Array.isArray(draft.routeChain) ? draft.routeChain : [];
+    const gates = Array.isArray(draft.gates) ? draft.gates : [];
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-draft",
+        JSON.stringify({
+          kind: "manual_note",
+          source: "runtime_route_record",
+          routeRecordId: item.id,
+          routeKind: typeof draft.kind === "string" ? draft.kind : "route_preview",
+          title: typeof taskDraft.title === "string" ? taskDraft.title : `Route #${item.id}: ${item.originalText}`,
+          summary: typeof draft.summary === "string" ? draft.summary : item.originalText,
+          routeAgent: typeof draft.ownerAgent === "string" ? draft.ownerAgent : null,
+          permissionClass: "manual_note",
+          targetUri: typeof draft.projectPath === "string" ? draft.projectPath : null,
+          routeChain,
+          gates,
+          nextAction: typeof draft.nextAction === "string" ? draft.nextAction : "Review this route before saving a Workbench receipt.",
+          modelLane: typeof draft.modelLane === "object" && draft.modelLane != null ? draft.modelLane : null,
+          notice: `Route #${item.id} staged as a Workbench draft. Review before saving.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the route remains visible in Ledger.
+    }
+    onNavigate("workbench");
+  }
+
   return (
     <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
       <div className="grid gap-2">
@@ -1181,6 +1217,22 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     <span>{item.mode}</span>
                     <span style={{ color: C.border }}>/</span>
                     <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-6 px-2 text-[10px]"
+                      onClick={() => openRouteWorkbenchDraft(item)}
+                      aria-label={`Stage Workbench body from route ${item.id}`}
+                      title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
+                    >
+                      Stage Body
+                    </Button>
+                    <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                      Review before saving.
+                    </span>
                   </div>
                 </div>
               ))}
