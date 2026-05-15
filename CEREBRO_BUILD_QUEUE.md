@@ -117,6 +117,9 @@ Recent Prime slices:
 - 2026-05-14 2223 EDT: added `runtime.routeRecords` read model and a compact
   Ledger `Recent Route Reads` strip. Route records are parsed for UI use, stay
   local-only, and remain separate from Workbench evidence bodies.
+- 2026-05-14 2253 EDT: added a visible `Save Route` action to the Ask Aang
+  route preview. It calls `runtime.commitRoute`, refreshes Ledger routes, and
+  changes to the saved route id without running routed work.
 
 ### Frontend Worker
 
@@ -407,3 +410,7 @@ Expected shape:
 - Runtime route records now have a backend read model and a compact Ledger
   overview section. Ledger shows recent Aang to Cortana route reads without raw
   JSON or hidden execution.
+- Ask Aang route previews now have an explicit `Save Route` action. Saving
+  writes one local route record, disables the save button with the route id, and
+  refreshes Ledger route reads. It does not create a task, save Workbench
+  evidence, run a command, call a model, open a browser, or write externally.

@@ -174,6 +174,7 @@ export default function Home() {
   const [isContextPanelOpen, setIsContextPanelOpen] = useState(true);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
+  const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
 
   const selectedHero = useMemo(
     () => heroes.find((h) => h.id === selectedHeroId) || null,
@@ -184,6 +185,9 @@ export default function Home() {
   const { data: agentRoster } = trpc.keep.agents.useQuery();
   const routePreview = trpc.runtime.previewRoute.useMutation();
   const utils = trpc.useUtils();
+  const commitRoute = trpc.runtime.commitRoute.useMutation({
+    onSuccess: () => utils.runtime.routeRecords.invalidate(),
+  });
   const createTask = trpc.tasks.create.useMutation({
     onSuccess: () => utils.tasks.list.invalidate(),
   });
@@ -508,10 +512,20 @@ export default function Home() {
       {routePreview.data && (
         <RuntimeRouteReceipt
           result={routePreview.data}
-          onDismiss={() => routePreview.reset()}
+          onDismiss={() => {
+            routePreview.reset();
+            commitRoute.reset();
+            setLastRouteRequest(null);
+          }}
           onNavigate={setNav}
           isCreatingTask={createTask.isPending}
           taskCreated={Boolean(createTask.data)}
+          isSavingRoute={commitRoute.isPending}
+          routeSavedId={commitRoute.data?.record.id ?? null}
+          onSaveRoute={() => {
+            if (!lastRouteRequest || commitRoute.isPending) return;
+            commitRoute.mutate(lastRouteRequest);
+          }}
           onCreateTask={() => {
             const draft = routePreview.data?.taskDraft;
             if (!draft || createTask.isPending) return;
@@ -546,6 +560,8 @@ export default function Home() {
             window.location.assign(ravenEntryUrl);
             return;
           }
+          commitRoute.reset();
+          setLastRouteRequest({ text, mode });
           routePreview.mutate({ text, mode });
         }}
       />
@@ -1536,8 +1552,11 @@ function RuntimeRouteReceipt({
   result,
   onDismiss,
   onNavigate,
+  onSaveRoute,
   onCreateTask,
+  isSavingRoute,
   isCreatingTask,
+  routeSavedId,
   taskCreated,
 }: {
   result: {
@@ -1609,8 +1628,11 @@ function RuntimeRouteReceipt({
   };
   onDismiss: () => void;
   onNavigate: (id: NavId) => void;
+  onSaveRoute: () => void;
   onCreateTask: () => void;
+  isSavingRoute: boolean;
   isCreatingTask: boolean;
+  routeSavedId: number | null;
   taskCreated: boolean;
 }) {
   const routePreviewFields = [
@@ -1696,7 +1718,19 @@ function RuntimeRouteReceipt({
             <Button
               type="button"
               size="sm"
-              variant={taskCreated ? "secondary" : "default"}
+              variant={routeSavedId ? "secondary" : "default"}
+              className="h-7 px-2"
+              onClick={onSaveRoute}
+              disabled={isSavingRoute || routeSavedId != null}
+              aria-label={routeSavedId ? `Route saved as record ${routeSavedId}` : isSavingRoute ? "Saving route record" : "Save route record"}
+              title="Save this Aang to Cortana route read locally. No routed work runs."
+            >
+              {routeSavedId ? `Route #${routeSavedId}` : isSavingRoute ? "Saving" : "Save Route"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={taskCreated ? "secondary" : "outline"}
               className="h-7 px-2"
               onClick={onCreateTask}
               disabled={isCreatingTask}

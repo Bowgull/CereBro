@@ -16355,3 +16355,70 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and app/server/routers/runtime.ts first. Continue CereBro on the main build path. Next safe slice: add a visible save-route affordance to Ask Aang that calls runtime.commitRoute only after preview, then refreshes Ledger route reads. Keep it local-only. Do not run routed work, create tasks, save Workbench evidence, call models, open browsers, execute commands, or write externally from the save-route action.
 ```
+
+## 2026-05-14 2253 EDT — Ask Aang save route action
+
+Overall completion after this pass:
+
+- Overall: 52%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 84%
+- Backend/runtime: 35%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Continued the main CereBro build path from the route-record Ledger read.
+- Added an explicit `Save Route` button to the runtime route preview receipt.
+- `Save Route` calls the existing `runtime.commitRoute` mutation with the exact
+  text and mode that produced the preview.
+- After saving, the button changes to the saved route id and is disabled.
+- Saving invalidates `runtime.routeRecords`, so Ledger route reads refresh.
+- Kept Create Task, Workbench, and Ledger as separate actions.
+- The save-route action still does not:
+  - create a task
+  - save Workbench evidence
+  - run a command
+  - call a model
+  - open a browser
+  - write to Notion, Slack, Drive, Obsidian, memory, or external providers
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-route-save-test-$$.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`
+  passed, 5 tests.
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-route-save-test-final-$$.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 3 files and 32 tests.
+- `git diff --check -- app/client/src/pages/Home.tsx` passed.
+- Playwright opened `http://localhost:3002`, set Build mode, entered
+  `keep building CereBro front end`, previewed the route, clicked Save Route,
+  saw `Route #3`, opened Ledger, and confirmed route #3 was at the top of
+  `Recent Route Reads`.
+
+Known risks:
+
+- This is still a route record, not a full work receipt. Workbench evidence save
+  remains a separate deliberate action.
+- The live local DB has a route #3 from browser proof. It is a valid local audit
+  row created by the new button.
+
+Storage impact:
+
+- No schema change.
+- Adds one local `runtime_route_records` row when the user clicks Save Route.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: decide whether saved route records should offer one visible next action in Ledger, such as Stage Workbench Body or Create Task, while keeping all actions separate and explicit. Keep the low-machinery rule: no raw JSON, no hidden execution, and no external writes.
+```
