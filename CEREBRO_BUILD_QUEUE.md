@@ -454,3 +454,6 @@ Expected shape:
 - Workbench Receipt Links now use the same compact local search pattern for
   task and session links. Receipt creation stays append-only and local; the
   search only narrows already loaded link options.
+- Workbench Receipt Links now also has compact local search for source,
+  command, and artifact links. The whole receipt-link disclosure now narrows
+  loaded options instead of exposing raw long dropdowns.

@@ -122,6 +122,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
+  const [sourceLinkQuery, setSourceLinkQuery] = useState("");
+  const [commandLinkQuery, setCommandLinkQuery] = useState("");
+  const [artifactLinkQuery, setArtifactLinkQuery] = useState("");
   const [stagedDraftNotice, setStagedDraftNotice] = useState<string | null>(null);
   const [stagedDraftChain, setStagedDraftChain] = useState<WorkbenchDraft | null>(null);
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
@@ -162,6 +165,50 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
         label: session.optionLabel,
       }));
   }, [linkOptions.data?.sessions, projectId, sessionLinkQuery]);
+  const sourceLinkOptions = useMemo(() => {
+    const normalizedQuery = sourceLinkQuery.trim().toLowerCase();
+    return (linkOptions.data?.sources ?? [])
+      .filter((source) => {
+        if (!normalizedQuery) return true;
+        const label = `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
+          source.title ?? sourceDisplayName(source.uri)
+        }`;
+        return label.toLowerCase().includes(normalizedQuery);
+      })
+      .map((source) => ({
+        value: String(source.id),
+        label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
+          source.title ?? sourceDisplayName(source.uri)
+        }`,
+      }));
+  }, [linkOptions.data?.sources, sourceLinkQuery]);
+  const commandLinkOptions = useMemo(() => {
+    const normalizedQuery = commandLinkQuery.trim().toLowerCase();
+    return (linkOptions.data?.commandObservations ?? [])
+      .filter((command) => {
+        if (!normalizedQuery) return true;
+        const label = `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`;
+        return label.toLowerCase().includes(normalizedQuery);
+      })
+      .map((command) => ({
+        value: String(command.id),
+        label: `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`,
+      }));
+  }, [commandLinkQuery, linkOptions.data?.commandObservations]);
+  const artifactLinkOptions = useMemo(() => {
+    const normalizedQuery = artifactLinkQuery.trim().toLowerCase();
+    return (linkOptions.data?.artifacts ?? [])
+      .filter((artifact) => projectId === "none" || artifact.projectId === projectId)
+      .filter((artifact) => {
+        if (!normalizedQuery) return true;
+        const label = `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`;
+        return label.toLowerCase().includes(normalizedQuery);
+      })
+      .map((artifact) => ({
+        value: String(artifact.id),
+        label: `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`,
+      }));
+  }, [artifactLinkQuery, linkOptions.data?.artifacts, projectId]);
   const projectProofGroups = useMemo(() => {
     const projectNames = new Map(
       projectOptions.map((project) => [project.tasks.projectId, project.name] as const),
@@ -685,45 +732,47 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       ]}
                       emptyLabel={sessionLinkQuery.trim() ? "No matching run" : "No session link"}
                     />
-                    <AppSelect
+                    <LinkSelect
                       label="Source link"
+                      searchLabel="Find Workbench source link"
+                      searchPlaceholder="Find source."
+                      searchValue={sourceLinkQuery}
+                      onSearchChange={setSourceLinkQuery}
                       value={String(sourceId)}
                       onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
                       options={[
                         { value: "none", label: "No source link" },
-                        ...(linkOptions.data?.sources ?? []).map((source) => ({
-                          value: String(source.id),
-                          label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
-                            source.title ?? sourceDisplayName(source.uri)
-                          }`,
-                        })),
+                        ...sourceLinkOptions,
                       ]}
+                      emptyLabel={sourceLinkQuery.trim() ? "No matching source" : "No source link"}
                     />
-                    <AppSelect
+                    <LinkSelect
                       label="Command link"
+                      searchLabel="Find Workbench command link"
+                      searchPlaceholder="Find command."
+                      searchValue={commandLinkQuery}
+                      onSearchChange={setCommandLinkQuery}
                       value={String(commandObservationId)}
                       onChange={(value) => setCommandObservationId(value === "none" ? "none" : Number(value))}
                       options={[
                         { value: "none", label: "No command link" },
-                        ...(linkOptions.data?.commandObservations ?? []).map((command) => ({
-                          value: String(command.id),
-                          label: `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`,
-                        })),
+                        ...commandLinkOptions,
                       ]}
+                      emptyLabel={commandLinkQuery.trim() ? "No matching command" : "No command link"}
                     />
-                    <AppSelect
+                    <LinkSelect
                       label="Artifact link"
+                      searchLabel="Find Workbench artifact link"
+                      searchPlaceholder="Find artifact."
+                      searchValue={artifactLinkQuery}
+                      onSearchChange={setArtifactLinkQuery}
                       value={String(artifactId)}
                       onChange={(value) => setArtifactId(value === "none" ? "none" : Number(value))}
                       options={[
                         { value: "none", label: "No artifact link" },
-                        ...(linkOptions.data?.artifacts ?? [])
-                        .filter((artifact) => projectId === "none" || artifact.projectId === projectId)
-                        .map((artifact) => ({
-                          value: String(artifact.id),
-                          label: `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`,
-                        })),
+                        ...artifactLinkOptions,
                       ]}
+                      emptyLabel={artifactLinkQuery.trim() ? "No matching artifact" : "No artifact link"}
                     />
                   </div>
                 </details>

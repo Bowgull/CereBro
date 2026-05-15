@@ -17114,3 +17114,68 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect Workbench source/command/artifact links and other receipt surfaces for the same picker-search pattern, then apply it only where it reduces visible machinery without widening execution scope.
 ```
+
+## 2026-05-15 1907 EDT — Workbench full receipt link search
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 92%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a continuation of the same Workbench picker surface.
+
+What changed:
+
+- Workbench Receipt Links now has compact local search for source links.
+- Workbench Receipt Links now has compact local search for command links.
+- Workbench Receipt Links now has compact local search for artifact links.
+- Task and session link search from the prior pass remains in place.
+- The full Receipt Links disclosure now narrows loaded options instead of
+  exposing long raw dropdowns.
+- This remains local receipt UI only. It does not execute commands, run tasks,
+  call models, write memory, push git, call Notion, call Slack, or touch
+  external providers.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-workbench-full-link-picker-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Workshop > Workbench,
+  opened Receipt Links, and confirmed all five search fields are visible:
+  task, session, source, command, and artifact.
+- Playwright also confirmed the command search field accepts `pnpm`. A final
+  combobox-open proof was skipped after the approval layer rejected the last
+  Playwright click. The visible field proof plus TypeScript and targeted tests
+  passed.
+
+Known risks:
+
+- Search is local to the loaded Workbench link options. It is not backend
+  historical search.
+- The five search fields make the open disclosure taller. The disclosure stays
+  closed by default, so the primary Workbench surface remains low-machinery.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect other receipt/link surfaces for the same picker-search and duplicate-label pattern, then apply only where it reduces visible machinery without adding execution.
+```
