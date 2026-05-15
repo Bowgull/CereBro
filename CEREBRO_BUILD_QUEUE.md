@@ -167,14 +167,16 @@ Recent Prime slices:
   overview/detail reads onto the shared cache.
 - 2026-05-15 1946 EDT: removed Skills Manager 3 second polling; agent/skill
   file reads are now active-tab, active-scope, manual-refresh reads.
+- 2026-05-15 1950 EDT: added compact `approvals.queue` plus selected
+  `approvals.detail`; Approval Queue no longer loads full proof for every row.
 
 ### Frontend Worker
 
 Next block:
 
 - Take one high-noise surface pass only if the next surface still shows
-  machinery first. Otherwise move to the compact approval queue read model or
-  another broad-read reduction.
+  machinery first. Otherwise move to another broad-read reduction or runtime
+  receipt contract slice.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -202,8 +204,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  compact approval queue reads, then deeper Project Lab DB-only summary if the
-  cached git split is still too heavy.
+  deeper Project Lab DB-only summary if the cached git split is still too heavy,
+  Workbench link-options compaction, or the next runtime receipt contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -513,3 +515,5 @@ Expected shape:
   overview/detail refresh.
 - Skills Manager now reads local agent/skill files only for the active
   tab/scope and uses manual refresh instead of 3 second polling.
+- Approval Queue now uses compact local queue rows by default and loads full
+  preflight/Oak/Spock proof only for the selected decision.

@@ -68,7 +68,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   );
   const [projectId, setProjectId] = useState<number | "all">("all");
 
-  const approvals = trpc.approvals.list.useQuery({
+  const approvals = trpc.approvals.queue.useQuery({
     status,
     origin,
     projectId: projectId === "all" ? undefined : projectId,
@@ -88,7 +88,12 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   });
 
   const items = approvals.data?.items ?? [];
-  const selected = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
+  const selectedPreview = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
+  const selectedDetail = trpc.approvals.detail.useQuery(
+    { id: selectedPreview?.id ?? 0 },
+    { enabled: selectedPreview != null },
+  );
+  const selected = selectedDetail.data?.approval ?? null;
   const preflightItems = preflights.data?.items ?? [];
   const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
   const preflightTotal = preflights.data?.summary.total ?? 0;
@@ -353,8 +358,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   className="h-auto w-full justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
-                    background: selected?.id === item.id ? C.surfaceRaised : C.surface,
-                    border: `1px solid ${selected?.id === item.id ? C.accent : C.borderSoft}`,
+                    background: selectedPreview?.id === item.id ? C.surfaceRaised : C.surface,
+                    border: `1px solid ${selectedPreview?.id === item.id ? C.accent : C.borderSoft}`,
                     color: C.textPrimary,
                   }}
                 >
@@ -389,9 +394,17 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         </section>
 
         <aside className="overflow-y-auto p-2" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
-          {!selected ? (
+          {!selectedPreview ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Select an approval preview to inspect validation notes.
+            </div>
+          ) : selectedDetail.isLoading ? (
+            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              Reading selected decision.
+            </div>
+          ) : !selected ? (
+            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              Selected approval preview was not found. Reset filters.
             </div>
           ) : (
             <div className="grid gap-2">

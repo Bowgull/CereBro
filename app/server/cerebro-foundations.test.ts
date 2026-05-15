@@ -2853,6 +2853,28 @@ describe("Hedwig capture planning", () => {
     expect(queued?.validationPreview.oakNotes.join(" ")).toContain("Source action");
     expect(queued?.validationPreview.spockNotes.join(" ")).toContain("local approval preview");
 
+    const compactApprovalQueue = await caller.approvals.queue({
+      origin: "hedwig",
+      query: "source enrichment",
+      limit: 20,
+    });
+    expect(compactApprovalQueue.mode).toBe("compact_read_only");
+    expect(compactApprovalQueue.writesExternal).toBe(false);
+    expect(compactApprovalQueue.wouldApprove).toBe(false);
+    expect(compactApprovalQueue.items.map((item) => item.id)).toContain(approvalPreview.approval?.id);
+    const compactQueued = compactApprovalQueue.items.find((item) => item.id === approvalPreview.approval?.id);
+    expect(compactQueued?.permissionPreflight?.decision).toBe("approval_required");
+    expect(JSON.stringify(compactQueued)).not.toContain("oakNotes");
+    expect(JSON.stringify(compactQueued)).not.toContain("requiredApprovals");
+
+    const approvalDetail = await caller.approvals.detail({ id: approvalPreview.approval?.id ?? -1 });
+    expect(approvalDetail.mode).toBe("read_only");
+    expect(approvalDetail.writesExternal).toBe(false);
+    expect(approvalDetail.wouldApprove).toBe(false);
+    expect(approvalDetail.found).toBe(true);
+    expect(approvalDetail.approval?.validationPreview.oakNotes.join(" ")).toContain("Source action");
+    expect(approvalDetail.approval?.permissionPreflight?.requiredApprovals.join(" ")).toContain("public-browser approval");
+
     const hedwigPreflights = await caller.permissions.preflightRecords({
       actionClass: "browser_or_media_capture",
       limit: 20,
@@ -3463,6 +3485,26 @@ describe("Terminal Lab planning", () => {
     expect(queued?.permissionPreflight?.actionClass).toBe("command_execution");
     expect(queued?.permissionPreflight?.reasons.join(" ")).toContain("Terminal Lab approval previews");
     expect(queued?.validationPreview.spockNotes.join(" ")).toContain("local approval preview");
+
+    const compactTerminalQueue = await caller.approvals.queue({
+      origin: "terminal",
+      query: "missing-file",
+      limit: 20,
+    });
+    expect(compactTerminalQueue.mode).toBe("compact_read_only");
+    expect(compactTerminalQueue.writesExternal).toBe(false);
+    expect(compactTerminalQueue.wouldApprove).toBe(false);
+    expect(compactTerminalQueue.items.map((item) => item.id)).toContain(terminalApproval.approval?.id);
+    const compactTerminal = compactTerminalQueue.items.find((item) => item.id === terminalApproval.approval?.id);
+    expect(compactTerminal?.origin).toBe("terminal");
+    expect(compactTerminal?.permissionPreflight?.approvalRequired).toBe(true);
+    expect(JSON.stringify(compactTerminal)).not.toContain("spockNotes");
+    expect(JSON.stringify(compactTerminal)).not.toContain("Terminal Lab approval previews");
+
+    const terminalApprovalDetail = await caller.approvals.detail({ id: terminalApproval.approval?.id ?? -1 });
+    expect(terminalApprovalDetail.found).toBe(true);
+    expect(terminalApprovalDetail.approval?.permissionPreflight?.actionClass).toBe("command_execution");
+    expect(terminalApprovalDetail.approval?.validationPreview.spockNotes.join(" ")).toContain("local approval preview");
 
     const terminalPreflights = await caller.permissions.preflightRecords({
       actionClass: "command_execution",

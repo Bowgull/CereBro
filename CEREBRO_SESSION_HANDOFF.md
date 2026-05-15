@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1946 EDT
+Last updated: 2026-05-15 1950 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1950 EDT - Compact Approval Queue Read Model
+
+### What Changed
+- Added `approvals.queue`, a compact read-only approval preview list.
+- Added `approvals.detail`, a selected-decision detail read.
+- Approval Queue now loads compact rows by default and loads full preflight plus
+  Oak/Spock notes only for the selected decision.
+- Kept `approvals.list` intact for compatibility with existing callers.
+- Added targeted regression coverage for Hedwig and Terminal approval queue
+  compact rows plus selected detail reads.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-approval-compact-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false -t "Approval|approval|Terminal Lab"` passed. 1 file. 6 tests run, 24 skipped.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Approval Queue compact read-model split.
+- No approval, rejection, command execution, browser action, external write,
+  model call, package install, DB schema change, storage migration, git action
+  from CereBro, or Raven boundary changed.
+- No worker was used because the route, UI, and tests needed tight type
+  alignment.
+
+### Front-End Steward Review
+- The default queue now reads like a decision list instead of a full evidence
+  packet for every row.
+- The proof still exists. It loads only when the user inspects a specific
+  decision.
+
+### Completion Read
+- Overall: 59%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: inspect broad
+Project Lab and Workbench reads for another safe compaction, or move into the
+next runtime receipt contract if the visible shell is calm enough.
 
 ## 2026-05-15 1946 EDT - Skills Manager Manual Refresh Pass
 

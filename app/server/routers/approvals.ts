@@ -62,6 +62,39 @@ function rowToApproval(row: Record<string, unknown>) {
   };
 }
 
+function rowToApprovalPreview(row: Record<string, unknown>) {
+  const targetType = row.target_type == null ? null : String(row.target_type);
+  const actionType = String(row.action_type);
+  const requestedByAgent = row.requested_by_agent == null ? null : String(row.requested_by_agent);
+  const sensitive = Boolean(row.sensitive_data_flag);
+  const costRisk = row.cost_risk == null ? null : String(row.cost_risk);
+
+  return {
+    id: Number(row.id),
+    actionType,
+    targetType,
+    targetId: row.target_id == null ? null : Number(row.target_id),
+    requestedByAgent,
+    status: String(row.status),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    sensitive,
+    costRisk,
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    permissionPreflight: row.permission_preflight_id == null ? null : {
+      id: Number(row.permission_preflight_id),
+      decision: row.preflight_decision == null ? null : String(row.preflight_decision),
+      approvalRequired: row.preflight_approval_required == null ? false : Boolean(row.preflight_approval_required),
+    },
+    createdAt: Number(row.created_at),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    targetLabel: row.target_label == null ? null : String(row.target_label),
+    origin: originForApproval({ actionType, targetType, requestedByAgent }),
+  };
+}
+
 function rowToPreflightRecord(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -230,6 +263,184 @@ export const approvalsRouter = router({
           "Permission preflight records are local append-only audit history.",
           "This view does not approve, reject, execute, fetch, browse, capture media, call providers, or write externally.",
           "A preflight decision is policy evidence. It is not user approval.",
+        ],
+      };
+    }),
+
+  queue: publicProcedure
+    .input(
+      z
+        .object({
+          status: z.enum(statusOptions).optional(),
+          origin: z.enum(originOptions).optional(),
+          projectId: z.number().int().optional(),
+          query: z.string().max(200).optional(),
+          limit: z.number().int().min(1).max(100).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where: string[] = [];
+      const args: (number | string)[] = [];
+      const status = input?.status ?? "pending";
+      const origin = input?.origin ?? "all";
+
+      where.push("a.status = ?");
+      args.push(status);
+
+      if (input?.projectId !== undefined) {
+        where.push("COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) = ?");
+        args.push(input.projectId);
+      }
+
+      if (origin === "hedwig") {
+        where.push("a.requested_by_agent = 'hedwig'");
+      } else if (origin === "raven") {
+        where.push("(a.requested_by_agent = 'raven' OR a.target_type = 'raven_bridge_export_proposal')");
+      } else if (origin === "terminal") {
+        where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
+      } else if (origin === "source") {
+        where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
+      } else if (origin === "project_lab") {
+        where.push("(a.target_type IN ('task', 'project') OR COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) IS NOT NULL)");
+      } else if (origin === "other") {
+        where.push(`
+          a.requested_by_agent != 'hedwig'
+          AND a.requested_by_agent != 'raven'
+          AND COALESCE(a.target_type, '') != 'raven_bridge_export_proposal'
+          AND COALESCE(a.target_type, '') != 'command_observation'
+          AND a.action_type NOT LIKE 'terminal_%'
+          AND COALESCE(a.target_type, '') != 'source_event'
+          AND a.action_type NOT LIKE '%source%'
+        `);
+      }
+
+      const query = input?.query?.trim();
+      if (query) {
+        where.push(`
+          (
+            a.action_type LIKE ?
+            OR COALESCE(a.reason, '') LIKE ?
+            OR COALESCE(a.context_summary, '') LIKE ?
+            OR COALESCE(p.name, '') LIKE ?
+            OR COALESCE(co.command, '') LIKE ?
+            OR COALESCE(cap.title, '') LIKE ?
+            OR COALESCE(rp.title, '') LIKE ?
+            OR COALESCE(mp.title, '') LIKE ?
+            OR COALESCE(se.title, '') LIKE ?
+            OR COALESCE(rbp.title, '') LIKE ?
+            OR COALESCE(rbp.summary, '') LIKE ?
+          )
+        `);
+        const like = `%${query}%`;
+        args.push(like, like, like, like, like, like, like, like, like, like, like);
+      }
+
+      args.push(input?.limit ?? 40);
+      const result = await db.execute({
+        sql: `
+          SELECT
+            a.id, a.action_type, a.target_type, a.target_id,
+            a.requested_by_agent, a.status, a.reason, a.context_summary,
+            a.sensitive_data_flag, a.cost_risk, a.decided_at, a.created_at,
+            a.permission_preflight_id,
+            ppr.decision AS preflight_decision,
+            ppr.approval_required AS preflight_approval_required,
+            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            p.name AS project_name,
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title) AS target_label
+          FROM approvals a
+          LEFT JOIN tasks t ON t.id = a.task_id
+          LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
+          LEFT JOIN capture_observations cap ON a.target_type = 'capture_observation' AND cap.id = a.target_id
+          LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
+          LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
+          LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
+          LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
+          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          WHERE ${where.join(" AND ")}
+          ORDER BY a.created_at DESC, a.id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+
+      const items = result.rows.map(rowToApprovalPreview);
+      return {
+        mode: "compact_read_only" as const,
+        writesExternal: false,
+        wouldApprove: false,
+        status,
+        origin,
+        items,
+        summary: {
+          total: items.length,
+          sensitive: items.filter((item) => item.sensitive).length,
+          terminal: items.filter((item) => item.origin === "terminal").length,
+          hedwig: items.filter((item) => item.origin === "hedwig").length,
+          source: items.filter((item) => item.origin === "source").length,
+          raven: items.filter((item) => item.origin === "raven").length,
+          preflightLinked: items.filter((item) => item.permissionPreflightId != null).length,
+        },
+        gates: [
+          "This compact queue reads local approval preview labels only.",
+          "Detail evidence is loaded only for the selected decision.",
+          "It does not approve, reject, execute commands, browse, fetch, schedule, send, or write to Notion/Slack.",
+        ],
+      };
+    }),
+
+  detail: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT
+            a.id, a.task_id, a.action_type, a.target_type, a.target_id,
+            a.requested_by_agent, a.status, a.reason, a.context_summary,
+            a.sensitive_data_flag, a.cost_risk, a.decided_at, a.created_at,
+            a.permission_preflight_id,
+            ppr.mode AS preflight_mode,
+            ppr.decision AS preflight_decision,
+            ppr.approval_required AS preflight_approval_required,
+            ppr.required_approvals AS preflight_required_approvals,
+            ppr.reasons AS preflight_reasons,
+            ppr.mode_effect AS preflight_mode_effect,
+            ppr.perception_class AS preflight_perception_class,
+            ppr.action_class AS preflight_action_class,
+            ppr.target_summary AS preflight_target_summary,
+            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            p.name AS project_name,
+            p.path AS project_path,
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title) AS target_label
+          FROM approvals a
+          LEFT JOIN tasks t ON t.id = a.task_id
+          LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
+          LEFT JOIN capture_observations cap ON a.target_type = 'capture_observation' AND cap.id = a.target_id
+          LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
+          LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
+          LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
+          LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
+          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          WHERE a.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      const row = result.rows[0];
+      return {
+        mode: "read_only" as const,
+        writesExternal: false,
+        wouldApprove: false,
+        found: Boolean(row),
+        approval: row ? rowToApproval(row) : null,
+        gates: [
+          "Approval detail reads one local approval preview.",
+          "It does not approve, reject, execute commands, browse, fetch, schedule, send, or write externally.",
         ],
       };
     }),
