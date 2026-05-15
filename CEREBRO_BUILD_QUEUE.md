@@ -341,3 +341,6 @@ Expected shape:
   `Activity Details`, duplicate recent lists, or first-five dirty file lists.
 - Project Lab inspector language now reads as `Project Read`, with calmer search,
   empty, detail, and dirty-worktree copy.
+- Terminal Lab observation cards now keep command, output, receipt, and teaching
+  context visible while follow-ups, Tony diagnostics, gates, links, and archive
+  controls live behind per-row `Observation Actions`.

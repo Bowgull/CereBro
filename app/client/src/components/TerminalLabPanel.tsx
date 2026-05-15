@@ -687,217 +687,224 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           Workbench receipt #{savedEvidence.id}: {savedEvidence.validationStatus.replace(/_/g, " ")}. Open Workbench for the body or Ledger for the audit trail.
                         </div>
                       )}
-                      {item.followUps.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-                          {item.followUps.map((followUp) => (
-                            <div key={`${item.id}-${followUp.agent}-${followUp.title}`} className="rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: followUp.agent === "tony" ? C.gold : C.success }}>
-                                  {followUp.agent}: {followUp.title}
-                                </div>
-                              </div>
-                              <div className="text-[10px] leading-snug mt-0.5" style={{ color: C.textMuted }}>{followUp.reason}</div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {item.diagnosticDrafts.length > 0 && (
-                        <div className="space-y-1">
-                          {item.diagnosticDrafts.map((draft) => (
-                            <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                              <div className="grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_auto]">
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
-                                      Tony: {draft.title}
+                      <details className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                        <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                          Observation Actions
+                        </summary>
+                        <div className="mt-1.5 space-y-1.5">
+                          {item.followUps.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                              {item.followUps.map((followUp) => (
+                                <div key={`${item.id}-${followUp.agent}-${followUp.title}`} className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: followUp.agent === "tony" ? C.gold : C.success }}>
+                                      {followUp.agent}: {followUp.title}
                                     </div>
-                                    <Chip label="suggested only" tone={C.warning} />
                                   </div>
-                                  <div className="text-[11px] rounded px-2 py-1 mt-1 truncate" style={{ background: C.background, color: C.textPrimary }} title={draft.command}>
-                                    <code>{compactCommandLabel(draft.command)}</code>
-                                  </div>
-                                  <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={draft.reason}>{draft.reason}</div>
+                                  <div className="text-[10px] leading-snug mt-0.5" style={{ color: C.textMuted }}>{followUp.reason}</div>
                                 </div>
-                                <div className="flex flex-wrap gap-1 lg:justify-end lg:self-start">
-                                  <Button
-                                    type="button"
-                                    onClick={() => previewTonyDraft(item.id, draft.command)}
-                                    disabled={previewDiagnosticDraft.isPending}
-                                    title={previewDiagnosticDraft.isPending ? "Previewing Tony diagnostic draft." : "Preview Tony's diagnostic command as a saved observation. This does not run it."}
-                                    aria-label={`Preview Tony diagnostic draft from observation ${item.id}`}
-                                    variant="risk"
-                                    size="sm"
-                                  >
-                                    {previewDiagnosticDraft.isPending ? "Previewing" : "Preview"}
-                                  </Button>
-                                  <CopyButton
-                                    label="Copy"
-                                    active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
-                                    fallback={copiedDraftKey === `draft-command:${item.id}:${draft.command}:fallback`}
-                                    onClick={() => copyTonyDraft(`draft-command:${item.id}:${draft.command}`, draft.command)}
-                                  />
-                                  <CopyButton
-                                    label="Approval"
-                                    active={copiedDraftKey === `draft-approval:${item.id}:${draft.command}`}
-                                    fallback={copiedDraftKey === `draft-approval:${item.id}:${draft.command}:fallback`}
-                                    onClick={() =>
-                                      copyTonyDraft(
-                                        `draft-approval:${item.id}:${draft.command}`,
-                                        approvalPromptForTonyDraft({
-                                          observationId: item.id,
-                                          title: draft.title,
-                                          command: draft.command,
-                                          reason: draft.reason,
-                                          approvalGate: draft.approvalGate,
-                                        }),
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-1">
-                                <DiagnosticNote label="Receipt Need" value={draft.evidence} />
-                                <DiagnosticNote label="Expected" value={draft.expectedSignal} />
-                              </div>
-                              <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.warning }} title={draft.approvalGate}>
-                                {draft.approvalGate}
-                              </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="grid gap-1 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
-                        <ActionGroup label="Review">
-                          <Button
-                            type="button"
-                            onClick={() => setObservationStatus(item.id, "reviewing")}
-                            disabled={updateObservationStatus.isPending || item.status === "reviewing"}
-                            title={item.status === "reviewing" ? "This observation is already marked for review." : undefined}
-                            aria-label={item.status === "reviewing" ? "Observation already marked for review" : `Mark observation ${item.id} for review`}
-                            variant={item.status === "reviewing" ? "secondary" : "ghost"}
-                            size="sm"
-                          >
-                            Review
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => setObservationStatus(item.id, "blocked")}
-                            disabled={updateObservationStatus.isPending || item.status === "blocked"}
-                            title={item.status === "blocked" ? "This observation is already blocked." : undefined}
-                            aria-label={item.status === "blocked" ? "Observation already blocked" : `Block observation ${item.id}`}
-                            variant="risk"
-                            size="sm"
-                          >
-                            Block
-                          </Button>
-                        </ActionGroup>
-                        <ActionGroup label="Gate">
-                          <Button
-                            type="button"
-                            onClick={() => stageCommandApprovalPreview(item.id)}
-                            disabled={createApprovalPreview.isPending}
-                            title={createApprovalPreview.isPending ? "Creating local approval preview." : "Create a local approval preview. This does not run the command."}
-                            aria-label={`Create local approval preview for observation ${item.id}`}
-                            variant="risk"
-                            size="sm"
-                          >
-                            Approval
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => openSecurityGateForCommand(item.command)}
-                            disabled={!onNavigate}
-                            title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target."}
-                            aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for observation ${item.id}`}
-                            variant="risk"
-                            size="sm"
-                          >
-                            Security
-                          </Button>
-                        </ActionGroup>
-                        <ActionGroup label="Link">
-                          <Button
-                            type="button"
-                            onClick={() => attachSelectedLinks(item.id)}
-                            disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
-                            title={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking this observation." : undefined}
-                            aria-label={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking" : `Link selected task or session to observation ${item.id}`}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            Selected
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => createFollowUpTask(item.id)}
-                            disabled={createTaskFromObservation.isPending || item.taskId != null}
-                            title={item.taskId != null ? "This observation is already linked to a task." : undefined}
-                            aria-label={item.taskId != null ? "Observation already linked to a task" : `Create follow-up task from observation ${item.id}`}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            Task
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => createLearningNote(item.id)}
-                            disabled={createLearningProposal.isPending}
-                            title={createLearningProposal.isPending ? "Creating local learning proposal." : "Create a local learning proposal from this observation."}
-                            aria-label={`Create learning proposal from observation ${item.id}`}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            Learning
-                          </Button>
-                        </ActionGroup>
-                        <ActionGroup label="Output">
-                          <Button
-                            type="button"
-                            onClick={() => setSelectedObservationId(item.id)}
-                            aria-label={`Teach from observation ${item.id}`}
-                            title="Show Aang's teaching frame for this observation."
-                            variant={selectedObservationId === item.id ? "secondary" : "ghost"}
-                            size="sm"
-                          >
-                            Teach
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={() => savedEvidence ? openWorkbenchProof(item.id, savedEvidence.id) : stageWorkbenchProof(item)}
-                            disabled={!onNavigate}
-                            title={!onNavigate ? "Workbench route is not available from this panel state." : savedEvidence ? "Open the linked Workbench receipt body." : "Stage this observation as a local Workbench receipt."}
-                            aria-label={!onNavigate ? "Workbench route unavailable" : savedEvidence ? `Open Workbench receipt ${savedEvidence.id}` : `Save observation ${item.id} as Workbench receipt`}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            {savedEvidence ? "Workbench Body" : "Save Receipt"}
-                          </Button>
-                          {savedEvidence && (
-                            <Button
-                              type="button"
-                              onClick={() => openLedgerReceipt(item.id, savedEvidence.id)}
-                              disabled={!onNavigate}
-                              title={!onNavigate ? "Ledger route is not available from this panel state." : "Open the Ledger audit trail for this receipt."}
-                              aria-label={!onNavigate ? "Ledger route unavailable" : `Open Ledger trail for receipt ${savedEvidence.id}`}
-                              variant="secondary"
-                              size="sm"
-                            >
-                              Ledger Trail
-                            </Button>
                           )}
-                          <Button
-                            type="button"
-                            onClick={() => setObservationStatus(item.id, "archived")}
-                            disabled={updateObservationStatus.isPending || item.status === "archived"}
-                            title={item.status === "archived" ? "This observation is already archived." : undefined}
-                            aria-label={item.status === "archived" ? "Observation already archived" : `Archive observation ${item.id}`}
-                            variant="ghost"
-                            size="sm"
-                          >
-                            Archive
-                          </Button>
-                        </ActionGroup>
-                      </div>
+                          {item.diagnosticDrafts.length > 0 && (
+                            <div className="space-y-1">
+                              {item.diagnosticDrafts.map((draft) => (
+                                <div key={`${item.id}-${draft.title}-${draft.command}`} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                                  <div className="grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_auto]">
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.gold }}>
+                                          Tony: {draft.title}
+                                        </div>
+                                        <Chip label="suggested only" tone={C.warning} />
+                                      </div>
+                                      <div className="text-[11px] rounded px-2 py-1 mt-1 truncate" style={{ background: C.background, color: C.textPrimary }} title={draft.command}>
+                                        <code>{compactCommandLabel(draft.command)}</code>
+                                      </div>
+                                      <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.textMuted }} title={draft.reason}>{draft.reason}</div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1 lg:justify-end lg:self-start">
+                                      <Button
+                                        type="button"
+                                        onClick={() => previewTonyDraft(item.id, draft.command)}
+                                        disabled={previewDiagnosticDraft.isPending}
+                                        title={previewDiagnosticDraft.isPending ? "Previewing Tony diagnostic draft." : "Preview Tony's diagnostic command as a saved observation. This does not run it."}
+                                        aria-label={`Preview Tony diagnostic draft from observation ${item.id}`}
+                                        variant="risk"
+                                        size="sm"
+                                      >
+                                        {previewDiagnosticDraft.isPending ? "Previewing" : "Preview"}
+                                      </Button>
+                                      <CopyButton
+                                        label="Copy"
+                                        active={copiedDraftKey === `draft-command:${item.id}:${draft.command}`}
+                                        fallback={copiedDraftKey === `draft-command:${item.id}:${draft.command}:fallback`}
+                                        onClick={() => copyTonyDraft(`draft-command:${item.id}:${draft.command}`, draft.command)}
+                                      />
+                                      <CopyButton
+                                        label="Approval"
+                                        active={copiedDraftKey === `draft-approval:${item.id}:${draft.command}`}
+                                        fallback={copiedDraftKey === `draft-approval:${item.id}:${draft.command}:fallback`}
+                                        onClick={() =>
+                                          copyTonyDraft(
+                                            `draft-approval:${item.id}:${draft.command}`,
+                                            approvalPromptForTonyDraft({
+                                              observationId: item.id,
+                                              title: draft.title,
+                                              command: draft.command,
+                                              reason: draft.reason,
+                                              approvalGate: draft.approvalGate,
+                                            }),
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-1">
+                                    <DiagnosticNote label="Receipt Need" value={draft.evidence} />
+                                    <DiagnosticNote label="Expected" value={draft.expectedSignal} />
+                                  </div>
+                                  <div className="text-[10px] leading-snug mt-1 line-clamp-2" style={{ color: C.warning }} title={draft.approvalGate}>
+                                    {draft.approvalGate}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="grid gap-1 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
+                            <ActionGroup label="Review">
+                              <Button
+                                type="button"
+                                onClick={() => setObservationStatus(item.id, "reviewing")}
+                                disabled={updateObservationStatus.isPending || item.status === "reviewing"}
+                                title={item.status === "reviewing" ? "This observation is already marked for review." : undefined}
+                                aria-label={item.status === "reviewing" ? "Observation already marked for review" : `Mark observation ${item.id} for review`}
+                                variant={item.status === "reviewing" ? "secondary" : "ghost"}
+                                size="sm"
+                              >
+                                Review
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => setObservationStatus(item.id, "blocked")}
+                                disabled={updateObservationStatus.isPending || item.status === "blocked"}
+                                title={item.status === "blocked" ? "This observation is already blocked." : undefined}
+                                aria-label={item.status === "blocked" ? "Observation already blocked" : `Block observation ${item.id}`}
+                                variant="risk"
+                                size="sm"
+                              >
+                                Block
+                              </Button>
+                            </ActionGroup>
+                            <ActionGroup label="Gate">
+                              <Button
+                                type="button"
+                                onClick={() => stageCommandApprovalPreview(item.id)}
+                                disabled={createApprovalPreview.isPending}
+                                title={createApprovalPreview.isPending ? "Creating local approval preview." : "Create a local approval preview. This does not run the command."}
+                                aria-label={`Create local approval preview for observation ${item.id}`}
+                                variant="risk"
+                                size="sm"
+                              >
+                                Approval
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => openSecurityGateForCommand(item.command)}
+                                disabled={!onNavigate}
+                                title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target."}
+                                aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for observation ${item.id}`}
+                                variant="risk"
+                                size="sm"
+                              >
+                                Security
+                              </Button>
+                            </ActionGroup>
+                            <ActionGroup label="Link">
+                              <Button
+                                type="button"
+                                onClick={() => attachSelectedLinks(item.id)}
+                                disabled={linkObservation.isPending || (!selectedTaskId && !selectedSessionId)}
+                                title={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking this observation." : undefined}
+                                aria-label={!selectedTaskId && !selectedSessionId ? "Select a task or session before linking" : `Link selected task or session to observation ${item.id}`}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                Selected
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => createFollowUpTask(item.id)}
+                                disabled={createTaskFromObservation.isPending || item.taskId != null}
+                                title={item.taskId != null ? "This observation is already linked to a task." : undefined}
+                                aria-label={item.taskId != null ? "Observation already linked to a task" : `Create follow-up task from observation ${item.id}`}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                Task
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => createLearningNote(item.id)}
+                                disabled={createLearningProposal.isPending}
+                                title={createLearningProposal.isPending ? "Creating local learning proposal." : "Create a local learning proposal from this observation."}
+                                aria-label={`Create learning proposal from observation ${item.id}`}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                Learning
+                              </Button>
+                            </ActionGroup>
+                            <ActionGroup label="Output">
+                              <Button
+                                type="button"
+                                onClick={() => setSelectedObservationId(item.id)}
+                                aria-label={`Teach from observation ${item.id}`}
+                                title="Show Aang's teaching frame for this observation."
+                                variant={selectedObservationId === item.id ? "secondary" : "ghost"}
+                                size="sm"
+                              >
+                                Teach
+                              </Button>
+                              <Button
+                                type="button"
+                                onClick={() => savedEvidence ? openWorkbenchProof(item.id, savedEvidence.id) : stageWorkbenchProof(item)}
+                                disabled={!onNavigate}
+                                title={!onNavigate ? "Workbench route is not available from this panel state." : savedEvidence ? "Open the linked Workbench receipt body." : "Stage this observation as a local Workbench receipt."}
+                                aria-label={!onNavigate ? "Workbench route unavailable" : savedEvidence ? `Open Workbench receipt ${savedEvidence.id}` : `Save observation ${item.id} as Workbench receipt`}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                {savedEvidence ? "Workbench Body" : "Save Receipt"}
+                              </Button>
+                              {savedEvidence && (
+                                <Button
+                                  type="button"
+                                  onClick={() => openLedgerReceipt(item.id, savedEvidence.id)}
+                                  disabled={!onNavigate}
+                                  title={!onNavigate ? "Ledger route is not available from this panel state." : "Open the Ledger audit trail for this receipt."}
+                                  aria-label={!onNavigate ? "Ledger route unavailable" : `Open Ledger trail for receipt ${savedEvidence.id}`}
+                                  variant="secondary"
+                                  size="sm"
+                                >
+                                  Ledger Trail
+                                </Button>
+                              )}
+                              <Button
+                                type="button"
+                                onClick={() => setObservationStatus(item.id, "archived")}
+                                disabled={updateObservationStatus.isPending || item.status === "archived"}
+                                title={item.status === "archived" ? "This observation is already archived." : undefined}
+                                aria-label={item.status === "archived" ? "Observation already archived" : `Archive observation ${item.id}`}
+                                variant="ghost"
+                                size="sm"
+                              >
+                                Archive
+                              </Button>
+                            </ActionGroup>
+                          </div>
+                        </div>
+                      </details>
                           </>
                         );
                       })()}
