@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2020 EDT
+Last updated: 2026-05-14 2027 EDT
 
 ## Current North Star
 
@@ -20,6 +20,74 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2027 EDT - Project Card Push Detail Pass
+
+### What Changed
+- Continued in CereBro Prime mode with one read-only frontend worker finding.
+- Worker recommended Project Lab card simplification. Prime took the smallest
+  safe slice.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `ProjectLabPanel` so each project card keeps push readiness and the
+  push decision read visible, while push mode, manual commands, evidence, why,
+  stays-out, checks, suggested commit, and manual push preview move behind
+  per-card `Push Details`.
+- No backend behavior changed. No project action, git action, approval
+  execution, command execution, browser action, Ollama command, install, pull,
+  model call, vector index, external write, or storage migration ran.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Playwright opened `http://localhost:3002/`, opened Workshop, opened Project
+  Lab, and confirmed project cards still show Push Readiness and Push Decision
+  Read while `Push Details` is collapsed.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/ProjectLabPanel.tsx` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Project Lab per-card push detail density.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` stays ignored as local inspection output.
+- Blocked: Backend receipt contracts remain deferred because
+  `app/server/routers/approvals.ts` already contains unstaged Raven
+  approval-router changes.
+
+### Front-End Steward Review
+- Project cards now expose the push decision without turning every card into a
+  git console.
+- Manual push is still present and visible on demand.
+- The project map stays closer to a fast daily surface.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 67%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Next frontend slice: continue Project Lab card simplification by
+folding Knowledge Route, ProofStatusStrip, draft actions, recent queues, and
+dirty lists behind details or inspector. Switch to backend receipt contracts
+only after the Raven backend batch is resolved. Do not run Ollama status
+commands until the user explicitly approves the real check.
 
 ## 2026-05-14 2020 EDT - Ledger Low-Machinery Pass
 

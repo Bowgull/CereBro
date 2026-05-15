@@ -783,53 +783,58 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                       {autoPushArmed ? "Assisted recommendation is selected. Manual commands stay visible. Git execution still needs approval." : "Read-only recommendation. Manual push stays visible. No git command runs here."}
                     </div>
-                    <PushModeStrip autoSelected={autoPushArmed} />
-                    <ManualPushLine commands={pushReadiness.manualCommands} />
                     <PushDecisionNote
                       stats={proofStats}
                       pushLabel={pushReadiness.label}
                       pushState={pushReadiness.state}
                     />
-                    <PushEvidenceStrip
-                      branch={pushReadiness.evidence.branch}
-                      upstream={pushReadiness.evidence.upstream}
-                      dirtyCount={pushReadiness.evidence.dirtyCount}
-                      approvalRequired={pushReadiness.automationRequiresApproval}
-                      executesGit={pushReadiness.executesGit}
-                    />
-                    {showPushReceipt && (
+                    <details open={showPushReceipt} className="mt-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                        Push Details
+                      </summary>
                       <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
-                        <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushTone} />
-                        <PushReceiptBlock title="Stays Out" items={pushReadiness.staysOut} tone={C.warning} />
-                        <PushReceiptBlock title="Checks" items={pushReadiness.checks} tone={C.accent} />
-                        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
-                            Suggested Commit
-                          </div>
-                          <div className="mt-1 break-words" style={{ color: C.textSecondary }}>{pushReadiness.suggestedCommit}</div>
-                        </div>
-                        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                          <div className="flex flex-wrap items-center justify-between gap-1">
+                        <PushModeStrip autoSelected={autoPushArmed} />
+                        <ManualPushLine commands={pushReadiness.manualCommands} />
+                        <PushEvidenceStrip
+                          branch={pushReadiness.evidence.branch}
+                          upstream={pushReadiness.evidence.upstream}
+                          dirtyCount={pushReadiness.evidence.dirtyCount}
+                          approvalRequired={pushReadiness.automationRequiresApproval}
+                          executesGit={pushReadiness.executesGit}
+                        />
+                        <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
+                          <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushTone} />
+                          <PushReceiptBlock title="Stays Out" items={pushReadiness.staysOut} tone={C.warning} />
+                          <PushReceiptBlock title="Checks" items={pushReadiness.checks} tone={C.accent} />
+                          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                             <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
-                              Manual Push
+                              Suggested Commit
                             </div>
-                            <Badge variant="warning" className="uppercase">
-                              <span className="min-w-0 truncate">preview only</span>
-                            </Badge>
+                            <div className="mt-1 break-words" style={{ color: C.textSecondary }}>{pushReadiness.suggestedCommit}</div>
                           </div>
-                          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                            Copy or run these outside Project Lab after review. This panel never runs git.
-                          </div>
-                          <div className="mt-1 grid gap-0.5">
-                            {pushReadiness.manualCommands.map((command) => (
-                              <code key={command} className="block truncate text-[10px]" title={command} style={{ color: C.textSecondary }}>
-                                {command}
-                              </code>
-                            ))}
+                          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                            <div className="flex flex-wrap items-center justify-between gap-1">
+                              <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
+                                Manual Push
+                              </div>
+                              <Badge variant="warning" className="uppercase">
+                                <span className="min-w-0 truncate">preview only</span>
+                              </Badge>
+                            </div>
+                            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                              Copy or run these outside Project Lab after review. This panel never runs git.
+                            </div>
+                            <div className="mt-1 grid gap-0.5">
+                              {pushReadiness.manualCommands.map((command) => (
+                                <code key={command} className="block truncate text-[10px]" title={command} style={{ color: C.textSecondary }}>
+                                  {command}
+                                </code>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    )}
+                    </details>
                   </div>
 
                   <div className="mt-2 space-y-1.5">

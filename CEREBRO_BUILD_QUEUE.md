@@ -329,3 +329,6 @@ Expected shape:
   project cards as the default work surface.
 - Ledger now keeps receipt history and selected receipt inspection primary,
   with audit rules and the receipt-path explanation tucked into `Ledger Rules`.
+- Project Lab project cards now keep the push decision visible while manual
+  commands, policy/evidence, checks, suggested commit, and manual push preview
+  live behind per-card `Push Details`.
