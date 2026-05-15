@@ -364,3 +364,6 @@ Expected shape:
   closed details.
 - Research now keeps saved-source identity and summaries visible while per-card
   source rules, browser ladder, and approval policy live behind closed details.
+- Model Tools now keeps registry, selected capability detail, and route preview
+  visible while Ollama status internals, model batches, proposal form, eval
+  form, and gates live behind closed details.

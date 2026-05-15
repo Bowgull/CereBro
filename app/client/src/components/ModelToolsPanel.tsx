@@ -303,14 +303,16 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             </div>
 
-            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>Install Status Check</div>
-                  <div className="mt-1" style={{ color: C.textSecondary }}>{policyData.ollamaSetupPlan.installStatusCheck.approvalGate}</div>
-                </div>
-                <Badge label={labelize(policyData.ollamaSetupPlan.installStatusCheck.status)} tone={C.warning} />
-              </div>
+            <details className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer">
+                <span className="flex flex-wrap items-start justify-between gap-2">
+                  <span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>Install Status Check</span>
+                    <span className="mt-1 block" style={{ color: C.textSecondary }}>{policyData.ollamaSetupPlan.installStatusCheck.approvalGate}</span>
+                  </span>
+                  <Badge label={labelize(policyData.ollamaSetupPlan.installStatusCheck.status)} tone={C.warning} />
+                </span>
+              </summary>
               <div className="mt-2 grid gap-1.5 md:grid-cols-3">
                 <StatusList title="Allowed" items={policyData.ollamaSetupPlan.installStatusCheck.allowedCommands} tone={C.success} />
                 <StatusList title="Forbidden" items={policyData.ollamaSetupPlan.installStatusCheck.forbiddenCommands} tone={C.danger} />
@@ -359,21 +361,26 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                   </div>
                 ))}
               </div>
-            </div>
+            </details>
 
-            <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
+            <details className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Model Batches
+              </summary>
+              <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
               <ModelBatch title="First Approval Batch" items={policyData.ollamaSetupPlan.firstApprovalBatch} />
               <ModelBatch title="Stretch Candidates" items={policyData.ollamaSetupPlan.stretchCandidates} />
-            </div>
+              </div>
+            </details>
 
-            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.danger }}>Do Not Start With</div>
+            <details className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.danger }}>Do Not Start With</summary>
               <div className="mt-1 flex flex-wrap gap-1">
                 {policyData.ollamaSetupPlan.blockedFirstInstalls.map((item) => (
                   <Badge key={item} label={item} tone={C.danger} />
                 ))}
               </div>
-            </div>
+            </details>
           </section>
         )}
 
@@ -498,8 +505,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </section>
 
         <section className="grid gap-2 xl:grid-cols-3">
-          <form onSubmit={submitCapability} className="rounded p-2 space-y-2" aria-label="Create local model tool proposal" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <SectionTitle title="Propose" detail="local only" />
+          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <summary className="cursor-pointer">
+              <SectionTitle title="Propose" detail="local only" />
+            </summary>
+            <form onSubmit={submitCapability} className="mt-2 space-y-2" aria-label="Create local model tool proposal">
             <Input value={provider} onChange={(event) => setProvider(event.target.value)} aria-label="Model tool provider" placeholder="Provider or tool owner." />
             <Input value={toolName} onChange={(event) => setToolName(event.target.value)} aria-label="Model tool name" placeholder="Model or tool name." />
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
@@ -520,10 +530,14 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             >
               {createCapability.isPending ? "Recording" : "Create Proposal"}
             </Button>
-          </form>
+            </form>
+          </details>
 
-          <form onSubmit={submitEval} className="rounded p-2 space-y-2" aria-label="Record local model tool eval note" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <SectionTitle title="Eval Note" detail={selectedCapability ? `for ${selectedCapability.id}` : "unlinked"} />
+          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <summary className="cursor-pointer">
+              <SectionTitle title="Eval Note" detail={selectedCapability ? `for ${selectedCapability.id}` : "unlinked"} />
+            </summary>
+            <form onSubmit={submitEval} className="mt-2 space-y-2" aria-label="Record local model tool eval note">
             <AppSelect label="Eval task" value={evalTaskKey} onChange={setEvalTaskKey} options={localEvalTasks.map((task) => task.key)} />
             <AppSelect label="Eval outcome" value={evalOutcome} onChange={(value) => setEvalOutcome(value as typeof evalOutcome)} options={EVAL_OUTCOMES} />
             <Textarea value={evalSummary} onChange={(event) => setEvalSummary(event.target.value)} aria-label="Model tool eval summary" placeholder="What was checked or blocked." rows={4} />
@@ -551,7 +565,8 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 </div>
               ))}
             </div>
-          </form>
+            </form>
+          </details>
 
           <section className="rounded p-2 space-y-2" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <SectionTitle title="Route Preview" detail={route?.routeStatus ?? "proposal"} />
@@ -583,8 +598,10 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </section>
         </section>
 
-        <section className="rounded p-2" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <SectionTitle title="Gates" detail="always visible" />
+        <details className="rounded p-2" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer">
+            <SectionTitle title="Gates" detail="policy" />
+          </summary>
           <div className="mt-2 grid gap-1.5 md:grid-cols-2">
             {(policyData?.gates ?? []).map((gate) => (
               <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -592,7 +609,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             ))}
           </div>
-        </section>
+        </details>
       </main>
     </div>
   );
