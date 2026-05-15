@@ -600,137 +600,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   aria-label="Receipt title"
                   className="xl:col-span-3"
                 />
-                <AppSelect
-                  label="Project link"
-                  value={String(projectId)}
-                  onChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No project" },
-                    ...projectOptions.map((project) => ({
-                      value: String(project.tasks.projectId ?? ""),
-                      label: project.name,
-                    })),
-                  ]}
-                />
-                <Input
-                  value={targetUri}
-                  onChange={(event) => setTargetUri(event.target.value)}
-                  placeholder="Optional target URL, file path, artifact id, or panel."
-                  aria-label="Receipt target"
-                  className="xl:col-span-3"
-                />
-                <AppSelect
-                  label="Task link"
-                  value={String(taskId)}
-                  onChange={(value) => setTaskId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No task link" },
-                    ...(linkOptions.data?.tasks ?? [])
-                    .filter((task) => projectId === "none" || task.projectId === projectId)
-                    .map((task) => ({
-                      value: String(task.id),
-                      label: `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`,
-                    })),
-                  ]}
-                />
-                <AppSelect
-                  label="Session link"
-                  value={String(sessionId)}
-                  onChange={(value) => setSessionId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No session link" },
-                    ...(linkOptions.data?.sessions ?? [])
-                    .filter((session) => projectId === "none" || session.projectId === projectId)
-                    .map((session) => ({
-                      value: String(session.id),
-                      label: session.displayName,
-                    })),
-                  ]}
-                />
-                <AppSelect
-                  label="Route agent"
-                  value={routeAgent}
-                  onChange={setRouteAgent}
-                  options={[
-                    { value: "gojo", label: "Gojo" },
-                    { value: "surfer", label: "Surfer" },
-                    { value: "tony", label: "Tony" },
-                    { value: "oak", label: "Professor Oak" },
-                    { value: "spock", label: "Spock" },
-                    { value: "aang", label: "Aang" },
-                    { value: "cortana", label: "Cortana" },
-                  ]}
-                />
-                <AppSelect
-                  label="Source link"
-                  value={String(sourceId)}
-                  onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No source link" },
-                    ...(linkOptions.data?.sources ?? []).map((source) => ({
-                      value: String(source.id),
-                      label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
-                        source.title ?? sourceDisplayName(source.uri)
-                      }`,
-                    })),
-                  ]}
-                />
-                <AppSelect
-                  label="Command link"
-                  value={String(commandObservationId)}
-                  onChange={(value) => setCommandObservationId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No command link" },
-                    ...(linkOptions.data?.commandObservations ?? []).map((command) => ({
-                      value: String(command.id),
-                      label: `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`,
-                    })),
-                  ]}
-                />
-                <AppSelect
-                  label="Artifact link"
-                  value={String(artifactId)}
-                  onChange={(value) => setArtifactId(value === "none" ? "none" : Number(value))}
-                  options={[
-                    { value: "none", label: "No artifact link" },
-                    ...(linkOptions.data?.artifacts ?? [])
-                    .filter((artifact) => projectId === "none" || artifact.projectId === projectId)
-                    .map((artifact) => ({
-                      value: String(artifact.id),
-                      label: `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`,
-                    })),
-                  ]}
-                />
-                <AppSelect
-                  label="Permission class"
-                  value={permissionClass}
-                  onChange={(value) => setPermissionClass(value as PermissionClass)}
-                  options={[
-                    { value: "manual_note", label: "Manual note" },
-                    { value: "media_review", label: "Media review" },
-                    { value: "annotation", label: "Annotation" },
-                    { value: "validation", label: "Validation" },
-                  ]}
-                />
-                <Input
-                  value={viewport}
-                  onChange={(event) => setViewport(event.target.value)}
-                  placeholder="Viewport, such as 1440x900."
-                  aria-label="Receipt viewport"
-                />
-                <Input
-                  value={coordinates}
-                  onChange={(event) => setCoordinates(event.target.value)}
-                  placeholder="Coordinates, such as x=120 y=80 w=300 h=140."
-                  aria-label="Receipt coordinates"
-                />
-                <Input
-                  value={annotationText}
-                  onChange={(event) => setAnnotationText(event.target.value)}
-                  placeholder="Annotation note, optional."
-                  aria-label="Receipt annotation text"
-                  className="sm:col-span-2"
-                />
                 <Textarea
                   value={summary}
                   onChange={(event) => setSummary(event.target.value)}
@@ -739,150 +608,303 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   className="sm:col-span-2 xl:col-span-4"
                 />
               </div>
-              <div
+
+              <div className="mt-2 grid gap-1.5">
+                <details className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                    Receipt Links
+                  </summary>
+                  <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
+                    <AppSelect
+                      label="Project link"
+                      value={String(projectId)}
+                      onChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No project" },
+                        ...projectOptions.map((project) => ({
+                          value: String(project.tasks.projectId ?? ""),
+                          label: project.name,
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="Task link"
+                      value={String(taskId)}
+                      onChange={(value) => setTaskId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No task link" },
+                        ...(linkOptions.data?.tasks ?? [])
+                        .filter((task) => projectId === "none" || task.projectId === projectId)
+                        .map((task) => ({
+                          value: String(task.id),
+                          label: `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`,
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="Session link"
+                      value={String(sessionId)}
+                      onChange={(value) => setSessionId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No session link" },
+                        ...(linkOptions.data?.sessions ?? [])
+                        .filter((session) => projectId === "none" || session.projectId === projectId)
+                        .map((session) => ({
+                          value: String(session.id),
+                          label: session.displayName,
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="Source link"
+                      value={String(sourceId)}
+                      onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No source link" },
+                        ...(linkOptions.data?.sources ?? []).map((source) => ({
+                          value: String(source.id),
+                          label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.trustLevel}/${source.freshnessStatus} ${
+                            source.title ?? sourceDisplayName(source.uri)
+                          }`,
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="Command link"
+                      value={String(commandObservationId)}
+                      onChange={(value) => setCommandObservationId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No command link" },
+                        ...(linkOptions.data?.commandObservations ?? []).map((command) => ({
+                          value: String(command.id),
+                          label: `#${command.id} ${command.status}/${command.risk} ${command.projectName ?? "unlinked"} ${command.command.slice(0, 80)}`,
+                        })),
+                      ]}
+                    />
+                    <AppSelect
+                      label="Artifact link"
+                      value={String(artifactId)}
+                      onChange={(value) => setArtifactId(value === "none" ? "none" : Number(value))}
+                      options={[
+                        { value: "none", label: "No artifact link" },
+                        ...(linkOptions.data?.artifacts ?? [])
+                        .filter((artifact) => projectId === "none" || artifact.projectId === projectId)
+                        .map((artifact) => ({
+                          value: String(artifact.id),
+                          label: `#${artifact.id} ${artifact.lifecycleState} ${artifact.projectName ?? "unlinked"} ${artifact.title ?? artifact.storagePath}`,
+                        })),
+                      ]}
+                    />
+                  </div>
+                </details>
+
+                <details className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                    Receipt Metadata
+                  </summary>
+                  <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                    <AppSelect
+                      label="Route agent"
+                      value={routeAgent}
+                      onChange={setRouteAgent}
+                      options={[
+                        { value: "gojo", label: "Gojo" },
+                        { value: "surfer", label: "Surfer" },
+                        { value: "tony", label: "Tony" },
+                        { value: "oak", label: "Professor Oak" },
+                        { value: "spock", label: "Spock" },
+                        { value: "aang", label: "Aang" },
+                        { value: "cortana", label: "Cortana" },
+                      ]}
+                    />
+                    <AppSelect
+                      label="Permission class"
+                      value={permissionClass}
+                      onChange={(value) => setPermissionClass(value as PermissionClass)}
+                      options={[
+                        { value: "manual_note", label: "Manual note" },
+                        { value: "media_review", label: "Media review" },
+                        { value: "annotation", label: "Annotation" },
+                        { value: "validation", label: "Validation" },
+                      ]}
+                    />
+                    <Input
+                      value={viewport}
+                      onChange={(event) => setViewport(event.target.value)}
+                      placeholder="Viewport, such as 1440x900."
+                      aria-label="Receipt viewport"
+                    />
+                    <Input
+                      value={coordinates}
+                      onChange={(event) => setCoordinates(event.target.value)}
+                      placeholder="Coordinates, such as x=120 y=80 w=300 h=140."
+                      aria-label="Receipt coordinates"
+                    />
+                    <Input
+                      value={targetUri}
+                      onChange={(event) => setTargetUri(event.target.value)}
+                      placeholder="Optional target URL, file path, artifact id, or panel."
+                      aria-label="Receipt target"
+                      className="sm:col-span-2"
+                    />
+                    <Input
+                      value={annotationText}
+                      onChange={(event) => setAnnotationText(event.target.value)}
+                      placeholder="Annotation note, optional."
+                      aria-label="Receipt annotation text"
+                      className="sm:col-span-2"
+                    />
+                    <label className="flex items-center gap-2 text-xs" style={{ color: C.textMuted }}>
+                      <Checkbox
+                        checked={sensitive}
+                        onCheckedChange={(checked) => setSensitive(checked === true)}
+                        aria-label="Mark receipt as sensitive"
+                      />
+                      Sensitive
+                    </label>
+                  </div>
+                </details>
+              </div>
+
+              <details
                 className="mt-2 rounded p-2"
                 aria-label="Temporary media intake"
-                onDragOver={(event) => {
-                  event.preventDefault();
-                }}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  stageTemporaryMedia(event.dataTransfer.files.item(0));
-                }}
                 style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                      Temporary Media
-                    </h4>
-                    <p className="mt-0.5 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                  Temporary Media
+                </summary>
+                <div
+                  className="mt-2 rounded p-2"
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    stageTemporaryMedia(event.dataTransfer.files.item(0));
+                  }}
+                  style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                       Browser-memory preview. No upload. No vault save. No vision model.
                     </p>
-                  </div>
-                  <label
-                    className="inline-flex cursor-pointer items-center rounded px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider"
-                    style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
-                  >
-                    Choose Media
-                    <Input
-                      type="file"
-                      accept="image/*,video/*"
-                      className="sr-only"
-                      aria-label="Choose temporary Workbench media"
-                      onChange={(event) => {
-                        stageTemporaryMedia(event.target.files?.item(0) ?? null);
-                        event.currentTarget.value = "";
-                      }}
-                    />
-                  </label>
-                </div>
-                {temporaryMedia ? (
-                  <div className="mt-2 grid gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
-                    <div
-                      className="relative overflow-hidden rounded"
-                      role="button"
-                      tabIndex={0}
-                      aria-label="Mark annotation coordinates on temporary media"
-                      onPointerDown={markTemporaryMedia}
-                      onKeyDown={(event) => {
-                        if (event.key !== "Enter" && event.key !== " ") return;
-                        const rect = event.currentTarget.getBoundingClientRect();
-                        const fakeEvent = {
-                          ...event,
-                          clientX: rect.left + rect.width / 2,
-                          clientY: rect.top + rect.height / 2,
-                          currentTarget: event.currentTarget,
-                        } as unknown as React.PointerEvent<HTMLDivElement>;
-                        markTemporaryMedia(fakeEvent);
-                      }}
-                      style={{ border: `1px solid ${C.borderSoft}`, background: C.background, cursor: "crosshair" }}
+                    <label
+                      className="inline-flex cursor-pointer items-center rounded px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider"
+                      style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                     >
-                      {temporaryMedia.kind === "image" ? (
-                        <img
-                          src={temporaryMedia.url}
-                          alt=""
-                          className="block h-40 w-full object-contain"
-                        />
-                      ) : (
-                        <video
-                          src={temporaryMedia.url}
-                          controls
-                          preload="metadata"
-                          className="block h-40 w-full object-contain"
-                          onLoadedMetadata={(event) => {
-                            const duration = event.currentTarget.duration;
-                            setTemporaryMedia((current) => current ? {
-                              ...current,
-                              durationSec: Number.isFinite(duration) ? duration : null,
-                            } : current);
-                          }}
-                        />
-                      )}
-                      {annotationMarker && (
-                        <div
-                          aria-hidden="true"
-                          className="pointer-events-none absolute h-4 w-4 rounded-full"
-                          style={{
-                            left: `${annotationMarker.xPct}%`,
-                            top: `${annotationMarker.yPct}%`,
-                            transform: "translate(-50%, -50%)",
-                            border: `2px solid ${C.warning}`,
-                            boxShadow: `0 0 0 2px ${C.background}, 0 0 12px ${C.warning}`,
-                          }}
-                        />
-                      )}
-                    </div>
-                    <div className="grid content-start gap-2">
-                      <div className="flex flex-wrap gap-1">
-                        <Chip label={temporaryMedia.kind} tone={C.accent} />
-                        <Chip label={temporaryMedia.type} tone={C.accent} />
-                        <Chip label={formatBytes(temporaryMedia.size)} tone={C.textMuted} />
-                        {temporaryMedia.durationSec != null && <Chip label={`${formatSeconds(temporaryMedia.durationSec)} duration`} tone={C.textMuted} />}
-                        <Chip label="temporary" tone={C.warning} />
-                      </div>
-                      <div className="text-[11px] leading-snug break-words" style={{ color: C.textSecondary }}>
-                        {temporaryMedia.name}
-                      </div>
-                      {temporaryMedia.kind === "video" && (
-                        <Input
-                          value={mediaFrameTimeSec}
-                          onChange={(event) => setMediaFrameTimeSec(event.target.value)}
-                          inputMode="decimal"
-                          placeholder="Frame time in seconds."
-                          aria-label="Video frame time in seconds"
-                        />
-                      )}
-                      <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                        Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={clearTemporaryMedia}
-                        aria-label="Clear temporary Workbench media"
-                        variant="ghost"
-                        size="sm"
-                        className="w-fit"
+                      Choose Media
+                      <Input
+                        type="file"
+                        accept="image/*,video/*"
+                        className="sr-only"
+                        aria-label="Choose temporary Workbench media"
+                        onChange={(event) => {
+                          stageTemporaryMedia(event.target.files?.item(0) ?? null);
+                          event.currentTarget.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {temporaryMedia ? (
+                    <div className="mt-2 grid gap-2 md:grid-cols-[180px_minmax(0,1fr)]">
+                      <div
+                        className="relative overflow-hidden rounded"
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Mark annotation coordinates on temporary media"
+                        onPointerDown={markTemporaryMedia}
+                        onKeyDown={(event) => {
+                          if (event.key !== "Enter" && event.key !== " ") return;
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          const fakeEvent = {
+                            ...event,
+                            clientX: rect.left + rect.width / 2,
+                            clientY: rect.top + rect.height / 2,
+                            currentTarget: event.currentTarget,
+                          } as unknown as React.PointerEvent<HTMLDivElement>;
+                          markTemporaryMedia(fakeEvent);
+                        }}
+                        style={{ border: `1px solid ${C.borderSoft}`, background: C.background, cursor: "crosshair" }}
                       >
-                        Clear
-                      </Button>
+                        {temporaryMedia.kind === "image" ? (
+                          <img
+                            src={temporaryMedia.url}
+                            alt=""
+                            className="block h-40 w-full object-contain"
+                          />
+                        ) : (
+                          <video
+                            src={temporaryMedia.url}
+                            controls
+                            preload="metadata"
+                            className="block h-40 w-full object-contain"
+                            onLoadedMetadata={(event) => {
+                              const duration = event.currentTarget.duration;
+                              setTemporaryMedia((current) => current ? {
+                                ...current,
+                                durationSec: Number.isFinite(duration) ? duration : null,
+                              } : current);
+                            }}
+                          />
+                        )}
+                        {annotationMarker && (
+                          <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute h-4 w-4 rounded-full"
+                            style={{
+                              left: `${annotationMarker.xPct}%`,
+                              top: `${annotationMarker.yPct}%`,
+                              transform: "translate(-50%, -50%)",
+                              border: `2px solid ${C.warning}`,
+                              boxShadow: `0 0 0 2px ${C.background}, 0 0 12px ${C.warning}`,
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div className="grid content-start gap-2">
+                        <div className="flex flex-wrap gap-1">
+                          <Chip label={temporaryMedia.kind} tone={C.accent} />
+                          <Chip label={temporaryMedia.type} tone={C.accent} />
+                          <Chip label={formatBytes(temporaryMedia.size)} tone={C.textMuted} />
+                          {temporaryMedia.durationSec != null && <Chip label={`${formatSeconds(temporaryMedia.durationSec)} duration`} tone={C.textMuted} />}
+                          <Chip label="temporary" tone={C.warning} />
+                        </div>
+                        <div className="text-[11px] leading-snug break-words" style={{ color: C.textSecondary }}>
+                          {temporaryMedia.name}
+                        </div>
+                        {temporaryMedia.kind === "video" && (
+                          <Input
+                            value={mediaFrameTimeSec}
+                            onChange={(event) => setMediaFrameTimeSec(event.target.value)}
+                            inputMode="decimal"
+                            placeholder="Frame time in seconds."
+                            aria-label="Video frame time in seconds"
+                          />
+                        )}
+                        <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                          Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={clearTemporaryMedia}
+                          aria-label="Clear temporary Workbench media"
+                          variant="ghost"
+                          size="sm"
+                          className="w-fit"
+                        >
+                          Clear
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="mt-2 rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                    Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.
-                  </div>
-                )}
-              </div>
+                  ) : (
+                    <div className="mt-2 rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                      Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.
+                    </div>
+                  )}
+                </div>
+              </details>
               <div className="mt-2 flex items-center justify-between gap-2">
-                <label className="flex items-center gap-2 text-xs" style={{ color: C.textMuted }}>
-                  <Checkbox
-                    checked={sensitive}
-                    onCheckedChange={(checked) => setSensitive(checked === true)}
-                    aria-label="Mark receipt as sensitive"
-                  />
-                  Sensitive
-                </label>
                 <div role="status" aria-live="polite" className="flex-1 text-[11px]" style={{ color: C.textMuted }}>
                   {createEvidence.data?.ok ? `Saved receipt #${createEvidence.data.evidence.id}. No external action.` : "Receipts append. They do not replace earlier notes."}
                 </div>

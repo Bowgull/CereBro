@@ -349,3 +349,6 @@ Expected shape:
   `Receipt Details` and `Command Boundary`.
 - Repo hygiene pass removed ignored generated clutter from the workspace and
   removed the only tracked `.DS_Store` file from the starter pack.
+- Workbench Add Receipt now keeps receipt kind, title, summary, save status, and
+  save action visible while optional links, metadata, sensitive flag, and
+  temporary media intake live behind closed details.

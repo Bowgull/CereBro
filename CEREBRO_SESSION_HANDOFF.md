@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2054 EDT
+Last updated: 2026-05-14 2100 EDT
 
 ## Current North Star
 
@@ -20,6 +20,75 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2100 EDT - Workbench Add Receipt Detail Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `WorkbenchPanel` so Add Receipt keeps only the core action visible:
+  receipt kind, title, summary, save status, and Save Local Receipt.
+- Moved optional project/task/session/source/command/artifact links behind
+  `Receipt Links`.
+- Moved route agent, permission class, target, viewport, coordinates,
+  annotation text, and sensitive flag behind `Receipt Metadata`.
+- Moved temporary media intake behind `Temporary Media`.
+- No backend behavior changed. No project action, git action from the UI,
+  approval execution, command execution from the app, browser action from
+  CereBro, Ollama command, install, pull, model call, vector index, external
+  write, or storage migration ran.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened `http://localhost:3002/`, opened Workshop, and confirmed
+  Add Receipt shows `Receipt Links`, `Receipt Metadata`, `Temporary Media`, and
+  `Save Local Receipt` while detailed link and metadata labels stay collapsed.
+- Playwright console check returned 0 errors.
+
+### Cleanliness Read
+- Current slice: Workbench Add Receipt low-machinery pass.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored. `app/.manus-logs` may regenerate from local sessions.
+- Blocked: broader Mac cleanup outside this repo stays manual-review only.
+
+### Front-End Steward Review
+- Workbench now reads as receipt creation first.
+- Optional wiring still exists, but it no longer makes the primary form feel
+  like backend administration.
+- This keeps the fast AI OS direction intact: one visible action, proof below
+  the floor, no hidden execution.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 73%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Next safe frontend slice: inspect Ledger selected receipt and
+Workbench recent receipt detail for remaining exposed machinery, then choose the
+smallest visible-loop cleanup. Switch to backend receipt contracts only after
+the Raven backend batch is resolved.
 
 ## 2026-05-14 2054 EDT - Workspace Hygiene Pass
 
