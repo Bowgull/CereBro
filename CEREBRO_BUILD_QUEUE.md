@@ -156,12 +156,15 @@ Recent Prime slices:
 - 2026-05-15 1933 EDT: added `sessions.recent`, indexed
   `sessions.last_seen_at`, and switched dropdown/filter surfaces off full
   `sessions.list` where notes are not needed.
+- 2026-05-15 1935 EDT: simplified Approval Queue default read by hiding groups
+  and permission checks behind disclosures and removing raw ids from default
+  approval cards.
 
 ### Frontend Worker
 
 Next block:
 
-- Take one high-noise surface pass, starting with Approval Queue or Artifacts.
+- Take one high-noise surface pass, starting with Artifacts or Workbench.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -489,3 +492,5 @@ Expected shape:
   receipt stats instead of full receipt row reads.
 - Tasks, Terminal Lab, Memory, and Artifacts now use compact recent session
   label reads instead of full session ledger rows.
+- Approval Queue now shows waiting decisions first; grouping and permission
+  check machinery sit behind closed disclosures.

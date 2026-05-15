@@ -113,7 +113,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               Action Receipt Gate
             </h2>
             <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Universal local receipts for approvals, blocks, and permission preflights. No action execution.
+              Review waiting decisions. Nothing runs from this queue.
             </p>
           </div>
           <Button
@@ -183,16 +183,24 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           ))}
         </div>
 
-        <div className="mt-2 rounded p-2" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details className="mt-2 rounded p-2" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer list-none">
+            <span className="flex items-center justify-between gap-2">
+              <span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                  Groups
+                </span>
+                <span className="mt-0.5 block text-[11px]" style={{ color: C.textMuted }}>
+                  Filter preview batches.
+                </span>
+              </span>
+              <Badge variant="secondary" className="uppercase">
+                {groups.data?.groups.length ?? 0}
+              </Badge>
+            </span>
+          </summary>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                Groups
-              </div>
-              <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
-                Local previews only. No approval action.
-              </div>
-            </div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>Local previews only. No approval action.</div>
             <AppSelect
               label="Group approval previews"
               value={groupBy}
@@ -235,14 +243,14 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                     </span>
                     <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
-                      {group.sampleIds.map((id) => `#${id}`).join(", ")}
+                      {group.sampleIds.length} recent match{group.sampleIds.length === 1 ? "" : "es"}
                     </span>
                   </span>
                 </Button>
               ))
             )}
           </div>
-        </div>
+        </details>
 
         <div
           role="status"
@@ -255,16 +263,26 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             : `Showing ${items.length} ${status} preview${items.length === 1 ? "" : "s"}. Sensitive ${approvals.data?.summary.sensitive ?? 0}.`}
         </div>
 
-        <div className="mt-2 rounded p-2" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                Permission Preflights
-              </div>
-              <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
-                Local audit history. Policy receipt only.
-              </div>
-            </div>
+        <details className="mt-2 rounded p-2" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer list-none">
+            <span className="flex items-start justify-between gap-3">
+              <span>
+                <span className="block text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                  Permission Checks
+                </span>
+                <span className="mt-0.5 block text-[11px]" style={{ color: C.textMuted }}>
+                  Local policy receipts.
+                </span>
+              </span>
+              <span className="flex flex-wrap justify-end gap-1">
+                <Chip label={`${preflights.data?.summary.total ?? 0} records`} tone={C.accent} />
+                {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={`${preflights.data?.summary.approvalRequired} gated`} tone={C.warning} />}
+                {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
+              </span>
+            </span>
+          </summary>
+          <div className="mt-2 flex items-start justify-between gap-3">
+            <div className="text-[11px]" style={{ color: C.textMuted }}>Audit history. Policy receipt only.</div>
             <div className="flex flex-wrap justify-end gap-1">
               <Chip label={`${preflights.data?.summary.total ?? 0} records`} tone={C.accent} />
               {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={`${preflights.data?.summary.approvalRequired} gated`} tone={C.warning} />}
@@ -284,7 +302,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}` }}
                 >
                   <div className="flex flex-wrap items-center gap-1">
-                    <Chip label={`preflight #${item.id}`} tone={C.textMuted} />
+                    <Chip label="policy check" tone={C.textMuted} />
                     <Chip label={labelize(item.decision)} tone={item.decision === "blocked_by_hard_gate" ? C.danger : item.approvalRequired ? C.warning : C.accent} />
                     {item.sensitiveData && <Chip label="sensitive" tone={C.danger} />}
                   </div>
@@ -309,7 +327,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               {gate}
             </div>
           ))}
-        </div>
+        </details>
       </header>
 
       <div className="flex-1 grid gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px]" style={{ minHeight: 0 }}>
@@ -342,12 +360,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 >
                   <span className="block w-full">
                     <span className="flex flex-wrap items-center gap-1">
-                      <Chip label={`#${item.id}`} tone={C.textMuted} />
                       <Chip label={labelize(item.origin)} tone={C.accent} />
                       <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
                       {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                       {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
-                      {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
+                      {item.permissionPreflightId != null && <Chip label="policy checked" tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
                     </span>
                     <span className="mt-1.5 block text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                       {labelize(item.actionType)}
@@ -379,11 +396,12 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           ) : (
             <div className="grid gap-2">
               <ApprovalReceiptChain selected={selected} onNavigate={onNavigate} onOpenSecurity={openSecurityGate} />
-              <Section title={`Approval #${selected.id}`} detail={labelize(selected.actionType)}>
+              <Section title="Decision" detail={labelize(selected.status)}>
                 <Meta label="Origin" value={labelize(selected.origin)} />
                 <Meta label="Requested By" value={selected.requestedByAgent ?? "unknown"} />
                 <Meta label="Project" value={selected.projectName ?? "unlinked"} />
-                <Meta label="Target" value={`${selected.targetType ?? "unknown"} ${selected.targetId ?? ""}`.trim()} />
+                <Meta label="Action" value={labelize(selected.actionType)} />
+                <Meta label="Target" value={labelize(selected.targetType)} />
                 {selected.targetLabel && (
                   <Meta label="Target Label" value={receiptLabel(selected.targetLabel) ?? "unknown"} title={selected.targetLabel} />
                 )}
@@ -402,7 +420,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   </Button>
                 )}
                 <Meta label="Cost/Risk" value={labelize(selected.costRisk)} />
-                <Meta label="Permission Preflight" value={selected.permissionPreflightId == null ? "unlinked" : `#${selected.permissionPreflightId}`} />
+                <Meta label="Policy Check" value={selected.permissionPreflightId == null ? "unlinked" : labelize(selected.permissionPreflight?.decision)} />
               </Section>
 
               <DetailSection title="Permission Preflight" detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>

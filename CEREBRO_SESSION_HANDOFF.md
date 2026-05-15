@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1933 EDT
+Last updated: 2026-05-15 1935 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1935 EDT - Approval Queue Low-Machinery Pass
+
+### What Changed
+- Simplified the Approval Queue default surface.
+- Changed the header copy from approval/preflight machinery language to the
+  user-facing decision read: review waiting decisions; nothing runs here.
+- Moved approval grouping behind a closed `Groups` disclosure.
+- Moved permission preflight audit rows behind a closed `Permission Checks`
+  disclosure.
+- Removed raw approval ids and raw preflight ids from the default approval
+  cards.
+- Replaced group sample-id display with a plain recent-match count.
+- Renamed the selected approval default section from `Approval #...` to
+  `Decision`.
+- Kept detailed policy/preflight/Oak/Spock/reason/context evidence available
+  behind the existing detail disclosures.
+
+### Files Touched
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Approval Queue visible-shell copy and disclosure polish.
+- No backend behavior, DB schema, external write, model call, package install,
+  browser action from CereBro, command execution from CereBro, storage
+  migration, or Raven boundary changed.
+
+### Front-End Steward Review
+- This directly addresses the frontend worker audit: Approval Queue no longer
+  puts preflight internals, raw ids, sample ids, and policy proof rows on the
+  first read.
+- The safety evidence remains accessible. It just stops owning the screen.
+
+### Completion Read
+- Overall: 58%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 95%.
+- Backend/runtime: 42%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: simplify the
+next high-noise visible surface, likely Artifacts or Workbench, or take the
+Project Lab DB-only/cached git status read-model split.
 
 ## 2026-05-15 1933 EDT - Compact Recent Sessions Read Model
 
