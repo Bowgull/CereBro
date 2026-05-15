@@ -894,7 +894,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           </span>
                         </span>
                         <span className="block text-[11px] leading-snug" style={{ color: C.textSecondary }}>
-                          Open inspector to review files before any commit.
+                          Open Project Read to review files before any commit.
                         </span>
                       </span>
                     </Button>
@@ -1181,23 +1181,23 @@ function ProjectDetailInspector({
   ];
 
   return (
-    <section className="shrink-0 px-2 py-1.5" aria-label={`${projectName} Local Inspector`} aria-busy={isLoading} style={{ background: C.surface, borderBottom: `1px solid ${C.borderSoft}` }}>
+    <section className="shrink-0 px-2 py-1.5" aria-label={`${projectName} Project Read`} aria-busy={isLoading} style={{ background: C.surface, borderBottom: `1px solid ${C.borderSoft}` }}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-            Local Inspector
+            Project Read
           </div>
           <div className="text-[12px] font-semibold truncate" style={{ color: C.textPrimary }} title={projectName}>
             {projectName}
           </div>
         </div>
-        <Button type="button" onClick={onClose} aria-label="Hide local inspector" variant="outline" size="sm" className="shrink-0">
+        <Button type="button" onClick={onClose} aria-label="Hide project read" variant="outline" size="sm" className="shrink-0">
           Hide
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="mt-1.5 text-[11px]" style={{ color: C.textMuted }}>Reading local queue details.</div>
+        <div className="mt-1.5 text-[11px]" style={{ color: C.textMuted }}>Reading project details.</div>
       ) : (
         <div className="mt-1.5">
           <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 xl:grid-cols-7">
@@ -1206,7 +1206,7 @@ function ProjectDetailInspector({
                 key={queue.id}
                 type="button"
                 aria-pressed={activeQueue === queue.id}
-                aria-label={`Show ${queue.label} inspector queue`}
+                aria-label={`Show ${queue.label} project rows`}
                 onClick={() => {
                   setActiveQueue(queue.id);
                   setSelectedItemId(null);
@@ -1227,13 +1227,13 @@ function ProjectDetailInspector({
           <div className="mt-1.5 grid grid-cols-1 gap-1.5 xl:grid-cols-[minmax(180px,1fr)_minmax(0,2fr)_auto] xl:items-center">
             <Input
               type="search"
-              aria-label={`Search ${active.label} inspector rows`}
+              aria-label={`Search ${active.label} project rows`}
               value={inspectorSearch}
               onChange={(event) => {
                 setInspectorSearch(event.target.value);
                 setSelectedItemId(null);
               }}
-              placeholder={`Filter ${active.label.toLowerCase()} rows`}
+              placeholder={`Find ${active.label.toLowerCase()}`}
               className="min-w-0 flex-1"
             />
             <div className="flex flex-wrap gap-1 min-w-0">
@@ -1241,7 +1241,7 @@ function ProjectDetailInspector({
                 <Button
                   type="button"
                   aria-pressed={inspectorLabelFilter == null}
-                  aria-label={`Show all ${active.label} row types`}
+                  aria-label={`Show all ${active.label} types`}
                   onClick={() => {
                     setInspectorLabelFilter(null);
                     setSelectedItemId(null);
@@ -1257,7 +1257,7 @@ function ProjectDetailInspector({
                     type="button"
                     key={label}
                     aria-pressed={inspectorLabelFilter === label}
-                    aria-label={`Show ${labelize(label)} ${active.label} rows`}
+                    aria-label={`Show ${labelize(label)} ${active.label} type`}
                     onClick={() => {
                       setInspectorLabelFilter(label);
                       setSelectedItemId(null);
@@ -1273,7 +1273,7 @@ function ProjectDetailInspector({
                   type="button"
                   key={option.id}
                   aria-pressed={inspectorSort === option.id}
-                  aria-label={`Sort inspector rows by ${option.label}`}
+                  aria-label={`Sort project rows by ${option.label}`}
                   onClick={() => {
                     setInspectorSort(option.id);
                     setSelectedItemId(null);
@@ -1292,7 +1292,7 @@ function ProjectDetailInspector({
               {filterActive && (
                 <Button
                   type="button"
-                  aria-label="Reset inspector filters"
+                  aria-label="Reset project read filters"
                   onClick={() => {
                     setInspectorSearch("");
                     setInspectorLabelFilter(null);
@@ -1361,7 +1361,7 @@ function DetailColumn({
   const visibleItems = items.slice(0, 12);
 
   return (
-    <div className="min-w-0 rounded p-1.5" role="region" aria-label={`${title} inspector rows`} style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded p-1.5" role="region" aria-label={`${title} project rows`} style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
           {title}{filterActive ? ` filtered: ${filterLabel}` : ""}
@@ -1371,7 +1371,7 @@ function DetailColumn({
         </div>
       </div>
       {items.length === 0 ? (
-        <div className="text-[11px]" style={{ color: C.textMuted }}>{filterActive ? "No local rows match the current filter." : empty}</div>
+        <div className="text-[11px]" style={{ color: C.textMuted }}>{filterActive ? "No rows match the current filter." : empty}</div>
       ) : (
         <>
           <div className="space-y-1 max-h-52 overflow-y-auto pr-1">
@@ -1405,12 +1405,12 @@ function DetailColumn({
           </div>
           {items.length > visibleItems.length && (
             <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-              Showing {visibleItems.length} of {items.length} local rows
+              Showing {visibleItems.length} of {items.length} rows
             </div>
           )}
           {filterActive && (
             <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-              Filter matched {items.length} of {totalItems} local rows
+              Filter matched {items.length} of {totalItems} rows
             </div>
           )}
         </>
@@ -1444,12 +1444,12 @@ function DetailPreview({
     : null;
 
   return (
-    <div className="min-w-0 rounded p-1.5 max-h-64 overflow-y-auto" role="region" aria-label="Inspector row detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded p-1.5 max-h-64 overflow-y-auto" role="region" aria-label="Project row detail" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>
         Detail
       </div>
       {!item ? (
-        <div className="text-[11px]" style={{ color: C.textMuted }}>Select a local row to inspect metadata.</div>
+        <div className="text-[11px]" style={{ color: C.textMuted }}>Select a row to read its metadata.</div>
       ) : (
         <div>
           <div className="flex items-start justify-between gap-2">
@@ -1481,7 +1481,7 @@ function DetailPreview({
             ))}
           </div>
           <div className="mt-2 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-            Read-only metadata. No action is performed from this row.
+            Read-only details. No action is performed from this row.
           </div>
           {activeQueue === "drafts" && typeof item.id === "number" && (
             <div className="mt-2 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>

@@ -339,3 +339,5 @@ Expected shape:
 - Project Lab card support detail is now consolidated into the Local Inspector
   path. The default card no longer renders `Project Details`, `Draft Actions`,
   `Activity Details`, duplicate recent lists, or first-five dirty file lists.
+- Project Lab inspector language now reads as `Project Read`, with calmer search,
+  empty, detail, and dirty-worktree copy.
