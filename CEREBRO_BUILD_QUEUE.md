@@ -362,3 +362,5 @@ Expected shape:
 - Security Gate now keeps target, risk, project link, and source link visible
   while receipt findings/checks/browser policy and scanner adapters live behind
   closed details.
+- Research now keeps saved-source identity and summaries visible while per-card
+  source rules, browser ladder, and approval policy live behind closed details.

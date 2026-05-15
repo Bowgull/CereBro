@@ -297,17 +297,21 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />
+            <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer">
+                <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />
+              </summary>
               <div className="mt-2 grid gap-1">
                 {(data?.ladder ?? []).map((step, index) => (
                   <RailLine key={step} marker={String(index)} text={step} />
                 ))}
               </div>
-            </section>
+            </details>
 
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Policy" detail="approval-gated" />
+            <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer">
+                <SectionTitle title="Policy" detail="approval-gated" />
+              </summary>
               <div className="mt-2 grid gap-1.5">
                 {data?.policy && Object.entries(data.policy).map(([key, value]) => (
                   <RailLine key={key} marker={key.replace(/([A-Z])/g, " $1")} text={String(value)} />
@@ -316,7 +320,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                   <RailLine key={gate} marker="gate" text={gate} tone={C.warning} />
                 ))}
               </div>
-            </section>
+            </details>
           </aside>
         </div>
       </div>
@@ -390,13 +394,22 @@ function SourceCard({
       <div className="text-[10px] leading-snug mt-1.5 truncate" style={{ color: C.textMuted }} title={sourceUri ?? whyItMatters}>
         {whyItMatters}
       </div>
-      <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.warning }}>
-        {requiredApproval}
-      </div>
-      {scrubNotes && (
-        <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
-          {scrubNotes}
-        </div>
+      {(requiredApproval || scrubNotes) && (
+        <details className="mt-1.5 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+            Source Rules
+          </summary>
+          {requiredApproval && (
+            <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.warning }}>
+              {requiredApproval}
+            </div>
+          )}
+          {scrubNotes && (
+            <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
+              {scrubNotes}
+            </div>
+          )}
+        </details>
       )}
     </article>
   );
