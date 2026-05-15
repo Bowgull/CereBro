@@ -16912,3 +16912,74 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: clean Terminal Lab and Tasks session filter noise by grouping duplicate session labels or moving session selection into a compact searchable menu. Keep it read-only and do not add execution.
 ```
+
+## 2026-05-15 0831 EDT — Grouped session filter labels
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 91%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a small coupled frontend plus backend read-filter
+  slice. Worker handoff would have added merge overhead.
+
+What changed:
+
+- Added shared session-label helpers for grouped filter labels and duplicate
+  option disambiguation.
+- Tasks now groups duplicate session filter chips by display label.
+- A repeated run now appears as one compact chip, for example
+  `Terminal QA run (25)`, instead of many identical filter buttons.
+- `tasks.workQueue` now accepts `sessionIds` so grouped Tasks filters can read
+  all matching run ids without falling back to the full task list.
+- Terminal Lab session labels now disambiguate duplicate run names with ids,
+  for example `Terminal QA run #539`.
+- This remains read-only UI/data work. It does not execute tasks, commands,
+  browser actions, model calls, Workbench evidence writes, memory writes, git
+  actions, Slack writes, Notion writes, or external provider calls.
+
+Files touched in this slice:
+
+- `app/client/src/lib/sessionLabels.ts`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/routers/tasks.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-session-filter-groups-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Ledger > Tasks, and
+  confirmed the run filter lane shows `Terminal QA run (25)`.
+- Playwright opened Workshop > Terminal Lab and confirmed duplicate run context
+  is disambiguated with labels such as `Terminal QA run #539` while Terminal
+  Lab remains execution-disabled.
+
+Known risks:
+
+- Grouping is label-based, not semantic run-family analysis.
+- Backend grouped session filtering is capped at 50 session ids by input schema.
+- Terminal Lab still shows the first 80 work-queue tasks, not a searchable full
+  historical task picker.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: reduce remaining noisy read surfaces without adding execution. Candidate: give Terminal Lab a compact task/session picker search path or continue replacing older `tasks.list` usage where it affects visible speed.
+```

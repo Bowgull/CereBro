@@ -442,3 +442,9 @@ Expected shape:
   evidence, command, browser, and model actions remain separate.
 - Route-created task ids now open Tasks with a focus notice. This is a UI focus
   handoff only; it does not add a new route-task relation or run work.
+- Tasks now groups duplicate run filter labels into one compact chip, such as
+  `Terminal QA run (25)`, and sends the grouped session ids through the
+  read-only work queue instead of flooding the filter lane.
+- Terminal Lab now disambiguates duplicate session labels with run ids in its
+  task/observation surface, such as `Terminal QA run #539`, while keeping
+  execution disabled.

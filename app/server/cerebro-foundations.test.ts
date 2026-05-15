@@ -2881,6 +2881,35 @@ describe("Terminal Lab planning", () => {
       projectName: "CereBro",
       projectPath: "/Users/lindsaybell/Desktop/CereBro",
     });
+    const db = await getCerebroDb();
+    const groupedSessionA = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-task-workqueue-group-a-${stamp}`, older.projectId, "Grouped queue run", "tony"],
+    });
+    const groupedSessionB = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-task-workqueue-group-b-${stamp}`, older.projectId, "Grouped queue run", "tony"],
+    });
+    const groupedSessionAId = Number(groupedSessionA.rows[0]!.id);
+    const groupedSessionBId = Number(groupedSessionB.rows[0]!.id);
+    const groupedTaskA = await caller.tasks.create({
+      title: `Grouped queue task A ${stamp}`,
+      agent: "tony",
+      sessionId: groupedSessionAId,
+    });
+    const groupedTaskB = await caller.tasks.create({
+      title: `Grouped queue task B ${stamp}`,
+      agent: "tony",
+      sessionId: groupedSessionBId,
+    });
 
     const queue = await caller.tasks.workQueue({
       limit: 1,
@@ -2889,12 +2918,21 @@ describe("Terminal Lab planning", () => {
 
     expect(queue.mode).toBe("read_only");
     expect(queue.items.map((item) => item.id)).toContain(older.id);
-    expect(queue.items.map((item) => item.id)).toContain(newer.id);
     expect(queue.total).toBeGreaterThanOrEqual(2);
     expect(queue.statusCounts.open).toBeGreaterThanOrEqual(2);
     expect(queue.page.limit).toBe(1);
     expect(queue.page.returned).toBe(queue.items.length);
     expect(queue.focusedTaskPinned).toBe(true);
+
+    const groupedQueue = await caller.tasks.workQueue({
+      limit: 10,
+      sessionIds: [groupedSessionAId, groupedSessionBId],
+    });
+    expect(groupedQueue.mode).toBe("read_only");
+    expect(groupedQueue.items.map((item) => item.id)).toContain(groupedTaskA.id);
+    expect(groupedQueue.items.map((item) => item.id)).toContain(groupedTaskB.id);
+    expect(groupedQueue.items.map((item) => item.id)).not.toContain(older.id);
+    expect(groupedQueue.items.map((item) => item.id)).not.toContain(newer.id);
   });
 
   it("previews commands without executing them", async () => {

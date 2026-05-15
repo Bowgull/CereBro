@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { disambiguateSessionOptions } from "@/lib/sessionLabels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,9 +99,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const data = plan.data;
   const observationRows = observations.data ?? [];
   const taskOptions = tasks.data?.items ?? [];
+  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
   const selectedTask = taskOptions.find((task) => String(task.id) === selectedTaskId);
-  const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
-  const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
+  const selectedSession = sessionOptions.find((session) => String(session.id) === selectedSessionId);
+  const sessionLabelById = new Map(sessionOptions.map((session) => [session.id, session.optionLabel]));
   const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
   const evidenceByObservationId = new Map(
     (terminalEvidence.data?.items ?? [])
@@ -485,9 +487,9 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             onChange={(value) => setSelectedSessionId(value === "none" ? "" : value)}
             options={[
               { value: "none", label: "No session link" },
-              ...(sessions.data ?? []).map((session) => ({
+              ...sessionOptions.map((session) => ({
                 value: String(session.id),
-                label: session.displayName,
+                label: session.optionLabel,
               })),
             ]}
           />

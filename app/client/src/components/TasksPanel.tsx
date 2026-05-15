@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { disambiguateSessionOptions, groupSessionFilters } from "@/lib/sessionLabels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,16 +40,26 @@ const TASK_PAGE_STEP = 80;
 export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [projectFilter, setProjectFilter] = useState<number | "all">("all");
-  const [sessionFilter, setSessionFilter] = useState<number | "all">("all");
+  const [sessionFilter, setSessionFilter] = useState<string>("all");
+  const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 10000 });
+  const rawSessionOptions = sessions.data ?? [];
+  const sessionOptions = disambiguateSessionOptions(rawSessionOptions);
+  const sessionFilterGroups = groupSessionFilters(rawSessionOptions);
+  const selectedSessionGroup = sessionFilter === "all"
+    ? null
+    : sessionFilterGroups.find((group) => group.key === sessionFilter) ?? null;
   const listFilters =
-    projectFilter === "all" && sessionFilter === "all"
+    projectFilter === "all" && !selectedSessionGroup
       ? undefined
       : {
           ...(projectFilter === "all" ? {} : { projectId: projectFilter }),
-          ...(sessionFilter === "all" ? {} : { sessionId: sessionFilter }),
+          ...(selectedSessionGroup
+            ? selectedSessionGroup.ids.length === 1
+              ? { sessionId: selectedSessionGroup.ids[0] }
+              : { sessionIds: selectedSessionGroup.ids }
+            : {}),
         };
-  const projects = trpc.tasks.projects.useQuery(undefined, { refetchInterval: 10000 });
-  const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 10000 });
   const create = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
@@ -116,7 +127,6 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
 
   const tasks = queue.data?.items ?? [];
   const projectOptions = projects.data ?? [];
-  const sessionOptions = sessions.data ?? [];
   const totalTasks = queue.data?.total ?? 0;
   const openTasks = queue.data?.statusCounts.open ?? 0;
   const inProgressTasks = queue.data?.statusCounts.inProgress ?? 0;
@@ -174,7 +184,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             <SelectItem value="none">No run link</SelectItem>
             {sessionOptions.map((session) => (
               <SelectItem key={session.id} value={String(session.id)}>
-                {session.displayName}
+                {session.optionLabel}
               </SelectItem>
             ))}
           </SelectContent>
@@ -223,14 +233,14 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           count={totalTasks}
           onClick={() => setSessionFilter("all")}
         />
-        {sessionOptions.map((session) => (
+        {sessionFilterGroups.map((session) => (
           <FilterButton
-            key={session.id}
-            label={session.title || `Run #${session.id}`}
-            active={sessionFilter === session.id}
-            count={sessionFilter === session.id ? totalTasks : undefined}
-            title={session.displayName}
-            onClick={() => setSessionFilter(session.id)}
+            key={session.key}
+            label={session.label}
+            active={sessionFilter === session.key}
+            count={sessionFilter === session.key ? totalTasks : undefined}
+            title={session.title}
+            onClick={() => setSessionFilter(session.key)}
           />
         ))}
       </div>
