@@ -1165,6 +1165,23 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     );
   }
 
+  function openCreatedRouteTask(taskId: number, routeId: number) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:tasks-focus",
+        JSON.stringify({
+          source: "ledger_route",
+          taskId,
+          routeId,
+          notice: `Showing task #${taskId} created from route #${routeId}.`,
+        }),
+      );
+    } catch {
+      // Tasks still opens; the new task is listed in the local queue.
+    }
+    onNavigate("tasks");
+  }
+
   return (
     <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
       <div className="grid gap-2">
@@ -1255,16 +1272,27 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       size="sm"
                       variant={createdRouteTaskIds[item.id] ? "secondary" : "outline"}
                       className="h-6 px-2 text-[10px]"
-                      onClick={() => createTaskFromRouteRecord(item)}
-                      disabled={creatingRouteTaskId === item.id || createdRouteTaskIds[item.id] != null}
+                      onClick={() => {
+                        const createdTaskId = createdRouteTaskIds[item.id];
+                        if (createdTaskId) {
+                          openCreatedRouteTask(createdTaskId, item.id);
+                          return;
+                        }
+                        createTaskFromRouteRecord(item);
+                      }}
+                      disabled={creatingRouteTaskId === item.id}
                       aria-label={
                         createdRouteTaskIds[item.id]
-                          ? `Task ${createdRouteTaskIds[item.id]} created from route ${item.id}`
+                          ? `Open task ${createdRouteTaskIds[item.id]} created from route ${item.id}`
                           : creatingRouteTaskId === item.id
                             ? `Creating task from route ${item.id}`
                             : `Create local task from route ${item.id}`
                       }
-                      title="Create a local task from this saved route. This does not run the task."
+                      title={
+                        createdRouteTaskIds[item.id]
+                          ? "Open the local task created from this route."
+                          : "Create a local task from this saved route. This does not run the task."
+                      }
                     >
                       {createdRouteTaskIds[item.id]
                         ? `Task #${createdRouteTaskIds[item.id]}`

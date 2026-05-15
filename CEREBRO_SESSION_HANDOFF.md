@@ -16549,3 +16549,69 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: make route-created tasks easier to inspect from Ledger or Project Lab without adding new machinery. Keep route records, tasks, Workbench evidence, commands, browser actions, model calls, and external writes separate.
 ```
+
+## 2026-05-15 0656 EDT — Route-created task focus handoff
+
+Overall completion after this pass:
+
+- Overall: 54%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 87%
+- Backend/runtime: 35%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Worker threads remain unavailable.
+- Continued locally because the slice was UI-only and isolated.
+
+What changed:
+
+- Made created task ids on saved Ledger route rows clickable.
+- Clicking `Task #<id>` now opens Tasks.
+- Tasks reads a sessionStorage focus payload and shows a notice:
+  `Showing task #<id> created from route #<id>.`
+- Tasks highlights the focused row with a local gold edge.
+- This is a UI focus handoff only. It does not create a new route-task relation.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/TasksPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `git diff --check -- app/client/src/pages/Home.tsx app/client/src/components/TasksPanel.tsx`
+  passed.
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-ledger-route-task-focus-test.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 3 files and 32 tests.
+- Playwright verification required network/cache escalation for `npx` under the
+  current restricted sandbox, then opened `http://localhost:3000`, created
+  local task #1713 from route #3, clicked `Task #1713`, and confirmed Tasks
+  opened with the focus notice.
+
+Known risks:
+
+- Browser proof created one real local task row, task #1713, from route #3.
+- The previous pass also created local task #1712 from route #3.
+- There is no durable route-to-task relation yet. The focus link exists for the
+  current UI session after creation.
+- Dev server ran on `http://localhost:3000` in this sandbox, not 3002.
+
+Storage impact:
+
+- No schema change.
+- Adds one local `tasks` row only when the user clicks `Create Task`.
+- The focus handoff itself writes only sessionStorage.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: decide whether route-created task linkage needs a durable backend field, or keep it as session focus until the agent runtime proves the relation is worth storing. Do not add persistence unless it improves the core route-task-workbench loop.
+```

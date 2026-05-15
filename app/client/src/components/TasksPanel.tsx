@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,26 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [sessionDraft, setSessionDraft] = useState("none");
   const [deleteGate, setDeleteGate] = useState<{ id: number; title: string } | null>(null);
+  const [focusedTaskId, setFocusedTaskId] = useState<number | null>(null);
+  const [focusNotice, setFocusNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:tasks-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:tasks-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const focus = JSON.parse(raw) as { taskId?: number; notice?: string };
+      if (typeof focus.taskId === "number") setFocusedTaskId(focus.taskId);
+      setFocusNotice(focus.notice ?? "Tasks opened with a focused local task.");
+    } catch {
+      setFocusNotice("Task focus could not be read. Inspect the latest local task.");
+    }
+  }, []);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -197,6 +217,15 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
+      {focusNotice && (
+        <div className="mx-2 mt-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+          <span className="min-w-0">{focusNotice}</span>
+          <Button type="button" size="sm" variant="outline" onClick={() => setFocusNotice(null)} aria-label="Dismiss task focus notice">
+            Dismiss
+          </Button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {list.isLoading ? (
           <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
@@ -209,7 +238,11 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             <div
               key={t.id}
               className="flex items-center gap-1.5 px-2.5 py-1.5"
-              style={{ borderBottom: `1px solid ${C.borderSoft}` }}
+              style={{
+                background: focusedTaskId === t.id ? `${C.gold}14` : "transparent",
+                borderBottom: `1px solid ${C.borderSoft}`,
+                boxShadow: focusedTaskId === t.id ? `inset 2px 0 0 ${C.gold}` : "none",
+              }}
             >
               <Button
                 type="button"

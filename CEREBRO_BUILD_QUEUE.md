@@ -126,6 +126,8 @@ Recent Prime slices:
 - 2026-05-14 2326 EDT: added `Create Task` on saved Ledger route reads. It
   creates one local task from the route draft, shows the task id, and still does
   not run the task.
+- 2026-05-15 0656 EDT: made route-created task ids clickable. Ledger now opens
+  Tasks with a focused notice for the created local task.
 
 ### Frontend Worker
 
@@ -426,3 +428,5 @@ Expected shape:
 - Saved Ledger route reads now expose `Create Task`. It turns a route into one
   local task record and displays the created task id. Route, task, Workbench
   evidence, command, browser, and model actions remain separate.
+- Route-created task ids now open Tasks with a focus notice. This is a UI focus
+  handoff only; it does not add a new route-task relation or run work.
