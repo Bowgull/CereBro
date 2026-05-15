@@ -320,3 +320,7 @@ Expected shape:
 - Workbench now follows the low-machinery rule more closely: surfaces,
   permissions, receipt shape, and gates live behind one `Workbench Rules`
   disclosure instead of occupying the primary work flow.
+- Terminal Lab now follows the same low-machinery pattern: command teaching,
+  observations, observed output, and project context stay visible while policy,
+  live links, surface inventory, and approval preview history sit behind
+  `Terminal Rules`.

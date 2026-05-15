@@ -608,23 +608,6 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             )}
 
             <section className="space-y-2">
-              <SectionTitle title="Surfaces" detail="Terminal Lab V1" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {(data?.surfaces ?? []).map((surface) => (
-                  <div key={surface.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{surface.label}</div>
-                      <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "live_preview" ? C.success : C.textMuted} />
-                    </div>
-                    <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
-                      {surface.notes}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <SectionTitle title="Recent Observations" detail={observationScope === "all" ? "local DB" : "filtered"} />
                 <div className="flex flex-wrap gap-1 justify-end">
@@ -926,15 +909,6 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           </div>
 
           <aside className="space-y-1.5 min-w-0">
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Policy" detail="locked" />
-              <div className="mt-2 grid gap-1">
-                {(data?.policies ?? []).map((policy) => (
-                  <RailLine key={policy} text={policy} />
-                ))}
-              </div>
-            </section>
-
             <ProjectContextRail
               project={contextProject}
               isLoading={projectOverview.isLoading}
@@ -977,43 +951,76 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </form>
 
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Live Links" detail="local only" />
-              <div className="mt-2 grid gap-1">
-                {[
-                  "Previews attach to selected tasks and sessions.",
-                  "Observations relink with Link Selected.",
-                  "Observed output surfaces Aang and Tony follow-ups.",
-                  "Execution stays approval-gated through Codex.",
-                ].map((item) => (
-                  <RailLine key={item} text={item} />
-                ))}
-              </div>
-            </section>
-
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
-              <div className="mt-2 space-y-2">
-                {(terminalApprovalPreviews.data ?? []).length === 0 ? (
-                  <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
-                    No local command approval previews yet.
+            <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Terminal Rules
+              </summary>
+              <div className="mt-2 grid gap-2">
+                <section className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <SectionTitle title="Policy" detail="locked" />
+                  <div className="mt-2 grid gap-1">
+                    {(data?.policies ?? []).map((policy) => (
+                      <RailLine key={policy} text={policy} />
+                    ))}
                   </div>
-                ) : (
-                  terminalApprovalPreviews.data?.map((approval) => (
-                    <div key={approval.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                      <div className="flex flex-wrap gap-1">
-                        <Chip label={`approval #${approval.id}`} tone={C.textMuted} />
-                        <Chip label={approval.status} tone={C.warning} />
-                        <Chip label={approval.actionType.replace(/_/g, " ")} tone={C.gold} />
+                </section>
+
+                <section className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <SectionTitle title="Live Links" detail="local only" />
+                  <div className="mt-2 grid gap-1">
+                    {[
+                      "Previews attach to selected tasks and sessions.",
+                      "Observations relink with Link Selected.",
+                      "Observed output surfaces Aang and Tony follow-ups.",
+                      "Execution stays approval-gated through Codex.",
+                    ].map((item) => (
+                      <RailLine key={item} text={item} />
+                    ))}
+                  </div>
+                </section>
+
+                <section className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <SectionTitle title="Surfaces" detail="Terminal Lab V1" />
+                  <div className="mt-2 grid gap-1.5">
+                    {(data?.surfaces ?? []).map((surface) => (
+                      <div key={surface.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{surface.label}</div>
+                          <Chip label={surface.status.replace(/_/g, " ")} tone={surface.status === "live_preview" ? C.success : C.textMuted} />
+                        </div>
+                        <div className="text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
+                          {surface.notes}
+                        </div>
                       </div>
-                      <div className="text-[10px] leading-snug mt-1 line-clamp-3" style={{ color: C.textMuted }} title={approval.reason ?? ""}>
-                        {approval.reason}
+                    ))}
+                  </div>
+                </section>
+
+                <section className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
+                  <div className="mt-2 space-y-2">
+                    {(terminalApprovalPreviews.data ?? []).length === 0 ? (
+                      <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                        No local command approval previews yet.
                       </div>
-                    </div>
-                  ))
-                )}
+                    ) : (
+                      terminalApprovalPreviews.data?.map((approval) => (
+                        <div key={approval.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                          <div className="flex flex-wrap gap-1">
+                            <Chip label={`approval #${approval.id}`} tone={C.textMuted} />
+                            <Chip label={approval.status} tone={C.warning} />
+                            <Chip label={approval.actionType.replace(/_/g, " ")} tone={C.gold} />
+                          </div>
+                          <div className="text-[10px] leading-snug mt-1 line-clamp-3" style={{ color: C.textMuted }} title={approval.reason ?? ""}>
+                            {approval.reason}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </section>
               </div>
-            </section>
+            </details>
           </aside>
         </div>
       </div>
