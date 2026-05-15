@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2109 EDT
+Last updated: 2026-05-14 2113 EDT
 
 ## Current North Star
 
@@ -20,6 +20,76 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2113 EDT - Security Gate Receipt Detail Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `SecurityGatePanel` so inspected receipt output keeps target, risk,
+  project link, and source link visible.
+- Moved findings, blocked actions, allowed actions, checks, and browser profile
+  policy behind `Receipt Details`.
+- Moved scanner adapter details behind `Scanner Plan`.
+- No backend behavior changed. No approval execution, command execution, browser
+  action from CereBro, project action, git action from the UI, Ollama command,
+  install, pull, model call, vector index, external write, or storage migration
+  ran.
+
+### Files Touched
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened Security Gate, inspected `https://example.com`, and
+  confirmed target/risk/link fields stay visible while `Receipt Details` and
+  `Scanner Plan` are collapsed.
+- Playwright console check returned 0 errors.
+- `git diff --check -- app/client/src/components/SecurityGatePanel.tsx` passed.
+
+### Cleanliness Read
+- Current slice: Security Gate receipt-detail low-machinery pass.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+- Blocked: Ledger polish in `Home.tsx` should wait until the Raven entry change
+  is either committed separately or deliberately integrated.
+
+### Front-End Steward Review
+- Security Gate now reads as a decision receipt first.
+- Scanner internals and browser-policy details remain available, but they do
+  not occupy the default result view.
+- This supports the product rule: visible gate, hidden machinery, no accidental
+  action.
+
+### Completion Read
+- Overall: 46%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 76%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Worker slots may already be full, so use local slices unless a
+worker frees up. Next safe frontend slice: inspect `SurferSourcesPanel` or
+`ModelToolsPanel` for remaining default-visible machinery. Avoid `Home.tsx`
+until Raven entry work is resolved. Switch to backend receipt contracts only
+after the Raven backend batch is resolved.
 
 ## 2026-05-14 2109 EDT - Approval Queue Detail Collapse Pass
 

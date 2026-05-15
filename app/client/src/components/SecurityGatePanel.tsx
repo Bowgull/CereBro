@@ -206,33 +206,42 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                   title={receiptSourceUri ?? undefined}
                 />
               </div>
-              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
-                <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
-                <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
-                <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
-                <ReceiptList title="Checks" items={receipt.checks} tone={C.accent} />
-              </div>
-              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                Browser profile: {receipt.browserPolicy.profile}. Downloads {receipt.browserPolicy.blockDownloads ? "blocked" : "allowed only after approval"}.
-              </div>
+              <details className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  Receipt Details
+                </summary>
+                <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                  <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
+                  <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
+                  <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
+                  <ReceiptList title="Checks" items={receipt.checks} tone={C.accent} />
+                </div>
+                <div className="mt-1.5 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  Browser profile: {receipt.browserPolicy.profile}. Downloads {receipt.browserPolicy.blockDownloads ? "blocked" : "allowed only after approval"}.
+                </div>
+              </details>
             </section>
           )}
 
-          <section className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <SectionTitle title="Scanner Plan" detail={`${plan.data?.scannerPlan.length ?? 0} adapters`} />
-            {(plan.data?.scannerPlan ?? []).map((item) => (
-              <div key={item.tool} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                <div className="flex flex-wrap gap-1">
-                  <Chip label={item.tool} tone={C.accent} />
-                  <Chip label={labelize(item.status)} tone={C.textMuted} />
+          <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <summary className="cursor-pointer">
+              <SectionTitle title="Scanner Plan" detail={`${plan.data?.scannerPlan.length ?? 0} adapters`} />
+            </summary>
+            <div className="mt-2 grid gap-1.5">
+              {(plan.data?.scannerPlan ?? []).map((item) => (
+                <div key={item.tool} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex flex-wrap gap-1">
+                    <Chip label={item.tool} tone={C.accent} />
+                    <Chip label={labelize(item.status)} tone={C.textMuted} />
+                  </div>
+                  <p className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
+                  <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.source}>
+                    Source: {sourceDisplayName(item.source)}
+                  </div>
                 </div>
-                <p className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
-                <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.source}>
-                  Source: {sourceDisplayName(item.source)}
-                </div>
-              </div>
-            ))}
-          </section>
+              ))}
+            </div>
+          </details>
         </section>
 
         <aside className="grid content-start gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>

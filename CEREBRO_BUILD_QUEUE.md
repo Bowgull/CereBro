@@ -359,3 +359,6 @@ Expected shape:
 - Approval Queue selected detail now keeps receipt chain and approval summary
   visible while permission preflight, Oak notes, Spock notes, reason, and
   context live behind closed details.
+- Security Gate now keeps target, risk, project link, and source link visible
+  while receipt findings/checks/browser policy and scanner adapters live behind
+  closed details.
