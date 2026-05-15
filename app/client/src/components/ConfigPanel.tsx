@@ -133,11 +133,10 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
             )}
           </section>
 
-          {/* Quick Start */}
-          <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+          <details>
+            <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.gold, ["--tw-ring-color" as string]: C.accent }}>
               Local Bridge Setup
-            </h3>
+            </summary>
             <div className="space-y-2.5">
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>1. Download the bridge script.</div>
@@ -192,14 +191,13 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 Active sessions appear in the Keep and Ledger.
               </div>
             </div>
-          </section>
+          </details>
 
-          {/* How It Works */}
-          <section>
-            <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+          <details>
+            <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.gold, ["--tw-ring-color" as string]: C.accent }}>
               How It Works
-            </h3>
-            <div className="text-xs space-y-2 leading-relaxed" style={{ color: C.textMuted }}>
+            </summary>
+            <div className="mt-2 text-xs space-y-2 leading-relaxed" style={{ color: C.textMuted }}>
               <div className="flex gap-2">
                 <span style={{ color: C.accent }} className="shrink-0">›</span>
                 <span>The bridge script monitors <code style={{ color: C.gold }}>~/.claude/projects/</code> on your local machine.</span>
@@ -221,15 +219,15 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 <span>The Keep receives updates through WebSocket and shows live state.</span>
               </div>
             </div>
-          </section>
+          </details>
 
           {/* Tracked Projects */}
           {status?.projects && status.projects.length > 0 && (
-            <section>
-              <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
+            <details>
+              <summary className="cursor-pointer list-none text-xs font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.gold, ["--tw-ring-color" as string]: C.accent }}>
                 Tracked Projects ({status.projects.length})
-              </h3>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
+              </summary>
+              <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
                 {status.projects.map((p) => (
                   <div key={p.encodedName} className="flex items-center justify-between px-2.5 py-1.5 rounded text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                     <span className="truncate flex-1" style={{ color: C.textPrimary }}>{p.realPath}</span>
@@ -237,7 +235,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                   </div>
                 ))}
               </div>
-            </section>
+            </details>
           )}
         </div>
 

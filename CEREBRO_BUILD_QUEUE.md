@@ -98,6 +98,9 @@ Recent Prime slices:
   shape, approval gates, routing rules, triage gates, review fields, approval
   previews, and proposal gates behind explicit details. Kept capture input,
   local captures, proposal basics, reminders, and message drafts visible.
+- 2026-05-14 2156 EDT: collapsed Basement Settings bridge setup, how-it-works
+  notes, and tracked project list behind explicit details. Kept machine status
+  and bridge key copy visible.
 
 ### Frontend Worker
 

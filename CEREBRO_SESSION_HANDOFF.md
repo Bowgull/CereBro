@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2152 EDT
+Last updated: 2026-05-14 2156 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2156 EDT - Basement Settings Machinery Collapse Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `ConfigPanel` so machine status and Bridge API key copy stay visible.
+- Moved local bridge setup steps behind `Local Bridge Setup`.
+- Moved bridge internals behind `How It Works`.
+- Moved tracked project paths behind `Tracked Projects`.
+- No backend behavior changed. No bridge command, download, script execution,
+  approval execution, browser action from CereBro, project action, git action
+  from the UI, Ollama command, install, pull, model call, vector index, external
+  write, or storage migration ran.
+
+### Files Touched
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 2 files. 27 tests.
+- `pnpm -C app check` passed.
+- `curl -s 'http://localhost:3002/src/components/ConfigPanel.tsx?t=now'` confirmed the served module contains `details` for Basement Settings.
+- Playwright opened Settings after a cache-busted reload and confirmed `Local
+  Bridge Setup`, `How It Works`, and `Tracked Projects` details are present and
+  closed.
+- Playwright console check returned 0 errors.
+
+### Cleanliness Read
+- Current slice: Basement Settings low-machinery pass.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+- Blocked: remaining dirty backend/Raven batch is too broad to fold into a
+  frontend-only pass.
+
+### Front-End Steward Review
+- Settings now reads as status first.
+- Setup instructions are still one click away, but the default view no longer
+  feels like onboarding documentation.
+- This matches the fast AI OS direction: show readiness, hide setup machinery.
+
+### Completion Read
+- Overall: 49%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 81%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Clean low-machinery component surfaces are mostly complete.
+Next best path: resolve or quarantine the large dirty Raven/backend batch before
+further core backend work. Frontend can continue on shell polish only if it does
+not touch `Home.tsx`.
 
 ## 2026-05-14 2152 EDT - Hedwig Capture Machinery Collapse Pass
 
