@@ -347,3 +347,5 @@ Expected shape:
 - Terminal Lab right rail now keeps Terminal Map Read and Next Safe Action
   visible while receipt counts and command-boundary policy live behind
   `Receipt Details` and `Command Boundary`.
+- Repo hygiene pass removed ignored generated clutter from the workspace and
+  removed the only tracked `.DS_Store` file from the starter pack.
