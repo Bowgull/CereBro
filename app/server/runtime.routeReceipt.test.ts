@@ -203,4 +203,50 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.taskDraft.agent).toBe("tony");
     expect(records.items[0]?.createdAt).toBeGreaterThan(0);
   });
+
+  it("creates one local task from a committed route record and links it durably", async () => {
+    const caller = createCaller();
+    const taskCountBefore = await countRows("tasks");
+    const evidenceCountBefore = await countRows("workbench_evidence_records");
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+
+    const first = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(first.mode).toBe("local_task_record");
+    expect(first.created).toBe(true);
+    expect(first.writesExternal).toBe(false);
+    expect(first.runsCommand).toBe(false);
+    expect(first.opensBrowser).toBe(false);
+    expect(first.callsModel).toBe(false);
+    expect(first.routeRecordId).toBe(committed.record.id);
+    expect(first.task.id).toBeGreaterThan(0);
+    expect(first.task.title).toContain("project build");
+    expect(first.task.agent).toBe("tony");
+    expect(first.task.projectName).toBe("CereBro");
+    expect(await countRows("tasks")).toBe(taskCountBefore + 1);
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore);
+
+    const records = await caller.runtime.routeRecords({
+      limit: 1,
+      projectSlug: "cerebro",
+      ownerAgent: "tony",
+    });
+    expect(records.items[0]?.id).toBe(committed.record.id);
+    expect(records.items[0]?.taskId).toBe(first.task.id);
+
+    const second = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(second.created).toBe(false);
+    expect(second.task.id).toBe(first.task.id);
+    expect(await countRows("tasks")).toBe(taskCountBefore + 1);
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore);
+  });
 });

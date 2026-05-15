@@ -151,6 +151,7 @@ async function ensureSchema(client: Client): Promise<void> {
          workbench_draft_json TEXT NOT NULL,
          ledger_focus_json TEXT NOT NULL,
          task_draft_json TEXT NOT NULL,
+         task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL,
          next_action TEXT NOT NULL,
          created_at INTEGER NOT NULL DEFAULT (unixepoch())
        )`,
@@ -799,6 +800,7 @@ async function ensureSchema(client: Client): Promise<void> {
   await ensureHedwigProposalMetadataColumns(client);
   await ensureWorkbenchEvidenceColumns(client);
   await ensureApprovalColumns(client);
+  await ensureRuntimeRouteRecordColumns(client);
 }
 
 async function ensureSessionLedgerColumns(client: Client): Promise<void> {
@@ -911,6 +913,15 @@ async function ensureApprovalColumns(client: Client): Promise<void> {
   if (!existing.has("permission_preflight_id")) {
     await client.execute(`ALTER TABLE approvals ADD COLUMN permission_preflight_id INTEGER REFERENCES permission_preflight_records(id) ON DELETE SET NULL`);
   }
+}
+
+async function ensureRuntimeRouteRecordColumns(client: Client): Promise<void> {
+  const table = await client.execute(`PRAGMA table_info(runtime_route_records)`);
+  const existing = new Set(table.rows.map((row) => String(row.name)));
+  if (!existing.has("task_id")) {
+    await client.execute(`ALTER TABLE runtime_route_records ADD COLUMN task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL`);
+  }
+  await client.execute(`CREATE INDEX IF NOT EXISTS idx_runtime_route_records_task ON runtime_route_records(task_id)`);
 }
 
 export type MemoryKind = "fact" | "note" | "reference" | "feedback";

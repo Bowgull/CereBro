@@ -128,6 +128,9 @@ Recent Prime slices:
   not run the task.
 - 2026-05-15 0656 EDT: made route-created task ids clickable. Ledger now opens
   Tasks with a focused notice for the created local task.
+- 2026-05-15 0716 EDT: made route-created task links durable. Saved route rows
+  now store `task_id`, `runtime.createTaskFromRouteRecord` creates at most one
+  local task per route, and Ledger reuses the stored task link after refresh.
 
 ### Frontend Worker
 

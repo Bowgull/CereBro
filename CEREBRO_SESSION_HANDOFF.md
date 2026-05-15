@@ -16615,3 +16615,87 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: decide whether route-created task linkage needs a durable backend field, or keep it as session focus until the agent runtime proves the relation is worth storing. Do not add persistence unless it improves the core route-task-workbench loop.
 ```
+
+## 2026-05-15 0716 EDT — Durable route-task link handoff
+
+Overall completion after this pass:
+
+- Overall: 55%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 88%
+- Backend/runtime: 36%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This slice was tightly coupled across schema, runtime router,
+  tests, and one Ledger UI button.
+
+What changed:
+
+- Added `runtime_route_records.task_id`.
+- Added idempotent schema repair for existing local DBs.
+- Added `runtime.createTaskFromRouteRecord`.
+- The mutation creates one local task from a saved route, links the route to
+  that task, and returns the existing linked task on later clicks.
+- The mutation explicitly does not run commands, browser actions, model calls,
+  Workbench evidence writes, memory writes, Slack writes, Notion writes, git
+  actions, or external provider calls.
+- `runtime.routeRecords` now returns `taskId`.
+- Ledger `Create Task` now calls the runtime route mutation instead of
+  `tasks.create`.
+- Ledger shows persisted `Task #<id>` when a saved route already has a task
+  link, so refresh and later sessions keep the receipt.
+- Clicking a persisted task id still opens Tasks with the focused notice.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red phase: `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`
+  failed as expected with `No procedure found on path "runtime,createTaskFromRouteRecord"`.
+- `pnpm -C app exec tsc --noEmit` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false`
+  passed, 6 tests.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 24 tests.
+- A combined targeted run of both suites hit `SQLITE_BUSY` in an existing Raven
+  defaults write while the local app DB was active. Rerunning the suites
+  independently passed.
+- Playwright opened `http://localhost:3000`, confirmed Ledger route #15 already
+  showed persisted `Task #1726`, clicked `Create Task` on route #14, and
+  confirmed Tasks opened with `Showing task #1727 created from route #14.`
+- SQLite proof: route #14 now has `task_id=1727`; route #15 has `task_id=1726`.
+
+Known risks:
+
+- Browser proof created one real local task row, task #1727, from route #14.
+- Earlier test/browser activity created local route and task rows in the active
+  development DB. They are local harness data, not tracked git files.
+- The combined Vitest command still exposes a DB isolation problem around Raven
+  defaults when tests share the active local DB. This is not caused by the
+  route-task link, but it should be cleaned up later with isolated test DBs.
+- The Tasks list is now very large, so focus proof works but the surface needs
+  list virtualization or tighter filtering soon.
+
+Storage impact:
+
+- Local schema adds nullable `runtime_route_records.task_id`.
+- Existing route rows are left untouched until a task is created from that row.
+- Adds one local `tasks` row only when the user clicks `Create Task`.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: clean up the oversized Tasks surface so focused route-created tasks are easy to inspect without rendering the entire historical task pile. Keep this as UI/data-read work only. Do not run tasks, commands, browser actions, model calls, Workbench evidence writes, memory writes, git actions, Slack writes, Notion writes, or external provider calls from the task focus path.
+```

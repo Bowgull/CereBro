@@ -943,7 +943,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
-  const [createdRouteTaskIds, setCreatedRouteTaskIds] = useState<Record<number, number>>({});
   const utils = trpc.useUtils();
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
@@ -957,8 +956,12 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
   const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 50 });
   const routeRecords = trpc.runtime.routeRecords.useQuery({ limit: 6 });
-  const createTaskFromRoute = trpc.tasks.create.useMutation({
-    onSuccess: () => utils.tasks.list.invalidate(),
+  const createTaskFromRoute = trpc.runtime.createTaskFromRouteRecord.useMutation({
+    onSuccess: () => {
+      utils.runtime.routeRecords.invalidate();
+      utils.tasks.list.invalidate();
+      utils.tasks.projects.invalidate();
+    },
   });
 
   const taskRows = tasks.data ?? [];
@@ -1140,24 +1143,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("workbench");
   }
 
-  function createTaskFromRouteRecord(item: { id: number; originalText: string; taskDraft: Record<string, unknown> }) {
+  function createTaskFromRouteRecord(item: { id: number }) {
     if (createTaskFromRoute.isPending) return;
-    const title = typeof item.taskDraft.title === "string" ? item.taskDraft.title : `Route #${item.id}: ${item.originalText}`;
-    const agent = typeof item.taskDraft.agent === "string" ? item.taskDraft.agent : undefined;
-    const projectName = typeof item.taskDraft.projectName === "string" ? item.taskDraft.projectName : undefined;
-    const projectPath = typeof item.taskDraft.projectPath === "string" ? item.taskDraft.projectPath : undefined;
     setCreatingRouteTaskId(item.id);
     createTaskFromRoute.mutate(
       {
-        title,
-        agent,
-        projectName,
-        projectPath,
+        routeRecordId: item.id,
       },
       {
-        onSuccess: (task) => {
-          setCreatedRouteTaskIds((current) => ({ ...current, [item.id]: task.id }));
-        },
+        onSuccess: (result) => openCreatedRouteTask(result.task.id, item.id),
         onSettled: () => {
           setCreatingRouteTaskId(null);
         },
@@ -1245,78 +1239,80 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
-              {latestRouteRows.map((item) => (
-                <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">route #{item.id}</span></Badge>
-                    <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
-                    <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
-                    {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
-                  </div>
-                  <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
-                    {item.originalText}
-                  </div>
-                  <div className="mt-1 line-clamp-2 text-[11px] leading-snug" style={{ color: C.textMuted }} title={item.nextAction}>
-                    {item.nextAction}
-                  </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] leading-none" style={{ color: C.textMuted }}>
-                    <span>Aang read</span>
-                    <span style={{ color: C.border }}>/</span>
-                    <span>{item.mode}</span>
-                    <span style={{ color: C.border }}>/</span>
-                    <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-1">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={createdRouteTaskIds[item.id] ? "secondary" : "outline"}
-                      className="h-6 px-2 text-[10px]"
-                      onClick={() => {
-                        const createdTaskId = createdRouteTaskIds[item.id];
-                        if (createdTaskId) {
-                          openCreatedRouteTask(createdTaskId, item.id);
-                          return;
+              {latestRouteRows.map((item) => {
+                const routeTaskId = item.taskId;
+                return (
+                  <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">route #{item.id}</span></Badge>
+                      <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
+                      <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
+                      {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
+                    </div>
+                    <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
+                      {item.originalText}
+                    </div>
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-snug" style={{ color: C.textMuted }} title={item.nextAction}>
+                      {item.nextAction}
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] leading-none" style={{ color: C.textMuted }}>
+                      <span>Aang read</span>
+                      <span style={{ color: C.border }}>/</span>
+                      <span>{item.mode}</span>
+                      <span style={{ color: C.border }}>/</span>
+                      <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={routeTaskId ? "secondary" : "outline"}
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => {
+                          if (routeTaskId) {
+                            openCreatedRouteTask(routeTaskId, item.id);
+                            return;
+                          }
+                          createTaskFromRouteRecord(item);
+                        }}
+                        disabled={creatingRouteTaskId === item.id}
+                        aria-label={
+                          routeTaskId
+                            ? `Open task ${routeTaskId} created from route ${item.id}`
+                            : creatingRouteTaskId === item.id
+                              ? `Creating task from route ${item.id}`
+                              : `Create local task from route ${item.id}`
                         }
-                        createTaskFromRouteRecord(item);
-                      }}
-                      disabled={creatingRouteTaskId === item.id}
-                      aria-label={
-                        createdRouteTaskIds[item.id]
-                          ? `Open task ${createdRouteTaskIds[item.id]} created from route ${item.id}`
+                        title={
+                          routeTaskId
+                            ? "Open the local task created from this route."
+                            : "Create a local task from this saved route. This does not run the task."
+                        }
+                      >
+                        {routeTaskId
+                          ? `Task #${routeTaskId}`
                           : creatingRouteTaskId === item.id
-                            ? `Creating task from route ${item.id}`
-                            : `Create local task from route ${item.id}`
-                      }
-                      title={
-                        createdRouteTaskIds[item.id]
-                          ? "Open the local task created from this route."
-                          : "Create a local task from this saved route. This does not run the task."
-                      }
-                    >
-                      {createdRouteTaskIds[item.id]
-                        ? `Task #${createdRouteTaskIds[item.id]}`
-                        : creatingRouteTaskId === item.id
-                          ? "Creating"
-                          : "Create Task"}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="h-6 px-2 text-[10px]"
-                      onClick={() => openRouteWorkbenchDraft(item)}
-                      aria-label={`Stage Workbench body from route ${item.id}`}
-                      title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
-                    >
-                      Stage Body
-                    </Button>
-                    <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                      Review before saving.
-                    </span>
+                            ? "Creating"
+                            : "Create Task"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => openRouteWorkbenchDraft(item)}
+                        aria-label={`Stage Workbench body from route ${item.id}`}
+                        title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
+                      >
+                        Stage Body
+                      </Button>
+                      <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                        Review before saving.
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>

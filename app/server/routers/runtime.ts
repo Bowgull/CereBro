@@ -1,6 +1,12 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
-import { getCerebroDb } from "../cerebroDb";
+import {
+  getCerebroDb,
+  getOrCreateProjectByPath,
+  type TaskRow,
+  type TaskStatus,
+} from "../cerebroDb";
 import { decidePermissionPreflight, type ActionClass, type PerceptionClass } from "../permissionPolicy";
 
 const runtimeModes = ["quick", "explore", "build"] as const;
@@ -53,9 +59,51 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
     workbenchReceiptDraft: parseJsonField<Record<string, unknown>>(row.workbench_draft_json, {}),
     ledgerFocusDraft: parseJsonField<Record<string, unknown>>(row.ledger_focus_json, {}),
     taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
+    taskId: row.task_id == null ? null : Number(row.task_id),
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
+}
+
+function mapRuntimeTaskRow(row: Record<string, unknown>): TaskRow {
+  return {
+    id: Number(row.id),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sessionId: row.session_id == null ? null : Number(row.session_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    projectPath: row.project_path == null ? null : String(row.project_path),
+    title: String(row.title),
+    status: String(row.status) as TaskStatus,
+    agent: row.agent == null ? null : String(row.agent),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+async function getRuntimeTaskById(id: number): Promise<TaskRow | null> {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        t.id,
+        t.project_id,
+        t.session_id,
+        p.name AS project_name,
+        p.path AS project_path,
+        t.title,
+        t.status,
+        t.agent,
+        t.created_at,
+        t.updated_at
+      FROM tasks t
+      LEFT JOIN projects p ON p.id = t.project_id
+      WHERE t.id = ?
+      LIMIT 1
+    `,
+    args: [id],
+  });
+  const row = result.rows[0];
+  return row ? mapRuntimeTaskRow(row as Record<string, unknown>) : null;
 }
 
 const projectHints = [
@@ -383,6 +431,110 @@ export const runtimeRouter = router({
     )
     .mutation(({ input }) => {
       return buildRoutePreview(input);
+    }),
+  createTaskFromRouteRecord: publicProcedure
+    .input(
+      z.object({
+        routeRecordId: z.number().int().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const routeResult = await db.execute({
+        sql: `SELECT * FROM runtime_route_records WHERE id = ? LIMIT 1`,
+        args: [input.routeRecordId],
+      });
+      const routeRow = routeResult.rows[0] as Record<string, unknown> | undefined;
+      if (!routeRow) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Route record not found",
+        });
+      }
+
+      const linkedTaskId = routeRow.task_id == null ? null : Number(routeRow.task_id);
+      if (linkedTaskId != null) {
+        const linkedTask = await getRuntimeTaskById(linkedTaskId);
+        if (linkedTask) {
+          return {
+            mode: "local_task_record" as const,
+            created: false,
+            writesExternal: false,
+            runsCommand: false,
+            opensBrowser: false,
+            callsModel: false,
+            routeRecordId: input.routeRecordId,
+            task: linkedTask,
+            gates: [
+              "Existing local task link returned. No routed work runs.",
+            ],
+          };
+        }
+      }
+
+      const taskDraft = parseJsonField<Record<string, unknown>>(routeRow.task_draft_json, {});
+      const title =
+        typeof taskDraft.title === "string" && taskDraft.title.trim().length > 0
+          ? taskDraft.title.trim()
+          : `Route #${input.routeRecordId}: ${String(routeRow.original_text ?? "")}`.slice(0, 280);
+      const agent = typeof taskDraft.agent === "string" && taskDraft.agent.trim().length > 0 ? taskDraft.agent.trim() : null;
+      const projectName =
+        typeof taskDraft.projectName === "string" && taskDraft.projectName.trim().length > 0
+          ? taskDraft.projectName.trim()
+          : routeRow.project_name == null
+            ? null
+            : String(routeRow.project_name);
+      const projectPath =
+        typeof taskDraft.projectPath === "string" && taskDraft.projectPath.trim().length > 0
+          ? taskDraft.projectPath.trim()
+          : routeRow.project_path == null
+            ? null
+            : String(routeRow.project_path);
+      const projectId = projectName && projectPath ? await getOrCreateProjectByPath(projectName, projectPath) : null;
+
+      const insertResult = await db.execute({
+        sql: `
+          INSERT INTO tasks (title, agent, project_id, session_id)
+          VALUES (?, ?, ?, NULL)
+          RETURNING id
+        `,
+        args: [title, agent, projectId],
+      });
+      const taskId = Number(insertResult.rows[0]?.id);
+      if (!Number.isFinite(taskId) || taskId <= 0) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Task insert failed",
+        });
+      }
+
+      await db.execute({
+        sql: `UPDATE runtime_route_records SET task_id = ? WHERE id = ?`,
+        args: [taskId, input.routeRecordId],
+      });
+
+      const task = await getRuntimeTaskById(taskId);
+      if (!task) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Task readback failed",
+        });
+      }
+
+      return {
+        mode: "local_task_record" as const,
+        created: true,
+        writesExternal: false,
+        runsCommand: false,
+        opensBrowser: false,
+        callsModel: false,
+        routeRecordId: input.routeRecordId,
+        task,
+        gates: [
+          "Local task record only. No routed work runs.",
+          "No Workbench evidence, command, browser, model call, git action, Slack write, Notion write, memory write, or external provider call runs.",
+        ],
+      };
     }),
   commitRoute: publicProcedure
     .input(
