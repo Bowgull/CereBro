@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2159 EDT
+Last updated: 2026-05-14 2202 EDT
 
 ## Current North Star
 
@@ -20,6 +20,71 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2202 EDT - Legacy Map Dead Code Cleanup
+
+### What Changed
+- Continued after the Raven sealed boundary checkpoint with a clean worktree.
+- Deleted the unused inherited `DungeonMap.tsx` canvas/BFS map.
+- Deleted the unused generic Google `Map.tsx` component.
+- Updated `keepConfig.ts` legacy comment so it no longer points at
+  `DungeonMapPhaser`.
+- Updated `websocket.ts` comments so bridge payload positioning no longer
+  references the deleted `DungeonMap` pathing model.
+- Updated `AGENTS.md` to record that old fork map/layout files are gone and
+  should not be recreated for the main Keep.
+- No runtime behavior, DB schema, route contract, approval behavior, external
+  write, browser action from CereBro, command execution, model call, install,
+  pull, vector index, or storage migration changed.
+
+### Files Touched
+- `app/client/src/components/DungeonMap.tsx`
+- `app/client/src/components/Map.tsx`
+- `app/client/src/lib/keepConfig.ts`
+- `app/server/websocket.ts`
+- `AGENTS.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 3 tests.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened the app with a cache-busted URL and console check returned
+  0 errors.
+- `rg -n "DungeonMap|MapView|components/Map|DungeonMapPhaser" app/client/src app/server AGENTS.md CEREBRO_SESSION_HANDOFF.md | head -120` now only finds archived/history mentions and the intentional AGENTS note.
+
+### Cleanliness Read
+- Current slice: legacy frontend dead-code cleanup.
+- Deleted 1,319 lines of unused fork code.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+- Remaining risk: none found for active imports. The active Keep is still
+  `KeepScene`/`KeepFortressBlueprint`, not the old fork map.
+
+### Front-End Steward Review
+- This makes the codebase less misleading.
+- The old dungeon map and generic map wrapper were not product surfaces and
+  should not guide future CereBro UI decisions.
+
+### Completion Read
+- Overall: 50%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 81%.
+- Backend/runtime: 32%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Next best path: backend receipt contracts or a narrow shell polish pass
+that preserves the low-machinery rule.
 
 ## 2026-05-14 2159 EDT - Raven Sealed Boundary Checkpoint
 

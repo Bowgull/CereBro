@@ -234,8 +234,7 @@ export function agentStateTier(s: AgentState | undefined): AgentStateTier {
   return "active";
 }
 
-// Legacy export — Phaser scene still imports this name. Map of ground chambers.
-// Kept for backward compatibility while DungeonMapPhaser is being phased out.
+// Legacy ground-room labels kept for bridge payload compatibility.
 export type GroundRoomId = "spawn" | "dungeon" | "boss" | "shop" | "rest";
 
 export interface ChamberLabel {

@@ -7,9 +7,12 @@ CereBro V1 is a cloud-backed, local-controlled, harness-first personal AI operat
 - `app/` — the running client+server. Forked from `thousandsky2024/Codex-pixel-agent-web` (MIT, "Codex Dungeon"). React 19 + Tailwind 4 + Phaser 3 + Express + tRPC + Drizzle + WebSocket.
   - `app/client/src/lib/keepConfig.ts` — palette tokens, FLOORS, CHAMBERS (10 agents), GROUND_CHAMBERS (legacy, scoped for delete).
   - `app/client/src/components/KeepScene.tsx` — **the live Phaser scene**. Side-cutaway castle: 3 floors stacked, 10 chambers laid out left-to-right. **As of 2026-05-05 second pass, every visible tile is custom PixelLab pixel art — no 0x72 atlas references anywhere.** Castle stone walls (top + back), horizontal stone slab floor, custom torch sconces, atmospheric wall variants (arrow slits, alcoves, framed panels), 4 staircases between floors. Each chamber has 2-9 PixelLab hero/decor props. 11 PixelLab agent characters (10 + Surfer's silver horse) in their chambers. Cortana centerpiece: violet dais + floating user-orb + stained_glass on back wall + flanking candelabras. State machine wired (idle/active/dormant motion + chamber lighting).
-  - `app/client/src/components/KeepLayout.tsx` — **dead code**. Was a static card-grid that silently took over from the Phaser canvas; reverted in session 5. Kept temporarily; safe to delete next pass.
-  - `app/client/src/components/DungeonMapPhaser.tsx` — **deleted in session 5**. Was the fork's hero-pathing dungeon (5 rooms, BFS pathing, HP bars). Replaced by KeepScene per locked Option A: live sessions drive chamber state (tints, activity markers), not wandering hero sprites.
-  - `app/client/src/pages/Home.tsx` — header, sidebar, floor selector. Renders `<KeepScene>`. Floor selector is currently visual-only since side-cutaway shows all floors at once; may repurpose for camera focus later. Has dead `FloorPending` function from old per-floor view; safe to delete.
+  - Old fork map/layout files are gone. `KeepLayout.tsx`, `DungeonMapPhaser.tsx`,
+    `DungeonMap.tsx`, and generic `Map.tsx` should not be recreated for the
+    main Keep.
+  - `app/client/src/pages/Home.tsx` — header, sidebar, floor selector. Renders
+    `<KeepScene>`. Floor selector is currently visual-only since side-cutaway
+    shows all floors at once; may repurpose for camera focus later.
   - `app/scripts/palette-swap.mjs` — recolor any PNG to the castle palette (sharp, MIT). Two modes: `--mode=nearest` (RGB nearest) and `--mode=luma` (preserves source brightness, default). Validated on `dungeon_bg_v2.png`.
   - `app/client/public/sprites/cc0/` — staged third-party CC0 source art (Kenney tiny-dungeon). Tile sprites, not scenes; needs a compose pass before wiring.
 - `.Codex/launch.json` — preview-tool config for `pnpm dev` on port 3002.
