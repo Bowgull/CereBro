@@ -324,3 +324,6 @@ Expected shape:
   observations, observed output, and project context stay visible while policy,
   live links, surface inventory, and approval preview history sit behind
   `Terminal Rules`.
+- Project Lab now moves global scan state and the project-wide receipt-chain
+  proof into `Project Rules`, leaving project filters, next safe projects, and
+  project cards as the default work surface.

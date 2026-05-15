@@ -378,7 +378,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
     { label: "Receipts", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
-    { label: "Scanned", value: formatScannedAt(data?.scannedAt), tone: C.textSecondary },
   ];
   const receiptChainStats = evidenceRows.reduce(
     (stats, item) => {
@@ -442,7 +441,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-6" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
         {primaryStats.map((stat) => (
           <StatusBlock
             key={stat.label}
@@ -500,12 +499,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </Button>
           </div>
         )}
-        <ProjectReceiptChainStrip
-          stats={receiptChainStats}
-          projectCount={projects.length}
-          topProjectName={topProject?.name ?? null}
-          topPushLabel={topProject?.pushReadiness.label ?? null}
-        />
         {nextSafeProjects.length > 0 && (
           <div className="grid grid-cols-[38px_minmax(0,1fr)] gap-1.5">
             <div className="text-[10px] uppercase tracking-wider pt-1" style={{ color: C.textMuted }}>
@@ -553,6 +546,24 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         )}
+        <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Project Rules
+          </summary>
+          <div className="mt-2 grid gap-1.5">
+            <div className="flex flex-wrap gap-1">
+              <Badge variant="secondary" className="uppercase">mode {labelize(data?.mode ?? "read_only")}</Badge>
+              <Badge variant="secondary" className="uppercase">scanned {formatScannedAt(data?.scannedAt)}</Badge>
+              <Badge variant="secondary" className="uppercase">{projects.length} projects</Badge>
+            </div>
+            <ProjectReceiptChainStrip
+              stats={receiptChainStats}
+              projectCount={projects.length}
+              topProjectName={topProject?.name ?? null}
+              topPushLabel={topProject?.pushReadiness.label ?? null}
+            />
+          </div>
+        </details>
       </div>
 
       {selectedSlug && (
