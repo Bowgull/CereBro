@@ -307,9 +307,14 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
             {preview.isPending ? "Reading" : "Preview"}
           </Button>
         </div>
-        <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-          Preview classifies the capture and shows the proposed Notion row. It does not save to Notion, read Slack, post Slack, or create tasks.
-        </div>
+        <details>
+          <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+            Capture Rules
+          </summary>
+          <div className="mt-1.5 rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            Preview classifies the capture and shows the proposed Notion row. It does not save to Notion, read Slack, post Slack, or create tasks.
+          </div>
+        </details>
       </form>
 
       <div className="flex-1 overflow-y-auto">
@@ -334,14 +339,16 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 </div>
 
-                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <SectionTitle title="Proposed Notion Row" detail="no write" />
+                <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                    <SectionTitle title="Proposed Notion Row" detail="no write" />
+                  </summary>
                   <div className="mt-1.5 grid grid-cols-1 gap-1.5 md:grid-cols-2">
                     {Object.entries(preview.data.proposedNotionRow).map(([key, value]) => (
                       <MetaBlock key={key} label={key} value={value == null ? "none" : String(value)} />
                     ))}
                   </div>
-                </div>
+                </details>
               </section>
             )}
 
@@ -542,19 +549,23 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                     </div>
                   )}
                 </div>
-                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <SectionTitle title="Triage Gates" detail="no write" />
+                <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                    <SectionTitle title="Triage Gates" detail="no write" />
+                  </summary>
                   <div className="mt-1.5 space-y-1">
                     {triage.data.gates.map((gate) => (
                       <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {gate}</div>
                     ))}
                   </div>
-                </div>
+                </details>
               </section>
             )}
 
-            <section className="space-y-2">
-              <SectionTitle title="Notion Capture Database" detail={data?.notionDatabase.envVar ?? "NOTION_CAPTURE_DATABASE_ID"} />
+            <details className="space-y-2">
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <SectionTitle title="Notion Capture Database" detail={data?.notionDatabase.envVar ?? "NOTION_CAPTURE_DATABASE_ID"} />
+              </summary>
               <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 {(data?.notionDatabase.properties ?? []).map((property) => (
                   <div key={property.name} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -568,7 +579,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 ))}
               </div>
-            </section>
+            </details>
           </div>
 
           <aside className="min-w-0 space-y-2">
@@ -675,8 +686,10 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         ));
                       })()}
                     </div>
-                    <div className="space-y-1.5 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                      <SectionTitle title="Review Fields" detail="local edit" />
+                    <details className="space-y-1.5 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                      <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                        <SectionTitle title="Review Fields" detail="local edit" />
+                      </summary>
                       <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                         <AppSelect
                           label="Priority"
@@ -744,9 +757,11 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           Staged pending approval #{createApprovalPreview.data.approval.id}. No external action approved or executed.
                         </div>
                       )}
-                    </div>
-                    <div className="space-y-1">
-                      <SectionTitle title="Approval Previews" detail="pending local" />
+                    </details>
+                    <details className="space-y-1">
+                      <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                        <SectionTitle title="Approval Previews" detail="pending local" />
+                      </summary>
                       {(approvalPreviews.data ?? []).length === 0 ? (
                         <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                           No pending local approval previews for this proposal yet.
@@ -765,14 +780,17 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                           </div>
                         ))
                       )}
-                    </div>
-                    <div className="space-y-1">
+                    </details>
+                    <details className="space-y-1">
+                      <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+                        Proposal Gates
+                      </summary>
                       {proposalDetail.data.gates.map((gate) => (
                         <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                           - {gate}
                         </div>
                       ))}
-                    </div>
+                    </details>
                   </div>
                 ) : (
                   <div className="text-[11px] leading-snug" style={{ color: C.warning }}>
@@ -782,8 +800,10 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
               </div>
             </section>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Slack Shape" detail={data?.slackProposal.recommendedShape.replace(/_/g, " ") ?? "proposal"} />
+            <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <SectionTitle title="Slack Shape" detail={data?.slackProposal.recommendedShape.replace(/_/g, " ") ?? "proposal"} />
+              </summary>
               <div className="mt-1.5 space-y-1.5">
                 {(data?.slackProposal.options ?? []).map((option) => (
                   <div key={option.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -793,25 +813,29 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 ))}
               </div>
-            </section>
+            </details>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Approval Gates" detail="required" />
+            <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <SectionTitle title="Approval Gates" detail="required" />
+              </summary>
               <div className="mt-1.5 space-y-1">
                 {(data?.slackProposal.approvalGates ?? []).map((gate) => (
                   <div key={gate} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {gate}</div>
                 ))}
               </div>
-            </section>
+            </details>
 
-            <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <SectionTitle title="Routing Rules" detail="first pass" />
+            <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <SectionTitle title="Routing Rules" detail="first pass" />
+              </summary>
               <div className="mt-1.5 space-y-1">
                 {(data?.routingRules ?? []).map((rule) => (
                   <div key={rule} className="text-[11px] leading-snug" style={{ color: C.textMuted }}>- {rule}</div>
                 ))}
               </div>
-            </section>
+            </details>
 
             <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <SectionTitle title="Reminder Proposals" detail="local" />

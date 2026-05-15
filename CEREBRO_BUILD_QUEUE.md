@@ -94,6 +94,10 @@ Recent Prime slices:
 - 2026-05-14 2149 EDT: collapsed Piccolo cleanup rules/storage contract,
   Artifacts save routing, and Memory proposal routing behind explicit details.
   Kept scan results, artifact list, and memory proposal input visible.
+- 2026-05-14 2152 EDT: collapsed Hedwig capture rules, Notion schema, Slack
+  shape, approval gates, routing rules, triage gates, review fields, approval
+  previews, and proposal gates behind explicit details. Kept capture input,
+  local captures, proposal basics, reminders, and message drafts visible.
 
 ### Frontend Worker
 
