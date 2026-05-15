@@ -332,3 +332,7 @@ Expected shape:
 - Project Lab project cards now keep the push decision visible while manual
   commands, policy/evidence, checks, suggested commit, and manual push preview
   live behind per-card `Push Details`.
+- Project Lab project cards now keep route/proof, local draft actions, recent
+  queues, and dirty file lists behind `Project Details`, `Draft Actions`,
+  `Activity Details`, or the inspector instead of showing every supporting row
+  on the default card.

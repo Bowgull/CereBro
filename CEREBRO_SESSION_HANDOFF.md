@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2027 EDT
+Last updated: 2026-05-14 2032 EDT
 
 ## Current North Star
 
@@ -20,6 +20,77 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2032 EDT - Project Card Supporting Detail Pass
+
+### What Changed
+- Continued in CereBro Prime mode without adding another worker because the next
+  safe slice was in the same file and did not need parallel ownership.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `ProjectLabPanel` so project cards keep the map read, push decision,
+  next action, activity signal buttons, and dirty-state inspector entry visible.
+- Moved knowledge route and Workbench proof into `Project Details`.
+- Moved local draft creation controls into `Draft Actions`.
+- Moved current tasks, terminal observations, Hedwig captures, approval queue
+  details, and source-event lists into `Activity Details`.
+- Simplified dirty worktree cards to a single inspector CTA instead of showing
+  the first five file paths on every project card.
+- No backend behavior changed. No project action, git action, approval
+  execution, command execution, browser action, Ollama command, install, pull,
+  model call, vector index, external write, or storage migration ran.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Playwright reloaded `http://localhost:3002/`, opened Workshop, opened Project
+  Lab, and confirmed `Project Details`, `Draft Actions`, and `Activity Details`
+  are collapsed while dirty worktree cards show a single inspector CTA.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 7 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/ProjectLabPanel.tsx` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Project Lab supporting-detail density.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` stays ignored as local inspection output.
+- Blocked: Backend receipt contracts remain deferred because
+  `app/server/routers/approvals.ts` already contains unstaged Raven
+  approval-router changes.
+
+### Front-End Steward Review
+- Project Lab now reads more like a project map.
+- The default card shows status, next safe action, push decision, and where to
+  inspect.
+- The machinery remains reachable, but it no longer owns the first read.
+
+### Completion Read
+- Overall: 45%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 68%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Next safe frontend slice: inspect Project Lab after this density
+pass and decide whether the project-card inspector should become the main place
+for route/proof/activity details. Switch to backend receipt contracts only
+after the Raven backend batch is resolved. Do not run Ollama status commands
+until the user explicitly approves the real check.
 
 ## 2026-05-14 2027 EDT - Project Card Push Detail Pass
 
