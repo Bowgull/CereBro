@@ -448,3 +448,6 @@ Expected shape:
 - Terminal Lab now disambiguates duplicate session labels with run ids in its
   task/observation surface, such as `Terminal QA run #539`, while keeping
   execution disabled.
+- Terminal Lab link pickers now have compact local search fields for task and
+  session links. Searching `539` narrows the Session Link dropdown to
+  `Terminal QA run #539` without changing the proposal-only command boundary.

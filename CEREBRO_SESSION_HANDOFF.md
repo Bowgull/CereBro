@@ -16983,3 +16983,69 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: reduce remaining noisy read surfaces without adding execution. Candidate: give Terminal Lab a compact task/session picker search path or continue replacing older `tasks.list` usage where it affects visible speed.
 ```
+
+## 2026-05-15 1747 EDT — Terminal Lab link picker search
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 91%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a single-file frontend slice with direct browser
+  proof.
+
+What changed:
+
+- Terminal Lab task and session link controls now include compact local search
+  fields.
+- Task search filters the current 80-row work-queue picker by id, project name,
+  or title.
+- Session search filters the current run picker by disambiguated label.
+- Duplicate run labels stay explicit. Searching `539` narrows Session Link to
+  `Terminal QA run #539`.
+- This remains proposal-only UI. It does not execute commands, run tasks, call
+  models, write Workbench evidence, write memory, push git, call Notion, call
+  Slack, or touch external providers.
+
+Files touched in this slice:
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-terminal-link-picker-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Workshop > Terminal Lab,
+  confirmed the new `Find task link` and `Find session link` fields are
+  visible, typed `539`, opened Session Link, and confirmed the dropdown narrowed
+  to `Terminal QA run #539`.
+
+Known risks:
+
+- Search filters only the already loaded task/session picker rows. It is not a
+  backend historical search yet.
+- Terminal Lab still caps task choices at the current work-queue window.
+- The search fields are visible by default. This is acceptable for V1 because
+  they directly support the linking task and avoid exposing raw database
+  machinery.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining visible surfaces for noisy raw counts or duplicated local records, then clean the highest-impact one without adding execution. Keep the localhost proof and percentage report.
+```

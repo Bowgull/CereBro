@@ -57,6 +57,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState("");
+  const [taskLinkQuery, setTaskLinkQuery] = useState("");
+  const [sessionLinkQuery, setSessionLinkQuery] = useState("");
   const [observationScope, setObservationScope] = useState<"all" | "selectedTask" | "selectedSession">("all");
   const [outputText, setOutputText] = useState("");
   const [exitCode, setExitCode] = useState("0");
@@ -100,6 +102,17 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const observationRows = observations.data ?? [];
   const taskOptions = tasks.data?.items ?? [];
   const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
+  const normalizedTaskLinkQuery = taskLinkQuery.trim().toLowerCase();
+  const normalizedSessionLinkQuery = sessionLinkQuery.trim().toLowerCase();
+  const visibleTaskOptions = normalizedTaskLinkQuery
+    ? taskOptions.filter((task) => {
+        const label = `#${task.id} ${task.projectName ? `${task.projectName}: ` : ""}${task.title}`;
+        return label.toLowerCase().includes(normalizedTaskLinkQuery);
+      })
+    : taskOptions;
+  const visibleSessionOptions = normalizedSessionLinkQuery
+    ? sessionOptions.filter((session) => session.optionLabel.toLowerCase().includes(normalizedSessionLinkQuery))
+    : sessionOptions;
   const selectedTask = taskOptions.find((task) => String(task.id) === selectedTaskId);
   const selectedSession = sessionOptions.find((session) => String(session.id) === selectedSessionId);
   const sessionLabelById = new Map(sessionOptions.map((session) => [session.id, session.optionLabel]));
@@ -469,25 +482,35 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-          <AppSelect
+          <LinkPicker
             label="Task Link"
+            searchLabel="Find task link"
+            searchPlaceholder="Find task."
+            searchValue={taskLinkQuery}
+            onSearchChange={setTaskLinkQuery}
             value={selectedTaskId || "none"}
             onChange={(value) => setSelectedTaskId(value === "none" ? "" : value)}
+            emptyLabel={normalizedTaskLinkQuery ? "No matching task" : "No task link"}
             options={[
               { value: "none", label: "No task link" },
-              ...taskOptions.map((task) => ({
+              ...visibleTaskOptions.map((task) => ({
                 value: String(task.id),
                 label: `#${task.id} ${task.projectName ? `${task.projectName}: ` : ""}${task.title}`,
               })),
             ]}
           />
-          <AppSelect
+          <LinkPicker
             label="Session Link"
+            searchLabel="Find session link"
+            searchPlaceholder="Find run."
+            searchValue={sessionLinkQuery}
+            onSearchChange={setSessionLinkQuery}
             value={selectedSessionId || "none"}
             onChange={(value) => setSelectedSessionId(value === "none" ? "" : value)}
+            emptyLabel={normalizedSessionLinkQuery ? "No matching run" : "No session link"}
             options={[
               { value: "none", label: "No session link" },
-              ...sessionOptions.map((session) => ({
+              ...visibleSessionOptions.map((session) => ({
                 value: String(session.id),
                 label: session.optionLabel,
               })),
@@ -1334,33 +1357,59 @@ function TeachingBlock({ title, body, tone }: { title: string; body: string; ton
   );
 }
 
-function AppSelect({
+function LinkPicker({
   label,
+  searchLabel,
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
   value,
   onChange,
+  emptyLabel,
   options,
 }: {
   label: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
   value: string;
   onChange: (value: string) => void;
+  emptyLabel: string;
   options: readonly { value: string; label: string }[];
 }) {
+  const hasVisibleMatches = options.length > 1;
+
   return (
-    <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-      {label}
-      <UiSelect value={value} onValueChange={onChange} aria-label={label}>
-        <SelectTrigger className="w-full normal-case">
-          <SelectValue placeholder={label} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </UiSelect>
-    </label>
+    <div className="grid gap-1">
+      <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+        <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+          <SelectTrigger className="w-full normal-case">
+            <SelectValue placeholder={label} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </UiSelect>
+      </label>
+      <Input
+        aria-label={searchLabel}
+        value={searchValue}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={searchPlaceholder}
+        className="h-6 text-[11px]"
+      />
+      {!hasVisibleMatches && (
+        <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+          {emptyLabel}
+        </div>
+      )}
+    </div>
   );
 }
 
