@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { disambiguateSessionOptions, groupSessionFilters } from "@/lib/sessionLabels";
 
 const KINDS = ["fact", "note", "reference", "feedback"] as const;
 type Kind = (typeof KINDS)[number];
@@ -42,13 +43,15 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
   const [tags, setTags] = useState("");
   const [deleteGate, setDeleteGate] = useState<{ id: number; body: string } | null>(null);
 
+  const selectedSessionIds =
+    sessionFilter === "all" ? undefined : sessionFilter.split(",").map((id) => Number(id)).filter(Boolean);
   const list = trpc.memory.list.useQuery({
     kind: filter === "all" ? undefined : filter,
-    sessionId: sessionFilter === "all" ? undefined : Number(sessionFilter),
+    sessionIds: selectedSessionIds,
     search: search.trim() || undefined,
   });
   const proposalsQuery = trpc.memory.proposals.useQuery({
-    sessionId: sessionFilter === "all" ? undefined : Number(sessionFilter),
+    sessionIds: selectedSessionIds,
     limit: 100,
   });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 10000 });
@@ -76,7 +79,8 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
 
   const entries = list.data ?? [];
   const proposals = proposalsQuery.data ?? [];
-  const sessionOptions = sessions.data ?? [];
+  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
+  const sessionFilters = groupSessionFilters(sessions.data ?? []);
   const trusted = entries.filter((entry) => entry.kind === "fact" || entry.kind === "reference").length;
 
   return (
@@ -148,17 +152,17 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           count={entries.length + proposals.length}
           onClick={() => setSessionFilter("all")}
         />
-        {sessionOptions.map((session) => (
+        {sessionFilters.map((session) => (
           <FilterButton
-            key={session.id}
-            label={session.title || `Run #${session.id}`}
-            active={sessionFilter === String(session.id)}
+            key={session.key}
+            label={session.label}
+            active={sessionFilter === session.ids.join(",")}
             count={
-              entries.filter((entry) => entry.sessionId === session.id).length +
-              proposals.filter((proposal) => proposal.sessionId === session.id).length
+              entries.filter((entry) => entry.sessionId != null && session.ids.includes(entry.sessionId)).length +
+              proposals.filter((proposal) => proposal.sessionId != null && session.ids.includes(proposal.sessionId)).length
             }
-            title={session.displayName}
-            onClick={() => setSessionFilter(String(session.id))}
+            title={session.title}
+            onClick={() => setSessionFilter(session.ids.join(","))}
           />
         ))}
       </div>
@@ -198,7 +202,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                 { value: "none", label: "No run link" },
                 ...sessionOptions.map((session) => ({
                   value: String(session.id),
-                  label: session.displayName,
+                  label: session.optionLabel,
                 })),
               ]}
             />

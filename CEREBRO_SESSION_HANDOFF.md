@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2217 EDT
+Last updated: 2026-05-15 1916 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1916 EDT - Grouped Memory And Artifact Run Filters
+
+### What Changed
+- Continued CereBro Prime mode with 3 read-only workers.
+- Frontend worker audited remaining machinery-heavy panels and ranked
+  Approval Queue, Project Lab, Workbench, Terminal Lab, and Artifacts as the
+  highest-noise surfaces.
+- Design primitive worker audited shared primitives and found remaining token,
+  focus, alert-dialog, menubar, command, and chart normalization debt.
+- Backend worker audited read-model pressure and ranked `ledger.overview`,
+  Workbench evidence summaries, Project Lab git status caching, sessions
+  summaries, skill-manager polling, and approval queue compaction as the next
+  performance path.
+- Added grouped run-id filtering to `memory.list`, `memory.proposals`, and
+  `artifacts.list`.
+- Memory and Artifacts now collapse duplicate run labels into one compact chip,
+  matching the Tasks duplicate-run behavior.
+- Memory and Artifacts write/link dropdowns now disambiguate duplicate run
+  labels with the run id.
+- Added a regression test proving grouped run ids include both matching runs
+  and exclude outside runs for memory entries, memory proposals, and artifacts.
+
+### Files Touched
+- `app/server/routers/memory.ts`
+- `app/server/routers/artifacts.ts`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-grouped-receipts-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 26 tests.
+
+### Cleanliness Read
+- Current slice: duplicate-run normalization for Memory and Artifacts.
+- No external writes, model calls, package installs, browser actions from
+  CereBro, command execution from CereBro, storage migrations, or Raven data
+  touched.
+- Workers were read-only. Their findings were folded into the build queue.
+
+### Front-End Steward Review
+- This removes another visible source of run-list clutter.
+- It also keeps the Aang/receipt shell faster to scan: duplicate sessions now
+  read as one run group where the user is filtering history, while exact run
+  ids still appear when the user is linking a new receipt.
+
+### Completion Read
+- Overall: 56%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 93%.
+- Backend/runtime: 38%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: finish the
+primitive normalization debt found by the design worker, then take the first
+read-model compaction slice, likely `ledger.overview`, unless the visible shell
+needs one more duplicate-run cleanup first.
 
 ## 2026-05-14 2217 EDT - Runtime Route Commit Record Pass
 

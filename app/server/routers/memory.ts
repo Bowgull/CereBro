@@ -71,6 +71,7 @@ export const memoryRouter = router({
         .object({
           kind: kindSchema.optional(),
           sessionId: z.number().int().optional(),
+          sessionIds: z.array(z.number().int()).max(50).optional(),
           search: z.string().max(280).optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
@@ -87,6 +88,10 @@ export const memoryRouter = router({
       if (input?.sessionId !== undefined) {
         where.push("m.session_id = ?");
         args.push(input.sessionId);
+      }
+      if (input?.sessionIds && input.sessionIds.length > 0) {
+        where.push(`m.session_id IN (${input.sessionIds.map(() => "?").join(", ")})`);
+        args.push(...input.sessionIds);
       }
       if (input?.search) {
         where.push("(m.body LIKE ? OR m.tags LIKE ?)");
@@ -131,6 +136,7 @@ export const memoryRouter = router({
             .enum(["pending", "validated", "needs_revision", "blocked", "approved", "written", "rejected"])
             .optional(),
           sessionId: z.number().int().optional(),
+          sessionIds: z.array(z.number().int()).max(50).optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
         .optional(),
@@ -146,6 +152,10 @@ export const memoryRouter = router({
       if (input?.sessionId !== undefined) {
         where.push("mp.session_id = ?");
         args.push(input.sessionId);
+      }
+      if (input?.sessionIds && input.sessionIds.length > 0) {
+        where.push(`mp.session_id IN (${input.sessionIds.map(() => "?").join(", ")})`);
+        args.push(...input.sessionIds);
       }
       const limit = input?.limit ?? 100;
       args.push(limit);

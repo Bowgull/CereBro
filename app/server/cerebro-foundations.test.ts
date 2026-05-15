@@ -2935,6 +2935,128 @@ describe("Terminal Lab planning", () => {
     expect(groupedQueue.items.map((item) => item.id)).not.toContain(newer.id);
   });
 
+  it("filters memory and artifacts across grouped run ids", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+    const stamp = Date.now();
+    const projectTask = await caller.tasks.create({
+      title: `Grouped receipt project ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    const db = await getCerebroDb();
+    const sessionA = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-grouped-receipts-a-${stamp}`, projectTask.projectId, "Grouped receipt run", "aang"],
+    });
+    const sessionB = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-grouped-receipts-b-${stamp}`, projectTask.projectId, "Grouped receipt run", "aang"],
+    });
+    const sessionOutside = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-grouped-receipts-outside-${stamp}`, projectTask.projectId, "Outside receipt run", "aang"],
+    });
+    const sessionAId = Number(sessionA.rows[0]!.id);
+    const sessionBId = Number(sessionB.rows[0]!.id);
+    const sessionOutsideId = Number(sessionOutside.rows[0]!.id);
+
+    const memoryA = await caller.memory.create({
+      body: `Grouped memory A ${stamp}`,
+      kind: "note",
+      sessionId: sessionAId,
+      approved: true,
+    });
+    const memoryB = await caller.memory.create({
+      body: `Grouped memory B ${stamp}`,
+      kind: "note",
+      sessionId: sessionBId,
+      approved: true,
+    });
+    const memoryOutside = await caller.memory.create({
+      body: `Outside memory ${stamp}`,
+      kind: "note",
+      sessionId: sessionOutsideId,
+      approved: true,
+    });
+    const proposalA = await caller.memory.propose({
+      body: `Grouped proposal A ${stamp}`,
+      kind: "note",
+      sessionId: sessionAId,
+      proposedByAgent: "aang",
+    });
+    const proposalB = await caller.memory.propose({
+      body: `Grouped proposal B ${stamp}`,
+      kind: "note",
+      sessionId: sessionBId,
+      proposedByAgent: "aang",
+    });
+    const proposalOutside = await caller.memory.propose({
+      body: `Outside proposal ${stamp}`,
+      kind: "note",
+      sessionId: sessionOutsideId,
+      proposedByAgent: "aang",
+    });
+    const artifactA = await caller.artifacts.recordExternal({
+      kind: "qa_report",
+      title: `Grouped artifact A ${stamp}`,
+      storageProvider: "local",
+      storagePath: `test:grouped-artifact-a-${stamp}`,
+      sessionId: sessionAId,
+      approved: true,
+    });
+    const artifactB = await caller.artifacts.recordExternal({
+      kind: "qa_report",
+      title: `Grouped artifact B ${stamp}`,
+      storageProvider: "local",
+      storagePath: `test:grouped-artifact-b-${stamp}`,
+      sessionId: sessionBId,
+      approved: true,
+    });
+    const artifactOutside = await caller.artifacts.recordExternal({
+      kind: "qa_report",
+      title: `Outside artifact ${stamp}`,
+      storageProvider: "local",
+      storagePath: `test:outside-artifact-${stamp}`,
+      sessionId: sessionOutsideId,
+      approved: true,
+    });
+    expect(artifactA.ok).toBe(true);
+    expect(artifactB.ok).toBe(true);
+    expect(artifactOutside.ok).toBe(true);
+
+    const groupedMemory = await caller.memory.list({ sessionIds: [sessionAId, sessionBId], limit: 20 });
+    expect(groupedMemory.map((item) => item.id)).toContain(memoryA.id);
+    expect(groupedMemory.map((item) => item.id)).toContain(memoryB.id);
+    expect(groupedMemory.map((item) => item.id)).not.toContain(memoryOutside.id);
+
+    const groupedProposals = await caller.memory.proposals({ sessionIds: [sessionAId, sessionBId], limit: 20 });
+    expect(groupedProposals.map((item) => item.id)).toContain(proposalA.id);
+    expect(groupedProposals.map((item) => item.id)).toContain(proposalB.id);
+    expect(groupedProposals.map((item) => item.id)).not.toContain(proposalOutside.id);
+
+    const groupedArtifacts = await caller.artifacts.list({ sessionIds: [sessionAId, sessionBId], limit: 20 });
+    expect(groupedArtifacts.map((item) => item.title)).toContain(`Grouped artifact A ${stamp}`);
+    expect(groupedArtifacts.map((item) => item.title)).toContain(`Grouped artifact B ${stamp}`);
+    expect(groupedArtifacts.map((item) => item.title)).not.toContain(`Outside artifact ${stamp}`);
+  });
+
   it("previews commands without executing them", async () => {
     const caller = appRouter.createCaller({
       user: null,

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-14
+Last updated: 2026-05-15
 
 This file is CereBro Prime's active queue.
 
@@ -140,12 +140,19 @@ Recent Prime slices:
 - 2026-05-15 0822 EDT: moved Ledger Overview task counts and Terminal Lab task
   selector to `tasks.workQueue`, removing the old full `tasks.list` fetch from
   those high-traffic surfaces.
+- 2026-05-15 1916 EDT: used 3 read-only workers for frontend, backend, and
+  primitive audits. Folded findings into this queue, then shipped grouped run
+  filters for Memory and Artifacts so duplicate run chips match Tasks.
 
 ### Frontend Worker
 
 Next block:
 
-- Inspect the current visible loop and recommend one safe UI slice.
+- Finish the current primitive normalization debt: button/badge token drift,
+  menu and command focus rings, menubar grouping, alert-dialog
+  risk/destructive shape, chart token mapping, and sheet edge radius.
+- Then take one high-noise surface pass, starting with Approval Queue or
+  Artifacts.
 - Favor hidden machinery, compact receipts, obvious next action, and fast AI OS
   feel.
 - Do not create a new surface.
@@ -169,8 +176,12 @@ Checks:
 
 Next block:
 
-- Inspect current dirty backend/Raven files and report what can safely move into
-  CereBro core without mixing quarantined Raven work.
+- Build compact read models before broad UI growth. Highest-value order:
+  `ledger.overview`, `workbench.evidenceSummary`, DB-only
+  `projectIntelligence.summary` plus cached `gitStatus`, `sessions.recent` and
+  `sessions.summary`, skill-manager polling reduction, then compact approval
+  queue reads.
+- Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
 - No model call, browser action, command execution, DB write, or external write.
@@ -457,3 +468,5 @@ Expected shape:
 - Workbench Receipt Links now also has compact local search for source,
   command, and artifact links. The whole receipt-link disclosure now narrows
   loaded options instead of exposing raw long dropdowns.
+- Memory and Artifacts now group duplicate run filter chips by display label
+  while keeping exact run ids visible in write/link dropdowns.

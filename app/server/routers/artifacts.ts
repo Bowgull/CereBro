@@ -63,6 +63,7 @@ export const artifactsRouter = router({
           lifecycleState: lifecycleStateSchema.optional(),
           projectId: z.number().int().optional(),
           sessionId: z.number().int().optional(),
+          sessionIds: z.array(z.number().int()).max(50).optional(),
           limit: z.number().int().min(1).max(500).optional(),
         })
         .optional(),
@@ -86,6 +87,10 @@ export const artifactsRouter = router({
       if (input?.sessionId !== undefined) {
         where.push("a.session_id = ?");
         args.push(input.sessionId);
+      }
+      if (input?.sessionIds && input.sessionIds.length > 0) {
+        where.push(`a.session_id IN (${input.sessionIds.map(() => "?").join(", ")})`);
+        args.push(...input.sessionIds);
       }
       args.push(input?.limit ?? 100);
       const result = await db.execute({

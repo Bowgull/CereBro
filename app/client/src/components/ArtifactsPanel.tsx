@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { disambiguateSessionOptions, groupSessionFilters } from "@/lib/sessionLabels";
 
 const KIND_OPTIONS = [
   "all",
@@ -125,9 +126,11 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const [sourceUri, setSourceUri] = useState("");
   const [obsidianSubdir, setObsidianSubdir] = useState("20_Knowledge/Capture");
   const [lastWrite, setLastWrite] = useState<string | null>(null);
+  const selectedSessionIds =
+    sessionFilter === "all" ? undefined : sessionFilter.split(",").map((id) => Number(id)).filter(Boolean);
   const artifacts = trpc.artifacts.list.useQuery({
     kind: kind === "all" ? undefined : kind,
-    sessionId: sessionFilter === "all" ? undefined : Number(sessionFilter),
+    sessionIds: selectedSessionIds,
     limit: 200,
   });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 10000 });
@@ -139,7 +142,8 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   });
 
   const rows = artifacts.data ?? [];
-  const sessionOptions = sessions.data ?? [];
+  const sessionOptions = disambiguateSessionOptions(sessions.data ?? []);
+  const sessionFilters = groupSessionFilters(sessions.data ?? []);
   const isWriting = writeVault.isPending || writeObsidian.isPending;
   const writeCopy = WRITE_KIND_COPY[writeKind];
 
@@ -241,14 +245,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           count={rows.length}
           onClick={() => setSessionFilter("all")}
         />
-        {sessionOptions.map((session) => (
+        {sessionFilters.map((session) => (
           <FilterButton
-            key={session.id}
-            label={session.title || `Run #${session.id}`}
-            active={sessionFilter === String(session.id)}
-            count={rows.filter((row) => row.sessionId === session.id).length}
-            title={session.displayName}
-            onClick={() => setSessionFilter(String(session.id))}
+            key={session.key}
+            label={session.label}
+            active={sessionFilter === session.ids.join(",")}
+            count={rows.filter((row) => row.sessionId != null && session.ids.includes(row.sessionId)).length}
+            title={session.title}
+            onClick={() => setSessionFilter(session.ids.join(","))}
           />
         ))}
       </div>
@@ -269,7 +273,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
               { value: "none", label: "No run link" },
               ...sessionOptions.map((session) => ({
                 value: String(session.id),
-                label: session.displayName,
+                label: session.optionLabel,
               })),
             ]}
           />
