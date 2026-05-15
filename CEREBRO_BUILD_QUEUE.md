@@ -327,3 +327,5 @@ Expected shape:
 - Project Lab now moves global scan state and the project-wide receipt-chain
   proof into `Project Rules`, leaving project filters, next safe projects, and
   project cards as the default work surface.
+- Ledger now keeps receipt history and selected receipt inspection primary,
+  with audit rules and the receipt-path explanation tucked into `Ledger Rules`.

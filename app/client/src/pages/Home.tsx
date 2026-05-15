@@ -1075,12 +1075,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 Ledger Overview
               </h2>
               <p className="mt-1 max-w-2xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                Receipt before summary. Workbench holds bodies. Ledger holds the audit trail. Project Lab reads push context.
+                Local history. Select a receipt to inspect the body, project, validation, and next step.
               </p>
             </div>
-            <Badge variant="warning" className="px-1.5 py-0.5" style={{ color: C.gold, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-              local receipts
-            </Badge>
+            <Badge variant="secondary" className="uppercase">read-only</Badge>
           </div>
         </section>
 
@@ -1261,16 +1259,21 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           )}
         </section>
 
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Audit Rules
+        <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+            Ledger Rules
+          </summary>
+          <div className="mt-2 grid gap-2">
+            <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              Receipt before summary. Workbench holds bodies. Ledger holds the audit trail. Project Lab reads push context.
+            </div>
+            <div className="grid gap-1.5 md:grid-cols-3">
+              <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
+              <LedgerRule title="Memory" body="Needs source, approval, and Oak status before truth." tone={C.accent} />
+              <LedgerRule title="Output" body="Needs owner, destination, write policy, and artifact path." tone={C.gold} />
+            </div>
           </div>
-          <div className="mt-2 grid gap-1.5 md:grid-cols-3">
-            <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
-            <LedgerRule title="Memory" body="Needs source, approval, and Oak status before truth." tone={C.accent} />
-            <LedgerRule title="Output" body="Needs owner, destination, write policy, and artifact path." tone={C.gold} />
-          </div>
-        </section>
+        </details>
       </div>
     </div>
   );
