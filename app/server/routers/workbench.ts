@@ -532,6 +532,157 @@ export const workbenchRouter = router({
       };
     }),
 
+  evidenceSummary: publicProcedure
+    .input(
+      z
+        .object({
+          groupBy: z.enum(evidenceGroupBys).default("project"),
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          latestLimit: z.number().int().min(1).max(100).default(40),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const groupBy = input?.groupBy ?? "project";
+      const { where, args } = evidenceWhere(input);
+      const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+      const baseFrom = `
+        FROM workbench_evidence_records wer
+        LEFT JOIN projects p ON p.id = wer.project_id
+        LEFT JOIN tasks t ON t.id = wer.task_id
+        LEFT JOIN sessions s ON s.id = wer.session_id
+        LEFT JOIN sources src ON src.id = wer.source_id
+        LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+        LEFT JOIN artifacts a ON a.id = wer.artifact_id
+        ${whereSql}
+      `;
+
+      const summaryResult = await db.execute({
+        sql: `
+          SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN wer.sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+            SUM(CASE WHEN wer.kind = 'terminal_output' THEN 1 ELSE 0 END) AS terminal,
+            SUM(CASE WHEN wer.kind = 'validation_note' THEN 1 ELSE 0 END) AS validation_notes,
+            SUM(CASE WHEN wer.validation_status = 'needs_review' THEN 1 ELSE 0 END) AS needs_review,
+            SUM(CASE WHEN wer.validation_status IN ('validated_for_local_use', 'looks_consistent') THEN 1 ELSE 0 END) AS validated
+          ${baseFrom}
+        `,
+        args,
+      });
+
+      const latestResult = await db.execute({
+        sql: `
+          SELECT
+            wer.id,
+            wer.kind,
+            wer.title,
+            wer.project_id,
+            p.name AS project_name,
+            wer.task_id,
+            wer.session_id,
+            wer.command_observation_id,
+            wer.artifact_id,
+            wer.validation_status,
+            wer.sensitive_data_flag,
+            wer.created_at
+          ${baseFrom}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT ?
+        `,
+        args: [...args, input?.latestLimit ?? 40],
+      });
+
+      const groupKeySql =
+        groupBy === "project" ? "COALESCE(CAST(wer.project_id AS TEXT), 'unlinked')"
+        : groupBy === "task" ? "COALESCE(CAST(wer.task_id AS TEXT), 'unlinked')"
+        : groupBy === "session" ? "COALESCE(CAST(wer.session_id AS TEXT), 'unlinked')"
+        : groupBy === "kind" ? "wer.kind"
+        : groupBy === "source" ? "COALESCE(CAST(wer.source_id AS TEXT), 'unlinked')"
+        : groupBy === "command" ? "COALESCE(CAST(wer.command_observation_id AS TEXT), 'unlinked')"
+        : groupBy === "artifact" ? "COALESCE(CAST(wer.artifact_id AS TEXT), 'unlinked')"
+        : "wer.validation_status";
+      const groupLabelSql =
+        groupBy === "project" ? "COALESCE(p.name, 'Unlinked project')"
+        : groupBy === "task" ? "COALESCE(t.title, 'Unlinked task')"
+        : groupBy === "session" ? "COALESCE(s.claude_session_id, 'Unlinked session')"
+        : groupBy === "kind" ? "REPLACE(wer.kind, '_', ' ')"
+        : groupBy === "source" ? "COALESCE(src.title, src.uri, 'Unlinked source')"
+        : groupBy === "command" ? "COALESCE(co.command, 'Unlinked command')"
+        : groupBy === "artifact" ? "COALESCE(a.title, a.storage_path, 'Unlinked artifact')"
+        : "REPLACE(wer.validation_status, '_', ' ')";
+
+      const groupsResult = await db.execute({
+        sql: `
+          SELECT
+            ${groupKeySql} AS group_key,
+            ${groupLabelSql} AS group_label,
+            COUNT(*) AS total,
+            SUM(CASE WHEN wer.sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+            SUM(CASE WHEN wer.kind = 'terminal_output' THEN 1 ELSE 0 END) AS terminal,
+            SUM(CASE WHEN wer.kind = 'validation_note' THEN 1 ELSE 0 END) AS validation_notes,
+            SUM(CASE WHEN wer.validation_status = 'needs_review' THEN 1 ELSE 0 END) AS needs_review,
+            SUM(CASE WHEN wer.validation_status IN ('validated_for_local_use', 'looks_consistent') THEN 1 ELSE 0 END) AS validated,
+            MAX(wer.created_at) AS latest_at
+          ${baseFrom}
+          GROUP BY group_key, group_label
+          ORDER BY total DESC, latest_at DESC
+          LIMIT 100
+        `,
+        args,
+      });
+
+      const summary = summaryResult.rows[0] ?? {};
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        executesCommand: false,
+        groupBy,
+        summary: {
+          total: Number(summary.total ?? 0),
+          sensitive: Number(summary.sensitive ?? 0),
+          terminal: Number(summary.terminal ?? 0),
+          validationNotes: Number(summary.validation_notes ?? 0),
+          needsReview: Number(summary.needs_review ?? 0),
+          validated: Number(summary.validated ?? 0),
+        },
+        groups: groupsResult.rows.map((row) => ({
+          key: String(row.group_key),
+          label: String(row.group_label),
+          count: Number(row.total ?? 0),
+          sensitive: Number(row.sensitive ?? 0),
+          terminal: Number(row.terminal ?? 0),
+          validationNotes: Number(row.validation_notes ?? 0),
+          needsReview: Number(row.needs_review ?? 0),
+          validated: Number(row.validated ?? 0),
+          latestAt: Number(row.latest_at ?? 0),
+        })),
+        latest: latestResult.rows.map((row) => ({
+          id: Number(row.id),
+          kind: String(row.kind),
+          title: String(row.title),
+          projectId: row.project_id == null ? null : Number(row.project_id),
+          projectName: row.project_name == null ? null : String(row.project_name),
+          taskId: row.task_id == null ? null : Number(row.task_id),
+          sessionId: row.session_id == null ? null : Number(row.session_id),
+          commandObservationId: row.command_observation_id == null ? null : Number(row.command_observation_id),
+          artifactId: row.artifact_id == null ? null : Number(row.artifact_id),
+          validationStatus: String(row.validation_status),
+          sensitive: Boolean(row.sensitive_data_flag),
+          createdAt: Number(row.created_at),
+        })),
+        gates: [
+          "Workbench evidence summary is read-only.",
+          "This summary reads local receipts only. It does not fetch sources, execute commands, open browsers, capture media, or write externally.",
+        ],
+      };
+    }),
+
   evidenceDetail: publicProcedure
     .input(z.object({ id: z.number().int() }))
     .query(async ({ input }) => {

@@ -150,6 +150,9 @@ Recent Prime slices:
 - 2026-05-15 1926 EDT: added `ledger.overview`, a compact read-only Ledger
   overview model, then switched LedgerOverview from 8 separate queries to one
   read model.
+- 2026-05-15 1930 EDT: added `workbench.evidenceSummary` and switched Project
+  Lab plus Terminal Lab receipt stats away from full Workbench evidence row
+  reads.
 
 ### Frontend Worker
 
@@ -183,9 +186,9 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  `workbench.evidenceSummary`, DB-only `projectIntelligence.summary` plus
-  cached `gitStatus`, `sessions.recent` and `sessions.summary`, skill-manager
-  polling reduction, then compact approval queue reads.
+  DB-only `projectIntelligence.summary` plus cached `gitStatus`,
+  `sessions.recent` and `sessions.summary`, skill-manager polling reduction,
+  then compact approval queue reads.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -480,3 +483,5 @@ Expected shape:
 - Ledger Overview now reads one compact backend model instead of fanning out
   into Tasks, Sessions, Approvals, Artifacts, Memory, Workbench, and Runtime
   read calls from React.
+- Project Lab and Terminal Lab now use compact Workbench evidence summaries for
+  receipt stats instead of full receipt row reads.

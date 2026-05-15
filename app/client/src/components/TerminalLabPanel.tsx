@@ -78,12 +78,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   );
   const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
   const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
-  const terminalEvidence = trpc.workbench.evidence.useQuery(
-    { kind: "terminal_output", limit: 50 },
+  const terminalEvidence = trpc.workbench.evidenceSummary.useQuery(
+    { kind: "terminal_output", latestLimit: 50 },
     { refetchInterval: 10000 },
   );
-  const workbenchReceipts = trpc.workbench.evidence.useQuery(
-    { limit: 100 },
+  const workbenchReceipts = trpc.workbench.evidenceSummary.useQuery(
+    { groupBy: "project", latestLimit: 1 },
     { refetchInterval: 10000 },
   );
   const preview = trpc.terminalLab.previewCommand.useMutation();
@@ -118,7 +118,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const sessionLabelById = new Map(sessionOptions.map((session) => [session.id, session.optionLabel]));
   const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
   const evidenceByObservationId = new Map(
-    (terminalEvidence.data?.items ?? [])
+    (terminalEvidence.data?.latest ?? [])
       .filter((item) => item.commandObservationId != null)
       .map((item) => [item.commandObservationId!, item]),
   );
@@ -134,19 +134,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const contextReceiptStats = (() => {
     const projectId = contextProject?.tasks.projectId;
     if (projectId == null) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
-    return (workbenchReceipts.data?.items ?? []).reduce(
-      (stats, item) => {
-        if (item.projectId !== projectId) return stats;
-        stats.total += 1;
-        if (item.kind === "terminal_output") stats.terminal += 1;
-        if (item.validationStatus === "needs_review") stats.needsReview += 1;
-        if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") {
-          stats.validated += 1;
-        }
-        return stats;
-      },
-      { total: 0, terminal: 0, needsReview: 0, validated: 0 },
-    );
+    const group = workbenchReceipts.data?.groups.find((item) => item.key === String(projectId));
+    if (!group) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
+    return {
+      total: group.count,
+      terminal: group.terminal,
+      needsReview: group.needsReview,
+      validated: group.validated,
+    };
   })();
   const teachingFrame = preview.data
     ? {

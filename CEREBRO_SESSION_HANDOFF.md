@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1926 EDT
+Last updated: 2026-05-15 1930 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1930 EDT - Workbench Evidence Summary Read Model
+
+### What Changed
+- Added `workbench.evidenceSummary`, a compact read-only receipt summary.
+- The summary returns total, sensitive, terminal, validation, needs-review, and
+  validated counts, plus compact groups and latest receipt metadata.
+- Switched Project Lab receipt stats from full Workbench evidence rows to
+  `workbench.evidenceSummary`.
+- Switched Terminal Lab receipt context stats and terminal receipt lookup from
+  full Workbench evidence rows to `workbench.evidenceSummary`.
+- Kept Workbench's own evidence list as the full body surface, because that
+  panel actually displays and edits receipt bodies.
+- Added invalidation for `workbench.evidenceSummary` after Workbench creates
+  evidence, validation notes, or before/after comparisons.
+- Added a regression test for compact Workbench evidence summary counts and
+  grouping.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `CEREBRO_DB_URL=file:/tmp/cerebro-evidence-summary-red.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` failed because `workbench.evidenceSummary` did not exist.
+- Green phase: `CEREBRO_DB_URL=file:/tmp/cerebro-evidence-summary-green.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 28 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Workbench receipt summary read-model compaction.
+- No DB schema change, external write, model call, package install, browser
+  action from CereBro, command execution from CereBro, storage migration, or
+  Raven boundary changed.
+- Full receipt bodies remain in Workbench, not in Project Lab or Terminal Lab.
+
+### Front-End Steward Review
+- This removes another pile of hidden machinery from the everyday shell. Project
+  Lab and Terminal Lab now ask for receipt summaries instead of dragging receipt
+  bodies across the wire just to count them.
+- The visible UI shape stays the same.
+
+### Completion Read
+- Overall: 57%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 94%.
+- Backend/runtime: 41%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: either split
+Project Lab DB-only summary from cached git status, or simplify Approval Queue
+as the highest-noise visible surface from the frontend worker audit.
 
 ## 2026-05-15 1926 EDT - Compact Ledger Overview Read Model
 

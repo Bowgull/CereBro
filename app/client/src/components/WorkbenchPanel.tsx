@@ -80,11 +80,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   });
   const utils = trpc.useUtils();
   const createEvidence = trpc.workbench.createEvidence.useMutation({
-    onSuccess: () => utils.workbench.evidence.invalidate(),
+    onSuccess: () => {
+      utils.workbench.evidence.invalidate();
+      utils.workbench.evidenceSummary.invalidate();
+    },
   });
   const createValidationNote = trpc.workbench.createValidationNote.useMutation({
     onSuccess: () => {
       utils.workbench.evidence.invalidate();
+      utils.workbench.evidenceSummary.invalidate();
       if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
     },
   });
@@ -92,6 +96,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     onSuccess: () => {
       utils.workbench.evidence.invalidate();
       utils.workbench.evidenceGroups.invalidate();
+      utils.workbench.evidenceSummary.invalidate();
       if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
     },
   });

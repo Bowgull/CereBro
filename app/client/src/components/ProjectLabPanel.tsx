@@ -273,7 +273,10 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
-  const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 100 }, { refetchInterval: 10000 });
+  const workbenchEvidenceSummary = trpc.workbench.evidenceSummary.useQuery(
+    { groupBy: "project", latestLimit: 1 },
+    { refetchInterval: 10000 },
+  );
   const utils = trpc.useUtils();
   const [lastDraftNoteNotice, setLastDraftNoteNotice] = useState<{ draftId: number; noteId: number } | null>(null);
   const appendActionDraftNote = trpc.projectIntelligence.appendActionDraftNote.useMutation({
@@ -292,17 +295,19 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   );
   const data = overview.data;
   const projects = data?.projects ?? [];
-  const evidenceRows = workbenchEvidence.data?.items ?? [];
-  const evidenceByProjectId = evidenceRows.reduce((map, item) => {
-    if (item.projectId == null) return map;
-    const current = map.get(item.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 };
-    current.total += 1;
-    if (item.kind === "terminal_output") current.terminal += 1;
-    if (item.validationStatus === "needs_review") current.needsReview += 1;
-    if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") current.validated += 1;
-    map.set(item.projectId, current);
-    return map;
-  }, new Map<number, { total: number; terminal: number; needsReview: number; validated: number }>());
+  const evidenceByProjectId = new Map(
+    (workbenchEvidenceSummary.data?.groups ?? [])
+      .filter((group) => group.key !== "unlinked")
+      .map((group) => [
+        Number(group.key),
+        {
+          total: group.count,
+          terminal: group.terminal,
+          needsReview: group.needsReview,
+          validated: group.validated,
+        },
+      ]),
+  );
   const filteredProjects = [
     ...projects.filter((project) => {
       if (projectFilter === "approvals") return project.activity.approvals.pending > 0;
@@ -362,18 +367,14 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
-    { label: "Receipts", value: String(evidenceRows.length), tone: evidenceRows.some((item) => item.validationStatus === "needs_review") ? C.warning : C.success },
+    { label: "Receipts", value: String(workbenchEvidenceSummary.data?.summary.total ?? 0), tone: (workbenchEvidenceSummary.data?.summary.needsReview ?? 0) > 0 ? C.warning : C.success },
   ];
-  const receiptChainStats = evidenceRows.reduce(
-    (stats, item) => {
-      stats.total += 1;
-      if (item.kind === "terminal_output") stats.terminal += 1;
-      if (item.validationStatus === "needs_review") stats.needsReview += 1;
-      if (item.validationStatus === "validated_for_local_use" || item.validationStatus === "looks_consistent") stats.validated += 1;
-      return stats;
-    },
-    { total: 0, terminal: 0, needsReview: 0, validated: 0 },
-  );
+  const receiptChainStats = {
+    total: workbenchEvidenceSummary.data?.summary.total ?? 0,
+    terminal: workbenchEvidenceSummary.data?.summary.terminal ?? 0,
+    needsReview: workbenchEvidenceSummary.data?.summary.needsReview ?? 0,
+    validated: workbenchEvidenceSummary.data?.summary.validated ?? 0,
+  };
 
   useEffect(() => {
     if (projects.length === 0) return;

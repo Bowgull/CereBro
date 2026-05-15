@@ -3146,6 +3146,68 @@ describe("Terminal Lab planning", () => {
     expect(proposal.id).toBeGreaterThan(0);
   });
 
+  it("returns compact Workbench evidence summary counts", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+    const stamp = Date.now();
+    const task = await caller.tasks.create({
+      title: `Evidence summary task ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    const db = await getCerebroDb();
+    const session = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-evidence-summary-${stamp}`, task.projectId, "Evidence summary run", "tony"],
+    });
+    const sessionId = Number(session.rows[0]!.id);
+    const terminal = await caller.workbench.createEvidence({
+      kind: "terminal_output",
+      title: `Evidence summary terminal ${stamp}`,
+      summary: "Terminal evidence summary row.",
+      projectId: task.projectId ?? undefined,
+      taskId: task.id,
+      sessionId,
+      ownerAgent: "tony",
+      routeAgent: "aang",
+      permissionClass: "manual_note",
+    });
+    await caller.workbench.createEvidence({
+      kind: "validation_note",
+      title: `Evidence summary validation ${stamp}`,
+      summary: "Validation evidence summary row.",
+      projectId: task.projectId ?? undefined,
+      taskId: task.id,
+      sessionId,
+      ownerAgent: "spock",
+      routeAgent: "spock",
+      permissionClass: "validation",
+    });
+
+    const summary = await caller.workbench.evidenceSummary({
+      latestLimit: 10,
+      groupBy: "project",
+      query: String(stamp),
+    });
+
+    expect(summary.mode).toBe("read_only");
+    expect(summary.summary.total).toBeGreaterThanOrEqual(2);
+    expect(summary.summary.terminal).toBeGreaterThanOrEqual(1);
+    expect(summary.summary.validationNotes).toBeGreaterThanOrEqual(1);
+    expect(summary.latest.map((item) => item.id)).toContain(terminal.evidence.id);
+    expect(summary.groups.find((group) => group.key === String(task.projectId))?.terminal).toBeGreaterThanOrEqual(1);
+    expect(summary.groups.find((group) => group.key === String(task.projectId))?.validationNotes).toBeGreaterThanOrEqual(1);
+    expect(summary.gates.join(" ")).toContain("read-only");
+  });
+
   it("previews commands without executing them", async () => {
     const caller = appRouter.createCaller({
       user: null,
