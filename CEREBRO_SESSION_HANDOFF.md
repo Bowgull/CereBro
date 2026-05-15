@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1920 EDT
+Last updated: 2026-05-15 1926 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1926 EDT - Compact Ledger Overview Read Model
+
+### What Changed
+- Added a new `ledger.overview` read-only backend router.
+- `ledger.overview` returns compact Ledger card counts, recent Workbench
+  receipt rows, and recent runtime route records in one call.
+- Switched `LedgerOverview` from 8 separate read queries to the single compact
+  `ledger.overview` query.
+- Kept route-task creation refreshes wired so Ledger overview updates after
+  saved routes and task creation.
+- Added a regression test proving the compact read model returns task, session,
+  approval, output, memory, proposal, receipt, and route counts plus latest
+  evidence and route rows.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/routers.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `CEREBRO_DB_URL=file:/tmp/cerebro-ledger-overview-red.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` failed because `ledger.overview` did not exist.
+- Green phase: `CEREBRO_DB_URL=file:/tmp/cerebro-ledger-overview-green.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 27 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: backend read-model compaction plus LedgerOverview wiring.
+- No DB schema change, external write, model call, package install, browser
+  action from CereBro, command execution from CereBro, storage migration, or
+  Raven boundary changed.
+- Ledger stays read-only. Workbench still owns receipt bodies.
+
+### Front-End Steward Review
+- The Ledger surface now asks for the thing it displays instead of loading the
+  underlying machinery and counting it in React.
+- This supports the fast AI OS goal without changing the visual shape.
+
+### Completion Read
+- Overall: 57%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 94%.
+- Backend/runtime: 40%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: either add
+`workbench.evidenceSummary` to reduce Workbench/Terminal/Project read pressure,
+or simplify the highest-noise visible surface from the frontend worker audit,
+starting with Approval Queue.
 
 ## 2026-05-15 1920 EDT - Primitive Token And Focus Normalization
 

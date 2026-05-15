@@ -3057,6 +3057,95 @@ describe("Terminal Lab planning", () => {
     expect(groupedArtifacts.map((item) => item.title)).not.toContain(`Outside artifact ${stamp}`);
   });
 
+  it("returns a compact Ledger overview read model", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+    const stamp = Date.now();
+    const task = await caller.tasks.create({
+      title: `Ledger overview task ${stamp}`,
+      agent: "tony",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    const db = await getCerebroDb();
+    const session = await db.execute({
+      sql: `
+        INSERT INTO sessions (claude_session_id, project_id, title, hero_class)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+      `,
+      args: [`test-ledger-overview-${stamp}`, task.projectId, "Ledger overview run", "tony"],
+    });
+    const sessionId = Number(session.rows[0]!.id);
+    await db.execute({
+      sql: `
+        INSERT INTO approvals (task_id, action_type, target_type, target_id, requested_by_agent, status, reason)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [task.id, "external_write", "test", task.id, "tony", "pending", `Ledger overview approval ${stamp}`],
+    });
+    await caller.artifacts.recordExternal({
+      kind: "qa_report",
+      title: `Ledger overview artifact ${stamp}`,
+      storageProvider: "local",
+      storagePath: `test:ledger-overview-artifact-${stamp}`,
+      sessionId,
+      approved: true,
+    });
+    const memory = await caller.memory.create({
+      body: `Ledger overview memory ${stamp}`,
+      kind: "note",
+      sessionId,
+      approved: true,
+    });
+    const proposal = await caller.memory.propose({
+      body: `Ledger overview proposal ${stamp}`,
+      kind: "note",
+      sessionId,
+      proposedByAgent: "aang",
+    });
+    const evidence = await caller.workbench.createEvidence({
+      kind: "terminal_output",
+      title: `Ledger overview evidence ${stamp}`,
+      summary: "Compact read model evidence.",
+      projectId: task.projectId ?? undefined,
+      taskId: task.id,
+      sessionId,
+      ownerAgent: "tony",
+      routeAgent: "aang",
+      permissionClass: "manual_note",
+    });
+    const route = await caller.runtime.commitRoute({
+      text: `Build ledger overview ${stamp}`,
+      mode: "build",
+    });
+
+    const overview = await caller.ledger.overview({ evidenceLimit: 10, routeLimit: 10 });
+
+    expect(overview.mode).toBe("read_only");
+    expect(overview.cards.tasks.total).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.tasks.open).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.sessions.recent).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.sessions.active).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.approvals.pending).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.outputs.total).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.memory.total).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.memory.proposed).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.receipts.total).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.receipts.terminal).toBeGreaterThanOrEqual(1);
+    expect(overview.cards.routes.total).toBeGreaterThanOrEqual(1);
+    expect(overview.latestEvidence.map((item) => item.id)).toContain(evidence.evidence.id);
+    expect(overview.latestEvidence.find((item) => item.id === evidence.evidence.id)?.projectName).toBe("CereBro");
+    expect(overview.latestRoutes.map((item) => item.id)).toContain(route.record.id);
+    expect(overview.latestRoutes.find((item) => item.id === route.record.id)?.originalText).toContain(`Build ledger overview ${stamp}`);
+    expect(overview.gates.join(" ")).toContain("read-only");
+    expect(memory.id).toBeGreaterThan(0);
+    expect(proposal.id).toBeGreaterThan(0);
+  });
+
   it("previews commands without executing them", async () => {
     const caller = appRouter.createCaller({
       user: null,

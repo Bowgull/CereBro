@@ -186,12 +186,16 @@ export default function Home() {
   const routePreview = trpc.runtime.previewRoute.useMutation();
   const utils = trpc.useUtils();
   const commitRoute = trpc.runtime.commitRoute.useMutation({
-    onSuccess: () => utils.runtime.routeRecords.invalidate(),
+    onSuccess: () => {
+      utils.runtime.routeRecords.invalidate();
+      utils.ledger.overview.invalidate();
+    },
   });
   const createTask = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
       utils.tasks.workQueue.invalidate();
+      utils.ledger.overview.invalidate();
     },
   });
 
@@ -947,41 +951,27 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const utils = trpc.useUtils();
-  const taskQueue = trpc.tasks.workQueue.useQuery({ limit: 1 }, { refetchInterval: 10000 });
-  const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
-  const approvals = trpc.approvals.list.useQuery({
-    status: "pending",
-    origin: "all",
-    limit: 50,
-  });
-  const outputs = trpc.artifacts.list.useQuery({ limit: 50 });
-  const memory = trpc.memory.list.useQuery({});
-  const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
-  const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 50 });
-  const routeRecords = trpc.runtime.routeRecords.useQuery({ limit: 6 });
+  const ledgerOverview = trpc.ledger.overview.useQuery({ evidenceLimit: 50, routeLimit: 6 }, { refetchInterval: 10000 });
   const createTaskFromRoute = trpc.runtime.createTaskFromRouteRecord.useMutation({
     onSuccess: () => {
       utils.runtime.routeRecords.invalidate();
+      utils.ledger.overview.invalidate();
       utils.tasks.list.invalidate();
       utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
     },
   });
 
-  const sessionRows = sessions.data ?? [];
-  const approvalRows = approvals.data?.items ?? [];
-  const outputRows = outputs.data ?? [];
-  const memoryRows = memory.data ?? [];
-  const proposalRows = proposals.data ?? [];
-  const evidenceRows = workbenchEvidence.data?.items ?? [];
-  const routeRows = routeRecords.data?.items ?? [];
+  const overviewCards = ledgerOverview.data?.cards;
+  const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
+  const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const latestEvidenceRows = evidenceRows.slice(0, 4);
   const latestRouteRows = routeRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
-  const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
-  const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
-  const taskTotal = taskQueue.data?.total ?? 0;
-  const openTasks = (taskQueue.data?.statusCounts.open ?? 0) + (taskQueue.data?.statusCounts.inProgress ?? 0);
+  const terminalEvidenceCount = overviewCards?.receipts.terminal ?? 0;
+  const activeSessions = overviewCards?.sessions.active ?? 0;
+  const taskTotal = overviewCards?.tasks.total ?? 0;
+  const openTasks = overviewCards?.tasks.open ?? 0;
   const selectedAuditRead = selectedEvidence
     ? [
         { label: "Body", value: `Workbench #${selectedEvidence.id}`, tone: C.gold },
@@ -1002,7 +992,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     : [];
 
   useEffect(() => {
-    if (workbenchEvidence.isLoading) return;
+    if (ledgerOverview.isLoading) return;
     let raw: string | null = null;
     try {
       raw = window.sessionStorage.getItem("cerebro:ledger-focus");
@@ -1018,7 +1008,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     } catch {
       setLedgerFocusNotice("Ledger focus could not be read. Select a receipt manually.");
     }
-  }, [workbenchEvidence.isLoading]);
+  }, [ledgerOverview.isLoading]);
 
   const cards = [
     {
@@ -1031,42 +1021,42 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     {
       label: "Sessions",
       value: String(activeSessions),
-      meta: `${sessionRows.length} recent runs`,
+      meta: `${overviewCards?.sessions.recent ?? 0} recent runs`,
       target: "sessions" as NavId,
       tone: C.success,
     },
     {
       label: "Approvals",
-      value: String(approvalRows.length),
+      value: String(overviewCards?.approvals.pending ?? 0),
       meta: "pending gates",
       target: "approvals" as NavId,
-      tone: approvalRows.length > 0 ? C.warning : C.textMuted,
+      tone: (overviewCards?.approvals.pending ?? 0) > 0 ? C.warning : C.textMuted,
     },
     {
       label: "Outputs",
-      value: String(outputRows.length),
+      value: String(overviewCards?.outputs.total ?? 0),
       meta: "artifact receipts",
       target: "outputs" as NavId,
       tone: C.gold,
     },
     {
       label: "Receipts",
-      value: String(evidenceRows.length),
+      value: String(overviewCards?.receipts.total ?? 0),
       meta: `${terminalEvidenceCount} terminal receipts`,
       target: "workbench" as NavId,
       tone: C.accentViolet,
     },
     {
       label: "Routes",
-      value: String(routeRows.length),
+      value: String(overviewCards?.routes.total ?? 0),
       meta: "Aang to Cortana reads",
       target: "ledger" as NavId,
       tone: C.accent,
     },
     {
       label: "Memory",
-      value: String(memoryRows.length),
-      meta: `${proposalRows.length} proposed`,
+      value: String(overviewCards?.memory.total ?? 0),
+      meta: `${overviewCards?.memory.proposed ?? 0} proposed`,
       target: "memory" as NavId,
       tone: C.accent,
     },
@@ -1233,7 +1223,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
             <Badge variant="secondary" className="uppercase">local only</Badge>
           </div>
-          {routeRecords.isLoading ? (
+          {ledgerOverview.isLoading ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Reading local route records.
             </div>
@@ -1337,7 +1327,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               Open Workbench Bodies
             </Button>
           </div>
-          {workbenchEvidence.isLoading ? (
+          {ledgerOverview.isLoading ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               Reading local Workbench receipts.
             </div>

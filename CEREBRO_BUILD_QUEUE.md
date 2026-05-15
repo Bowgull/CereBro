@@ -147,6 +147,9 @@ Recent Prime slices:
   Button/Badge token fills, menu and command focus rings, Menubar grouping,
   AlertDialog risk/destructive defaults, Sheet edge radius, and Chart token
   selectors.
+- 2026-05-15 1926 EDT: added `ledger.overview`, a compact read-only Ledger
+  overview model, then switched LedgerOverview from 8 separate queries to one
+  read model.
 
 ### Frontend Worker
 
@@ -180,10 +183,9 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  `ledger.overview`, `workbench.evidenceSummary`, DB-only
-  `projectIntelligence.summary` plus cached `gitStatus`, `sessions.recent` and
-  `sessions.summary`, skill-manager polling reduction, then compact approval
-  queue reads.
+  `workbench.evidenceSummary`, DB-only `projectIntelligence.summary` plus
+  cached `gitStatus`, `sessions.recent` and `sessions.summary`, skill-manager
+  polling reduction, then compact approval queue reads.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -475,3 +477,6 @@ Expected shape:
   while keeping exact run ids visible in write/link dropdowns.
 - Shared primitives now use tighter CereBro token/focus/risk contracts across
   Button, Badge, Dropdown Menu, Menubar, Command, AlertDialog, Sheet, and Chart.
+- Ledger Overview now reads one compact backend model instead of fanning out
+  into Tasks, Sessions, Approvals, Artifacts, Memory, Workbench, and Runtime
+  read calls from React.
