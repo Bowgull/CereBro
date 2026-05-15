@@ -107,13 +107,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     },
   });
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
+  const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
     { id: selectedEvidenceId ?? 0 },
     { enabled: selectedEvidenceId != null },
   );
   const evidencePicker = trpc.workbench.evidencePicker.useQuery(
     { limit: 120, excludeId: selectedEvidenceId ?? undefined },
-    { enabled: selectedEvidenceId != null },
+    {
+      enabled: selectedEvidenceId != null && comparisonPickerOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
@@ -1347,6 +1353,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     }))}
                     evidencePickerLoading={evidencePicker.isLoading}
                     evidencePickerGates={evidencePicker.data?.gates ?? []}
+                    onComparisonPickerOpenChange={setComparisonPickerOpen}
                     onCreateComparison={(input) => {
                       createBeforeAfterComparison.mutate(input);
                     }}
@@ -1438,6 +1445,7 @@ function EvidenceDetailPanel({
   evidenceOptions,
   evidencePickerLoading,
   evidencePickerGates,
+  onComparisonPickerOpenChange,
   onCreateComparison,
   isCreatingComparison,
   comparisonSavedId,
@@ -1548,6 +1556,7 @@ function EvidenceDetailPanel({
   }>;
   evidencePickerLoading?: boolean;
   evidencePickerGates?: string[];
+  onComparisonPickerOpenChange?: (open: boolean) => void;
   onCreateComparison?: (input: { beforeEvidenceId: number; afterEvidenceId: number; title: string; summary: string; result: string; routeAgent?: string | null }) => void;
   isCreatingComparison?: boolean;
   comparisonSavedId?: number | null;
@@ -1889,11 +1898,18 @@ function EvidenceDetailPanel({
           </div>
         )}
       </details>
-      <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <details
+        className="mt-2 rounded p-2"
+        onToggle={(event) => onComparisonPickerOpenChange?.(event.currentTarget.open)}
+        style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+      >
         <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
           Append Before/After Receipt
         </summary>
         <div className="mt-2 grid gap-2">
+          <div className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            {evidencePickerLoading ? "Reading local comparison receipts." : "Comparison receipts read only when this drawer is open."}
+          </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px]">
             <Input
               value={pickerQuery}

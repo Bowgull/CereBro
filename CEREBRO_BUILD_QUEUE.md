@@ -173,6 +173,8 @@ Recent Prime slices:
   Links drawer, with a 30 second stale window and manual disclosure read.
 - 2026-05-15 1955 EDT: gated Design Review `workbench.evidencePicker` behind
   the linked receipt selector.
+- 2026-05-15 1957 EDT: gated Workbench comparison `evidencePicker` behind the
+  Append Before/After Receipt drawer.
 
 ### Frontend Worker
 
@@ -208,8 +210,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  Workbench comparison picker gating, deeper Project Lab DB-only summary if the
-  cached git split is still too heavy, or the next runtime receipt contract.
+  deeper Project Lab DB-only summary if the cached git split is still too
+  heavy, or the next runtime receipt contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -524,3 +526,5 @@ Expected shape:
 - Workbench now reads link options only when the Receipt Links drawer is open.
 - Design Review now reads Workbench receipt candidates only when the linked
   receipt selector is opened.
+- Workbench now reads comparison receipt candidates only when the Append
+  Before/After Receipt drawer is open.

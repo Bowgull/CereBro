@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1955 EDT
+Last updated: 2026-05-15 1957 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1957 EDT - Workbench Comparison Picker On Demand
+
+### What Changed
+- Gated Workbench `workbench.evidencePicker` behind the `Append Before/After
+  Receipt` disclosure.
+- Added a 30 second stale window and disabled focus/reconnect refetches for
+  comparison candidate reads.
+- Added visible copy inside the comparison drawer so the user sees that local
+  comparison receipts read only when the drawer is open.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Workbench hidden comparison-picker read reduction.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file UI query-gating slice.
+
+### Front-End Steward Review
+- Selecting a receipt still loads the receipt body.
+- The larger comparison candidate list now waits until the user opens the
+  append-comparison drawer.
+
+### Completion Read
+- Overall: 59%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: inspect
+Project Lab overview weight for a DB-only summary split, or move into the next
+runtime receipt contract if the visible shell is calm enough.
 
 ## 2026-05-15 1955 EDT - Design Review Receipt Picker On Demand
 
