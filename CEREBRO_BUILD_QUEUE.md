@@ -171,6 +171,8 @@ Recent Prime slices:
   `approvals.detail`; Approval Queue no longer loads full proof for every row.
 - 2026-05-15 1953 EDT: gated Workbench `linkOptions` behind the closed Receipt
   Links drawer, with a 30 second stale window and manual disclosure read.
+- 2026-05-15 1955 EDT: gated Design Review `workbench.evidencePicker` behind
+  the linked receipt selector.
 
 ### Frontend Worker
 
@@ -520,3 +522,5 @@ Expected shape:
 - Approval Queue now uses compact local queue rows by default and loads full
   preflight/Oak/Spock proof only for the selected decision.
 - Workbench now reads link options only when the Receipt Links drawer is open.
+- Design Review now reads Workbench receipt candidates only when the linked
+  receipt selector is opened.

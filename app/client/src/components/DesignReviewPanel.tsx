@@ -35,7 +35,16 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
   const plan = trpc.designReview.plan.useQuery();
   const reviews = trpc.designReview.list.useQuery({ limit: 30 });
   const projects = trpc.projectIntelligence.overview.useQuery();
-  const evidencePicker = trpc.workbench.evidencePicker.useQuery({ limit: 80 });
+  const [receiptPickerOpen, setReceiptPickerOpen] = useState(false);
+  const evidencePicker = trpc.workbench.evidencePicker.useQuery(
+    { limit: 80 },
+    {
+      enabled: receiptPickerOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const utils = trpc.useUtils();
   const createReview = trpc.designReview.create.useMutation({
     onSuccess: () => {
@@ -199,7 +208,11 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={String(evidenceId)} onValueChange={(value) => setEvidenceId(value === "none" ? "none" : Number(value))}>
+                  <Select
+                    value={String(evidenceId)}
+                    onValueChange={(value) => setEvidenceId(value === "none" ? "none" : Number(value))}
+                    onOpenChange={setReceiptPickerOpen}
+                  >
                     <SelectTrigger aria-label="Linked Workbench receipt" className="w-full sm:col-span-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -212,6 +225,9 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="text-[11px] sm:col-span-2" style={{ color: C.textMuted }}>
+                    {evidencePicker.isLoading ? "Reading local receipt links." : "Receipt links read when the selector opens."}
+                  </div>
                 </div>
 
                 <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -308,11 +324,6 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
                       </div>
                     </article>
                   ))}
-                </div>
-              )}
-              {evidencePicker.isLoading && (
-                <div className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-                  Reading Workbench receipt links.
                 </div>
               )}
             </aside>
