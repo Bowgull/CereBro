@@ -405,7 +405,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 <Meta label="Permission Preflight" value={selected.permissionPreflightId == null ? "unlinked" : `#${selected.permissionPreflightId}`} />
               </Section>
 
-              <Section title="Permission Preflight" detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>
+              <DetailSection title="Permission Preflight" detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>
                 {selected.permissionPreflight == null ? (
                   <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     No linked permission preflight record exists for this approval preview yet.
@@ -460,31 +460,31 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     )}
                   </div>
                 )}
-              </Section>
+              </DetailSection>
 
-              <Section title="Oak Notes" detail="risk preflight">
+              <DetailSection title="Oak Notes" detail="risk preflight">
                 {selected.validationPreview.oakNotes.map((note) => (
                   <Note key={note} tone={C.warning} text={note} />
                 ))}
-              </Section>
+              </DetailSection>
 
-              <Section title="Spock Notes" detail="shape check">
+              <DetailSection title="Spock Notes" detail="shape check">
                 {selected.validationPreview.spockNotes.map((note) => (
                   <Note key={note} tone={C.accent} text={note} />
                 ))}
-              </Section>
+              </DetailSection>
 
-              <Section title="Reason" detail="local record">
+              <DetailSection title="Reason" detail="local record">
                 <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textSecondary }}>
                   {selected.reason ?? "No reason recorded."}
                 </p>
-              </Section>
+              </DetailSection>
 
-              <Section title="Context" detail="local receipt">
+              <DetailSection title="Context" detail="local receipt">
                 <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textMuted }}>
                   {selected.contextSummary ?? "No context summary recorded."}
                 </p>
-              </Section>
+              </DetailSection>
             </div>
           )}
         </aside>
@@ -726,6 +726,20 @@ function Section({ title, detail, children }: { title: string; detail: string; c
       </div>
       <div className="grid gap-1.5">{children}</div>
     </section>
+  );
+}
+
+function DetailSection({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
+  return (
+    <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <summary className="cursor-pointer list-none">
+        <span className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</span>
+          <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{detail}</span>
+        </span>
+      </summary>
+      <div className="mt-2 grid gap-1.5">{children}</div>
+    </details>
   );
 }
 

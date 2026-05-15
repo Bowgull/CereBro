@@ -356,3 +356,6 @@ Expected shape:
   visible while knowledge route, metadata, permission preflight, gates,
   validation trail, comparison trail, and append forms live behind closed
   details.
+- Approval Queue selected detail now keeps receipt chain and approval summary
+  visible while permission preflight, Oak notes, Spock notes, reason, and
+  context live behind closed details.
