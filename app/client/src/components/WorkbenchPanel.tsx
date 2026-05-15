@@ -58,7 +58,13 @@ type TemporaryMediaPreview = {
 export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: WorkbenchRoute) => void }) {
   const plan = trpc.workbench.plan.useQuery();
   const projects = trpc.projectIntelligence.overview.useQuery();
-  const linkOptions = trpc.workbench.linkOptions.useQuery();
+  const [receiptLinksOpen, setReceiptLinksOpen] = useState(false);
+  const linkOptions = trpc.workbench.linkOptions.useQuery(undefined, {
+    enabled: receiptLinksOpen,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const [filterKind, setFilterKind] = useState<EvidenceKind>("all");
   const [filterProjectId, setFilterProjectId] = useState<number | "all">("all");
   const [filterQuery, setFilterQuery] = useState("");
@@ -705,10 +711,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
 
               <div className="mt-2 grid gap-1.5">
-                <details className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <details
+                  className="rounded p-2"
+                  onToggle={(event) => setReceiptLinksOpen(event.currentTarget.open)}
+                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                >
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                     Receipt Links
                   </summary>
+                  <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    {linkOptions.isLoading ? "Reading local link options." : "Link options read only when this drawer is open."}
+                  </div>
                   <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
                     <AppSelect
                       label="Project link"

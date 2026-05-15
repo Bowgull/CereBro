@@ -169,6 +169,8 @@ Recent Prime slices:
   file reads are now active-tab, active-scope, manual-refresh reads.
 - 2026-05-15 1950 EDT: added compact `approvals.queue` plus selected
   `approvals.detail`; Approval Queue no longer loads full proof for every row.
+- 2026-05-15 1953 EDT: gated Workbench `linkOptions` behind the closed Receipt
+  Links drawer, with a 30 second stale window and manual disclosure read.
 
 ### Frontend Worker
 
@@ -204,8 +206,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  deeper Project Lab DB-only summary if the cached git split is still too heavy,
-  Workbench link-options compaction, or the next runtime receipt contract.
+  Workbench comparison picker gating, deeper Project Lab DB-only summary if the
+  cached git split is still too heavy, or the next runtime receipt contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -517,3 +519,4 @@ Expected shape:
   tab/scope and uses manual refresh instead of 3 second polling.
 - Approval Queue now uses compact local queue rows by default and loads full
   preflight/Oak/Spock proof only for the selected decision.
+- Workbench now reads link options only when the Receipt Links drawer is open.
