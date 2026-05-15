@@ -163,14 +163,16 @@ Recent Prime slices:
   path, retention, and owner now sit behind per-output details.
 - 2026-05-15 1940 EDT: simplified the Workbench default read; Project Proof,
   receipt grouping, and read gates now sit behind closed disclosures.
+- 2026-05-15 1944 EDT: added cached read-only Project Lab git status and moved
+  overview/detail reads onto the shared cache.
 
 ### Frontend Worker
 
 Next block:
 
 - Take one high-noise surface pass only if the next surface still shows
-  machinery first. Otherwise move to the Project Lab DB-only/cached git status
-  read-model split.
+  machinery first. Otherwise move to skill-manager polling reduction or the
+  compact approval queue read model.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -198,8 +200,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  DB-only `projectIntelligence.summary` plus cached `gitStatus`, skill-manager
-  polling reduction, then compact approval queue reads.
+  skill-manager polling reduction, compact approval queue reads, then deeper
+  Project Lab DB-only summary if the cached git split is still too heavy.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -504,3 +506,6 @@ Expected shape:
   owner proof sit behind per-output details.
 - Workbench now keeps Add Receipt and Recent Receipts primary while Project
   Proof, receipt grouping, and read gates sit behind closed disclosures.
+- Project Lab now reads git status through a cached read-only model and shows a
+  compact Git read/cached badge instead of silently shelling out on every
+  overview/detail refresh.

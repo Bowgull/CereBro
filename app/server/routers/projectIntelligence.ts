@@ -160,6 +160,79 @@ function parseStatus(status: string | null) {
   };
 }
 
+type ProjectGitStatusSnapshot = {
+  slug: string;
+  name: string;
+  localPath: string;
+  githubRepo: string;
+  localExists: boolean;
+  git: ReturnType<typeof parseStatus> & { remote: string | null };
+};
+
+const gitStatusCacheTtlMs = 30_000;
+let projectGitStatusCache:
+  | {
+      scannedAt: number;
+      expiresAt: number;
+      projects: ProjectGitStatusSnapshot[];
+    }
+  | null = null;
+
+async function readProjectGitStatusSnapshots(): Promise<ProjectGitStatusSnapshot[]> {
+  return Promise.all(
+    projectProfiles.map(async (profile) => {
+      const exists = await pathExists(profile.localPath);
+      const [status, remote] = exists
+        ? await Promise.all([
+            gitOutput(profile.localPath, ["status", "--short", "--branch"]),
+            gitOutput(profile.localPath, ["remote", "get-url", "origin"]),
+          ])
+        : [null, null];
+
+      return {
+        slug: profile.slug,
+        name: profile.name,
+        localPath: profile.localPath,
+        githubRepo: profile.githubRepo,
+        localExists: exists,
+        git: {
+          ...parseStatus(status),
+          remote,
+        },
+      };
+    }),
+  );
+}
+
+async function projectGitStatusSnapshot(options: { force?: boolean } = {}) {
+  const nowMs = Date.now();
+  if (!options.force && projectGitStatusCache && projectGitStatusCache.expiresAt > nowMs) {
+    return {
+      ...projectGitStatusCache,
+      cacheHit: true,
+    };
+  }
+
+  const projects = await readProjectGitStatusSnapshots();
+  projectGitStatusCache = {
+    scannedAt: Math.floor(nowMs / 1000),
+    expiresAt: nowMs + gitStatusCacheTtlMs,
+    projects,
+  };
+
+  return {
+    ...projectGitStatusCache,
+    cacheHit: false,
+  };
+}
+
+function emptyGitStatus() {
+  return {
+    ...parseStatus(null),
+    remote: null,
+  };
+}
+
 function rowToTaskSummary(r: Record<string, unknown>) {
   const sessionId = r.session_id == null ? null : Number(r.session_id);
   return {
@@ -994,17 +1067,11 @@ async function projectDetailForSlug(slug: string) {
   const profile = projectProfiles.find((candidate) => candidate.slug === slug);
   if (!profile) return emptyProjectDetail(slug, "Unknown Project Lab profile.");
 
-  const exists = await pathExists(profile.localPath);
-  const [status, remote] = exists
-    ? await Promise.all([
-        gitOutput(profile.localPath, ["status", "--short", "--branch"]),
-        gitOutput(profile.localPath, ["remote", "get-url", "origin"]),
-      ])
-    : [null, null];
+  const gitSnapshot = await projectGitStatusSnapshot();
+  const profileGit = gitSnapshot.projects.find((candidate) => candidate.slug === profile.slug);
   const git = {
-    ...parseStatus(status),
-    remote,
-    localExists: exists,
+    ...(profileGit?.git ?? emptyGitStatus()),
+    localExists: profileGit?.localExists ?? false,
     localPath: profile.localPath,
     githubRepo: profile.githubRepo,
   };
@@ -1128,28 +1195,21 @@ async function projectDetailForSlug(slug: string) {
 
 export const projectIntelligenceRouter = router({
   overview: publicProcedure.query(async () => {
+    const gitSnapshot = await projectGitStatusSnapshot();
+    const gitBySlug = new Map(gitSnapshot.projects.map((project) => [project.slug, project]));
     const projects = await Promise.all(
       projectProfiles.map(async (profile) => {
-        const exists = await pathExists(profile.localPath);
-        const [status, remote] = exists
-          ? await Promise.all([
-              gitOutput(profile.localPath, ["status", "--short", "--branch"]),
-              gitOutput(profile.localPath, ["remote", "get-url", "origin"]),
-            ])
-          : [null, null];
+        const gitStatus = gitBySlug.get(profile.slug);
 
         const tasks = await taskRollupForPath(profile.localPath);
         const activity = await activityRollupForProject(tasks.projectId, profile.slug);
 
         const project = {
           ...profile,
-          localExists: exists,
+          localExists: gitStatus?.localExists ?? false,
           tasks,
           activity,
-          git: {
-            ...parseStatus(status),
-            remote,
-          },
+          git: gitStatus?.git ?? emptyGitStatus(),
         };
 
         return {
@@ -1164,6 +1224,13 @@ export const projectIntelligenceRouter = router({
     return {
       mode: "read_only",
       scannedAt: Math.floor(Date.now() / 1000),
+      gitStatus: {
+        mode: "cached_local_read",
+        scannedAt: gitSnapshot.scannedAt,
+        cacheTtlMs: gitStatusCacheTtlMs,
+        cacheHit: gitSnapshot.cacheHit,
+        runsGit: !gitSnapshot.cacheHit,
+      },
       intakeCategories,
       projectModes,
       projects,
@@ -1183,6 +1250,35 @@ export const projectIntelligenceRouter = router({
       },
     };
   }),
+
+  gitStatus: publicProcedure
+    .input(z.object({ force: z.boolean().optional() }).optional())
+    .query(async ({ input }) => {
+      const snapshot = await projectGitStatusSnapshot({ force: input?.force });
+      return {
+        mode: "cached_local_read" as const,
+        scannedAt: snapshot.scannedAt,
+        cacheTtlMs: gitStatusCacheTtlMs,
+        cacheHit: snapshot.cacheHit,
+        runsGit: !snapshot.cacheHit,
+        readsOnly: true,
+        writesRepo: false,
+        executesUserCommands: false,
+        projects: snapshot.projects,
+        summary: {
+          total: snapshot.projects.length,
+          local: snapshot.projects.filter((project) => project.localExists).length,
+          dirty: snapshot.projects.filter((project) => project.git.dirty).length,
+          missing: snapshot.projects.filter((project) => !project.localExists).length,
+          dirtyChanges: snapshot.projects.reduce((sum, project) => sum + project.git.dirtyCount, 0),
+        },
+        gates: [
+          "Project git status is a cached read-only local shell read.",
+          "It runs `git status --short --branch` and `git remote get-url origin` only when the cache expires or force is true.",
+          "It does not stage, commit, push, pull, fetch, checkout, reset, or edit files.",
+        ],
+      };
+    }),
 
   detail: publicProcedure
     .input(z.object({ slug: z.string().min(1).max(80) }))

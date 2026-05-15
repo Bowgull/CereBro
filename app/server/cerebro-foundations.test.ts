@@ -3686,6 +3686,34 @@ describe("Project Lab proposal-only actions", () => {
     expect(typeof cerebro?.pushReadiness.evidence.dirtyCount).toBe("number");
     expect(["hold_dirty", "commit_locally", "push_branch", "open_pr", "needs_cleanup"]).toContain(cerebro?.pushReadiness.state);
   });
+
+  it("returns cached read-only Project Lab git status separately from DB rollups", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const firstRead = await caller.projectIntelligence.gitStatus({ force: true });
+    expect(firstRead.mode).toBe("cached_local_read");
+    expect(firstRead.readsOnly).toBe(true);
+    expect(firstRead.writesRepo).toBe(false);
+    expect(firstRead.executesUserCommands).toBe(false);
+    expect(firstRead.runsGit).toBe(true);
+    expect(firstRead.summary.total).toBeGreaterThan(0);
+    expect(firstRead.projects.find((project) => project.slug === "cerebro")?.git.remote).toBeTruthy();
+    expect(firstRead.gates.join(" ")).toContain("does not stage");
+
+    const cachedRead = await caller.projectIntelligence.gitStatus();
+    expect(cachedRead.cacheHit).toBe(true);
+    expect(cachedRead.runsGit).toBe(false);
+    expect(cachedRead.scannedAt).toBe(firstRead.scannedAt);
+
+    const overview = await caller.projectIntelligence.overview();
+    expect(overview.gitStatus.mode).toBe("cached_local_read");
+    expect(overview.gitStatus.runsGit).toBe(false);
+    expect(overview.gitStatus.scannedAt).toBe(firstRead.scannedAt);
+  });
 });
 
 describe("Model/tool capability registry", () => {

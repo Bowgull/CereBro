@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1940 EDT
+Last updated: 2026-05-15 1944 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1944 EDT - Project Lab Cached Git Status Read Model
+
+### What Changed
+- Added a cached read-only `projectIntelligence.gitStatus` read model.
+- Project git status now has a 30 second cache and reports whether a read used
+  the cache or ran local git status commands.
+- `projectIntelligence.overview` now uses the cached git status snapshot instead
+  of shelling out separately on every overview read.
+- `projectIntelligence.detail` uses the same cached git status snapshot.
+- Project Lab shows a compact `Git read` or `Git cached` badge.
+- Added a regression test that proves the git status model is read-only,
+  cached, and separate from DB rollups.
+
+### Files Touched
+- `app/server/routers/projectIntelligence.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-project-git-status-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false -t "Project Lab"` passed. 1 file. 4 tests run, 26 skipped.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Project Lab read-model performance and safety split.
+- It still runs read-only local git status commands when the cache is cold or
+  forced. It does not stage, commit, push, pull, fetch, checkout, reset, edit
+  files, write external systems, call models, open browsers, or cross Raven
+  boundaries.
+- No worker was used because the change touched one backend router, one UI
+  badge, and one targeted test. Splitting it would have cost more integration
+  time than it saved.
+
+### Front-End Steward Review
+- Project Lab keeps the same visible project cards and push-readiness behavior.
+- The user now gets a small visible signal for whether git status is fresh or
+  cached, without exposing the whole machinery by default.
+
+### Completion Read
+- Overall: 59%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 43%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: reduce
+skill-manager polling or add the next compact approval queue read model. Use a
+worker if the next slice can be split cleanly across backend and frontend.
 
 ## 2026-05-15 1940 EDT - Workbench Low-Machinery Default Read
 

@@ -273,6 +273,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
+  const projectGitStatus = trpc.projectIntelligence.gitStatus.useQuery(undefined, { refetchInterval: 30000 });
   const workbenchEvidenceSummary = trpc.workbench.evidenceSummary.useQuery(
     { groupBy: "project", latestLimit: 1 },
     { refetchInterval: 10000 },
@@ -294,6 +295,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { enabled: Boolean(selectedSlug), refetchInterval: 10000 },
   );
   const data = overview.data;
+  const gitRead = projectGitStatus.data ?? data?.gitStatus;
   const projects = data?.projects ?? [];
   const evidenceByProjectId = new Map(
     (workbenchEvidenceSummary.data?.groups ?? [])
@@ -420,6 +422,9 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
             <Badge variant="secondary" className="uppercase">{projects.length} projects</Badge>
             <Badge variant="secondary" className="uppercase">Mode {labelize(data?.mode ?? "read_only")}</Badge>
+            <Badge variant={gitRead?.runsGit ? "warning" : "secondary"} className="uppercase">
+              Git {gitRead ? (gitRead.runsGit ? "read" : "cached") : "reading"}
+            </Badge>
           </div>
         </div>
         <Button type="button" onClick={onClose} aria-label="Close Project Lab" variant="outline" size="sm" className="shrink-0">
