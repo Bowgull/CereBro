@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2204 EDT
+Last updated: 2026-05-14 2206 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2206 EDT - Unused Handoff Panel Cleanup
+
+### What Changed
+- Deleted unused `HandoffArchivePanel.tsx`.
+- Confirmed no client import references `HandoffArchivePanel` or
+  `handoffs.archivePlan`.
+- Left the backend handoffs router alone because the build still uses the
+  handoff/archive contract outside the visible shell.
+- Updated `CEREBRO_BUILD_QUEUE.md` and this handoff.
+- No product surface, DB schema, route contract, approval behavior, external
+  write, command execution, browser action from CereBro, model call, install,
+  pull, vector index, or storage migration changed.
+
+### Files Touched
+- `app/client/src/components/HandoffArchivePanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- `rg -n "HandoffArchivePanel|handoffs\\.archivePlan" app/client/src app/server | head -80` returned no matches.
+- Playwright opened the app with a cache-busted URL and console check returned
+  0 errors.
+
+### Cleanliness Read
+- Current slice: unused frontend panel cleanup.
+- Deleted 166 lines of unused UI proposal code.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+
+### Front-End Steward Review
+- This avoids growing a second archive UI before the actual user flow needs it.
+- Handoff integrity remains handled by `CEREBRO_SESSION_HANDOFF.md` plus the
+  append-only Obsidian archive.
+
+### Completion Read
+- Overall: 50%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 82%.
+- Backend/runtime: 32%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start by classifying dirty files. Next best path: backend
+receipt contracts can move toward `runtime.commitRoute` only after choosing the
+local route-record schema. Otherwise continue narrow shell polish with the
+existing surfaces.
 
 ## 2026-05-14 2204 EDT - Runtime Route Receipt Browser Proof
 

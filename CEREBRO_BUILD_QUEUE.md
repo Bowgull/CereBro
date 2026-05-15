@@ -109,6 +109,8 @@ Recent Prime slices:
   map pathing model.
 - 2026-05-14 2204 EDT: browser-verified the runtime route receipt loop. Ask
   Aang stages a Workbench draft and focuses Ledger without autosaving.
+- 2026-05-14 2206 EDT: deleted unused `HandoffArchivePanel.tsx`. The real
+  handoff archive remains the repo handoff plus append-only Obsidian snapshots.
 
 ### Frontend Worker
 
