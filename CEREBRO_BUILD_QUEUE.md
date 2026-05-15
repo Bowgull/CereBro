@@ -161,12 +161,16 @@ Recent Prime slices:
   approval cards.
 - 2026-05-15 1937 EDT: simplified Artifacts into Saved Outputs; raw storage
   path, retention, and owner now sit behind per-output details.
+- 2026-05-15 1940 EDT: simplified the Workbench default read; Project Proof,
+  receipt grouping, and read gates now sit behind closed disclosures.
 
 ### Frontend Worker
 
 Next block:
 
-- Take one high-noise surface pass, starting with Workbench.
+- Take one high-noise surface pass only if the next surface still shows
+  machinery first. Otherwise move to the Project Lab DB-only/cached git status
+  read-model split.
 - Keep the primitive contract intact: CereBro token colors, visible focus,
   compact density, 8px max radius, risk before destructive, grouped menus, and
   dark shell surfaces.
@@ -498,3 +502,5 @@ Expected shape:
   check machinery sit behind closed disclosures.
 - Artifacts now reads as Saved Outputs first; raw storage path, retention, and
   owner proof sit behind per-output details.
+- Workbench now keeps Add Receipt and Recent Receipts primary while Project
+  Proof, receipt grouping, and read gates sit behind closed disclosures.

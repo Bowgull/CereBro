@@ -497,7 +497,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
             <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Shared receipt surface for user and agents.
+              Save the proof for what just happened.
             </p>
           </div>
           <Button
@@ -511,7 +511,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </Button>
         </div>
         <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-          {plan.isLoading ? "Reading Workbench state." : "Local receipts only. Browser, media tools, and external writes stay gated."}
+          {plan.isLoading ? "Reading Workbench state." : "Local receipts only. Risky moves still go through Security Gate."}
         </div>
       </header>
 
@@ -526,12 +526,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-                    Active Job
+                    Current Move
                   </div>
                   <Chip label="manual receipt" tone={C.warning} />
                 </div>
                 <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
-                  Gather receipt before summary.
+                  Write a receipt before summary.
                 </div>
                 <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
                   Pick a lane. Record the observation. Append a receipt.
@@ -580,7 +580,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               }
             />
 
-            <section className="rounded p-2" aria-label="Project receipt grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <details className="rounded p-2" aria-label="Project receipt grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Proof</h3>
+                    <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+                      Receipts that Project Lab can read before push decisions.
+                    </p>
+                  </div>
+                  <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
+                </div>
+              </summary>
+              <div className="mt-2">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Receipts</h3>
@@ -636,7 +648,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   ))}
                 </div>
               )}
-            </section>
+              </div>
+            </details>
 
             <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
@@ -1137,7 +1150,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   Reset
                 </Button>
               </div>
-              <div className="mb-2 rounded p-2" aria-label="Workbench receipt groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <details className="mb-2 rounded p-2" aria-label="Workbench receipt groups" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                        Group Receipts
+                      </h4>
+                      <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+                        Local grouping and query proof.
+                      </p>
+                    </div>
+                    <Chip label={`${evidenceGroups.data?.groups.length ?? 0} groups`} tone={C.textMuted} />
+                  </div>
+                </summary>
+                <div className="mt-2">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -1207,19 +1234,29 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                           </span>
                           <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
-                            Sample: {group.sampleIds.map((id) => `#${id}`).join(", ")}
+                            Matches stay local. Open a group to narrow the list.
                           </span>
                         </span>
                       </Button>
                     ))}
                   </div>
                 )}
-              </div>
-              {(evidence.data?.gates ?? []).map((gate) => (
-                <div key={gate} className="mb-2 rounded px-3 py-2 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  {gate}
                 </div>
-              ))}
+              </details>
+              {(evidence.data?.gates ?? []).length > 0 && (
+                <details className="mb-2 rounded p-2" aria-label="Workbench receipt read gates" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textPrimary, ["--tw-ring-color" as string]: C.accent }}>
+                    Receipt Read Rules
+                  </summary>
+                  <div className="mt-2 grid gap-1.5">
+                    {(evidence.data?.gates ?? []).map((gate) => (
+                      <div key={gate} className="rounded px-3 py-2 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                        {gate}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
               {(evidence.data?.items ?? []).length === 0 ? (
                 <div className="rounded px-3 py-3 text-xs leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                   No Workbench receipts yet. Pick a lane above, name the observation, then save a local receipt.

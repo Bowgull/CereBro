@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1937 EDT
+Last updated: 2026-05-15 1940 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1940 EDT - Workbench Low-Machinery Default Read
+
+### What Changed
+- Simplified the Workbench header and active job language around the real user
+  action: save proof for what just happened.
+- Kept Add Receipt and Recent Receipts as the primary visible work path.
+- Moved Project Receipts behind a closed `Project Proof` disclosure.
+- Moved receipt grouping and query proof behind a closed `Group Receipts`
+  disclosure.
+- Moved receipt read gates behind a closed `Receipt Read Rules` disclosure.
+- Removed raw sample-id lists from receipt group cards.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Workbench visible-shell low-machinery pass.
+- No backend behavior, DB schema, external write, model call, package install,
+  browser action from CereBro, command execution from CereBro, storage
+  migration, or Raven boundary changed.
+- No worker was used for this pass because the slice was a tight single-file UI
+  cleanup with a smaller integration cost locally.
+
+### Front-End Steward Review
+- This keeps the Workbench useful as a receipt body surface while reducing the
+  first-read proof wall.
+- Project proof and grouping still exist, but they no longer compete with Add
+  Receipt and Recent Receipts.
+
+### Completion Read
+- Overall: 58%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 96%.
+- Backend/runtime: 42%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: Project Lab
+DB-only/cached git status read-model split, or another compact visible-shell
+cleanup if the UI still shows machinery first.
 
 ## 2026-05-15 1937 EDT - Artifacts Saved Outputs Low-Machinery Pass
 
