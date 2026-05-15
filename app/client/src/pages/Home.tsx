@@ -947,7 +947,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const utils = trpc.useUtils();
-  const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
+  const taskQueue = trpc.tasks.workQueue.useQuery({ limit: 1 }, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
   const approvals = trpc.approvals.list.useQuery({
     status: "pending",
@@ -968,7 +968,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
   });
 
-  const taskRows = tasks.data ?? [];
   const sessionRows = sessions.data ?? [];
   const approvalRows = approvals.data?.items ?? [];
   const outputRows = outputs.data ?? [];
@@ -981,7 +980,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = evidenceRows.filter((item) => item.kind === "terminal_output").length;
   const activeSessions = sessionRows.filter((session) => session.endedAt == null).length;
-  const openTasks = taskRows.filter((task) => task.status === "open" || task.status === "in_progress").length;
+  const taskTotal = taskQueue.data?.total ?? 0;
+  const openTasks = (taskQueue.data?.statusCounts.open ?? 0) + (taskQueue.data?.statusCounts.inProgress ?? 0);
   const selectedAuditRead = selectedEvidence
     ? [
         { label: "Body", value: `Workbench #${selectedEvidence.id}`, tone: C.gold },
@@ -1024,7 +1024,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     {
       label: "Tasks",
       value: String(openTasks),
-      meta: `${taskRows.length} total work records`,
+      meta: `${taskTotal} total work records`,
       target: "tasks" as NavId,
       tone: C.warning,
     },

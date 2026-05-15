@@ -16843,3 +16843,72 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: move Ledger Overview task counting and Terminal Lab task selection toward lighter read models so the old full `tasks.list` query is not used by high-traffic surfaces. Keep the UI compact and do not add execution.
 ```
+
+## 2026-05-15 0822 EDT — Light task reads for Ledger and Terminal Lab
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 90%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a small frontend wiring pass on two surfaces.
+
+What changed:
+
+- Ledger Overview no longer calls the full `tasks.list` query for its task
+  card.
+- Ledger Overview now reads `tasks.workQueue({ limit: 1 })` for total task
+  count plus open/in-progress counts.
+- Terminal Lab no longer calls the full `tasks.list` query for its task link
+  selector.
+- Terminal Lab now reads `tasks.workQueue({ limit: 80, focusedTaskId })`.
+- Terminal Lab still supports task link selection and keeps the selected task
+  available through the work-queue focus pin.
+- Terminal Lab follow-up task creation now invalidates `tasks.workQueue`.
+- No task execution, command execution, browser action, model call, Workbench
+  write, memory write, git action, Slack write, Notion write, or external
+  provider call was added.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-task-workqueue-light-surfaces-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Ledger, and confirmed the
+  task card still shows open task count plus total task count.
+- Playwright opened Workshop > Terminal Lab and confirmed the task selector
+  loads while Terminal Lab remains execution-disabled.
+
+Known risks:
+
+- `tasks.list` still exists and is still used by some lower-traffic or older
+  surfaces, including Hedwig and Sessions invalidation paths.
+- Terminal Lab task selector now shows the first 80 work-queue tasks, not every
+  historical task. That is intentional for V1 speed, but a search field would
+  be better later.
+- Session chips remain repetitive in Terminal Lab and Tasks.
+
+Storage impact:
+
+- No schema change.
+- No database rows created.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: clean Terminal Lab and Tasks session filter noise by grouping duplicate session labels or moving session selection into a compact searchable menu. Keep it read-only and do not add execution.
+```

@@ -137,6 +137,9 @@ Recent Prime slices:
 - 2026-05-15 0815 EDT: added `tasks.workQueue`, a paged read-only Tasks read
   model with full status counts and focused task pinning. `TasksPanel` now uses
   this read model instead of fetching the whole task table.
+- 2026-05-15 0822 EDT: moved Ledger Overview task counts and Terminal Lab task
+  selector to `tasks.workQueue`, removing the old full `tasks.list` fetch from
+  those high-traffic surfaces.
 
 ### Frontend Worker
 

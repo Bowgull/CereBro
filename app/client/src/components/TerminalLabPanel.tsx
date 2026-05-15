@@ -68,7 +68,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         ? { limit: 12, sessionId: Number(selectedSessionId) }
         : { limit: 12 };
   const observations = trpc.terminalLab.observations.useQuery(observationFilter);
-  const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
+  const selectedTaskNumber = selectedTaskId ? Number(selectedTaskId) : undefined;
+  const tasks = trpc.tasks.workQueue.useQuery(
+    { limit: 80, focusedTaskId: selectedTaskNumber },
+    { refetchInterval: 10000 },
+  );
   const sessions = trpc.sessions.list.useQuery({ limit: 25 }, { refetchInterval: 5000 });
   const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
   const terminalEvidence = trpc.workbench.evidence.useQuery(
@@ -93,7 +97,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const utils = trpc.useUtils();
   const data = plan.data;
   const observationRows = observations.data ?? [];
-  const selectedTask = tasks.data?.find((task) => String(task.id) === selectedTaskId);
+  const taskOptions = tasks.data?.items ?? [];
+  const selectedTask = taskOptions.find((task) => String(task.id) === selectedTaskId);
   const selectedSession = sessions.data?.find((session) => String(session.id) === selectedSessionId);
   const sessionLabelById = new Map((sessions.data ?? []).map((session) => [session.id, session.displayName]));
   const selectedObservation = observationRows.find((item) => item.id === selectedObservationId) ?? null;
@@ -241,6 +246,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         onSuccess: () => {
           utils.terminalLab.observations.invalidate();
           utils.tasks.list.invalidate();
+          utils.tasks.workQueue.invalidate();
           utils.tasks.projects.invalidate();
         },
       },
@@ -467,7 +473,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             onChange={(value) => setSelectedTaskId(value === "none" ? "" : value)}
             options={[
               { value: "none", label: "No task link" },
-              ...(tasks.data ?? []).map((task) => ({
+              ...taskOptions.map((task) => ({
                 value: String(task.id),
                 label: `#${task.id} ${task.projectName ? `${task.projectName}: ` : ""}${task.title}`,
               })),
