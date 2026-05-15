@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 1916 EDT
+Last updated: 2026-05-15 1920 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 1920 EDT - Primitive Token And Focus Normalization
+
+### What Changed
+- Continued from the worker audit and took the next queued primitive slice.
+- Removed remaining non-token ad hoc fills from Button and Badge variants.
+- Added visible keyboard focus rings to dropdown menu items, checkbox items,
+  radio items, and sub triggers.
+- Normalized Menubar groups, disabled state, destructive focus state, and
+  keyboard focus rings to match dropdown/context menu rules.
+- Added a selected-item ring to Command items so keyboard position is visible.
+- Changed AlertDialog action default from destructive to risk, with an explicit
+  `variant="destructive"` escape hatch for irreversible actions.
+- Added top/bottom sheet edge rounding within the 8px max-radius rule.
+- Replaced generic shadcn chart semantic selectors with CereBro token hexes.
+
+### Files Touched
+- `app/client/src/components/ui/button.tsx`
+- `app/client/src/components/ui/badge.tsx`
+- `app/client/src/components/ui/dropdown-menu.tsx`
+- `app/client/src/components/ui/menubar.tsx`
+- `app/client/src/components/ui/command.tsx`
+- `app/client/src/components/ui/alert-dialog.tsx`
+- `app/client/src/components/ui/sheet.tsx`
+- `app/client/src/components/ui/chart.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Source drift check for the audited ad hoc color/focus patterns returned no
+  matches.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: shared UI primitive normalization.
+- No backend behavior, DB schema, external write, model call, package install,
+  browser action from CereBro, command execution from CereBro, storage
+  migration, or Raven boundary changed.
+- Alert dialogs now default to risk, not destructive. Callers can still opt
+  into destructive for irreversible actions.
+
+### Front-End Steward Review
+- This keeps CereBro's surface vocabulary tighter: risk is amber by default,
+  destructive is red only when the action deserves it, and keyboard users get a
+  visible position marker in menu and command primitives.
+- The change supports the fast AI OS goal by making shared controls legible
+  without adding more visible machinery.
+
+### Completion Read
+- Overall: 56%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 94%.
+- Backend/runtime: 38%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: either take
+the first compact read-model slice with `ledger.overview`, or simplify the
+highest-noise visible surface from the frontend worker audit, starting with
+Approval Queue.
 
 ## 2026-05-15 1916 EDT - Grouped Memory And Artifact Run Filters
 

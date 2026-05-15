@@ -143,16 +143,19 @@ Recent Prime slices:
 - 2026-05-15 1916 EDT: used 3 read-only workers for frontend, backend, and
   primitive audits. Folded findings into this queue, then shipped grouped run
   filters for Memory and Artifacts so duplicate run chips match Tasks.
+- 2026-05-15 1920 EDT: normalized the remaining audited primitive drift:
+  Button/Badge token fills, menu and command focus rings, Menubar grouping,
+  AlertDialog risk/destructive defaults, Sheet edge radius, and Chart token
+  selectors.
 
 ### Frontend Worker
 
 Next block:
 
-- Finish the current primitive normalization debt: button/badge token drift,
-  menu and command focus rings, menubar grouping, alert-dialog
-  risk/destructive shape, chart token mapping, and sheet edge radius.
-- Then take one high-noise surface pass, starting with Approval Queue or
-  Artifacts.
+- Take one high-noise surface pass, starting with Approval Queue or Artifacts.
+- Keep the primitive contract intact: CereBro token colors, visible focus,
+  compact density, 8px max radius, risk before destructive, grouped menus, and
+  dark shell surfaces.
 - Favor hidden machinery, compact receipts, obvious next action, and fast AI OS
   feel.
 - Do not create a new surface.
@@ -470,3 +473,5 @@ Expected shape:
   loaded options instead of exposing raw long dropdowns.
 - Memory and Artifacts now group duplicate run filter chips by display label
   while keeping exact run ids visible in write/link dropdowns.
+- Shared primitives now use tighter CereBro token/focus/risk contracts across
+  Button, Badge, Dropdown Menu, Menubar, Command, AlertDialog, Sheet, and Chart.

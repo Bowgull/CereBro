@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-[#6BA6FF] bg-[#6BA6FF] text-[#0E1116] hover:bg-[#8DBBFF]",
+          "border-[#6BA6FF] bg-[#6BA6FF] text-[#0E1116] hover:bg-[#6BA6FF]/85",
         destructive:
           "border-[#EF6F6C] bg-[#7F1D1D] text-[#F4EFE3] hover:bg-[#EF6F6C] hover:text-[#0E1116] focus-visible:border-[#EF6F6C] focus-visible:ring-[#EF6F6C]/35",
         risk:
-          "border-[#F6C177] bg-[#3A2A18] text-[#F6C177] hover:bg-[#F6C177] hover:text-[#0E1116] focus-visible:border-[#F6C177] focus-visible:ring-[#F6C177]/35",
+          "border-[#F6C177] bg-[#F6C177]/10 text-[#F6C177] hover:bg-[#F6C177] hover:text-[#0E1116] focus-visible:border-[#F6C177] focus-visible:ring-[#F6C177]/35",
         outline:
           "border-[#334155] bg-[#151A23] text-[#F4EFE3] hover:border-[#6BA6FF] hover:bg-[#202A38]",
         secondary:
-          "border-[#334155] bg-[#202A38] text-[#F4EFE3] hover:border-[#D9B56A] hover:bg-[#252F3F]",
+          "border-[#334155] bg-[#202A38] text-[#F4EFE3] hover:border-[#D9B56A] hover:bg-[#151A23]",
         ghost:
           "border-transparent bg-transparent text-[#B8C0CC] hover:border-[#253041] hover:bg-[#151A23] hover:text-[#F4EFE3]",
         link: "border-transparent bg-transparent px-0 text-[#6BA6FF] underline-offset-4 hover:text-[#F4EFE3] hover:underline",

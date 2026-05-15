@@ -16,11 +16,11 @@ const badgeVariants = cva(
         destructive:
           "border-[#7F1D1D] bg-[#7F1D1D]/55 text-[#EF6F6C] [a&]:hover:bg-[#7F1D1D]",
         success:
-          "border-[#9FD2B7]/50 bg-[#13231D] text-[#9FD2B7] [a&]:hover:bg-[#193026]",
+          "border-[#9FD2B7]/50 bg-[#9FD2B7]/10 text-[#9FD2B7] [a&]:hover:bg-[#9FD2B7]/15",
         warning:
-          "border-[#F6C177]/50 bg-[#2B2114] text-[#F6C177] [a&]:hover:bg-[#3A2A18]",
+          "border-[#F6C177]/50 bg-[#F6C177]/10 text-[#F6C177] [a&]:hover:bg-[#F6C177]/15",
         violet:
-          "border-[#8B5CF6]/50 bg-[#1E1930] text-[#A78BFA] [a&]:hover:bg-[#28213E]",
+          "border-[#8B5CF6]/50 bg-[#8B5CF6]/10 text-[#A78BFA] [a&]:hover:bg-[#8B5CF6]/15",
         outline:
           "border-[#334155] bg-transparent text-[#F4EFE3] [a&]:hover:bg-[#202A38]",
       },

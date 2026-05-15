@@ -118,11 +118,14 @@ function AlertDialogDescription({
 
 function AlertDialogAction({
   className,
+  variant = "risk",
   ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
+}: React.ComponentProps<typeof AlertDialogPrimitive.Action> & {
+  variant?: "risk" | "destructive";
+}) {
   return (
     <AlertDialogPrimitive.Action
-      className={cn(buttonVariants({ variant: "destructive" }), className)}
+      className={cn(buttonVariants({ variant }), className)}
       {...props}
     />
   );
