@@ -89,6 +89,12 @@ Current integration order:
 - Preserve existing unrelated dirty worktree files.
 - Update handoff and Obsidian archive at the end of real build blocks.
 
+Recent Prime slices:
+
+- 2026-05-14 2149 EDT: collapsed Piccolo cleanup rules/storage contract,
+  Artifacts save routing, and Memory proposal routing behind explicit details.
+  Kept scan results, artifact list, and memory proposal input visible.
+
 ### Frontend Worker
 
 Next block:

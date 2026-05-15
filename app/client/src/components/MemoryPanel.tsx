@@ -163,36 +163,12 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <form onSubmit={submit} className="grid grid-cols-1 gap-1.5 px-2.5 py-1.5 shrink-0 sm:grid-cols-[120px_145px_minmax(0,1fr)] lg:grid-cols-[120px_145px_minmax(0,1fr)_140px_76px]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <AppSelect
-          label="Memory proposal kind"
-          value={kind}
-          onChange={(value) => setKind(value as Kind)}
-          options={KINDS.map((k) => ({ value: k, label: k }))}
-        />
-        <AppSelect
-          label="Run link"
-          value={proposalSessionId}
-          onChange={setProposalSessionId}
-          options={[
-            { value: "none", label: "No run link" },
-            ...sessionOptions.map((session) => ({
-              value: String(session.id),
-              label: session.displayName,
-            })),
-          ]}
-        />
+      <form onSubmit={submit} className="grid grid-cols-1 gap-1.5 px-2.5 py-1.5 shrink-0 sm:grid-cols-[minmax(0,1fr)_76px]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <Input
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="New memory proposal. Enter to stage."
           className="flex-1"
-        />
-        <Input
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          placeholder="tags, comma-sep"
-          className="w-full"
         />
         <Button
           type="submit"
@@ -203,6 +179,37 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         >
           Propose
         </Button>
+        <details className="sm:col-span-2">
+          <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+            Proposal Routing
+          </summary>
+          <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-[120px_145px_minmax(0,1fr)]">
+            <AppSelect
+              label="Memory proposal kind"
+              value={kind}
+              onChange={(value) => setKind(value as Kind)}
+              options={KINDS.map((k) => ({ value: k, label: k }))}
+            />
+            <AppSelect
+              label="Run link"
+              value={proposalSessionId}
+              onChange={setProposalSessionId}
+              options={[
+                { value: "none", label: "No run link" },
+                ...sessionOptions.map((session) => ({
+                  value: String(session.id),
+                  label: session.displayName,
+                })),
+              ]}
+            />
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="tags, comma-sep"
+              className="w-full"
+            />
+          </div>
+        </details>
       </form>
 
       <div className="flex-1 overflow-y-auto">

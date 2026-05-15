@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2135 EDT
+Last updated: 2026-05-14 2149 EDT
 
 ## Current North Star
 
@@ -20,6 +20,85 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2149 EDT - Ledger And Automation Machinery Collapse Pass
+
+### What Changed
+- Continued in CereBro Prime mode.
+- Kept Raven, backend, and reference changes quarantined.
+- Updated `PiccoloPanel` so status, findings, vault path, and the hard-gated
+  Save Report action stay visible.
+- Moved Piccolo cleanup rules, storage contract counts, Obsidian lanes, and
+  GitHub bridge examples behind `Cleanup Rules And Storage Contract`.
+- Updated `ArtifactsPanel` so the output body, title, kind, run link, and Save
+  action stay visible.
+- Moved optional source/subfolder routing, owner policy, current-state warning,
+  and last write receipt behind `Save Routing`.
+- Updated `MemoryPanel` so the memory proposal field and Propose action stay
+  visible.
+- Moved proposal kind, run link, and tags behind `Proposal Routing`.
+- No backend behavior changed. No approval execution, command execution,
+  browser action from CereBro, project action, git action from the UI, Ollama
+  command, install, pull, model call, vector index, external write, or storage
+  migration ran.
+
+### Files Touched
+- `app/client/src/components/PiccoloPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts server/modelTools.localFirst.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 3 files. 30 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened Memory and confirmed `Proposal Routing` is collapsed with
+  no console errors.
+- Playwright opened Outputs and confirmed `Save Routing` is collapsed with no
+  console errors.
+- Playwright opened Automation and confirmed `Cleanup Rules And Storage
+  Contract` is collapsed with no console errors.
+
+### Cleanliness Read
+- Current slice: Piccolo, Artifacts, and Memory low-machinery pass.
+- Quarantine: `AGENTS.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`,
+  Raven ADR, the existing Raven entry change in `app/client/src/pages/Home.tsx`,
+  and dirty backend/Raven files remain unstaged.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+- Blocked: Ledger polish in `Home.tsx` should wait until the Raven entry change
+  is either committed separately or deliberately integrated.
+
+### Front-End Steward Review
+- Piccolo now reads as a maintenance scanner first.
+- Artifacts now reads as output library and save action first.
+- Memory now reads as knowledge receipts and one-stage proposal input first.
+- The machinery remains visible on demand, but it no longer owns the default
+  screen.
+
+### Completion Read
+- Overall: 48%.
+- Foundation/docs/planning: 92%.
+- Frontend visible loop: 79%.
+- Backend/runtime: 30%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Keep Raven implementation quarantined because Raven is being built in a
+separate chat. Worker slots may already be full, so use local slices unless a
+worker frees up. Next safe frontend slice: inspect `HedwigInboxPanel` for
+default-visible machinery. Avoid `Home.tsx` until Raven entry work is resolved.
+Switch to backend receipt contracts only after the Raven backend batch is
+resolved.
 
 ## 2026-05-14 2135 EDT - Model Tools Detail Collapse Pass
 

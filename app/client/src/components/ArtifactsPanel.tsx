@@ -294,14 +294,18 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
             {isWriting ? "Saving" : "Save"}
           </Button>
         </div>
-        <div className="grid grid-cols-1 gap-1.5 lg:grid-cols-[minmax(0,1fr)_210px]">
+        <div className="grid grid-cols-1 gap-1.5">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder={writeCopy.body}
             className="min-h-16"
           />
-          <div className="space-y-1.5">
+          <details>
+            <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+              Save Routing
+            </summary>
+            <div className="mt-1.5 grid gap-1.5 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_1.2fr]">
             {writeKind === "obsidian_note" ? (
               <Input
                 value={obsidianSubdir}
@@ -322,11 +326,12 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
               These controls save durable history/drafts/reports. Current-state updates need a separate explicit current-state writer.
             </div>
             {lastWrite && (
-              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surfaceRaised, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+              <div className="rounded p-1.5 text-[10px] leading-snug md:col-span-2 xl:col-span-3" style={{ background: C.surfaceRaised, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                 {lastWrite}
               </div>
             )}
-          </div>
+            </div>
+          </details>
         </div>
       </form>
 

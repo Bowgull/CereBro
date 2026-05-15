@@ -117,73 +117,77 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
         <StatusBlock label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
       </div>
 
-      <div className="grid gap-1.5 px-2 py-1.5 shrink-0 md:grid-cols-3" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <RuleCard title="Read Only" body="Scans can report drift. They do not move, archive, delete, install, or schedule." tone={C.success} />
-        <RuleCard title="Durable Write" body="Saving a report writes a vault artifact and must pass the hard gate first." tone={C.warning} />
-        <RuleCard title="Cleanup" body="Cleanup proposals remain proposals until an action receipt is approved." tone={C.danger} />
-      </div>
-
-      <div className="grid gap-1.5 px-2 py-1.5 shrink-0 xl:grid-cols-[0.9fr_1.2fr_1.1fr]" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.gold }}>
-              Storage Contract
-            </div>
-            <Badge variant="secondary" className="uppercase">
-              {contractData?.mode ?? "read_only"}
-            </Badge>
-          </div>
-          <div className="mt-1 grid grid-cols-3 gap-1">
-            <MiniMetric label="Kinds" value={String(contractData?.counts.artifactKinds ?? 0)} />
-            <MiniMetric label="States" value={String(contractData?.counts.lifecycleStates ?? 0)} />
-            <MiniMetric label="Rules" value={String(contractData?.counts.retentionRules ?? 0)} />
-          </div>
-          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-            Piccolo reports. Oak validates knowledge shape. Spock gates writes.
-          </div>
+      <details className="shrink-0 px-2 py-1.5 group" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+          Cleanup Rules And Storage Contract
+        </summary>
+        <div className="mt-1.5 grid gap-1.5 md:grid-cols-3">
+          <RuleCard title="Read Only" body="Scans report drift. They do not move, archive, delete, install, or schedule." tone={C.success} />
+          <RuleCard title="Durable Write" body="Saving a report writes a vault artifact and must pass the hard gate first." tone={C.warning} />
+          <RuleCard title="Cleanup" body="Cleanup proposals remain proposals until an action receipt is approved." tone={C.danger} />
         </div>
-
-        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.accent }}>
-            Obsidian Lanes
-          </div>
-          <div className="mt-1 grid grid-cols-2 gap-1">
-            {(contractData?.obsidianContract.routes ?? []).map((route) => (
-              <div key={route.key} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: route.retrievalDefault === "archive_only" ? C.warning : C.textSecondary }} title={route.relativePath}>
-                  {route.relativePath}
-                </div>
-                <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
-                  {route.retrievalDefault.replace(/_/g, " ")}
-                </div>
+        <div className="mt-1.5 grid gap-1.5 xl:grid-cols-[0.9fr_1.2fr_1.1fr]">
+          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.gold }}>
+                Storage Contract
               </div>
-            ))}
+              <Badge variant="secondary" className="uppercase">
+                {contractData?.mode ?? "read_only"}
+              </Badge>
+            </div>
+            <div className="mt-1 grid grid-cols-3 gap-1">
+              <MiniMetric label="Kinds" value={String(contractData?.counts.artifactKinds ?? 0)} />
+              <MiniMetric label="States" value={String(contractData?.counts.lifecycleStates ?? 0)} />
+              <MiniMetric label="Rules" value={String(contractData?.counts.retentionRules ?? 0)} />
+            </div>
+            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              Piccolo reports. Oak validates knowledge shape. Spock gates writes.
+            </div>
           </div>
-        </div>
 
-        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.success }}>
-            Project Bridge
+          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.accent }}>
+              Obsidian Lanes
+            </div>
+            <div className="mt-1 grid grid-cols-2 gap-1">
+              {(contractData?.obsidianContract.routes ?? []).map((route) => (
+                <div key={route.key} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: route.retrievalDefault === "archive_only" ? C.warning : C.textSecondary }} title={route.relativePath}>
+                    {route.relativePath}
+                  </div>
+                  <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+                    {route.retrievalDefault.replace(/_/g, " ")}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-            Active projects enter memory through a bridge note, not a raw code dump.
-          </div>
-          <div
-            className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
-            title={contractData?.githubProjectPaths.bridgeExample}
-          >
-            {contractData?.githubProjectPaths.bridgeExample ?? "10_Projects/<Project>/<Project>.md"}
-          </div>
-          <div
-            className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
-            title={contractData?.githubProjectPaths.sourceExample}
-          >
-            {contractData?.githubProjectPaths.sourceExample ?? "20_Knowledge/Sources/GitHub/<Project> Repository Source.md"}
+
+          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.success }}>
+              Project Bridge
+            </div>
+            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              Active projects enter memory through a bridge note, not a raw code dump.
+            </div>
+            <div
+              className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+              title={contractData?.githubProjectPaths.bridgeExample}
+            >
+              {contractData?.githubProjectPaths.bridgeExample ?? "10_Projects/<Project>/<Project>.md"}
+            </div>
+            <div
+              className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
+              title={contractData?.githubProjectPaths.sourceExample}
+            >
+              {contractData?.githubProjectPaths.sourceExample ?? "20_Knowledge/Sources/GitHub/<Project> Repository Source.md"}
+            </div>
           </div>
         </div>
-      </div>
+      </details>
 
       {data?.vault.vaultDir && (
         <div className="px-2 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
