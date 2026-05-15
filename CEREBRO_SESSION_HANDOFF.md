@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2202 EDT
+Last updated: 2026-05-14 2204 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2204 EDT - Runtime Route Receipt Browser Proof
+
+### What Changed
+- Verified the existing runtime route receipt to Workbench and Ledger flow in
+  browser.
+- Confirmed Ask Aang creates a visible `Runtime route receipt preview`.
+- Confirmed the Workbench button stages a draft receipt with title and summary
+  filled from the route receipt.
+- Confirmed the Ledger button opens Ledger with a route-focus notice.
+- Updated `CEREBRO_BUILD_QUEUE.md` so this proof is no longer stale QA debt.
+- No code changed in this proof pass.
+- No receipt save, audit write, approval execution, command execution, browser
+  action from CereBro, model call, install, pull, external write, vector index,
+  or storage migration ran.
+
+### Files Touched
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Playwright filled Ask Aang with `keep building CereBro front end` and
+  confirmed the runtime route preview appeared.
+- Playwright clicked `Workbench` and confirmed a staged Workbench draft appeared
+  with title `CereBro: project build - keep building CereBro front end`.
+- Playwright clicked `Ledger` and confirmed the focus notice:
+  `Focus Ledger on tony project build route preview. No audit row is saved.`
+- Playwright console checks returned 0 errors.
+
+### Cleanliness Read
+- Current slice: browser proof and queue cleanup.
+- Worktree was clean before the docs update.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+
+### Front-End Steward Review
+- The route loop now behaves like the intended V1 spine:
+  Ask Aang -> route receipt -> Workbench body or Ledger audit focus.
+- The important part held: preview and staging do not secretly save.
+
+### Completion Read
+- Overall: 50%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 82%.
+- Backend/runtime: 32%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Next best path: backend receipt contracts can move toward a
+`runtime.commitRoute` preview/write boundary, but only after deciding the local
+route record schema. If avoiding backend schema, continue shell polish that
+keeps Workbench and Ledger primary.
 
 ## 2026-05-14 2202 EDT - Legacy Map Dead Code Cleanup
 

@@ -107,6 +107,8 @@ Recent Prime slices:
 - 2026-05-14 2202 EDT: deleted unused fork remnants `DungeonMap.tsx` and
   `Map.tsx`, then updated stale comments/docs that still pointed at the old
   map pathing model.
+- 2026-05-14 2204 EDT: browser-verified the runtime route receipt loop. Ask
+  Aang stages a Workbench draft and focuses Ledger without autosaving.
 
 ### Frontend Worker
 
@@ -216,6 +218,8 @@ Goal:
   Cortana route, owner/support agents, permission class, model/tool proposals,
   approval gates, and next action.
 - Next: route preview returns Workbench draft and Ledger focus payloads.
+- Browser proof complete: route preview opens Workbench with a staged draft and
+  opens Ledger with a focus notice. No receipt or audit row is autosaved.
 - Later: `runtime.commitRoute` appends local route records only after UI proves
   the preview shape.
 
