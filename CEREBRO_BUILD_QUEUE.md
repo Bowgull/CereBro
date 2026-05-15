@@ -123,6 +123,9 @@ Recent Prime slices:
 - 2026-05-14 2312 EDT: added `Stage Body` on saved Ledger route reads. It
   carries the route draft into Workbench as a local draft only; the user still
   has to press Save Local Receipt to append evidence.
+- 2026-05-14 2326 EDT: added `Create Task` on saved Ledger route reads. It
+  creates one local task from the route draft, shows the task id, and still does
+  not run the task.
 
 ### Frontend Worker
 
@@ -420,3 +423,6 @@ Expected shape:
 - Saved Ledger route reads now expose `Stage Body`. It moves the saved route
   into Workbench's Add Receipt form as a draft, preserves review-before-save,
   and still avoids hidden execution or evidence writes.
+- Saved Ledger route reads now expose `Create Task`. It turns a route into one
+  local task record and displays the created task id. Route, task, Workbench
+  evidence, command, browser, and model actions remain separate.

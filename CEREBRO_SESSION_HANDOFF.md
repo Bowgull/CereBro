@@ -16489,3 +16489,63 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: add the matching explicit Create Task action for saved route records in Ledger, or tighten Workbench staged route metadata if that is the smaller safer move. Keep route, task, Workbench evidence, command, browser, and model actions separate and visible.
 ```
+
+## 2026-05-14 2326 EDT — Ledger route Create Task action
+
+Overall completion after this pass:
+
+- Overall: 53%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 86%
+- Backend/runtime: 35%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Tried to spawn a read-only worker to inspect the task contract.
+- Spawn failed because the agent thread limit is reached.
+- Continued locally because the slice was small and isolated.
+
+What changed:
+
+- Added a compact `Create Task` action to each saved route read in Ledger.
+- The action reads the saved route `taskDraft` and calls `tasks.create`.
+- The route row shows `Task #<id>` after creation and disables the button.
+- The task count card refreshes after creation.
+- `Stage Body` remains a separate action.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `git diff --check -- app/client/src/pages/Home.tsx` passed.
+- Browser proof opened `http://localhost:3002`, opened Ledger, clicked
+  `Create Task` on route #3, saw `Task #1712`, and saw the task count update.
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-ledger-route-task-test-$$.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 3 files and 32 tests.
+
+Known risks:
+
+- Browser proof created one real local task row, task #1712, from route #3.
+- The task action is local and explicit, but it does not create a Workbench
+  evidence row. That remains separate.
+- It does not run the task.
+
+Storage impact:
+
+- No schema change.
+- Adds one local `tasks` row only when the user clicks `Create Task`.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: make route-created tasks easier to inspect from Ledger or Project Lab without adding new machinery. Keep route records, tasks, Workbench evidence, commands, browser actions, model calls, and external writes separate.
+```

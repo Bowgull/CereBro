@@ -942,6 +942,9 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
+  const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
+  const [createdRouteTaskIds, setCreatedRouteTaskIds] = useState<Record<number, number>>({});
+  const utils = trpc.useUtils();
   const tasks = trpc.tasks.list.useQuery(undefined, { refetchInterval: 10000 });
   const sessions = trpc.sessions.list.useQuery({ limit: 50 }, { refetchInterval: 5000 });
   const approvals = trpc.approvals.list.useQuery({
@@ -954,6 +957,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const proposals = trpc.memory.proposals.useQuery({ limit: 50 });
   const workbenchEvidence = trpc.workbench.evidence.useQuery({ limit: 50 });
   const routeRecords = trpc.runtime.routeRecords.useQuery({ limit: 6 });
+  const createTaskFromRoute = trpc.tasks.create.useMutation({
+    onSuccess: () => utils.tasks.list.invalidate(),
+  });
 
   const taskRows = tasks.data ?? [];
   const sessionRows = sessions.data ?? [];
@@ -1134,6 +1140,31 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("workbench");
   }
 
+  function createTaskFromRouteRecord(item: { id: number; originalText: string; taskDraft: Record<string, unknown> }) {
+    if (createTaskFromRoute.isPending) return;
+    const title = typeof item.taskDraft.title === "string" ? item.taskDraft.title : `Route #${item.id}: ${item.originalText}`;
+    const agent = typeof item.taskDraft.agent === "string" ? item.taskDraft.agent : undefined;
+    const projectName = typeof item.taskDraft.projectName === "string" ? item.taskDraft.projectName : undefined;
+    const projectPath = typeof item.taskDraft.projectPath === "string" ? item.taskDraft.projectPath : undefined;
+    setCreatingRouteTaskId(item.id);
+    createTaskFromRoute.mutate(
+      {
+        title,
+        agent,
+        projectName,
+        projectPath,
+      },
+      {
+        onSuccess: (task) => {
+          setCreatedRouteTaskIds((current) => ({ ...current, [item.id]: task.id }));
+        },
+        onSettled: () => {
+          setCreatingRouteTaskId(null);
+        },
+      },
+    );
+  }
+
   return (
     <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
       <div className="grid gap-2">
@@ -1219,6 +1250,28 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={createdRouteTaskIds[item.id] ? "secondary" : "outline"}
+                      className="h-6 px-2 text-[10px]"
+                      onClick={() => createTaskFromRouteRecord(item)}
+                      disabled={creatingRouteTaskId === item.id || createdRouteTaskIds[item.id] != null}
+                      aria-label={
+                        createdRouteTaskIds[item.id]
+                          ? `Task ${createdRouteTaskIds[item.id]} created from route ${item.id}`
+                          : creatingRouteTaskId === item.id
+                            ? `Creating task from route ${item.id}`
+                            : `Create local task from route ${item.id}`
+                      }
+                      title="Create a local task from this saved route. This does not run the task."
+                    >
+                      {createdRouteTaskIds[item.id]
+                        ? `Task #${createdRouteTaskIds[item.id]}`
+                        : creatingRouteTaskId === item.id
+                          ? "Creating"
+                          : "Create Task"}
+                    </Button>
                     <Button
                       type="button"
                       size="sm"
