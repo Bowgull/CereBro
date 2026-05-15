@@ -3,6 +3,7 @@ import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { disambiguateSessionOptions } from "@/lib/sessionLabels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -116,6 +117,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [projectId, setProjectId] = useState<number | "none">("none");
   const [taskId, setTaskId] = useState<number | "none">("none");
   const [sessionId, setSessionId] = useState<number | "none">("none");
+  const [taskLinkQuery, setTaskLinkQuery] = useState("");
+  const [sessionLinkQuery, setSessionLinkQuery] = useState("");
   const [sourceId, setSourceId] = useState<number | "none">("none");
   const [commandObservationId, setCommandObservationId] = useState<number | "none">("none");
   const [artifactId, setArtifactId] = useState<number | "none">("none");
@@ -132,6 +135,33 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
   );
+  const taskLinkOptions = useMemo(() => {
+    const normalizedQuery = taskLinkQuery.trim().toLowerCase();
+    return (linkOptions.data?.tasks ?? [])
+      .filter((task) => projectId === "none" || task.projectId === projectId)
+      .filter((task) => {
+        if (!normalizedQuery) return true;
+        const label = `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`;
+        return label.toLowerCase().includes(normalizedQuery);
+      })
+      .map((task) => ({
+        value: String(task.id),
+        label: `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`,
+      }));
+  }, [linkOptions.data?.tasks, projectId, taskLinkQuery]);
+  const sessionLinkOptions = useMemo(() => {
+    const normalizedQuery = sessionLinkQuery.trim().toLowerCase();
+    return disambiguateSessionOptions(linkOptions.data?.sessions ?? [])
+      .filter((session) => projectId === "none" || session.projectId === projectId)
+      .filter((session) => {
+        if (!normalizedQuery) return true;
+        return session.optionLabel.toLowerCase().includes(normalizedQuery);
+      })
+      .map((session) => ({
+        value: String(session.id),
+        label: session.optionLabel,
+      }));
+  }, [linkOptions.data?.sessions, projectId, sessionLinkQuery]);
   const projectProofGroups = useMemo(() => {
     const projectNames = new Map(
       projectOptions.map((project) => [project.tasks.projectId, project.name] as const),
@@ -627,33 +657,33 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         })),
                       ]}
                     />
-                    <AppSelect
+                    <LinkSelect
                       label="Task link"
+                      searchLabel="Find Workbench task link"
+                      searchPlaceholder="Find task."
+                      searchValue={taskLinkQuery}
+                      onSearchChange={setTaskLinkQuery}
                       value={String(taskId)}
                       onChange={(value) => setTaskId(value === "none" ? "none" : Number(value))}
                       options={[
                         { value: "none", label: "No task link" },
-                        ...(linkOptions.data?.tasks ?? [])
-                        .filter((task) => projectId === "none" || task.projectId === projectId)
-                        .map((task) => ({
-                          value: String(task.id),
-                          label: `#${task.id} ${task.projectName ?? "unlinked"} ${task.status} ${task.title}`,
-                        })),
+                        ...taskLinkOptions,
                       ]}
+                      emptyLabel={taskLinkQuery.trim() ? "No matching task" : "No task link"}
                     />
-                    <AppSelect
+                    <LinkSelect
                       label="Session link"
+                      searchLabel="Find Workbench session link"
+                      searchPlaceholder="Find run."
+                      searchValue={sessionLinkQuery}
+                      onSearchChange={setSessionLinkQuery}
                       value={String(sessionId)}
                       onChange={(value) => setSessionId(value === "none" ? "none" : Number(value))}
                       options={[
                         { value: "none", label: "No session link" },
-                        ...(linkOptions.data?.sessions ?? [])
-                        .filter((session) => projectId === "none" || session.projectId === projectId)
-                        .map((session) => ({
-                          value: String(session.id),
-                          label: session.displayName,
-                        })),
+                        ...sessionLinkOptions,
                       ]}
+                      emptyLabel={sessionLinkQuery.trim() ? "No matching run" : "No session link"}
                     />
                     <AppSelect
                       label="Source link"
@@ -2009,6 +2039,48 @@ function AppSelect({
         ))}
       </SelectContent>
     </UiSelect>
+  );
+}
+
+function LinkSelect({
+  label,
+  searchLabel,
+  searchPlaceholder,
+  searchValue,
+  onSearchChange,
+  value,
+  onChange,
+  options,
+  emptyLabel,
+}: {
+  label: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly SelectOption[];
+  emptyLabel: string;
+}) {
+  const hasVisibleMatches = options.length > 1;
+
+  return (
+    <div className="grid gap-1">
+      <AppSelect label={label} value={value} onChange={onChange} options={options} />
+      <Input
+        aria-label={searchLabel}
+        value={searchValue}
+        onChange={(event) => onSearchChange(event.target.value)}
+        placeholder={searchPlaceholder}
+        className="h-6 text-[11px]"
+      />
+      {!hasVisibleMatches && (
+        <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+          {emptyLabel}
+        </div>
+      )}
+    </div>
   );
 }
 

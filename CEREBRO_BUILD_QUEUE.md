@@ -451,3 +451,6 @@ Expected shape:
 - Terminal Lab link pickers now have compact local search fields for task and
   session links. Searching `539` narrows the Session Link dropdown to
   `Terminal QA run #539` without changing the proposal-only command boundary.
+- Workbench Receipt Links now use the same compact local search pattern for
+  task and session links. Receipt creation stays append-only and local; the
+  search only narrows already loaded link options.

@@ -17049,3 +17049,68 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining visible surfaces for noisy raw counts or duplicated local records, then clean the highest-impact one without adding execution. Keep the localhost proof and percentage report.
 ```
+
+## 2026-05-15 1753 EDT — Workbench link picker search
+
+Overall completion after this pass:
+
+- Overall: 56%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 92%
+- Backend/runtime: 37%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a single-surface Workbench frontend slice.
+
+What changed:
+
+- Workbench Receipt Links now include compact local search for task links.
+- Workbench Receipt Links now include compact local search for session links.
+- Workbench session links now use the shared duplicate-label disambiguation,
+  so repeated run names show ids such as `Terminal QA run #539`.
+- Searching `539` narrows the Workbench Session link dropdown to
+  `Terminal QA run #539`.
+- Project, source, command, and artifact links were left unchanged in this
+  slice.
+- Receipt creation remains local and append-only. The new fields only narrow
+  already loaded link options and do not execute commands, run tasks, call
+  models, write memory, push git, call Notion, call Slack, or touch external
+  providers.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-workbench-link-picker-test.db pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false`
+  passed, 25 tests.
+- Playwright opened `http://localhost:3000`, opened Workshop > Workbench,
+  opened Receipt Links, confirmed `Find Workbench task link` and
+  `Find Workbench session link`, typed `539`, opened Session link, and
+  confirmed the dropdown narrowed to `Terminal QA run #539`.
+
+Known risks:
+
+- Search is local to the loaded Workbench link options. It is not a backend
+  historical search.
+- Source, command, and artifact links may need the same treatment later, but
+  they were not changed to keep this pass small.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect Workbench source/command/artifact links and other receipt surfaces for the same picker-search pattern, then apply it only where it reduces visible machinery without widening execution scope.
+```
