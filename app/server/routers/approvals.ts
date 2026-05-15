@@ -3,7 +3,7 @@ import { getCerebroDb } from "../cerebroDb";
 import { publicProcedure, router } from "../_core/trpc";
 
 const statusOptions = ["pending", "approved", "rejected", "cancelled"] as const;
-const originOptions = ["all", "hedwig", "terminal", "project_lab", "source", "other"] as const;
+const originOptions = ["all", "hedwig", "terminal", "project_lab", "source", "raven", "other"] as const;
 const groupOptions = ["origin", "project", "action_type", "status", "risk"] as const;
 const preflightDecisions = ["allowed_local", "proposal_only", "approval_required", "blocked_by_hard_gate"] as const;
 const perceptionClasses = ["explicit_context", "local_files", "terminal_logs", "workbench_media", "public_browser"] as const;
@@ -89,6 +89,7 @@ function originForApproval(input: {
   requestedByAgent: string | null;
 }) {
   if (input.requestedByAgent === "hedwig") return "hedwig";
+  if (input.requestedByAgent === "raven" || input.targetType === "raven_bridge_export_proposal") return "raven";
   if (input.targetType === "command_observation" || input.actionType.startsWith("terminal_")) return "terminal";
   if (input.targetType === "source_event" || input.actionType.includes("source")) return "source";
   if (input.targetType === "task" || input.targetType === "project") return "project_lab";
@@ -140,6 +141,10 @@ function validationPreviewForApproval(input: {
   }
   if (input.requestedByAgent === "hedwig" && !["capture_observation", "reminder_proposal", "message_draft_proposal"].includes(input.targetType ?? "")) {
     spockNotes.push("Hedwig approval should point at a capture, reminder, or message proposal.");
+  }
+  if (input.requestedByAgent === "raven") {
+    oakNotes.push("Raven approval is sealed private scope. Confirm scrub receipt and exact export target before any bridge action.");
+    spockNotes.push("Raven approval remains preview-only. It must not write core memory or external systems from the queue.");
   }
   if (spockNotes.length === 0) {
     spockNotes.push("Shape check passed for a local approval preview. This is not approval.");
@@ -258,6 +263,8 @@ export const approvalsRouter = router({
 
       if (origin === "hedwig") {
         where.push("a.requested_by_agent = 'hedwig'");
+      } else if (origin === "raven") {
+        where.push("(a.requested_by_agent = 'raven' OR a.target_type = 'raven_bridge_export_proposal')");
       } else if (origin === "terminal") {
         where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
       } else if (origin === "source") {
@@ -267,6 +274,8 @@ export const approvalsRouter = router({
       } else if (origin === "other") {
         where.push(`
           a.requested_by_agent != 'hedwig'
+          AND a.requested_by_agent != 'raven'
+          AND COALESCE(a.target_type, '') != 'raven_bridge_export_proposal'
           AND COALESCE(a.target_type, '') != 'command_observation'
           AND a.action_type NOT LIKE 'terminal_%'
           AND COALESCE(a.target_type, '') != 'source_event'
@@ -287,10 +296,12 @@ export const approvalsRouter = router({
             OR COALESCE(rp.title, '') LIKE ?
             OR COALESCE(mp.title, '') LIKE ?
             OR COALESCE(se.title, '') LIKE ?
+            OR COALESCE(rbp.title, '') LIKE ?
+            OR COALESCE(rbp.summary, '') LIKE ?
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like);
       }
 
       args.push(input?.limit ?? 40);
@@ -313,7 +324,7 @@ export const approvalsRouter = router({
             COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
             p.name AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -321,6 +332,7 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
           WHERE ${where.join(" AND ")}
@@ -344,6 +356,7 @@ export const approvalsRouter = router({
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,
           source: items.filter((item) => item.origin === "source").length,
+          raven: items.filter((item) => item.origin === "raven").length,
         },
         gates: [
           "This dashboard reads local approval previews only.",
@@ -382,6 +395,8 @@ export const approvalsRouter = router({
 
       if (origin === "hedwig") {
         where.push("a.requested_by_agent = 'hedwig'");
+      } else if (origin === "raven") {
+        where.push("(a.requested_by_agent = 'raven' OR a.target_type = 'raven_bridge_export_proposal')");
       } else if (origin === "terminal") {
         where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
       } else if (origin === "source") {
@@ -391,6 +406,8 @@ export const approvalsRouter = router({
       } else if (origin === "other") {
         where.push(`
           a.requested_by_agent != 'hedwig'
+          AND a.requested_by_agent != 'raven'
+          AND COALESCE(a.target_type, '') != 'raven_bridge_export_proposal'
           AND COALESCE(a.target_type, '') != 'command_observation'
           AND a.action_type NOT LIKE 'terminal_%'
           AND COALESCE(a.target_type, '') != 'source_event'
@@ -411,10 +428,12 @@ export const approvalsRouter = router({
             OR COALESCE(rp.title, '') LIKE ?
             OR COALESCE(mp.title, '') LIKE ?
             OR COALESCE(se.title, '') LIKE ?
+            OR COALESCE(rbp.title, '') LIKE ?
+            OR COALESCE(rbp.summary, '') LIKE ?
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like);
       }
 
       const result = await db.execute({
@@ -427,7 +446,7 @@ export const approvalsRouter = router({
             COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
             p.name AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -435,6 +454,7 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC

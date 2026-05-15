@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
+import { getCerebroDb } from "../cerebroDb";
 import { searchPromptHandoffs } from "./promptHandoffs";
 
 const intakeCategories = [
@@ -25,6 +26,7 @@ const intakeCategories = [
   "prompt_reuse",
   "artifact_write",
   "security_review",
+  "raven_build",
 ] as const;
 
 const projectModes = ["Build", "Design", "QA", "Ship", "Package", "Pitch", "Learn", "Hygiene"] as const;
@@ -53,6 +55,7 @@ const categoryRules: Array<{ category: IntakeCategory; keywords: string[] }> = [
   { category: "freelance", keywords: ["freelance", "client", "proposal", "lead", "invoice", "contract"] },
   { category: "prompt_reuse", keywords: ["reuse prompt", "that prompt", "old prompt", "excel prompt", "spreadsheet prompt", "pixellab prompt", "prompt from", "handoff prompt", "deepseek prompt", "nanobanana", "nano banana", "tool handoff"] },
   { category: "security_review", keywords: ["safe", "security", "cyber", "malware", "phishing", "anti phishing", "popup", "popups", "ad blocker", "adblock", "ublock", "ublock origin", "virus", "scan this repo", "github repo safe", "suspicious link"] },
+  { category: "raven_build", keywords: ["raven keep building", "raven build", "build raven", "keep building raven"] },
   { category: "research", keywords: ["research", "source", "docs", "compare", "look up", "find", "google", "best", "right now", "latest", "current", "reddit", "youtube"] },
   { category: "learning", keywords: ["teach", "learn", "explain", "understand", "lesson"] },
   { category: "creative", keywords: ["idea", "creative", "image", "video", "prompt", "brand"] },
@@ -73,6 +76,7 @@ function classifyCategory(text: string): IntakeCategory {
 }
 
 function modeForCategory(category: IntakeCategory): ProjectMode | null {
+  if (category === "raven_build") return "Build";
   if (category === "project_build") return "Build";
   if (category === "project_design") return "Design";
   if (category === "project_qa") return "QA";
@@ -93,6 +97,12 @@ function detectProject(text: string) {
 function agentsFor(category: IntakeCategory, projectSlug: string | null): string[] {
   const agents = new Set<string>(["cortana"]);
 
+  if (category === "raven_build") {
+    agents.add("raven");
+    agents.add("spock");
+    agents.add("oak");
+    agents.add("batman");
+  }
   if (category === "decision") agents.add("batman");
   if (category.startsWith("project_")) agents.add("tony");
   if (category === "project_design" || category === "project_package" || category === "portfolio") agents.add("gojo");
@@ -144,6 +154,10 @@ function agentsFor(category: IntakeCategory, projectSlug: string | null): string
 
 function permissionGates(category: IntakeCategory, text: string): string[] {
   const gates = ["No writes or external actions from intake preview."];
+  if (category === "raven_build") {
+    gates.push("Raven work stays inside the sealed private module.");
+    gates.push("No browser session, adult source scan, media download, generator call, external write, or core-memory export.");
+  }
   if (category.startsWith("project_")) gates.push("Code edits require explicit project-specific approval.");
   if (category === "project_ship") gates.push("Deployments, App Store, and account operations require explicit approval.");
   if (category === "file_hygiene") gates.push("Moving, archiving, or deleting files requires explicit approval.");
@@ -168,6 +182,7 @@ function permissionGates(category: IntakeCategory, text: string): string[] {
 
 function nextStep(category: IntakeCategory, projectLabel: string | null): string {
   const target = projectLabel ? `${projectLabel}: ` : "";
+  if (category === "raven_build") return "continue the next local-only Raven backend slice inside the sealed privacy boundary.";
   if (category === "decision") return `${target}ask Batman for a tradeoff map, then let Cortana choose the smallest next move.`;
   if (category === "project_build") return `${target}ask Tony to inspect instructions, git status, and propose one safe implementation slice.`;
   if (category === "project_design") return `${target}ask Gojo for a focused UI/UX critique before Tony changes code.`;
@@ -187,6 +202,7 @@ function nextStep(category: IntakeCategory, projectLabel: string | null): string
 
 function routeChainFor(category: IntakeCategory, agents: string[]) {
   const chain = ["Aang reads mode", "Cortana routes"];
+  if (category === "raven_build") chain.push("Raven stays sealed");
   if (agents.includes("gojo")) chain.push("Gojo reviews design");
   if (agents.includes("tony")) chain.push("Tony scopes patch");
   if (agents.includes("surfer")) chain.push("Surfer gathers sources");
@@ -231,6 +247,23 @@ function taskTitleFor(text: string, category: IntakeCategory, projectLabel: stri
   return `${prefix}${category.replace(/_/g, " ")} - ${shortText}`;
 }
 
+function asksToKeepBuilding(text: string) {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  return normalized === "keep building" || normalized === "' keep building" || normalized === "’ keep building";
+}
+
+async function hasActiveRavenSession() {
+  const db = await getCerebroDb();
+  const result = await db.execute(`
+    SELECT id
+    FROM raven_private_sessions
+    WHERE status = 'active'
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `);
+  return Boolean(result.rows[0]);
+}
+
 export const commandIntakeRouter = router({
   preview: publicProcedure
     .input(
@@ -241,7 +274,11 @@ export const commandIntakeRouter = router({
     )
     .mutation(async ({ input }) => {
       const normalized = input.text.toLowerCase();
-      const category = classifyCategory(normalized);
+      const ravenSessionActive = await hasActiveRavenSession();
+      const category =
+        asksToKeepBuilding(normalized) && ravenSessionActive
+          ? "raven_build"
+          : classifyCategory(normalized);
       const project = detectProject(normalized);
       const projectMode = modeForCategory(category);
       const agents = agentsFor(category, project?.slug ?? null);
@@ -255,6 +292,8 @@ export const commandIntakeRouter = router({
         receivedMode: input.mode,
         originalText: input.text,
         category,
+        sealedModule: category === "raven_build" ? "raven" : null,
+        trigger: category === "raven_build" && asksToKeepBuilding(normalized) ? "keep_building" : null,
         projectMode,
         project: project ? { slug: project.slug, label: project.label, localPath: project.localPath } : null,
         agents,

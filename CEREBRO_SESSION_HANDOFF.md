@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-14 2156 EDT
+Last updated: 2026-05-14 2159 EDT
 
 ## Current North Star
 
@@ -20,6 +20,96 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-14 2159 EDT - Raven Sealed Boundary Checkpoint
+
+### What Changed
+- Classified the remaining dirty batch instead of mixing it into normal
+  frontend work.
+- Confirmed the batch is Raven/backend-heavy, not an ordinary CereBro core UI
+  continuation.
+- Updated `AGENTS.md` so Raven rules match the active sealed-track decision:
+  Raven stays outside core CereBro, core CereBro does not touch Raven data, and
+  the only allowed connection is an explicit sealed launcher with no content
+  flowing back.
+- Updated the Raven ADR to describe Raven as an active sealed private build
+  track outside core CereBro.
+- Added Raven private settings, hard boundaries, user blocks, source adapters,
+  candidates, candidate events, scrub receipts, bridge export proposals, and
+  recommendation-candidate storage tables.
+- Added Raven settings, discovery readiness, source adapter, candidate
+  boundary, normalisation, candidate storage, retention, queue, transition, and
+  review receipt behavior.
+- Added Raven approval-queue origin support so sealed Raven bridge export
+  proposals stay visibly separate from Hedwig, terminal, source, project, and
+  other approvals.
+- Added command-intake recognition for `raven_build` while keeping it
+  proposal-only and sealed.
+- Tightened the CereBro launcher in `Home.tsx` from fuzzy phrase matching to an
+  exact normalized phrase match before opening the local Raven URL.
+- No adult source fetch, browser action from CereBro, media download, external
+  model call, core memory write, Notion write, Slack write, Obsidian knowledge
+  export, approval execution, or storage migration ran.
+
+### Files Touched
+- `AGENTS.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Claude_Code_Repo_Starter_Pack/docs/decisions/ADR-0004-raven-sealed.md`
+- `app/client/src/pages/Home.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/routers/commandIntake.ts`
+- `app/server/routers/raven.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 24 tests.
+- `pnpm -C app exec vitest run server/cerebro-foundations.test.ts server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 2 files. 27 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3002/` returned `HTTP/1.1 200 OK`.
+- Playwright opened the app with a cache-busted URL and console check returned
+  0 errors.
+- `git diff --check` passed for the full Raven boundary checkpoint.
+
+### Cleanliness Read
+- Current slice: Raven sealed boundary checkpoint.
+- The previous dirty Raven/backend batch is now intentionally classified as a
+  coherent sealed Raven checkpoint rather than hidden drift.
+- Generated/local: `.playwright-cli/` regenerated during browser proof and
+  remains ignored.
+- Remaining risk: Raven is still a separate product track. Do not build normal
+  CereBro surfaces around Raven content. Any further Raven work should stay in
+  sealed Raven files or the separate Raven chat unless the user explicitly
+  approves a narrow launcher or boundary receipt change.
+
+### Front-End Steward Review
+- The main CereBro UI still does not display Raven content.
+- The only CereBro-side launcher path now requires an exact phrase instead of a
+  fuzzy phrase, which is the safer shape for a sealed private boundary.
+- This keeps the big picture intact: CereBro is the AI OS. Raven is a sealed
+  private module, not part of the everyday core.
+
+### Completion Read
+- Overall: 50%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 81%.
+- Backend/runtime: 32%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Also read
+Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+before UI edits. Continue in CereBro Prime mode. Start by classifying dirty
+files. Raven is now committed as a sealed backend checkpoint; do not expand it
+into ordinary CereBro surfaces. Next best path for core CereBro: return to
+backend receipt contracts or shell polish that does not expose machinery.
 
 ## 2026-05-14 2156 EDT - Basement Settings Machinery Collapse Pass
 

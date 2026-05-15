@@ -158,6 +158,9 @@ const MODE_ROUTES: Record<Mode, string[]> = {
   build: ["Aang", "Cortana", "Tony", "Spock"],
 };
 
+const ravenEntryOrder = "execute order 66";
+const ravenEntryUrl = "http://127.0.0.1:5174/?handoff=aang";
+
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
@@ -539,6 +542,10 @@ export default function Home() {
         onSubmit={() => {
           const text = askInput.trim();
           if (!text || routePreview.isPending) return;
+          if (isExactPhrase(text, ravenEntryOrder)) {
+            window.location.assign(ravenEntryUrl);
+            return;
+          }
           routePreview.mutate({ text, mode });
         }}
       />
@@ -2101,4 +2108,17 @@ function CommandBar({
       </Button>
     </form>
   );
+}
+
+function normalizePhrase(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function isExactPhrase(input: string, target: string): boolean {
+  return normalizePhrase(input) === normalizePhrase(target);
 }

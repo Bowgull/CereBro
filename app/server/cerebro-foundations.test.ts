@@ -118,6 +118,2002 @@ describe("CereBro proposal-only shell plans", () => {
     expect(recent.mode).toBe("private_read");
     expect(recent.items.map((item) => item.id)).toContain(event.event.id);
 
+    const continuation = await caller.commandIntake.preview({
+      text: "' keep building",
+      mode: "build",
+    });
+    expect(continuation.category).toBe("raven_build");
+    expect(continuation.sealedModule).toBe("raven");
+    expect(continuation.trigger).toBe("keep_building");
+    expect(continuation.agents).toContain("raven");
+    expect(continuation.agents).toContain("spock");
+    expect(continuation.permissionGates.join(" ")).toContain("sealed private module");
+    expect(continuation.permissionGates.join(" ")).toContain("No browser session");
+
+    const categories = await caller.raven.preferenceCategories();
+    expect(categories.categories).toContain("visual_style");
+    expect(categories.writesCoreMemory).toBe(false);
+
+    await caller.raven.updateSettings({
+      ravenEnabled: false,
+      adultDiscoveryEnabled: false,
+      runSourceSearchFromChat: false,
+      explicitSearchOnly: true,
+      backgroundDiscoveryEnabled: false,
+      thumbnailsAllowed: false,
+      previewMediaAllowed: false,
+      candidateRetentionMode: "keep_until_manual_delete",
+    });
+    await caller.raven.updateSourceAdapter({
+      sourceId: "eporner",
+      enabled: false,
+      searchAllowed: false,
+    });
+
+    const defaultRavenSettings = await caller.raven.settings();
+    expect(defaultRavenSettings.mode).toBe("sealed_settings");
+    expect(defaultRavenSettings.settings.ravenEnabled).toBe(false);
+    expect(defaultRavenSettings.settings.adultDiscoveryEnabled).toBe(false);
+    expect(defaultRavenSettings.settings.requirePassphraseOnOpen).toBe(true);
+    expect(defaultRavenSettings.settings.externalModelPrivateContentAllowed).toBe(false);
+    expect(defaultRavenSettings.settings.candidateRetentionMode).toBe("keep_until_manual_delete");
+    expect(defaultRavenSettings.settings.candidateRetentionLocalOnly).toBe(true);
+    expect(defaultRavenSettings.candidateRetention.localOnly).toBe(true);
+    expect(defaultRavenSettings.candidateRetention.batchDeleteEnabled).toBe(false);
+    expect(defaultRavenSettings.candidateRetention.externalExportEnabled).toBe(false);
+    expect(defaultRavenSettings.discoveryReadiness.canSearch).toBe(false);
+    expect(defaultRavenSettings.discoveryReadiness.blockedReasons).toContain("raven_disabled");
+    expect(defaultRavenSettings.discoveryReadiness.blockedReasons).toContain("adult_discovery_disabled");
+    expect(defaultRavenSettings.discoveryReadiness.blockedReasons).toContain("no_enabled_search_source");
+    expect(defaultRavenSettings.sourceReadiness.find((item) => item.sourceId === "eporner")?.canSearch).toBe(false);
+    expect(defaultRavenSettings.sourceReadiness.find((item) => item.sourceId === "eporner")?.blockedReasons).toContain("raven_disabled");
+    expect(defaultRavenSettings.sourceReadiness.find((item) => item.sourceId === "eporner")?.blockedReasons).toContain("source_disabled");
+    expect(defaultRavenSettings.lockedProtections.find((item) => item.key === "illegal_content")?.userEditable).toBe(false);
+    expect(defaultRavenSettings.lockedProtections.find((item) => item.key === "illegal_content")?.enforced).toBe(true);
+    expect(defaultRavenSettings.lockedProtections.every((item) => item.enforced)).toBe(true);
+    expect(defaultRavenSettings.boundaryEnforcement.lockedProtectionCount).toBe(defaultRavenSettings.lockedProtections.length);
+    expect(defaultRavenSettings.boundaryEnforcement.enforcedLockedProtectionCount).toBe(defaultRavenSettings.lockedProtections.length);
+    expect(defaultRavenSettings.boundaryEnforcement.allLockedProtectionsEnforced).toBe(true);
+    expect(defaultRavenSettings.userBlockTypes).toContain("source");
+    expect(defaultRavenSettings.sourceAdapters.map((item) => item.sourceId)).toContain("eporner");
+    expect(defaultRavenSettings.sourceAdapters.find((item) => item.sourceId === "eporner")?.enabled).toBe(false);
+    expect(defaultRavenSettings.writesCoreMemory).toBe(false);
+    expect(defaultRavenSettings.opensBrowser).toBe(false);
+    expect(defaultRavenSettings.downloadsMedia).toBe(false);
+
+    const retentionSettingsReceipt = await caller.raven.candidateRetentionSettingsReceipt();
+    expect(retentionSettingsReceipt.mode).toBe("sealed_candidate_retention_settings_receipt");
+    expect(retentionSettingsReceipt.candidateRetention.mode).toBe("keep_until_manual_delete");
+    expect(retentionSettingsReceipt.candidateRetention.localOnly).toBe(true);
+    expect(retentionSettingsReceipt.candidateRetention.lockedToLocalRaven).toBe(true);
+    expect(retentionSettingsReceipt.candidateRetention.batchDeleteEnabled).toBe(false);
+    expect(retentionSettingsReceipt.candidateRetention.externalExportEnabled).toBe(false);
+    expect(retentionSettingsReceipt.deletesCandidates).toBe(false);
+    expect(retentionSettingsReceipt.writesCoreMemory).toBe(false);
+
+    const addedUserBlock = await caller.raven.addUserBlock({
+      blockType: "source",
+      label: "Vitest blocked source",
+      value: "vitest-blocked-source",
+      enabled: true,
+    });
+    const testUserBlock = addedUserBlock.userBlocks.find((item) => item.value === "vitest-blocked-source");
+    expect(testUserBlock?.enabled).toBe(true);
+    expect(testUserBlock?.userEditable).toBe(true);
+    const disabledUserBlock = await caller.raven.updateUserBlock({
+      id: testUserBlock!.id,
+      enabled: false,
+    });
+    expect(disabledUserBlock.userBlocks.find((item) => item.id === testUserBlock!.id)?.enabled).toBe(false);
+    const reenabledUserBlock = await caller.raven.updateUserBlock({
+      id: testUserBlock!.id,
+      enabled: true,
+    });
+    expect(reenabledUserBlock.userBlocks.find((item) => item.id === testUserBlock!.id)?.enabled).toBe(true);
+    expect(reenabledUserBlock.boundaryEnforcement.enabledUserBlockCountsByType.source).toBeGreaterThan(0);
+    await expect(caller.raven.updateSettings({
+      externalModelPrivateContentAllowed: true,
+    })).rejects.toThrow("Private Raven content cannot be sent to external models in V1.");
+    const updatedRetentionSettings = await caller.raven.updateSettings({
+      candidateRetentionMode: "delete_blocked_candidates",
+    });
+    expect(updatedRetentionSettings.candidateRetention.mode).toBe("delete_blocked_candidates");
+    expect(updatedRetentionSettings.candidateRetention.localOnly).toBe(true);
+    expect(updatedRetentionSettings.candidateRetention.batchDeleteEnabled).toBe(false);
+    expect(updatedRetentionSettings.candidateRetention.externalExportEnabled).toBe(false);
+    expect(updatedRetentionSettings.writesCoreMemory).toBe(false);
+
+    const enabledSettings = await caller.raven.updateSettings({
+      ravenEnabled: true,
+      adultDiscoveryEnabled: true,
+    });
+    expect(enabledSettings.ok).toBe(true);
+    expect(enabledSettings.settings.ravenEnabled).toBe(true);
+    expect(enabledSettings.settings.adultDiscoveryEnabled).toBe(true);
+    expect(enabledSettings.discoveryReadiness.canSearch).toBe(false);
+    expect(enabledSettings.discoveryReadiness.blockedReasons).toEqual(["no_enabled_search_source"]);
+
+    const enabledSource = await caller.raven.updateSourceAdapter({
+      sourceId: "eporner",
+      enabled: true,
+      searchAllowed: true,
+    });
+    expect(enabledSource.ok).toBe(true);
+    expect(enabledSource.sourceAdapters.find((item) => item.sourceId === "eporner")?.enabled).toBe(true);
+    expect(enabledSource.sourceAdapters.find((item) => item.sourceId === "eporner")?.searchAllowed).toBe(true);
+    expect(enabledSource.discoveryReadiness.canSearch).toBe(true);
+    expect(enabledSource.discoveryReadiness.enabledSearchSourceCount).toBeGreaterThan(0);
+    expect(enabledSource.opensBrowser).toBe(false);
+    expect(enabledSource.downloadsMedia).toBe(false);
+
+    const readinessReceipt = await caller.raven.discoveryReadinessReceipt();
+    expect(readinessReceipt.mode).toBe("sealed_discovery_readiness_receipt");
+    expect(readinessReceipt.discoveryReadiness.canSearch).toBe(true);
+    expect(readinessReceipt.sourceReadiness.find((item) => item.sourceId === "eporner")?.canSearch).toBe(true);
+    expect(readinessReceipt.boundaryEnforcement.allLockedProtectionsEnforced).toBe(true);
+    expect(readinessReceipt.boundaryEnforcement.enabledUserBlockCount).toBeGreaterThan(0);
+    expect(readinessReceipt.receipts.searchableSourceCount).toBeGreaterThan(0);
+    expect(readinessReceipt.receipts.lockedProtectionCount).toBe(defaultRavenSettings.lockedProtections.length);
+    expect(readinessReceipt.writesCoreMemory).toBe(false);
+    expect(readinessReceipt.opensBrowser).toBe(false);
+    expect(readinessReceipt.downloadsMedia).toBe(false);
+
+    await caller.raven.addUserBlock({
+      blockType: "term",
+      label: "Vitest blocked term",
+      value: "local-only-avoid-term",
+      enabled: true,
+    });
+    const boundaryReceipt = await caller.raven.candidateBoundaryReceipt({
+      sourceId: "vitest-blocked-source",
+      title: "Synthetic local-only-avoid-term fixture",
+      tags: ["private test tag"],
+      durationSeconds: 320,
+      lockedProtectionFlags: ["malware_scam_or_forced_download"],
+    });
+    expect(boundaryReceipt.mode).toBe("sealed_candidate_boundary_receipt");
+    expect(boundaryReceipt.receipts.blockedBeforeScoring).toBe(true);
+    expect(boundaryReceipt.boundaryReceipt.lockedProtectionHitCount).toBe(1);
+    expect(boundaryReceipt.boundaryReceipt.userBlockHitCount).toBeGreaterThanOrEqual(2);
+    expect(boundaryReceipt.boundaryReceipt.userBlockCountsByType.source).toBeGreaterThan(0);
+    expect(boundaryReceipt.boundaryReceipt.userBlockCountsByType.term).toBeGreaterThan(0);
+    expect(boundaryReceipt.boundaryReceipt.lockedProtectionHits.map((item) => item.key)).toContain("malware_scam_or_forced_download");
+    expect(JSON.stringify(boundaryReceipt)).not.toContain("Synthetic local-only-avoid-term fixture");
+    expect(boundaryReceipt.writesCoreMemory).toBe(false);
+    expect(boundaryReceipt.opensBrowser).toBe(false);
+    expect(boundaryReceipt.downloadsMedia).toBe(false);
+
+    const normalisationReceipt = await caller.raven.manualCandidateNormalisationReceipt({
+      sourceId: "manual",
+      sourceClass: "manual",
+      candidateKey: "vitest-private-candidate-key",
+      sourceUri: "https://example.invalid/private-raven-fixture",
+      title: "Synthetic local-only-avoid-term normalisation fixture",
+      terms: [" local-only-avoid-term ", "local-only-avoid-term"],
+      tags: ["private test tag", "private test tag"],
+      durationSeconds: 320,
+      lockedProtectionFlags: ["malware_scam_or_forced_download"],
+    });
+    expect(normalisationReceipt.mode).toBe("sealed_manual_candidate_normalisation_receipt");
+    expect(normalisationReceipt.normalisation.shapeVersion).toBe("raven_private_candidate_v1");
+    expect(normalisationReceipt.normalisation.sourceId).toBe("manual");
+    expect(normalisationReceipt.normalisation.fieldCounts.terms).toBe(1);
+    expect(normalisationReceipt.normalisation.fieldCounts.tags).toBe(1);
+    expect(normalisationReceipt.receipts.blockedBeforeScoring).toBe(true);
+    expect(normalisationReceipt.boundaryReceipt.lockedProtectionHitCount).toBe(1);
+    expect(normalisationReceipt.boundaryReceipt.userBlockCountsByType.term).toBeGreaterThan(0);
+    expect(normalisationReceipt.storesCandidate).toBe(false);
+    expect(normalisationReceipt.scoresCandidate).toBe(false);
+    expect(JSON.stringify(normalisationReceipt)).not.toContain("Synthetic local-only-avoid-term normalisation fixture");
+    expect(JSON.stringify(normalisationReceipt)).not.toContain("https://example.invalid/private-raven-fixture");
+    expect(normalisationReceipt.writesCoreMemory).toBe(false);
+    expect(normalisationReceipt.opensBrowser).toBe(false);
+    expect(normalisationReceipt.downloadsMedia).toBe(false);
+
+    const batchReceipt = await caller.raven.manualCandidateBatchDryRunReceipt({
+      candidates: [
+        {
+          sourceId: "manual",
+          sourceClass: "manual",
+          candidateKey: "vitest-private-candidate-key",
+          sourceUri: "https://example.invalid/private-raven-fixture",
+          title: "Synthetic local-only-avoid-term batch fixture",
+          terms: ["local-only-avoid-term"],
+          tags: ["private test tag"],
+          durationSeconds: 320,
+          lockedProtectionFlags: ["malware_scam_or_forced_download"],
+        },
+        {
+          sourceId: "manual",
+          sourceClass: "manual",
+          candidateKey: "vitest-private-candidate-key",
+          sourceUri: "https://example.invalid/private-raven-fixture",
+          title: "Synthetic local-only-avoid-term batch fixture",
+          terms: ["local-only-avoid-term"],
+          tags: ["private test tag"],
+          durationSeconds: 320,
+          lockedProtectionFlags: ["malware_scam_or_forced_download"],
+        },
+        {
+          sourceId: "manual",
+          sourceClass: "manual",
+          candidateKey: "vitest-clear-candidate-key",
+          title: "Synthetic clear batch fixture",
+          terms: ["ordinary local fixture"],
+          tags: ["ordinary tag"],
+          durationSeconds: 900,
+        },
+      ],
+    });
+    expect(batchReceipt.mode).toBe("sealed_manual_candidate_batch_dry_run_receipt");
+    expect(batchReceipt.batch.candidateCount).toBe(3);
+    expect(batchReceipt.batch.uniqueFingerprintCount).toBe(2);
+    expect(batchReceipt.batch.duplicateFingerprintCount).toBe(1);
+    expect(batchReceipt.batch.blockedCandidateCount).toBe(2);
+    expect(batchReceipt.batch.clearBeforeScoringCount).toBe(1);
+    expect(batchReceipt.duplicateFingerprints[0]?.count).toBe(2);
+    expect(batchReceipt.boundarySummary.lockedProtectionCountsByKey.malware_scam_or_forced_download).toBe(2);
+    expect(batchReceipt.boundarySummary.userBlockCountsByType.term).toBeGreaterThanOrEqual(2);
+    expect(batchReceipt.items[0]?.normalisation.fieldCounts.terms).toBe(1);
+    expect(batchReceipt.storesCandidates).toBe(false);
+    expect(batchReceipt.scoresCandidates).toBe(false);
+    expect(JSON.stringify(batchReceipt)).not.toContain("Synthetic local-only-avoid-term batch fixture");
+    expect(JSON.stringify(batchReceipt)).not.toContain("https://example.invalid/private-raven-fixture");
+    expect(batchReceipt.writesCoreMemory).toBe(false);
+    expect(batchReceipt.opensBrowser).toBe(false);
+    expect(batchReceipt.downloadsMedia).toBe(false);
+
+    const storageProposal = await caller.raven.candidateStorageProposalReceipt();
+    expect(storageProposal.mode).toBe("sealed_candidate_storage_proposal_receipt");
+    expect(storageProposal.proposal.schemaVersion).toBe("raven_private_candidates_v1");
+    expect(storageProposal.proposal.proposedTables.map((table) => table.name)).toContain("raven_private_candidates");
+    expect(storageProposal.proposal.proposedTables.map((table) => table.name)).toContain("raven_private_candidate_events");
+    expect(storageProposal.proposal.proposedTables[0]?.columns.some((column) => column.name === "normalised_metadata_json" && column.storesPrivateContent)).toBe(true);
+    expect(storageProposal.writeGates.join(" ")).toContain("Boundary enforcement must run before scoring");
+    expect(storageProposal.readiness.canCreateCandidateStorage).toBe(false);
+    expect(storageProposal.createsTables).toBe(false);
+    expect(storageProposal.storesCandidates).toBe(false);
+    expect(storageProposal.scoresCandidates).toBe(false);
+    expect(storageProposal.writesCoreMemory).toBe(false);
+    expect(storageProposal.opensBrowser).toBe(false);
+    expect(storageProposal.downloadsMedia).toBe(false);
+
+    const manualDraft = await caller.raven.createManualCandidateDraft({
+      sourceId: "manual",
+      sourceClass: "manual",
+      candidateKey: "vitest-private-draft-key",
+      sourceUri: "https://example.invalid/private-raven-draft",
+      title: "Synthetic local-only-avoid-term stored draft fixture",
+      terms: ["local-only-avoid-term"],
+      tags: ["private draft tag"],
+      durationSeconds: 420,
+      lockedProtectionFlags: ["malware_scam_or_forced_download"],
+    });
+    expect(manualDraft.mode).toBe("sealed_manual_candidate_draft_write");
+    expect(manualDraft.ok).toBe(true);
+    expect(manualDraft.candidate.ravenSessionId).toBe(unlocked.session.id);
+    expect(manualDraft.candidate.sourceId).toBe("manual");
+    expect(manualDraft.candidate.status).toBe("blocked_before_scoring");
+    expect(manualDraft.receipts.blockedBeforeScoring).toBe(true);
+    expect(manualDraft.boundaryReceipt.lockedProtectionHitCount).toBe(1);
+    expect(manualDraft.boundaryReceipt.userBlockCountsByType.term).toBeGreaterThan(0);
+    expect(manualDraft.storesCandidate).toBe(true);
+    expect(manualDraft.scoresCandidate).toBe(false);
+    expect(JSON.stringify(manualDraft)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(manualDraft)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(manualDraft.writesCoreMemory).toBe(false);
+    expect(manualDraft.opensBrowser).toBe(false);
+    expect(manualDraft.downloadsMedia).toBe(false);
+    const ravenDb = await getCerebroDb();
+    const storedDraft = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidates WHERE candidate_fingerprint = ? LIMIT 1`,
+      args: [manualDraft.candidate.candidateFingerprint],
+    });
+    expect(storedDraft.rows[0]).toBeDefined();
+    expect(String(storedDraft.rows[0]?.normalised_metadata_json)).toContain("Synthetic local-only-avoid-term stored draft fixture");
+    const storedDraftEvents = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidate_events WHERE candidate_id = ?`,
+      args: [manualDraft.candidate.id],
+    });
+    expect(storedDraftEvents.rows.map((row) => String(row.event_type))).toContain("manual_candidate_draft_written");
+
+    const reviewReadyDraft = await caller.raven.createManualCandidateDraft({
+      sourceId: "manual",
+      sourceClass: "manual",
+      candidateKey: "vitest-review-ready-draft-key",
+      title: "Synthetic review-ready stored draft fixture",
+      terms: ["ordinary local fixture"],
+      tags: ["ordinary draft tag"],
+      durationSeconds: 900,
+    });
+    expect(reviewReadyDraft.candidate.status).toBe("draft");
+    const queueReceipt = await caller.raven.privateCandidateQueueReceipt();
+    expect(queueReceipt.mode).toBe("sealed_private_candidate_queue_receipt");
+    expect(queueReceipt.queue.includeStatuses).toContain("draft");
+    expect(queueReceipt.queue.excludedStatuses).toContain("blocked_before_scoring");
+    expect(queueReceipt.items.some((item) => item.candidate.id === reviewReadyDraft.candidate.id)).toBe(true);
+    expect(queueReceipt.items.some((item) => item.candidate.id === manualDraft.candidate.id)).toBe(false);
+    expect(queueReceipt.items.every((item) => item.candidate.status !== "blocked_before_scoring")).toBe(true);
+    expect(JSON.stringify(queueReceipt)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(queueReceipt)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(queueReceipt.returnsPrivateMetadata).toBe(false);
+    expect(queueReceipt.writesCoreMemory).toBe(false);
+    expect(queueReceipt.opensBrowser).toBe(false);
+    expect(queueReceipt.downloadsMedia).toBe(false);
+
+    const transitionProposal = await caller.raven.privateCandidateStatusTransitionProposalReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+      proposedStatus: "ready_for_private_review",
+      reason: "Vitest local review lane proposal.",
+    });
+    expect(transitionProposal.mode).toBe("sealed_private_candidate_status_transition_proposal_receipt");
+    expect(transitionProposal.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(transitionProposal.proposal.fromStatus).toBe("draft");
+    expect(transitionProposal.proposal.proposedStatus).toBe("ready_for_private_review");
+    expect(transitionProposal.proposal.allowed).toBe(true);
+    expect(transitionProposal.proposal.allowedTargets).toContain("never_again");
+    expect(transitionProposal.mutatesStatus).toBe(false);
+    expect(JSON.stringify(transitionProposal)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(transitionProposal)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(transitionProposal.returnsPrivateMetadata).toBe(false);
+    expect(transitionProposal.writesCoreMemory).toBe(false);
+    expect(transitionProposal.opensBrowser).toBe(false);
+    expect(transitionProposal.downloadsMedia).toBe(false);
+    const unchangedReviewReadyDraft = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(unchangedReviewReadyDraft.rows[0]?.status)).toBe("draft");
+    const transitionedDraft = await caller.raven.updatePrivateCandidateStatus({
+      candidateId: reviewReadyDraft.candidate.id,
+      status: "ready_for_private_review",
+      reason: "Vitest local review lane transition.",
+    });
+    expect(transitionedDraft.mode).toBe("sealed_private_candidate_status_write");
+    expect(transitionedDraft.ok).toBe(true);
+    expect(transitionedDraft.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(transitionedDraft.candidate.status).toBe("ready_for_private_review");
+    expect(transitionedDraft.transition.fromStatus).toBe("draft");
+    expect(transitionedDraft.transition.toStatus).toBe("ready_for_private_review");
+    expect(transitionedDraft.mutatesStatus).toBe(true);
+    expect(JSON.stringify(transitionedDraft)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(transitionedDraft)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(transitionedDraft.returnsPrivateMetadata).toBe(false);
+    expect(transitionedDraft.writesCoreMemory).toBe(false);
+    expect(transitionedDraft.opensBrowser).toBe(false);
+    expect(transitionedDraft.downloadsMedia).toBe(false);
+    const transitionedDraftRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(transitionedDraftRow.rows[0]?.status)).toBe("ready_for_private_review");
+    const transitionEvents = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidate_events WHERE candidate_id = ? AND event_type = ?`,
+      args: [reviewReadyDraft.candidate.id, "private_candidate_status_transition"],
+    });
+    expect(transitionEvents.rows.length).toBeGreaterThan(0);
+    const statusHistory = await caller.raven.privateCandidateStatusHistoryReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(statusHistory.mode).toBe("sealed_private_candidate_status_history_receipt");
+    expect(statusHistory.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(statusHistory.transitionEvents.length).toBeGreaterThan(0);
+    expect(statusHistory.transitionEvents.every((event) => event.eventType === "private_candidate_status_transition")).toBe(true);
+    expect(statusHistory.transitionEvents[0]?.fromStatus).toBe("draft");
+    expect(statusHistory.transitionEvents[0]?.status).toBe("ready_for_private_review");
+    expect(statusHistory.receipts.eventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(statusHistory)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(statusHistory)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(statusHistory.returnsPrivateMetadata).toBe(false);
+    expect(statusHistory.writesCoreMemory).toBe(false);
+    expect(statusHistory.opensBrowser).toBe(false);
+    expect(statusHistory.downloadsMedia).toBe(false);
+    const reviewNoteDraft = await caller.raven.addPrivateCandidateReviewNoteDraftReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+      reviewAction: "hold_for_future_private_review",
+      rationale: "Keep the Synthetic review-ready stored draft fixture private. Review https://example.invalid/private-raven-note later.",
+    });
+    expect(reviewNoteDraft.mode).toBe("sealed_private_candidate_review_note_draft_receipt");
+    expect(reviewNoteDraft.ok).toBe(true);
+    expect(reviewNoteDraft.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(reviewNoteDraft.candidate.status).toBe("ready_for_private_review");
+    expect(reviewNoteDraft.reviewNote.eventType).toBe("private_candidate_review_note_draft");
+    expect(reviewNoteDraft.reviewNote.status).toBe("ready_for_private_review");
+    expect(reviewNoteDraft.reviewNote.reviewAction).toBe("hold_for_future_private_review");
+    expect(reviewNoteDraft.reviewNote.reviewNoteFingerprint).toBe(reviewNoteDraft.receipts.reviewNoteFingerprint);
+    expect(reviewNoteDraft.reviewNote.redactedRationale).toContain("[private_rationale_redacted:");
+    expect(reviewNoteDraft.reviewNote.rationaleCharCount).toBeGreaterThan(0);
+    expect(reviewNoteDraft.reviewNote.redactionFindingCount).toBeGreaterThan(0);
+    expect(reviewNoteDraft.receipts.statusUnchanged).toBe(true);
+    expect(reviewNoteDraft.mutatesStatus).toBe(false);
+    expect(JSON.stringify(reviewNoteDraft)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(reviewNoteDraft)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(reviewNoteDraft)).not.toContain("https://example.invalid/private-raven-note");
+    expect(reviewNoteDraft.returnsPrivateMetadata).toBe(false);
+    expect(reviewNoteDraft.writesCoreMemory).toBe(false);
+    expect(reviewNoteDraft.opensBrowser).toBe(false);
+    expect(reviewNoteDraft.downloadsMedia).toBe(false);
+    const reviewNoteDraftRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(reviewNoteDraftRow.rows[0]?.status)).toBe("ready_for_private_review");
+    const reviewNoteDraftEvents = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidate_events WHERE candidate_id = ? AND event_type = ?`,
+      args: [reviewReadyDraft.candidate.id, "private_candidate_review_note_draft"],
+    });
+    expect(reviewNoteDraftEvents.rows.length).toBeGreaterThan(0);
+    expect(String(reviewNoteDraftEvents.rows[0]?.event_json)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(String(reviewNoteDraftEvents.rows[0]?.event_json)).not.toContain("https://example.invalid/private-raven-note");
+    const reviewNoteHistory = await caller.raven.privateCandidateReviewNoteHistoryReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(reviewNoteHistory.mode).toBe("sealed_private_candidate_review_note_history_receipt");
+    expect(reviewNoteHistory.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(reviewNoteHistory.reviewNoteEvents.length).toBeGreaterThan(0);
+    expect(reviewNoteHistory.reviewNoteEvents.every((event) => event.eventType === "private_candidate_review_note_draft")).toBe(true);
+    expect(reviewNoteHistory.reviewNoteEvents[0]?.reviewAction).toBe("hold_for_future_private_review");
+    expect(reviewNoteHistory.reviewNoteEvents[0]?.reviewNoteFingerprint).toBe(reviewNoteDraft.receipts.reviewNoteFingerprint);
+    expect(reviewNoteHistory.reviewNoteEvents[0]?.redactedRationale).toContain("[private_rationale_redacted:");
+    expect(reviewNoteHistory.receipts.eventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(reviewNoteHistory)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(reviewNoteHistory)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(reviewNoteHistory)).not.toContain("https://example.invalid/private-raven-note");
+    expect(reviewNoteHistory.returnsPrivateMetadata).toBe(false);
+    expect(reviewNoteHistory.returnsRawRationale).toBe(false);
+    expect(reviewNoteHistory.writesCoreMemory).toBe(false);
+    expect(reviewNoteHistory.opensBrowser).toBe(false);
+    expect(reviewNoteHistory.downloadsMedia).toBe(false);
+    const decisionProposal = await caller.raven.privateCandidateDecisionProposalReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(decisionProposal.mode).toBe("sealed_private_candidate_decision_proposal_receipt");
+    expect(decisionProposal.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(decisionProposal.candidate.status).toBe("ready_for_private_review");
+    expect(decisionProposal.proposal.proposedStatus).toBe("kept");
+    expect(decisionProposal.proposal.allowedTargets).toContain("never_again");
+    expect(decisionProposal.proposal.appliesStatus).toBe(false);
+    expect(decisionProposal.proposal.requiresExplicitMutation).toBe(true);
+    expect(decisionProposal.evidence.statusEventCount).toBeGreaterThan(0);
+    expect(decisionProposal.evidence.reviewNoteEventCount).toBeGreaterThan(0);
+    expect(decisionProposal.evidence.reviewActions).toContain("hold_for_future_private_review");
+    expect(decisionProposal.mutatesStatus).toBe(false);
+    expect(JSON.stringify(decisionProposal)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(decisionProposal)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(decisionProposal)).not.toContain("https://example.invalid/private-raven-note");
+    expect(decisionProposal.returnsPrivateMetadata).toBe(false);
+    expect(decisionProposal.returnsRawRationale).toBe(false);
+    expect(decisionProposal.writesCoreMemory).toBe(false);
+    expect(decisionProposal.opensBrowser).toBe(false);
+    expect(decisionProposal.downloadsMedia).toBe(false);
+    const decisionProposalRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(decisionProposalRow.rows[0]?.status)).toBe("ready_for_private_review");
+    const ravenPrivateDecisionDraftNote = await caller.raven.addPrivateCandidateDecisionDraftNoteReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+      proposedStatus: decisionProposal.proposal.proposedStatus,
+      reason: decisionProposal.proposal.reason,
+      rationale: "Keep the private decision rationale local. Recheck https://example.invalid/private-raven-decision before any explicit status mutation.",
+    });
+    expect(ravenPrivateDecisionDraftNote.mode).toBe("sealed_private_candidate_decision_draft_note_receipt");
+    expect(ravenPrivateDecisionDraftNote.ok).toBe(true);
+    expect(ravenPrivateDecisionDraftNote.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(ravenPrivateDecisionDraftNote.candidate.status).toBe("ready_for_private_review");
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.eventType).toBe("private_candidate_decision_draft_note");
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.proposedStatus).toBe(decisionProposal.proposal.proposedStatus);
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.decisionReason).toBe(decisionProposal.proposal.reason);
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.decisionDraftFingerprint).toBe(ravenPrivateDecisionDraftNote.receipts.decisionDraftFingerprint);
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.redactedDecisionRationale).toContain("[private_decision_rationale_redacted:");
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.decisionRationaleCharCount).toBeGreaterThan(0);
+    expect(ravenPrivateDecisionDraftNote.decisionDraftNote.redactionFindingCount).toBeGreaterThan(0);
+    expect(ravenPrivateDecisionDraftNote.receipts.statusUnchanged).toBe(true);
+    expect(ravenPrivateDecisionDraftNote.mutatesStatus).toBe(false);
+    expect(JSON.stringify(ravenPrivateDecisionDraftNote)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(ravenPrivateDecisionDraftNote)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(ravenPrivateDecisionDraftNote)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(ravenPrivateDecisionDraftNote.returnsPrivateMetadata).toBe(false);
+    expect(ravenPrivateDecisionDraftNote.returnsRawRationale).toBe(false);
+    expect(ravenPrivateDecisionDraftNote.writesCoreMemory).toBe(false);
+    expect(ravenPrivateDecisionDraftNote.opensBrowser).toBe(false);
+    expect(ravenPrivateDecisionDraftNote.downloadsMedia).toBe(false);
+    const ravenPrivateDecisionDraftNoteRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(ravenPrivateDecisionDraftNoteRow.rows[0]?.status)).toBe("ready_for_private_review");
+    const ravenPrivateDecisionDraftNoteEvents = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidate_events WHERE candidate_id = ? AND event_type = ?`,
+      args: [reviewReadyDraft.candidate.id, "private_candidate_decision_draft_note"],
+    });
+    expect(ravenPrivateDecisionDraftNoteEvents.rows.length).toBeGreaterThan(0);
+    expect(String(ravenPrivateDecisionDraftNoteEvents.rows[0]?.event_json)).not.toContain("private decision rationale local");
+    expect(String(ravenPrivateDecisionDraftNoteEvents.rows[0]?.event_json)).not.toContain("https://example.invalid/private-raven-decision");
+    const decisionDraftNoteHistory = await caller.raven.privateCandidateDecisionDraftNoteHistoryReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(decisionDraftNoteHistory.mode).toBe("sealed_private_candidate_decision_draft_note_history_receipt");
+    expect(decisionDraftNoteHistory.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents.length).toBeGreaterThan(0);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents.every((event) => event.eventType === "private_candidate_decision_draft_note")).toBe(true);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents[0]?.proposedStatus).toBe(decisionProposal.proposal.proposedStatus);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents[0]?.decisionReason).toBe(decisionProposal.proposal.reason);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents[0]?.decisionDraftFingerprint).toBe(ravenPrivateDecisionDraftNote.receipts.decisionDraftFingerprint);
+    expect(decisionDraftNoteHistory.decisionDraftNoteEvents[0]?.redactedDecisionRationale).toContain("[private_decision_rationale_redacted:");
+    expect(decisionDraftNoteHistory.receipts.eventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(decisionDraftNoteHistory)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(decisionDraftNoteHistory)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(decisionDraftNoteHistory)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(decisionDraftNoteHistory.returnsPrivateMetadata).toBe(false);
+    expect(decisionDraftNoteHistory.returnsRawRationale).toBe(false);
+    expect(decisionDraftNoteHistory.writesCoreMemory).toBe(false);
+    expect(decisionDraftNoteHistory.opensBrowser).toBe(false);
+    expect(decisionDraftNoteHistory.downloadsMedia).toBe(false);
+    const reviewDossier = await caller.raven.privateCandidateReviewDossierReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(reviewDossier.mode).toBe("sealed_private_candidate_review_dossier_receipt");
+    expect(reviewDossier.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(reviewDossier.candidate.status).toBe("ready_for_private_review");
+    expect(reviewDossier.statusEvents.length).toBeGreaterThan(0);
+    expect(reviewDossier.reviewNoteEvents.length).toBeGreaterThan(0);
+    expect(reviewDossier.decisionDraftNoteEvents.length).toBeGreaterThan(0);
+    expect(reviewDossier.statusEvents.every((event) => event.eventType === "private_candidate_status_transition")).toBe(true);
+    expect(reviewDossier.reviewNoteEvents.every((event) => event.eventType === "private_candidate_review_note_draft")).toBe(true);
+    expect(reviewDossier.decisionDraftNoteEvents.every((event) => event.eventType === "private_candidate_decision_draft_note")).toBe(true);
+    expect(reviewDossier.proposal.proposedStatus).toBe(decisionProposal.proposal.proposedStatus);
+    expect(reviewDossier.proposal.requiresExplicitMutation).toBe(true);
+    expect(reviewDossier.receipts.statusEventCount).toBeGreaterThan(0);
+    expect(reviewDossier.receipts.reviewNoteEventCount).toBeGreaterThan(0);
+    expect(reviewDossier.receipts.decisionDraftNoteEventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(reviewDossier)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(reviewDossier)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(reviewDossier)).not.toContain("https://example.invalid/private-raven-note");
+    expect(JSON.stringify(reviewDossier)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(reviewDossier)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(reviewDossier.mutatesStatus).toBe(false);
+    expect(reviewDossier.returnsPrivateMetadata).toBe(false);
+    expect(reviewDossier.returnsRawRationale).toBe(false);
+    expect(reviewDossier.writesCoreMemory).toBe(false);
+    expect(reviewDossier.opensBrowser).toBe(false);
+    expect(reviewDossier.downloadsMedia).toBe(false);
+    const finalApplyProposal = await caller.raven.privateCandidateFinalDecisionApplyProposalReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(finalApplyProposal.mode).toBe("sealed_private_candidate_final_decision_apply_proposal_receipt");
+    expect(finalApplyProposal.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(finalApplyProposal.candidate.status).toBe("ready_for_private_review");
+    expect(finalApplyProposal.proposal.proposedStatus).toBe(decisionProposal.proposal.proposedStatus);
+    expect(finalApplyProposal.apply.canApplyWithExplicitMutation).toBe(true);
+    expect(finalApplyProposal.apply.requiredMutation).toBe("raven.updatePrivateCandidateStatus");
+    expect(finalApplyProposal.apply.requiredStatus).toBe(decisionProposal.proposal.proposedStatus);
+    expect(finalApplyProposal.apply.requiresExplicitMutation).toBe(true);
+    expect(finalApplyProposal.apply.mutatesStatusHere).toBe(false);
+    expect(finalApplyProposal.apply.blockedReasons).toEqual([]);
+    expect(finalApplyProposal.receipts.currentStatus).toBe("ready_for_private_review");
+    expect(finalApplyProposal.receipts.matchingDecisionDraftNotePresent).toBe(true);
+    expect(finalApplyProposal.mutatesStatus).toBe(false);
+    expect(JSON.stringify(finalApplyProposal)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(finalApplyProposal)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(finalApplyProposal)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(finalApplyProposal)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(finalApplyProposal.returnsPrivateMetadata).toBe(false);
+    expect(finalApplyProposal.returnsRawRationale).toBe(false);
+    expect(finalApplyProposal.writesCoreMemory).toBe(false);
+    expect(finalApplyProposal.opensBrowser).toBe(false);
+    expect(finalApplyProposal.downloadsMedia).toBe(false);
+    const finalApplyProposalRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(finalApplyProposalRow.rows[0]?.status)).toBe("ready_for_private_review");
+    const finalApplyWrite = await caller.raven.applyPrivateCandidateFinalDecisionReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+      proposedStatus: finalApplyProposal.proposal.proposedStatus,
+      reason: finalApplyProposal.proposal.reason,
+    });
+    expect(finalApplyWrite.mode).toBe("sealed_private_candidate_final_decision_apply_write");
+    expect(finalApplyWrite.ok).toBe(true);
+    expect(finalApplyWrite.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(finalApplyWrite.candidate.status).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(finalApplyWrite.transition.fromStatus).toBe("ready_for_private_review");
+    expect(finalApplyWrite.transition.toStatus).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(finalApplyWrite.finalDecisionEvent.eventType).toBe("private_candidate_final_decision_applied");
+    expect(finalApplyWrite.finalDecisionEvent.proposedStatus).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(finalApplyWrite.finalDecisionEvent.decisionReason).toBe(finalApplyProposal.proposal.reason);
+    expect(finalApplyWrite.receipts.wroteStatusTransitionEvent).toBe(true);
+    expect(finalApplyWrite.receipts.wroteFinalDecisionEvent).toBe(true);
+    expect(finalApplyWrite.mutatesStatus).toBe(true);
+    expect(JSON.stringify(finalApplyWrite)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(finalApplyWrite)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(finalApplyWrite)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(finalApplyWrite)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(finalApplyWrite.returnsPrivateMetadata).toBe(false);
+    expect(finalApplyWrite.returnsRawRationale).toBe(false);
+    expect(finalApplyWrite.writesCoreMemory).toBe(false);
+    expect(finalApplyWrite.opensBrowser).toBe(false);
+    expect(finalApplyWrite.downloadsMedia).toBe(false);
+    const finalApplyWriteRow = await ravenDb.execute({
+      sql: `SELECT status FROM raven_private_candidates WHERE id = ?`,
+      args: [reviewReadyDraft.candidate.id],
+    });
+    expect(String(finalApplyWriteRow.rows[0]?.status)).toBe(finalApplyProposal.proposal.proposedStatus);
+    const finalApplyEvents = await ravenDb.execute({
+      sql: `SELECT * FROM raven_private_candidate_events WHERE candidate_id = ? AND event_type = ?`,
+      args: [reviewReadyDraft.candidate.id, "private_candidate_final_decision_applied"],
+    });
+    expect(finalApplyEvents.rows.length).toBeGreaterThan(0);
+    expect(String(finalApplyEvents.rows[0]?.event_json)).not.toContain("private decision rationale local");
+    expect(String(finalApplyEvents.rows[0]?.event_json)).not.toContain("https://example.invalid/private-raven-decision");
+    const appliedDecisionHistory = await caller.raven.privateCandidateAppliedDecisionHistoryReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(appliedDecisionHistory.mode).toBe("sealed_private_candidate_applied_decision_history_receipt");
+    expect(appliedDecisionHistory.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(appliedDecisionHistory.candidate.status).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(appliedDecisionHistory.appliedDecisionEvents.length).toBeGreaterThan(0);
+    expect(appliedDecisionHistory.appliedDecisionEvents.every((event) => event.eventType === "private_candidate_final_decision_applied")).toBe(true);
+    expect(appliedDecisionHistory.appliedDecisionEvents[0]?.fromStatus).toBe("ready_for_private_review");
+    expect(appliedDecisionHistory.appliedDecisionEvents[0]?.status).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(appliedDecisionHistory.appliedDecisionEvents[0]?.proposedStatus).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(appliedDecisionHistory.appliedDecisionEvents[0]?.decisionReason).toBe(finalApplyProposal.proposal.reason);
+    expect(appliedDecisionHistory.receipts.eventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(appliedDecisionHistory)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(appliedDecisionHistory)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(appliedDecisionHistory)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(appliedDecisionHistory)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(appliedDecisionHistory.returnsPrivateMetadata).toBe(false);
+    expect(appliedDecisionHistory.returnsRawRationale).toBe(false);
+    expect(appliedDecisionHistory.writesCoreMemory).toBe(false);
+    expect(appliedDecisionHistory.opensBrowser).toBe(false);
+    expect(appliedDecisionHistory.downloadsMedia).toBe(false);
+    const lifecycleReceipt = await caller.raven.privateCandidateLifecycleReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+    });
+    expect(lifecycleReceipt.mode).toBe("sealed_private_candidate_lifecycle_receipt");
+    expect(lifecycleReceipt.candidate.id).toBe(reviewReadyDraft.candidate.id);
+    expect(lifecycleReceipt.lifecycle.currentStatus).toBe(finalApplyProposal.proposal.proposedStatus);
+    expect(lifecycleReceipt.lifecycle.statusTransitionCount).toBeGreaterThan(0);
+    expect(lifecycleReceipt.lifecycle.reviewNoteCount).toBeGreaterThan(0);
+    expect(lifecycleReceipt.lifecycle.decisionDraftNoteCount).toBeGreaterThan(0);
+    expect(lifecycleReceipt.lifecycle.appliedDecisionCount).toBeGreaterThan(0);
+    expect(["keep_until_manual_delete", "delete_blocked_candidates", "delete_all_candidates_for_active_session"]).toContain(lifecycleReceipt.retention.mode);
+    expect(lifecycleReceipt.retention.localOnly).toBe(true);
+    expect(lifecycleReceipt.deleteAvailability.previewEndpoint).toBe("raven.privateCandidateDeletePreviewReceipt");
+    expect(lifecycleReceipt.deleteAvailability.deleteEndpoint).toBe("raven.deletePrivateCandidate");
+    expect(lifecycleReceipt.deleteAvailability.explicitConfirmationRequired).toBe(true);
+    expect(lifecycleReceipt.deleteAvailability.canPreviewDelete).toBe(true);
+    expect(lifecycleReceipt.deleteAvailability.canDeleteWithConfirmation).toBe(true);
+    expect(lifecycleReceipt.transitionAvailability.canTransitionFromCurrentStatus).toBe(false);
+    expect(lifecycleReceipt.transitionAvailability.allowedTargets).toEqual([]);
+    expect(JSON.stringify(lifecycleReceipt)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(lifecycleReceipt)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(lifecycleReceipt)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(lifecycleReceipt)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(lifecycleReceipt.mutatesStatus).toBe(false);
+    expect(lifecycleReceipt.deletesCandidates).toBe(false);
+    expect(lifecycleReceipt.deletesCandidateEvents).toBe(false);
+    expect(lifecycleReceipt.returnsPrivateMetadata).toBe(false);
+    expect(lifecycleReceipt.returnsRawRationale).toBe(false);
+    expect(lifecycleReceipt.writesCoreMemory).toBe(false);
+    expect(lifecycleReceipt.opensBrowser).toBe(false);
+    expect(lifecycleReceipt.downloadsMedia).toBe(false);
+    const queueSummaryReceipt = await caller.raven.privateCandidateQueueSummaryReceipt();
+    expect(queueSummaryReceipt.mode).toBe("sealed_private_candidate_queue_summary_receipt");
+    expect(queueSummaryReceipt.queue.totalCandidates).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.queue.byStatus[finalApplyProposal.proposal.proposedStatus]).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.queue.reviewQueueStatuses).toContain("ready_for_private_review");
+    expect(queueSummaryReceipt.queue.excludedStatuses).toContain("blocked_before_scoring");
+    expect(queueSummaryReceipt.lifecycle.withStatusTransitions).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.lifecycle.withReviewNotes).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.lifecycle.withDecisionDraftNotes).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.lifecycle.withAppliedDecisions).toBeGreaterThan(0);
+    expect(queueSummaryReceipt.lifecycle.eventCounts.appliedDecisions).toBeGreaterThan(0);
+    expect(["keep_until_manual_delete", "delete_blocked_candidates", "delete_all_candidates_for_active_session"]).toContain(queueSummaryReceipt.retention.mode);
+    expect(queueSummaryReceipt.retention.localOnly).toBe(true);
+    expect(queueSummaryReceipt.deleteAvailability.previewEndpoint).toBe("raven.privateCandidateDeletePreviewReceipt");
+    expect(queueSummaryReceipt.deleteAvailability.deleteEndpoint).toBe("raven.deletePrivateCandidate");
+    expect(queueSummaryReceipt.deleteAvailability.explicitConfirmationRequired).toBe(true);
+    expect(JSON.stringify(queueSummaryReceipt)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(queueSummaryReceipt)).not.toContain("Synthetic review-ready stored draft fixture");
+    expect(JSON.stringify(queueSummaryReceipt)).not.toContain("private decision rationale local");
+    expect(JSON.stringify(queueSummaryReceipt)).not.toContain("https://example.invalid/private-raven-decision");
+    expect(queueSummaryReceipt.mutatesStatus).toBe(false);
+    expect(queueSummaryReceipt.deletesCandidates).toBe(false);
+    expect(queueSummaryReceipt.deletesCandidateEvents).toBe(false);
+    expect(queueSummaryReceipt.returnsPrivateMetadata).toBe(false);
+    expect(queueSummaryReceipt.returnsRawRationale).toBe(false);
+    expect(queueSummaryReceipt.writesCoreMemory).toBe(false);
+    expect(queueSummaryReceipt.opensBrowser).toBe(false);
+    expect(queueSummaryReceipt.downloadsMedia).toBe(false);
+    await expect(caller.raven.addPrivateCandidateDecisionDraftNoteReceipt({
+      candidateId: reviewReadyDraft.candidate.id,
+      proposedStatus: "skipped",
+      reason: decisionProposal.proposal.reason,
+      rationale: "This mismatch should be rejected locally.",
+    })).rejects.toThrow("Private candidate decision draft note must match the current decision proposal.");
+    await expect(caller.raven.updatePrivateCandidateStatus({
+      candidateId: manualDraft.candidate.id,
+      status: "ready_for_private_review",
+      reason: "Blocked candidates should not enter review.",
+    })).rejects.toThrow("Raven private candidate status can only change from draft or ready_for_private_review.");
+
+    const candidateList = await caller.raven.privateCandidateListReceipt({
+      status: "blocked_before_scoring",
+      limit: 10,
+    });
+    expect(candidateList.mode).toBe("sealed_private_candidate_list_receipt");
+    expect(candidateList.total).toBeGreaterThan(0);
+    expect(candidateList.byStatus.blocked_before_scoring).toBeGreaterThan(0);
+    expect(candidateList.boundarySummary.lockedProtectionCountsByKey.malware_scam_or_forced_download).toBeGreaterThan(0);
+    const listedDraft = candidateList.items.find((item) => item.candidate.id === manualDraft.candidate.id);
+    expect(listedDraft?.candidate.candidateFingerprint).toBe(manualDraft.candidate.candidateFingerprint);
+    expect(listedDraft?.candidate.sourceId).toBe("manual");
+    expect(listedDraft?.boundary.blockedBeforeScoring).toBe(true);
+    expect(JSON.stringify(candidateList)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(candidateList)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(candidateList)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(candidateList.returnsPrivateMetadata).toBe(false);
+    expect(candidateList.writesCoreMemory).toBe(false);
+    expect(candidateList.opensBrowser).toBe(false);
+    expect(candidateList.downloadsMedia).toBe(false);
+
+    const privateCandidateDetail = await caller.raven.privateCandidateDetailReceipt({
+      candidateId: manualDraft.candidate.id,
+    });
+    expect(privateCandidateDetail.mode).toBe("sealed_private_candidate_detail_receipt");
+    expect(privateCandidateDetail.candidate.id).toBe(manualDraft.candidate.id);
+    expect(privateCandidateDetail.candidate.candidateFingerprint).toBe(manualDraft.candidate.candidateFingerprint);
+    expect(privateCandidateDetail.boundary.blockedBeforeScoring).toBe(true);
+    expect(privateCandidateDetail.boundary.lockedProtectionKeys).toContain("malware_scam_or_forced_download");
+    expect(privateCandidateDetail.eventReceipts.length).toBeGreaterThan(0);
+    expect(privateCandidateDetail.eventReceipts[0]?.eventType).toBe("manual_candidate_draft_written");
+    expect(privateCandidateDetail.receipts.eventCount).toBeGreaterThan(0);
+    expect(JSON.stringify(privateCandidateDetail)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(privateCandidateDetail)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(privateCandidateDetail)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(privateCandidateDetail.returnsPrivateMetadata).toBe(false);
+    expect(privateCandidateDetail.writesCoreMemory).toBe(false);
+    expect(privateCandidateDetail.opensBrowser).toBe(false);
+    expect(privateCandidateDetail.downloadsMedia).toBe(false);
+
+    const retentionDeleteProposal = await caller.raven.candidateRetentionDeleteProposalReceipt();
+    expect(retentionDeleteProposal.mode).toBe("sealed_candidate_retention_delete_proposal_receipt");
+    expect(retentionDeleteProposal.proposal.schemaVersion).toBe("raven_private_candidate_retention_v1");
+    expect(retentionDeleteProposal.deleteGates.join(" ")).toContain("Delete preview must run first");
+    expect(retentionDeleteProposal.redactionPolicy.previewFieldsAllowed).toContain("candidateFingerprint");
+    expect(retentionDeleteProposal.readiness.canDeleteCandidates).toBe(false);
+    expect(retentionDeleteProposal.deletesCandidates).toBe(false);
+    expect(retentionDeleteProposal.deletesCandidateEvents).toBe(false);
+    expect(retentionDeleteProposal.returnsPrivateMetadata).toBe(false);
+    expect(JSON.stringify(retentionDeleteProposal)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(retentionDeleteProposal)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(retentionDeleteProposal.writesCoreMemory).toBe(false);
+    expect(retentionDeleteProposal.opensBrowser).toBe(false);
+    expect(retentionDeleteProposal.downloadsMedia).toBe(false);
+
+    const deletePreview = await caller.raven.privateCandidateDeletePreviewReceipt({
+      candidateId: manualDraft.candidate.id,
+    });
+    expect(deletePreview.mode).toBe("sealed_private_candidate_delete_preview_receipt");
+    expect(deletePreview.candidate.id).toBe(manualDraft.candidate.id);
+    expect(deletePreview.boundary.blockedBeforeScoring).toBe(true);
+    expect(deletePreview.receipts.eventCount).toBeGreaterThan(0);
+    expect(deletePreview.receipts.wouldDeleteCandidate).toBe(true);
+    expect(deletePreview.deletesCandidates).toBe(false);
+    expect(deletePreview.deletesCandidateEvents).toBe(false);
+    expect(deletePreview.previewOnly).toBe(true);
+    expect(JSON.stringify(deletePreview)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(deletePreview)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(deletePreview)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(deletePreview.returnsPrivateMetadata).toBe(false);
+    expect(deletePreview.writesCoreMemory).toBe(false);
+    expect(deletePreview.opensBrowser).toBe(false);
+    expect(deletePreview.downloadsMedia).toBe(false);
+    const stillStoredDraft = await ravenDb.execute({
+      sql: `SELECT COUNT(*) AS count FROM raven_private_candidates WHERE id = ?`,
+      args: [manualDraft.candidate.id],
+    });
+    expect(Number(stillStoredDraft.rows[0]?.count ?? 0)).toBe(1);
+    const stillStoredDraftEvents = await ravenDb.execute({
+      sql: `SELECT COUNT(*) AS count FROM raven_private_candidate_events WHERE candidate_id = ?`,
+      args: [manualDraft.candidate.id],
+    });
+    expect(Number(stillStoredDraftEvents.rows[0]?.count ?? 0)).toBeGreaterThan(0);
+    await expect(caller.raven.deletePrivateCandidate({
+      candidateId: manualDraft.candidate.id,
+      candidateFingerprint: manualDraft.candidate.candidateFingerprint,
+      previewEventCount: deletePreview.receipts.eventCount,
+      confirmPhrase: "delete it",
+    })).rejects.toThrow("Raven candidate delete requires the exact delete confirmation phrase.");
+    const deletedDraft = await caller.raven.deletePrivateCandidate({
+      candidateId: manualDraft.candidate.id,
+      candidateFingerprint: manualDraft.candidate.candidateFingerprint,
+      previewEventCount: deletePreview.receipts.eventCount,
+      confirmPhrase: "delete this raven candidate.",
+    });
+    expect(deletedDraft.mode).toBe("sealed_private_candidate_delete");
+    expect(deletedDraft.ok).toBe(true);
+    expect(deletedDraft.deletedCandidate.id).toBe(manualDraft.candidate.id);
+    expect(deletedDraft.receipts.deletedCandidate).toBe(true);
+    expect(deletedDraft.receipts.deletedCandidateEvents).toBe(deletePreview.receipts.eventCount);
+    expect(deletedDraft.deletesCandidates).toBe(true);
+    expect(deletedDraft.deletesCandidateEvents).toBe(true);
+    expect(JSON.stringify(deletedDraft)).not.toContain("normalised_metadata_json");
+    expect(JSON.stringify(deletedDraft)).not.toContain("Synthetic local-only-avoid-term stored draft fixture");
+    expect(JSON.stringify(deletedDraft)).not.toContain("https://example.invalid/private-raven-draft");
+    expect(deletedDraft.returnsPrivateMetadata).toBe(false);
+    expect(deletedDraft.writesCoreMemory).toBe(false);
+    expect(deletedDraft.opensBrowser).toBe(false);
+    expect(deletedDraft.downloadsMedia).toBe(false);
+    const deletedDraftRow = await ravenDb.execute({
+      sql: `SELECT COUNT(*) AS count FROM raven_private_candidates WHERE id = ?`,
+      args: [manualDraft.candidate.id],
+    });
+    expect(Number(deletedDraftRow.rows[0]?.count ?? 0)).toBe(0);
+    const deletedDraftEvents = await ravenDb.execute({
+      sql: `SELECT COUNT(*) AS count FROM raven_private_candidate_events WHERE candidate_id = ?`,
+      args: [manualDraft.candidate.id],
+    });
+    expect(Number(deletedDraftEvents.rows[0]?.count ?? 0)).toBe(0);
+
+    const preference = await caller.raven.addPreference({
+      ravenSessionId: unlocked.session.id,
+      category: "visual_style",
+      signal: "cinematic dark violet lounge",
+      weight: 3,
+      notes: "Private preference. Keep local.",
+      sourceEventId: event.event.id,
+    });
+    expect(preference.ok).toBe(true);
+    expect(preference.preference.category).toBe("visual_style");
+    expect(preference.preference.sourceEventId).toBe(event.event.id);
+    expect(preference.writesCoreMemory).toBe(false);
+
+    await caller.raven.addPreference({
+      ravenSessionId: unlocked.session.id,
+      category: "visual_style",
+      signal: "flat generic dashboard cards",
+      weight: -2,
+      notes: "Contradiction/avoid signal.",
+    });
+    await caller.raven.addPreference({
+      ravenSessionId: unlocked.session.id,
+      category: "avoid",
+      signal: "generic public-feed recommendations",
+      weight: -4,
+      notes: "Private avoid signal.",
+    });
+    await caller.raven.addPreference({
+      ravenSessionId: unlocked.session.id,
+      category: "tone",
+      signal: "quiet private lounge",
+      weight: 2,
+    });
+    const rollup = await caller.raven.preferenceRollup({
+      ravenSessionId: unlocked.session.id,
+      limitPerCategory: 3,
+    });
+    expect(rollup.mode).toBe("private_read");
+    expect(rollup.writesCoreMemory).toBe(false);
+    expect(rollup.writesExternal).toBe(false);
+    expect(rollup.opensBrowser).toBe(false);
+    expect(rollup.callsExternalModels).toBe(false);
+    expect(rollup.rollups.find((item) => item.category === "visual_style")?.topSignals).toContain("cinematic dark violet lounge");
+    expect(rollup.rollups.find((item) => item.category === "visual_style")?.avoidSignals).toContain("flat generic dashboard cards");
+    expect(rollup.rollups.find((item) => item.category === "visual_style")?.contradictionState).toBe("mixed");
+    expect(rollup.rollups.find((item) => item.category === "visual_style")?.decayBucket).toBe("fresh");
+    expect(rollup.rollups.find((item) => item.category === "visual_style")?.decayedWeight).toBe(1);
+    expect(rollup.rollups.find((item) => item.category === "avoid")?.avoidSignals).toContain("generic public-feed recommendations");
+    expect(rollup.recommendationSeeds.find((item) => item.category === "visual_style")?.source).toBe("raven_private_preferences");
+    expect(rollup.recommendationSeeds.find((item) => item.category === "visual_style")?.contradictionState).toBe("mixed");
+    expect(rollup.gates.join(" ")).toContain("derived only from raven_private_preferences");
+
+    const draftedCandidates = await caller.raven.draftRecommendationCandidates({
+      ravenSessionId: unlocked.session.id,
+      limit: 5,
+    });
+    expect(draftedCandidates.ok).toBe(true);
+    expect(draftedCandidates.mode).toBe("private_local_draft");
+    expect(draftedCandidates.writesCoreMemory).toBe(false);
+    expect(draftedCandidates.writesExternal).toBe(false);
+    expect(draftedCandidates.opensBrowser).toBe(false);
+    expect(draftedCandidates.downloadsMedia).toBe(false);
+    expect(draftedCandidates.callsExternalModels).toBe(false);
+    expect(draftedCandidates.items.find((item) => item.seedCategory === "visual_style")?.seedText).toContain("cinematic dark violet lounge");
+    expect(draftedCandidates.items.find((item) => item.seedCategory === "visual_style")?.rationale).toContain("Contradiction: mixed");
+    expect(draftedCandidates.items.find((item) => item.seedCategory === "visual_style")?.rationale).toContain("Decay: fresh");
+    expect(draftedCandidates.items.find((item) => item.seedCategory === "visual_style")?.sourcePreferenceIds.length).toBeGreaterThan(0);
+    expect(draftedCandidates.gates.join(" ")).toContain("text-only local drafts");
+
+    const candidateRows = await caller.raven.recommendationCandidates({
+      ravenSessionId: unlocked.session.id,
+      status: "draft",
+      limit: 10,
+    });
+    expect(candidateRows.mode).toBe("private_read");
+    expect(candidateRows.items.length).toBeGreaterThan(0);
+    const firstCandidate = candidateRows.items[0]!;
+    const candidateDetail = await caller.raven.recommendationCandidateDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(candidateDetail.mode).toBe("private_read");
+    expect(candidateDetail.candidate.id).toBe(firstCandidate.id);
+    expect(candidateDetail.sourcePreferences.length).toBeGreaterThan(0);
+    expect(candidateDetail.rollupContext.category).toBe(firstCandidate.seedCategory);
+    expect(candidateDetail.history[0]?.toStatus).toBe("draft");
+    expect(candidateDetail.writesExternal).toBe(false);
+    expect(candidateDetail.callsExternalModels).toBe(false);
+
+    const keptCandidate = await caller.raven.updateRecommendationCandidateStatus({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      status: "kept",
+      reason: "Keep this local seed for later.",
+    });
+    expect(keptCandidate.ok).toBe(true);
+    expect(keptCandidate.candidate.status).toBe("kept");
+    expect(keptCandidate.writesExternal).toBe(false);
+    expect(keptCandidate.callsExternalModels).toBe(false);
+    const keptCandidateDetail = await caller.raven.recommendationCandidateDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(keptCandidateDetail.history.map((item) => item.toStatus)).toContain("kept");
+    expect(keptCandidateDetail.history.find((item) => item.toStatus === "kept")?.reason).toContain("local seed");
+
+    const queueSummary = await caller.raven.recommendationCandidateQueueSummary({
+      ravenSessionId: unlocked.session.id,
+    });
+    expect(queueSummary.mode).toBe("private_read");
+    expect(queueSummary.summary.total).toBeGreaterThan(0);
+    expect(queueSummary.summary.byStatus.kept).toBeGreaterThan(0);
+    expect(queueSummary.summary.byContradiction.mixed).toBeGreaterThan(0);
+    expect(queueSummary.summary.byDecay.fresh).toBeGreaterThan(0);
+    expect((queueSummary.summary.byConfidence.low ?? 0) + (queueSummary.summary.byConfidence.medium ?? 0) + (queueSummary.summary.byConfidence.high ?? 0)).toBeGreaterThan(0);
+    expect(queueSummary.rows.find((row) => row.candidateId === firstCandidate.id)?.contradictionState).toBeDefined();
+    expect(queueSummary.writesExternal).toBe(false);
+    expect(queueSummary.callsExternalModels).toBe(false);
+    expect(queueSummary.gates.join(" ")).toContain("derived only from local Raven candidates");
+
+    const reviewPlan = await caller.raven.recommendationCandidateReviewPlan({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(reviewPlan.mode).toBe("private_read");
+    expect(reviewPlan.items.length).toBeGreaterThan(0);
+    expect(reviewPlan.items.find((item) => item.candidateId === firstCandidate.id)?.action).toBe("hold_for_future_private_review");
+    expect(reviewPlan.items.some((item) => item.action === "ask_private_clarifying_question")).toBe(true);
+    expect(reviewPlan.writesExternal).toBe(false);
+    expect(reviewPlan.callsExternalModels).toBe(false);
+    expect(reviewPlan.gates.join(" ")).toContain("deterministic local suggestions");
+
+    const reviewNote = await caller.raven.addRecommendationCandidateReviewNote({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      plannerAction: "hold_for_future_private_review",
+      note: "Keep this private. Review it again after one more local preference signal.",
+    });
+    expect(reviewNote.ok).toBe(true);
+    expect(reviewNote.mode).toBe("private_append_only_note");
+    expect(reviewNote.note.candidateId).toBe(firstCandidate.id);
+    expect(reviewNote.note.plannerAction).toBe("hold_for_future_private_review");
+    expect(reviewNote.appendOnly).toBe(true);
+    expect(reviewNote.writesExternal).toBe(false);
+    expect(reviewNote.callsExternalModels).toBe(false);
+    expect(reviewNote.gates.join(" ")).toContain("does not approve export");
+
+    const reviewNotes = await caller.raven.recommendationCandidateReviewNotes({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      limit: 10,
+    });
+    expect(reviewNotes.mode).toBe("private_read");
+    expect(reviewNotes.items.map((item) => item.id)).toContain(reviewNote.note.id);
+    expect(reviewNotes.appendOnly).toBe(true);
+    expect(reviewNotes.writesExternal).toBe(false);
+
+    const notedCandidateDetail = await caller.raven.recommendationCandidateDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(notedCandidateDetail.reviewNotes.map((item) => item.id)).toContain(reviewNote.note.id);
+
+    const reviewDigest = await caller.raven.recommendationCandidateReviewDigest({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(reviewDigest.mode).toBe("private_read");
+    expect(reviewDigest.groups.hold_for_future_private_review?.count).toBeGreaterThan(0);
+    expect(reviewDigest.groups.hold_for_future_private_review?.notedCount).toBeGreaterThan(0);
+    expect(reviewDigest.groups.ask_private_clarifying_question?.pendingNoteCount).toBeGreaterThan(0);
+    const digestRow = reviewDigest.rows.find((item) => item.candidateId === firstCandidate.id);
+    expect(digestRow?.plannerAction).toBe("hold_for_future_private_review");
+    expect(digestRow?.reviewNoteCount).toBeGreaterThan(0);
+    expect(digestRow?.latestReviewNote?.id).toBe(reviewNote.note.id);
+    expect(reviewDigest.writesExternal).toBe(false);
+    expect(reviewDigest.callsExternalModels).toBe(false);
+    expect(reviewDigest.gates.join(" ")).toContain("derived only from local Raven candidates");
+
+    const clarifyIds = reviewDigest.groups.ask_private_clarifying_question?.candidateIds ?? [];
+    expect(clarifyIds.length).toBeGreaterThan(0);
+    const batchNote = await caller.raven.addRecommendationCandidateReviewBatchNote({
+      ravenSessionId: unlocked.session.id,
+      candidateIds: clarifyIds,
+      plannerAction: "ask_private_clarifying_question",
+      note: "Clarify the mixed preference signal before ranking this group.",
+    });
+    expect(batchNote.ok).toBe(true);
+    expect(batchNote.mode).toBe("private_append_only_batch_note");
+    expect(batchNote.notes.length).toBe(clarifyIds.length);
+    expect(batchNote.notes.every((item) => item.plannerAction === "ask_private_clarifying_question")).toBe(true);
+    expect(batchNote.appendOnly).toBe(true);
+    expect(batchNote.writesExternal).toBe(false);
+    expect(batchNote.callsExternalModels).toBe(false);
+    expect(batchNote.gates.join(" ")).toContain("validated against the active Raven session");
+
+    const batchDigest = await caller.raven.recommendationCandidateReviewDigest({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(batchDigest.groups.ask_private_clarifying_question?.pendingNoteCount).toBe(0);
+    expect(batchDigest.groups.ask_private_clarifying_question?.notedCount).toBe(clarifyIds.length);
+
+    const filteredReviewNotes = await caller.raven.recommendationCandidateReviewNotes({
+      ravenSessionId: unlocked.session.id,
+      plannerAction: "ask_private_clarifying_question",
+      limit: 10,
+    });
+    expect(filteredReviewNotes.filters.plannerAction).toBe("ask_private_clarifying_question");
+    expect(filteredReviewNotes.items.length).toBe(clarifyIds.length);
+    expect(filteredReviewNotes.items.every((item) => item.plannerAction === "ask_private_clarifying_question")).toBe(true);
+
+    const filteredDigest = await caller.raven.recommendationCandidateReviewDigest({
+      ravenSessionId: unlocked.session.id,
+      plannerAction: "ask_private_clarifying_question",
+      limit: 10,
+    });
+    expect(filteredDigest.filters.plannerAction).toBe("ask_private_clarifying_question");
+    expect(Object.keys(filteredDigest.groups)).toEqual(["ask_private_clarifying_question"]);
+    expect(filteredDigest.rows.every((item) => item.plannerAction === "ask_private_clarifying_question")).toBe(true);
+
+    const noteSearch = await caller.raven.searchRecommendationCandidateReviewNotes({
+      ravenSessionId: unlocked.session.id,
+      query: "mixed preference",
+      plannerAction: "ask_private_clarifying_question",
+      limit: 10,
+    });
+    expect(noteSearch.mode).toBe("private_read");
+    expect(noteSearch.items.length).toBe(clarifyIds.length);
+    expect(noteSearch.items.every((item) => item.note.plannerAction === "ask_private_clarifying_question")).toBe(true);
+    expect(noteSearch.items[0]?.snippet).toContain("mixed preference");
+    expect(noteSearch.items[0]?.seedCategory).toBeDefined();
+    expect(noteSearch.writesExternal).toBe(false);
+    expect(noteSearch.callsExternalModels).toBe(false);
+    expect(noteSearch.gates.join(" ")).toContain("reads only Raven candidate and review-note tables");
+
+    const categorySearch = await caller.raven.searchRecommendationCandidateReviewNotes({
+      ravenSessionId: unlocked.session.id,
+      query: "visual_style",
+      limit: 10,
+    });
+    expect(categorySearch.items.some((item) => item.seedCategory === "visual_style")).toBe(true);
+
+    const timeline = await caller.raven.recommendationCandidateTimeline({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(timeline.mode).toBe("private_read");
+    expect(timeline.candidate.id).toBe(firstCandidate.id);
+    expect(timeline.events.some((item) => item.kind === "status_change")).toBe(true);
+    expect(timeline.events.some((item) => item.kind === "review_note")).toBe(true);
+    expect(timeline.events.map((item) => item.createdAt)).toEqual([...timeline.events.map((item) => item.createdAt)].sort((a, b) => a - b));
+    expect(timeline.events.find((item) => item.kind === "review_note")?.reviewNote?.id).toBe(reviewNote.note.id);
+    expect(timeline.writesExternal).toBe(false);
+    expect(timeline.callsExternalModels).toBe(false);
+    expect(timeline.gates.join(" ")).toContain("status history, review notes, and decision draft notes");
+
+    const reviewStats = await caller.raven.recommendationCandidateReviewStats({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(reviewStats.mode).toBe("private_read");
+    expect(reviewStats.candidate.id).toBe(firstCandidate.id);
+    expect(reviewStats.stats.timelineEventCount).toBe(timeline.events.length);
+    expect(reviewStats.stats.reviewNoteCount).toBeGreaterThan(0);
+    expect(reviewStats.stats.statusTransitionCount).toBeGreaterThan(0);
+    expect(reviewStats.stats.latestNoteAgeSeconds).not.toBeNull();
+    expect(reviewStats.stats.plannerActions).toContain("hold_for_future_private_review");
+    expect(reviewStats.stats.hasEnoughPrivateReviewEvidence).toBe(false);
+    expect(reviewStats.writesExternal).toBe(false);
+    expect(reviewStats.callsExternalModels).toBe(false);
+    expect(reviewStats.gates.join(" ")).toContain("advisory and derived only from local Raven candidate history");
+
+    const statsSummary = await caller.raven.recommendationCandidateReviewStatsSummary({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(statsSummary.mode).toBe("private_read");
+    expect(statsSummary.summary.total).toBeGreaterThan(0);
+    expect(statsSummary.summary.byReadiness.needs_more_private_review).toBeGreaterThan(0);
+    expect(statsSummary.summary.byPlannerAction.hold_for_future_private_review).toBeGreaterThan(0);
+    expect(statsSummary.summary.byPlannerAction.ask_private_clarifying_question).toBeGreaterThan(0);
+    expect(statsSummary.summary.byNoteCoverage.one_note + (statsSummary.summary.byNoteCoverage.multiple_notes ?? 0)).toBeGreaterThan(0);
+    expect(statsSummary.rows.find((item) => item.candidateId === firstCandidate.id)?.reviewNoteCount).toBeGreaterThan(0);
+    expect(statsSummary.writesExternal).toBe(false);
+    expect(statsSummary.callsExternalModels).toBe(false);
+    expect(statsSummary.gates.join(" ")).toContain("derived only from local Raven candidates");
+
+    const decisionDraft = await caller.raven.draftRecommendationCandidateReviewDecision({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(decisionDraft.mode).toBe("private_read");
+    expect(decisionDraft.candidate.id).toBe(firstCandidate.id);
+    expect(decisionDraft.decision.proposedStatus).toBe("kept");
+    expect(decisionDraft.decision.appliesStatus).toBe(false);
+    expect(decisionDraft.decision.requiresExplicitMutation).toBe(true);
+    expect(decisionDraft.evidence.reviewNoteCount).toBeGreaterThan(0);
+    expect(decisionDraft.evidence.plannerActions).toContain("hold_for_future_private_review");
+    expect(decisionDraft.writesExternal).toBe(false);
+    expect(decisionDraft.callsExternalModels).toBe(false);
+    expect(decisionDraft.gates.join(" ")).toContain("local advice only");
+
+    const clarifyDecisionDraft = await caller.raven.draftRecommendationCandidateReviewDecision({
+      ravenSessionId: unlocked.session.id,
+      candidateId: clarifyIds[0]!,
+    });
+    expect(clarifyDecisionDraft.decision.proposedStatus).toBe("draft");
+    expect(clarifyDecisionDraft.decision.reason).toContain("Mixed signals");
+
+    const decisionSummary = await caller.raven.draftRecommendationCandidateReviewDecisionSummary({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(decisionSummary.mode).toBe("private_read");
+    expect(decisionSummary.summary.total).toBeGreaterThan(0);
+    expect(decisionSummary.summary.byProposedStatus.kept).toBeGreaterThan(0);
+    expect(decisionSummary.summary.byProposedStatus.draft).toBeGreaterThan(0);
+    expect(decisionSummary.rows.find((item) => item.candidateId === firstCandidate.id)?.proposedStatus).toBe("kept");
+    expect(decisionSummary.rows.every((item) => item.appliesStatus === false)).toBe(true);
+    expect(decisionSummary.rows.every((item) => item.requiresExplicitMutation === true)).toBe(true);
+    expect(decisionSummary.writesExternal).toBe(false);
+    expect(decisionSummary.callsExternalModels).toBe(false);
+    expect(decisionSummary.gates.join(" ")).toContain("local advice only");
+
+    const keptDecisionSummary = await caller.raven.draftRecommendationCandidateReviewDecisionSummary({
+      ravenSessionId: unlocked.session.id,
+      proposedStatus: "kept",
+      plannerAction: "hold_for_future_private_review",
+      limit: 10,
+    });
+    expect(keptDecisionSummary.filters.proposedStatus).toBe("kept");
+    expect(keptDecisionSummary.filters.plannerAction).toBe("hold_for_future_private_review");
+    expect(keptDecisionSummary.summary.byProposedStatus.kept).toBe(keptDecisionSummary.rows.length);
+    expect(keptDecisionSummary.rows.every((item) => item.proposedStatus === "kept")).toBe(true);
+    expect(keptDecisionSummary.rows.every((item) => item.plannerActions.includes("hold_for_future_private_review"))).toBe(true);
+
+    const draftDecisionSummary = await caller.raven.draftRecommendationCandidateReviewDecisionSummary({
+      ravenSessionId: unlocked.session.id,
+      proposedStatus: "draft",
+      plannerAction: "ask_private_clarifying_question",
+      limit: 10,
+    });
+    expect(draftDecisionSummary.rows.every((item) => item.proposedStatus === "draft")).toBe(true);
+    expect(draftDecisionSummary.rows.every((item) => item.plannerActions.includes("ask_private_clarifying_question"))).toBe(true);
+
+    const decisionDetail = await caller.raven.recommendationCandidateDecisionDraftDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(decisionDetail.mode).toBe("private_read");
+    expect(decisionDetail.detail.candidate.id).toBe(firstCandidate.id);
+    expect(decisionDetail.detail.sourcePreferences.length).toBeGreaterThan(0);
+    expect(decisionDetail.detail.reviewNotes.map((item) => item.id)).toContain(reviewNote.note.id);
+    expect(decisionDetail.timeline.events.length).toBe(decisionDetail.stats.timelineEventCount);
+    expect(decisionDetail.stats.plannerActions).toContain("hold_for_future_private_review");
+    expect(decisionDetail.decision.proposedStatus).toBe("kept");
+    expect(decisionDetail.decision.appliesStatus).toBe(false);
+    expect(decisionDetail.decision.requiresExplicitMutation).toBe(true);
+    expect(decisionDetail.writesExternal).toBe(false);
+    expect(decisionDetail.callsExternalModels).toBe(false);
+    expect(decisionDetail.gates.join(" ")).toContain("combines only local Raven candidate detail");
+
+    const privateDecisionDraftNote = await caller.raven.addRecommendationCandidateDecisionDraftNote({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      proposedStatus: decisionDraft.decision.proposedStatus,
+      reason: decisionDraft.decision.reason,
+      note: "Keep the draft rationale local. Do not apply status from this note.",
+    });
+    expect(privateDecisionDraftNote.ok).toBe(true);
+    expect(privateDecisionDraftNote.mode).toBe("private_append_only_decision_draft_note");
+    expect(privateDecisionDraftNote.note.candidateId).toBe(firstCandidate.id);
+    expect(privateDecisionDraftNote.note.proposedStatus).toBe("kept");
+    expect(privateDecisionDraftNote.appendOnly).toBe(true);
+    expect(privateDecisionDraftNote.appliesStatus).toBe(false);
+    expect(privateDecisionDraftNote.writesExternal).toBe(false);
+    expect(privateDecisionDraftNote.callsExternalModels).toBe(false);
+    expect(privateDecisionDraftNote.gates.join(" ")).toContain("records rationale only");
+
+    const decisionDraftNotes = await caller.raven.recommendationCandidateDecisionDraftNotes({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      proposedStatus: "kept",
+      limit: 10,
+    });
+    expect(decisionDraftNotes.mode).toBe("private_read");
+    expect(decisionDraftNotes.items.map((item) => item.id)).toContain(privateDecisionDraftNote.note.id);
+    expect(decisionDraftNotes.items.every((item) => item.proposedStatus === "kept")).toBe(true);
+    expect(decisionDraftNotes.summary.byProposedStatus.kept).toBe(decisionDraftNotes.items.length);
+    expect(decisionDraftNotes.appendOnly).toBe(true);
+    expect(decisionDraftNotes.writesExternal).toBe(false);
+
+    const decisionDetailWithDraftNote = await caller.raven.recommendationCandidateDecisionDraftDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(decisionDetailWithDraftNote.detail.decisionDraftNotes.map((item) => item.id)).toContain(privateDecisionDraftNote.note.id);
+    expect(decisionDetailWithDraftNote.stats.decisionDraftNoteCount).toBeGreaterThan(0);
+    expect(decisionDetailWithDraftNote.timeline.events.find((item) => item.kind === "decision_draft_note")?.decisionDraftNote?.id).toBe(privateDecisionDraftNote.note.id);
+
+    const timelineWithDecisionDraftNote = await caller.raven.recommendationCandidateTimeline({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+    });
+    expect(timelineWithDecisionDraftNote.events.find((item) => item.kind === "decision_draft_note")?.decisionDraftNote?.id).toBe(privateDecisionDraftNote.note.id);
+    expect(timelineWithDecisionDraftNote.summary.byKind.status_change).toBeGreaterThan(0);
+    expect(timelineWithDecisionDraftNote.summary.byKind.review_note).toBeGreaterThan(0);
+    expect(timelineWithDecisionDraftNote.summary.byKind.decision_draft_note).toBeGreaterThan(0);
+
+    const filteredDecisionDraftTimeline = await caller.raven.recommendationCandidateTimeline({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      eventKind: "decision_draft_note",
+    });
+    expect(filteredDecisionDraftTimeline.filters.eventKind).toBe("decision_draft_note");
+    expect(filteredDecisionDraftTimeline.events.every((item) => item.kind === "decision_draft_note")).toBe(true);
+    expect(filteredDecisionDraftTimeline.events.map((item) => item.decisionDraftNote?.id)).toContain(privateDecisionDraftNote.note.id);
+    expect(filteredDecisionDraftTimeline.summary.byKind.decision_draft_note).toBeGreaterThan(0);
+    expect(filteredDecisionDraftTimeline.summary.total).toBeGreaterThan(filteredDecisionDraftTimeline.events.length);
+
+    const filteredDecisionDetail = await caller.raven.recommendationCandidateDecisionDraftDetail({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      eventKind: "decision_draft_note",
+    });
+    expect(filteredDecisionDetail.timeline.filters.eventKind).toBe("decision_draft_note");
+    expect(filteredDecisionDetail.timeline.events.every((item) => item.kind === "decision_draft_note")).toBe(true);
+    expect(filteredDecisionDetail.timeline.summary.byKind.decision_draft_note).toBeGreaterThan(0);
+    expect(filteredDecisionDetail.stats.timelineEventCount).toBe(filteredDecisionDetail.timeline.events.length);
+
+    const timelineSearch = await caller.raven.searchRecommendationCandidateTimeline({
+      ravenSessionId: unlocked.session.id,
+      candidateId: firstCandidate.id,
+      query: "rationale",
+      eventKind: "decision_draft_note",
+      limit: 10,
+    });
+    expect(timelineSearch.mode).toBe("private_read");
+    expect(timelineSearch.filters.eventKind).toBe("decision_draft_note");
+    expect(timelineSearch.items.map((item) => item.eventId)).toContain(`decision_draft_note:${privateDecisionDraftNote.note.id}`);
+    expect(timelineSearch.items.every((item) => item.kind === "decision_draft_note")).toBe(true);
+    expect(timelineSearch.items[0]?.snippet).toContain("rationale");
+    expect(timelineSearch.summary.total).toBe(timelineSearch.items.length);
+    expect(timelineSearch.summary.byKind.decision_draft_note).toBe(timelineSearch.items.length);
+    expect(timelineSearch.writesExternal).toBe(false);
+    expect(timelineSearch.callsExternalModels).toBe(false);
+    expect(timelineSearch.gates.join(" ")).toContain("reads only local Raven candidate history");
+
+    const candidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      limit: 10,
+    });
+    expect(candidateOverview.mode).toBe("private_read");
+    expect(candidateOverview.queue.total).toBeGreaterThan(0);
+    expect(candidateOverview.queue.byStatus.kept).toBeGreaterThan(0);
+    expect(candidateOverview.review.byPlannerAction.hold_for_future_private_review).toBeGreaterThan(0);
+    expect(candidateOverview.decisions.byProposedStatus.kept).toBeGreaterThan(0);
+    expect(candidateOverview.timeline.searchableCandidates).toBeGreaterThan(0);
+    expect(candidateOverview.timeline.eventCountByKind.decision_draft_note).toBeGreaterThan(0);
+    expect(candidateOverview.sort).toEqual({ by: "updated_at", direction: "desc" });
+    expect(candidateOverview.presets.readyReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.readiness === "ready_for_private_status_review").length,
+    );
+    expect(candidateOverview.presets.needsMoreReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.readiness === "needs_more_private_review").length,
+    );
+    expect(candidateOverview.presets.hasDecisionRationale.count).toBe(
+      candidateOverview.rows.filter((item) => item.eventCounts.decision_draft_note > 0).length,
+    );
+    expect(candidateOverview.presets.highConfidenceKept.count).toBe(
+      candidateOverview.rows.filter((item) => item.status === "kept" && item.confidence === "high").length,
+    );
+    expect(candidateOverview.presets.hasDecisionRationale.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      preset: "has_decision_rationale",
+    });
+    expect(candidateOverview.review.byFreshnessState.current_private_review).toBe(
+      candidateOverview.rows.filter((item) => item.notes.freshnessState === "current_private_review").length,
+    );
+    expect(candidateOverview.freshnessPresets.currentReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.notes.freshnessState === "current_private_review").length,
+    );
+    expect(candidateOverview.freshnessPresets.missingReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.notes.freshnessState === "missing_private_review").length,
+    );
+    expect(candidateOverview.freshnessPresets.staleReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.notes.freshnessState === "stale_private_review").length,
+    );
+    expect(candidateOverview.freshnessPresets.candidateUpdatedAfterReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.notes.freshnessState === "candidate_updated_after_review").length,
+    );
+    expect(candidateOverview.freshnessPresets.currentReview.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      reviewFreshness: "current_private_review",
+    });
+    expect(candidateOverview.rows.every((item) => item.riskFlags.hasMixedPreferenceSignals === (item.contradictionState === "mixed"))).toBe(true);
+    expect(candidateOverview.rows.every((item) => item.riskFlags.hasLowConfidence === (item.confidence === "low"))).toBe(true);
+    expect(candidateOverview.rows.every((item) => item.riskFlags.hasStaleSourceSignal === (item.decayBucket === "stale"))).toBe(true);
+    expect(candidateOverview.rows.every((item) => item.riskFlags.isMissingPrivateReview === (item.notes.freshnessState === "missing_private_review"))).toBe(true);
+    expect(
+      candidateOverview.rows.every(
+        (item) => item.riskFlags.needsPrivateAttention === (
+          item.riskFlags.hasMixedPreferenceSignals
+          || item.riskFlags.hasLowConfidence
+          || item.riskFlags.hasStaleSourceSignal
+          || item.riskFlags.isMissingPrivateReview
+        ),
+      ),
+    ).toBe(true);
+    expect(candidateOverview.rows.every((item) => item.riskFlags.exposesPrivateBodies === false)).toBe(true);
+    expect(candidateOverview.risk.needsPrivateAttention).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.needsPrivateAttention).length,
+    );
+    expect(candidateOverview.risk.byFlag.mixed_preference_signals ?? 0).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasMixedPreferenceSignals).length,
+    );
+    expect(candidateOverview.risk.byFlag.low_confidence ?? 0).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasLowConfidence).length,
+    );
+    expect(candidateOverview.risk.byFlag.stale_source_signal ?? 0).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasStaleSourceSignal).length,
+    );
+    expect(candidateOverview.risk.byFlag.missing_private_review ?? 0).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.isMissingPrivateReview).length,
+    );
+    expect(candidateOverview.riskPresets.needsAttention.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.needsPrivateAttention).length,
+    );
+    expect(candidateOverview.riskPresets.mixedPreferenceSignals.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasMixedPreferenceSignals).length,
+    );
+    expect(candidateOverview.riskPresets.lowConfidence.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasLowConfidence).length,
+    );
+    expect(candidateOverview.riskPresets.staleSourceSignal.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasStaleSourceSignal).length,
+    );
+    expect(candidateOverview.riskPresets.missingPrivateReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.isMissingPrivateReview).length,
+    );
+    expect(candidateOverview.riskPresets.needsAttention.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      needsPrivateAttention: true,
+    });
+    expect(candidateOverview.riskPresets.mixedPreferenceSignals.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      riskFlag: "mixed_preference_signals",
+    });
+    expect(candidateOverview.combinedRiskPresets.needsAttentionCurrentReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.needsPrivateAttention && item.notes.freshnessState === "current_private_review").length,
+    );
+    expect(candidateOverview.combinedRiskPresets.needsAttentionHasDecisionRationale.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.needsPrivateAttention && item.eventCounts.decision_draft_note > 0).length,
+    );
+    expect(candidateOverview.combinedRiskPresets.mixedSignalsWithCurrentReview.count).toBe(
+      candidateOverview.rows.filter((item) => item.riskFlags.hasMixedPreferenceSignals && item.notes.freshnessState === "current_private_review").length,
+    );
+    expect(candidateOverview.combinedRiskPresets.needsAttentionCurrentReview.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      needsPrivateAttention: true,
+      reviewFreshness: "current_private_review",
+    });
+    expect(candidateOverview.evidencePresets.completeEvidence.count).toBe(
+      candidateOverview.rows.filter((item) => (
+        item.evidenceSummary.hasPreferenceEvidence
+        && item.evidenceSummary.hasStatusHistoryEvidence
+        && item.evidenceSummary.hasReviewNoteEvidence
+        && item.evidenceSummary.hasDecisionDraftNoteEvidence
+      )).length,
+    );
+    expect(candidateOverview.evidencePresets.missingReviewEvidence.count).toBe(
+      candidateOverview.rows.filter((item) => !item.evidenceSummary.hasReviewNoteEvidence).length,
+    );
+    expect(candidateOverview.evidencePresets.missingDecisionRationale.count).toBe(
+      candidateOverview.rows.filter((item) => !item.evidenceSummary.hasDecisionDraftNoteEvidence).length,
+    );
+    expect(candidateOverview.evidencePresets.preferenceOnly.count).toBe(
+      candidateOverview.rows.filter((item) => (
+        item.evidenceSummary.hasPreferenceEvidence
+        && !item.evidenceSummary.hasStatusHistoryEvidence
+        && !item.evidenceSummary.hasReviewNoteEvidence
+        && !item.evidenceSummary.hasDecisionDraftNoteEvidence
+      )).length,
+    );
+    expect(candidateOverview.evidencePresets.completeEvidence.input).toEqual({
+      ravenSessionId: unlocked.session.id,
+      evidencePreset: "complete_evidence",
+    });
+    expect(candidateOverview.evidenceDrilldowns.sources.reviewNote.present).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id, evidenceSource: "review_note" },
+    });
+    expect(candidateOverview.evidenceDrilldowns.sources.reviewNote.missing).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id, missingEvidenceSource: "review_note" },
+    });
+    expect(candidateOverview.evidenceDrilldowns.presets.complete_evidence).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id, evidencePreset: "complete_evidence" },
+    });
+    expect(candidateOverview.evidenceDrilldowns.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.evidenceDrilldowns.mutatesStatus).toBe(false);
+    expect(candidateOverview.evidenceReceipt.activeEvidenceFilters).toEqual({
+      evidenceSource: null,
+      missingEvidenceSource: null,
+      evidencePreset: null,
+    });
+    expect(candidateOverview.evidenceReceipt.warnings).toEqual([]);
+    expect(candidateOverview.evidenceReceipt.recommendations).toEqual([]);
+    expect(candidateOverview.evidenceReceipt.summaryLabels).toContain(
+      candidateOverview.evidenceSummary.rowsWithAllEvidence === candidateOverview.rows.length ? "complete" : "partial",
+    );
+    if (candidateOverview.evidenceSummary.bySource.reviewNote.rowsWithEvidence < candidateOverview.rows.length) {
+      expect(candidateOverview.evidenceReceipt.summaryLabels).toContain("missing_review_evidence");
+      expect(candidateOverview.evidenceReceipt.summaryLabelDrilldowns.missing_review_evidence).toEqual({
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidencePreset: "missing_review_evidence" },
+      });
+    }
+    if (candidateOverview.evidenceSummary.bySource.decisionDraftNote.rowsWithEvidence < candidateOverview.rows.length) {
+      expect(candidateOverview.evidenceReceipt.summaryLabels).toContain("missing_decision_evidence");
+      expect(candidateOverview.evidenceReceipt.summaryLabelDrilldowns.missing_decision_evidence).toEqual({
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidencePreset: "missing_decision_rationale" },
+      });
+    }
+    expect(candidateOverview.evidenceReceipt.matchingRowCount).toBe(candidateOverview.rows.length);
+    expect(candidateOverview.evidenceReceipt.totalReturnedRows).toBe(candidateOverview.rows.length);
+    expect(candidateOverview.evidenceReceipt.evidenceSourceCount).toBe(candidateOverview.evidenceSummary.rowsWithAnyEvidence);
+    expect(candidateOverview.evidenceReceipt.completeEvidenceRowCount).toBe(candidateOverview.evidenceSummary.rowsWithAllEvidence);
+    expect(candidateOverview.evidenceReceipt.missingEvidenceRowCount).toBe(candidateOverview.evidenceSummary.rowsMissingEvidence);
+    expect(candidateOverview.evidenceReceipt.actionManifest.supportedFilters).toEqual([
+      "evidenceSource",
+      "missingEvidenceSource",
+      "evidencePreset",
+    ]);
+    expect(candidateOverview.evidenceReceipt.actionManifest.supportedSummaryLabels).toContain("complete");
+    expect(candidateOverview.evidenceReceipt.actionManifest.supportedSummaryLabels).toContain("missing_review_evidence");
+    expect(candidateOverview.evidenceReceipt.actionManifest.supportedWarnings).toContain("empty_evidence_queue");
+    expect(candidateOverview.evidenceReceipt.actionManifest.supportedRecommendations).toContain("inspect_complete_evidence");
+    expect(candidateOverview.evidenceReceipt.actionManifest.drilldownCategories).toEqual([
+      "source_present",
+      "source_missing",
+      "preset",
+      "summary_label",
+    ]);
+    expect(candidateOverview.evidenceReceipt.actionManifest.activeWarningCount).toBe(candidateOverview.evidenceReceipt.warnings.length);
+    expect(candidateOverview.evidenceReceipt.actionManifest.activeRecommendationCount).toBe(candidateOverview.evidenceReceipt.recommendations.length);
+    expect(candidateOverview.evidenceReceipt.actionManifest.activeSummaryLabelCount).toBe(candidateOverview.evidenceReceipt.summaryLabels.length);
+    expect(candidateOverview.evidenceReceipt.actionManifest.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.evidenceReceipt.actionManifest.mutatesStatus).toBe(false);
+    expect(candidateOverview.evidenceReceipt.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.evidenceReceipt.mutatesStatus).toBe(false);
+    expect(candidateOverview.evidenceReceipt.writesExternal).toBe(false);
+    expect(candidateOverview.evidenceReceipt.callsExternalModels).toBe(false);
+    expect(candidateOverview.queueManifest.filterKeys).toEqual([
+      "status",
+      "proposedStatus",
+      "readiness",
+      "eventKind",
+      "preset",
+      "reviewFreshness",
+      "needsPrivateAttention",
+      "riskFlag",
+      "evidenceSource",
+      "missingEvidenceSource",
+      "evidencePreset",
+    ]);
+    expect(candidateOverview.queueManifest.sortKeys).toContain("updated_at");
+    expect(candidateOverview.queueManifest.sortKeys).toContain("timeline_event_count");
+    expect(candidateOverview.queueManifest.presetGroups.map((group) => group.key)).toEqual([
+      "presets",
+      "freshnessPresets",
+      "riskPresets",
+      "combinedRiskPresets",
+      "evidencePresets",
+    ]);
+    expect(candidateOverview.queueManifest.presetGroups.find((group) => group.key === "riskPresets")?.ids).toContain("mixed_preference_signals");
+    expect(candidateOverview.queueManifest.presetGroups.find((group) => group.key === "combinedRiskPresets")?.ids).toContain("needs_attention_current_review");
+    expect(candidateOverview.queueManifest.presetGroups.find((group) => group.key === "evidencePresets")?.ids).toContain("complete_evidence");
+    expect(candidateOverview.queueManifest.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.queueManifest.mutatesStatus).toBe(false);
+    expect(candidateOverview.capabilityReceipt.readSources).toContain("raven_recommendation_candidates");
+    expect(candidateOverview.capabilityReceipt.readSources).toContain("raven_recommendation_candidate_review_notes");
+    expect(candidateOverview.capabilityReceipt.supportedFilters).toEqual(candidateOverview.queueManifest.filterKeys);
+    expect(candidateOverview.capabilityReceipt.supportedPresetGroups).toEqual([
+      "presets",
+      "freshnessPresets",
+      "riskPresets",
+      "combinedRiskPresets",
+      "evidencePresets",
+    ]);
+    expect(candidateOverview.capabilityReceipt.privacyGates.join(" ")).toContain("Does not expose private note bodies");
+    expect(candidateOverview.capabilityReceipt.writesExternal).toBe(false);
+    expect(candidateOverview.capabilityReceipt.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.capabilityReceipt.mutatesStatus).toBe(false);
+    expect(candidateOverview.overviewReceiptManifest.surfaces).toEqual([
+      "queue",
+      "risk",
+      "freshness",
+      "evidence",
+      "capability",
+    ]);
+    expect(candidateOverview.overviewReceiptManifest.filterCount).toBe(candidateOverview.queueManifest.filterKeys.length);
+    expect(candidateOverview.overviewReceiptManifest.presetGroupCount).toBe(candidateOverview.queueManifest.presetGroups.length);
+    expect(candidateOverview.overviewReceiptManifest.activeRowCount).toBe(candidateOverview.rows.length);
+    expect(candidateOverview.overviewReceiptManifest.riskFlagCount).toBe(Object.keys(candidateOverview.risk.byFlag).length);
+    expect(candidateOverview.overviewReceiptManifest.freshnessStateCount).toBe(Object.keys(candidateOverview.review.byFreshnessState).length);
+    expect(candidateOverview.overviewReceiptManifest.evidenceSourceCount).toBe(Object.keys(candidateOverview.evidenceSummary.bySource).length);
+    expect(candidateOverview.overviewReceiptManifest.evidenceReceiptWarningCount).toBe(candidateOverview.evidenceReceipt.warnings.length);
+    expect(candidateOverview.overviewReceiptManifest.evidenceReceiptRecommendationCount).toBe(candidateOverview.evidenceReceipt.recommendations.length);
+    expect(candidateOverview.overviewReceiptManifest.capabilityGateCount).toBe(candidateOverview.capabilityReceipt.privacyGates.length);
+    expect(candidateOverview.overviewReceiptManifest.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.overviewReceiptManifest.mutatesStatus).toBe(false);
+    const overviewFirstCandidate = candidateOverview.rows.find((item) => item.candidateId === firstCandidate.id);
+    expect(overviewFirstCandidate?.riskDrilldowns.mixedPreferenceSignals).toEqual({
+      endpoint: "raven.recommendationCandidateDetail",
+      input: { ravenSessionId: unlocked.session.id, candidateId: firstCandidate.id },
+    });
+    expect(overviewFirstCandidate?.riskDrilldowns.lowConfidence.endpoint).toBe("raven.draftRecommendationCandidateReviewDecision");
+    expect(overviewFirstCandidate?.riskDrilldowns.staleSourceSignal.endpoint).toBe("raven.recommendationCandidateDetail");
+    expect(overviewFirstCandidate?.riskDrilldowns.missingPrivateReview.endpoint).toBe("raven.recommendationCandidateReviewNotes");
+    expect(overviewFirstCandidate?.riskDrilldowns.exposesPrivateBodies).toBe(false);
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.candidateId).toBe(firstCandidate.id);
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.availableDrilldowns).toContain("detail");
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.availableDrilldowns).toContain("decisionDraftNotes");
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.availableRiskDrilldowns).toContain("missingPrivateReview");
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.summary.availableDrilldownCount).toBe(
+      overviewFirstCandidate?.rowCapabilityReceipt.availableDrilldowns.length,
+    );
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.summary.availableRiskDrilldownCount).toBe(
+      overviewFirstCandidate?.rowCapabilityReceipt.availableRiskDrilldowns.length,
+    );
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.summary.totalAvailableDrilldowns).toBe(
+      (overviewFirstCandidate?.rowCapabilityReceipt.availableDrilldowns.length ?? 0)
+      + (overviewFirstCandidate?.rowCapabilityReceipt.availableRiskDrilldowns.length ?? 0),
+    );
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.writesExternal).toBe(false);
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.exposesPrivateBodies).toBe(false);
+    expect(overviewFirstCandidate?.rowCapabilityReceipt.mutatesStatus).toBe(false);
+    expect(overviewFirstCandidate?.evidenceSummary.hasPreferenceEvidence).toBe(true);
+    expect(overviewFirstCandidate?.evidenceSummary.hasStatusHistoryEvidence).toBe(true);
+    expect(overviewFirstCandidate?.evidenceSummary.hasReviewNoteEvidence).toBe(true);
+    expect(overviewFirstCandidate?.evidenceSummary.hasDecisionDraftNoteEvidence).toBe(true);
+    expect(overviewFirstCandidate?.evidenceSummary.preferenceEvidenceCount).toBeGreaterThan(0);
+    expect(overviewFirstCandidate?.evidenceSummary.statusHistoryEvidenceCount).toBeGreaterThan(0);
+    expect(overviewFirstCandidate?.evidenceSummary.reviewNoteEvidenceCount).toBe(overviewFirstCandidate?.notes.reviewNoteCount);
+    expect(overviewFirstCandidate?.evidenceSummary.decisionDraftNoteEvidenceCount).toBe(overviewFirstCandidate?.notes.decisionDraftNoteCount);
+    expect(overviewFirstCandidate?.evidenceSummary.exposesPrivateBodies).toBe(false);
+    expect(candidateOverview.evidenceSummary.rowsWithAnyEvidence).toBe(
+      candidateOverview.rows.filter((item) => (
+        item.evidenceSummary.hasPreferenceEvidence
+        || item.evidenceSummary.hasStatusHistoryEvidence
+        || item.evidenceSummary.hasReviewNoteEvidence
+        || item.evidenceSummary.hasDecisionDraftNoteEvidence
+      )).length,
+    );
+    expect(candidateOverview.evidenceSummary.rowsWithAllEvidence).toBe(
+      candidateOverview.rows.filter((item) => (
+        item.evidenceSummary.hasPreferenceEvidence
+        && item.evidenceSummary.hasStatusHistoryEvidence
+        && item.evidenceSummary.hasReviewNoteEvidence
+        && item.evidenceSummary.hasDecisionDraftNoteEvidence
+      )).length,
+    );
+    expect(candidateOverview.evidenceSummary.rowsMissingEvidence).toBe(
+      candidateOverview.rows.filter((item) => (
+        !item.evidenceSummary.hasPreferenceEvidence
+        && !item.evidenceSummary.hasStatusHistoryEvidence
+        && !item.evidenceSummary.hasReviewNoteEvidence
+        && !item.evidenceSummary.hasDecisionDraftNoteEvidence
+      )).length,
+    );
+    expect(candidateOverview.evidenceSummary.bySource.preference.rowsWithEvidence).toBe(
+      candidateOverview.rows.filter((item) => item.evidenceSummary.hasPreferenceEvidence).length,
+    );
+    expect(candidateOverview.evidenceSummary.bySource.statusHistory.rowsWithEvidence).toBe(
+      candidateOverview.rows.filter((item) => item.evidenceSummary.hasStatusHistoryEvidence).length,
+    );
+    expect(candidateOverview.evidenceSummary.bySource.reviewNote.rowsWithEvidence).toBe(
+      candidateOverview.rows.filter((item) => item.evidenceSummary.hasReviewNoteEvidence).length,
+    );
+    expect(candidateOverview.evidenceSummary.bySource.decisionDraftNote.rowsWithEvidence).toBe(
+      candidateOverview.rows.filter((item) => item.evidenceSummary.hasDecisionDraftNoteEvidence).length,
+    );
+    expect(candidateOverview.evidenceSummary.bySource.preference.totalEvidenceCount).toBe(
+      candidateOverview.rows.reduce((total, item) => total + item.evidenceSummary.preferenceEvidenceCount, 0),
+    );
+    expect(candidateOverview.evidenceSummary.bySource.statusHistory.totalEvidenceCount).toBe(
+      candidateOverview.rows.reduce((total, item) => total + item.evidenceSummary.statusHistoryEvidenceCount, 0),
+    );
+    expect(candidateOverview.evidenceSummary.bySource.reviewNote.totalEvidenceCount).toBe(
+      candidateOverview.rows.reduce((total, item) => total + item.evidenceSummary.reviewNoteEvidenceCount, 0),
+    );
+    expect(candidateOverview.evidenceSummary.bySource.decisionDraftNote.totalEvidenceCount).toBe(
+      candidateOverview.rows.reduce((total, item) => total + item.evidenceSummary.decisionDraftNoteEvidenceCount, 0),
+    );
+    expect(candidateOverview.evidenceSummary.exposesPrivateBodies).toBe(false);
+    expect(overviewFirstCandidate?.timelineEventCount).toBeGreaterThan(0);
+    expect(overviewFirstCandidate?.notes.reviewNoteCount).toBeGreaterThan(0);
+    expect(overviewFirstCandidate?.notes.latestReviewNoteAt).toBe(reviewNote.note.createdAt);
+    expect(overviewFirstCandidate?.notes.decisionDraftNoteCount).toBeGreaterThan(0);
+    expect(overviewFirstCandidate?.notes.latestDecisionDraftNoteAt).toBe(privateDecisionDraftNote.note.createdAt);
+    expect(overviewFirstCandidate?.notes.latestPrivateReviewAt).toBe(
+      Math.max(reviewNote.note.createdAt, privateDecisionDraftNote.note.createdAt),
+    );
+    expect(overviewFirstCandidate?.notes.hasReviewNotes).toBe(true);
+    expect(overviewFirstCandidate?.notes.hasDecisionDraftNotes).toBe(true);
+    expect(overviewFirstCandidate?.notes.freshnessState).toBe("current_private_review");
+    expect(overviewFirstCandidate?.notes.isMissingPrivateReview).toBe(false);
+    expect(overviewFirstCandidate?.notes.isStalePrivateReview).toBe(false);
+    expect(overviewFirstCandidate?.notes.isOutpacedByCandidateUpdate).toBe(false);
+    expect(overviewFirstCandidate?.notes.exposesPrivateBodies).toBe(false);
+    expect(JSON.stringify(overviewFirstCandidate?.notes)).not.toContain("Keep the draft rationale local");
+    expect(overviewFirstCandidate?.drilldowns.detail).toEqual({
+      endpoint: "raven.recommendationCandidateDetail",
+      input: { ravenSessionId: unlocked.session.id, candidateId: firstCandidate.id },
+    });
+    expect(overviewFirstCandidate?.drilldowns.timeline.endpoint).toBe("raven.recommendationCandidateTimeline");
+    expect(overviewFirstCandidate?.drilldowns.timelineSearch.endpoint).toBe("raven.searchRecommendationCandidateTimeline");
+    expect(overviewFirstCandidate?.drilldowns.reviewNotes.endpoint).toBe("raven.recommendationCandidateReviewNotes");
+    expect(overviewFirstCandidate?.drilldowns.decisionDraftDetail.endpoint).toBe("raven.draftRecommendationCandidateReviewDecision");
+    expect(overviewFirstCandidate?.drilldowns.decisionDraftNotes.endpoint).toBe("raven.recommendationCandidateDecisionDraftNotes");
+    expect(candidateOverview.writesExternal).toBe(false);
+    expect(candidateOverview.callsExternalModels).toBe(false);
+    expect(candidateOverview.gates.join(" ")).toContain("derived only from local Raven candidates");
+
+    const filteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      status: "kept",
+      proposedStatus: "kept",
+      readiness: "needs_more_private_review",
+      eventKind: "decision_draft_note",
+      limit: 10,
+    });
+    expect(filteredCandidateOverview.filters.status).toBe("kept");
+    expect(filteredCandidateOverview.filters.proposedStatus).toBe("kept");
+    expect(filteredCandidateOverview.filters.eventKind).toBe("decision_draft_note");
+    expect(filteredCandidateOverview.rows.every((item) => item.status === "kept")).toBe(true);
+    expect(filteredCandidateOverview.rows.every((item) => item.proposedStatus === "kept")).toBe(true);
+    expect(filteredCandidateOverview.rows.every((item) => item.eventCounts.decision_draft_note > 0)).toBe(true);
+    expect(filteredCandidateOverview.queue.total).toBe(filteredCandidateOverview.rows.length);
+
+    const freshnessFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      reviewFreshness: "current_private_review",
+      limit: 10,
+    });
+    expect(freshnessFilteredCandidateOverview.filters.reviewFreshness).toBe("current_private_review");
+    expect(freshnessFilteredCandidateOverview.rows.map((item) => item.candidateId)).toContain(firstCandidate.id);
+    expect(freshnessFilteredCandidateOverview.rows.every((item) => item.notes.freshnessState === "current_private_review")).toBe(true);
+    expect(freshnessFilteredCandidateOverview.queue.total).toBe(freshnessFilteredCandidateOverview.rows.length);
+    expect(freshnessFilteredCandidateOverview.review.byFreshnessState.current_private_review).toBe(freshnessFilteredCandidateOverview.rows.length);
+
+    const riskFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      needsPrivateAttention: true,
+      limit: 10,
+    });
+    expect(riskFilteredCandidateOverview.filters.needsPrivateAttention).toBe(true);
+    expect(riskFilteredCandidateOverview.rows.every((item) => item.riskFlags.needsPrivateAttention)).toBe(true);
+    expect(riskFilteredCandidateOverview.risk.needsPrivateAttention).toBe(riskFilteredCandidateOverview.rows.length);
+
+    const combinedRiskFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      needsPrivateAttention: true,
+      reviewFreshness: "current_private_review",
+      limit: 10,
+    });
+    expect(combinedRiskFilteredCandidateOverview.filters.needsPrivateAttention).toBe(true);
+    expect(combinedRiskFilteredCandidateOverview.filters.reviewFreshness).toBe("current_private_review");
+    expect(combinedRiskFilteredCandidateOverview.rows.every((item) => item.riskFlags.needsPrivateAttention && item.notes.freshnessState === "current_private_review")).toBe(true);
+
+    const mixedRiskFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      riskFlag: "mixed_preference_signals",
+      limit: 10,
+    });
+    expect(mixedRiskFilteredCandidateOverview.filters.riskFlag).toBe("mixed_preference_signals");
+    expect(mixedRiskFilteredCandidateOverview.rows.every((item) => item.riskFlags.hasMixedPreferenceSignals)).toBe(true);
+    expect(mixedRiskFilteredCandidateOverview.risk.byFlag.mixed_preference_signals).toBe(mixedRiskFilteredCandidateOverview.rows.length);
+
+    const evidenceFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      evidenceSource: "review_note",
+      limit: 10,
+    });
+    expect(evidenceFilteredCandidateOverview.filters.evidenceSource).toBe("review_note");
+    expect(evidenceFilteredCandidateOverview.rows.every((item) => item.evidenceSummary.hasReviewNoteEvidence)).toBe(true);
+    expect(evidenceFilteredCandidateOverview.evidenceSummary.bySource.reviewNote.rowsWithEvidence).toBe(
+      evidenceFilteredCandidateOverview.rows.length,
+    );
+    expect(evidenceFilteredCandidateOverview.evidenceSummary.exposesPrivateBodies).toBe(false);
+
+    const missingEvidenceFilteredCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      missingEvidenceSource: "review_note",
+      limit: 10,
+    });
+    expect(missingEvidenceFilteredCandidateOverview.filters.missingEvidenceSource).toBe("review_note");
+    expect(missingEvidenceFilteredCandidateOverview.rows.every((item) => !item.evidenceSummary.hasReviewNoteEvidence)).toBe(true);
+    expect(missingEvidenceFilteredCandidateOverview.evidenceSummary.bySource.reviewNote.rowsWithEvidence).toBe(0);
+    expect(missingEvidenceFilteredCandidateOverview.evidenceSummary.exposesPrivateBodies).toBe(false);
+
+    const evidencePresetCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      evidencePreset: "complete_evidence",
+      limit: 10,
+    });
+    expect(evidencePresetCandidateOverview.filters.evidencePreset).toBe("complete_evidence");
+    expect(evidencePresetCandidateOverview.evidenceReceipt.activeEvidenceFilters).toEqual({
+      evidenceSource: null,
+      missingEvidenceSource: null,
+      evidencePreset: "complete_evidence",
+    });
+    expect(evidencePresetCandidateOverview.evidenceReceipt.matchingRowCount).toBe(evidencePresetCandidateOverview.rows.length);
+    expect(evidencePresetCandidateOverview.evidenceReceipt.summaryLabels).toEqual(["complete"]);
+    expect(evidencePresetCandidateOverview.evidenceReceipt.summaryLabelDrilldowns.complete).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id, evidencePreset: "complete_evidence" },
+    });
+    expect(evidencePresetCandidateOverview.evidenceReceipt.exposesPrivateBodies).toBe(false);
+    expect(evidencePresetCandidateOverview.rows.every((item) => (
+      item.evidenceSummary.hasPreferenceEvidence
+      && item.evidenceSummary.hasStatusHistoryEvidence
+      && item.evidenceSummary.hasReviewNoteEvidence
+      && item.evidenceSummary.hasDecisionDraftNoteEvidence
+    ))).toBe(true);
+    expect(evidencePresetCandidateOverview.evidenceSummary.rowsWithAllEvidence).toBe(evidencePresetCandidateOverview.rows.length);
+    expect(evidencePresetCandidateOverview.evidenceSummary.exposesPrivateBodies).toBe(false);
+
+    const contradictoryEvidenceCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      evidenceSource: "review_note",
+      missingEvidenceSource: "review_note",
+      limit: 10,
+    });
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.activeEvidenceFilters).toEqual({
+      evidenceSource: "review_note",
+      missingEvidenceSource: "review_note",
+      evidencePreset: null,
+    });
+    expect(contradictoryEvidenceCandidateOverview.rows).toHaveLength(0);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.matchingRowCount).toBe(0);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.warnings).toEqual([
+      "contradictory_evidence_source_filters",
+      "empty_evidence_queue",
+    ]);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.recommendations).toEqual([
+      {
+        id: "clear_missing_evidence_source",
+        reason: "contradictory_evidence_source_filters",
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidenceSource: "review_note" },
+      },
+      {
+        id: "inspect_complete_evidence",
+        reason: "empty_evidence_queue",
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidencePreset: "complete_evidence" },
+      },
+      {
+        id: "inspect_missing_review_evidence",
+        reason: "missing_review_note_coverage",
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidencePreset: "missing_review_evidence" },
+      },
+      {
+        id: "inspect_missing_decision_rationale",
+        reason: "missing_decision_draft_note_coverage",
+        endpoint: "raven.recommendationCandidateOverview",
+        input: { ravenSessionId: unlocked.session.id, evidencePreset: "missing_decision_rationale" },
+      },
+    ]);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.summaryLabels).toEqual(["contradictory", "empty"]);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.summaryLabelDrilldowns.contradictory).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id, evidenceSource: "review_note" },
+    });
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.summaryLabelDrilldowns.empty).toEqual({
+      endpoint: "raven.recommendationCandidateOverview",
+      input: { ravenSessionId: unlocked.session.id },
+    });
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.actionManifest.activeWarningCount).toBe(2);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.actionManifest.activeRecommendationCount).toBe(4);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.actionManifest.activeSummaryLabelCount).toBe(2);
+    expect(contradictoryEvidenceCandidateOverview.evidenceReceipt.exposesPrivateBodies).toBe(false);
+
+    const presetCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      preset: "has_decision_rationale",
+      limit: 10,
+    });
+    expect(presetCandidateOverview.filters.preset).toBe("has_decision_rationale");
+    expect(presetCandidateOverview.rows.every((item) => item.eventCounts.decision_draft_note > 0)).toBe(true);
+    expect(presetCandidateOverview.queue.total).toBe(presetCandidateOverview.rows.length);
+
+    const timelineSortedCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      sortBy: "timeline_event_count",
+      sortDirection: "desc",
+      limit: 10,
+    });
+    expect(timelineSortedCandidateOverview.sort).toEqual({ by: "timeline_event_count", direction: "desc" });
+    expect(
+      timelineSortedCandidateOverview.rows.every((item, index, rows) => index === 0 || rows[index - 1].timelineEventCount >= item.timelineEventCount),
+    ).toBe(true);
+
+    const confidenceRank = (confidence: string) => (confidence === "high" ? 3 : confidence === "medium" ? 2 : confidence === "low" ? 1 : 0);
+    const confidenceSortedCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      sortBy: "confidence",
+      sortDirection: "asc",
+      limit: 10,
+    });
+    expect(confidenceSortedCandidateOverview.sort).toEqual({ by: "confidence", direction: "asc" });
+    expect(
+      confidenceSortedCandidateOverview.rows.every((item, index, rows) => index === 0 || confidenceRank(rows[index - 1].confidence) <= confidenceRank(item.confidence)),
+    ).toBe(true);
+
+    const readinessRank = (readiness: string) => (readiness === "ready_for_private_status_review" ? 1 : 0);
+    const readinessSortedCandidateOverview = await caller.raven.recommendationCandidateOverview({
+      ravenSessionId: unlocked.session.id,
+      sortBy: "readiness",
+      sortDirection: "desc",
+      limit: 10,
+    });
+    expect(readinessSortedCandidateOverview.sort).toEqual({ by: "readiness", direction: "desc" });
+    expect(
+      readinessSortedCandidateOverview.rows.every((item, index, rows) => index === 0 || readinessRank(rows[index - 1].readiness) >= readinessRank(item.readiness)),
+    ).toBe(true);
+
+    const privateDecisionDraftNoteSearch = await caller.raven.searchRecommendationCandidateDecisionDraftNotes({
+      ravenSessionId: unlocked.session.id,
+      query: "rationale",
+      proposedStatus: "kept",
+      limit: 10,
+    });
+    expect(privateDecisionDraftNoteSearch.mode).toBe("private_read");
+    expect(privateDecisionDraftNoteSearch.filters.proposedStatus).toBe("kept");
+    expect(privateDecisionDraftNoteSearch.items.map((item) => item.note.id)).toContain(privateDecisionDraftNote.note.id);
+    expect(privateDecisionDraftNoteSearch.items.every((item) => item.note.proposedStatus === "kept")).toBe(true);
+    expect(privateDecisionDraftNoteSearch.items[0]?.snippet).toContain("rationale");
+    expect(privateDecisionDraftNoteSearch.writesExternal).toBe(false);
+    expect(privateDecisionDraftNoteSearch.callsExternalModels).toBe(false);
+    expect(privateDecisionDraftNoteSearch.gates.join(" ")).toContain("reads only Raven decision draft note tables");
+
+    const scrub = await caller.raven.scrubPrivateText({
+      ravenSessionId: unlocked.session.id,
+      targetKind: "free_text",
+      body: "Private note from test@example.com with https://example.com and /Users/lindsaybell/private/file.txt",
+    });
+    expect(scrub.ok).toBe(true);
+    expect(scrub.receipt.scrubbedBody).toContain("[email]");
+    expect(scrub.receipt.scrubbedBody).toContain("[url]");
+    expect(scrub.receipt.scrubbedBody).toContain("[local_path]");
+    expect(scrub.receipt.findingLabels).toContain("email");
+    expect(scrub.receipt.severity).toBe("medium");
+    expect(scrub.writesExternal).toBe(false);
+
+    const highRiskScrub = await caller.raven.scrubPrivateText({
+      ravenSessionId: unlocked.session.id,
+      targetKind: "free_text",
+      body: "token=abc123 and card 4111 1111 1111 1111",
+    });
+    expect(highRiskScrub.receipt.scrubbedBody).toContain("[secret_like]");
+    expect(highRiskScrub.receipt.scrubbedBody).toContain("[financial_id]");
+    expect(highRiskScrub.receipt.findingLabels).toContain("secret-like text");
+    expect(highRiskScrub.receipt.severity).toBe("high");
+
+    const proposal = await caller.raven.proposeBridgeExport({
+      ravenSessionId: unlocked.session.id,
+      sourceEventId: event.event.id,
+      target: "gojo_moodboard",
+      title: "Private visual direction",
+      summary: "Moodboard seed from test@example.com and https://example.com. Keep it private until approved.",
+    });
+    expect(proposal.ok).toBe(true);
+    expect(proposal.approvalRequired).toBe(true);
+    expect(proposal.proposal.status).toBe("queued_for_approval");
+    expect(proposal.proposal.summary).toContain("[email]");
+    expect(proposal.proposal.summary).toContain("[url]");
+    expect(proposal.proposal.approvalRequired).toContain("Explicit user approval");
+    expect(proposal.approvalId).toBeGreaterThan(0);
+    expect(proposal.permissionPreflightId).toBeGreaterThan(0);
+    expect(proposal.writesCoreMemory).toBe(false);
+    expect(proposal.writesExternal).toBe(false);
+
+    const ravenQueue = await caller.approvals.list({
+      origin: "raven",
+      status: "pending",
+      limit: 10,
+    });
+    expect(ravenQueue.mode).toBe("read_only");
+    expect(ravenQueue.summary.raven).toBeGreaterThan(0);
+    const queuedRaven = ravenQueue.items.find((item) => item.id === proposal.approvalId);
+    expect(queuedRaven?.origin).toBe("raven");
+    expect(queuedRaven?.targetLabel).toBe("Private visual direction");
+    expect(queuedRaven?.validationPreview.oakNotes.join(" ")).toContain("sealed private scope");
+    expect(queuedRaven?.permissionPreflight?.decision).toBe("blocked_by_hard_gate");
+
+    const proposalRows = await caller.raven.bridgeProposals({
+      ravenSessionId: unlocked.session.id,
+      status: "queued_for_approval",
+      limit: 10,
+    });
+    expect(proposalRows.items.map((item) => item.id)).toContain(proposal.proposal.id);
+
+    const detail = await caller.raven.bridgeProposalDetail({
+      ravenSessionId: unlocked.session.id,
+      proposalId: proposal.proposal.id,
+    });
+    expect(detail.mode).toBe("private_read");
+    expect(detail.proposal.id).toBe(proposal.proposal.id);
+    expect(detail.scrubReceipt?.scrubbedBody).toContain("[email]");
+    expect(detail.sourceEvent?.id).toBe(event.event.id);
+    expect(detail.approvalPreview?.id).toBe(proposal.approvalId);
+    expect(detail.permissionPreflight?.decision).toBe("blocked_by_hard_gate");
+    expect(detail.history[0]?.toStatus).toBe("queued_for_approval");
+    expect(detail.approvesExport).toBe(false);
+
+    const revised = await caller.raven.updateBridgeProposalStatus({
+      ravenSessionId: unlocked.session.id,
+      proposalId: proposal.proposal.id,
+      status: "needs_revision",
+      reason: "Needs a narrower summary before any approval.",
+    });
+    expect(revised.ok).toBe(true);
+    expect(revised.proposal.status).toBe("needs_revision");
+    expect(revised.approvesExport).toBe(false);
+    expect(revised.writesCoreMemory).toBe(false);
+
+    const revisedDetail = await caller.raven.bridgeProposalDetail({
+      ravenSessionId: unlocked.session.id,
+      proposalId: proposal.proposal.id,
+    });
+    expect(revisedDetail.history.map((item) => item.toStatus)).toContain("needs_revision");
+    expect(revisedDetail.history.find((item) => item.toStatus === "needs_revision")?.reason).toContain("narrower summary");
+
+    const cancelled = await caller.raven.updateBridgeProposalStatus({
+      ravenSessionId: unlocked.session.id,
+      proposalId: proposal.proposal.id,
+      status: "cancelled",
+      reason: "Cancel local proposal preview.",
+    });
+    expect(cancelled.ok).toBe(true);
+    expect(cancelled.proposal.status).toBe("cancelled");
+    expect(cancelled.approvesExport).toBe(false);
+    const cancelledQueue = await caller.approvals.list({
+      origin: "raven",
+      status: "cancelled",
+      limit: 10,
+    });
+    expect(cancelledQueue.items.find((item) => item.id === proposal.approvalId)?.status).toBe("cancelled");
+
     const locked = await caller.raven.lock({
       ravenSessionId: unlocked.session.id,
       phrase: "we’re done here",

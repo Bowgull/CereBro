@@ -45,6 +45,11 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 - Root `DESIGN.md` is active. Read it before UI, motion, prototype, deck, asset,
   or product-copy work. It is the agent-readable design law that prevents
   generic AI output.
+- Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+  is active. Read it before app/software UI work. Product screens must hide
+  machinery until requested, make the primary object own the screen, put
+  settings in a real destination, and keep debug/proof language out of the
+  primary product surface.
 - External references such as Impeccable, Awesome DESIGN.md, Huashu Design, UI
   UX Pro Max, React Bits, Uncodixfy, Google Stitch, v0.app, Ruflo, Docling,
   Addy Osmani Agent Skills, AIDLC, Archon, Hermes, Multica, GenericAgent,
@@ -132,7 +137,12 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 - External Codex calls confirm individually. No auto-batching. Eats existing Codex session quota, not a separate API bill.
 - Browser tools start with public-page browsing only.
 - Generated files and deliverables should default to a Google Drive synced CereBro vault once `CEREBRO_VAULT_DIR` is configured; repo folders are not the default home for generated images, videos, renders, or client work.
-- Raven Reviews: hard-locked. Zero surface in V1. Sealed code dir only with three-gate password unseal. NSFW image generation declined.
+- Raven is a sealed private build track outside core CereBro. Core CereBro must
+  not read, write, route, summarize, sync, index, or export Raven data. The only
+  allowed CereBro connection is an explicit sealed launcher that carries no
+  Raven content back into CereBro. No adult generation surface exists in V1. No
+  Raven private content goes to external models in V1. No media downloads run in
+  V1.
 - Walkthrough guide is the LAST phase.
 
 ## Build cadence

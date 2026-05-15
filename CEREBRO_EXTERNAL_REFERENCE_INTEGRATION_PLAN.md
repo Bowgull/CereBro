@@ -468,6 +468,9 @@ No promise enters the product until it has a receipt.
   any deck-pipeline change.
 - Agent-harness references should feed Tony/Spock/Oak runbooks before runtime
   changes.
+- Agent skill references should feed `CEREBRO_SKILLS_AND_TOOLS_LAYER.md`
+  before any runtime loader work. No third-party skill becomes active until its
+  license, tool surface, memory access, and approval gates are recorded.
 - `LICENSE_REVIEW_MATRIX.md` should track these references.
 - Future UI work should cite which design rule it used.
 

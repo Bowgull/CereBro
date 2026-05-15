@@ -101,6 +101,9 @@ Recent Prime slices:
 - 2026-05-14 2156 EDT: collapsed Basement Settings bridge setup, how-it-works
   notes, and tracked project list behind explicit details. Kept machine status
   and bridge key copy visible.
+- 2026-05-14 2159 EDT: integrated the dirty Raven backend checkpoint as a
+  sealed boundary slice after tightening the CereBro launcher to exact phrase
+  matching. Raven remains outside core CereBro.
 
 ### Frontend Worker
 
