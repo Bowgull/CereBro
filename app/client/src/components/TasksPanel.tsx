@@ -34,6 +34,8 @@ const NEXT_STATUS: Record<string, "open" | "in_progress" | "done" | "cancelled">
   cancelled: "open",
 };
 
+const TASK_RENDER_STEP = 80;
+
 export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [projectFilter, setProjectFilter] = useState<number | "all">("all");
@@ -71,6 +73,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const [deleteGate, setDeleteGate] = useState<{ id: number; title: string } | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<number | null>(null);
   const [focusNotice, setFocusNotice] = useState<string | null>(null);
+  const [visibleLimit, setVisibleLimit] = useState(TASK_RENDER_STEP);
 
   useEffect(() => {
     let raw: string | null = null;
@@ -90,6 +93,10 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
     }
   }, []);
 
+  useEffect(() => {
+    setVisibleLimit(TASK_RENDER_STEP);
+  }, [projectFilter, sessionFilter, focusedTaskId]);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = title.trim();
@@ -105,6 +112,14 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const openTasks = tasks.filter((task) => task.status === "open").length;
   const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length;
   const doneTasks = tasks.filter((task) => task.status === "done").length;
+  const focusedTask = focusedTaskId == null ? null : tasks.find((task) => task.id === focusedTaskId) ?? null;
+  const visibleTasks = focusedTask
+    ? [
+        focusedTask,
+        ...tasks.filter((task) => task.id !== focusedTask.id).slice(0, Math.max(visibleLimit - 1, 0)),
+      ]
+    : tasks.slice(0, visibleLimit);
+  const hasMoreTasks = visibleTasks.length < tasks.length;
 
   return (
     <div
@@ -220,9 +235,16 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
       {focusNotice && (
         <div className="mx-2 mt-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
           <span className="min-w-0">{focusNotice}</span>
-          <Button type="button" size="sm" variant="outline" onClick={() => setFocusNotice(null)} aria-label="Dismiss task focus notice">
-            Dismiss
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            {focusedTaskId != null && (
+              <Button type="button" size="sm" variant="ghost" onClick={() => setFocusedTaskId(null)} aria-label="Clear focused task">
+                Clear
+              </Button>
+            )}
+            <Button type="button" size="sm" variant="outline" onClick={() => setFocusNotice(null)} aria-label="Dismiss task focus notice">
+              Dismiss
+            </Button>
+          </div>
         </div>
       )}
 
@@ -234,66 +256,86 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             No tasks yet. Add one above.
           </div>
         ) : (
-          tasks.map((t) => (
-            <div
-              key={t.id}
-              className="flex items-center gap-1.5 px-2.5 py-1.5"
-              style={{
-                background: focusedTaskId === t.id ? `${C.gold}14` : "transparent",
-                borderBottom: `1px solid ${C.borderSoft}`,
-                boxShadow: focusedTaskId === t.id ? `inset 2px 0 0 ${C.gold}` : "none",
-              }}
-            >
-              <Button
-                type="button"
-                onClick={() => setStatus.mutate({ id: t.id, status: NEXT_STATUS[t.status] })}
-                className="min-w-24 shrink-0"
-                variant={statusVariant(t.status)}
-                size="sm"
-                title={`Advance local task status from ${STATUS_LABEL[t.status] ?? t.status} to ${STATUS_LABEL[NEXT_STATUS[t.status]] ?? NEXT_STATUS[t.status]}.`}
-                aria-label={`Advance task ${t.title} status`}
-              >
-                {STATUS_LABEL[t.status] ?? t.status}
-              </Button>
+          <>
+            <div className="flex items-center justify-between gap-2 px-2.5 py-1 text-[10px] uppercase tracking-widest" style={{ borderBottom: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              <span>
+                Showing {visibleTasks.length} of {tasks.length}
+              </span>
+              {focusedTask && <span style={{ color: C.gold }}>Focused task pinned</span>}
+            </div>
+            {visibleTasks.map((t) => (
               <div
-                className="flex-1 text-[11px]"
+                key={t.id}
+                className="flex items-center gap-1.5 px-2.5 py-1.5"
                 style={{
-                  color: t.status === "done" || t.status === "cancelled" ? C.textMuted : C.textPrimary,
-                  textDecoration: t.status === "done" ? "line-through" : "none",
+                  background: focusedTaskId === t.id ? `${C.gold}14` : "transparent",
+                  borderBottom: `1px solid ${C.borderSoft}`,
+                  boxShadow: focusedTaskId === t.id ? `inset 2px 0 0 ${C.gold}` : "none",
                 }}
               >
-                <div className="line-clamp-2">{t.title}</div>
-                {(t.projectId != null || t.sessionId != null) && (
-                  <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                    {t.projectId != null && (
-                      <span
-                        className="text-[10px] uppercase tracking-wider truncate"
-                        style={{ color: C.textMuted }}
-                        title={t.projectPath ?? undefined}
-                      >
-                        {t.projectName ?? `Project #${t.projectId}`}
-                      </span>
-                    )}
-                    {t.sessionId != null && (
-                      <Badge variant="outline" className="text-[10px] uppercase" title={t.sessionDisplayName ?? undefined}>
-                        {t.sessionDisplayName ?? `Run #${t.sessionId}`}
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                <Button
+                  type="button"
+                  onClick={() => setStatus.mutate({ id: t.id, status: NEXT_STATUS[t.status] })}
+                  className="min-w-24 shrink-0"
+                  variant={statusVariant(t.status)}
+                  size="sm"
+                  title={`Advance local task status from ${STATUS_LABEL[t.status] ?? t.status} to ${STATUS_LABEL[NEXT_STATUS[t.status]] ?? NEXT_STATUS[t.status]}.`}
+                  aria-label={`Advance task ${t.title} status`}
+                >
+                  {STATUS_LABEL[t.status] ?? t.status}
+                </Button>
+                <div
+                  className="flex-1 text-[11px]"
+                  style={{
+                    color: t.status === "done" || t.status === "cancelled" ? C.textMuted : C.textPrimary,
+                    textDecoration: t.status === "done" ? "line-through" : "none",
+                  }}
+                >
+                  <div className="line-clamp-2">{t.title}</div>
+                  {(t.projectId != null || t.sessionId != null) && (
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                      {t.projectId != null && (
+                        <span
+                          className="text-[10px] uppercase tracking-wider truncate"
+                          style={{ color: C.textMuted }}
+                          title={t.projectPath ?? undefined}
+                        >
+                          {t.projectName ?? `Project #${t.projectId}`}
+                        </span>
+                      )}
+                      {t.sessionId != null && (
+                        <Badge variant="outline" className="text-[10px] uppercase" title={t.sessionDisplayName ?? undefined}>
+                          {t.sessionDisplayName ?? `Run #${t.sessionId}`}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setDeleteGate({ id: t.id, title: t.title })}
+                  variant="destructive"
+                  size="sm"
+                  aria-label={`Delete task ${t.title}`}
+                  title="Open the hard-gate confirmation before deleting this local task receipt."
+                >
+                  Delete
+                </Button>
               </div>
+            ))}
+            {hasMoreTasks && (
               <Button
                 type="button"
-                onClick={() => setDeleteGate({ id: t.id, title: t.title })}
-                variant="destructive"
+                onClick={() => setVisibleLimit((current) => current + TASK_RENDER_STEP)}
+                variant="outline"
+                className="m-2 w-[calc(100%-1rem)]"
                 size="sm"
-                aria-label={`Delete task ${t.title}`}
-                title="Open the hard-gate confirmation before deleting this local task receipt."
+                aria-label="Show more local tasks"
               >
-                Delete
+                Show 80 More
               </Button>
-            </div>
-          ))
+            )}
+          </>
         )}
       </div>
 

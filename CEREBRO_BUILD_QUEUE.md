@@ -131,6 +131,9 @@ Recent Prime slices:
 - 2026-05-15 0716 EDT: made route-created task links durable. Saved route rows
   now store `task_id`, `runtime.createTaskFromRouteRecord` creates at most one
   local task per route, and Ledger reuses the stored task link after refresh.
+- 2026-05-15 0752 EDT: capped the Tasks visible DOM to 80 rows at a time,
+  added `Show 80 More`, and pinned route-focused tasks into the visible set so
+  the focused receipt stays inspectable without dumping the full task pile.
 
 ### Frontend Worker
 

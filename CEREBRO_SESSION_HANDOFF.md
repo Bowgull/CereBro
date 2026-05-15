@@ -16699,3 +16699,68 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: clean up the oversized Tasks surface so focused route-created tasks are easy to inspect without rendering the entire historical task pile. Keep this as UI/data-read work only. Do not run tasks, commands, browser actions, model calls, Workbench evidence writes, memory writes, git actions, Slack writes, Notion writes, or external provider calls from the task focus path.
 ```
+
+## 2026-05-15 0752 EDT — Tasks visible list cap handoff
+
+Overall completion after this pass:
+
+- Overall: 55%
+- Foundation/docs/planning: 93%
+- Frontend visible loop: 89%
+- Backend/runtime: 36%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a single frontend surface slice.
+
+What changed:
+
+- Capped the rendered Tasks list to 80 visible rows at a time.
+- Added a compact `Showing <visible> of <total>` readout.
+- Added `Show 80 More` for deliberate expansion.
+- Preserved full task counts and existing project/session filters.
+- Kept any route-focused task pinned into the visible set.
+- Added `Focused task pinned` status text when a route handoff opens Tasks.
+- Added `Clear` beside the focus notice so the user can return to the normal
+  list without leaving Tasks.
+- This is UI/data-read work only. It does not run tasks, commands, browser
+  actions, model calls, Workbench evidence writes, memory writes, git actions,
+  Slack writes, Notion writes, or external provider calls.
+
+Files touched in this slice:
+
+- `app/client/src/components/TasksPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Playwright opened `http://localhost:3000`, opened Ledger > Tasks, and
+  confirmed the list shows `Showing 80 of 1738` plus `Show 80 More`.
+- Playwright clicked a route-created `Task #1734` link and confirmed Tasks
+  opened with `Showing task #1734 created from route #21.` and `Focused task
+  pinned`.
+
+Known risks:
+
+- Tasks still fetches the full list from the backend. This pass fixes the
+  immediate DOM/UX problem, not the payload size.
+- Session filter chips are still noisy because many sessions share the same
+  display name. That should be normalized later.
+- The local development DB contains many test/demo tasks from prior proof
+  passes.
+
+Storage impact:
+
+- No schema change.
+- No new database rows.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: reduce task payload and filter noise by adding backend pagination or a task read model that supports focused task lookup without loading the whole local task table. Keep full counts visible. Do not add task execution or automation.
+```
