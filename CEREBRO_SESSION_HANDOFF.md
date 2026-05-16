@@ -22232,3 +22232,76 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Home shell copy now uses bodies, command teaching, surface markers, push decisions, and audit trail language around Workshop, Project Lab, and Terminal Lab. Next best slice: move past copy cleanup unless browser review finds a concrete leak; inspect the next build-plan surface for real functionality or clarity work without adding Code Lab or execution behavior. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 1502 EDT - Research source route contract
+
+Overall completion after this pass:
+
+- Overall: 65%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 39%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Block C knowledge/source route slice.
+
+What changed:
+
+- Surfer backend panel now returns a read-only Source Library route contract
+  derived from the existing knowledge contracts.
+- Research now shows `Source Route` with source-note lane, GitHub repository
+  source path, Project Map path, archive-only retrieval, and Write Gate.
+- Added targeted test coverage proving the route is read-only and creates no
+  artifacts, approvals, or memory entries.
+
+Files touched in this slice:
+
+- `app/server/routers/surfer.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-surfer-source-route.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 1 test.
+- `git diff --check -- app/server/routers/surfer.ts
+  app/client/src/components/SurferSourcesPanel.tsx
+  app/server/surfer.sourceLibraryRoute.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, opened
+  Research, and confirmed Source Route, `20_Knowledge`, GitHub repository
+  source path, Project Map path, `archive_only`, and Write Gate were present.
+
+Drift check:
+
+- On path because the build queue's next lane is Knowledge contracts before
+  knowledge automation.
+- This exposes where source knowledge belongs before any Source Library, RAG,
+  or Obsidian automation expands.
+- No browsing, RAG, Obsidian write, Notion write, Drive write, memory write,
+  model install, external source clone, new agent, Raven path, or backend
+  execution behavior was added.
+
+Known risks:
+
+- The Source Route is display/read-only. It does not create project bridge
+  notes, GitHub source notes, or RAG-ready notes yet.
+- The Write Gate details are behind a closed disclosure; this is intentional
+  low-machinery behavior.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Research now shows the read-only Source Route from existing knowledge contracts. Next best slice: continue Block C by making vault/Obsidian configured-or-missing status visible in the least noisy place, or add a focused test-backed contract for RAG-ready note metadata. Do not build RAG automation, browser crawling, GitHub cloning, or external writes. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

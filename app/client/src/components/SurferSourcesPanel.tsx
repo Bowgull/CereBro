@@ -301,6 +301,31 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
+            {data?.sourceLibraryRoute && (
+              <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />
+                <div className="mt-2 grid gap-1">
+                  <RailLine marker="Source notes" text={data.sourceLibraryRoute.sourceNoteLane} tone={C.accent} />
+                  <RailLine marker="GitHub source" text={data.sourceLibraryRoute.githubRepositorySourcePath} tone={C.gold} />
+                  <RailLine marker="Project map" text={data.sourceLibraryRoute.githubProjectMapPath} tone={C.textSecondary} />
+                  <RailLine marker="Archive" text={data.sourceLibraryRoute.archiveRetrieval} tone={C.warning} />
+                </div>
+                <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                    Write Gate
+                  </summary>
+                  <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.warning }}>
+                    {data.sourceLibraryRoute.approvalGate}
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {data.sourceLibraryRoute.retrievalMetadataFields.map((field) => (
+                      <MiniBadge key={field} label={field} tone={C.textMuted} />
+                    ))}
+                  </div>
+                </details>
+              </section>
+            )}
+
             <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <summary className="cursor-pointer">
                 <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />

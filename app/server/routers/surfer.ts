@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { getCerebroDb, recordArtifact, recordSourceEvent, type SourceKind, type SourceRow } from "../cerebroDb";
 import { sourceDisplayName } from "../displayLabels";
+import {
+  GITHUB_PROJECT_MAP_PATH,
+  GITHUB_REPOSITORY_SOURCE_PATH,
+  GITHUB_SOURCES_INDEX_PATH,
+  OBSIDIAN_KNOWLEDGE_ROUTES,
+  OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+} from "../knowledge/contracts";
 import { publicProcedure, router } from "../_core/trpc";
 
 const TRUST_LEVELS = ["official", "primary", "high", "medium", "low", "unknown"] as const;
@@ -164,6 +171,22 @@ function scrubSummary(value: string) {
   };
 }
 
+function sourceLibraryRouteContract() {
+  const archiveRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "archive");
+  const knowledgeRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "knowledge");
+  return {
+    mode: "read_only" as const,
+    sourceNoteLane: knowledgeRoute?.relativePath ?? "20_Knowledge",
+    githubRepositorySourcePath: GITHUB_REPOSITORY_SOURCE_PATH,
+    githubProjectMapPath: GITHUB_PROJECT_MAP_PATH,
+    githubSourcesIndexPath: GITHUB_SOURCES_INDEX_PATH,
+    archiveRetrieval: archiveRoute?.retrievalDefault ?? "archive_only",
+    retrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+    writesExternalSystems: false,
+    approvalGate: "Source Library saves can create local records. Obsidian, Notion, Drive, browser, and long-term memory writes still need explicit approval.",
+  };
+}
+
 export const surferRouter = router({
   panel: publicProcedure
     .input(
@@ -239,6 +262,7 @@ export const surferRouter = router({
           sensitiveOnly: Boolean(input?.sensitiveOnly),
           limit: input?.limit ?? 25,
         },
+        sourceLibraryRoute: sourceLibraryRouteContract(),
       };
     }),
 

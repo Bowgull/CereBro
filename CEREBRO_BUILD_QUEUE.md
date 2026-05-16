@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0902 EDT
+Last updated: 2026-05-16 1502 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1502 EDT: started the Block C knowledge/source route lane in
+  Research. Surfer panel now shows a read-only Source Route with source note
+  lane, GitHub source path, Project Map path, archive-only retrieval, and a
+  Write Gate. No browsing, RAG, Obsidian write, Notion write, Drive write, or
+  memory write was added.
 - 2026-05-16 0902 EDT: cleaned Home shell copy around Workshop, Project Lab,
   and Terminal Lab. Workshop now says `Do the work with bodies and reads`,
   Terminal Lab is `Command teaching`, the shell marker row is `surface markers`,
