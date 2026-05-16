@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-15 2323 EDT
+Last updated: 2026-05-15 2327 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -220,6 +220,8 @@ Recent Prime slices:
   Ollama approval-preview reads behind explicit open/read actions.
 - 2026-05-15 2323 EDT: gated Terminal Lab side-rail receipt stats and terminal
   approval previews behind explicit drawer opens.
+- 2026-05-15 2327 EDT: gated Project Lab Workbench receipt summary behind
+  Project Rules so project cards show `open to read` until proof is requested.
 
 ### Frontend Worker
 

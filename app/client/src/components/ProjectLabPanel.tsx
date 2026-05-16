@@ -272,6 +272,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [pushReceiptSlug, setPushReceiptSlug] = useState<string | null>(null);
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
+  const [projectReceiptsOpen, setProjectReceiptsOpen] = useState(false);
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
     refetchOnWindowFocus: false,
@@ -285,6 +286,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const workbenchEvidenceSummary = trpc.workbench.evidenceSummary.useQuery(
     { groupBy: "project", latestLimit: 1 },
     {
+      enabled: projectReceiptsOpen,
       staleTime: 30_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -386,13 +388,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
-    { label: "Receipts", value: String(workbenchEvidenceSummary.data?.summary.total ?? 0), tone: (workbenchEvidenceSummary.data?.summary.needsReview ?? 0) > 0 ? C.warning : C.success },
+    {
+      label: "Receipts",
+      value: projectReceiptsOpen ? String(workbenchEvidenceSummary.data?.summary.total ?? 0) : "open",
+      tone: !projectReceiptsOpen ? C.textMuted : (workbenchEvidenceSummary.data?.summary.needsReview ?? 0) > 0 ? C.warning : C.success,
+    },
   ];
   const receiptChainStats = {
-    total: workbenchEvidenceSummary.data?.summary.total ?? 0,
-    terminal: workbenchEvidenceSummary.data?.summary.terminal ?? 0,
-    needsReview: workbenchEvidenceSummary.data?.summary.needsReview ?? 0,
-    validated: workbenchEvidenceSummary.data?.summary.validated ?? 0,
+    total: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.total ?? 0 : 0,
+    terminal: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.terminal ?? 0 : 0,
+    needsReview: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.needsReview ?? 0 : 0,
+    validated: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.validated ?? 0 : 0,
   };
 
   useEffect(() => {
@@ -554,9 +560,13 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         )}
-        <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details
+          className="rounded p-1.5"
+          onToggle={(event) => setProjectReceiptsOpen(event.currentTarget.open)}
+          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        >
           <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Project Rules
+            Project Rules <span style={{ color: C.textMuted }}>{projectReceiptsOpen ? "local receipts" : "open to read"}</span>
           </summary>
           <div className="mt-2 grid gap-1.5">
             <div className="flex flex-wrap gap-1">
@@ -566,6 +576,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
             </div>
             <ProjectReceiptChainStrip
               stats={receiptChainStats}
+              statsOpen={projectReceiptsOpen}
+              statsReading={workbenchEvidenceSummary.isLoading}
               projectCount={projects.length}
               topProjectName={topProject?.name ?? null}
               topPushLabel={topProject?.pushReadiness.label ?? null}
@@ -617,7 +629,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const autoPushArmed = autoPushSlugs.has(project.slug);
               const proofStats = project.tasks.projectId == null
                 ? { total: 0, terminal: 0, needsReview: 0, validated: 0 }
-                : evidenceByProjectId.get(project.tasks.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 };
+                : projectReceiptsOpen ? evidenceByProjectId.get(project.tasks.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 } : { total: 0, terminal: 0, needsReview: 0, validated: 0 };
               const activitySignals: Array<{
                 title: string;
                 count: number;
@@ -712,7 +724,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Approvals" value={`${project.activity.approvals.pending} pending`} />
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
-                    <MetaBlock label="Receipts" value={`${proofStats.total} receipts / ${proofStats.needsReview} review`} />
+                    <MetaBlock label="Receipts" value={projectReceiptsOpen ? `${proofStats.total} receipts / ${proofStats.needsReview} review` : "open to read"} />
                   </div>
 
                   <ProjectMapRead
@@ -723,6 +735,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     pushState={pushReadiness.state}
                     riskFlags={project.riskFlags}
                     receiptStats={proofStats}
+                    receiptStatsOpen={projectReceiptsOpen}
                     autoSelected={autoPushArmed}
                     nextSafeAction={project.nextSafeAction}
                   />
@@ -787,6 +800,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                     <PushDecisionNote
                       stats={proofStats}
+                      statsOpen={projectReceiptsOpen}
                       pushLabel={pushReadiness.label}
                       pushState={pushReadiness.state}
                     />
@@ -1601,6 +1615,7 @@ function ProjectMapRead({
   pushState,
   riskFlags,
   receiptStats,
+  receiptStatsOpen,
   autoSelected,
   nextSafeAction,
 }: {
@@ -1611,18 +1626,19 @@ function ProjectMapRead({
   pushState: string;
   riskFlags: readonly string[];
   receiptStats: { total: number; terminal: number; needsReview: number; validated: number };
+  receiptStatsOpen: boolean;
   autoSelected: boolean;
   nextSafeAction: string;
 }) {
   const pushTone = toneForPushState(pushState);
-  const receiptTone = receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
+  const receiptTone = !receiptStatsOpen ? C.textMuted : receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
   const riskTone = riskFlags.length > 0 ? C.warning : C.success;
   const rows = [
     { label: "Branch", value: branch ?? "unavailable", tone: branch ? C.textSecondary : C.warning },
     { label: "Dirty", value: dirty ? `${dirtyCount} local change${dirtyCount === 1 ? "" : "s"}` : "clean", tone: dirty ? C.danger : C.success },
     { label: "Push", value: pushLabel, tone: pushTone },
     { label: "Risk", value: riskFlags[0] ?? "none flagged", tone: riskTone },
-    { label: "Receipt", value: `${receiptStats.total} Workbench / ${receiptStats.needsReview} review`, tone: receiptTone },
+    { label: "Receipt", value: receiptStatsOpen ? `${receiptStats.total} Workbench / ${receiptStats.needsReview} review` : "open to read", tone: receiptTone },
     { label: "Manual", value: "visible, gated", tone: C.gold },
     { label: "Assist", value: autoSelected ? "recommendation selected" : "off", tone: autoSelected ? C.warning : C.textMuted },
   ];
@@ -1658,25 +1674,29 @@ function ProjectMapRead({
 
 function ProjectReceiptChainStrip({
   stats,
+  statsOpen,
+  statsReading,
   projectCount,
   topProjectName,
   topPushLabel,
 }: {
   stats: { total: number; terminal: number; needsReview: number; validated: number };
+  statsOpen: boolean;
+  statsReading: boolean;
   projectCount: number;
   topProjectName: string | null;
   topPushLabel: string | null;
 }) {
-  const receiptTone = stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
+  const receiptTone = !statsOpen ? C.textMuted : stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
   const steps = [
     {
       label: "Terminal proof",
-      value: stats.terminal > 0 ? `${stats.terminal} command receipt${stats.terminal === 1 ? "" : "s"}` : "no command receipts",
-      tone: stats.terminal > 0 ? C.gold : C.textMuted,
+      value: !statsOpen ? "open to read" : statsReading ? "reading" : stats.terminal > 0 ? `${stats.terminal} command receipt${stats.terminal === 1 ? "" : "s"}` : "no command receipts",
+      tone: !statsOpen ? C.textMuted : stats.terminal > 0 ? C.gold : C.textMuted,
     },
     {
       label: "Workbench body",
-      value: `${stats.total} receipts / ${stats.needsReview} review`,
+      value: !statsOpen ? "open to read" : statsReading ? "reading" : `${stats.total} receipts / ${stats.needsReview} review`,
       tone: receiptTone,
     },
     {
@@ -1761,15 +1781,24 @@ function ManualPushLine({ commands }: { commands: readonly string[] }) {
 
 function PushDecisionNote({
   stats,
+  statsOpen,
   pushLabel,
   pushState,
 }: {
   stats: { total: number; terminal: number; needsReview: number; validated: number };
+  statsOpen: boolean;
   pushLabel: string;
   pushState: string;
 }) {
   const readyState = pushState === "push_branch" || pushState === "open_pr" || pushState === "commit_locally";
   const decision = (() => {
+    if (!statsOpen) {
+      return {
+        label: "open to read",
+        tone: C.textMuted,
+        text: "Open Project Rules to read the compact Workbench receipt summary before treating this as push evidence.",
+      };
+    }
     if (stats.needsReview > 0) {
       return {
         label: "hold",
