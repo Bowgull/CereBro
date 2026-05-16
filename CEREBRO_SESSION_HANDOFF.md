@@ -20649,3 +20649,74 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench receipt list, groups, and selected detail copy are now cleaner and tested. Next best slice: either finish one more Workbench detail simplification or move to Project Lab if Workbench feels stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0645 EDT - Project Lab map copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Project Lab visible-copy pass.
+
+What changed:
+
+- Added `projectLabCopyModel` for Project Lab guide and receipt labels.
+- Added focused tests for Project Lab map copy.
+- Changed the local drawer from `Project Rules` to `Project Map`.
+- Kept receipt closed state as `open to read`.
+- Changed push decision notes from `Open Project Rules...` to
+  `Open Project Map...`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/projectLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts`
+  failed because `projectLabCopyModel` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts`
+  passed, 2 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Project Lab, and
+  confirmed `Project Map open to read` plus push notes saying
+  `Open Project Map...`.
+
+Drift check:
+
+- On path because Project Lab is the map surface in the current build order.
+- Creative UI/UX stayed inside the lane: same surface, no behavior expansion,
+  less machinery, clearer primary object.
+- No new surface, agent, plugin, model, external source, Raven path, or GitHub
+  implementation was added.
+
+Known risks:
+
+- Project Lab still has some dense push-readiness and detail wording. This pass
+  only cleaned the first visible map/rules language.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab now says Project Map instead of Project Rules. Next best slice: continue Project Lab low-machinery cleanup around push-readiness wording or detail inspector labels. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

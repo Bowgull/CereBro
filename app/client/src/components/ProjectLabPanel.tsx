@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { projectLabGuideCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -408,6 +409,8 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     needsReview: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.needsReview ?? 0 : 0,
     validated: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.validated ?? 0 : 0,
   };
+  const guideCopy = projectLabGuideCopy({ receiptsOpen: projectReceiptsOpen });
+  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: projectReceiptsOpen });
 
   useEffect(() => {
     if (projects.length === 0) return;
@@ -578,7 +581,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
           style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
         >
           <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Project Rules <span style={{ color: C.textMuted }}>{projectReceiptsOpen ? "local receipts" : "open to read"}</span>
+            {guideCopy.title} <span style={{ color: C.textMuted }}>{guideCopy.status}</span>
           </summary>
           <div className="mt-2 grid gap-1.5">
             <div className="flex flex-wrap gap-1">
@@ -737,7 +740,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
                     <MetaBlock label="Routes" value={project.activity.routes.total > 0 ? `${project.activity.routes.total} saved` : "none"} />
-                    <MetaBlock label="Receipts" value={projectReceiptsOpen ? `${proofStats.total} receipts / ${proofStats.needsReview} review` : "open to read"} />
+                    <MetaBlock label="Receipts" value={projectReceiptsOpen ? `${proofStats.total} receipts / ${proofStats.needsReview} review` : receiptCopy.closedValue} />
                   </div>
 
                   <ProjectMapRead
@@ -1804,12 +1807,13 @@ function PushDecisionNote({
   pushState: string;
 }) {
   const readyState = pushState === "push_branch" || pushState === "open_pr" || pushState === "commit_locally";
+  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: statsOpen });
   const decision = (() => {
     if (!statsOpen) {
       return {
         label: "open to read",
         tone: C.textMuted,
-        text: "Open Project Rules to read the compact Workbench receipt summary before treating this as push evidence.",
+        text: receiptCopy.closedPushText,
       };
     }
     if (stats.needsReview > 0) {
