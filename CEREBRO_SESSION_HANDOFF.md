@@ -20417,3 +20417,86 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Creativity is allowed inside the lane: make UI/UX better only when the change serves the build plan, has a named owner surface, reduces machinery or improves comprehension, and returns to the current path. Next best slice: continue low-machinery Workbench or Project Lab cleanup. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0628 EDT - Raven sealed-boundary hardening
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a small boundary-hardening and classifier pass.
+
+What changed:
+
+- Added `ravenSealedLauncher` client model for the exact local Raven launcher
+  phrase and URL.
+- Updated `Home.tsx` to use that model instead of loose local constants.
+- Updated command intake so Raven is no longer returned as a normal CereBro
+  routed agent. Raven remains a sealed module marker only.
+- Fixed the short-keyword classifier so tiny keywords like `ui` and `ux` match
+  as real words instead of inside words like `building`.
+- Added a focused Raven boundary test covering the sealed launcher, normal
+  agent exclusion, and the `building` vs `ui` classifier bug.
+- Updated the existing foundations test to assert Raven does not appear as a
+  normal routed agent.
+
+Files touched in this slice:
+
+- `app/client/src/lib/ravenSealedLauncher.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/routers/commandIntake.ts`
+- `app/server/ravenBoundaryModel.test.ts`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-raven-boundary.db' pnpm -C app exec vitest run server/ravenBoundaryModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because `building` matched the short `ui` keyword and classified as
+  design.
+- Green after patch:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-raven-boundary.db' pnpm -C app exec vitest run server/ravenBoundaryModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 3 tests.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-foundations-raven-boundary.db' pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 31 tests.
+- `pnpm -C app check` passed.
+- Browser smoke opened `http://localhost:3000/`, confirmed the Keep loaded, and
+  confirmed no Raven surface appeared in the normal shell.
+
+Drift check:
+
+- On path because the anti-drift audit found Raven boundary tension in core
+  CereBro and the user asked to keep building under the plan.
+- This did not build Raven. It hardened the boundary around existing sealed
+  infrastructure.
+- No new app surface, agent, mode, plugin, model, service, external source, or
+  Raven content path was added.
+- Creative UI/UX was not part of this pass.
+
+Known risks:
+
+- Raven router and private tables still exist in the core repo. They are gated
+  and tested as sealed, but the cleaner long-term shape may be a dedicated
+  Raven package or repo once the separate Raven chat stabilizes its plan.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Raven boundary is hardened: Raven is a sealed module marker, not a normal routed CereBro agent, and the exact local launcher is isolated. Next best slice: return to low-machinery Workbench or Project Lab cleanup, unless the anti-drift law marks a higher-priority correction. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

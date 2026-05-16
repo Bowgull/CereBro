@@ -43,6 +43,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
+import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
 import { routeActionModel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
@@ -158,9 +159,6 @@ const MODE_ROUTES: Record<Mode, string[]> = {
   explore: ["Aang", "Cortana", "Surfer", "Oak"],
   build: ["Aang", "Cortana", "Tony", "Spock"],
 };
-
-const ravenEntryOrder = "execute order 66";
-const ravenEntryUrl = "http://127.0.0.1:5174/?handoff=aang";
 
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
@@ -568,8 +566,8 @@ export default function Home() {
         onSubmit={() => {
           const text = askInput.trim();
           if (!text || routePreview.isPending) return;
-          if (isExactPhrase(text, ravenEntryOrder)) {
-            window.location.assign(ravenEntryUrl);
+          if (isExactRavenSealedLauncherPhrase(text)) {
+            window.location.assign(ravenSealedLauncherUrl);
             return;
           }
           commitRoute.reset();

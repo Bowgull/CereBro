@@ -125,7 +125,7 @@ describe("CereBro proposal-only shell plans", () => {
     expect(continuation.category).toBe("raven_build");
     expect(continuation.sealedModule).toBe("raven");
     expect(continuation.trigger).toBe("keep_building");
-    expect(continuation.agents).toContain("raven");
+    expect(continuation.agents).not.toContain("raven");
     expect(continuation.agents).toContain("spock");
     expect(continuation.permissionGates.join(" ")).toContain("sealed private module");
     expect(continuation.permissionGates.join(" ")).toContain("No browser session");

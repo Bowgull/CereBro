@@ -64,8 +64,19 @@ const categoryRules: Array<{ category: IntakeCategory; keywords: string[] }> = [
   { category: "project_build", keywords: ["build", "implement", "fix", "code", "refactor", "feature"] },
 ];
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function keywordMatches(text: string, keyword: string) {
+  if (keyword.length <= 3 && /^[a-z0-9]+$/.test(keyword)) {
+    return new RegExp(`\\b${escapeRegExp(keyword)}\\b`).test(text);
+  }
+  return text.includes(keyword);
+}
+
 function includesAny(text: string, keywords: readonly string[]) {
-  return keywords.some((keyword) => text.includes(keyword));
+  return keywords.some((keyword) => keywordMatches(text, keyword));
 }
 
 function classifyCategory(text: string): IntakeCategory {
@@ -98,7 +109,6 @@ function agentsFor(category: IntakeCategory, projectSlug: string | null): string
   const agents = new Set<string>(["cortana"]);
 
   if (category === "raven_build") {
-    agents.add("raven");
     agents.add("spock");
     agents.add("oak");
     agents.add("batman");
@@ -219,8 +229,8 @@ function designProtocolFor(category: IntakeCategory, text: string) {
     category === "project_package" ||
     category === "portfolio" ||
     category === "creative" ||
-    text.includes("ui") ||
-    text.includes("ux") ||
+    keywordMatches(text, "ui") ||
+    keywordMatches(text, "ux") ||
     text.includes("design") ||
     text.includes("generic") ||
     text.includes("slop");

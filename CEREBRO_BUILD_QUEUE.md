@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0613 EDT
+Last updated: 2026-05-16 0628 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0628 EDT: hardened the Raven sealed boundary after applying the
+  anti-drift law. Raven no longer appears as a normal command-intake agent;
+  the exact local sealed launcher is isolated in a small model. Also fixed the
+  short-keyword classifier so `building` no longer matches the `ui` design
+  keyword.
 - 2026-05-16 0613 EDT: updated the anti-drift law with the creativity rule:
   creativity is allowed inside the lane; freestyling outside the lane stops for
   approval.
