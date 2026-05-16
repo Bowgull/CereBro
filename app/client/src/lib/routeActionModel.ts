@@ -14,7 +14,7 @@ export type RouteActionInput = {
 
 export type RouteAction = {
   key: RouteActionKey;
-  destination: "Project" | "Body" | "Gate" | "Task";
+  destination: "Project Read" | "Receipt Body" | "Approval Gate" | "Task Record";
   label: string;
   status: RouteActionStatus;
   executes: false;
@@ -66,8 +66,8 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
   return [
     {
       key: "project",
-      destination: "Project",
-      label: "Project",
+      destination: "Project Read",
+      label: "Open Project",
       status: "read",
       executes: false,
       ariaLabel: `Open Project Lab context for route ${input.routeId}`,
@@ -75,8 +75,8 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
     },
     {
       key: "workbench",
-      destination: "Body",
-      label: input.evidenceId ? `Receipt #${input.evidenceId}` : input.creatingReceipt ? "Saving Body" : "Save Body",
+      destination: "Receipt Body",
+      label: input.evidenceId ? `Receipt #${input.evidenceId}` : input.creatingReceipt ? "Saving Receipt" : "Save Receipt",
       status: input.evidenceId ? "saved" : input.creatingReceipt ? "pending" : "read",
       executes: false,
       ariaLabel: input.evidenceId
@@ -90,7 +90,7 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
     },
     {
       key: "gate",
-      destination: "Gate",
+      destination: "Approval Gate",
       label: gateLabel,
       status: input.approvalId ? "saved" : input.creatingApproval ? "pending" : "read",
       executes: false,
@@ -105,7 +105,7 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
     },
     {
       key: "task",
-      destination: "Task",
+      destination: "Task Record",
       label: input.taskId ? `Task #${input.taskId}` : input.creatingTask ? "Creating Task" : "Create Task",
       status: input.taskId ? "saved" : input.creatingTask ? "pending" : "read",
       executes: false,
@@ -125,8 +125,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
   return [
     {
       key: "project",
-      destination: "Project",
-      label: "Project",
+      destination: "Project Read",
+      label: "Open Project",
       status: "read",
       executes: false,
       ariaLabel: "Open Project Lab focused on route preview",
@@ -134,8 +134,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
     },
     {
       key: "workbench",
-      destination: "Body",
-      label: "Workbench",
+      destination: "Receipt Body",
+      label: "Stage Body",
       status: "read",
       executes: false,
       ariaLabel: "Stage route receipt draft in Workbench",
@@ -143,8 +143,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
     },
     {
       key: "gate",
-      destination: "Gate",
-      label: "Ledger",
+      destination: "Approval Gate",
+      label: "Open Ledger",
       status: "read",
       executes: false,
       ariaLabel: "Open Ledger focused on route preview",
@@ -152,7 +152,7 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
     },
     {
       key: "task",
-      destination: "Task",
+      destination: "Task Record",
       label: input.taskCreated ? "Task Saved" : input.creatingTask ? "Saving Task" : "Create Task",
       status: input.taskCreated ? "saved" : input.creatingTask ? "pending" : "read",
       executes: false,
@@ -170,7 +170,7 @@ export function routePreviewProofModel(input: RoutePreviewProofInput) {
       { label: "Receipt", value: input.receiptSummary, tone: "gold" },
       { label: "Next", value: input.nextAction, tone: "muted" },
     ] satisfies RoutePreviewProofField[],
-    detailsSummary: "Route proof",
+    detailsSummary: "Route Details",
     routeChain: input.cortanaRoute.join(" -> "),
     lane: {
       label: input.laneId.replace(/_/g, " "),

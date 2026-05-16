@@ -21421,3 +21421,71 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger now has an audit-trail copy model and no longer defaults to proof/route-read wording. Next best slice: continue Ledger by reviewing route action controls for low-machinery grouping and labels, or move to Sessions/Ledger run history if the route cards look acceptable in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0732 EDT - Ledger route action labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Ledger route-action display slice.
+
+What changed:
+
+- Ledger route action controls now use clearer destination labels:
+  `Project Read`, `Receipt Body`, `Approval Gate`, and `Task Record`.
+- Route receipt creation now says `Save Receipt` instead of `Save Body`.
+- Route preview actions now use the same destination model.
+- Route preview details now say `Route Details` instead of `Route proof`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/routeActionModel.ts`
+- `app/server/routeActionModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/routeActionModel.test.ts
+  server/ledgerCopyModel.test.ts` passed, 7 tests.
+- `git diff --check -- app/client/src/lib/routeActionModel.ts
+  app/server/routeActionModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, and confirmed
+  `Project Read`, `Receipt Body`, `Approval Gate`, `Task Record`, and `Save
+  Receipt`; `Save Body` and `Route proof` were absent.
+
+Drift check:
+
+- On path because Ledger is the approved receipts and audit-trail surface.
+- Creative UI/UX stayed inside the lane: route control labels only, no new
+  behavior, no stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Ledger run history still has older wording such as `Ledger Run History`,
+  `Session rows prove...`, and a dense table. Next best slice is Sessions/Ledger
+  run history copy.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger route controls now use Project Read, Receipt Body, Approval Gate, and Task Record labels. Next best slice: clean Sessions/Ledger run history copy so it reads as run history/audit trail, not a proof table. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

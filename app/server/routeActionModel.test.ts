@@ -15,8 +15,8 @@ describe("routeActionModel", () => {
     });
 
     expect(actions.map((action) => action.key)).toEqual(["project", "workbench", "gate", "task"]);
-    expect(actions.map((action) => action.destination)).toEqual(["Project", "Body", "Gate", "Task"]);
-    expect(actions.map((action) => action.label)).toEqual(["Project", "Receipt #88", "Gate #99", "Task #77"]);
+    expect(actions.map((action) => action.destination)).toEqual(["Project Read", "Receipt Body", "Approval Gate", "Task Record"]);
+    expect(actions.map((action) => action.label)).toEqual(["Open Project", "Receipt #88", "Gate #99", "Task #77"]);
     expect(actions.every((action) => action.executes === false)).toBe(true);
   });
 
@@ -32,7 +32,7 @@ describe("routeActionModel", () => {
       creatingApproval: true,
     });
 
-    expect(actions.map((action) => action.label)).toEqual(["Project", "Saving Body", "Queuing Gate", "Creating Task"]);
+    expect(actions.map((action) => action.label)).toEqual(["Open Project", "Saving Receipt", "Queuing Gate", "Creating Task"]);
     expect(actions.map((action) => action.status)).toEqual(["read", "pending", "pending", "pending"]);
   });
 
@@ -44,8 +44,8 @@ describe("routeActionModel", () => {
     });
 
     expect(actions.map((action) => action.key)).toEqual(["project", "workbench", "gate", "task"]);
-    expect(actions.map((action) => action.destination)).toEqual(["Project", "Body", "Gate", "Task"]);
-    expect(actions.map((action) => action.label)).toEqual(["Project", "Workbench", "Ledger", "Create Task"]);
+    expect(actions.map((action) => action.destination)).toEqual(["Project Read", "Receipt Body", "Approval Gate", "Task Record"]);
+    expect(actions.map((action) => action.label)).toEqual(["Open Project", "Stage Body", "Open Ledger", "Create Task"]);
     expect(actions.every((action) => action.executes === false)).toBe(true);
   });
 
@@ -68,7 +68,7 @@ describe("routeActionModel", () => {
     });
 
     expect(proof.primary.map((field) => field.label)).toEqual(["Aang", "Owner", "Receipt", "Next"]);
-    expect(proof.detailsSummary).toBe("Route proof");
+    expect(proof.detailsSummary).toBe("Route Details");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("model local_code_helper");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("data leaves machine");
   });
