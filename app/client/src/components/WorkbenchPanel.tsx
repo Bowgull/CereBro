@@ -27,9 +27,11 @@ type SelectOption = { value: string; label: string };
 type WorkbenchDraft = {
   source?: string;
   kind?: EvidenceKind;
+  routeRecordId?: number;
   title?: string;
   summary?: string;
   targetUri?: string | null;
+  projectPath?: string | null;
   routeAgent?: string | null;
   permissionClass?: PermissionClass;
   projectId?: number | null;
@@ -330,7 +332,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setFilterKind(draft.kind === "terminal_output" ? "terminal_output" : "all");
       setGroupBy(draft.commandObservationId == null ? "project" : "command");
       setStagedDraftChain(draft);
-      setStagedDraftNotice(draft.source === "terminal_lab" ? "Terminal Lab staged a Workbench receipt draft. Review it, then save a local receipt." : "Workbench receipt draft staged. Review it, then save a local receipt.");
+      setStagedDraftNotice(
+        draft.source === "terminal_lab"
+          ? "Terminal Lab staged a Workbench receipt draft. Review it, then save a local receipt."
+          : draft.source === "runtime_route_record" && draft.routeRecordId != null
+            ? `Route #${draft.routeRecordId} staged a Workbench receipt draft. Target stays runtime_route:${draft.routeRecordId}.`
+            : "Workbench receipt draft staged. Review it, then save a local receipt.",
+      );
     } catch {
       setStagedDraftNotice("Workbench draft could not be read. Add the receipt manually.");
     }

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-15 2352 EDT
+Last updated: 2026-05-16 0009 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0009 EDT: preserved runtime route targets in Workbench drafts
+  staged from saved Ledger routes. Stage Body now carries `runtime_route:<id>`
+  instead of a project path.
 - 2026-05-15 2352 EDT: repaired runtime route task linkage so existing
   route-linked approval previews and Workbench receipts receive the created
   task id when task creation happens after them.

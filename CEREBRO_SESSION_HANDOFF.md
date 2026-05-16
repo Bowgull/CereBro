@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2352 EDT
+Last updated: 2026-05-16 0009 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0009 EDT - Staged Route Draft Target Link
+
+### What Changed
+- Saved Ledger route `Stage Body` drafts now carry
+  `targetUri: runtime_route:<id>` instead of the route project's local path.
+- Saved Ledger route drafts now carry the existing route task id into
+  Workbench when a task link already exists.
+- Workbench draft typing now knows about `routeRecordId` and `projectPath`.
+- Workbench staged draft notice now names the runtime route target so the link
+  is visible before saving.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: Ask Aang
+  saved route #23, Ledger opened route #23, `Stage Body` opened Workbench, and
+  Workbench showed `Target stays runtime_route:23` with the receipt target
+  field set to `runtime_route:23`.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Workbench staged route draft link repair.
+- No backend code, schema, task execution, approval decision, command
+  execution, model call, package install, external write, storage migration,
+  git action from CereBro, or Raven boundary changed.
+- Browser proof created one local route record in the dev DB for verification.
+  The DB is local and gitignored.
+- No worker was used because this was a two-file frontend link-preservation
+  slice.
+
+### Front-End Steward Review
+- The user still sees the same simple Stage Body flow.
+- The machinery stays hidden, but the receipt target now preserves the route
+  chain when the user opens metadata or saves the local receipt.
+- This keeps Workbench, Ledger, and route receipts aligned before adding more
+  agent execution controls.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 52%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: runtime route
+child idempotency hardening or decided approval visibility in Ledger route
+cards. Keep the pass narrow and preserve the hidden-machinery rule.
 
 ## 2026-05-15 2352 EDT - Runtime Route Task Link Backfill
 

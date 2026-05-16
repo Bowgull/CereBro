@@ -1133,6 +1133,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
   function openRouteWorkbenchDraft(item: {
     id: number;
+    taskId: number | null;
     originalText: string;
     workbenchReceiptDraft: Record<string, unknown>;
     taskDraft: Record<string, unknown>;
@@ -1153,12 +1154,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           summary: typeof draft.summary === "string" ? draft.summary : item.originalText,
           routeAgent: typeof draft.ownerAgent === "string" ? draft.ownerAgent : null,
           permissionClass: "manual_note",
-          targetUri: typeof draft.projectPath === "string" ? draft.projectPath : null,
+          targetUri: `runtime_route:${item.id}`,
+          taskId: item.taskId,
+          projectPath: typeof draft.projectPath === "string" ? draft.projectPath : null,
           routeChain,
           gates,
           nextAction: typeof draft.nextAction === "string" ? draft.nextAction : "Review this route before saving a Workbench receipt.",
           modelLane: typeof draft.modelLane === "object" && draft.modelLane != null ? draft.modelLane : null,
-          notice: `Route #${item.id} staged as a Workbench draft. Review before saving.`,
+          notice: `Route #${item.id} staged as a Workbench draft. Target stays runtime_route:${item.id}. Review before saving.`,
         }),
       );
     } catch {
