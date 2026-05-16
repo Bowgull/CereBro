@@ -210,6 +210,9 @@ Recent Prime slices:
 - 2026-05-15 2047 EDT: gated Security Gate source-link reads behind a closed
   `Source Link` drawer. Spock no longer loads Workbench source link options on
   default panel open.
+- 2026-05-15 2125 EDT: gated Approval Queue support reads behind the closed
+  Groups and Permission Checks drawers. Header counts now say `closed` until
+  Permission Checks is opened.
 
 ### Frontend Worker
 

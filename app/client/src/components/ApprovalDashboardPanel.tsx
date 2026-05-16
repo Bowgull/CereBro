@@ -60,6 +60,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [groupBy, setGroupBy] = useState<GroupFilter>("origin");
+  const [groupsOpen, setGroupsOpen] = useState(false);
+  const [preflightsOpen, setPreflightsOpen] = useState(false);
 
   const projects = trpc.projectIntelligence.overview.useQuery();
   const projectOptions = useMemo(
@@ -75,17 +77,33 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
     query: query.trim() || undefined,
     limit: 60,
   });
-  const groups = trpc.approvals.groups.useQuery({
-    groupBy,
-    status,
-    origin,
-    projectId: projectId === "all" ? undefined : projectId,
-    query: query.trim() || undefined,
-  });
-  const preflights = trpc.approvals.permissionPreflights.useQuery({
-    query: query.trim() || undefined,
-    limit: 8,
-  });
+  const groups = trpc.approvals.groups.useQuery(
+    {
+      groupBy,
+      status,
+      origin,
+      projectId: projectId === "all" ? undefined : projectId,
+      query: query.trim() || undefined,
+    },
+    {
+      enabled: groupsOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const preflights = trpc.approvals.permissionPreflights.useQuery(
+    {
+      query: query.trim() || undefined,
+      limit: 8,
+    },
+    {
+      enabled: preflightsOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
 
   const items = approvals.data?.items ?? [];
   const selectedPreview = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
@@ -94,10 +112,10 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
     { enabled: selectedPreview != null },
   );
   const selected = selectedDetail.data?.approval ?? null;
-  const preflightItems = preflights.data?.items ?? [];
   const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
-  const preflightTotal = preflights.data?.summary.total ?? 0;
-  const blockedPreflights = preflights.data?.summary.blocked ?? 0;
+  const preflightItems = preflightsOpen ? preflights.data?.items ?? [] : [];
+  const preflightTotal = preflightsOpen ? preflights.data?.summary.total ?? 0 : null;
+  const blockedPreflights = preflightsOpen ? preflights.data?.summary.blocked ?? 0 : null;
 
   function openSecurityGate(target: string | null | undefined) {
     if (!target?.trim() || !onNavigate) return;
@@ -135,8 +153,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Approval receipt summary">
           <ReceiptStat label="Pending" value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
           <ReceiptStat label="Sensitive" value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
-          <ReceiptStat label="Preflights" value={String(preflightTotal)} tone={C.accent} />
-          <ReceiptStat label="Blocked" value={String(blockedPreflights)} tone={blockedPreflights > 0 ? C.danger : C.textMuted} />
+          <ReceiptStat label="Preflights" value={preflightTotal == null ? "closed" : String(preflightTotal)} tone={preflightTotal == null ? C.textMuted : C.accent} />
+          <ReceiptStat label="Blocked" value={blockedPreflights == null ? "closed" : String(blockedPreflights)} tone={(blockedPreflights ?? 0) > 0 ? C.danger : C.textMuted} />
         </div>
 
         <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_180px_auto]">
@@ -188,7 +206,12 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           ))}
         </div>
 
-        <details className="mt-2 rounded p-2" aria-label="Approval preview groups" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details
+          className="mt-2 rounded p-2"
+          aria-label="Approval preview groups"
+          onToggle={(event) => setGroupsOpen(event.currentTarget.open)}
+          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        >
           <summary className="cursor-pointer list-none">
             <span className="flex items-center justify-between gap-2">
               <span>
@@ -200,7 +223,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 </span>
               </span>
               <Badge variant="secondary" className="uppercase">
-                {groups.data?.groups.length ?? 0}
+                {groupsOpen ? groups.data?.groups.length ?? 0 : "open to read"}
               </Badge>
             </span>
           </summary>
@@ -220,7 +243,9 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {(groups.data?.groups ?? []).length === 0 ? (
+            {groups.isLoading ? (
+              <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local approval groups.</div>
+            ) : (groups.data?.groups ?? []).length === 0 ? (
               <div className="text-[11px]" style={{ color: C.textMuted }}>No groups match these filters.</div>
             ) : (
               groups.data?.groups.map((group) => (
@@ -268,7 +293,12 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             : `Showing ${items.length} ${status} preview${items.length === 1 ? "" : "s"}. Sensitive ${approvals.data?.summary.sensitive ?? 0}.`}
         </div>
 
-        <details className="mt-2 rounded p-2" aria-label="Permission preflight audit records" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details
+          className="mt-2 rounded p-2"
+          aria-label="Permission preflight audit records"
+          onToggle={(event) => setPreflightsOpen(event.currentTarget.open)}
+          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        >
           <summary className="cursor-pointer list-none">
             <span className="flex items-start justify-between gap-3">
               <span>
@@ -280,7 +310,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 </span>
               </span>
               <span className="flex flex-wrap justify-end gap-1">
-                <Chip label={`${preflights.data?.summary.total ?? 0} records`} tone={C.accent} />
+                <Chip label={preflightsOpen ? `${preflights.data?.summary.total ?? 0} records` : "open to read"} tone={preflightsOpen ? C.accent : C.textMuted} />
                 {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={`${preflights.data?.summary.approvalRequired} gated`} tone={C.warning} />}
                 {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
               </span>

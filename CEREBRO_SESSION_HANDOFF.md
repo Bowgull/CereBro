@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2047 EDT
+Last updated: 2026-05-15 2125 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2125 EDT - Approval Queue Support Lazy Reads
+
+### What Changed
+- Approval Queue no longer reads support grouping or preflight history on
+  panel open.
+- The default header now shows `Preflights closed` and `Blocked closed` until
+  the Permission Checks drawer is opened.
+- Groups and Permission Checks now show `open to read` while closed.
+- Opening Groups reads local approval batches with a 30 second stale cache.
+- Opening Permission Checks reads local preflight receipts with a 30 second
+  stale cache.
+
+### Files Touched
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Approval Queue opens with Groups and Permission Checks closed; Groups opens
+  to 3 local preview batches; Permission Checks opens to 8 local preflight
+  records and updates the header counts.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Approval Queue support read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Approval Queue UI
+  read-gating slice.
+
+### Front-End Steward Review
+- Approval Queue keeps pending decisions and selected receipt proof primary.
+- Support grouping and permission history remain available, but they read only
+  after the user asks for them.
+- This keeps the gate surface lighter and closer to the fast AI OS shape.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+broad-read reduction on Hedwig or another high-traffic support drawer, or move
+to the next runtime contract only if it closes a missing visible action in the
+Aang -> Workbench -> Ledger loop.
 
 ## 2026-05-15 2047 EDT - Security Source Link Lazy Read
 
