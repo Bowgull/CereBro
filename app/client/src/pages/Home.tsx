@@ -1143,6 +1143,34 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("projects");
   }
 
+  function openRouteProjectFocus(item: {
+    id: number;
+    projectName: string | null;
+    projectPath: string | null;
+    projectFocusDraft?: Record<string, unknown>;
+  }) {
+    const draft = item.projectFocusDraft;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "runtime_route_record",
+          routeRecordId: item.id,
+          projectName: typeof draft?.projectName === "string" ? draft.projectName : item.projectName,
+          projectPath: typeof draft?.projectPath === "string" ? draft.projectPath : item.projectPath,
+          projectFocus: draft,
+          notice:
+            typeof draft?.focusSummary === "string"
+              ? draft.focusSummary
+              : `Route #${item.id} opened Project Lab. No project write is saved.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the route remains visible in Ledger.
+    }
+    onNavigate("projects");
+  }
+
   function openRouteWorkbenchDraft(item: {
     id: number;
     taskId: number | null;
@@ -1168,7 +1196,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           permissionClass: "manual_note",
           targetUri: `runtime_route:${item.id}`,
           taskId: item.taskId,
+          projectName: typeof draft.projectName === "string" ? draft.projectName : null,
           projectPath: typeof draft.projectPath === "string" ? draft.projectPath : null,
+          projectFocus: typeof draft.projectFocus === "object" && draft.projectFocus != null ? draft.projectFocus : null,
           routeChain,
           gates,
           nextAction: typeof draft.nextAction === "string" ? draft.nextAction : "Review this route before saving a Workbench receipt.",
@@ -1392,6 +1422,17 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                           : creatingRouteTaskId === item.id
                             ? "Creating"
                             : "Create Task"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => openRouteProjectFocus(item)}
+                        aria-label={`Open Project Lab context for route ${item.id}`}
+                        title="Open Project Lab for this saved route. This does not save or run work."
+                      >
+                        Project
                       </Button>
                       <Button
                         type="button"

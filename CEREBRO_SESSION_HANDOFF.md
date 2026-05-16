@@ -19942,3 +19942,72 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview now has safe Project, Workbench, and Ledger exits. Next safe slice: tighten any remaining saved-route-to-Project-Lab handoff gaps, or move to the next backend/runtime receipt contract that directly supports the visible loop. Run red/green targeted tests, pnpm check, browser-proof localhost if UI changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0546 EDT - Saved route Project Lab focus
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow saved-route read model and Ledger UI handoff
+  slice.
+
+What changed:
+
+- Saved runtime route reads now include a derived `projectFocusDraft`.
+- The draft is built from route record project slug, name, path, and route id.
+- Ledger saved route rows now show a compact `Project` action beside Create
+  Task, Stage Body, Save Body, and Queue Gate.
+- The saved-route Project action opens Project Lab with route context and does
+  not save a project, task, receipt, approval, audit row, command, model call,
+  browser action, or external write.
+- Saved route Stage Body now forwards project name and project focus into the
+  Workbench draft as well as the route target.
+
+Files touched in this slice:
+
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-saved-route-project-focus-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because saved route reads had no `projectFocusDraft`.
+- Green after patch:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-saved-route-project-focus-green.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 11 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, opened Ledger, clicked the
+  saved route Project action, and confirmed Project Lab showed
+  `Route #23 opened Project Lab. No project write is saved.` plus the CereBro
+  Project Read.
+
+Known risks:
+
+- The saved route focus draft is derived at read time, not stored in a new DB
+  column. This avoids schema churn and matches the current runtime route table.
+- Project Lab focus remains read-only and depends on tracked project profiles
+  for name/path resolution.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview and saved route reads now have safe Project, Workbench, and Ledger handoffs. Next best slice: shift from contract patching into visible polish on the route receipt/action row, unless a remaining handoff gap is found. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

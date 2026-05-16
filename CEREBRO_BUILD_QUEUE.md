@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0539 EDT
+Last updated: 2026-05-16 0546 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0546 EDT: saved route reads now expose a Project Lab focus
+  draft derived from route record project columns. Ledger saved route rows now
+  have a Project action beside task/body/gate actions, so saved routes can open
+  the project map without saving or running work.
 - 2026-05-16 0539 EDT: `runtime.previewRoute` now includes a Project Lab
   focus draft. Ask Aang route previews expose a compact Project action beside
   Workbench and Ledger, and Project Lab can resolve preview focus by project

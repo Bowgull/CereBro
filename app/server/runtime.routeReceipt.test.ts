@@ -226,6 +226,17 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.approvalGates).toContain("No external action from route preview.");
     expect(records.items[0]?.workbenchReceiptDraft.autosave).toBe(false);
     expect(records.items[0]?.ledgerFocusDraft.autosave).toBe(false);
+    expect(records.items[0]?.projectFocusDraft).toEqual({
+      kind: "route_record_project_focus",
+      focusTarget: "project_lab",
+      autosave: false,
+      projectSlug: "cerebro",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+      projectId: null,
+      routeRecordId: committed.record.id,
+      focusSummary: `Open Project Lab for route #${committed.record.id}. No project write is saved.`,
+    });
     expect(records.items[0]?.taskDraft.agent).toBe("tony");
     expect(records.items[0]?.createdAt).toBeGreaterThan(0);
   });

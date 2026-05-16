@@ -39,8 +39,12 @@ function parseJsonField<T>(value: unknown, fallback: T): T {
 }
 
 function mapRouteRecordRow(row: Record<string, unknown>) {
+  const id = Number(row.id);
+  const projectSlug = row.project_slug == null ? null : String(row.project_slug);
+  const projectName = row.project_name == null ? null : String(row.project_name);
+  const projectPath = row.project_path == null ? null : String(row.project_path);
   return {
-    id: Number(row.id),
+    id,
     originalText: String(row.original_text ?? ""),
     mode: String(row.mode ?? "quick") as RuntimeMode,
     category: String(row.category ?? "quick_answer") as RouteCategory,
@@ -48,9 +52,9 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
     aangRead: String(row.aang_read ?? ""),
     ownerAgent: String(row.owner_agent ?? "aang"),
     supportAgents: parseJsonField<string[]>(row.support_agents_json, []),
-    projectSlug: row.project_slug == null ? null : String(row.project_slug),
-    projectName: row.project_name == null ? null : String(row.project_name),
-    projectPath: row.project_path == null ? null : String(row.project_path),
+    projectSlug,
+    projectName,
+    projectPath,
     permissionClass: String(row.permission_class ?? "local_note"),
     routeChain: parseJsonField<string[]>(row.route_chain_json, []),
     approvalGates: parseJsonField<string[]>(row.approval_gates_json, []),
@@ -58,6 +62,17 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
     toolProposal: parseJsonField<Record<string, unknown>>(row.tool_proposal_json, {}),
     workbenchReceiptDraft: parseJsonField<Record<string, unknown>>(row.workbench_draft_json, {}),
     ledgerFocusDraft: parseJsonField<Record<string, unknown>>(row.ledger_focus_json, {}),
+    projectFocusDraft: {
+      kind: "route_record_project_focus",
+      focusTarget: "project_lab",
+      autosave: false,
+      projectSlug,
+      projectName,
+      projectPath,
+      projectId: null,
+      routeRecordId: id,
+      focusSummary: `Open Project Lab for route #${id}. No project write is saved.`,
+    },
     taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
     taskId: row.task_id == null ? null : Number(row.task_id),
     approvalPreview: row.approval_id == null ? null : {
