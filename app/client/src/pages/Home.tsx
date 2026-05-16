@@ -43,6 +43,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
+import { routeActionModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -1363,6 +1364,16 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 const routeApprovalDone = routeApprovalStatus != null && routeApprovalStatus !== "pending";
                 const routeEvidence = item.workbenchEvidence;
                 const routeEvidenceId = routeEvidence?.id ?? null;
+                const routeActions = routeActionModel({
+                  routeId: item.id,
+                  taskId: routeTaskId,
+                  evidenceId: routeEvidenceId,
+                  approvalId: routeApprovalId,
+                  approvalStatus: routeApprovalStatus,
+                  creatingTask: creatingRouteTaskId === item.id,
+                  creatingReceipt: creatingRouteReceiptId === item.id,
+                  creatingApproval: creatingRouteApprovalId === item.id,
+                });
                 return (
                   <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex flex-wrap items-center gap-1">
@@ -1390,129 +1401,51 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <span style={{ color: C.border }}>/</span>
                       <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                     </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-1">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={routeTaskId ? "secondary" : "outline"}
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => {
-                          if (routeTaskId) {
-                            openCreatedRouteTask(routeTaskId, item.id);
-                            return;
-                          }
-                          createTaskFromRouteRecord(item);
-                        }}
-                        disabled={creatingRouteTaskId === item.id}
-                        aria-label={
-                          routeTaskId
-                            ? `Open task ${routeTaskId} created from route ${item.id}`
-                            : creatingRouteTaskId === item.id
-                              ? `Creating task from route ${item.id}`
-                              : `Create local task from route ${item.id}`
-                        }
-                        title={
-                          routeTaskId
-                            ? "Open the local task created from this route."
-                            : "Create a local task from this saved route. This does not run the task."
-                        }
-                      >
-                        {routeTaskId
-                          ? `Task #${routeTaskId}`
-                          : creatingRouteTaskId === item.id
-                            ? "Creating"
-                            : "Create Task"}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => openRouteProjectFocus(item)}
-                        aria-label={`Open Project Lab context for route ${item.id}`}
-                        title="Open Project Lab for this saved route. This does not save or run work."
-                      >
-                        Project
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => openRouteWorkbenchDraft(item)}
-                        aria-label={`Stage Workbench body from route ${item.id}`}
-                        title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
-                      >
-                        Stage Body
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={routeEvidenceId ? "secondary" : "outline"}
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => {
-                          if (routeEvidence) {
-                            openWorkbenchEvidence(routeEvidence);
-                            return;
-                          }
-                          createWorkbenchReceiptFromRouteRecord(item);
-                        }}
-                        disabled={creatingRouteReceiptId === item.id}
-                        aria-label={
-                          routeEvidenceId
-                            ? `Open Workbench receipt ${routeEvidenceId} linked to route ${item.id}`
-                            : creatingRouteReceiptId === item.id
-                              ? `Saving Workbench receipt for route ${item.id}`
-                              : `Save Workbench receipt for route ${item.id}`
-                        }
-                        title={
-                          routeEvidenceId
-                            ? "Open the local Workbench body linked to this route."
-                            : "Save this route as one local Workbench receipt. This does not run work."
-                        }
-                      >
-                        {routeEvidenceId
-                          ? `Receipt #${routeEvidenceId}`
-                          : creatingRouteReceiptId === item.id
-                            ? "Saving"
-                            : "Save Body"}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={routeApprovalId ? "secondary" : "outline"}
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => {
-                          if (routeApprovalId) {
-                            setLedgerFocusNotice(`Approval #${routeApprovalId} ${routeApprovalStatus ?? "recorded"} for route #${item.id}.`);
-                            onNavigate("approvals");
-                            return;
-                          }
-                          createApprovalFromRouteRecord(item);
-                        }}
-                        disabled={creatingRouteApprovalId === item.id}
-                        aria-label={
-                          routeApprovalId
-                            ? `Open ${routeApprovalStatus ?? "recorded"} approval ${routeApprovalId} for route ${item.id}`
-                            : creatingRouteApprovalId === item.id
-                            ? `Queuing approval preview for route ${item.id}`
-                            : `Queue approval preview for route ${item.id}`
-                        }
-                        title={
-                          routeApprovalId
-                            ? "Open the local approval record for this route."
-                            : "Queue a local approval/preflight preview for this route. This does not approve or run work."
-                        }
-                      >
-                        {routeApprovalId
-                          ? `${routeApprovalStatus === "pending" ? "Gate" : routeApprovalStatus === "approved" ? "Approved" : "Closed"} #${routeApprovalId}`
-                          : creatingRouteApprovalId === item.id
-                            ? "Queuing"
-                            : "Queue Gate"}
-                      </Button>
-                      <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                        Review before saving.
-                      </span>
+                    <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} safe actions`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="mb-1 flex items-center justify-between gap-2">
+                        <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                          Safe actions
+                        </span>
+                        <span className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                          no execution
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+                        {routeActions.map((action) => (
+                          <RouteActionButton
+                            key={action.key}
+                            action={action}
+                            onClick={() => {
+                              if (action.key === "project") {
+                                openRouteProjectFocus(item);
+                                return;
+                              }
+                              if (action.key === "workbench") {
+                                if (routeEvidence) {
+                                  openWorkbenchEvidence(routeEvidence);
+                                  return;
+                                }
+                                createWorkbenchReceiptFromRouteRecord(item);
+                                return;
+                              }
+                              if (action.key === "gate") {
+                                if (routeApprovalId) {
+                                  setLedgerFocusNotice(`Approval #${routeApprovalId} ${routeApprovalStatus ?? "recorded"} for route #${item.id}.`);
+                                  onNavigate("approvals");
+                                  return;
+                                }
+                                createApprovalFromRouteRecord(item);
+                                return;
+                              }
+                              if (routeTaskId) {
+                                openCreatedRouteTask(routeTaskId, item.id);
+                                return;
+                              }
+                              createTaskFromRouteRecord(item);
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 );
@@ -1706,6 +1639,32 @@ function LedgerRule({ title, body, tone }: { title: string; body: string; tone: 
         {body}
       </div>
     </div>
+  );
+}
+
+function RouteActionButton({ action, onClick }: { action: RouteAction; onClick: () => void }) {
+  const tone = action.status === "saved" ? C.success : action.status === "pending" ? C.warning : C.accent;
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant={action.status === "saved" ? "secondary" : "outline"}
+      className="h-auto min-h-10 justify-start whitespace-normal px-2 py-1 text-left"
+      onClick={onClick}
+      disabled={action.status === "pending"}
+      aria-label={action.ariaLabel}
+      title={action.title}
+      style={{ background: action.status === "saved" ? C.surfaceRaised : C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+    >
+      <span className="block min-w-0">
+        <span className="block text-[9px] font-semibold uppercase tracking-widest leading-none" style={{ color: tone }}>
+          {action.destination}
+        </span>
+        <span className="mt-1 block text-[11px] leading-tight" style={{ color: C.textPrimary }}>
+          {action.label}
+        </span>
+      </span>
+    </Button>
   );
 }
 

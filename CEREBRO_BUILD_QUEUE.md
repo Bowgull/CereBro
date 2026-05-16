@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0546 EDT
+Last updated: 2026-05-16 0552 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0552 EDT: Ledger saved route rows now use a compact safe-action
+  rail. The row groups Project, Body, Gate, and Task as separate read/save
+  destinations, marks saved and pending state, and keeps `no execution`
+  visible.
 - 2026-05-16 0546 EDT: saved route reads now expose a Project Lab focus
   draft derived from route record project columns. Ledger saved route rows now
   have a Project action beside task/body/gate actions, so saved routes can open

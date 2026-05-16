@@ -20011,3 +20011,73 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview and saved route reads now have safe Project, Workbench, and Ledger handoffs. Next best slice: shift from contract patching into visible polish on the route receipt/action row, unless a remaining handoff gap is found. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0552 EDT - Ledger route safe-action rail
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was visible polish on one route row surface with a small
+  pure UI model test.
+
+What changed:
+
+- Added `routeActionModel` for saved-route action labels, destinations, and
+  state.
+- Added a focused test that locks Project, Body, Gate, Task ordering and
+  confirms these actions do not imply execution.
+- Ledger saved route rows now show a compact `Safe actions` rail with `no
+  execution` visible.
+- Route actions are grouped as Project, Body, Gate, and Task instead of a flat
+  button pile.
+- Saved/pending states now render in the action labels, such as `Receipt #1527`,
+  `Gate #99`, `Task #1734`, or `Saving Body`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/routeActionModel.ts`
+- `app/server/routeActionModel.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  failed because `routeActionModel` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  passed, 2 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, opened Ledger, confirmed saved
+  route rows show `Safe actions`, `no execution`, `Project`, `Body`, `Gate`,
+  and `Task`, then clicked Project on route #23 and confirmed Project Lab
+  opened with `Route #23 opened Project Lab. No project write is saved.`
+
+Known risks:
+
+- The action rail is still text-first. It is cleaner, but icons can come later
+  once the route surface is fully stable.
+- The Body action still saves a receipt when no saved receipt exists. The label
+  is explicit, and the action remains local-only.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally during this pass.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. The saved-route row now has a compact safe-action rail. Next best slice: polish the runtime route preview modal to match the same Project/Body/Gate/Task mental model, or inspect Workbench/Project Lab for the next visible low-machinery cleanup. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```
