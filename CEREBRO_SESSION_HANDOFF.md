@@ -22084,3 +22084,76 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab's visible map layer now uses Bodies/Body and push-decision labels without push-readiness-receipt wording. Next best slice: move to Terminal Lab path clarity, unless browser review finds a concrete Project Lab blocker. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0857 EDT - Terminal Lab body path labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Terminal Lab display-copy slice.
+
+What changed:
+
+- Terminal Lab Project Read rail now labels Workbench support as `Bodies`.
+- The Project Read drawer now says `Body Read`, `Workbench Bodies`, and
+  `Reading Workbench body summary.`
+- The Aang-to-Workbench strip now exposes `Aang to Workbench body path` and
+  shows `body not saved` before a Workbench body exists.
+- Terminal Lab copy model now owns these body-path labels.
+
+Files touched in this slice:
+
+- `app/client/src/lib/terminalLabCopyModel.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/terminalLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/terminalLabCopyModel.test.ts` passed, 3
+  tests.
+- `git diff --check -- app/client/src/lib/terminalLabCopyModel.ts
+  app/client/src/components/TerminalLabPanel.tsx app/server/terminalLabCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, opened
+  Terminal Lab, confirmed `Bodies`, `Body Read`, and `Aang to Workbench body
+  path`; old exact phrases `Receipt Read`, `Workbench Receipts`, `Aang to
+  Workbench receipt chain`, and `receipt not saved` were absent from the
+  workspace read.
+
+Drift check:
+
+- On path because Terminal Lab is the next build-order item after Project Lab.
+- Creative UI/UX stayed inside the lane: display-copy and accessibility label
+  cleanup only.
+- No Code Lab, new agent, execution path, plugin, model, external source,
+  backend behavior, storage change, or Raven path was added.
+
+Known risks:
+
+- Workbench itself still uses receipt language by design because it is the body
+  capture surface. Terminal Lab now points to that body without calling its own
+  path a receipt chain.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now uses body-path labels for its Project Read rail and Aang-to-Workbench strip. Next best slice: continue Terminal Lab path clarity only if a browser review finds concrete visible leaks; otherwise move to the next high-value build-plan item without adding Code Lab or execution behavior. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

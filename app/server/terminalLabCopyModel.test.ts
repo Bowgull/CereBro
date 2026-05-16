@@ -15,7 +15,11 @@ describe("terminalLabCopyModel", () => {
     expect(copy.executionLabel).toBe("Action");
     expect(copy.executionValue(false)).toBe("read only");
     expect(copy.manualValue).toBe("review first");
-    expect(copy.receiptDetailsTitle).toBe("Receipt Read");
+    expect(copy.bodyStatsLabel).toBe("Bodies");
+    expect(copy.bodyStatsValue(4, 1)).toBe("4 / 1 review");
+    expect(copy.receiptDetailsTitle).toBe("Body Read");
+    expect(copy.receiptDetailsHeading).toBe("Workbench Bodies");
+    expect(copy.receiptDetailsReading).toBe("Reading Workbench body summary.");
     expect(copy.boundaryTitle).toBe("Action Boundary");
     expect(copy.boundaryStateText(false, true)).toBe("Project Lab read only. Git action: no. Approval required: yes.");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("push readiness");
@@ -23,12 +27,13 @@ describe("terminalLabCopyModel", () => {
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("intent classifier");
   });
 
-  it("names the receipt chain as Aang teaching before Workbench proof", () => {
+  it("names the body path as Aang teaching before Workbench body", () => {
     const copy = terminalLabReceiptChainCopy();
 
-    expect(copy.ariaLabel).toBe("Aang to Workbench receipt chain");
+    expect(copy.ariaLabel).toBe("Aang to Workbench body path");
     expect(copy.firstStepLabel).toBe("Aang teaches");
     expect(copy.workbenchStepLabel).toBe("Workbench body");
+    expect(copy.emptyReceiptText).toBe("body not saved");
     expect(copy.projectStepLabel).toBe("Project read");
     expect(copy.footer).toBe("Teaching path: Aang explains here. Save the body in Workbench. Read project context before any git decision.");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("terminal explains");

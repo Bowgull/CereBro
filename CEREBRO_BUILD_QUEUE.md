@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0850 EDT
+Last updated: 2026-05-16 0857 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0857 EDT: cleaned Terminal Lab body-path labels. The Project
+  Read rail now says `Bodies`, the drawer says `Body Read` / `Workbench
+  Bodies`, and the Aang-to-Workbench strip is now a body path instead of a
+  receipt chain.
 - 2026-05-16 0850 EDT: finished Project Lab visible context leak cleanup. Top
   stats now say `Bodies`, project card body rows stay `Body`, and push decision
   buttons no longer expose `push readiness receipt` accessibility labels.

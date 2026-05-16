@@ -1308,7 +1308,11 @@ function ProjectContextRail({
     { label: "Branch", value: project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable", tone: project.git.branch ? C.textSecondary : C.warning },
     { label: "Dirty", value: project.git.dirty ? `${project.git.dirtyCount} local` : "clean", tone: project.git.dirty ? C.danger : C.success },
     { label: copy.readStateLabel, value: project.pushReadiness.label, tone: pushTone },
-    { label: "Receipts", value: receiptStatsOpen ? `${receiptStats.total} / ${receiptStats.needsReview} review` : "open to read", tone: receiptTone },
+    {
+      label: copy.bodyStatsLabel,
+      value: receiptStatsOpen ? copy.bodyStatsValue(receiptStats.total, receiptStats.needsReview) : copy.bodyStatsClosed,
+      tone: receiptTone,
+    },
     { label: copy.manualLabel, value: copy.manualValue, tone: C.gold },
     { label: copy.executionLabel, value: copy.executionValue(project.pushReadiness.executesGit), tone: project.pushReadiness.executesGit ? C.danger : C.success },
   ];
@@ -1399,13 +1403,13 @@ function ProjectContextRail({
         <div className="mt-1.5">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted }}>
-              Workbench Receipts
+              {copy.receiptDetailsHeading}
             </div>
             <Chip label={`${receiptStats.total} total`} tone={receiptStats.total > 0 ? C.accent : C.textMuted} />
           </div>
           {receiptStatsReading ? (
             <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-              Reading Workbench receipt summary.
+              {copy.receiptDetailsReading}
             </div>
           ) : (
             <>
@@ -1415,7 +1419,7 @@ function ProjectContextRail({
                 <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
               </div>
               <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
+                {copy.receiptDetailsFooter}
               </div>
             </>
           )}

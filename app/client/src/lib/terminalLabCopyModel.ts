@@ -11,8 +11,14 @@ export function terminalLabProjectReadCopy() {
     executionValue: (executesGit: boolean) => (executesGit ? "git action" : "read only"),
     manualLabel: "Manual",
     manualValue: "review first",
-    receiptDetailsTitle: "Receipt Read",
+    bodyStatsLabel: "Bodies",
+    bodyStatsClosed: "open to read",
+    bodyStatsValue: (total: number, needsReview: number) => `${total} / ${needsReview} review`,
+    receiptDetailsTitle: "Body Read",
     receiptDetailsClosed: "open to read",
+    receiptDetailsHeading: "Workbench Bodies",
+    receiptDetailsReading: "Reading Workbench body summary.",
+    receiptDetailsFooter: "Workbench has the body. Ledger has the audit trail. Project Lab reads push context.",
     boundaryTitle: "Action Boundary",
     boundaryText: "Terminal Lab explains and records. Commands run elsewhere through approval. Project Lab reads state. Workbench stores the body. Ledger audits it.",
     boundaryStateText: (executesGit: boolean, automationRequiresApproval: boolean) =>
@@ -22,11 +28,11 @@ export function terminalLabProjectReadCopy() {
 
 export function terminalLabReceiptChainCopy() {
   return {
-    ariaLabel: "Aang to Workbench receipt chain",
+    ariaLabel: "Aang to Workbench body path",
     firstStepLabel: "Aang teaches",
     emptyObservationText: "no observation selected",
     workbenchStepLabel: "Workbench body",
-    emptyReceiptText: "receipt not saved",
+    emptyReceiptText: "body not saved",
     projectStepLabel: "Project read",
     emptyProjectText: "no project match",
     fallbackProjectValue: "project decision reading",
