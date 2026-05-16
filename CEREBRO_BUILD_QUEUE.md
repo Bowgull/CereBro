@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0840 EDT
+Last updated: 2026-05-16 0846 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0846 EDT: cleaned Project Lab context-path labels. Project cards
+  now show `Bodies`, Project Map reads show `Body`, the context bridge uses
+  Terminal read / Workbench body / Project context language, and push decisions
+  now say body missing/present instead of receipt missing/present.
 - 2026-05-16 0840 EDT: cleaned Ledger overview object labels. Overview cards
   now use `saved outputs`, `saved route reads`, `Workbench`, and `Latest
   Workbench Bodies`; selected reads now say body/audit path instead of

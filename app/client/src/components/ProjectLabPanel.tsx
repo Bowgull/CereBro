@@ -741,7 +741,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
                     <MetaBlock label="Routes" value={project.activity.routes.total > 0 ? `${project.activity.routes.total} saved` : "none"} />
-                    <MetaBlock label="Receipts" value={projectReceiptsOpen ? `${proofStats.total} receipts / ${proofStats.needsReview} review` : receiptCopy.closedValue} />
+                    <MetaBlock label={receiptCopy.metaLabel} value={projectReceiptsOpen ? receiptCopy.metaValue(proofStats.total, proofStats.needsReview) : receiptCopy.closedValue} />
                   </div>
 
                   <ProjectMapRead
@@ -1648,6 +1648,7 @@ function ProjectMapRead({
   nextSafeAction: string;
 }) {
   const pushTone = toneForPushState(pushState);
+  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: receiptStatsOpen });
   const receiptTone = !receiptStatsOpen ? C.textMuted : receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
   const riskTone = riskFlags.length > 0 ? C.warning : C.success;
   const rows = [
@@ -1655,7 +1656,7 @@ function ProjectMapRead({
     { label: "Dirty", value: dirty ? `${dirtyCount} local change${dirtyCount === 1 ? "" : "s"}` : "clean", tone: dirty ? C.danger : C.success },
     { label: "Push", value: pushLabel, tone: pushTone },
     { label: "Risk", value: riskFlags[0] ?? "none flagged", tone: riskTone },
-    { label: "Receipt", value: receiptStatsOpen ? `${receiptStats.total} Workbench / ${receiptStats.needsReview} review` : "open to read", tone: receiptTone },
+    { label: receiptCopy.mapRowLabel, value: receiptStatsOpen ? receiptCopy.mapRowValue(receiptStats.total, receiptStats.needsReview) : "open to read", tone: receiptTone },
     { label: "Manual", value: "visible, gated", tone: C.gold },
     { label: "Assist", value: autoSelected ? "recommendation selected" : "off", tone: autoSelected ? C.warning : C.textMuted },
   ];
@@ -1704,27 +1705,28 @@ function ProjectReceiptChainStrip({
   topProjectName: string | null;
   topPushLabel: string | null;
 }) {
+  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: statsOpen });
   const receiptTone = !statsOpen ? C.textMuted : stats.needsReview > 0 ? C.warning : stats.total > 0 ? C.success : C.textMuted;
   const steps = [
     {
-      label: "Terminal proof",
-      value: !statsOpen ? "open to read" : statsReading ? "reading" : stats.terminal > 0 ? `${stats.terminal} command receipt${stats.terminal === 1 ? "" : "s"}` : "no command receipts",
+      label: receiptCopy.chainTerminalLabel,
+      value: !statsOpen ? "open to read" : statsReading ? "reading" : receiptCopy.chainTerminalValue(stats.terminal),
       tone: !statsOpen ? C.textMuted : stats.terminal > 0 ? C.gold : C.textMuted,
     },
     {
-      label: "Workbench body",
-      value: !statsOpen ? "open to read" : statsReading ? "reading" : `${stats.total} receipts / ${stats.needsReview} review`,
+      label: receiptCopy.chainBodyLabel,
+      value: !statsOpen ? "open to read" : statsReading ? "reading" : receiptCopy.chainBodyValue(stats.total, stats.needsReview),
       tone: receiptTone,
     },
     {
-      label: "Project context",
+      label: receiptCopy.chainContextLabel,
       value: topProjectName == null ? `${projectCount} projects read` : `${topProjectName}: ${topPushLabel ?? "push context"}`,
       tone: topProjectName == null ? C.textMuted : C.accent,
     },
   ];
 
   return (
-    <section className="rounded p-1.5" aria-label="Project Lab receipt chain" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <section className="rounded p-1.5" aria-label={receiptCopy.chainAria} style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="grid gap-1 md:grid-cols-3">
         {steps.map((step) => (
           <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1738,7 +1740,7 @@ function ProjectReceiptChainStrip({
         ))}
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Project Lab reads context only. Workbench has the body. Terminal has the command observation.
+        {receiptCopy.chainNote}
       </div>
     </section>
   );
@@ -1822,27 +1824,27 @@ function PushDecisionNote({
       return {
         label: "hold",
         tone: C.warning,
-        text: `${stats.needsReview} Workbench receipt${stats.needsReview === 1 ? "" : "s"} need review. Check the Workbench body and Ledger audit trail before commit.`,
+        text: pushCopy.reviewText(stats.needsReview),
       };
     }
     if (stats.total === 0) {
       return {
-        label: "receipts missing",
+        label: pushCopy.missingLabel,
         tone: readyState ? C.warning : C.textMuted,
-        text: pushCopy.noReceiptText(pushLabel),
+        text: pushCopy.noBodyText(pushLabel),
       };
     }
     if (stats.validated > 0 && readyState) {
       return {
         label: "supported",
         tone: C.success,
-        text: `${stats.validated} validated receipt${stats.validated === 1 ? "" : "s"} support ${pushLabel.toLowerCase()}. Review the staged diff before pushing.`,
+        text: pushCopy.supportedText(stats.validated, pushLabel),
       };
     }
     return {
-      label: "receipts present",
+      label: pushCopy.presentLabel,
       tone: C.accent,
-      text: `${stats.total} receipt${stats.total === 1 ? "" : "s"} exist. Use Workbench for receipt bodies and Ledger for the audit trail.`,
+      text: pushCopy.presentText(stats.total),
     };
   })();
 
