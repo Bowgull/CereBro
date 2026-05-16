@@ -953,7 +953,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
-  const [ledgerFocusProject, setLedgerFocusProject] = useState<{ id: number; name: string | null } | null>(null);
+  const [ledgerFocusProject, setLedgerFocusProject] = useState<{ id: number | null; name: string | null } | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
   const [creatingRouteReceiptId, setCreatingRouteReceiptId] = useState<number | null>(null);
@@ -997,7 +997,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const focusedEvidenceRows = ledgerFocusProject
-    ? evidenceRows.filter((item) => item.projectId === ledgerFocusProject.id)
+    ? evidenceRows.filter((item) => (
+        ledgerFocusProject.id != null
+          ? item.projectId === ledgerFocusProject.id
+          : ledgerFocusProject.name != null && item.projectName === ledgerFocusProject.name
+      ))
     : evidenceRows;
   const latestEvidenceRows = focusedEvidenceRows.slice(0, 4);
   const latestRouteRows = routeRows.slice(0, 4);
@@ -1037,8 +1041,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     if (!raw) return;
     try {
       const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; projectId?: number | null; projectName?: string | null; notice?: string };
-      if (typeof draft.projectId === "number") {
-        setLedgerFocusProject({ id: draft.projectId, name: draft.projectName ?? null });
+      if (typeof draft.projectId === "number" || draft.projectName) {
+        setLedgerFocusProject({ id: typeof draft.projectId === "number" ? draft.projectId : null, name: draft.projectName ?? null });
         if (typeof draft.evidenceId !== "number") setSelectedEvidenceId(null);
       }
       if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
@@ -1923,10 +1927,12 @@ function RuntimeRouteReceipt({
       ownerAgent: string;
       category: string;
       projectSlug: string | null;
+      projectName: string | null;
       auditFilters: {
         ownerAgent: string;
         category: string;
         projectSlug: string | null;
+        projectName?: string | null;
         modelLaneId?: string;
         bodyTarget: string;
       };
@@ -1998,6 +2004,7 @@ function RuntimeRouteReceipt({
         JSON.stringify({
           source: "runtime_route",
           focusKind: focus.kind,
+          projectName: focus.projectName,
           filters: focus.auditFilters,
           notice: focus.focusSummary,
         }),

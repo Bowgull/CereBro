@@ -477,10 +477,12 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
       ownerAgent,
       category,
       projectSlug,
+      projectName: project?.label ?? null,
       auditFilters: {
         ownerAgent,
         category,
         projectSlug,
+        projectName: project?.label ?? null,
         modelLaneId: modelProposal.laneId,
         bodyTarget: "workbench",
       },

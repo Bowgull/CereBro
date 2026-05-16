@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0320 EDT
+Last updated: 2026-05-16 0358 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0358 EDT: `runtime.previewRoute` Ledger focus drafts now carry
+  project name as well as slug. Ledger accepts project-name focus for
+  preview-only routes, so Ask Aang route preview can open CereBro-scoped Ledger
+  receipts before any route record is saved.
 - 2026-05-16 0320 EDT: Workbench validation chips and receipt body reads now
   use the same validation tones as Ledger and Terminal Lab: blocked is risk,
   needs review is warning, checked states are success, and unknown/unvalidated

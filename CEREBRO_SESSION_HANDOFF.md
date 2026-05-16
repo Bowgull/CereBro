@@ -19726,3 +19726,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. The visible receipt loop is nearly closed. Next safe slice: move to the next backend/runtime contract only if no generic handoff gap remains in Project Lab, Terminal Lab, Workbench, or Ledger. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0358 EDT - Runtime Ledger project-name focus contract
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 56%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a backend/runtime contract patch with a small client
+  consumer change.
+
+What changed:
+
+- `runtime.previewRoute` now includes `projectName` on `ledgerFocusDraft`.
+- `runtime.previewRoute` now includes `projectName` inside
+  `ledgerFocusDraft.auditFilters`.
+- The runtime route receipt test now locks that contract for CereBro route
+  previews.
+- Ledger project focus now supports either project id or project name. This
+  lets preview-only route handoffs scope Ledger receipts without creating a
+  project row or route record first.
+- The Ask Aang route preview Ledger action now forwards `projectName`.
+- No route record, Workbench receipt, approval, task, memory, command, git,
+  model, browser, Notion, Slack, or external write is created by this preview.
+
+Files touched in this slice:
+
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-project-focus-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because `ledgerFocusDraft.projectName` was undefined.
+- Green after patch:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-project-focus-green.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 11 tests.
+- `pnpm -C app check` passed.
+- `git diff --check -- app/server/runtime.routeReceipt.test.ts app/server/routers/runtime.ts app/client/src/pages/Home.tsx`
+  passed.
+- Playwright opened `http://localhost:3000`, set Ask Aang to Build, previewed
+  `keep building CereBro front end`, clicked the route preview Ledger action,
+  and confirmed Ledger showed `CereBro Workbench Receipts`,
+  `Focus Ledger on tony project build route preview. No audit row is saved.`,
+  and `Clear Focus`.
+
+Known risks:
+
+- Project-name Ledger focus is scoped to loaded latest receipt rows. It remains
+  a local preview read, not a deep historical search.
+- Slug-only focus still cannot scope receipts unless a matching project name or
+  id is provided.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: continue backend/runtime receipt contracts. Prefer contracts that remove client assumptions from route preview, route records, Workbench drafts, Ledger focus, and Project Lab reads. Run red/green targeted tests, pnpm check, browser-proof localhost if UI changes, update handoff, archive to Obsidian, commit, and push.
+```

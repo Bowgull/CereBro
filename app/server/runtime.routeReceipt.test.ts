@@ -85,10 +85,12 @@ describe("runtime route receipt preview", () => {
     expect(preview.ledgerFocusDraft.focusTarget).toBe("ledger");
     expect(preview.ledgerFocusDraft.autosave).toBe(false);
     expect(preview.ledgerFocusDraft.projectSlug).toBe("cerebro");
+    expect(preview.ledgerFocusDraft.projectName).toBe("CereBro");
     expect(preview.ledgerFocusDraft.auditFilters).toEqual({
       ownerAgent: "tony",
       category: "project_build",
       projectSlug: "cerebro",
+      projectName: "CereBro",
       modelLaneId: "frontier_or_codex_escalation",
       bodyTarget: "workbench",
     });
