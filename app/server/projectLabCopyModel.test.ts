@@ -27,6 +27,7 @@ describe("projectLabCopyModel", () => {
     expect(open.chainBodyValue(3, 1)).toBe("3 bodies / 1 review");
     expect(open.metaLabel).toBe("Bodies");
     expect(open.metaValue(3, 1)).toBe("3 bodies / 1 review");
+    expect(open.statLabel).toBe("Bodies");
     expect(open.chainAria).toBe("Project Lab context path");
   });
 
@@ -34,8 +35,10 @@ describe("projectLabCopyModel", () => {
     const copy = projectLabPushCopy();
 
     expect(copy.buttonTitle).toBe("Push Decision");
+    expect(copy.buttonAria("CereBro")).toBe("Show push decision for CereBro");
     expect(copy.detailsTitle).toBe("Decision Details");
     expect(copy.manualBlockTitle).toBe("Manual Commands");
+    expect(copy.readButtonAria("CereBro")).toBe("Open push decision for CereBro");
     expect(copy.noBodyText("Push branch")).toBe("No Workbench body is linked yet. Push branch is only a local status read until a body exists.");
     expect(copy.reviewText(2)).toContain("Workbench bodies need review");
     expect(copy.supportedText(1, "Push branch")).toContain("checked body support push branch");

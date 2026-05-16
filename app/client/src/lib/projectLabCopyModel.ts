@@ -9,6 +9,8 @@ export function projectLabReceiptCopy({ receiptsOpen }: { receiptsOpen: boolean 
   return {
     cardLabel: receiptsOpen ? "bodies loaded" : "open to read",
     closedValue: "open to read",
+    statLabel: "Bodies",
+    statValueClosed: "open",
     closedPushText: "Open Project Map to read the compact Workbench body summary before treating this as push evidence.",
     mapRowLabel: "Body",
     mapRowValue: (total: number, needsReview: number) => `${total} Workbench / ${needsReview} review`,
@@ -28,9 +30,11 @@ export function projectLabPushCopy() {
   return {
     buttonTitle: "Push Decision",
     buttonTooltip: "Read the push decision. Project Lab does not run git.",
+    buttonAria: (projectName: string) => `Show push decision for ${projectName}`,
     detailsTitle: "Decision Details",
     readButtonLabel: "Read",
     readButtonTooltip: "Open the push decision read. This is not a git action.",
+    readButtonAria: (projectName: string) => `Open push decision for ${projectName}`,
     manualBlockTitle: "Manual Commands",
     manualBlockBadge: "review first",
     manualBlockText: "Use these after review. This panel never runs git.",

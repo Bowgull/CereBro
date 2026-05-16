@@ -392,14 +392,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
+  const guideCopy = projectLabGuideCopy({ receiptsOpen: projectReceiptsOpen });
+  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: projectReceiptsOpen });
+  const pushCopy = projectLabPushCopy();
   const primaryStats = [
     { label: "Local", value: String(data?.summary.local ?? 0), tone: C.accent, filter: "all" as const },
     { label: "Attention", value: String(projectFilters.find((filter) => filter.id === "attention")?.count ?? 0), tone: (projectFilters.find((filter) => filter.id === "attention")?.count ?? 0) > 0 ? C.warning : C.success, filter: "attention" as const },
     { label: "Dirty", value: String(data?.summary.dirty ?? 0), tone: (data?.summary.dirty ?? 0) > 0 ? C.danger : C.success, filter: "dirty" as const },
     { label: "Approvals", value: String(data?.summary.pendingApprovals ?? 0), tone: (data?.summary.pendingApprovals ?? 0) > 0 ? C.warning : C.success, filter: "approvals" as const },
     {
-      label: "Receipts",
-      value: projectReceiptsOpen ? String(workbenchEvidenceSummary.data?.summary.total ?? 0) : "open",
+      label: receiptCopy.statLabel,
+      value: projectReceiptsOpen ? String(workbenchEvidenceSummary.data?.summary.total ?? 0) : receiptCopy.statValueClosed,
       tone: !projectReceiptsOpen ? C.textMuted : (workbenchEvidenceSummary.data?.summary.needsReview ?? 0) > 0 ? C.warning : C.success,
     },
   ];
@@ -409,10 +412,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     needsReview: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.needsReview ?? 0 : 0,
     validated: projectReceiptsOpen ? workbenchEvidenceSummary.data?.summary.validated ?? 0 : 0,
   };
-  const guideCopy = projectLabGuideCopy({ receiptsOpen: projectReceiptsOpen });
-  const receiptCopy = projectLabReceiptCopy({ receiptsOpen: projectReceiptsOpen });
-  const pushCopy = projectLabPushCopy();
-
   useEffect(() => {
     if (projects.length === 0) return;
     let raw: string | null = null;
@@ -772,7 +771,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         type="button"
                         onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         aria-expanded={showPushReceipt}
-                        aria-label={`Show push readiness receipt for ${project.name}`}
+                        aria-label={pushCopy.buttonAria(project.name)}
                         title={pushCopy.buttonTooltip}
                         className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none"
                         style={{ color: pushTone, background: C.surface, borderColor: `${pushTone}66` }}
@@ -804,7 +803,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           type="button"
                           variant="secondary"
                           size="sm"
-                          aria-label={`Open push readiness receipt for ${project.name}`}
+                          aria-label={pushCopy.readButtonAria(project.name)}
                           title={pushCopy.readButtonTooltip}
                           onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         >

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0846 EDT
+Last updated: 2026-05-16 0850 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0850 EDT: finished Project Lab visible context leak cleanup. Top
+  stats now say `Bodies`, project card body rows stay `Body`, and push decision
+  buttons no longer expose `push readiness receipt` accessibility labels.
 - 2026-05-16 0846 EDT: cleaned Project Lab context-path labels. Project cards
   now show `Bodies`, Project Map reads show `Body`, the context bridge uses
   Terminal read / Workbench body / Project context language, and push decisions

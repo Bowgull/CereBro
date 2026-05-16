@@ -22010,3 +22010,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab now has cleaner context-path labels: Bodies/Body, Terminal read, Workbench body, Project context, and body missing/present push notes. Next best slice: inspect Project Lab browser state for remaining concrete visible leaks, then move to Terminal Lab path clarity if Project Lab is good enough. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0850 EDT - Project Lab body stat and push labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Project Lab display-copy follow-up.
+
+What changed:
+
+- Project Lab top stats now show `Bodies` instead of `Receipts`.
+- Project card body rows still show `Body`.
+- Push decision buttons now expose `Show push decision` and `Open push
+  decision` labels instead of push-readiness-receipt wording.
+- Project Lab copy model now owns these labels.
+
+Files touched in this slice:
+
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/projectLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts` passed, 3
+  tests.
+- `git diff --check -- app/client/src/components/ProjectLabPanel.tsx
+  app/client/src/lib/projectLabCopyModel.ts app/server/projectLabCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, opened
+  Project Lab, confirmed `Bodies`, `Body`, and push-decision accessibility
+  labels; old exact phrases `push readiness receipt`, `Receipts open`,
+  `Terminal proof`, `command receipts`, `Project Lab receipt chain`, `receipts
+  missing`, and `receipts present` were absent from the visible/accessibility
+  page read.
+
+Drift check:
+
+- On path because Project Lab is the current build-order item after the
+  Keep-first visible loop.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Project Lab still reads historical Workbench records whose stored titles can
+  include receipt wording. This pass cleaned the shell and action labels, not
+  stored history.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab's visible map layer now uses Bodies/Body and push-decision labels without push-readiness-receipt wording. Next best slice: move to Terminal Lab path clarity, unless browser review finds a concrete Project Lab blocker. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
