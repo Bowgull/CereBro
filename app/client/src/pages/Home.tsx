@@ -181,7 +181,11 @@ export default function Home() {
     [heroes, selectedHeroId]
   );
 
-  const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, { refetchInterval: 5000 });
+  const { data: trackedProjects } = trpc.agents.trackedProjects.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const { data: agentRoster } = trpc.keep.agents.useQuery();
   const routePreview = trpc.runtime.previewRoute.useMutation();
   const utils = trpc.useUtils();
@@ -951,7 +955,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const utils = trpc.useUtils();
-  const ledgerOverview = trpc.ledger.overview.useQuery({ evidenceLimit: 50, routeLimit: 6 }, { refetchInterval: 10000 });
+  const ledgerOverview = trpc.ledger.overview.useQuery(
+    { evidenceLimit: 50, routeLimit: 6 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const createTaskFromRoute = trpc.runtime.createTaskFromRouteRecord.useMutation({
     onSuccess: () => {
       utils.runtime.routeRecords.invalidate();
@@ -1493,10 +1504,25 @@ function LedgerRule({ title, body, tone }: { title: string; body: string; tone: 
 }
 
 function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
-  const connection = trpc.agents.connectionStatus.useQuery(undefined, { refetchInterval: 10000 });
+  const connection = trpc.agents.connectionStatus.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const modelPolicy = trpc.modelTools.policy.useQuery();
-  const piccolo = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
-  const security = trpc.securityGate.recent.useQuery({ limit: 20 }, { refetchInterval: 10000 });
+  const piccolo = trpc.piccolo.hygieneReport.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const security = trpc.securityGate.recent.useQuery(
+    { limit: 20 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const status = connection.data;
   const hygiene = piccolo.data;
   const securityRows = security.data?.items ?? [];
@@ -2185,7 +2211,14 @@ function CommandBar({
   onSubmit: () => void;
   isClassifying: boolean;
 }) {
-  const security = trpc.securityGate.recent.useQuery({ limit: 1 }, { refetchInterval: 10000 });
+  const security = trpc.securityGate.recent.useQuery(
+    { limit: 1 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const latestReceipt = security.data?.items[0] ?? null;
   const latestRiskTone = latestReceipt == null
     ? C.textMuted

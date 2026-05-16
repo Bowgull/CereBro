@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2013 EDT
+Last updated: 2026-05-15 2015 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2015 EDT - Home Shell Polling Cleanup
+
+### What Changed
+- Removed timer polling from Home tracked-project reads.
+- Removed timer polling from the Ledger overview embedded in Home.
+- Removed timer polling from Basement connection, Piccolo hygiene, and security
+  receipt reads.
+- Removed timer polling from the Command Bar's latest security receipt read.
+- Left websocket reconnect timers and live status-specific components for a
+  separate product decision.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Home shell idle polling cleanup.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Home shell query-policy
+  pass.
+
+### Front-End Steward Review
+- Home keeps the same Keep, Ledger, Basement, and Command Bar shape.
+- Local Home summary reads no longer rerun every 5 to 10 seconds while idle.
+- Remaining client polling is limited to Permission Mode, Aang companion local
+  events, and Surfer source events, which need a separate live-status decision.
+
+### Completion Read
+- Overall: 60%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: decide whether
+Permission Mode, Aang Companion, and Surfer Sources need live polling or should
+move to manual/cached reads, then move into the next runtime receipt contract.
 
 ## 2026-05-15 2013 EDT - Drawer List Polling Cleanup
 
