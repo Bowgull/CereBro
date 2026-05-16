@@ -22538,6 +22538,94 @@ Next-session starter prompt:
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Runtime routes now expose computed executionReadiness while canExecute remains false. Next best slice: continue item 8 by tightening backend route receipt status language or surfacing this readiness only where an existing Ledger/route read already owns it. Do not build an executor, agent loop, browser action, command runner, model call, approval bypass, new UI surface, external write, or Raven path. Preserve unrelated dirty docs unless the user asks. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
 
+## 2026-05-16 1538 EDT - Ledger route readiness read
+
+Overall completion after this pass:
+
+- Overall: 66%
+- Frontend visible loop: 99%
+- Backend/runtime: 61%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Used one read-only explorer worker.
+- Worker confirmed the safest placement was the existing Ledger `Recent Route
+  Reads` route card, not a new panel, dashboard, executor view, or Basement
+  surface.
+
+What changed:
+
+- Moved runtime execution readiness into a shared server helper.
+- Ledger overview route rows now use the same `executionReadiness` contract as
+  runtime route reads.
+- Ledger route cards now show one compact strip: `Readiness: <plain status>`
+  and `No execution`.
+- Added a client copy helper for plain readiness labels.
+- Renamed the missing-task status to `missing_task_record` to avoid implying
+  the route record itself is missing.
+
+Files touched in this slice:
+
+- `app/server/runtimeExecutionReadiness.ts`
+- `app/server/routers/runtime.ts`
+- `app/server/routers/ledger.ts`
+- `app/client/src/lib/routeActionModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/server/routeActionModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Unrelated dirty files left untouched:
+
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-readiness.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because tests still expected the older `missing_route_record` status.
+- Updated tests to `missing_task_record`.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-readiness-2.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 12 tests.
+- `pnpm -C app exec vitest run server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 5 tests.
+- `pnpm -C app check` passed.
+- Browser proof used the in-app browser at `http://localhost:3000/`, opened
+  Ledger, and confirmed `Recent Route Reads`, `Readiness: needs task`,
+  `Readiness: needs Workbench body`, and `No execution` are visible inside
+  existing route cards.
+
+Drift check:
+
+- On path because this continues item 8 by making route receipt readiness
+  visible where Ledger already owns route audit reads.
+- No new surface was added.
+- No executor, agent loop, command runner, browser action, model call,
+  approval bypass, external write, Raven path, GitHub clone, or RAG automation
+  was added.
+
+Known risks:
+
+- The readiness strip is intentionally compact. If the next pass needs more
+  detail, it should stay behind an existing route details disclosure.
+- `ready for future executor review` is visible only as a readiness label, not
+  as an action.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally outside tests.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger route cards now show executionReadiness as plain readiness text plus No execution. Next best slice: continue item 8 by adding a route details read for requiredBeforeExecution/noActionTaken if needed, or move to item 9 Model and Tool Registry if backend route receipts are sufficient for now. Do not build an executor, agent loop, command runner, browser action, model call, approval bypass, new UI surface, external write, Raven path, GitHub clone, or RAG automation. Preserve unrelated dirty docs unless the user asks. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
+
 ## 2026-05-16 1531 EDT - design reference taste fold-in
 
 Overall completion after this pass:
@@ -22608,4 +22696,57 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md first. Continue CereBro on the main build path. The design reference fold-in is docs-only: future UI work must name brand-vs-product register, use Emil-style motion restraint only as concepts, use Impeccable-style critique loops without copying site assets, and apply Taste Kill by rejecting generic generated directions with receipts. Next best slice remains backend route receipts before agent execution unless a concrete Block C storage/source contract still blocks it. Do not install design skills, clone external repos, paste external code, build RAG automation, browse private pages, or create new UI surfaces without explicit approval. Run targeted tests, pnpm check, browser-proof app changes, update handoff, archive to Obsidian, commit, and push.
+```
+
+## 2026-05-16 1537 EDT - Taste Skill reference correction
+
+What changed:
+
+- Corrected the design reference fold-in after the user clarified that
+  `https://www.tasteskill.dev/` was the intended reference.
+- Updated root `DESIGN.md` to name Taste Skill directly as the anti-slop
+  frontend framework and skill family.
+- Updated `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md` to add Taste Skill
+  with its site and GitHub repo, MIT license read, relevant skill variants, and
+  the no-install-without-approval boundary.
+- Updated `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md` to
+  record `Leonxlnx/taste-skill` as MIT verified on 2026-05-16.
+- Kept "taste with receipts" as secondary design judgment context, not the
+  canonical project the user meant.
+
+Files touched in this slice:
+
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Sources checked:
+
+- `https://www.tasteskill.dev/`
+- `https://github.com/Leonxlnx/taste-skill`
+
+Checks run:
+
+- `git diff -- DESIGN.md CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- No app tests were run. This was a docs-only correction.
+
+Drift check:
+
+- On path because this corrects the exact external design reference the user
+  requested.
+- No install, clone, copied skill files, package changes, runtime app changes,
+  new surface, external write beyond the approved Obsidian handoff archive, or
+  Raven path was added.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- Obsidian session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md first. Continue CereBro on the main build path. Taste Skill is now the direct anti-slop frontend reference: use it as MIT-licensed source material for layout variance, typography, spacing, motion, redesign audits, image-to-code workflows, and controlled visual variants, but do not install or copy its skill files without explicit approval. Keep "taste with receipts" only as secondary judgment language. Next best slice remains backend route receipts before agent execution unless a concrete Block C storage/source contract still blocks it. Preserve unrelated dirty app files unless assigned. Run targeted tests, pnpm check, browser-proof app changes, update handoff, archive to Obsidian, commit, and push.
 ```

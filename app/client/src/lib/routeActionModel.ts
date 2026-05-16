@@ -22,6 +22,15 @@ export type RouteAction = {
   title: string;
 };
 
+export type RouteExecutionReadinessStatus =
+  | "preview_only"
+  | "missing_task_record"
+  | "missing_workbench_receipt"
+  | "missing_approval"
+  | "approval_pending"
+  | "approval_rejected"
+  | "ready_for_explicit_execution_call";
+
 export type RoutePreviewActionInput = {
   taskCreated: boolean;
   creatingTask: boolean;
@@ -119,6 +128,16 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
         : "Create a local task from this saved route. This does not run the task.",
     },
   ];
+}
+
+export function routeExecutionReadinessLabel(status: RouteExecutionReadinessStatus | string | null | undefined) {
+  if (status === "preview_only") return "preview only";
+  if (status === "missing_task_record") return "needs task";
+  if (status === "missing_workbench_receipt") return "needs Workbench body";
+  if (status === "missing_approval" || status === "approval_pending") return "waiting gate";
+  if (status === "approval_rejected") return "gate closed";
+  if (status === "ready_for_explicit_execution_call") return "ready for future executor review";
+  return "read route first";
 }
 
 export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAction[] {

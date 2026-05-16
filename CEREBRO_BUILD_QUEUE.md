@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1532 EDT
+Last updated: 2026-05-16 1538 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1538 EDT: surfaced item 8 readiness in the existing Ledger route
+  read. Runtime and Ledger now share the same `executionReadiness` helper, and
+  Ledger route cards show one compact `Readiness: ...` plus `No execution`
+  strip. No new surface, executor, command runner, browser action, model call,
+  approval bypass, external write, Raven path, GitHub clone, or RAG automation
+  was added.
 - 2026-05-16 1532 EDT: started item 8 backend route receipts before agent
   execution. Runtime route previews and saved route reads now expose computed
   `executionReadiness` with required local records and no-action proof.

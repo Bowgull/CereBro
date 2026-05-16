@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeActionModel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
+import { routeActionModel, routeExecutionReadinessLabel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
 
 describe("routeActionModel", () => {
   it("keeps saved route actions grouped by safe destination and state", () => {
@@ -71,5 +71,15 @@ describe("routeActionModel", () => {
     expect(proof.detailsSummary).toBe("Route Details");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("model local_code_helper");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("data leaves machine");
+  });
+
+  it("keeps execution readiness labels plain and non-executing", () => {
+    expect(routeExecutionReadinessLabel("preview_only")).toBe("preview only");
+    expect(routeExecutionReadinessLabel("missing_task_record")).toBe("needs task");
+    expect(routeExecutionReadinessLabel("missing_workbench_receipt")).toBe("needs Workbench body");
+    expect(routeExecutionReadinessLabel("missing_approval")).toBe("waiting gate");
+    expect(routeExecutionReadinessLabel("approval_pending")).toBe("waiting gate");
+    expect(routeExecutionReadinessLabel("approval_rejected")).toBe("gate closed");
+    expect(routeExecutionReadinessLabel("ready_for_explicit_execution_call")).toBe("ready for future executor review");
   });
 });

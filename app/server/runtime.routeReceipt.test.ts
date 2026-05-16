@@ -200,7 +200,7 @@ describe("runtime route receipt preview", () => {
     expect(committed.record.id).toBeGreaterThan(0);
     expect(committed.record.executionReadiness).toMatchObject({
       canExecute: false,
-      status: "missing_route_record",
+      status: "missing_task_record",
       routeRecordId: committed.record.id,
       taskId: null,
       workbenchEvidenceId: null,
@@ -258,7 +258,7 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.taskDraft.agent).toBe("tony");
     expect(records.items[0]?.executionReadiness).toMatchObject({
       canExecute: false,
-      status: "missing_route_record",
+      status: "missing_task_record",
       routeRecordId: committed.record.id,
       taskId: null,
       workbenchEvidenceId: null,
@@ -437,6 +437,10 @@ describe("runtime route receipt preview", () => {
       limit: 1,
       ownerAgent: "surfer",
     });
+    const approvedOverview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 1,
+    });
     expect(approvedRecords.items[0]?.executionReadiness).toMatchObject({
       canExecute: false,
       status: "ready_for_explicit_execution_call",
@@ -450,6 +454,16 @@ describe("runtime route receipt preview", () => {
     expect(approvedRecords.items[0]?.executionReadiness.requiredBeforeExecution).toContain(
       "future explicit execution call",
     );
+    expect(approvedOverview.latestRoutes[0]?.id).toBe(committed.record.id);
+    expect(approvedOverview.latestRoutes[0]?.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "ready_for_explicit_execution_call",
+      routeRecordId: committed.record.id,
+      taskId: task.task.id,
+      approvalId: approval.approval?.id,
+      approvalStatus: "approved",
+      workbenchEvidenceId: evidence.evidence?.id,
+    });
   });
 
   it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {

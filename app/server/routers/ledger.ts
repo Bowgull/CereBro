@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb } from "../cerebroDb";
+import { routeExecutionReadiness } from "../runtimeExecutionReadiness";
 
 function parseJsonField<T>(value: unknown, fallback: T): T {
   if (typeof value !== "string") return fallback;
@@ -12,6 +13,25 @@ function parseJsonField<T>(value: unknown, fallback: T): T {
 }
 
 function routeRow(row: Record<string, unknown>) {
+  const approvalGates = parseJsonField<string[]>(row.approval_gates_json, []);
+  const taskId = row.task_id == null ? null : Number(row.task_id);
+  const approvalPreview = row.approval_id == null ? null : {
+    id: Number(row.approval_id),
+    taskId: row.approval_task_id == null ? null : Number(row.approval_task_id),
+    status: String(row.approval_status ?? "pending"),
+    actionType: String(row.approval_action_type ?? ""),
+    requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
+    permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
+    decidedAt: row.approval_decided_at == null ? null : Number(row.approval_decided_at),
+  };
+  const workbenchEvidence = row.workbench_evidence_id == null ? null : {
+    id: Number(row.workbench_evidence_id),
+    kind: String(row.workbench_evidence_kind ?? ""),
+    title: String(row.workbench_evidence_title ?? ""),
+    targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
+    taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
+    permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
+  };
   return {
     id: Number(row.id),
     originalText: String(row.original_text ?? ""),
@@ -26,30 +46,23 @@ function routeRow(row: Record<string, unknown>) {
     projectPath: row.project_path == null ? null : String(row.project_path),
     permissionClass: String(row.permission_class ?? "local_note"),
     routeChain: parseJsonField<string[]>(row.route_chain_json, []),
-    approvalGates: parseJsonField<string[]>(row.approval_gates_json, []),
+    approvalGates,
     modelProposal: parseJsonField<Record<string, unknown>>(row.model_proposal_json, {}),
     toolProposal: parseJsonField<Record<string, unknown>>(row.tool_proposal_json, {}),
     workbenchReceiptDraft: parseJsonField<Record<string, unknown>>(row.workbench_draft_json, {}),
     ledgerFocusDraft: parseJsonField<Record<string, unknown>>(row.ledger_focus_json, {}),
     taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
-    taskId: row.task_id == null ? null : Number(row.task_id),
-    approvalPreview: row.approval_id == null ? null : {
-      id: Number(row.approval_id),
-      taskId: row.approval_task_id == null ? null : Number(row.approval_task_id),
-      status: String(row.approval_status ?? "pending"),
-      actionType: String(row.approval_action_type ?? ""),
-      requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
-      permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
-      decidedAt: row.approval_decided_at == null ? null : Number(row.approval_decided_at),
-    },
-    workbenchEvidence: row.workbench_evidence_id == null ? null : {
-      id: Number(row.workbench_evidence_id),
-      kind: String(row.workbench_evidence_kind ?? ""),
-      title: String(row.workbench_evidence_title ?? ""),
-      targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
-      taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
-      permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
-    },
+    taskId,
+    approvalPreview,
+    workbenchEvidence,
+    executionReadiness: routeExecutionReadiness({
+      routeRecordId: Number(row.id),
+      taskId,
+      approvalGates,
+      approvalId: approvalPreview?.id ?? null,
+      approvalStatus: approvalPreview?.status ?? null,
+      workbenchEvidenceId: workbenchEvidence?.id ?? null,
+    }),
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
