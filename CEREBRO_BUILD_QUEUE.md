@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0318 EDT
+Last updated: 2026-05-16 0320 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0320 EDT: Workbench validation chips and receipt body reads now
+  use the same validation tones as Ledger and Terminal Lab: blocked is risk,
+  needs review is warning, checked states are success, and unknown/unvalidated
+  stays muted.
 - 2026-05-16 0318 EDT: Workbench now forwards receipt project id/name into
   Ledger and Project Lab focus drafts. Ledger opens exact receipts while also
   keeping the project-scoped receipt read.

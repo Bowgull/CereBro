@@ -19666,3 +19666,63 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining receipt validation/read consistency between Ledger and Workbench, then move to the next backend/runtime contract only if the visible loop has no generic handoff gaps left. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0320 EDT - Workbench validation tone consistency
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 55%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench consistency patch.
+
+What changed:
+
+- Added a local Workbench `toneForValidationStatus` helper.
+- Workbench receipt row chips now use the helper instead of forcing all
+  validation states into warning tone.
+- Workbench receipt body read now uses the helper for its Validation field.
+- Workbench validation trail and comparison trail chips now use the helper.
+- `blocked` reads as risk, `needs_review` reads as warning,
+  `looks_consistent` and `validated_for_local_use` read as success, and
+  unknown/unvalidated states stay muted.
+- No backend route, schema, command execution, git execution, receipt creation,
+  model call, external provider, Notion call, or Slack call changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx` passed.
+- Playwright opened `http://localhost:3000`, opened Workshop > Workbench,
+  confirmed receipt rows render validation chips, selected receipt #1527, and
+  confirmed the receipt body read still shows Validation plus Ledger and
+  Project actions.
+
+Known risks:
+
+- This is presentation-only. It does not recalculate validation state.
+- `unvalidated` remains muted because it is neither blocked nor checked.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. The visible receipt loop is nearly closed. Next safe slice: move to the next backend/runtime contract only if no generic handoff gap remains in Project Lab, Terminal Lab, Workbench, or Ledger. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

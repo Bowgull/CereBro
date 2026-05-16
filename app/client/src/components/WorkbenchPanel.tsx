@@ -1296,7 +1296,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         <span className="flex flex-wrap items-center gap-1">
                           <Chip label={`#${item.id}`} tone={C.textMuted} />
                           <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
-                          <Chip label={item.validationStatus.replace(/_/g, " ")} tone={C.warning} />
+                          <Chip label={item.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(item.validationStatus)} />
                           {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                           {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
                           {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
@@ -1671,7 +1671,7 @@ function EvidenceDetailPanel({
     { label: "Body", value: item.title, tone: C.textPrimary },
     { label: "Source", value: sourceLabel, tone: item.sourceId == null && !item.sourceUri ? C.warning : C.accent },
     { label: "Project", value: projectLabel, tone: item.projectName ? C.success : C.warning },
-    { label: "Validation", value: validationLabel, tone: item.validationStatus === "needs_review" ? C.warning : C.success },
+    { label: "Validation", value: validationLabel, tone: toneForValidationStatus(item.validationStatus) },
     { label: "Ledger", value: ledgerLabel, tone: C.gold },
     { label: "Next", value: nextAction, tone: C.textSecondary },
   ];
@@ -1860,7 +1860,7 @@ function EvidenceDetailPanel({
                   <Chip label={`#${entry.id}`} tone={C.textMuted} />
                   <Chip label={entry.ownerAgent} tone={C.accent} />
                   {entry.sessionDisplayName && <Chip label={entry.sessionDisplayName} tone={C.gold} />}
-                  <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
+                  <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(entry.validationStatus)} />
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
                 </div>
@@ -1887,7 +1887,7 @@ function EvidenceDetailPanel({
                   {entry.sessionDisplayName && <Chip label={entry.sessionDisplayName} tone={C.gold} />}
                   <Chip label={`before receipt #${entry.beforeEvidenceId ?? "none"}`} tone={C.accent} />
                   <Chip label={`after receipt #${entry.afterEvidenceId ?? "none"}`} tone={C.accent} />
-                  <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={C.warning} />
+                  <Chip label={entry.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(entry.validationStatus)} />
                   {entry.permissionPreflightId != null && <Chip label={`preflight #${entry.permissionPreflightId}`} tone={C.textMuted} />}
                   <Chip label={formatTimestamp(entry.createdAt)} tone={C.textMuted} />
                 </div>
@@ -2135,6 +2135,13 @@ function Chip({ label, tone }: { label: string; tone: string }) {
       <span className="min-w-0 truncate">{label}</span>
     </Badge>
   );
+}
+
+function toneForValidationStatus(status: string) {
+  if (status === "blocked") return C.danger;
+  if (status === "needs_review") return C.warning;
+  if (status === "looks_consistent" || status === "validated_for_local_use") return C.success;
+  return C.textMuted;
 }
 
 function AppSelect({
