@@ -36,6 +36,8 @@ describe("Model Tools local-first routing policy", () => {
     expect(route.recommendedLane).toBe("ollama_local_fast_lane");
     expect(route.lanes[0]?.lane).toBe("ollama_local_fast_lane");
     expect(route.lanes[0]?.status).toBe("not_verified_no_install");
+    expect(route.decisionPath.map((step) => step.step)).toEqual(["Source", "Eval", "Approval"]);
+    expect(route.decisionPath.find((step) => step.step === "Approval")?.status).toBe("local_receipt");
     expect(route.noActionTaken.join(" ")).toContain("No Ollama install");
   });
 
@@ -173,10 +175,17 @@ describe("Model Tools local-first routing policy", () => {
     expect(sourced.capability.sourceReadiness.noActionTaken.join(" ")).toContain("No browser");
 
     const policy = await caller.modelTools.policy();
+    const route = await caller.modelTools.routePreview({
+      taskKind: "research current model options",
+      modality: "text",
+      privacyClass: "public_safe",
+    });
     expect(policy.sourceVerificationGate.mode).toBe("read_only");
     expect(policy.sourceVerificationGate.trustedStates).toEqual(["source_verified", "tested_pass"]);
     expect(policy.sourceVerificationGate.noActionTaken.join(" ")).toContain("No browser");
     expect(policy.capabilityMapSummary.sourceReadiness.missingSources).toBeGreaterThanOrEqual(1);
     expect(policy.capabilityMapSummary.sourceReadiness.needsSourceReview).toBeGreaterThanOrEqual(1);
+    expect(route.decisionPath.find((step) => step.step === "Source")?.status).toBe("required_before_trust");
+    expect(route.decisionPath.find((step) => step.step === "Eval")?.ownerAgent).toBe("spock");
   });
 });

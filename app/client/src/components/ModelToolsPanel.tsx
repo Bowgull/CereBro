@@ -212,6 +212,31 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   const localEvalTasks = policyData?.evalTasks ?? [];
   const route = routePreview.data;
   const summary = policyData?.capabilityMapSummary;
+  const selectedDecisionPath = selectedCapability
+    ? [
+        {
+          step: "Source",
+          status: selectedCapability.sourceReadiness.label,
+          owner: selectedCapability.sourceReadiness.status === "missing_sources" ? "surfer" : "oak",
+          body: selectedCapability.sourceReadiness.nextStep,
+          tone: toneForSourceReadiness(selectedCapability.sourceReadiness.status),
+        },
+        {
+          step: "Eval",
+          status: selectedCapability.evalStatus === "untested" ? "needed" : labelize(selectedCapability.evalStatus),
+          owner: "spock",
+          body: selectedCapability.evalStatus === "untested" ? "Record a local eval note before this becomes a default." : "Eval status is recorded on the proposal.",
+          tone: selectedCapability.evalStatus === "tested_pass" || selectedCapability.evalStatus === "source_verified" ? C.success : C.warning,
+        },
+        {
+          step: "Approval",
+          status: labelize(selectedCapability.approvalLevel),
+          owner: "spock",
+          body: selectedCapability.approvalLevel === "none" ? "Local receipt only." : "Show the approval receipt before use.",
+          tone: selectedCapability.approvalLevel === "blocked" ? C.danger : selectedCapability.approvalLevel === "none" ? C.success : C.warning,
+        },
+      ]
+    : [];
 
   const registryCounts = useMemo(() => {
     const untested = rows.filter((item) => item.evalStatus === "untested").length;
@@ -348,6 +373,17 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               tone={C.success}
             />
           </div>
+        </section>
+
+        <section className="rounded p-2" aria-label="Model tool decision path" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Decision Path" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "select proposal"} />
+          {selectedCapability ? (
+            <DecisionPath items={selectedDecisionPath} />
+          ) : (
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Select a capability to read source, eval, and approval gates as one path.
+            </div>
+          )}
         </section>
 
         <section className="rounded p-2" aria-label="Local model lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -621,6 +657,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Strengths" value={selectedCapability.strengths ?? "No strengths recorded."} />
                 <Field label="Weaknesses" value={selectedCapability.weaknesses ?? "No weaknesses recorded."} />
                 <Field label="Risk" value={selectedCapability.riskReview ?? "No risk review recorded."} />
+                <Field label="Eval" value={selectedCapability.evalStatus === "untested" ? "No local eval recorded." : labelize(selectedCapability.evalStatus)} />
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
               </div>
             ) : (
@@ -727,6 +764,15 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <div className="space-y-2">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />
+                <DecisionPath
+                  items={route.decisionPath.map((step) => ({
+                    step: step.step,
+                    status: labelize(step.status),
+                    owner: step.ownerAgent,
+                    body: step.receipt,
+                    tone: step.step === "Approval" && step.status === "local_receipt" ? C.success : C.warning,
+                  }))}
+                />
                 <div className="space-y-1.5">
                   {route.lanes.map((lane) => (
                     <div key={lane.lane} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -757,6 +803,35 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </details>
       </main>
+    </div>
+  );
+}
+
+function DecisionPath({
+  items,
+}: {
+  items: Array<{
+    step: string;
+    status: string;
+    owner: string;
+    body: string;
+    tone: string;
+  }>;
+}) {
+  return (
+    <div className="mt-2 grid gap-1.5 md:grid-cols-3">
+      {items.map((item) => (
+        <div key={item.step} className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: item.tone }}>{item.step}</div>
+              <div className="mt-0.5 truncate" title={item.owner} style={{ color: C.textMuted }}>{item.owner}</div>
+            </div>
+            <Badge label={labelize(item.status)} tone={item.tone} />
+          </div>
+          <div className="mt-2" style={{ color: C.textSecondary }}>{item.body}</div>
+        </div>
+      ))}
     </div>
   );
 }

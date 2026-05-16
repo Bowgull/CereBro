@@ -515,6 +515,26 @@ function routePlanForTask(input: {
     routeStatus: "proposal_only",
     recommendedLane: input.requiresFrontier ? "frontier_reasoning_candidate" : lanes[0]?.lane ?? "ollama_local_fast_lane",
     approvalGate: approvalForPrivacy(privacyClass),
+    decisionPath: [
+      {
+        step: "Source",
+        status: needsCurrentSources || needsVision || needsCode ? "required_before_trust" : "recommended_before_default",
+        ownerAgent: needsCurrentSources ? "surfer" : "oak",
+        receipt: "Source URLs, date checked, risk review, and validation notes.",
+      },
+      {
+        step: "Eval",
+        status: "required_before_default",
+        ownerAgent: "spock",
+        receipt: "Local eval note tied to a CereBro eval task.",
+      },
+      {
+        step: "Approval",
+        status: privacyClass === "local_private" ? "local_receipt" : "required_before_use",
+        ownerAgent: "spock",
+        receipt: approvalForPrivacy(privacyClass),
+      },
+    ],
     lanes,
     validationPlan: [
       "Check whether a capability record exists and is source-verified or eval-tested.",

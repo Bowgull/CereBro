@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1632 EDT
+Last updated: 2026-05-16 1637 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1637 EDT: tightened item 9 in Basement Model Tools. Route
+  previews now expose a Source → Eval → Approval decision path, and the Models
+  tab shows the same path for the selected capability and local route preview.
+  No browser/search/fetch, provider/model/gateway call, install, token/account
+  action, Ollama status command, schema migration, new primary surface,
+  external write, command runner, dependency, or Raven path was added.
 - 2026-05-16 1632 EDT: continued item 9 in Basement Model Tools. Capability
   records now compute local source readiness, policy exposes a read-only
   Source Verification Gate, and the Models tab shows readiness counts, no-action

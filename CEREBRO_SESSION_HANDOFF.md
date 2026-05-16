@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1632 EDT
+Last updated: 2026-05-16 1637 EDT
 
 ## Current North Star
 
@@ -20,6 +20,74 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 1637 EDT - Model Tool Decision Path
+
+### What Changed
+- Model route previews now expose a local `decisionPath` with Source, Eval,
+  and Approval steps.
+- Basement Model Registry now shows a selected-capability Decision Path, so a
+  model/tool proposal reads as one routeable object instead of loose metadata.
+- Route Preview now shows the same Source → Eval → Approval path before lane
+  details.
+- Selected capability detail now shows eval status beside source, risk, and
+  approval reads.
+- Added coverage proving the route preview decision path stays local-only.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-decision-path.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: opened
+  Basement → Models, verified selected proposal Decision Path, clicked `Read
+  Preview`, and verified route preview Source, Eval, and Approval steps.
+- Screenshot proof: `output/playwright/model-tools-decision-path-1637.png`.
+
+### Cleanliness Read
+- Current slice: Model Tools decision path.
+- Product surface register: Basement capability registry.
+- Generic UI rejected: no new card-heavy primary surface, no fake provider
+  dashboard, no new Code Lab, no model switcher on the Keep.
+- No browser/search/fetch/provider/model/gateway/install/token/account action
+  ran from CereBro.
+- No Ollama status command ran.
+- No schema migration, background job, external write, command runner, Raven
+  path, dependency, or primary Keep redesign was added.
+- No worker was used because the slice had one clear owner surface and one
+  tRPC contract.
+
+### Front-End Steward Review
+- The user question is now clear: what has to happen before this capability can
+  be trusted or routed.
+- Machinery remains in Basement and appears as a short path, not a new
+  planning surface.
+- Screenshot proof shows no overlap in the changed area.
+
+### Completion Read
+- Overall: 68%.
+- Foundation/docs/planning: 95%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 63%.
+- Knowledge/storage/source: 42%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and
+`CEREBRO_SESSION_HANDOFF.md`. Continue in CereBro Prime mode. Start with a
+dirty-file read. Next best path: finish item 9 by tightening Model Tools
+proposal creation so source URLs, risk notes, validation notes, and eval notes
+produce cleaner local readiness reads. Do not run Ollama status checks,
+installs, pulls, external searches, or provider calls without explicit
+approval.
 
 ## 2026-05-16 1632 EDT - Model Tool Source Readiness
 
