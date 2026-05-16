@@ -22305,3 +22305,75 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Research now shows the read-only Source Route from existing knowledge contracts. Next best slice: continue Block C by making vault/Obsidian configured-or-missing status visible in the least noisy place, or add a focused test-backed contract for RAG-ready note metadata. Do not build RAG automation, browser crawling, GitHub cloning, or external writes. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 1519 EDT - Basement storage status tiles
+
+Overall completion after this pass:
+
+- Overall: 65%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 39%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Used one read-only explorer worker.
+- Worker recommendation changed placement from Research to Basement Settings
+  because Settings already owns machine configuration and keeps vault machinery
+  below the Keep.
+
+What changed:
+
+- Basement Settings now reads `integrations.status`.
+- Machine Status now shows compact `Vault` and `Obsidian` readiness tiles.
+- The tiles show `Ready`, `Path missing`, `Not set`, or `Reading`, with compact
+  path labels only when a path exists.
+- Added a focused integration-status test proving vault and Obsidian readiness
+  are reported without creating artifacts, approvals, or memory entries.
+
+Files touched in this slice:
+
+- `app/client/src/components/ConfigPanel.tsx`
+- `app/server/integrations.status.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-integrations-status.db' pnpm -C app exec vitest run server/integrations.status.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 1 test.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-surfer-route.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 1 test.
+- `pnpm -C app check` passed.
+- Browser proof used the in-app browser at `http://localhost:3000/`, opened
+  Basement, opened Settings, and confirmed `Machine Status`, `Vault`, and
+  `Obsidian` are visible.
+
+Drift check:
+
+- On path because this continues Block C by exposing storage/source readiness
+  before knowledge automation.
+- Low-machinery rule applied: configuration status lives in Settings, not the
+  primary Keep or Research surface.
+- No RAG automation, browser crawling, GitHub cloning, model install, external
+  write, Obsidian write, Drive write, Notion write, memory write, new agent,
+  or Raven path was added.
+
+Known risks:
+
+- This is a status-only surface. It does not create missing folders or repair
+  vault paths.
+- Piccolo remains the fuller hygiene surface for findings and report saves.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Basement Settings now shows compact Vault and Obsidian readiness from integrations.status. Next best slice: continue Block C with a focused RAG-ready note metadata contract or move to backend route receipts before agent execution if no more storage contract visibility is needed. Do not build RAG automation, browser crawling, GitHub cloning, external writes, or folder creation. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { compactCommandLabel } from "@/lib/displayLabels";
+import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,11 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
   const { data: bridgeData, isLoading: keyLoading } = trpc.agents.bridgeApiKey.useQuery();
   const { data: status } = trpc.agents.connectionStatus.useQuery();
+  const { data: integrationStatus } = trpc.integrations.status.useQuery(undefined, {
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
   const serverUrl = window.location.origin;
 
@@ -88,6 +93,8 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 { label: "Projects Dir", value: status?.projectsDir || "~/.claude/projects", ok: status?.projectsExists },
                 { label: "Tracked Projects", value: String(status?.trackedProjects ?? 0), ok: (status?.trackedProjects ?? 0) > 0 },
                 { label: "Total Sessions", value: String(status?.totalSessions ?? 0), ok: (status?.totalSessions ?? 0) > 0 },
+                storageStatusTile("Vault", integrationStatus?.vault),
+                storageStatusTile("Obsidian", integrationStatus?.obsidian),
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-2 px-2.5 py-1.5 rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                   <span style={{ color: item.ok ? C.success : C.warning }}>
@@ -254,4 +261,26 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
       </div>
     </div>
   );
+}
+
+function storageStatusTile(
+  label: string,
+  status:
+    | { configured: boolean; exists: boolean; vaultDir?: string | null; obsidianDir?: string | null }
+    | undefined,
+) {
+  const path = status?.vaultDir ?? status?.obsidianDir ?? null;
+  const value = !status
+    ? "Reading"
+    : status.exists
+      ? "Ready"
+      : status.configured
+        ? "Path missing"
+        : "Not set";
+
+  return {
+    label,
+    value: path ? `${value} · ${compactPathLabel(path)}` : value,
+    ok: Boolean(status?.exists),
+  };
 }
