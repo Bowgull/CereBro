@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0857 EDT
+Last updated: 2026-05-16 0902 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0902 EDT: cleaned Home shell copy around Workshop, Project Lab,
+  and Terminal Lab. Workshop now says `Do the work with bodies and reads`,
+  Terminal Lab is `Command teaching`, the shell marker row is `surface markers`,
+  and context next actions now say push decisions/bodies instead of push
+  readiness/receipts.
 - 2026-05-16 0857 EDT: cleaned Terminal Lab body-path labels. The Project
   Read rail now says `Bodies`, the drawer says `Body Read` / `Workbench
   Bodies`, and the Aang-to-Workbench strip is now a body path instead of a

@@ -42,6 +42,7 @@ import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
+import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
@@ -90,9 +91,11 @@ interface ZoneSurface {
   meta: string;
 }
 
+const shellCopy = homeShellCopy();
+
 const ZONE_NAV_ITEMS: ZoneNavItem[] = [
   { zone: "keep", id: "home", label: "Keep", glyph: "◆", blurb: "Understand what is active." },
-  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: "Do the work with receipts." },
+  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: shellCopy.zoneBlurbs.workshop },
   { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: ledgerNavCopy().blurb },
   { zone: "basement", id: "basement", label: "Basement", glyph: "⚙", blurb: "Configure the machine." },
 ];
@@ -104,9 +107,9 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
     { id: "inbox", label: "Capture", meta: "Hedwig intake" },
   ],
   workshop: [
-    { id: "workbench", label: "Workbench", meta: "Receipt body surface" },
+    { id: "workbench", label: "Workbench", meta: shellCopy.surfaceMeta.workbench },
     { id: "projects", label: "Project Lab", meta: "Local project state" },
-    { id: "terminal", label: "Terminal Lab", meta: "Command previews" },
+    { id: "terminal", label: "Terminal Lab", meta: shellCopy.surfaceMeta.terminal },
     { id: "sources", label: "Research", meta: "Source review" },
   ],
   ledger: [
@@ -128,7 +131,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
 
 const ZONE_RECEIPTS: Record<ZoneId, string[]> = {
   keep: ["state", "route", "approval"],
-  workshop: ["receipts", "tools", "validation"],
+  workshop: shellCopy.zoneMarkers.workshop,
   ledger: ["tasks", "sessions", "approvals", "outputs", "memory"],
   basement: ["permissions", "models", "storage"],
 };
@@ -934,7 +937,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
         })}
       </div>
 
-      <div className="hidden 2xl:flex items-center gap-1.5 shrink-0" aria-label={`${zoneItem.label} receipt types`}>
+      <div className="hidden 2xl:flex items-center gap-1.5 shrink-0" aria-label={`${zoneItem.label} ${shellCopy.zoneMarkerLabel}`}>
         {receipts.map((receipt) => (
           <Badge
             key={receipt}
@@ -2431,19 +2434,7 @@ function activeSurfaceLabel(nav: NavId) {
 }
 
 function nextActionForSurface(nav: NavId, activeSessionCount: number, mode: Mode) {
-  if (nav === "home") {
-    return activeSessionCount > 0
-      ? "Open Project Lab to inspect active work and push readiness."
-      : "Ask Aang or open Project Lab. No action runs from the Keep alone.";
-  }
-  if (nav === "projects") return "Check branch, dirty state, risks, receipts, and manual push readiness.";
-  if (nav === "terminal") return "Use Terminal Lab for command teaching. Suggested commands stay proposal-only.";
-  if (nav === "workbench") return "Attach or inspect the receipt body before Ledger summary or push decisions.";
-  if (nav === "ledger") return "Read receipts first. Open Workbench for bodies or Project Lab for push context.";
-  if (nav === "approvals") return "Review gates. Approval changes risk state but does not run hidden work.";
-  if (nav === "security") return "Record Spock receipt before browser, clone, install, download, or execution.";
-  if (mode === "explore") return "Review source lane and keep Reddit as signal, not sole proof.";
-  return "Keep the route visible. Use Workbench for proof and Ledger for the audit trail.";
+  return homeShellNextActionCopy(nav, activeSessionCount, mode);
 }
 
 // ── Bottom command bar ──────────────────────────────────────────────────────

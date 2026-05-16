@@ -22157,3 +22157,78 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now uses body-path labels for its Project Read rail and Aang-to-Workbench strip. Next best slice: continue Terminal Lab path clarity only if a browser review finds concrete visible leaks; otherwise move to the next high-value build-plan item without adding Code Lab or execution behavior. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0902 EDT - Home shell body and teaching labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Home shell display-copy slice.
+
+What changed:
+
+- Added a small Home shell copy model for shared nav/header/context text.
+- Workshop shell blurb now says `Do the work with bodies and reads.`
+- Terminal Lab shell meta now says `Command teaching`.
+- Workshop marker row accessibility label now says `surface markers` instead
+  of receipt types.
+- Context next actions now say push decisions, bodies, and audit trail instead
+  of push readiness, receipts, or proof.
+
+Files touched in this slice:
+
+- `app/client/src/lib/homeShellCopyModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/homeShellCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/homeShellCopyModel.test.ts` passed, 2
+  tests.
+- `git diff --check -- app/client/src/pages/Home.tsx
+  app/client/src/lib/homeShellCopyModel.ts app/server/homeShellCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, confirmed
+  `Do the work with bodies and reads`, `Command teaching`, `bodies`, and
+  `Workshop surface markers`; old exact phrases `Do the work with receipts`,
+  `Command previews`, `push readiness`, `risks, receipts`, `Read receipts
+  first`, and `receipt types` were absent from the shell read.
+
+Drift check:
+
+- On path because the shell wraps the Keep-first visible loop and the Project
+  Lab / Terminal Lab surfaces.
+- Creative UI/UX stayed inside the lane: copy model and display/accessibility
+  text only.
+- No Code Lab, new agent, execution path, plugin, model, external source,
+  backend behavior, storage change, or Raven path was added.
+
+Known risks:
+
+- Ledger, Workbench, Security, and backend records still use receipt language
+  where receipts are the actual audit/body object. This pass only cleaned the
+  shell labels that were describing Project Lab and Terminal Lab too broadly.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Home shell copy now uses bodies, command teaching, surface markers, push decisions, and audit trail language around Workshop, Project Lab, and Terminal Lab. Next best slice: move past copy cleanup unless browser review finds a concrete leak; inspect the next build-plan surface for real functionality or clarity work without adding Code Lab or execution behavior. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
