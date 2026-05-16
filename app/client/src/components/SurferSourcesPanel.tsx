@@ -27,7 +27,11 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
       sensitiveOnly: sensitiveEventsOnly || undefined,
       limit: 25,
     },
-    { refetchInterval: 15000 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const preview = trpc.surfer.previewResearch.useMutation();
   const ingestUrl = trpc.surfer.ingestPublicUrl.useMutation({

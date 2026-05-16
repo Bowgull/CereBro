@@ -187,6 +187,9 @@ Recent Prime slices:
 - 2026-05-15 2015 EDT: removed Home shell timer polling from tracked projects,
   embedded Ledger overview, Basement status cards, Piccolo hygiene, and
   security receipt reads.
+- 2026-05-15 2017 EDT: removed the last client timer polling from Permission
+  Mode, Aang Companion, and Surfer Sources. No `refetchInterval` calls remain
+  under `app/client/src`.
 
 ### Frontend Worker
 
@@ -222,9 +225,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  decide whether Permission Mode, Aang Companion, and Surfer Sources need live
-  polling or should move to manual/cached reads, then move into the next runtime
-  receipt contract.
+  move into the next runtime receipt contract now that the visible frontend
+  polling cleanup is closed.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -550,3 +552,5 @@ Expected shape:
 - Home shell no longer timer-polls tracked projects, embedded Ledger overview,
   Basement status cards, Piccolo hygiene, or security receipt summaries while
   idle.
+- Permission Mode, Aang Companion, and Surfer Sources no longer timer-poll
+  client reads; `app/client/src` has no remaining `refetchInterval` calls.

@@ -15,7 +15,11 @@ export default function AangCompanionPanel({
   onNavigate?: (route: CompanionRoute) => void;
 }) {
   const policy = trpc.companion.policy.useQuery();
-  const localEvents = trpc.companion.localEvents.useQuery(undefined, { refetchInterval: 10000 });
+  const localEvents = trpc.companion.localEvents.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const [localState, setLocalState] = useState<LocalState>("awake");
   const data = policy.data;
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2015 EDT
+Last updated: 2026-05-15 2017 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2017 EDT - Final Client Polling Cleanup
+
+### What Changed
+- Removed timer polling from Permission Mode's current mode read.
+- Removed timer polling from Aang Companion's local event count read.
+- Removed timer polling from Surfer Sources' panel/source-event read.
+- Verified no `refetchInterval` reads remain under `app/client/src`.
+
+### Files Touched
+- `app/client/src/components/PermissionModeControl.tsx`
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: final client idle polling cleanup.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a three-component query-policy cleanup.
+
+### Front-End Steward Review
+- Permission Mode still updates immediately through its mutation invalidation.
+- Surfer Sources still refreshes after approved URL intake.
+- Aang Companion remains a local mock/policy surface.
+- Client tRPC reads no longer use timer polling.
+
+### Completion Read
+- Overall: 60%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: move into the
+next runtime receipt contract now that the visible frontend polling cleanup is
+closed.
 
 ## 2026-05-15 2015 EDT - Home Shell Polling Cleanup
 

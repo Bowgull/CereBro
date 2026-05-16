@@ -16,7 +16,11 @@ const LABELS: Record<string, string> = {
 
 export default function PermissionModeControl() {
   const utils = trpc.useUtils();
-  const current = trpc.permissions.current.useQuery(undefined, { refetchInterval: 15000 });
+  const current = trpc.permissions.current.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const setMode = trpc.permissions.setMode.useMutation({
     onSuccess: () => {
       utils.permissions.current.invalidate();
