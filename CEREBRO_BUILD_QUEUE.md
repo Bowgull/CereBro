@@ -190,6 +190,9 @@ Recent Prime slices:
 - 2026-05-15 2017 EDT: removed the last client timer polling from Permission
   Mode, Aang Companion, and Surfer Sources. No `refetchInterval` calls remain
   under `app/client/src`.
+- 2026-05-15 2021 EDT: added `runtime.createApprovalPreviewFromRouteRecord`
+  and a Ledger `Queue Gate` action so saved route records can queue one local
+  approval/preflight preview without running routed work.
 
 ### Frontend Worker
 
@@ -225,8 +228,9 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  move into the next runtime receipt contract now that the visible frontend
-  polling cleanup is closed.
+  show queued route approval ids on route records or continue the
+  route-to-Workbench receipt save contract, keeping every action local and
+  explicit.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -554,3 +558,6 @@ Expected shape:
   idle.
 - Permission Mode, Aang Companion, and Surfer Sources no longer timer-poll
   client reads; `app/client/src` has no remaining `refetchInterval` calls.
+- Runtime route records can now queue one local approval/preflight preview from
+  Ledger through `Queue Gate`; repeated clicks reuse the existing pending
+  approval.

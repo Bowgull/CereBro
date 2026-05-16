@@ -954,6 +954,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
+  const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
   const utils = trpc.useUtils();
   const ledgerOverview = trpc.ledger.overview.useQuery(
     { evidenceLimit: 50, routeLimit: 6 },
@@ -970,6 +971,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       utils.tasks.list.invalidate();
       utils.tasks.workQueue.invalidate();
       utils.tasks.projects.invalidate();
+    },
+  });
+  const createApprovalFromRoute = trpc.runtime.createApprovalPreviewFromRouteRecord.useMutation({
+    onSuccess: () => {
+      utils.ledger.overview.invalidate();
+      utils.approvals.queue.invalidate();
+      utils.approvals.detail.invalidate();
+      utils.approvals.list.invalidate();
+      utils.companion.localEvents.invalidate();
     },
   });
 
@@ -1164,6 +1174,31 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     );
   }
 
+  function createApprovalFromRouteRecord(item: { id: number }) {
+    if (createApprovalFromRoute.isPending) return;
+    setCreatingRouteApprovalId(item.id);
+    createApprovalFromRoute.mutate(
+      {
+        routeRecordId: item.id,
+        reason: "Route requires approval before any surfaced action runs.",
+      },
+      {
+        onSuccess: (result) => {
+          const approvalId = result.approval?.id;
+          setLedgerFocusNotice(
+            approvalId
+              ? `Approval #${approvalId} queued for route #${item.id}.`
+              : `Route #${item.id} approval preview could not be read back.`,
+          );
+          onNavigate("approvals");
+        },
+        onSettled: () => {
+          setCreatingRouteApprovalId(null);
+        },
+      },
+    );
+  }
+
   function openCreatedRouteTask(taskId: number, routeId: number) {
     try {
       window.sessionStorage.setItem(
@@ -1310,6 +1345,22 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
                       >
                         Stage Body
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => createApprovalFromRouteRecord(item)}
+                        disabled={creatingRouteApprovalId === item.id}
+                        aria-label={
+                          creatingRouteApprovalId === item.id
+                            ? `Queuing approval preview for route ${item.id}`
+                            : `Queue approval preview for route ${item.id}`
+                        }
+                        title="Queue a local approval/preflight preview for this route. This does not approve or run work."
+                      >
+                        {creatingRouteApprovalId === item.id ? "Queuing" : "Queue Gate"}
                       </Button>
                       <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
                         Review before saving.

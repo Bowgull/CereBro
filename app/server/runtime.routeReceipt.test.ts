@@ -249,4 +249,54 @@ describe("runtime route receipt preview", () => {
     expect(await countRows("tasks")).toBe(taskCountBefore + 1);
     expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore);
   });
+
+  it("stages one local approval preview from a committed route record without running work", async () => {
+    const caller = createCaller();
+    const approvalCountBefore = await countRows("approvals");
+    const preflightCountBefore = await countRows("permission_preflight_records");
+    const taskCountBefore = await countRows("tasks");
+    const evidenceCountBefore = await countRows("workbench_evidence_records");
+
+    const committed = await caller.runtime.commitRoute({
+      text: "research current Reddit feedback for app builders",
+      mode: "explore",
+    });
+
+    const first = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Need approval before Surfer opens public sources.",
+    });
+
+    expect(first.mode).toBe("local_approval_preview");
+    expect(first.created).toBe(true);
+    expect(first.writesExternal).toBe(false);
+    expect(first.runsCommand).toBe(false);
+    expect(first.opensBrowser).toBe(false);
+    expect(first.callsModel).toBe(false);
+    expect(first.routeRecordId).toBe(committed.record.id);
+    expect(first.approval?.status).toBe("pending");
+    expect(first.approval?.actionType).toBe("runtime_browser_or_media_capture");
+    expect(first.approval?.targetType).toBe("runtime_route_record");
+    expect(first.approval?.targetId).toBe(committed.record.id);
+    expect(first.approval?.requestedByAgent).toBe("surfer");
+    expect(first.approval?.permissionPreflightId).toBeGreaterThan(0);
+    expect(first.approval?.permissionPreflight?.decision).toBe("approval_required");
+    expect(first.approval?.permissionPreflight?.requiredApprovals).toContain("public-browser approval");
+    expect(first.gates.join(" ")).toContain("pending local approval record only");
+
+    expect(await countRows("approvals")).toBe(approvalCountBefore + 1);
+    expect(await countRows("permission_preflight_records")).toBe(preflightCountBefore + 1);
+    expect(await countRows("tasks")).toBe(taskCountBefore);
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore);
+
+    const second = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Do not create a duplicate approval.",
+    });
+
+    expect(second.created).toBe(false);
+    expect(second.approval?.id).toBe(first.approval?.id);
+    expect(await countRows("approvals")).toBe(approvalCountBefore + 1);
+    expect(await countRows("permission_preflight_records")).toBe(preflightCountBefore + 1);
+  });
 });

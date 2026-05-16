@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2017 EDT
+Last updated: 2026-05-15 2021 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2021 EDT - Runtime Route Approval Preview Contract
+
+### What Changed
+- Added `runtime.createApprovalPreviewFromRouteRecord`.
+- Saved route records can now queue one local approval/preflight preview without
+  running routed work.
+- The approval preview is idempotent per pending route record, so repeated
+  clicks return the existing pending approval instead of spamming duplicates.
+- Ledger route cards now expose `Queue Gate`, which sends the saved route to
+  Approvals after recording the local gate preview.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-approval-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "stages one local approval preview"` failed because `runtime.createApprovalPreviewFromRouteRecord` did not exist.
+- Green phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-approval-green.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "stages one local approval preview"` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-approval-full.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 7 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: runtime route approval preview contract.
+- The new route approval action writes one local approval row and one local
+  permission preflight row only.
+- No task execution, Workbench evidence write, browser action, command
+  execution, model call, package install, DB schema change, storage migration,
+  external write, git action from CereBro, or Raven boundary changed.
+- No worker was used because the backend contract, test, and Ledger button
+  needed tight single-slice alignment.
+
+### Front-End Steward Review
+- Saved route cards now show the sequence more honestly: create task, stage
+  body, or queue gate.
+- `Queue Gate` is local approval metadata only. It does not approve the route
+  or run any routed work.
+
+### Completion Read
+- Overall: 61%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 46%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: show the
+queued route approval id on route records or continue the route-to-Workbench
+receipt save contract, keeping every action local and explicit.
 
 ## 2026-05-15 2017 EDT - Final Client Polling Cleanup
 

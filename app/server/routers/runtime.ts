@@ -7,7 +7,7 @@ import {
   type TaskRow,
   type TaskStatus,
 } from "../cerebroDb";
-import { decidePermissionPreflight, type ActionClass, type PerceptionClass } from "../permissionPolicy";
+import { decidePermissionPreflight, recordPermissionPreflight, type ActionClass, type PerceptionClass } from "../permissionPolicy";
 
 const runtimeModes = ["quick", "explore", "build"] as const;
 const routeCategories = [
@@ -78,6 +78,69 @@ function mapRuntimeTaskRow(row: Record<string, unknown>): TaskRow {
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
   };
+}
+
+function mapRuntimeApprovalPreview(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    actionType: String(row.action_type),
+    targetType: row.target_type == null ? null : String(row.target_type),
+    targetId: row.target_id == null ? null : Number(row.target_id),
+    requestedByAgent: row.requested_by_agent == null ? null : String(row.requested_by_agent),
+    status: String(row.status),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    sensitive: Boolean(row.sensitive_data_flag),
+    costRisk: row.cost_risk == null ? null : String(row.cost_risk),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    permissionPreflight: row.permission_preflight_id == null ? null : {
+      id: Number(row.permission_preflight_id),
+      mode: row.preflight_mode == null ? null : String(row.preflight_mode),
+      decision: row.preflight_decision == null ? null : String(row.preflight_decision),
+      approvalRequired: row.preflight_approval_required == null ? false : Boolean(row.preflight_approval_required),
+      requiredApprovals: row.preflight_required_approvals == null ? [] : String(row.preflight_required_approvals).split("\n").filter(Boolean),
+      reasons: row.preflight_reasons == null ? [] : String(row.preflight_reasons).split("\n").filter(Boolean),
+      modeEffect: row.preflight_mode_effect == null ? null : String(row.preflight_mode_effect),
+      perceptionClass: row.preflight_perception_class == null ? null : String(row.preflight_perception_class),
+      actionClass: row.preflight_action_class == null ? null : String(row.preflight_action_class),
+      targetSummary: row.preflight_target_summary == null ? null : String(row.preflight_target_summary),
+    },
+    createdAt: Number(row.created_at),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+  };
+}
+
+async function runtimeRouteApprovalByRouteId(routeRecordId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        a.id, a.task_id, a.action_type, a.target_type, a.target_id,
+        a.requested_by_agent, a.status, a.reason, a.context_summary,
+        a.sensitive_data_flag, a.cost_risk, a.permission_preflight_id,
+        a.decided_at, a.created_at,
+        ppr.mode AS preflight_mode,
+        ppr.decision AS preflight_decision,
+        ppr.approval_required AS preflight_approval_required,
+        ppr.required_approvals AS preflight_required_approvals,
+        ppr.reasons AS preflight_reasons,
+        ppr.mode_effect AS preflight_mode_effect,
+        ppr.perception_class AS preflight_perception_class,
+        ppr.action_class AS preflight_action_class,
+        ppr.target_summary AS preflight_target_summary
+      FROM approvals a
+      LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
+      WHERE a.target_type = 'runtime_route_record'
+        AND a.target_id = ?
+        AND a.status = 'pending'
+      ORDER BY a.created_at DESC, a.id DESC
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = result.rows[0];
+  return row ? mapRuntimeApprovalPreview(row as Record<string, unknown>) : null;
 }
 
 async function getRuntimeTaskById(id: number): Promise<TaskRow | null> {
@@ -533,6 +596,118 @@ export const runtimeRouter = router({
         gates: [
           "Local task record only. No routed work runs.",
           "No Workbench evidence, command, browser, model call, git action, Slack write, Notion write, memory write, or external provider call runs.",
+        ],
+      };
+    }),
+  createApprovalPreviewFromRouteRecord: publicProcedure
+    .input(
+      z.object({
+        routeRecordId: z.number().int().min(1),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const routeResult = await db.execute({
+        sql: `SELECT * FROM runtime_route_records WHERE id = ? LIMIT 1`,
+        args: [input.routeRecordId],
+      });
+      const routeRow = routeResult.rows[0] as Record<string, unknown> | undefined;
+      if (!routeRow) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Route record not found",
+        });
+      }
+
+      const existingApproval = await runtimeRouteApprovalByRouteId(input.routeRecordId);
+      if (existingApproval) {
+        return {
+          mode: "local_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          runsCommand: false,
+          opensBrowser: false,
+          callsModel: false,
+          routeRecordId: input.routeRecordId,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local approval preview returned. No routed work runs.",
+          ],
+        };
+      }
+
+      const route = mapRouteRecordRow(routeRow);
+      const toolProposal = route.toolProposal as {
+        actionClass?: ActionClass;
+        perceptionClass?: PerceptionClass;
+        externalTarget?: boolean;
+        approvalRequired?: boolean;
+      };
+      const actionClass = toolProposal.actionClass ?? "local_note";
+      const perceptionClass = toolProposal.perceptionClass ?? "explicit_context";
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass,
+        actionClass,
+        externalTarget: Boolean(toolProposal.externalTarget),
+        destructive: route.category === "file_hygiene",
+        persistsMemory: route.category === "artifact_write",
+        requestedByAgent: route.ownerAgent,
+        targetSummary: `Runtime route #${route.id}: ${route.originalText}`,
+        additionalReasons: [
+          "Runtime route approval previews are local metadata only.",
+          "The routed work still needs a separate explicit action after approval review.",
+        ],
+      });
+      const contextSummary = [
+        `Route #${route.id}: ${route.originalText}`,
+        `Category: ${route.category}`,
+        `Owner agent: ${route.ownerAgent}`,
+        route.projectName ? `Project: ${route.projectName}` : null,
+        `Next action: ${route.nextAction}`,
+        route.approvalGates.length ? `Route gates: ${route.approvalGates.join("; ")}` : null,
+      ].filter(Boolean).join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (?, ?, 'runtime_route_record', ?, ?, 'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          route.taskId,
+          `runtime_${actionClass}`,
+          route.id,
+          route.ownerAgent,
+          input.reason ?? "Local runtime route approval preview only. This does not run or approve routed work.",
+          contextSummary,
+          actionClass === "local_note" || actionClass === "code_edit" ? "local_route_review" : "route_action_requires_explicit_review",
+          Number(preflight.row.id),
+        ],
+      });
+
+      const row = result.rows[0] as Record<string, unknown> | undefined;
+      const approval = row ? await runtimeRouteApprovalByRouteId(route.id) : null;
+      return {
+        mode: "local_approval_preview" as const,
+        created: Boolean(row),
+        writesExternal: false,
+        runsCommand: false,
+        opensBrowser: false,
+        callsModel: false,
+        routeRecordId: input.routeRecordId,
+        approval,
+        gates: [
+          "This is a pending local approval record only.",
+          "Recorded one local permission preflight audit row for this route approval preview.",
+          "It does not execute routed work or approve a future action.",
+          "The routed work still needs the normal surface-specific action after approval review.",
         ],
       };
     }),
