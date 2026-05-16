@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { workbenchReceiptBodyCopy, workbenchReceiptGroupCopy } from "../client/src/lib/workbenchCopyModel";
+import { workbenchReceiptBodyCopy, workbenchReceiptDetailCopy, workbenchReceiptGroupCopy, workbenchReceiptListCopy } from "../client/src/lib/workbenchCopyModel";
 
 describe("workbenchCopyModel", () => {
   it("names the primary Workbench form as a receipt body", () => {
@@ -25,5 +25,23 @@ describe("workbenchCopyModel", () => {
     expect(copy.controlLabel).toBe("Group by");
     expect(copy.emptyText).toBe("No receipt groups match the current filters.");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("query proof");
+  });
+
+  it("keeps selected receipt detail plain while preserving gates", () => {
+    const copy = workbenchReceiptDetailCopy();
+
+    expect(copy.readTitle).toBe("Receipt Read");
+    expect(copy.readBadge).toBe("local only");
+    expect(copy.readRulesTitle).toBe("Read Gates");
+    expect(copy.securityTitle).toBe("Security Check");
+    expect(copy.noSecurityText).toContain("Open Security Gate");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("preflight");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof read");
+  });
+
+  it("uses the same plain read-gate title in the receipt list", () => {
+    const copy = workbenchReceiptListCopy();
+
+    expect(copy.readRulesTitle).toBe("Read Gates");
   });
 });

@@ -18,3 +18,19 @@ export function workbenchReceiptGroupCopy() {
     itemHint: "Matches stay local. Open a group to narrow the list.",
   };
 }
+
+export function workbenchReceiptListCopy() {
+  return {
+    readRulesTitle: "Read Gates",
+  };
+}
+
+export function workbenchReceiptDetailCopy() {
+  return {
+    readTitle: "Receipt Read",
+    readBadge: "local only",
+    readRulesTitle: "Read Gates",
+    securityTitle: "Security Check",
+    noSecurityText: "No linked security check exists for this receipt. Open Security Gate when the target, source, command, or package needs risk review.",
+  };
+}

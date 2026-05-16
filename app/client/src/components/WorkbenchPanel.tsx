@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
-import { workbenchReceiptBodyCopy, workbenchReceiptGroupCopy } from "@/lib/workbenchCopyModel";
+import { workbenchReceiptBodyCopy, workbenchReceiptDetailCopy, workbenchReceiptGroupCopy, workbenchReceiptListCopy } from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -173,6 +173,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
   const receiptBodyCopy = workbenchReceiptBodyCopy({ hasDraft: Boolean(stagedDraftNotice) });
   const receiptGroupCopy = workbenchReceiptGroupCopy();
+  const receiptListCopy = workbenchReceiptListCopy();
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -1293,7 +1294,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               {(evidence.data?.gates ?? []).length > 0 && (
                 <details className="mb-2 rounded p-2" aria-label="Workbench receipt read gates" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textPrimary, ["--tw-ring-color" as string]: C.accent }}>
-                    Receipt Read Rules
+                    {receiptListCopy.readRulesTitle}
                   </summary>
                   <div className="mt-2 grid gap-1.5">
                     {(evidence.data?.gates ?? []).map((gate) => (
@@ -1602,6 +1603,7 @@ function EvidenceDetailPanel({
   const [comparisonResult, setComparisonResult] = useState("");
   const [pickerQuery, setPickerQuery] = useState("");
   const [pickerKind, setPickerKind] = useState<EvidenceKind>("all");
+  const detailCopy = workbenchReceiptDetailCopy();
   if (loading) {
     return (
       <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -1718,12 +1720,12 @@ function EvidenceDetailPanel({
       </div>
       <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
       <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.summary}</p>
-      <div className="mt-2 rounded p-2" aria-label="Workbench proof read" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="mt-2 rounded p-2" aria-label="Workbench receipt read" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Receipt Body Read
+            {detailCopy.readTitle}
           </h4>
-          <Chip label="local proof" tone={C.gold} />
+          <Chip label={detailCopy.readBadge} tone={C.gold} />
         </div>
         <div className="grid gap-1 sm:grid-cols-2">
           {proofRead.map((entry) => (
@@ -1831,13 +1833,13 @@ function EvidenceDetailPanel({
           <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
         </div>
       </details>
-      <details className="mt-2 rounded p-2" aria-label="Workbench permission preflight" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <details className="mt-2 rounded p-2" aria-label="Workbench security check" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Permission Preflight
+          {detailCopy.securityTitle}
         </summary>
         {detail.permissionPreflight == null ? (
           <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No linked permission preflight exists for this receipt. Run Security Gate when the target, source, command, or package needs risk review.
+            {detailCopy.noSecurityText}
           </div>
         ) : (
           <div className="mt-2 grid gap-2">
@@ -1866,7 +1868,7 @@ function EvidenceDetailPanel({
       {detail.gates.length > 0 && (
         <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Receipt Gates
+            {detailCopy.readRulesTitle}
           </summary>
           <div className="mt-2 grid gap-1.5">
             {detail.gates.map((gate) => (

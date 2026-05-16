@@ -20575,3 +20575,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench receipt groups are now simpler and tested. Next best slice: continue low-machinery Workbench cleanup around receipt read rules/detail panels, or move to Project Lab if Workbench is stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0636 EDT - Workbench receipt detail copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench detail-copy pass.
+
+What changed:
+
+- Added `workbenchReceiptDetailCopy` and `workbenchReceiptListCopy`.
+- Selected receipt detail now says `Receipt Read` instead of `Receipt Body
+  Read`.
+- Selected receipt detail badge now says `local only` instead of `local proof`.
+- Selected receipt detail now says `Security Check` instead of `Permission
+  Preflight`.
+- Receipt read-rule drawers now say `Read Gates`.
+- Added test coverage to keep `proof read` and `preflight` out of the selected
+  receipt detail copy.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  failed because `workbenchReceiptDetailCopy` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  passed, 5 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workbench, selected
+  receipt #1527, and confirmed `Receipt Read`, `local only`, `Security Check`,
+  and `Read Gates`.
+
+Drift check:
+
+- On path because Workbench receipt detail is the current build-plan surface.
+- Creative UI/UX stayed inside the lane: same component, no behavior expansion,
+  less machinery, same safety gates.
+- No new surface, agent, plugin, model, external source, Raven path, or GitHub
+  implementation was added.
+
+Known risks:
+
+- Workbench still has dense metadata and validation drawers. They are behind
+  details and can be cleaned later.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench receipt list, groups, and selected detail copy are now cleaner and tested. Next best slice: either finish one more Workbench detail simplification or move to Project Lab if Workbench feels stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
