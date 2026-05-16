@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0701 EDT
+Last updated: 2026-05-16 0704 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0704 EDT: cleaned Terminal Lab observation actions. The closed
+  drawer now says `Observation Next Steps`; groups now read `Status`,
+  `Approval`, `Connect`, and `Teach + Receipt`; buttons use plain next-action
+  labels such as `Approval Read`, `Link Selected`, `Aang Teach`, and `Receipt
+  Body`.
 - 2026-05-16 0701 EDT: made Terminal Lab's receipt chain Aang-first. The
   strip now says `Aang teaches`, its region is `Aang to Workbench receipt
   chain`, and the helper line says `Teaching path` instead of `Proof path`.

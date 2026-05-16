@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
-import { terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "@/lib/terminalLabCopyModel";
+import { terminalLabObservationActionCopy, terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "@/lib/terminalLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,6 +133,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const createLearningProposal = trpc.terminalLab.createLearningProposalFromObservation.useMutation();
   const utils = trpc.useUtils();
   const data = plan.data;
+  const observationActionCopy = terminalLabObservationActionCopy();
   const observationRows = observations.data ?? [];
   const taskOptions = tasks.data?.items ?? [];
   const sessionOptions = disambiguateSessionOptions(sessions.data?.items ?? []);
@@ -750,7 +751,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       )}
                       <details className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                         <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                          Observation Actions
+                          {observationActionCopy.drawerTitle}
                         </summary>
                         <div className="mt-1.5 space-y-1.5">
                           {item.followUps.length > 0 && (
@@ -833,7 +834,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             </div>
                           )}
                           <div className="grid gap-1 md:grid-cols-[auto_auto_minmax(0,1fr)_auto]">
-                            <ActionGroup label="Review">
+                            <ActionGroup label={observationActionCopy.statusGroup}>
                               <Button
                                 type="button"
                                 onClick={() => setObservationStatus(item.id, "reviewing")}
@@ -843,7 +844,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant={item.status === "reviewing" ? "secondary" : "ghost"}
                                 size="sm"
                               >
-                                Review
+                                {observationActionCopy.reviewButton}
                               </Button>
                               <Button
                                 type="button"
@@ -854,10 +855,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="risk"
                                 size="sm"
                               >
-                                Block
+                                {observationActionCopy.blockButton}
                               </Button>
                             </ActionGroup>
-                            <ActionGroup label="Gate">
+                            <ActionGroup label={observationActionCopy.approvalGroup}>
                               <Button
                                 type="button"
                                 onClick={() => stageCommandApprovalPreview(item.id)}
@@ -867,7 +868,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="risk"
                                 size="sm"
                               >
-                                Approval
+                                {observationActionCopy.approvalButton}
                               </Button>
                               <Button
                                 type="button"
@@ -878,10 +879,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="risk"
                                 size="sm"
                               >
-                                Security
+                                {observationActionCopy.securityButton}
                               </Button>
                             </ActionGroup>
-                            <ActionGroup label="Link">
+                            <ActionGroup label={observationActionCopy.connectGroup}>
                               <Button
                                 type="button"
                                 onClick={() => attachSelectedLinks(item.id)}
@@ -891,7 +892,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="secondary"
                                 size="sm"
                               >
-                                Selected
+                                {observationActionCopy.selectedLinkButton}
                               </Button>
                               <Button
                                 type="button"
@@ -902,7 +903,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="secondary"
                                 size="sm"
                               >
-                                Task
+                                {observationActionCopy.taskButton}
                               </Button>
                               <Button
                                 type="button"
@@ -913,10 +914,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="secondary"
                                 size="sm"
                               >
-                                Learning
+                                {observationActionCopy.learningButton}
                               </Button>
                             </ActionGroup>
-                            <ActionGroup label="Output">
+                            <ActionGroup label={observationActionCopy.receiptGroup}>
                               <Button
                                 type="button"
                                 onClick={() => setSelectedObservationId(item.id)}
@@ -925,7 +926,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant={selectedObservationId === item.id ? "secondary" : "ghost"}
                                 size="sm"
                               >
-                                Teach
+                                {observationActionCopy.teachButton}
                               </Button>
                               <Button
                                 type="button"
@@ -936,7 +937,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="secondary"
                                 size="sm"
                               >
-                                {savedEvidence ? "Workbench Body" : "Save Receipt"}
+                                {savedEvidence ? observationActionCopy.workbenchBodyButton : observationActionCopy.saveReceiptButton}
                               </Button>
                               {savedEvidence && (
                                 <Button
@@ -948,7 +949,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                   variant="secondary"
                                   size="sm"
                                 >
-                                  Ledger Trail
+                                  {observationActionCopy.ledgerButton}
                                 </Button>
                               )}
                               <Button
@@ -960,7 +961,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                                 variant="ghost"
                                 size="sm"
                               >
-                                Archive
+                                {observationActionCopy.archiveButton}
                               </Button>
                             </ActionGroup>
                           </div>

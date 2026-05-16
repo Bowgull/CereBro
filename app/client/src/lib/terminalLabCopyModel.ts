@@ -33,3 +33,25 @@ export function terminalLabReceiptChainCopy() {
     footer: "Teaching path: Aang explains here. Save the body in Workbench. Read project context before any git decision.",
   };
 }
+
+export function terminalLabObservationActionCopy() {
+  return {
+    drawerTitle: "Observation Next Steps",
+    statusGroup: "Status",
+    approvalGroup: "Approval",
+    connectGroup: "Connect",
+    receiptGroup: "Teach + Receipt",
+    reviewButton: "Review",
+    blockButton: "Block",
+    approvalButton: "Approval Read",
+    securityButton: "Security Gate",
+    selectedLinkButton: "Link Selected",
+    taskButton: "Make Task",
+    learningButton: "Learning Note",
+    teachButton: "Aang Teach",
+    workbenchBodyButton: "Workbench Body",
+    saveReceiptButton: "Receipt Body",
+    ledgerButton: "Ledger",
+    archiveButton: "Archive",
+  };
+}

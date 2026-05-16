@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "../client/src/lib/terminalLabCopyModel";
+import { terminalLabObservationActionCopy, terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "../client/src/lib/terminalLabCopyModel";
 
 describe("terminalLabCopyModel", () => {
   it("keeps the Project Read rail plain and non-executing", () => {
@@ -33,5 +33,22 @@ describe("terminalLabCopyModel", () => {
     expect(copy.footer).toBe("Teaching path: Aang explains here. Save the body in Workbench. Read project context before any git decision.");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("terminal explains");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof path");
+  });
+
+  it("keeps observation action labels user-facing and grouped by next step", () => {
+    const copy = terminalLabObservationActionCopy();
+
+    expect(copy.drawerTitle).toBe("Observation Next Steps");
+    expect(copy.statusGroup).toBe("Status");
+    expect(copy.approvalGroup).toBe("Approval");
+    expect(copy.connectGroup).toBe("Connect");
+    expect(copy.receiptGroup).toBe("Teach + Receipt");
+    expect(copy.approvalButton).toBe("Approval Read");
+    expect(copy.selectedLinkButton).toBe("Link Selected");
+    expect(copy.teachButton).toBe("Aang Teach");
+    expect(copy.saveReceiptButton).toBe("Receipt Body");
+    expect(copy.ledgerButton).toBe("Ledger");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("output");
+    expect(copy.approvalGroup).not.toBe("Gate");
   });
 });

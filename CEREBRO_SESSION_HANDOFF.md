@@ -20947,3 +20947,85 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now has Aang-first header, project read rail, and receipt chain copy. Next best slice: clean Terminal Lab observation action grouping, or move to Workbench if Terminal Lab feels stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0704 EDT - Terminal Lab observation next steps
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow follow-up to the named Terminal Lab risk.
+
+What changed:
+
+- Added `terminalLabObservationActionCopy` to the Terminal Lab copy model.
+- The observation drawer now says `Observation Next Steps` instead of
+  `Observation Actions`.
+- Action groups now read `Status`, `Approval`, `Connect`, and `Teach +
+  Receipt` instead of `Review`, `Gate`, `Link`, and `Output`.
+- Buttons now use clearer visible next-action labels: `Approval Read`,
+  `Security Gate`, `Link Selected`, `Make Task`, `Learning Note`, `Aang Teach`,
+  `Receipt Body`, and `Ledger`.
+- The copy test now blocks the old `Output` group and the old `Gate` group
+  label while preserving the real `Security Gate` destination.
+
+Files touched in this slice:
+
+- `app/client/src/lib/terminalLabCopyModel.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/terminalLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/terminalLabCopyModel.test.ts`
+  failed because the first guard banned the real `Security Gate` destination.
+- Green after tightening the assertion:
+  `pnpm -C app exec vitest run server/terminalLabCopyModel.test.ts` passed,
+  3 tests.
+- `git diff --check -- app/client/src/components/TerminalLabPanel.tsx
+  app/client/src/lib/terminalLabCopyModel.ts
+  app/server/terminalLabCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, opened
+  Terminal Lab, opened the first observation drawer, and confirmed
+  `Observation Next Steps`, `Status`, `Approval`, `Connect`, `Teach + Receipt`,
+  `Approval Read`, `Link Selected`, `Make Task`, `Learning Note`, `Aang Teach`,
+  `Receipt Body`, and `Ledger`.
+
+Drift check:
+
+- On path because Terminal Lab is the approved code-learning and command
+  teaching lane.
+- Creative UI/UX stayed inside the lane: same drawer, no behavior expansion,
+  less machinery, clearer next steps.
+- No new surface, agent, plugin, model, external source, Raven path, GitHub
+  implementation, or command execution feature was added.
+
+Known risks:
+
+- Terminal Lab is now more stable. Next best pass should move to Workbench
+  visual proof/body clarity, unless a final Terminal Lab density issue appears
+  in browser review.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now has Aang-first header, project read rail, receipt chain, and observation next-step copy. Next best slice: move to Workbench visual proof/body clarity unless browser review shows one last Terminal Lab density issue. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
