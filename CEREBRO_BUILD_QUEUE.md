@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0102 EDT
+Last updated: 2026-05-16 0213 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0213 EDT: Terminal Lab Project button now carries the matched
+  project context into Project Lab. Browser proof confirmed the CereBro project
+  read opens from Terminal Lab with the notice and Git inspector focused.
 - 2026-05-16 0102 EDT: Workbench receipt chain strip now shows
   `Route reads` / `Route #<id>` for route-linked receipts instead of saying
   there is no command link.

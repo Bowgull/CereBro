@@ -19411,3 +19411,66 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect other receipt/link surfaces for the same picker-search and duplicate-label pattern, then apply only where it reduces visible machinery without adding execution.
 ```
+
+## 2026-05-16 0213 EDT - Terminal Lab project focus handoff
+
+Overall completion after this pass:
+
+- Overall: 63%
+- Frontend visible loop: 98%
+- Backend/runtime: 55%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Terminal Lab to Project Lab handoff slice.
+
+What changed:
+
+- Terminal Lab Project Context rail now stages `cerebro:project-lab-focus`
+  before opening Project Lab.
+- The focus draft carries source `terminal_lab`, the matched project id/name,
+  and a plain notice explaining which Terminal Lab context opened the project.
+- Project Lab already knew how to consume this focus draft, so no new Project
+  Lab surface was needed.
+- No command execution, git execution, external write, model call, Notion call,
+  Slack call, or background automation was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/TerminalLabPanel.tsx` passed.
+- Playwright opened `http://localhost:3000`, opened Workshop > Terminal Lab,
+  clicked Project in the Terminal Map Read rail, and confirmed Project Lab
+  focused the CereBro project read with the notice:
+  `Terminal Lab current repo opened CereBro project context.`
+- The same browser proof confirmed Project Lab opened the Git inspector and
+  showed the current dirty file, proving the handoff lands on the project map
+  read instead of a generic project list.
+
+Known risks:
+
+- The Project Lab notice uses the current context label. When a selected
+  observation is active, it will read as `observation #<id>`. That is intended.
+- The handoff focuses project context only. It does not create a receipt or
+  validate a receipt body.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: keep tightening the visible loop from Terminal Lab to Workbench, Project Lab, and Ledger. Prefer small focus handoffs or receipt-read improvements over new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

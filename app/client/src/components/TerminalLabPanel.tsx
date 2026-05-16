@@ -1292,6 +1292,7 @@ function ProjectContextRail({
   }
 
   const pushTone = toneForPushState(project.pushReadiness.state);
+  const activeProject = project;
   const statusTone = project.localExists
     ? project.git.dirty
       ? C.danger
@@ -1306,6 +1307,23 @@ function ProjectContextRail({
     { label: "Manual", value: "proposal only", tone: C.gold },
     { label: "Executes", value: project.pushReadiness.executesGit ? "yes" : "no", tone: project.pushReadiness.executesGit ? C.danger : C.success },
   ];
+  function openProjectContext() {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "terminal_lab",
+          projectId: activeProject.tasks.projectId,
+          projectName: activeProject.name,
+          notice: `Terminal Lab ${contextLabel} opened ${activeProject.name} project context.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the user can inspect project context manually.
+    }
+    onNavigate("projects");
+  }
 
   return (
     <section className="rounded p-1.5" aria-label="Project Lab context" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1379,7 +1397,7 @@ function ProjectContextRail({
       </details>
       {onNavigate && (
         <div className="mt-2 grid grid-cols-3 gap-1">
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openProjectContext} aria-label={`Open ${project.name} in Project Lab`}>
             Project
           </Button>
           <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench receipt bodies">
