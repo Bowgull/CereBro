@@ -28,6 +28,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
   const [externalTarget, setExternalTarget] = useState("");
   const [needsReview, setNeedsReview] = useState(true);
   const [approvalAction, setApprovalAction] = useState("source_enrichment");
+  const [approvalPreviewsOpen, setApprovalPreviewsOpen] = useState(false);
   const plan = trpc.hedwig.capturePlan.useQuery();
   const observations = trpc.hedwig.observations.useQuery({ limit: 10 });
   const reminders = trpc.hedwig.reminderProposals.useQuery({ limit: 5 });
@@ -57,6 +58,12 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
     selectedProposal
       ? { targetType: targetTypeForProposal(selectedProposal.kind), targetId: selectedProposal.id, limit: 5 }
       : { limit: 5 },
+    {
+      enabled: selectedProposal != null && approvalPreviewsOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const utils = trpc.useUtils();
   const data = plan.data;
@@ -74,6 +81,10 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
     if (detail.kind === "reminder") setApprovalAction("schedule_reminder");
     if (detail.kind === "message") setApprovalAction("send_message");
   }, [proposalDetail.data]);
+
+  useEffect(() => {
+    setApprovalPreviewsOpen(false);
+  }, [selectedProposal?.kind, selectedProposal?.id]);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -758,11 +769,20 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
                         </div>
                       )}
                     </details>
-                    <details className="space-y-1">
+                    <details
+                      key={`${selectedProposal.kind}-${selectedProposal.id}-approval-previews`}
+                      open={approvalPreviewsOpen}
+                      className="space-y-1"
+                      onToggle={(event) => setApprovalPreviewsOpen(event.currentTarget.open)}
+                    >
                       <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
-                        <SectionTitle title="Approval Previews" detail="pending local" />
+                        <SectionTitle title="Approval Previews" detail={approvalPreviewsOpen ? "pending local" : "open to read"} />
                       </summary>
-                      {(approvalPreviews.data ?? []).length === 0 ? (
+                      {approvalPreviews.isLoading ? (
+                        <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                          Reading local approval previews.
+                        </div>
+                      ) : (approvalPreviews.data ?? []).length === 0 ? (
                         <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
                           No pending local approval previews for this proposal yet.
                         </div>

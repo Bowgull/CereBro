@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2125 EDT
+Last updated: 2026-05-15 2130 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2130 EDT - Hedwig Approval Preview Lazy Read
+
+### What Changed
+- Hedwig proposal detail no longer reads proposal approval previews as soon as
+  a source, reminder, or message proposal is selected.
+- The `Approval Previews` drawer now starts closed and says `open to read`.
+- Opening `Approval Previews` reads local approval preview records with a 30
+  second stale cache.
+- Switching proposals closes that drawer again so the next proposal starts
+  quiet.
+
+### Files Touched
+- `app/client/src/components/HedwigInboxPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Capture -> Reminder Details shows `Approval Previews open to read`; opening
+  the drawer reads local approval preview records and shows the empty local
+  result for the selected proposal.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Hedwig proposal approval-preview read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Hedwig UI read-gating
+  slice.
+
+### Front-End Steward Review
+- Hedwig keeps capture input, local captures, reminder proposals, and message
+  drafts visible.
+- Proposal detail stays focused on the selected local proposal.
+- Approval history remains available, but reads only after the user asks for
+  it.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+broad-read reduction on Hedwig support drawers or move to the next runtime
+contract only if it closes a missing visible action in the Aang -> Workbench ->
+Ledger loop.
 
 ## 2026-05-15 2125 EDT - Approval Queue Support Lazy Reads
 

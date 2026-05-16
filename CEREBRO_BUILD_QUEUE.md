@@ -213,6 +213,9 @@ Recent Prime slices:
 - 2026-05-15 2125 EDT: gated Approval Queue support reads behind the closed
   Groups and Permission Checks drawers. Header counts now say `closed` until
   Permission Checks is opened.
+- 2026-05-15 2130 EDT: gated Hedwig proposal approval-preview reads behind the
+  selected proposal's `Approval Previews` drawer. Selected proposals now start
+  with `open to read`.
 
 ### Frontend Worker
 
