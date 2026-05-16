@@ -20350,3 +20350,70 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Anti-drift law is now active: before edits, state the build-plan item, owning surface, and what not to build. Next best slice: continue low-machinery Workbench or Project Lab cleanup unless the law marks the slice as drift. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0613 EDT - Anti-drift creativity rule
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a tiny governance update.
+
+What changed:
+
+- Added the missing creativity rule to `CEREBRO_ANTI_DRIFT_LAW.md`:
+  creativity is allowed inside the lane; freestyling is not allowed outside the
+  lane.
+- Clarified that Codex and CereBro may still use judgment, taste, GitHub,
+  design references, and stronger UI/UX ideas when the change serves a named
+  build-plan item and owner surface.
+- Clarified that new surfaces, modes, agents, integrations, or product promises
+  are product decisions, not small creative choices.
+- Mirrored the same rule into Obsidian.
+- Updated `CEREBRO_BUILD_QUEUE.md` so future passes keep creative UI and UX
+  work inside the lane.
+
+Files touched in this slice:
+
+- `CEREBRO_ANTI_DRIFT_LAW.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian mirror:
+  `20_Knowledge/Playbooks/CereBro Anti-Drift Law.md`
+
+Checks run:
+
+- `git diff --check -- CEREBRO_ANTI_DRIFT_LAW.md CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md`
+  passed.
+- `pnpm -C app check` passed.
+
+Drift check:
+
+- On path because the user specifically asked whether the anti-drift law
+  protects against random UI/UX without killing creativity.
+- No app code, new surface, worker, plugin, model, or agent was added.
+- The rule preserves taste work while blocking off-path freestyle building.
+
+Known risks:
+
+- This is still a governance rule. In-app enforcement can be added later as a
+  route/read contract if needed.
+
+Storage impact:
+
+- Updated one repo law.
+- Updated one active Obsidian playbook note.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Creativity is allowed inside the lane: make UI/UX better only when the change serves the build plan, has a named owner surface, reduces machinery or improves comprehension, and returns to the current path. Next best slice: continue low-machinery Workbench or Project Lab cleanup. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

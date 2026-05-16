@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0608 EDT
+Last updated: 2026-05-16 0613 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -87,6 +87,9 @@ Current integration order:
   quarantine, generated/local, or blocked.
 - Before edits, state why the slice is on the build path, which surface owns
   it, and what will not be built.
+- Keep creative UI and UX work inside the lane: improve taste, comprehension,
+  and feeling only when the change has a named owner surface and a clear return
+  to the current build path.
 - Close each real build pass with a drift check in the handoff.
 - Stage only current-slice files.
 - Integrate worker findings into one next block.
@@ -95,6 +98,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0613 EDT: updated the anti-drift law with the creativity rule:
+  creativity is allowed inside the lane; freestyling outside the lane stops for
+  approval.
 - 2026-05-16 0608 EDT: added the canonical
   `CEREBRO_ANTI_DRIFT_LAW.md`, mirrored it into Obsidian retrieval, and wired
   AGENTS plus this queue to treat major drift as a stop condition.

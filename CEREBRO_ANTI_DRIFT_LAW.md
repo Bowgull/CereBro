@@ -43,6 +43,21 @@ user's understanding. That is not drift. Drift starts when GitHub becomes a
 reason to clone, install, run, copy, or build off-path work without proof,
 license review, security review, and a clear return to the current plan.
 
+## Creativity Rule
+
+Creativity is allowed inside the lane. Freestyling is not allowed outside the
+lane.
+
+Codex and CereBro should still make judgment calls, improve taste, simplify
+surfaces, use GitHub and design references, and make the product feel more
+alive. The guardrail is ownership and return path. A creative change is valid
+when it clearly serves the current build-plan item, belongs to a named surface,
+reduces machinery or improves comprehension, and returns to the planned path.
+
+If a creative idea needs a new surface, new mode, new agent, new integration, or
+new product promise, it is not a small creative choice. It is a product decision
+and must stop for approval.
+
 ## Major Drift
 
 Major drift stops the pass. Ask before continuing.
@@ -75,6 +90,7 @@ Minor drift includes:
 - wording that makes CereBro sound like generic AI software
 - a layout that shows too much machinery by default
 - a patch that is technically useful but weakly tied to the current build path
+- a creative UI or UX change that has no named owner surface or return path
 - missing proof of which product surface owns a change
 - overlong output that makes the next decision harder
 
@@ -89,6 +105,7 @@ Before meaningful edits, answer these internally:
 5. What condition makes me stop and ask?
 6. If GitHub/source material is relevant, what fact, pattern, or warning is it
    being used for, and where does the work return to the plan?
+7. If this is a creative UI or UX choice, is it inside the lane or outside it?
 
 If any answer is unclear, inspect the repo and Obsidian first. If it is still
 unclear and the risk is product drift, ask the user.
