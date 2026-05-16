@@ -14,8 +14,10 @@ export default function AangCompanionPanel({
   onClose: () => void;
   onNavigate?: (route: CompanionRoute) => void;
 }) {
+  const [eventStripOpen, setEventStripOpen] = useState(false);
   const policy = trpc.companion.policy.useQuery();
   const localEvents = trpc.companion.localEvents.useQuery(undefined, {
+    enabled: eventStripOpen,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -45,7 +47,9 @@ export default function AangCompanionPanel({
           </Button>
         </div>
         <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-          {policy.isLoading ? "Reading companion policy." : `Local mock state: ${localState}. Local events ${localEvents.data?.activeCount ?? 0}. No notifications sent.`}
+          {policy.isLoading
+            ? "Reading companion policy."
+            : `Local mock state: ${localState}. Local events ${eventStripOpen ? localEvents.data?.activeCount ?? 0 : "open to read"}. No notifications sent.`}
         </div>
       </header>
 
@@ -94,52 +98,73 @@ export default function AangCompanionPanel({
               </div>
             </section>
 
-            <section className="rounded p-2" aria-label="Live local companion event counts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Local Event Strip</h3>
-                  <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-                    Read-only counts. No notification channel.
-                  </p>
+            <details
+              className="rounded p-2"
+              aria-label="Live local companion event counts"
+              onToggle={(event) => setEventStripOpen(event.currentTarget.open)}
+              style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+            >
+              <summary className="cursor-pointer">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Local Event Strip</h3>
+                    <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
+                      Read-only counts. No notification channel.
+                    </p>
+                  </div>
+                  <Chip label={eventStripOpen ? `${localEvents.data?.bubbleCount ?? 0} bubbles` : "open to read"} tone={eventStripOpen ? C.warning : C.textMuted} />
                 </div>
-                <Chip label={`${localEvents.data?.bubbleCount ?? 0} bubbles`} tone={C.warning} />
+              </summary>
+              <div className="mt-2">
+                {!eventStripOpen ? (
+                  <div className="rounded p-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    Open to read local companion event counts.
+                  </div>
+                ) : localEvents.isLoading ? (
+                  <div className="rounded p-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    Reading local companion event counts.
+                  </div>
+                ) : (
+                  <>
+                    {(localEvents.data?.gates ?? []).map((gate) => (
+                      <div key={gate} className="mb-1.5 rounded p-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                        {gate}
+                      </div>
+                    ))}
+                    <div className="grid gap-1.5 md:grid-cols-2 xl:grid-cols-4">
+                      {(localEvents.data?.events ?? []).map((event) => (
+                        <Button
+                          key={event.id}
+                          type="button"
+                          onClick={() => onNavigate?.(event.route as CompanionRoute)}
+                          aria-label={`Open ${event.route} for ${event.label}`}
+                          title={`Open ${event.route} as a local read. Aang Companion does not trigger notifications.`}
+                          variant="outline"
+                          className="h-auto justify-start whitespace-normal p-2 text-left"
+                          style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                        >
+                          <span className="block w-full min-w-0">
+                            <span className="flex flex-wrap items-center gap-1">
+                              <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
+                              <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
+                            </span>
+                            <span className="mt-1.5 block text-[13px] font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
+                              {event.count}
+                            </span>
+                            <span className="mt-1 block text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                              {event.label}
+                            </span>
+                            <span className="mt-1.5 block text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
+                              Open {event.route}
+                            </span>
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              {(localEvents.data?.gates ?? []).map((gate) => (
-                <div key={gate} className="mb-1.5 rounded p-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  {gate}
-                </div>
-              ))}
-              <div className="grid gap-1.5 md:grid-cols-2 xl:grid-cols-4">
-                {(localEvents.data?.events ?? []).map((event) => (
-                  <Button
-                    key={event.id}
-                    type="button"
-                    onClick={() => onNavigate?.(event.route as CompanionRoute)}
-                    aria-label={`Open ${event.route} for ${event.label}`}
-                    title={`Open ${event.route} as a local read. Aang Companion does not trigger notifications.`}
-                    variant="outline"
-                    className="h-auto justify-start whitespace-normal p-2 text-left"
-                    style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
-                  >
-                    <span className="block w-full min-w-0">
-                      <span className="flex flex-wrap items-center gap-1">
-                        <Chip label={event.source.replace(/_/g, " ")} tone={C.accent} />
-                        <Chip label={event.quiet ? "quiet" : "bubble"} tone={event.quiet ? C.textMuted : C.warning} />
-                      </span>
-                      <span className="mt-1.5 block text-[13px] font-bold leading-none" style={{ color: event.count > 0 ? C.textPrimary : C.textMuted }}>
-                        {event.count}
-                      </span>
-                      <span className="mt-1 block text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                        {event.label}
-                      </span>
-                      <span className="mt-1.5 block text-[10px] uppercase tracking-wider" style={{ color: C.gold }}>
-                        Open {event.route}
-                      </span>
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </section>
+            </details>
 
             <section className="grid gap-1.5 md:grid-cols-3" aria-label="Companion shell options">
               {data.shellOptions.map((option) => (

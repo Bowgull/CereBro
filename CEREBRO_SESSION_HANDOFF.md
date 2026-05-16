@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2327 EDT
+Last updated: 2026-05-15 2347 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2347 EDT - Aang Companion Event Strip Lazy Read
+
+### What Changed
+- Aang Companion no longer reads local companion event counts on panel open.
+- Header now says `Local events open to read` until the strip opens.
+- `Local Event Strip` starts closed and says `open to read`.
+- Opening `Local Event Strip` reads local companion event counts with a 30
+  second stale cache.
+
+### Files Touched
+- `app/client/src/components/AangCompanionPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: Keep ->
+  Aang starts with `Local events open to read` and `Local Event Strip open to
+  read`; opening it reads local event counts/cards.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Aang Companion support read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a narrow Aang Companion UI read-gating
+  slice.
+
+### Front-End Steward Review
+- Aang Companion keeps policy, local controls, allowed/blocked events, shell
+  options, and gates visible.
+- Event counts remain available, but now read only after the user asks for
+  them.
+- This keeps Aang's surface as a human bridge instead of a notification
+  console.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: return to
+runtime receipt contracts unless another high-traffic surface still reads
+hidden support proof by default.
 
 ## 2026-05-15 2327 EDT - Project Lab Receipt Summary Lazy Read
 

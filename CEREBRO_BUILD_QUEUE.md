@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-15 2327 EDT
+Last updated: 2026-05-15 2347 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,8 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-15 2347 EDT: gated Aang Companion local event counts behind the
+  Local Event Strip drawer.
 - 2026-05-14 2149 EDT: collapsed Piccolo cleanup rules/storage contract,
   Artifacts save routing, and Memory proposal routing behind explicit details.
   Kept scan results, artifact list, and memory proposal input visible.
