@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
-import { terminalLabProjectReadCopy } from "@/lib/terminalLabCopyModel";
+import { terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "@/lib/terminalLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1213,26 +1213,27 @@ function TerminalReceiptChainStrip({
   pushLabel: string | null;
 }) {
   const receiptTone = receiptId == null ? C.warning : receiptStatus === "needs_review" ? C.warning : C.success;
+  const copy = terminalLabReceiptChainCopy();
   const steps = [
     {
-      label: "Terminal explains",
-      value: observationId == null ? "no observation selected" : `observation #${observationId}`,
+      label: copy.firstStepLabel,
+      value: observationId == null ? copy.emptyObservationText : `observation #${observationId}`,
       tone: observationId == null ? C.textMuted : C.gold,
     },
     {
-      label: "Workbench body",
-      value: receiptId == null ? "receipt not saved" : `receipt #${receiptId} ${receiptStatus?.replace(/_/g, " ") ?? "recorded"}`,
+      label: copy.workbenchStepLabel,
+      value: receiptId == null ? copy.emptyReceiptText : `receipt #${receiptId} ${receiptStatus?.replace(/_/g, " ") ?? "recorded"}`,
       tone: receiptTone,
     },
     {
-      label: "Project read",
-      value: projectName == null ? "no project match" : `${projectName}: ${pushLabel ?? "push context reading"}`,
+      label: copy.projectStepLabel,
+      value: projectName == null ? copy.emptyProjectText : `${projectName}: ${pushLabel ?? copy.fallbackProjectValue}`,
       tone: projectName == null ? C.textMuted : C.accent,
     },
   ];
 
   return (
-    <section className="shrink-0 px-2 py-1.5" aria-label="Terminal to Workbench receipt chain" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+    <section className="shrink-0 px-2 py-1.5" aria-label={copy.ariaLabel} style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
       <div className="grid gap-1 md:grid-cols-3">
         {steps.map((step) => (
           <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1246,7 +1247,7 @@ function TerminalReceiptChainStrip({
         ))}
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Proof path: explain here. Save the body in Workbench. Read project context before any git decision.
+        {copy.footer}
       </div>
     </section>
   );

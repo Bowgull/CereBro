@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0654 EDT
+Last updated: 2026-05-16 0701 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0701 EDT: made Terminal Lab's receipt chain Aang-first. The
+  strip now says `Aang teaches`, its region is `Aang to Workbench receipt
+  chain`, and the helper line says `Teaching path` instead of `Proof path`.
 - 2026-05-16 0654 EDT: cleaned Terminal Lab's project read and command
   teaching copy. Header now says `read only lane`, `Aang reads`, `Tony
   drafts`, and `Spock gates`; the project rail now says `Action` / `read only`

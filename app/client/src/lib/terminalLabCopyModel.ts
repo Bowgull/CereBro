@@ -19,3 +19,17 @@ export function terminalLabProjectReadCopy() {
       `Project Lab read only. Git action: ${executesGit ? "yes" : "no"}. Approval required: ${automationRequiresApproval ? "yes" : "no"}.`,
   };
 }
+
+export function terminalLabReceiptChainCopy() {
+  return {
+    ariaLabel: "Aang to Workbench receipt chain",
+    firstStepLabel: "Aang teaches",
+    emptyObservationText: "no observation selected",
+    workbenchStepLabel: "Workbench body",
+    emptyReceiptText: "receipt not saved",
+    projectStepLabel: "Project read",
+    emptyProjectText: "no project match",
+    fallbackProjectValue: "project decision reading",
+    footer: "Teaching path: Aang explains here. Save the body in Workbench. Read project context before any git decision.",
+  };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { terminalLabProjectReadCopy } from "../client/src/lib/terminalLabCopyModel";
+import { terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "../client/src/lib/terminalLabCopyModel";
 
 describe("terminalLabCopyModel", () => {
   it("keeps the Project Read rail plain and non-executing", () => {
@@ -21,5 +21,17 @@ describe("terminalLabCopyModel", () => {
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("push readiness");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("command boundary");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("intent classifier");
+  });
+
+  it("names the receipt chain as Aang teaching before Workbench proof", () => {
+    const copy = terminalLabReceiptChainCopy();
+
+    expect(copy.ariaLabel).toBe("Aang to Workbench receipt chain");
+    expect(copy.firstStepLabel).toBe("Aang teaches");
+    expect(copy.workbenchStepLabel).toBe("Workbench body");
+    expect(copy.projectStepLabel).toBe("Project read");
+    expect(copy.footer).toBe("Teaching path: Aang explains here. Save the body in Workbench. Read project context before any git decision.");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("terminal explains");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof path");
   });
 });
