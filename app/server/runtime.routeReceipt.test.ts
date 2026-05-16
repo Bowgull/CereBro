@@ -517,4 +517,48 @@ describe("runtime route receipt preview", () => {
     expect(secondRecords.items[0]?.approvalPreview?.taskId).toBe(secondTask.task.id);
     expect(secondRecords.items[0]?.workbenchEvidence?.taskId).toBe(secondTask.task.id);
   });
+
+  it("links manual Workbench saves back to the runtime route target", async () => {
+    const caller = createCaller();
+    const committed = await caller.runtime.commitRoute({
+      text: "save manual Workbench receipt for this route",
+      mode: "build",
+    });
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    const manual = await caller.workbench.createEvidence({
+      kind: "manual_note",
+      title: "Manual route body",
+      summary: "Human-edited receipt body saved from the Workbench draft.",
+      targetUri: `runtime_route:${committed.record.id}`,
+      ownerAgent: "tony",
+      routeAgent: "cortana",
+      permissionClass: "manual_note",
+    });
+
+    expect(manual.ok).toBe(true);
+    expect(manual.evidence.targetUri).toBe(`runtime_route:${committed.record.id}`);
+    expect(manual.evidence.projectName).toBe("CereBro");
+    expect(manual.evidence.taskId).toBe(task.task.id);
+    expect(manual.evidence.permissionPreflightId).toBeGreaterThan(0);
+
+    const records = await caller.runtime.routeRecords({
+      limit: 10,
+      projectSlug: "cerebro",
+      ownerAgent: committed.record.ownerAgent,
+    });
+    const routeRecord = records.items.find((item) => item.id === committed.record.id);
+    expect(routeRecord?.workbenchEvidence?.id).toBe(manual.evidence.id);
+    expect(routeRecord?.workbenchEvidence?.taskId).toBe(task.task.id);
+
+    const overview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 10,
+    });
+    const overviewRoute = overview.latestRoutes.find((item) => item.id === committed.record.id);
+    expect(overviewRoute?.workbenchEvidence?.id).toBe(manual.evidence.id);
+    expect(overviewRoute?.workbenchEvidence?.taskId).toBe(task.task.id);
+  });
 });

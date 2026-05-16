@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0015 EDT
+Last updated: 2026-05-16 0020 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0020 EDT - Manual Route Workbench Save Link
+
+### What Changed
+- Manual Workbench receipt saves now recognize `targetUri:
+  runtime_route:<id>` on the server.
+- When that route already has a project and task, the saved Workbench evidence
+  links back to the same project and task without requiring the frontend to
+  pass those ids.
+- The `workbench.createEvidence` mutation now reads back the saved receipt with
+  joined display fields, so immediate responses match later read models.
+- Added route receipt coverage for a human-edited Workbench save tied to a
+  committed route.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-route-manual-workbench-4.db" pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-foundations-route-manual-workbench.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+
+### Cleanliness Read
+- Current slice: manual Workbench save route contract.
+- No frontend UI, schema migration, task execution from Workbench, approval
+  decision, command execution, browser action from CereBro, model call,
+  package install, external write, storage migration, git action from CereBro,
+  or Raven boundary changed.
+- No worker was used because this was a narrow backend contract slice.
+
+### Front-End Steward Review
+- The visible Workbench flow stays the same.
+- The user can save the edited route body manually, and the backend keeps the
+  route chain intact underneath.
+- This supports the hidden-machinery rule: the UI does not need extra project
+  or task fields just to preserve Ledger accuracy.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 55%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: compact
+Project Lab/Workbench route-chain visibility polish, then browser proof the
+saved route to Workbench to Ledger loop.
 
 ## 2026-05-16 0015 EDT - Route Child Idempotency Hardening
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
-import { getCerebroDb } from "../cerebroDb";
+import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import {
   GITHUB_PROJECT_MAP_PATH,
   GITHUB_SOURCES_INDEX_PATH,
@@ -143,6 +143,53 @@ async function recordEvidencePreflight(input: {
     additionalReasons: preflight.additionalReasons,
   });
   return Number(row.id);
+}
+
+function runtimeRouteIdFromTarget(targetUri: string | null | undefined) {
+  const match = targetUri?.match(/^runtime_route:(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+async function resolveRuntimeRouteEvidenceLink(input: {
+  targetUri: string | null | undefined;
+  projectId: number | null | undefined;
+  taskId: number | null | undefined;
+}) {
+  const routeRecordId = runtimeRouteIdFromTarget(input.targetUri);
+  if (routeRecordId == null) {
+    return {
+      projectId: input.projectId ?? null,
+      taskId: input.taskId ?? null,
+    };
+  }
+
+  const db = await getCerebroDb();
+  const route = await db.execute({
+    sql: `
+      SELECT project_name, project_path, task_id
+      FROM runtime_route_records
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = route.rows[0];
+  if (!row) {
+    return {
+      projectId: input.projectId ?? null,
+      taskId: input.taskId ?? null,
+    };
+  }
+
+  let projectId = input.projectId ?? null;
+  if (projectId == null && row.project_name != null && row.project_path != null) {
+    projectId = await getOrCreateProjectByPath(String(row.project_name), String(row.project_path));
+  }
+
+  return {
+    projectId,
+    taskId: input.taskId ?? (row.task_id == null ? null : Number(row.task_id)),
+  };
 }
 
 function evidenceWhere(input?: {
@@ -1047,6 +1094,11 @@ export const workbenchRouter = router({
     )
     .mutation(async ({ input }) => {
       const db = await getCerebroDb();
+      const routeLink = await resolveRuntimeRouteEvidenceLink({
+        targetUri: input.targetUri ?? null,
+        projectId: input.projectId ?? null,
+        taskId: input.taskId ?? null,
+      });
       const permissionPreflightId = await recordEvidencePreflight({
         permissionClass: input.permissionClass,
         sensitive: input.sensitive,
@@ -1073,8 +1125,8 @@ export const workbenchRouter = router({
           input.title,
           input.summary,
           input.targetUri ?? null,
-          input.projectId ?? null,
-          input.taskId ?? null,
+          routeLink.projectId,
+          routeLink.taskId,
           input.sessionId ?? null,
           input.sourceId ?? null,
           input.commandObservationId ?? null,
@@ -1099,13 +1151,40 @@ export const workbenchRouter = router({
           input.sensitive ? 1 : 0,
         ],
       });
+      const saved = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          WHERE wer.id = ?
+          LIMIT 1
+        `,
+        args: [Number(result.rows[0]!.id)],
+      });
       return {
         ok: true,
         appendOnly: true,
         writesExternal: false,
         opensBrowser: false,
         capturesMedia: false,
-        evidence: rowToEvidence(result.rows[0]!),
+        evidence: rowToEvidence(saved.rows[0] ?? result.rows[0]!),
         permissionPreflightId,
         gates: [
           "Created one local Workbench evidence record.",

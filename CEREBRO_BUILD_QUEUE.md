@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0015 EDT
+Last updated: 2026-05-16 0020 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0020 EDT: linked manual Workbench saves with
+  `targetUri: runtime_route:<id>` back to the route project and task on the
+  server. Immediate Workbench save responses now return the joined display
+  fields used by read models.
 - 2026-05-16 0015 EDT: hardened route child creation so duplicate approval
   preview and Workbench receipt calls return one child row instead of creating
   duplicate route children.
