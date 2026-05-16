@@ -20794,3 +20794,82 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab map and push decision copy are cleaner and tested. Next best slice: continue Project Lab detail inspector label cleanup, or move to Terminal Lab if Project Lab is stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0654 EDT - Terminal Lab project read copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- One read-only explorer inspected Terminal Lab copy and found that the first
+  rail pass still said `Runs` and `Run Boundary`.
+- Prime integrated that finding in the same slice.
+
+What changed:
+
+- Added `terminalLabProjectReadCopy` to centralize Terminal Lab project-read
+  copy.
+- Terminal Lab header now says `read only lane`, `Aang reads`, `Tony drafts`,
+  and `Spock gates` instead of exposing `Execution disabled`, mode, owner, and
+  support machinery first.
+- Replaced the command helper line with `Terminal Lab reads commands before
+  they run elsewhere through approval.`
+- Right rail now says `Project Read`, `Decision`, `Manual`, `review first`,
+  `Action`, `read only`, `Receipt Read`, and `Action Boundary`.
+- The rail no longer says `Runs`, `Run Boundary`, or `Command Boundary`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/terminalLabCopyModel.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/terminalLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/terminalLabCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/TerminalLabPanel.tsx
+  app/client/src/lib/terminalLabCopyModel.ts
+  app/server/terminalLabCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop, opened
+  Terminal Lab, and confirmed `read only lane`, `Aang reads`, `Tony drafts`,
+  `Spock gates`, `Terminal Lab reads commands before they run elsewhere through
+  approval.`, `Project Read`, `Action`, `read only`, and `Action Boundary`.
+
+Drift check:
+
+- On path because Terminal Lab is the approved code-learning and command
+  teaching lane.
+- Creative UI/UX stayed inside the lane: same surface, no behavior expansion,
+  less machinery, clearer Aang-first read.
+- No new surface, agent, plugin, model, external source, Raven path, GitHub
+  implementation, or command execution feature was added.
+
+Known risks:
+
+- Terminal Lab still has dense observation-row actions. Next pass should either
+  make the receipt chain say `Aang teaches` instead of `Terminal explains`, or
+  clean observation action grouping if the chain is stable.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now shows Aang-first command teaching copy and a cleaner Project Read rail. Next best slice: make the receipt chain say Aang teaches instead of Terminal explains, or clean observation action grouping if the chain is stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

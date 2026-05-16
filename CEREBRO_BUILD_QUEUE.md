@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0648 EDT
+Last updated: 2026-05-16 0654 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0654 EDT: cleaned Terminal Lab's project read and command
+  teaching copy. Header now says `read only lane`, `Aang reads`, `Tony
+  drafts`, and `Spock gates`; the project rail now says `Action` / `read only`
+  and `Action Boundary` instead of execution-shaped labels.
 - 2026-05-16 0648 EDT: simplified Project Lab push decision wording. Project
   cards now say `Push Decision`, details say `Decision Details`, and visible
   manual command blocks say `Manual Commands` with `review first`.

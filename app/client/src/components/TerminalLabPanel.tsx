@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
+import { terminalLabProjectReadCopy } from "@/lib/terminalLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,7 @@ type TerminalProjectContext = {
 };
 
 export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "projects" | "security" | "workbench" | "ledger") => void }) {
+  const terminalCopy = terminalLabProjectReadCopy();
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("");
@@ -482,12 +484,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
               Terminal Lab
             </div>
-            <Badge variant="warning" className="uppercase">Execution disabled</Badge>
+            <Badge variant="success" className="uppercase">{terminalCopy.headerBadge}</Badge>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
-            <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
-            <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "tony"}</Badge>
-            <Badge variant="secondary" className="uppercase">Support {(data?.supportAgents ?? ["aang"]).join(", ")}</Badge>
+            <Badge variant="secondary" className="uppercase">{terminalCopy.headerMode}</Badge>
+            <Badge variant="default" className="uppercase">{terminalCopy.headerOwner}</Badge>
+            <Badge variant="secondary" className="uppercase">{terminalCopy.headerSupport}</Badge>
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm" className="shrink-0">
@@ -546,7 +548,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           />
         </div>
         <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
-          Intent classifier only. Commands still run through Codex approval.
+          {terminalCopy.intentLine}
           {(selectedTask || selectedSession) && (
             <span> New previews will attach to {selectedTask ? `task #${selectedTask.id}` : ""}{selectedTask && selectedSession ? " and " : ""}{selectedSession ? selectedSession.displayName : ""}.</span>
           )}
@@ -1293,6 +1295,7 @@ function ProjectContextRail({
 
   const pushTone = toneForPushState(project.pushReadiness.state);
   const activeProject = project;
+  const copy = terminalLabProjectReadCopy();
   const statusTone = project.localExists
     ? project.git.dirty
       ? C.danger
@@ -1302,10 +1305,10 @@ function ProjectContextRail({
   const mapRead = [
     { label: "Branch", value: project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable", tone: project.git.branch ? C.textSecondary : C.warning },
     { label: "Dirty", value: project.git.dirty ? `${project.git.dirtyCount} local` : "clean", tone: project.git.dirty ? C.danger : C.success },
-    { label: "Push", value: project.pushReadiness.label, tone: pushTone },
+    { label: copy.readStateLabel, value: project.pushReadiness.label, tone: pushTone },
     { label: "Receipts", value: receiptStatsOpen ? `${receiptStats.total} / ${receiptStats.needsReview} review` : "open to read", tone: receiptTone },
-    { label: "Manual", value: "proposal only", tone: C.gold },
-    { label: "Executes", value: project.pushReadiness.executesGit ? "yes" : "no", tone: project.pushReadiness.executesGit ? C.danger : C.success },
+    { label: copy.manualLabel, value: copy.manualValue, tone: C.gold },
+    { label: copy.executionLabel, value: copy.executionValue(project.pushReadiness.executesGit), tone: project.pushReadiness.executesGit ? C.danger : C.success },
   ];
   function openProjectContext() {
     if (!onNavigate) return;
@@ -1361,7 +1364,7 @@ function ProjectContextRail({
 
   return (
     <section className="rounded p-1.5" aria-label="Project Lab context" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <SectionTitle title="Terminal Map Read" detail={contextLabel} />
+      <SectionTitle title={copy.title} detail={contextLabel} />
       <div className="mt-2 flex flex-wrap gap-1">
         <Chip label={project.name} tone={C.gold} />
         <Chip label={project.localExists ? project.git.statusText : "missing"} tone={statusTone} />
@@ -1389,7 +1392,7 @@ function ProjectContextRail({
         style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
       >
         <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-          Receipt Details <span style={{ color: C.textMuted }}>{receiptStatsOpen ? "local" : "open to read"}</span>
+          {copy.receiptDetailsTitle} <span style={{ color: C.textMuted }}>{receiptStatsOpen ? "local" : copy.receiptDetailsClosed}</span>
         </summary>
         <div className="mt-1.5">
           <div className="flex items-center justify-between gap-2">
@@ -1419,14 +1422,13 @@ function ProjectContextRail({
 
       <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
         <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-          Command Boundary
+          {copy.boundaryTitle}
         </summary>
         <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-          Terminal Lab explains and records. Commands run elsewhere through approval. Project Lab reads state. Workbench stores the body. Ledger audits it.
+          {copy.boundaryText}
         </div>
         <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-          Project Lab read only. Executes git: {project.pushReadiness.executesGit ? "yes" : "no"}.
-          Approval required: {project.pushReadiness.automationRequiresApproval ? "yes" : "no"}.
+          {copy.boundaryStateText(project.pushReadiness.executesGit, project.pushReadiness.automationRequiresApproval)}
         </div>
       </details>
       {onNavigate && (
