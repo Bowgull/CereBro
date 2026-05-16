@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1555 EDT
+Last updated: 2026-05-16 1601 EDT
 
 ## Current North Star
 
@@ -22907,4 +22907,66 @@ Next-session starter prompt:
 
 ```text
 Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9. Model Tools now has live registry/eval counts and duplicate grouping. Next best slice is either a safe read-only local capability proposal path for Ollama status once the user approves the status check, or a small Source/Model Registry bridge that lets Surfer propose source-verified model/tool rows without calling providers. Keep it Basement-only. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, add dependencies, clean DB rows, or route Raven content into CereBro without explicit approval. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
+
+## 2026-05-16 1601 EDT - UI taste audit law
+
+Completion:
+
+- Overall: 67%
+- Frontend visible loop: 99%
+- Backend/runtime: 62%
+- Foundation/docs/planning: 95%
+- Knowledge/storage/source: 41%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Added `CEREBRO_UI_TASTE_AUDIT.md` as the active CereBro UI review artifact.
+- Mirrored it into Obsidian at
+  `20_Knowledge/Playbooks/CereBro UI Taste Audit.md` with retrieval frontmatter.
+- Wired the audit into `CEREBRO_BUILD_QUEUE.md` so material UI edits must name
+  the surface register and use the audit before changing visuals.
+- Defined the roles of Taste Skill, Impeccable, Emil Kowalski, Uncodixfy,
+  Stitch, and v0 inside CereBro's own design law.
+- Added an audit flow, anti-slop kill list, screenshot proof rules, stop rules,
+  and a handoff scorecard.
+
+Files touched in this slice:
+
+- `CEREBRO_UI_TASTE_AUDIT.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `20_Knowledge/Playbooks/CereBro UI Taste Audit.md`
+
+Checks run:
+
+- `git status --short`
+- No app tests were run. This was a docs/process slice only.
+
+Drift check:
+
+- On path. The user explicitly asked to operationalize the new UI tools.
+- This does not add a new product surface, dependency, plugin, UI redesign,
+  external repo install, copied skill file, generated UI code, or Raven path.
+- `DESIGN.md`, the castle spec, and `CEREBRO_ANTI_DRIFT_LAW.md` still outrank
+  the audit.
+
+Known risks:
+
+- The audit is now enforceable by process, not by automated linting. Future UI
+  passes must use it deliberately.
+- Existing dirty planning docs remain unrelated and untouched.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- One Obsidian playbook note created.
+- Obsidian session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9. Use the UI taste audit for any material UI change: name the register, reject generic AI UI, keep machinery in Basement, and screenshot-proof visual changes. Next best build slice is a source-verified Model/Tool Registry proposal path or an approved read-only Ollama status/capability read. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, add dependencies, clean DB rows, copy external skill files, or route Raven content into CereBro without explicit approval. Update handoff and Obsidian archive before commit.
 ```

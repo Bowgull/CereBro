@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1555 EDT
+Last updated: 2026-05-16 1602 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -87,6 +87,9 @@ Current integration order:
   quarantine, generated/local, or blocked.
 - Before edits, state why the slice is on the build path, which surface owns
   it, and what will not be built.
+- Before material UI edits, read `CEREBRO_UI_TASTE_AUDIT.md` and name the
+  surface register. Product surfaces stay task-led, proof-aware, and low
+  machinery.
 - Keep creative UI and UX work inside the lane: improve taste, comprehension,
   and feeling only when the change has a named owner surface and a clear return
   to the current build path.
@@ -818,3 +821,8 @@ Expected shape:
   capability rows in the visible list. The next item 9 slice should add a
   source-verified proposal path or approved Ollama status/capability read. Do
   not clean the repeated dev DB rows without a separate data-cleanup approval.
+- `CEREBRO_UI_TASTE_AUDIT.md` is active. It operationalizes Taste Skill,
+  Impeccable, Emil Kowalski, Uncodixfy, Stitch, and v0 as a CereBro-native
+  review loop. Use it before material UI changes and record the scorecard in
+  handoff when a UI slice matters. It is not a redesign queue and does not
+  outrank `DESIGN.md`, the castle spec, or the anti-drift law.
