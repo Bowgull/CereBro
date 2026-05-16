@@ -19605,3 +19605,64 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining visible-loop gaps now that Terminal Lab focuses Project Lab, Workbench, and Ledger. Prefer receipt validation/read improvements or Project Lab/Workbench consistency over new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0318 EDT - Workbench receipt project focus forwarding
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 55%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench handoff patch.
+
+What changed:
+
+- Workbench receipt detail now declares `projectId` in the client detail type.
+- Workbench `Ledger` action now forwards receipt `projectId` and `projectName`
+  into `cerebro:ledger-focus`.
+- Workbench `Project` action now forwards receipt `projectId` into
+  `cerebro:project-lab-focus` instead of relying only on project name.
+- Ledger can now open an exact Workbench receipt from Workbench while also
+  keeping the project-scoped receipt list active.
+- No backend route, schema, command execution, git execution, model call,
+  external provider, Notion call, Slack call, or receipt creation behavior
+  changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx` passed.
+- Playwright opened `http://localhost:3000`, opened Workshop > Workbench,
+  selected receipt #1527, clicked its Ledger action, and confirmed Ledger
+  showed `CereBro Workbench Receipts`, `Ledger opened Workbench receipt #1527.`,
+  `Clear Focus`, selected `receipt #1527`, and `Project: CereBro`.
+
+Known risks:
+
+- This depends on Workbench detail rows continuing to return `projectId`.
+  The server already returns it through `rowToEvidence`.
+- This is still a focused local read, not a deep historical receipt search.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining receipt validation/read consistency between Ledger and Workbench, then move to the next backend/runtime contract only if the visible loop has no generic handoff gaps left. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

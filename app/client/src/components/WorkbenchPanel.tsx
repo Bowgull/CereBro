@@ -1462,6 +1462,7 @@ function EvidenceDetailPanel({
           title: string;
           summary: string;
           targetUri: string | null;
+          projectId: number | null;
           projectName: string | null;
           taskId: number | null;
           taskTitle: string | null;
@@ -1623,6 +1624,8 @@ function EvidenceDetailPanel({
         JSON.stringify({
           source: "workbench",
           evidenceId: item.id,
+          projectId: item.projectId,
+          projectName: item.projectName,
           notice: `Ledger opened Workbench receipt #${item.id}.`,
         }),
       );
@@ -1639,6 +1642,7 @@ function EvidenceDetailPanel({
         JSON.stringify({
           source: "workbench",
           evidenceId: item.id,
+          projectId: item.projectId,
           projectName: item.projectName,
           notice: item.projectName
             ? `Workbench receipt #${item.id} opened ${item.projectName} project context.`
