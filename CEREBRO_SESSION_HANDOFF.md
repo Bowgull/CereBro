@@ -20148,3 +20148,68 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview and saved route rows now share the Project/Body/Gate/Task mental model. Next best slice: hide excess preview proof behind a compact details section, or inspect Workbench/Project Lab for the next visible low-machinery cleanup. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0601 EDT - Route preview proof details
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a focused visible cleanup on the route preview.
+
+What changed:
+
+- Added `routePreviewProofModel` to separate primary route preview read from
+  proof details.
+- The primary route preview now shows only Aang, Owner, Receipt, and Next.
+- Cortana route chain, approval gate, model lane, tool action, provider, and
+  data-leaving-machine proof moved behind a closed `Route proof` details block.
+- The safe destination rail remains visible above the primary read.
+- The route preview now reads less like a debug panel while still showing proof
+  when requested.
+
+Files touched in this slice:
+
+- `app/client/src/lib/routeActionModel.ts`
+- `app/server/routeActionModel.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  failed because `routePreviewProofModel` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  passed, 4 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, previewed
+  `keep building CereBro front end`, confirmed the primary preview shows Aang,
+  Owner, Receipt, Next, and `Route proof` closed. Opening `Route proof`
+  revealed model and data-leaving-machine proof.
+
+Known risks:
+
+- The preview surface is cleaner now. The next cleanup should move to Workbench
+  or Project Lab rather than keep sanding this same panel.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview is now compact: safe destination rail, primary read, and closed proof details. Next best slice: inspect Workbench or Project Lab for the next visible low-machinery cleanup that makes the app feel less like internal machinery. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

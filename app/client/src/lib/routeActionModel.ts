@@ -28,6 +28,34 @@ export type RoutePreviewActionInput = {
   approvalRequired: boolean;
 };
 
+export type RoutePreviewProofInput = {
+  aangRead: string;
+  ownerAgent: string;
+  receiptSummary: string;
+  nextAction: string;
+  cortanaRoute: string[];
+  approvalGate: string;
+  modelClass: string;
+  provider: string;
+  modelStatus: string;
+  toolAction: string;
+  toolApprovalRequired: boolean;
+  dataLeavingMachine: boolean;
+  laneId: string;
+  laneSummary: string;
+};
+
+export type RoutePreviewProofField = {
+  label: string;
+  value: string;
+  tone: "gold" | "accent" | "warning" | "success" | "muted";
+};
+
+export type RoutePreviewProofChip = {
+  label: string;
+  tone: "gold" | "accent" | "warning" | "success" | "danger" | "muted";
+};
+
 export function routeActionModel(input: RouteActionInput): RouteAction[] {
   const gateLabel = input.approvalId
     ? `${input.approvalStatus === "approved" ? "Approved" : input.approvalStatus === "pending" ? "Gate" : "Closed"} #${input.approvalId}`
@@ -132,4 +160,32 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
       title: "Create one local task from this route preview. This does not run the task.",
     },
   ];
+}
+
+export function routePreviewProofModel(input: RoutePreviewProofInput) {
+  return {
+    primary: [
+      { label: "Aang", value: input.aangRead, tone: "gold" },
+      { label: "Owner", value: input.ownerAgent, tone: "accent" },
+      { label: "Receipt", value: input.receiptSummary, tone: "gold" },
+      { label: "Next", value: input.nextAction, tone: "muted" },
+    ] satisfies RoutePreviewProofField[],
+    detailsSummary: "Route proof",
+    routeChain: input.cortanaRoute.join(" -> "),
+    lane: {
+      label: input.laneId.replace(/_/g, " "),
+      summary: input.laneSummary,
+      tone: input.modelStatus === "approval_required" ? "warning" as const : "success" as const,
+    },
+    detailChips: [
+      { label: input.cortanaRoute.length > 0 ? input.cortanaRoute.join(" -> ") : "No route chain", tone: "accent" },
+      { label: input.approvalGate, tone: input.toolApprovalRequired ? "warning" : "success" },
+      { label: `model ${input.modelClass}`, tone: "muted" },
+      { label: input.provider, tone: "gold" },
+      { label: input.modelStatus.replace(/_/g, " "), tone: input.modelStatus === "approval_required" ? "warning" : "success" },
+      { label: `tool ${input.toolAction}`, tone: "muted" },
+      { label: input.toolApprovalRequired ? "approval required" : "local only", tone: input.toolApprovalRequired ? "warning" : "success" },
+      { label: input.dataLeavingMachine ? "data leaves machine" : "no data leaves machine", tone: input.dataLeavingMachine ? "danger" : "success" },
+    ] satisfies RoutePreviewProofChip[],
+  };
 }

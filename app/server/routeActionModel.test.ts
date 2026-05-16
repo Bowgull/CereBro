@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeActionModel, routePreviewActionModel } from "../client/src/lib/routeActionModel";
+import { routeActionModel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
 
 describe("routeActionModel", () => {
   it("keeps saved route actions grouped by safe destination and state", () => {
@@ -47,5 +47,29 @@ describe("routeActionModel", () => {
     expect(actions.map((action) => action.destination)).toEqual(["Project", "Body", "Gate", "Task"]);
     expect(actions.map((action) => action.label)).toEqual(["Project", "Workbench", "Ledger", "Create Task"]);
     expect(actions.every((action) => action.executes === false)).toBe(true);
+  });
+
+  it("keeps route preview proof out of the primary read", () => {
+    const proof = routePreviewProofModel({
+      aangRead: "build request read as project build.",
+      ownerAgent: "tony",
+      receiptSummary: "Aang reads mode -> Cortana routes -> tony owns.",
+      nextAction: "Create a task or Workbench receipt before any code.",
+      cortanaRoute: ["Aang reads mode", "Cortana routes", "tony owns"],
+      approvalGate: "No external action from route preview.",
+      modelClass: "local_code_helper",
+      provider: "Codex/frontier lane",
+      modelStatus: "approval_required",
+      toolAction: "code_edit",
+      toolApprovalRequired: true,
+      dataLeavingMachine: true,
+      laneId: "frontier_or_codex_escalation",
+      laneSummary: "Use local planning first.",
+    });
+
+    expect(proof.primary.map((field) => field.label)).toEqual(["Aang", "Owner", "Receipt", "Next"]);
+    expect(proof.detailsSummary).toBe("Route proof");
+    expect(proof.detailChips.map((chip) => chip.label)).toContain("model local_code_helper");
+    expect(proof.detailChips.map((chip) => chip.label)).toContain("data leaves machine");
   });
 });

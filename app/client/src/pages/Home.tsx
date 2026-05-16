@@ -43,7 +43,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
-import { routeActionModel, routePreviewActionModel, type RouteAction } from "@/lib/routeActionModel";
+import { routeActionModel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -1969,14 +1969,22 @@ function RuntimeRouteReceipt({
   routeSavedId: number | null;
   taskCreated: boolean;
 }) {
-  const routePreviewFields = [
-    { label: "Aang", value: result.aangRead, tone: C.gold },
-    { label: "Cortana", value: result.cortanaRoute.join(" -> "), tone: C.accentViolet },
-    { label: "Owner", value: result.ownerAgent, tone: C.accent },
-    { label: "Receipt", value: `${result.receipt.bodyTarget} body. ${result.receipt.auditTarget} audit.`, tone: C.gold },
-    { label: "Approval", value: result.approvalGates[0] ?? "No gate listed", tone: result.toolProposal.approvalRequired ? C.warning : C.success },
-    { label: "Next", value: result.nextAction, tone: C.textSecondary },
-  ];
+  const routePreviewProof = routePreviewProofModel({
+    aangRead: result.aangRead,
+    ownerAgent: result.ownerAgent,
+    receiptSummary: `${result.receipt.bodyTarget} body. ${result.receipt.auditTarget} audit.`,
+    nextAction: result.nextAction,
+    cortanaRoute: result.cortanaRoute,
+    approvalGate: result.approvalGates[0] ?? "No gate listed",
+    modelClass: result.modelProposal.modelClass,
+    provider: result.modelProposal.provider,
+    modelStatus: result.modelProposal.status,
+    toolAction: result.toolProposal.actionClass,
+    toolApprovalRequired: result.toolProposal.approvalRequired,
+    dataLeavingMachine: result.modelProposal.dataLeavingMachine,
+    laneId: result.modelProposal.laneId,
+    laneSummary: result.modelProposal.userFacingSummary,
+  });
   const previewActions = routePreviewActionModel({
     taskCreated,
     creatingTask: isCreatingTask,
@@ -2128,26 +2136,27 @@ function RuntimeRouteReceipt({
             ))}
           </div>
         </div>
-        <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
-          {routePreviewFields.map((field) => (
-            <PreviewField key={field.label} label={field.label} value={field.value} tone={field.tone} />
+        <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
+          {routePreviewProof.primary.map((field) => (
+            <PreviewField key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
           ))}
         </div>
-        <div className="mt-2 flex flex-wrap gap-1" aria-label="Runtime route gates">
-          <PreviewChip label={`model ${result.modelProposal.modelClass}`} tone={C.textSecondary} />
-          <PreviewChip label={result.modelProposal.provider} tone={C.gold} />
-          <PreviewChip label={result.modelProposal.status.replace(/_/g, " ")} tone={result.modelProposal.approvalRequired ? C.warning : C.success} />
-          <PreviewChip label={`tool ${result.toolProposal.actionClass}`} tone={C.textSecondary} />
-          <PreviewChip label={result.toolProposal.approvalRequired ? "approval required" : "local only"} tone={result.toolProposal.approvalRequired ? C.warning : C.success} />
-          <PreviewChip label={result.modelProposal.dataLeavingMachine ? "data leaves machine" : "no data leaves machine"} tone={result.modelProposal.dataLeavingMachine ? C.danger : C.success} />
-          <PreviewChip label={result.gates[0]} tone={C.textMuted} />
-        </div>
-        <div className="mt-2 rounded px-2 py-1 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-          <span className="font-semibold uppercase tracking-wider" style={{ color: result.modelProposal.approvalRequired ? C.warning : C.success }}>
-            {result.modelProposal.laneId.replace(/_/g, " ")}
-          </span>{" "}
-          {result.modelProposal.userFacingSummary}
-        </div>
+        <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+            {routePreviewProof.detailsSummary}
+          </summary>
+          <div className="mt-2 flex flex-wrap gap-1" aria-label="Runtime route proof">
+            {routePreviewProof.detailChips.map((chip) => (
+              <PreviewChip key={chip.label} label={chip.label} tone={proofTone(chip.tone)} />
+            ))}
+          </div>
+          <div className="mt-2 rounded px-2 py-1 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <span className="font-semibold uppercase tracking-wider" style={{ color: proofTone(routePreviewProof.lane.tone) }}>
+              {routePreviewProof.lane.label}
+            </span>{" "}
+            {routePreviewProof.lane.summary}
+          </div>
+        </details>
       </section>
     </div>
   );
@@ -2163,6 +2172,15 @@ function PreviewChip({ label, tone }: { label: string; tone: string }) {
       <span className="min-w-0 truncate">{label}</span>
     </Badge>
   );
+}
+
+function proofTone(tone: "gold" | "accent" | "warning" | "success" | "danger" | "muted") {
+  if (tone === "gold") return C.gold;
+  if (tone === "accent") return C.accent;
+  if (tone === "warning") return C.warning;
+  if (tone === "success") return C.success;
+  if (tone === "danger") return C.danger;
+  return C.textMuted;
 }
 
 function PreviewField({ label, value, tone }: { label: string; value: string; tone: string }) {
