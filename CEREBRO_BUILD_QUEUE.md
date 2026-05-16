@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0732 EDT
+Last updated: 2026-05-16 0800 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -704,6 +704,9 @@ Expected shape:
 - Ledger route action controls now use clearer destinations: `Project Read`,
   `Receipt Body`, `Approval Gate`, and `Task Record`; route receipt creation now
   says `Save Receipt`.
+- Sessions/Ledger run history now says `Run History`, `Local audit trail`,
+  `Agent`, `Status`, `Run`, and `Actions` instead of proof/class/session
+  wording.
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.

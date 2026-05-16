@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { sessionHistoryCopy } from "@/lib/sessionHistoryCopyModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +44,7 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
   const active = sessions.filter((s) => s.endedAt == null).length;
   const ended = sessions.length - active;
   const projects = new Set(sessions.map((session) => session.projectName).filter(Boolean)).size;
+  const copy = sessionHistoryCopy();
 
   return (
     <div
@@ -55,7 +57,7 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Ledger Run History
+            {copy.title}
             <span className="ml-2" style={{ color: C.textSecondary }}>
               {sessions.length}
             </span>
@@ -66,7 +68,7 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
             )}
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Session rows prove when work started, ended, and which project owned it.
+            {copy.subtitle}
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">
@@ -82,22 +84,22 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {list.isLoading ? (
-          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>{copy.loadingText}</div>
         ) : sessions.length === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            No sessions recorded. Start a Claude Code session in any project; it will appear here.
+            {copy.emptyText}
           </div>
         ) : (
           <table className="w-full text-[11px]">
             <thead style={{ color: C.textMuted }}>
               <tr style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">Project</th>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">Class</th>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">State</th>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">Started</th>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">Duration</th>
-                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">Session</th>
-                <th className="px-2 py-1 text-right font-semibold uppercase tracking-wider">Ledger</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.project}</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.agent}</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.status}</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.started}</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.duration}</th>
+                <th className="px-2 py-1 text-left font-semibold uppercase tracking-wider">{copy.columns.run}</th>
+                <th className="px-2 py-1 text-right font-semibold uppercase tracking-wider">{copy.columns.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -155,8 +157,8 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
                           type="button"
                           variant="outline"
                           size="sm"
-                          title="Edit local run ledger title and notes."
-                          aria-label={`Edit run ledger row ${s.displayName}`}
+                          title={copy.editTitle}
+                          aria-label={copy.editAria(s.displayName)}
                           onClick={() => {
                             setEditingId(s.id);
                             setTitleDraft(s.title ?? "");
@@ -174,26 +176,26 @@ export default function SessionsPanel({ onClose }: { onClose: () => void }) {
                             <Input
                               value={titleDraft}
                               onChange={(event) => setTitleDraft(event.target.value)}
-                              placeholder="Run title"
-                              aria-label="Run title"
+                              placeholder={copy.titlePlaceholder}
+                              aria-label={copy.titlePlaceholder}
                             />
                             <Textarea
                               value={notesDraft}
                               onChange={(event) => setNotesDraft(event.target.value)}
-                              placeholder="Run notes"
-                              aria-label="Run notes"
+                              placeholder={copy.notesPlaceholder}
+                              aria-label={copy.notesPlaceholder}
                               className="min-h-12"
                             />
                             <div className="flex gap-1.5 justify-end">
-                              <Button type="button" variant="ghost" size="sm" onClick={() => setEditingId(null)} title="Discard local run ledger edits.">
+                              <Button type="button" variant="ghost" size="sm" onClick={() => setEditingId(null)} title={copy.cancelTitle}>
                                 Cancel
                               </Button>
                               <Button
                                 type="button"
                                 size="sm"
                                 disabled={updateLedger.isPending}
-                                title="Save local run ledger title and notes. This does not change the run transcript."
-                                aria-label={`Save run ledger edits for ${s.displayName}`}
+                                title={copy.saveTitle}
+                                aria-label={copy.saveAria(s.displayName)}
                                 onClick={() => {
                                   updateLedger.mutate(
                                     { id: s.id, title: titleDraft, notes: notesDraft },

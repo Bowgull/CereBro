@@ -21489,3 +21489,78 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger route controls now use Project Read, Receipt Body, Approval Gate, and Task Record labels. Next best slice: clean Sessions/Ledger run history copy so it reads as run history/audit trail, not a proof table. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0800 EDT - Sessions run history copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Sessions/Ledger run-history display slice.
+
+What changed:
+
+- Added `sessionHistoryCopyModel` to guard run-history language.
+- `Ledger Run History` now reads as `Run History`.
+- Header copy now says `Local audit trail for when work started, ended, and
+  which project owned it.`
+- Table headers now read `Agent`, `Status`, `Run`, and `Actions` instead of
+  older `Class`, `State`, `Session`, and `Ledger` wording.
+- Loading and empty states now use run-history language without naming Claude
+  Code.
+- Edit/save titles and aria labels now say run history/run edits instead of run
+  ledger edits.
+
+Files touched in this slice:
+
+- `app/client/src/lib/sessionHistoryCopyModel.ts`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/server/sessionHistoryCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/sessionHistoryCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/SessionsPanel.tsx
+  app/client/src/lib/sessionHistoryCopyModel.ts
+  app/server/sessionHistoryCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, opened
+  Sessions, and confirmed `RUN HISTORY`, `Local audit trail`, `AGENT`,
+  `STATUS`, `RUN`, and `ACTIONS`; old `Ledger Run History`, `Session rows
+  prove`, `Class`, and `Claude Code` were absent.
+
+Drift check:
+
+- On path because Sessions is part of the Ledger receipts and audit-trail lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- The run history table is still dense. Next best pass should review whether
+  row details need disclosure or grouping, without losing scan speed.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Sessions/Ledger run history now uses Run History and Local audit trail language. Next best slice: inspect run-history density and decide whether to leave it as a fast table or add a small selected-run detail/read pattern, then continue only if it improves clarity without adding machinery. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
