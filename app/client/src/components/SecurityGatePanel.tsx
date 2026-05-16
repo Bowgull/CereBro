@@ -62,10 +62,16 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
   const [target, setTarget] = useState(initialSecurityTarget);
   const [projectId, setProjectId] = useState<number | "none">("none");
   const [sourceId, setSourceId] = useState<number | "none">("none");
+  const [sourceLinksOpen, setSourceLinksOpen] = useState(false);
   const plan = trpc.securityGate.plan.useQuery();
   const recent = trpc.securityGate.recent.useQuery({ limit: 12 });
   const projects = trpc.projectIntelligence.overview.useQuery();
-  const linkOptions = trpc.workbench.linkOptions.useQuery();
+  const linkOptions = trpc.workbench.linkOptions.useQuery(undefined, {
+    enabled: sourceLinksOpen,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const inspect = trpc.securityGate.inspectTarget.useMutation();
   const createReview = trpc.securityGate.createReview.useMutation({
     onSuccess: () => {
@@ -129,7 +135,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
               aria-label="Security target"
               placeholder="URL, GitHub repo, package, file, or site."
             />
-            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-1.5">
               <AppSelect
                 label="Project link"
                 value={String(projectId)}
@@ -141,21 +147,35 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
                     .map((project) => ({
                       value: String(project.tasks.projectId),
                       label: project.name,
-                    })),
-                ]}
-              />
-              <AppSelect
-                label="Source link"
-                value={String(sourceId)}
-                onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
-                options={[
-                  { value: "none", label: "No source link" },
-                  ...(linkOptions.data?.sources ?? []).map((source) => ({
-                    value: String(source.id),
-                    label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.title ?? sourceDisplayName(source.uri)}`,
                   })),
                 ]}
               />
+              <details
+                className="rounded p-1.5"
+                onToggle={(event) => setSourceLinksOpen(event.currentTarget.open)}
+                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              >
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  Source Link
+                  <span className="ml-2 font-normal normal-case" style={{ color: C.textMuted }}>
+                    {sourceLinksOpen ? `${linkOptions.data?.sources.length ?? 0} local sources` : "open to read"}
+                  </span>
+                </summary>
+                <div className="mt-1.5">
+                  <AppSelect
+                    label="Source link"
+                    value={String(sourceId)}
+                    onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
+                    options={[
+                      { value: "none", label: linkOptions.isLoading ? "Reading local source links" : "No source link" },
+                      ...(linkOptions.data?.sources ?? []).map((source) => ({
+                        value: String(source.id),
+                        label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.title ?? sourceDisplayName(source.uri)}`,
+                      })),
+                    ]}
+                  />
+                </div>
+              </details>
             </div>
             <div className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
               Link known work when available. Standalone targets can remain unlinked.

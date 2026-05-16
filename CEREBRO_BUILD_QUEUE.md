@@ -207,6 +207,9 @@ Recent Prime slices:
 - 2026-05-15 2044 EDT: gated Workbench Project Proof reads behind the closed
   drawer and switched the opened read to compact `workbench.evidenceSummary`
   project groups instead of a 100-row receipt body fetch.
+- 2026-05-15 2047 EDT: gated Security Gate source-link reads behind a closed
+  `Source Link` drawer. Spock no longer loads Workbench source link options on
+  default panel open.
 
 ### Frontend Worker
 
@@ -585,3 +588,4 @@ Expected shape:
   Ledger as audit trail and Workbench as receipt body.
 - Workbench Project Proof now reads only when opened and uses compact project
   receipt groups instead of fetching 100 receipt bodies while closed.
+- Security Gate source links now read only when the `Source Link` drawer opens.

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2044 EDT
+Last updated: 2026-05-15 2047 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2047 EDT - Security Source Link Lazy Read
+
+### What Changed
+- Security Gate no longer loads Workbench source link options on panel open.
+- Source linking now sits behind a `Source Link` disclosure that says
+  `open to read` while closed.
+- Opening `Source Link` reads local source links with a 30 second stale cache.
+- Browser-checked the closed and opened Security Gate source-link states.
+
+### Files Touched
+- `app/client/src/components/SecurityGatePanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Basement -> Security shows `Source Link open to read`; opening it shows local
+  source count and the source link selector.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Security Gate read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Security Gate UI
+  read-gating slice.
+
+### Front-End Steward Review
+- Security Gate keeps target inspection, project link, and recent receipts
+  primary.
+- Source links are still available, but the source list reads only when the
+  user asks for it.
+- This keeps Spock's panel quieter and lighter by default.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+broad-read reduction on Approval Queue or Hedwig, or add the next runtime
+contract only if it closes a missing visible action in the Aang -> Workbench ->
+Ledger loop.
 
 ## 2026-05-15 2044 EDT - Workbench Project Proof Lazy Read
 
