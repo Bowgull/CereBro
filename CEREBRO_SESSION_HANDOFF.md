@@ -20500,3 +20500,78 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Raven boundary is hardened: Raven is a sealed module marker, not a normal routed CereBro agent, and the exact local launcher is isolated. Next best slice: return to low-machinery Workbench or Project Lab cleanup, unless the anti-drift law marks a higher-priority correction. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0633 EDT - Workbench receipt groups copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench visible-loop pass.
+
+What changed:
+
+- Added `workbenchReceiptGroupCopy` beside the Workbench receipt body copy
+  model.
+- Workbench receipt grouping drawer now says `Receipt Groups` and
+  `Narrow the local list.` instead of `Group Receipts` and proof language.
+- Removed the duplicate inner `Receipt Groups` heading.
+- Kept the local-only read gate visible inside the drawer:
+  `Local grouping. No source fetch. No command run.`
+- Added test coverage so the grouping copy stays plain and does not regress to
+  `query proof`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  failed because `workbenchReceiptGroupCopy` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  passed, 3 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workbench from the Keep
+  receipt action, opened `Receipt Groups`, and confirmed `Narrow the local
+  list.` plus `Local grouping. No source fetch. No command run.`
+
+Drift check:
+
+- On path because Workbench is the next active build-plan surface after Project
+  Lab and Terminal Lab routing work.
+- This was creative UI/UX inside the lane: same owner surface, no behavior
+  expansion, less machinery, clearer receipt grouping.
+- No new surface, agent, plugin, model, external tool, Raven path, or GitHub
+  implementation was added.
+
+Known risks:
+
+- Workbench still has dense lower detail areas. This pass only cleaned receipt
+  grouping copy and structure.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench receipt groups are now simpler and tested. Next best slice: continue low-machinery Workbench cleanup around receipt read rules/detail panels, or move to Project Lab if Workbench is stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

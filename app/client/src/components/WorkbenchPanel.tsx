@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
-import { workbenchReceiptBodyCopy } from "@/lib/workbenchCopyModel";
+import { workbenchReceiptBodyCopy, workbenchReceiptGroupCopy } from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -172,6 +172,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
   const receiptBodyCopy = workbenchReceiptBodyCopy({ hasDraft: Boolean(stagedDraftNotice) });
+  const receiptGroupCopy = workbenchReceiptGroupCopy();
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -1206,10 +1207,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                        Group Receipts
+                        {receiptGroupCopy.title}
                       </h4>
                       <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                        Local grouping and query proof.
+                        {receiptGroupCopy.subtitle}
                       </p>
                     </div>
                     <Chip label={`${evidenceGroups.data?.groups.length ?? 0} groups`} tone={C.textMuted} />
@@ -1217,16 +1218,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </summary>
                 <div className="mt-2">
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                      Receipt Groups
-                    </h4>
-                    <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                      Local grouping. No source fetch. No command run.
-                    </p>
+                  <div className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                    {receiptGroupCopy.gateText}
                   </div>
                   <AppSelect
-                    label="Group receipts"
+                    label={receiptGroupCopy.controlLabel}
                     value={groupBy}
                     onChange={(value) => setGroupBy(value as EvidenceGroupBy)}
                     options={[
@@ -1248,7 +1244,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 ))}
                 {(evidenceGroups.data?.groups ?? []).length === 0 ? (
                   <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                    No groups match the current filters.
+                    {receiptGroupCopy.emptyText}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -1285,7 +1281,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
                           </span>
                           <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
-                            Matches stay local. Open a group to narrow the list.
+                            {receiptGroupCopy.itemHint}
                           </span>
                         </span>
                       </Button>

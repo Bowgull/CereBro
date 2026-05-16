@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0628 EDT
+Last updated: 2026-05-16 0633 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0633 EDT: cleaned Workbench receipt grouping copy. Group drawer
+  now says `Receipt Groups` and `Narrow the local list.`, removes duplicated
+  heading/proof wording, and keeps the local-only gate visible inside the
+  drawer.
 - 2026-05-16 0628 EDT: hardened the Raven sealed boundary after applying the
   anti-drift law. Raven no longer appears as a normal command-intake agent;
   the exact local sealed launcher is isolated in a small model. Also fixed the
