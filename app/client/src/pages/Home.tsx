@@ -114,7 +114,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
     { id: "tasks", label: "Tasks", meta: "Work queue" },
     { id: "sessions", label: "Sessions", meta: "Run history" },
     { id: "approvals", label: "Approvals", meta: "Waiting gates" },
-    { id: "outputs", label: "Outputs", meta: "Artifacts" },
+    { id: "outputs", label: "Outputs", meta: "Saved outputs" },
     { id: "memory", label: "Memory", meta: "Knowledge records" },
   ],
   basement: [
@@ -763,7 +763,7 @@ function KeepHomeDock({
     target: NavId;
   }> = [
     {
-      label: "Receipts",
+      label: "Workbench",
       meta: "Open Workbench",
       value: "Workbench",
       tone: C.accent,
@@ -1057,49 +1057,49 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     {
       label: "Tasks",
       value: String(openTasks),
-      meta: `${taskTotal} total work records`,
+      meta: ledgerCopy.cardMeta.tasks(taskTotal),
       target: "tasks" as NavId,
       tone: C.warning,
     },
     {
       label: "Sessions",
       value: String(activeSessions),
-      meta: `${overviewCards?.sessions.recent ?? 0} recent runs`,
+      meta: ledgerCopy.cardMeta.sessions(overviewCards?.sessions.recent ?? 0),
       target: "sessions" as NavId,
       tone: C.success,
     },
     {
       label: "Approvals",
       value: String(overviewCards?.approvals.pending ?? 0),
-      meta: "pending gates",
+      meta: ledgerCopy.cardMeta.approvals,
       target: "approvals" as NavId,
       tone: (overviewCards?.approvals.pending ?? 0) > 0 ? C.warning : C.textMuted,
     },
     {
       label: "Outputs",
       value: String(overviewCards?.outputs.total ?? 0),
-      meta: "artifact receipts",
+      meta: ledgerCopy.cardMeta.outputs,
       target: "outputs" as NavId,
       tone: C.gold,
     },
     {
       label: "Receipts",
       value: String(overviewCards?.receipts.total ?? 0),
-      meta: `${terminalEvidenceCount} terminal receipts`,
+      meta: ledgerCopy.cardMeta.workbench(terminalEvidenceCount),
       target: "workbench" as NavId,
       tone: C.accentViolet,
     },
     {
       label: "Routes",
       value: String(overviewCards?.routes.total ?? 0),
-      meta: "route receipts",
+      meta: ledgerCopy.cardMeta.routes,
       target: "ledger" as NavId,
       tone: C.accent,
     },
     {
       label: "Memory",
       value: String(overviewCards?.memory.total ?? 0),
-      meta: `${overviewCards?.memory.proposed ?? 0} proposed`,
+      meta: ledgerCopy.cardMeta.memory(overviewCards?.memory.proposed ?? 0),
       target: "memory" as NavId,
       tone: C.accent,
     },
@@ -1311,7 +1311,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 gap-1.5 lg:grid-cols-4 xl:grid-cols-7" aria-label="Ledger receipt objects">
+        <section className="grid grid-cols-2 gap-1.5 lg:grid-cols-4 xl:grid-cols-7" aria-label={ledgerCopy.cardsAria}>
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -1386,7 +1386,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                           <span className="min-w-0 truncate">{routeApprovalDone ? `${routeApprovalStatus} gate #${routeApprovalId}` : `gate #${routeApprovalId}`}</span>
                         </Badge>
                       )}
-                      {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">receipt #{routeEvidenceId}</span></Badge>}
+                      {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">body #{routeEvidenceId}</span></Badge>}
                     </div>
                     <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={ledgerRouteText(item.originalText)}>
                       {ledgerRouteText(item.originalText)}
@@ -1489,7 +1489,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   onClick={() => setSelectedEvidenceId(item.id)}
                   variant="secondary"
                   className="h-auto justify-start rounded p-2 text-left"
-                  aria-label={`Preview Workbench receipt ${item.id}`}
+                  aria-label={`Preview Workbench body ${item.id}`}
                   style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
                 >
                   <span className="block w-full min-w-0">
@@ -1531,7 +1531,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               )}
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1">
-                  <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">receipt #{selectedEvidence.id}</span></Badge>
+                  <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">body #{selectedEvidence.id}</span></Badge>
                   <Badge variant={selectedEvidence.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
                     <span className="min-w-0 truncate">{ledgerKindLabel(selectedEvidence.kind)}</span>
                   </Badge>
@@ -1547,8 +1547,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   onClick={() => openWorkbenchEvidence(selectedEvidence)}
                   variant="outline"
                   size="sm"
-                  title={`Open receipt #${selectedEvidence.id} in Workbench. Ledger keeps the audit trail read-only.`}
-                  aria-label={`Open Workbench body for receipt ${selectedEvidence.id}`}
+                  title={`Open body #${selectedEvidence.id} in Workbench. Ledger keeps the audit trail read-only.`}
+                  aria-label={`Open Workbench body ${selectedEvidence.id}`}
                 >
                   Open Workbench Body
                 </Button>
@@ -1562,7 +1562,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       ? `Open ${selectedEvidence.projectName} push context in Project Lab. This does not run git.`
                       : "Open Project Lab push context. This receipt is not linked to a project and does not run git."
                   }
-                  aria-label={`Open Project Lab push context for receipt ${selectedEvidence.id}. This does not run git.`}
+                  aria-label={`Open Project Lab push context for body ${selectedEvidence.id}. This does not run git.`}
                 >
                   Project Push Context
                 </Button>
@@ -1575,7 +1575,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   {ledgerCopy.receiptPath}
                 </span>
               </div>
-              <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-5" aria-label="Selected receipt audit read">
+              <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-5" aria-label="Selected body audit read">
                 {selectedAuditRead.map((item) => (
                   <div key={item.label} className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                     <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
@@ -1618,9 +1618,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               {ledgerCopy.rulesBody}
             </div>
             <div className="grid gap-1.5 md:grid-cols-3">
-              <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />
-              <LedgerRule title="Memory" body="Needs source, approval, and Oak status before truth." tone={C.accent} />
-              <LedgerRule title="Output" body="Needs owner, destination, write policy, and artifact path." tone={C.gold} />
+              <LedgerRule title={ledgerCopy.rules.external.title} body={ledgerCopy.rules.external.body} tone={C.warning} />
+              <LedgerRule title={ledgerCopy.rules.memory.title} body={ledgerCopy.rules.memory.body} tone={C.accent} />
+              <LedgerRule title={ledgerCopy.rules.output.title} body={ledgerCopy.rules.output.body} tone={C.gold} />
             </div>
           </div>
         </details>

@@ -11,15 +11,36 @@ describe("ledgerCopyModel", () => {
   it("frames Ledger as an audit trail without proof language", () => {
     const nav = ledgerNavCopy();
     const overview = ledgerOverviewCopy();
-    const combined = `${Object.values(nav).join(" ")} ${Object.values(overview).join(" ")}`.toLowerCase();
+    const combined = [
+      ...Object.values(nav),
+      overview.title,
+      overview.subtitle,
+      overview.cardMeta.outputs,
+      overview.cardMeta.routes,
+      overview.cardMeta.workbench(2),
+      overview.routeSectionTitle,
+      overview.routeLoadingText,
+      overview.routeEmptyText,
+      overview.receiptSectionTitle,
+      overview.receiptLoadingText,
+      overview.receiptEmptyText,
+      overview.receiptPath,
+      overview.rulesBody,
+      overview.rules.external.body,
+      overview.rules.memory.body,
+      overview.rules.output.body,
+    ].join(" ").toLowerCase();
 
     expect(nav.blurb).toBe("Audit what happened.");
     expect(overview.subtitle).toContain("Local audit trail");
-    expect(overview.routeSectionTitle).toBe("Recent Route Receipts");
+    expect(overview.cardMeta.outputs).toBe("saved outputs");
+    expect(overview.cardMeta.routes).toBe("saved route reads");
+    expect(overview.routeSectionTitle).toBe("Recent Route Reads");
     expect(overview.routeActionsTitle).toBe("Next Actions");
     expect(overview.auditReadBadge).toBe("audit read only");
     expect(combined).not.toContain("proof");
-    expect(combined).not.toContain("route reads");
+    expect(combined).not.toContain("artifact receipts");
+    expect(combined).not.toContain("route receipts");
     expect(combined).not.toContain("safe actions");
     expect(combined).not.toContain("aang to cortana reads");
   });

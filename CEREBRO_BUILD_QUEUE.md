@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0835 EDT
+Last updated: 2026-05-16 0840 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0840 EDT: cleaned Ledger overview object labels. Overview cards
+  now use `saved outputs`, `saved route reads`, `Workbench`, and `Latest
+  Workbench Bodies`; selected reads now say body/audit path instead of
+  receipt-object wording.
 - 2026-05-16 0835 EDT: cleaned Approvals waiting-gate copy. The panel now
   opens as `Waiting Gates`, uses local gate/check language, shows `Review Path`
   for the selected decision, and removes primary-surface preflight/policy/

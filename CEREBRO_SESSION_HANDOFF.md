@@ -21859,3 +21859,79 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Approvals/Ledger now uses Waiting Gates and local gate-check language instead of preflight/policy/receipt-chain wording on the primary surface. Next best slice: continue Ledger overview low-machinery cleanup or move to the next build-plan item after Ledger surface copy, depending on visible browser review. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0840 EDT - Ledger overview object labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Ledger overview display-copy slice.
+
+What changed:
+
+- Ledger overview cards now say `saved outputs`, `saved route reads`, and
+  `terminal notes` instead of artifact/route receipt wording.
+- The Workbench count card now reads `Workbench`.
+- Ledger surface nav now shows Outputs as `Saved outputs`.
+- Route section now reads `Recent Route Reads`.
+- Workbench section now reads `Latest Workbench Bodies`.
+- Selected audit details now say body/audit path instead of selected receipt
+  audit wording.
+- Ledger rules now say `Saved body before summary`, `waiting gate`, `reuse`,
+  and `saved path`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/ledgerCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/ledgerCopyModel.test.ts` passed, 3
+  tests.
+- `git diff --check -- app/client/src/lib/ledgerCopyModel.ts
+  app/client/src/pages/Home.tsx app/server/ledgerCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger overview,
+  confirmed `saved outputs`, `saved route reads`, `LATEST WORKBENCH BODIES`,
+  and `WORKBENCH`; old exact phrases `artifact receipts`, `route receipts`,
+  `Ledger receipt objects`, and `Selected receipt audit read` were absent from
+  the visible page.
+
+Drift check:
+
+- On path because Ledger overview is the hub for the Ledger audit trail lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Stored route/body data can still include the word receipt because historical
+  rows and server contracts use that term. This pass cleaned the overview shell,
+  not archived data.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger overview, Approvals, Outputs, Memory, Tasks, and Sessions now have low-machinery primary copy. Next best slice: stop doing copy cleanup unless browser review finds a concrete visible leak; move to the next higher-value build-plan item on the visible loop, likely Project Lab or Terminal Lab path clarity. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
