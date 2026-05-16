@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0023 EDT
+Last updated: 2026-05-16 0032 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0032 EDT - Route Target Display Labels
+
+### What Changed
+- `runtime_route:<id>` targets now display as `Route #<id>` through the shared
+  display-label helper.
+- The same label rule is applied on the server and client.
+- Workbench receipt lists and detail target labels now show the human route
+  label while keeping the raw target URI available as title/proof.
+- Added a focused display-label test for runtime route targets.
+
+### Files Touched
+- `app/server/displayLabels.ts`
+- `app/client/src/lib/displayLabels.ts`
+- `app/server/displayLabels.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/displayLabels.test.ts` failed first
+  because `runtime_route:23` still displayed raw. This was the expected red
+  test.
+- `pnpm -C app exec vitest run server/displayLabels.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: Workbench
+  opened and a recent route-linked receipt rendered `Target: Route #22` while
+  retaining the raw `runtime_route:22` target as title/proof.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: route target display label polish.
+- No schema migration, route mutation, task execution, approval decision,
+  command execution, model call, package install, external write, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- Browser proof only read the local running app.
+- No worker was used because this was a two-helper UI label slice.
+
+### Front-End Steward Review
+- Workbench now reads like a product surface instead of showing internal route
+  URI syntax.
+- Raw proof is still available in the DOM title, so the system still shows its
+  work without putting machinery in the primary line.
+- The change affects shared target labels consistently across surfaces.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 55%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: browser-proof
+the Ledger-to-Workbench route body flow end to end, then tighten the Workbench
+chain strip only if a concrete visibility gap remains.
 
 ## 2026-05-16 0023 EDT - Project Lab Route Visibility
 
