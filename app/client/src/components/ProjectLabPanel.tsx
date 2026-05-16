@@ -724,6 +724,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     <MetaBlock label="Approvals" value={`${project.activity.approvals.pending} pending`} />
                     <MetaBlock label="Hedwig" value={`${hedwigTotal(project.activity.hedwig)} proposals`} />
                     <MetaBlock label="Terminal" value={`${project.activity.terminalStatus.total} observations`} />
+                    <MetaBlock label="Routes" value={project.activity.routes.total > 0 ? `${project.activity.routes.total} saved` : "none"} />
                     <MetaBlock label="Receipts" value={projectReceiptsOpen ? `${proofStats.total} receipts / ${proofStats.needsReview} review` : "open to read"} />
                   </div>
 

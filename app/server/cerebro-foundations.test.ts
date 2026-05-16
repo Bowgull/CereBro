@@ -3729,6 +3729,26 @@ describe("Project Lab proposal-only actions", () => {
     expect(["hold_dirty", "commit_locally", "push_branch", "open_pr", "needs_cleanup"]).toContain(cerebro?.pushReadiness.state);
   });
 
+  it("rolls saved route reads into Project Lab project activity", async () => {
+    const caller = appRouter.createCaller({
+      user: null,
+      req: {} as never,
+      res: {} as never,
+    });
+
+    const route = await caller.runtime.commitRoute({
+      text: "keep building CereBro route visibility",
+      mode: "build",
+    });
+    const overview = await caller.projectIntelligence.overview();
+    const cerebro = overview.projects.find((project) => project.slug === "cerebro");
+
+    expect(route.record.projectSlug).toBe("cerebro");
+    expect(cerebro?.activity.routes.total).toBeGreaterThan(0);
+    expect(cerebro?.activity.routes.latest?.id).toBe(route.record.id);
+    expect(overview.summary.routes).toBeGreaterThan(0);
+  });
+
   it("returns cached read-only Project Lab git status separately from DB rollups", async () => {
     const caller = appRouter.createCaller({
       user: null,

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0020 EDT
+Last updated: 2026-05-16 0023 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,8 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0023 EDT: added saved route read counts to Project Intelligence
+  and surfaced them as a compact `Routes` line on Project Lab cards.
 - 2026-05-16 0020 EDT: linked manual Workbench saves with
   `targetUri: runtime_route:<id>` back to the route project and task on the
   server. Immediate Workbench save responses now return the joined display

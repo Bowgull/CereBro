@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0020 EDT
+Last updated: 2026-05-16 0023 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0023 EDT - Project Lab Route Visibility
+
+### What Changed
+- Project Intelligence now rolls saved runtime route reads into each project
+  activity read.
+- Project Lab summary now includes the total saved route count.
+- Project cards now show a compact `Routes` line beside Tasks, Approvals,
+  Hedwig, Terminal, and Receipts.
+- Added coverage proving a saved CereBro route appears in Project Lab activity.
+
+### Files Touched
+- `app/server/routers/projectIntelligence.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/cerebro-foundations.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL="file:/tmp/cerebro-project-route-rollup-red.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because `activity.routes` did not exist. This was the expected red test.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-project-route-rollup-green.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: Project
+  Lab opened and the CereBro project card rendered `Routes 23 saved`; projects
+  with no route reads rendered `Routes none`.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Project Lab route visibility.
+- No schema migration, task execution, approval decision, command execution,
+  model call, package install, external write, storage migration, git action
+  from CereBro, or Raven boundary changed.
+- Playwright browser proof only read the local running app.
+- No worker was used because this touched one server read model and one compact
+  UI line.
+
+### Front-End Steward Review
+- The project card stays compact.
+- Route count is visible where the user decides what project needs attention.
+- The route machinery remains in Ledger and Workbench; Project Lab only shows a
+  count.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 55%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: compact
+Workbench route-chain proof polish, then Ledger-to-Project-to-Workbench browser
+proof if the slice stays narrow.
 
 ## 2026-05-16 0020 EDT - Manual Route Workbench Save Link
 

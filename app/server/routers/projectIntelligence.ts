@@ -719,6 +719,45 @@ async function actionDraftRollupForProject(projectId: number | null, projectSlug
   };
 }
 
+function rowToRouteActivity(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    category: String(row.category),
+    ownerAgent: String(row.owner_agent),
+    originalText: String(row.original_text),
+    createdAt: Number(row.created_at),
+  };
+}
+
+async function routeRollupForProject(projectSlug: string) {
+  const db = await getCerebroDb();
+  const [counts, latest] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT COUNT(*) AS total
+        FROM runtime_route_records
+        WHERE project_slug = ?
+      `,
+      args: [projectSlug],
+    }),
+    db.execute({
+      sql: `
+        SELECT id, category, owner_agent, original_text, created_at
+        FROM runtime_route_records
+        WHERE project_slug = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+      `,
+      args: [projectSlug],
+    }),
+  ]);
+
+  return {
+    total: Number(counts.rows[0]?.total ?? 0),
+    latest: latest.rows[0] == null ? null : rowToRouteActivity(latest.rows[0]),
+  };
+}
+
 async function activityRollupForProject(projectId: number | null, projectSlug: string) {
   if (projectId == null) {
     return {
@@ -731,6 +770,7 @@ async function activityRollupForProject(projectId: number | null, projectSlug: s
       terminalStatus: await terminalStatusRollupForProject(null),
       sourceEvents: await sourceEventRollupForProject(null),
       actionDrafts: await actionDraftRollupForProject(null, projectSlug),
+      routes: await routeRollupForProject(projectSlug),
     };
   }
 
@@ -745,6 +785,7 @@ async function activityRollupForProject(projectId: number | null, projectSlug: s
     terminalStatus,
     sourceEvents,
     actionDrafts,
+    routeRollup,
   ] = await Promise.all([
     db.execute({
       sql: `SELECT COUNT(*) AS count FROM command_observations WHERE project_id = ?`,
@@ -779,6 +820,7 @@ async function activityRollupForProject(projectId: number | null, projectSlug: s
     terminalStatusRollupForProject(projectId),
     sourceEventRollupForProject(projectId),
     actionDraftRollupForProject(projectId, projectSlug),
+    routeRollupForProject(projectSlug),
   ]);
 
   return {
@@ -791,6 +833,7 @@ async function activityRollupForProject(projectId: number | null, projectSlug: s
     terminalStatus,
     sourceEvents,
     actionDrafts,
+    routes: routeRollup,
   };
 }
 
@@ -1247,6 +1290,7 @@ export const projectIntelligenceRouter = router({
         terminalObservations: projects.reduce((sum, p) => sum + p.activity.terminalStatus.total, 0),
         sourceEvents: projects.reduce((sum, p) => sum + p.activity.sourceEvents.total, 0),
         actionDrafts: projects.reduce((sum, p) => sum + p.activity.actionDrafts.total, 0),
+        routes: projects.reduce((sum, p) => sum + p.activity.routes.total, 0),
       },
     };
   }),
