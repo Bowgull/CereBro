@@ -21564,3 +21564,75 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Sessions/Ledger run history now uses Run History and Local audit trail language. Next best slice: inspect run-history density and decide whether to leave it as a fast table or add a small selected-run detail/read pattern, then continue only if it improves clarity without adding machinery. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0804 EDT - Tasks work queue copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Tasks/Ledger work-queue display slice.
+
+What changed:
+
+- Added `taskQueueCopyModel` to guard work-queue language.
+- `Ledger Work Queue` now reads as `Work Queue`.
+- Header copy now says `Local tasks. Status changes stay visible in the audit
+  trail.`
+- Add-task and delete-task copy no longer names task receipts.
+- Empty/loading states now use work-queue language.
+- Delete hard gate remains intact.
+
+Files touched in this slice:
+
+- `app/client/src/lib/taskQueueCopyModel.ts`
+- `app/client/src/components/TasksPanel.tsx`
+- `app/server/taskQueueCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/taskQueueCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/TasksPanel.tsx
+  app/client/src/lib/taskQueueCopyModel.ts app/server/taskQueueCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, opened Tasks,
+  and confirmed `WORK QUEUE` and `Local tasks. Status changes stay visible in
+  the audit trail.`; old `Ledger Work Queue`, `Tasks are Ledger objects`, and
+  `task receipt` were absent.
+
+Drift check:
+
+- On path because Tasks is part of the Ledger receipts and audit-trail lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Tasks remains a dense fast list. That is acceptable for now because it is a
+  work queue, not a destination for deep task planning.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Tasks/Ledger work queue now uses Work Queue and audit-trail language without task-receipt wording. Next best slice: continue Ledger low-machinery pass on Approvals, Outputs, or Memory, choosing the surface with the most visible proof/machinery language in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

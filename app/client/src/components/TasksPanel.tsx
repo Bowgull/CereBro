@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions, groupSessionFilters } from "@/lib/sessionLabels";
+import { taskQueueCopy } from "@/lib/taskQueueCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -144,6 +145,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
   const doneTasks = queue.data?.statusCounts.done ?? 0;
   const focusedTaskPinned = queue.data?.focusedTaskPinned ?? false;
   const hasMoreTasks = queue.data?.page.hasMore ?? false;
+  const copy = taskQueueCopy();
 
   return (
     <div
@@ -156,13 +158,13 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Ledger Work Queue
+            {copy.title}
             <span className="ml-2" style={{ color: C.textSecondary }}>
               {totalTasks}
             </span>
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Tasks are Ledger objects. Status changes stay visible.
+            {copy.subtitle}
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">
@@ -180,19 +182,19 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="New task. Enter to add."
+          placeholder={copy.inputPlaceholder}
           className="flex-1"
         />
         <Select value={sessionDraft} onValueChange={setSessionDraft}>
           <SelectTrigger
             size="sm"
             className="w-full"
-            aria-label="Link new task to session"
+            aria-label={copy.runLinkAria}
           >
-            <SelectValue placeholder="Run link" />
+            <SelectValue placeholder={copy.runLinkPlaceholder} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">No run link</SelectItem>
+            <SelectItem value="none">{copy.noRunLink}</SelectItem>
             {sessionOptions.map((session) => (
               <SelectItem key={session.id} value={String(session.id)}>
                 {session.optionLabel}
@@ -204,8 +206,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
           type="submit"
           size="sm"
           disabled={!title.trim() || create.isPending}
-          title={!title.trim() ? "Enter a task title before adding a local task receipt." : "Add a local task receipt to the Ledger work queue."}
-          aria-label="Add local task receipt"
+          title={!title.trim() ? copy.addTitleEmpty : copy.addTitleReady}
+          aria-label={copy.addAria}
         >
           Add
         </Button>
@@ -239,7 +241,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
         style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
       >
         <FilterButton
-          label="All Runs"
+          label={copy.allRunsLabel}
           active={sessionFilter === "all"}
           count={totalTasks}
           onClick={() => setSessionFilter("all")}
@@ -274,18 +276,18 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {queue.isLoading ? (
-          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>{copy.loadingText}</div>
         ) : totalTasks === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            No tasks yet. Add one above.
+            {copy.emptyText}
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between gap-2 px-2.5 py-1 text-[10px] uppercase tracking-widest" style={{ borderBottom: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               <span>
-                Showing {tasks.length} of {totalTasks}
+                {copy.showingLabel(tasks.length, totalTasks)}
               </span>
-              {focusedTaskPinned && <span style={{ color: C.gold }}>Focused task pinned</span>}
+              {focusedTaskPinned && <span style={{ color: C.gold }}>{copy.focusedPinnedText}</span>}
             </div>
             {tasks.map((t) => (
               <div
@@ -303,8 +305,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                   className="min-w-24 shrink-0"
                   variant={statusVariant(t.status)}
                   size="sm"
-                  title={`Advance local task status from ${STATUS_LABEL[t.status] ?? t.status} to ${STATUS_LABEL[NEXT_STATUS[t.status]] ?? NEXT_STATUS[t.status]}.`}
-                  aria-label={`Advance task ${t.title} status`}
+                  title={copy.advanceTitle(STATUS_LABEL[t.status] ?? t.status, STATUS_LABEL[NEXT_STATUS[t.status]] ?? NEXT_STATUS[t.status])}
+                  aria-label={copy.advanceAria(t.title)}
                 >
                   {STATUS_LABEL[t.status] ?? t.status}
                 </Button>
@@ -341,7 +343,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                   variant="destructive"
                   size="sm"
                   aria-label={`Delete task ${t.title}`}
-                  title="Open the hard-gate confirmation before deleting this local task receipt."
+                  title={copy.deleteTitle}
                 >
                   Delete
                 </Button>
@@ -366,9 +368,9 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
       <Dialog open={deleteGate != null} onOpenChange={(open) => !open && setDeleteGate(null)}>
         <DialogContent gate showCloseButton>
           <DialogHeader>
-            <DialogTitle>Delete Task</DialogTitle>
+            <DialogTitle>{copy.deleteDialogTitle}</DialogTitle>
             <DialogDescription>
-              This removes a local task row from the Ledger work queue. Cancel keeps the record visible.
+              {copy.deleteDialogDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
@@ -381,7 +383,7 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
             <Button
               type="button"
               onClick={() => setDeleteGate(null)}
-              title="Keep the task receipt visible."
+              title={copy.cancelDeleteTitle}
               variant="ghost"
             >
               Cancel
@@ -396,8 +398,8 @@ export default function TasksPanel({ onClose }: { onClose: () => void }) {
                   { onSuccess: () => setDeleteGate(null) },
                 );
               }}
-              title="Permanently delete this local task receipt after confirmation."
-              aria-label="Confirm delete task receipt"
+              title={copy.confirmDeleteTitle}
+              aria-label={copy.confirmDeleteAria}
               variant="destructive"
             >
               {del.isPending ? "Deleting" : "Delete Task"}
