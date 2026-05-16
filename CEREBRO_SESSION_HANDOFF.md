@@ -21783,3 +21783,79 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Outputs/Ledger now uses destination, retention, and saved-output language instead of proof/receipt/artifact wording on the primary surface. Next best slice: continue Ledger low-machinery pass on Approvals, which still exposes preflight/policy/receipt machinery. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0835 EDT - Approvals waiting gates copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Approvals/Ledger display-copy slice.
+
+What changed:
+
+- Added `approvalPanelCopyModel` to guard waiting-gate language.
+- Approvals now opens as `Waiting Gates` with `Review decisions waiting on you.
+  Nothing runs from this queue.`
+- Summary and drawers now use `Waiting`, `Checks`, `Permission Checks`, local
+  gate checks, and `gate checked` instead of preflight/policy/receipt language
+  on the primary surface.
+- Selected decision chain now reads `Review Path`, `Check`, and `Next Read`.
+- Security Gate routing remains intact and still states that the Approvals
+  surface does not execute work.
+
+Files touched in this slice:
+
+- `app/client/src/lib/approvalPanelCopyModel.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/approvalPanelCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/approvalPanelCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/ApprovalDashboardPanel.tsx
+  app/client/src/lib/approvalPanelCopyModel.ts app/server/approvalPanelCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, opened
+  Approvals, confirmed the new no-run subtitle, and confirmed old exact phrases
+  `Action Receipt Gate`, `Preflights`, `Permission Preflight`, `policy
+  checked`, `policy receipts`, and `Receipt Chain` were absent from the visible
+  page.
+
+Drift check:
+
+- On path because Approvals is the Ledger waiting-gates lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- The server and database still use technical preflight/policy names. That is
+  acceptable for now because those are storage and contract terms, not primary
+  user-facing copy.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Approvals/Ledger now uses Waiting Gates and local gate-check language instead of preflight/policy/receipt-chain wording on the primary surface. Next best slice: continue Ledger overview low-machinery cleanup or move to the next build-plan item after Ledger surface copy, depending on visible browser review. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

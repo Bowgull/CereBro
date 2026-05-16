@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { approvalPanelCopy } from "@/lib/approvalPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,6 +117,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const preflightItems = preflightsOpen ? preflights.data?.items ?? [] : [];
   const preflightTotal = preflightsOpen ? preflights.data?.summary.total ?? 0 : null;
   const blockedPreflights = preflightsOpen ? preflights.data?.summary.blocked ?? 0 : null;
+  const copy = approvalPanelCopy();
 
   function openSecurityGate(target: string | null | undefined) {
     if (!target?.trim() || !onNavigate) return;
@@ -133,10 +135,10 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Action Receipt Gate
+              {copy.title}
             </h2>
             <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Review waiting decisions. Nothing runs from this queue.
+              {copy.subtitle}
             </p>
           </div>
           <Button
@@ -150,24 +152,24 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Approval receipt summary">
-          <ReceiptStat label="Pending" value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
-          <ReceiptStat label="Sensitive" value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
-          <ReceiptStat label="Preflights" value={preflightTotal == null ? "closed" : String(preflightTotal)} tone={preflightTotal == null ? C.textMuted : C.accent} />
-          <ReceiptStat label="Blocked" value={blockedPreflights == null ? "closed" : String(blockedPreflights)} tone={(blockedPreflights ?? 0) > 0 ? C.danger : C.textMuted} />
+        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label={copy.summaryAria}>
+          <ReceiptStat label={copy.stats.pending} value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
+          <ReceiptStat label={copy.stats.sensitive} value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
+          <ReceiptStat label={copy.stats.checks} value={preflightTotal == null ? copy.stats.closed : String(preflightTotal)} tone={preflightTotal == null ? C.textMuted : C.accent} />
+          <ReceiptStat label={copy.stats.blocked} value={blockedPreflights == null ? copy.stats.closed : String(blockedPreflights)} tone={(blockedPreflights ?? 0) > 0 ? C.danger : C.textMuted} />
         </div>
 
         <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_180px_auto]">
-          <label className="sr-only" htmlFor="approval-search">Search approval previews</label>
+          <label className="sr-only" htmlFor="approval-search">{copy.searchLabel}</label>
           <Input
             id="approval-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search action, project, reason, command, capture, source."
-            aria-label="Search approval previews"
+            placeholder={copy.searchPlaceholder}
+            aria-label={copy.searchLabel}
           />
           <AppSelect
-            label="Filter approvals by project"
+            label={copy.projectFilterLabel}
             value={String(projectId)}
             onChange={(value) => setProjectId(value === "all" ? "all" : Number(value))}
             options={[
@@ -187,20 +189,20 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
               setProjectId("all");
               setSelectedId(null);
             }}
-            aria-label="Reset approval filters to pending local previews"
-            title="Reset approval filters. This does not approve, reject, or change previews."
+            aria-label={copy.resetAria}
+            title={copy.resetTitle}
             variant="outline"
           >
             Reset
           </Button>
         </div>
 
-        <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Approval origin filters">
+        <div className="mt-2 flex flex-wrap gap-1.5" aria-label={copy.originFiltersAria}>
           {origins.map((item) => (
             <FilterButton key={item.id} active={origin === item.id} label={item.label} onClick={() => setOrigin(item.id)} />
           ))}
         </div>
-        <div className="mt-1.5 flex flex-wrap gap-1.5" aria-label="Approval status filters">
+        <div className="mt-1.5 flex flex-wrap gap-1.5" aria-label={copy.statusFiltersAria}>
           {statuses.map((item) => (
             <FilterButton key={item.id} active={status === item.id} label={item.label} onClick={() => setStatus(item.id)} />
           ))}
@@ -208,7 +210,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
 
         <details
           className="mt-2 rounded p-2"
-          aria-label="Approval preview groups"
+          aria-label={copy.groupsAria}
           onToggle={(event) => setGroupsOpen(event.currentTarget.open)}
           style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
         >
@@ -216,21 +218,21 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             <span className="flex items-center justify-between gap-2">
               <span>
                 <span className="block text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                  Groups
+                  {copy.groupsTitle}
                 </span>
                 <span className="mt-0.5 block text-[11px]" style={{ color: C.textMuted }}>
-                  Filter preview batches.
+                  {copy.groupsSubtitle}
                 </span>
               </span>
               <Badge variant="secondary" className="uppercase">
-                {groupsOpen ? groups.data?.groups.length ?? 0 : "open to read"}
+                {groupsOpen ? groups.data?.groups.length ?? 0 : copy.openToRead}
               </Badge>
             </span>
           </summary>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="text-[11px]" style={{ color: C.textMuted }}>Local previews only. No approval action.</div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.localOnly}</div>
             <AppSelect
-              label="Group approval previews"
+              label={copy.groupSelectLabel}
               value={groupBy}
               onChange={(value) => setGroupBy(value as GroupFilter)}
               options={[
@@ -244,9 +246,9 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {groups.isLoading ? (
-              <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local approval groups.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.groupLoading}</div>
             ) : (groups.data?.groups ?? []).length === 0 ? (
-              <div className="text-[11px]" style={{ color: C.textMuted }}>No groups match these filters.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.groupEmpty}</div>
             ) : (
               groups.data?.groups.map((group) => (
                 <Button
@@ -259,8 +261,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     if (groupBy === "action_type" || groupBy === "risk") setQuery(group.key === "unknown" ? "" : group.key);
                     setSelectedId(null);
                   }}
-                  aria-label={`Filter approval previews by ${labelize(group.label)}`}
-                  title={`Filter local approval previews by ${labelize(group.label)}. No approval action runs.`}
+                  aria-label={copy.groupFilterAria(labelize(group.label))}
+                  title={copy.groupFilterTitle(labelize(group.label))}
                   className="h-auto min-w-40 justify-start rounded p-1.5 text-left"
                   variant="secondary"
                 >
@@ -269,11 +271,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       {labelize(group.label)}
                     </span>
                     <span className="mt-1 flex flex-wrap gap-1">
-                      <Chip label={`${group.count} previews`} tone={C.accent} />
-                      {group.sensitive > 0 && <Chip label={`${group.sensitive} sensitive`} tone={C.danger} />}
+                      <Chip label={copy.groupCount(group.count)} tone={C.accent} />
+                      {group.sensitive > 0 && <Chip label={copy.groupSensitive(group.sensitive)} tone={C.danger} />}
                     </span>
                     <span className="mt-1 block text-[11px]" style={{ color: C.textMuted }}>
-                      {group.sampleIds.length} recent match{group.sampleIds.length === 1 ? "" : "es"}
+                      {copy.groupRecentMatches(group.sampleIds.length)}
                     </span>
                   </span>
                 </Button>
@@ -289,13 +291,13 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           style={{ color: C.textMuted }}
         >
           {approvals.isLoading
-            ? "Reading local approval previews."
-            : `Showing ${items.length} ${status} preview${items.length === 1 ? "" : "s"}. Sensitive ${approvals.data?.summary.sensitive ?? 0}.`}
+            ? copy.gateLoading
+            : copy.gateStatus(items.length, status, approvals.data?.summary.sensitive ?? 0)}
         </div>
 
         <details
           className="mt-2 rounded p-2"
-          aria-label="Permission preflight audit records"
+          aria-label={copy.checksAria}
           onToggle={(event) => setPreflightsOpen(event.currentTarget.open)}
           style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
         >
@@ -303,32 +305,32 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             <span className="flex items-start justify-between gap-3">
               <span>
                 <span className="block text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                  Permission Checks
+                  {copy.checksTitle}
                 </span>
                 <span className="mt-0.5 block text-[11px]" style={{ color: C.textMuted }}>
-                  Local policy receipts.
+                  {copy.checksSubtitle}
                 </span>
               </span>
               <span className="flex flex-wrap justify-end gap-1">
-                <Chip label={preflightsOpen ? `${preflights.data?.summary.total ?? 0} records` : "open to read"} tone={preflightsOpen ? C.accent : C.textMuted} />
-                {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={`${preflights.data?.summary.approvalRequired} gated`} tone={C.warning} />}
+                <Chip label={preflightsOpen ? copy.records(preflights.data?.summary.total ?? 0) : copy.openToRead} tone={preflightsOpen ? C.accent : C.textMuted} />
+                {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={copy.gated(preflights.data?.summary.approvalRequired ?? 0)} tone={C.warning} />}
                 {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
               </span>
             </span>
           </summary>
           <div className="mt-2 flex items-start justify-between gap-3">
-            <div className="text-[11px]" style={{ color: C.textMuted }}>Audit history. Policy receipt only.</div>
+            <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.auditHistory}</div>
             <div className="flex flex-wrap justify-end gap-1">
-              <Chip label={`${preflights.data?.summary.total ?? 0} records`} tone={C.accent} />
-              {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={`${preflights.data?.summary.approvalRequired} gated`} tone={C.warning} />}
+              <Chip label={copy.records(preflights.data?.summary.total ?? 0)} tone={C.accent} />
+              {(preflights.data?.summary.approvalRequired ?? 0) > 0 && <Chip label={copy.gated(preflights.data?.summary.approvalRequired ?? 0)} tone={C.warning} />}
               {(preflights.data?.summary.blocked ?? 0) > 0 && <Chip label={`${preflights.data?.summary.blocked} blocked`} tone={C.danger} />}
             </div>
           </div>
           <div className="mt-2 grid gap-1.5">
             {preflights.isLoading ? (
-              <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local preflight records.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.checkLoading}</div>
             ) : preflightItems.length === 0 ? (
-              <div className="text-[11px]" style={{ color: C.textMuted }}>No permission preflight records match these filters.</div>
+              <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.checkEmpty}</div>
             ) : (
               preflightItems.map((item) => (
                 <div
@@ -337,7 +339,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   style={{ background: C.backgroundSoft, border: `1px solid ${C.borderSoft}` }}
                 >
                   <div className="flex flex-wrap items-center gap-1">
-                    <Chip label="policy check" tone={C.textMuted} />
+                    <Chip label={copy.checkChip} tone={C.textMuted} />
                     <Chip label={labelize(item.decision)} tone={item.decision === "blocked_by_hard_gate" ? C.danger : item.approvalRequired ? C.warning : C.accent} />
                     {item.sensitiveData && <Chip label="sensitive" tone={C.danger} />}
                   </div>
@@ -366,7 +368,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
       </header>
 
       <div className="flex-1 grid gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px]" style={{ minHeight: 0 }}>
-        <section className="overflow-y-auto p-2" aria-label="Approval preview list">
+        <section className="overflow-y-auto p-2" aria-label={copy.listAria}>
           {(approvals.data?.gates ?? []).map((gate) => (
             <div key={gate} className="mb-2 rounded px-2.5 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               {gate}
@@ -375,7 +377,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
 
           {items.length === 0 ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No approval previews match these filters. Reset filters or stage a preview from Hedwig, Terminal Lab, Project Lab, Sources, or Model Tools.
+              {copy.empty}
             </div>
           ) : (
             <div className="grid gap-1.5">
@@ -399,7 +401,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
                       {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                       {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
-                      {item.permissionPreflightId != null && <Chip label="policy checked" tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
+                      {item.permissionPreflightId != null && <Chip label={copy.checkedChip} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
                     </span>
                     <span className="mt-1.5 block text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                       {labelize(item.actionType)}
@@ -423,23 +425,23 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           )}
         </section>
 
-        <aside className="overflow-y-auto p-2" aria-label="Approval validation notes" style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <aside className="overflow-y-auto p-2" aria-label={copy.detailAria} style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
           {!selectedPreview ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Select an approval preview to inspect validation notes.
+              {copy.selectEmpty}
             </div>
           ) : selectedDetail.isLoading ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Reading selected decision.
+              {copy.selectedLoading}
             </div>
           ) : !selected ? (
             <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Selected approval preview was not found. Reset filters.
+              {copy.selectedMissing}
             </div>
           ) : (
             <div className="grid gap-2">
               <ApprovalReceiptChain selected={selected} onNavigate={onNavigate} onOpenSecurity={openSecurityGate} />
-              <Section title="Decision" detail={labelize(selected.status)}>
+              <Section title={copy.decisionSection} detail={labelize(selected.status)}>
                 <Meta label="Origin" value={labelize(selected.origin)} />
                 <Meta label="Requested By" value={selected.requestedByAgent ?? "unknown"} />
                 <Meta label="Project" value={selected.projectName ?? "unlinked"} />
@@ -456,20 +458,20 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     variant="risk"
                     size="sm"
                     className="w-fit"
-                    title="Open Security Gate for this approval target. Approval Dashboard does not execute it."
+                    title={copy.securityTitle}
                     aria-label={`Open Security Gate for approval ${selected.id}`}
                   >
                     Security Gate
                   </Button>
                 )}
                 <Meta label="Cost/Risk" value={labelize(selected.costRisk)} />
-                <Meta label="Policy Check" value={selected.permissionPreflightId == null ? "unlinked" : labelize(selected.permissionPreflight?.decision)} />
+                <Meta label={copy.policyCheckLabel} value={selected.permissionPreflightId == null ? "unlinked" : labelize(selected.permissionPreflight?.decision)} />
               </Section>
 
-              <DetailSection title="Permission Preflight" detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>
+              <DetailSection title={copy.permissionCheckTitle} detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>
                 {selected.permissionPreflight == null ? (
                   <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    No linked permission preflight record exists for this approval preview yet.
+                    {copy.permissionCheckMissing}
                   </p>
                 ) : (
                   <div className="grid gap-1.5">
@@ -496,8 +498,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                         variant="risk"
                         size="sm"
                         className="w-fit"
-                        title="Open Security Gate for this preflight target. Approval Dashboard does not execute it."
-                        aria-label={`Open Security Gate for permission preflight ${selected.permissionPreflight.id}`}
+                        title={copy.securityTitle}
+                        aria-label={`Open Security Gate for permission check ${selected.permissionPreflight.id}`}
                       >
                         Security Gate
                       </Button>
@@ -523,7 +525,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 )}
               </DetailSection>
 
-              <DetailSection title="Oak Notes" detail="risk preflight">
+              <DetailSection title="Oak Notes" detail={copy.oakNotesDetail}>
                 {selected.validationPreview.oakNotes.map((note) => (
                   <Note key={note} tone={C.warning} text={note} />
                 ))}
@@ -537,11 +539,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
 
               <DetailSection title="Reason" detail="local record">
                 <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textSecondary }}>
-                  {selected.reason ?? "No reason recorded."}
+              {selected.reason ?? "No reason recorded."}
                 </p>
               </DetailSection>
 
-              <DetailSection title="Context" detail="local receipt">
+              <DetailSection title="Context" detail={copy.contextDetail}>
                 <p className="text-[11px] leading-snug whitespace-pre-wrap" style={{ color: C.textMuted }}>
                   {selected.contextSummary ?? "No context summary recorded."}
                 </p>
@@ -610,7 +612,7 @@ function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route
     return {
       label: "Terminal Lab",
       route: "terminal",
-      reason: "Review command context. Workbench holds the receipt body.",
+      reason: "Review command context. Workbench holds the saved body.",
     };
   }
   if (item.targetType === "source_event" || item.actionType.includes("source")) {
@@ -631,13 +633,13 @@ function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route
     return {
       label: "Project Lab",
       route: "projects",
-      reason: "Review project state, receipts, and push context.",
+      reason: "Review project state, saved bodies, and push context.",
     };
   }
   return {
     label: "Workbench",
     route: "workbench",
-    reason: "Review receipt body before any summary or action.",
+    reason: "Review the saved body before any summary or action.",
   };
 }
 
@@ -650,6 +652,7 @@ function ApprovalReceiptChain({
   onNavigate?: (route: ApprovalRoute) => void;
   onOpenSecurity: (target: string | null | undefined) => void;
 }) {
+  const copy = approvalPanelCopy();
   const nextSurface = nextSurfaceForApproval(selected);
   const preflightTone = selected.permissionPreflight == null
     ? C.warning
@@ -673,21 +676,21 @@ function ApprovalReceiptChain({
       tone: selected.targetType ? C.gold : C.textMuted,
     },
     {
-      label: "Preflight",
+      label: copy.chainCheckLabel,
       value: selected.permissionPreflightId == null
         ? "unlinked"
         : `#${selected.permissionPreflightId} ${labelize(selected.permissionPreflight?.decision)}`,
       tone: preflightTone,
     },
     {
-      label: "Next Surface",
+      label: copy.chainNextLabel,
       value: nextSurface.label,
       tone: C.success,
     },
   ];
 
   return (
-    <Section title="Receipt Chain" detail="review path">
+    <Section title={copy.chainTitle} detail={copy.chainDetail}>
       <div className="grid gap-1 sm:grid-cols-2">
         {steps.map((step) => (
           <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -721,7 +724,7 @@ function ApprovalReceiptChain({
           variant="risk"
           onClick={() => onOpenSecurity(securityTarget)}
           disabled={!securityTarget || !onNavigate}
-          title="Open Security Gate for this receipt target. Approval Queue does not execute it."
+          title={copy.securityReceiptTitle}
           aria-label={`Open Security Gate for approval ${selected.id}`}
         >
           Security Gate

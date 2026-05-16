@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0829 EDT
+Last updated: 2026-05-16 0835 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0835 EDT: cleaned Approvals waiting-gate copy. The panel now
+  opens as `Waiting Gates`, uses local gate/check language, shows `Review Path`
+  for the selected decision, and removes primary-surface preflight/policy/
+  receipt-chain wording while keeping Security Gate routing intact.
 - 2026-05-16 0829 EDT: cleaned Outputs saved-output copy. The panel now says
   details keep destination and retention visible, vault writes report `Saved
   vault output`, fallback rows say `Output #`, and details read `Destination`
