@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1931 EDT
+Last updated: 2026-05-16 1943 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1943 EDT: continued item 9 in Basement Model Tools. Capability
+  reads now include latest local eval evidence from `model_tool_evals`, and
+  source readiness can show `eval recorded` or `eval blocked` without changing
+  the proposal's trusted `eval_status`. The Models tab now shows eval evidence
+  on the row, decision path, and selected detail. No provider/model/tool call,
+  route default change, install, browser/search/fetch, token/account action,
+  Ollama status command, schema migration, new surface, external write,
+  command runner, dependency, or Raven path was added.
 - 2026-05-16 1931 EDT: tightened item 9 in Basement Model Tools proposal
   creation. Local capability proposals now store a source check date, risk
   review, and validation notes from the existing Propose drawer. Source

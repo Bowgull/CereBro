@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1931 EDT
+Last updated: 2026-05-16 1943 EDT
 
 ## Current North Star
 
@@ -20,6 +20,165 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 1943 EDT - Model Tool Eval Evidence
+
+### What Changed
+- Capability reads now include latest local eval evidence from
+  `model_tool_evals`.
+- Source readiness can now show `eval recorded` or `eval blocked`.
+- Recording an eval note does not auto-promote the capability to trusted
+  `eval_status`.
+- The Models tab now shows eval evidence on registry rows, the selected
+  decision path, and selected proposal detail.
+- Added coverage that proves eval evidence changes readiness while
+  `evalStatus` stays `untested`.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-eval-evidence-red.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `latestEval` was missing.
+- Green targeted test:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-eval-evidence-green.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Combined targeted tests:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-eval-evidence-final.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `git diff --check` passed.
+- Browser proof used the Playwright CLI wrapper against `http://localhost:3000/`.
+  A local QA proposal and eval note were inserted into the development SQLite
+  database only. The Models tab showed `untested`, `eval pass`,
+  `eval recorded`, and detail `Evidence: pass. Local eval evidence. No provider
+  ran.`
+- Screenshot proof: `output/playwright/model-tools-eval-evidence-1943.png`.
+
+### Cleanliness Read
+- Current slice: Model Tools eval evidence read.
+- Product surface register: Basement capability registry.
+- Pre-existing handoff update `Prime Build Compass` was present before this
+  closeout and was preserved.
+- Local development database now has one QA proposal named
+  `Eval Evidence Visual 1778974948197` and one linked eval note. This is local
+  proof data only.
+- No provider/model/tool/gateway/search/fetch call, install, token, account
+  action, Ollama status command, schema migration, new primary surface,
+  external write, command runner, dependency, route default change, trusted
+  status promotion, or Raven path was added.
+- No worker was used because the slice had one owner surface and one tRPC
+  contract.
+
+### Front-End Steward Review
+- Surface: Basement Model Registry.
+- Register: product surface.
+- Primary object: local capability proposal.
+- User question: has this capability been locally evaluated, and did that make
+  it trusted.
+- Route visible: Aang and Cortana remain in the shell context.
+- Receipt/proof visible: eval evidence is visible beside the trust boundary.
+- Approval/risk visible: approval level remains visible; trusted status stays
+  explicit.
+- Machinery hidden until needed: eval details remain in the existing detail
+  read and Eval Note drawer.
+- Generic UI rejected: no model dashboard, scoring wall, or automatic
+  recommender was added.
+- Screenshot proof: `output/playwright/model-tools-eval-evidence-1943.png`.
+- Remaining taste risk: Models remains dense. Targeted polish only.
+
+### Completion Read
+- Overall: 70%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 65%.
+- Knowledge/storage/source: 44%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Next best path: finish item 9 by
+adding an explicit local status-change action for `source_verified`,
+`tested_mixed`, `tested_fail`, and `stale`, gated as a local registry update.
+Do not auto-promote pass evals. Do not run Ollama status checks, installs,
+pulls, external searches, provider calls, or model calls without explicit
+approval.
+
+## 2026-05-16 1939 EDT - Prime Build Compass
+
+### What Changed
+- Added an Obsidian playbook note named `CereBro Prime Build Compass`.
+- The note consolidates the end-product read: CereBro is a Keep-first AI OS,
+  not a chatbot, generic dashboard, plugin launcher, or freelance-only app.
+- It locks the Aang-first interaction rule: the user talks to Aang, Aang
+  reports to Cortana, and Cortana routes agents through their lanes.
+- It records the browser OS direction: modular Workbench browser windows,
+  bookmarks as source objects, annotations, screenshots, download quarantine,
+  profile colors, project attachment, Ask Aang from any browser window, and
+  Electron later for detachable desktop windows.
+- It records the Aang companion direction: `yip yip` can wake or park Aang,
+  but the companion surface does not browse, inspect the screen, run commands,
+  send messages, schedule, or approve hard gates by itself.
+- It adds a Codex/build-chat-only mobile reply rule: shorter direct answers by
+  default when speaking to the user in build chats, while still naming useful
+  coding and process terms with plain explanations. This does not change
+  CereBro product voice, Aang copy, UI strings, agent copy, or shipping docs.
+- Linked the new note from the Obsidian Playbooks index.
+
+### Files Touched
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/CereBro Prime Build Compass.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/Playbooks.md`
+
+### Checks Run
+- Read active repo rules: `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+  `CEREBRO_UX_SYSTEM.md`, `CEREBRO_ANTI_DRIFT_LAW.md`,
+  `CEREBRO_SKILLS_AND_TOOLS_LAYER.md`, and `CEREBRO_MASTER_BUILD_PLAN.md`.
+- Read active Obsidian rules and maps: Low Machinery Software Design Law,
+  CereBro UI Taste Audit, GitHub Project Map, GitHub Repository Import Method,
+  Aang First Full Interaction Map, and Complete Interaction Spec.
+- No app code changed.
+- No tests run because this was a docs/knowledge update only.
+
+### Cleanliness Read
+- Current slice: Obsidian build compass and restart context.
+- Product surface register: internal build playbook.
+- No browser/search/fetch/provider/model/gateway call, install, token,
+  account action, schema migration, dependency, code path, external service
+  write, or Raven path was added.
+- No worker was used.
+
+### Completion Read
+- Overall: 69%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 64%.
+- Knowledge/storage/source: 44%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Keep the product frame: CereBro is a
+Keep-first AI OS, Aang is the only conversational handle, Cortana routes, agents
+stay in lanes, machinery stays hidden until requested, and UI work must reject
+generic AI dashboard slop. User may be on mobile, so keep replies short unless
+depth is requested. Next best path remains the current build-plan slice unless
+the user explicitly redirects.
 
 ## 2026-05-16 1931 EDT - Model Tool Proposal Fields
 

@@ -74,8 +74,8 @@ function toneForPrivacy(value: string) {
 }
 
 function toneForSourceReadiness(value: string) {
-  if (value === "eval_ready" || value === "source_ready") return C.success;
-  if (value === "blocked") return C.danger;
+  if (value === "eval_ready" || value === "source_ready" || value === "eval_recorded") return C.success;
+  if (value === "blocked" || value === "eval_blocked") return C.danger;
   if (value === "needs_source_review") return C.warning;
   return C.textMuted;
 }
@@ -235,10 +235,16 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         },
         {
           step: "Eval",
-          status: selectedCapability.evalStatus === "untested" ? "needed" : labelize(selectedCapability.evalStatus),
+          status: selectedCapability.latestEval?.status ?? (selectedCapability.evalStatus === "untested" ? "needed" : labelize(selectedCapability.evalStatus)),
           owner: "spock",
-          body: selectedCapability.evalStatus === "untested" ? "Record a local eval note before this becomes a default." : "Eval status is recorded on the proposal.",
-          tone: selectedCapability.evalStatus === "tested_pass" || selectedCapability.evalStatus === "source_verified" ? C.success : C.warning,
+          body: selectedCapability.latestEval
+            ? "Eval evidence is recorded. Trusted status still requires an explicit decision."
+            : selectedCapability.evalStatus === "untested"
+              ? "Record a local eval note before this becomes a default."
+              : "Eval status is recorded on the proposal.",
+          tone: selectedCapability.latestEval
+            ? selectedCapability.latestEval.status === "fail" || selectedCapability.latestEval.status === "blocked" ? C.danger : C.success
+            : selectedCapability.evalStatus === "tested_pass" || selectedCapability.evalStatus === "source_verified" ? C.success : C.warning,
         },
         {
           step: "Approval",
@@ -643,6 +649,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                       <span className="flex shrink-0 flex-wrap justify-end gap-1">
                         {count > 1 && <Badge label={`${count} copies`} tone={C.warning} />}
                         <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
+                        {item.latestEval && <Badge label={`eval ${labelize(item.latestEval.status)}`} tone={item.latestEval.status === "fail" || item.latestEval.status === "blocked" ? C.danger : C.success} />}
                         <Badge label={labelize(item.sourceReadiness.label)} tone={toneForSourceReadiness(item.sourceReadiness.status)} />
                       </span>
                     </span>
@@ -674,6 +681,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Risk" value={selectedCapability.riskReview ?? "No risk review recorded."} />
                 <Field label="Validate" value={selectedCapability.validationNotes ?? "No validation notes recorded."} />
                 <Field label="Eval" value={selectedCapability.evalStatus === "untested" ? "No local eval recorded." : labelize(selectedCapability.evalStatus)} />
+                <Field label="Evidence" value={selectedCapability.latestEval ? `${labelize(selectedCapability.latestEval.status)}. ${selectedCapability.latestEval.summary ?? "Local eval note recorded."}` : "No eval evidence recorded."} />
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
               </div>
             ) : (

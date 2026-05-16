@@ -281,10 +281,12 @@ const ollamaSetupPlan = {
 } as const;
 
 function rowToCapability(row: Record<string, unknown>) {
+  const latestEval = readLatestEval(row);
   const sourceReadiness = readSourceReadiness({
     approvalLevel: String(row.approval_level),
     evalStatus: String(row.eval_status),
     lastVerifiedAt: row.last_verified_at == null ? null : Number(row.last_verified_at),
+    latestEvalStatus: latestEval?.status ?? null,
     privacyClass: String(row.privacy_class),
     riskReview: row.risk_review == null ? null : String(row.risk_review),
     sourceUris: row.source_uris == null ? null : String(row.source_uris),
@@ -320,10 +322,24 @@ function rowToCapability(row: Record<string, unknown>) {
     validationNotes: row.validation_notes == null ? null : String(row.validation_notes),
     failureNotes: row.failure_notes == null ? null : String(row.failure_notes),
     fallbackSuggestion: row.fallback_suggestion == null ? null : String(row.fallback_suggestion),
+    latestEval,
     sourceReadiness,
     status: String(row.status),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
+  };
+}
+
+function readLatestEval(row: Record<string, unknown>) {
+  const count = Number(row.eval_note_count ?? 0);
+  if (count === 0 || row.latest_eval_status == null) return null;
+  return {
+    count,
+    status: String(row.latest_eval_status),
+    taskKey: row.latest_eval_task_key == null ? null : String(row.latest_eval_task_key),
+    summary: row.latest_eval_summary == null ? null : String(row.latest_eval_summary),
+    validationNotes: row.latest_eval_validation_notes == null ? null : String(row.latest_eval_validation_notes),
+    createdAt: row.latest_eval_created_at == null ? null : Number(row.latest_eval_created_at),
   };
 }
 
@@ -338,6 +354,7 @@ function readSourceReadiness(input: {
   approvalLevel: string;
   evalStatus: string;
   lastVerifiedAt: number | null;
+  latestEvalStatus: string | null;
   privacyClass: string;
   riskReview: string | null;
   sourceUris: string | null;
@@ -381,6 +398,22 @@ function readSourceReadiness(input: {
       sourceUriCount,
       nextStep: "Run a small CereBro eval before making this a recommended default.",
       requiredBeforeTrust: ["Local eval note.", "Failure notes if eval is mixed or blocked."],
+      noActionTaken,
+    };
+  }
+
+  if (input.latestEvalStatus != null) {
+    const failed = input.latestEvalStatus === "fail" || input.latestEvalStatus === "blocked";
+    return {
+      status: failed ? "eval_blocked" as const : "eval_recorded" as const,
+      label: failed ? "eval blocked" : "eval recorded",
+      sourceUriCount,
+      nextStep: failed
+        ? "Keep out of route defaults until Spock resolves the failed eval."
+        : "Eval evidence exists. It does not mark this trusted until Oak or Spock changes the capability status.",
+      requiredBeforeTrust: failed
+        ? ["Failure review.", "Replacement or retest.", "Explicit trusted-status decision."]
+        : ["Explicit trusted-status decision."],
       noActionTaken,
     };
   }
@@ -781,8 +814,27 @@ export const modelToolsRouter = router({
       args.push(input?.limit ?? 50);
       const result = await db.execute({
         sql: `
-          SELECT *
-          FROM model_tool_capabilities
+          SELECT
+            c.*,
+            (
+              SELECT COUNT(*)
+              FROM model_tool_evals e
+              WHERE e.capability_id = c.id
+            ) AS eval_note_count,
+            latest.status AS latest_eval_status,
+            latest.eval_task_key AS latest_eval_task_key,
+            latest.task_summary AS latest_eval_summary,
+            latest.validation_notes AS latest_eval_validation_notes,
+            latest.created_at AS latest_eval_created_at
+          FROM model_tool_capabilities c
+          LEFT JOIN model_tool_evals latest
+            ON latest.id = (
+              SELECT e2.id
+              FROM model_tool_evals e2
+              WHERE e2.capability_id = c.id
+              ORDER BY e2.created_at DESC, e2.id DESC
+              LIMIT 1
+            )
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
           ORDER BY updated_at DESC, id DESC
           LIMIT ?

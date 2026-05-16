@@ -214,4 +214,46 @@ describe("Model Tools local-first routing policy", () => {
     ]);
     expect(proposal.capability.sourceReadiness.nextStep).toContain("Oak mark source verification");
   });
+
+  it("connects eval notes to readiness without auto-promoting trust", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Eval Evidence ${stamp}`,
+      toolName: "Evidence candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "No install. Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+    await caller.modelTools.recordEval({
+      capabilityId: proposal.capability.id,
+      evalTaskKey: "source_summary_privacy",
+      taskSummary: "Local eval evidence. No provider ran.",
+      status: "pass",
+      evaluatorAgent: "spock",
+      validationNotes: "Passed the local handoff shape check.",
+    });
+
+    const capabilities = await caller.modelTools.capabilities({
+      provider: `Eval Evidence ${stamp}`,
+      limit: 5,
+    });
+    const item = capabilities.items.find((row) => row.id === proposal.capability.id);
+
+    expect(item?.evalStatus).toBe("untested");
+    expect(item?.latestEval?.status).toBe("pass");
+    expect(item?.latestEval?.count).toBe(1);
+    expect(item?.sourceReadiness.status).toBe("eval_recorded");
+    expect(item?.sourceReadiness.requiredBeforeTrust).toEqual([
+      "Explicit trusted-status decision.",
+    ]);
+    expect(item?.sourceReadiness.nextStep).toContain("does not mark this trusted");
+  });
 });
