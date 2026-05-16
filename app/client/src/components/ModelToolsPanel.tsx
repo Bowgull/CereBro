@@ -94,6 +94,14 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   const [evalSummary, setEvalSummary] = useState("");
   const [evalOutcome, setEvalOutcome] = useState<(typeof EVAL_OUTCOMES)[number]>("recorded");
   const [evalNotes, setEvalNotes] = useState("");
+  const [evalNotesOpen, setEvalNotesOpen] = useState(false);
+  const [ollamaStatusOpen, setOllamaStatusOpen] = useState(false);
+  const [routePreviewInput, setRoutePreviewInput] = useState<{
+    taskKind: string;
+    modality?: string;
+    privacyClass: PrivacyClass;
+    requiresFrontier: boolean;
+  } | null>(null);
 
   const policy = trpc.modelTools.policy.useQuery();
   const capabilities = trpc.modelTools.capabilities.useQuery({
@@ -102,17 +110,28 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
     provider: providerFilter.trim() || undefined,
     limit: 80,
   });
-  const evals = trpc.modelTools.evals.useQuery({
-    capabilityId: selectedCapabilityId ?? undefined,
-    limit: 80,
-  });
-  const ollamaStatusApprovals = trpc.modelTools.ollamaStatusApprovalPreviews.useQuery({ limit: 5 });
-  const routePreview = trpc.modelTools.routePreview.useQuery({
-    taskKind: routeTask.trim() || "general routing preview",
-    modality: routeModality.trim() || undefined,
-    privacyClass: routePrivacy,
-    requiresFrontier,
-  });
+  const ollamaStatusApprovals = trpc.modelTools.ollamaStatusApprovalPreviews.useQuery(
+    { limit: 5 },
+    {
+      enabled: ollamaStatusOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const routePreview = trpc.modelTools.routePreview.useQuery(
+    routePreviewInput ?? {
+      taskKind: "general routing preview",
+      privacyClass: "unknown",
+      requiresFrontier: false,
+    },
+    {
+      enabled: routePreviewInput != null,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
 
   const createCapability = trpc.modelTools.proposeCapability.useMutation({
     onSuccess: (result) => {
@@ -149,6 +168,18 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
 
   const rows = capabilities.data?.items ?? [];
   const selectedCapability = rows.find((item) => item.id === selectedCapabilityId) ?? rows[0] ?? null;
+  const evals = trpc.modelTools.evals.useQuery(
+    {
+      capabilityId: selectedCapability?.id,
+      limit: 80,
+    },
+    {
+      enabled: evalNotesOpen && selectedCapability != null,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const policyData = policy.data;
   const localEvalTasks = policyData?.evalTasks ?? [];
   const route = routePreview.data;
@@ -192,6 +223,15 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       evaluatorAgent: "spock",
       validationNotes: evalNotes.trim() || undefined,
       privacyNotes: "Local eval note only. No provider call was made.",
+    });
+  }
+
+  function readRoutePreview() {
+    setRoutePreviewInput({
+      taskKind: routeTask.trim() || "general routing preview",
+      modality: routeModality.trim() || undefined,
+      privacyClass: routePrivacy,
+      requiresFrontier,
     });
   }
 
@@ -303,7 +343,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             </div>
 
-            <details className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <details
+              className="mt-2 rounded p-2 text-[11px] leading-snug"
+              onToggle={(event) => setOllamaStatusOpen(event.currentTarget.open)}
+              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+            >
               <summary className="cursor-pointer">
                 <span className="flex flex-wrap items-start justify-between gap-2">
                   <span>
@@ -346,10 +390,15 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 >
                   Open Approval Queue
                 </Button>
-                <Badge label={`pending ${ollamaStatusApprovals.data?.items.filter((item) => item.status === "pending").length ?? 0}`} tone={C.warning} />
+                <Badge
+                  label={ollamaStatusOpen ? `pending ${ollamaStatusApprovals.data?.items.filter((item) => item.status === "pending").length ?? 0}` : "open to read"}
+                  tone={ollamaStatusOpen ? C.warning : C.textMuted}
+                />
               </div>
               <div className="mt-2 grid gap-1">
-                {(ollamaStatusApprovals.data?.items ?? []).length === 0 ? (
+                {ollamaStatusApprovals.isLoading ? (
+                  <div style={{ color: C.textMuted }}>Reading local approval previews.</div>
+                ) : (ollamaStatusApprovals.data?.items ?? []).length === 0 ? (
                   <div style={{ color: C.textMuted }}>No local approval previews staged for this check.</div>
                 ) : ollamaStatusApprovals.data?.items.map((item) => (
                   <div key={item.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -533,9 +582,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             </form>
           </details>
 
-          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <details
+            className="rounded p-2"
+            onToggle={(event) => setEvalNotesOpen(event.currentTarget.open)}
+            style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+          >
             <summary className="cursor-pointer">
-              <SectionTitle title="Eval Note" detail={selectedCapability ? `for ${selectedCapability.id}` : "unlinked"} />
+              <SectionTitle title="Eval Note" detail={evalNotesOpen ? selectedCapability ? `for ${selectedCapability.id}` : "unlinked" : "open to read"} />
             </summary>
             <form onSubmit={submitEval} className="mt-2 space-y-2" aria-label="Record local model tool eval note">
             <AppSelect label="Eval task" value={evalTaskKey} onChange={setEvalTaskKey} options={localEvalTasks.map((task) => task.key)} />
@@ -552,7 +605,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               {recordEval.isPending ? "Recording" : "Record Eval Note"}
             </Button>
             <div className="grid max-h-52 gap-1.5 overflow-y-auto" aria-label="Recent model tool eval notes">
-              {(evals.data?.items ?? []).length === 0 ? (
+              {!evalNotesOpen ? (
+                <div className="text-[11px]" style={{ color: C.textMuted }}>Open to read recent local eval notes.</div>
+              ) : evals.isLoading ? (
+                <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local eval notes.</div>
+              ) : (evals.data?.items ?? []).length === 0 ? (
                 <div className="text-[11px]" style={{ color: C.textMuted }}>No eval notes for this selection.</div>
               ) : evals.data?.items.map((item) => (
                 <div key={item.id} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -569,7 +626,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </details>
 
           <section className="rounded p-2 space-y-2" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <SectionTitle title="Route Preview" detail={route?.routeStatus ?? "proposal"} />
+            <SectionTitle title="Route Preview" detail={routePreviewInput ? route?.routeStatus ?? "reading" : "open to read"} />
             <Input value={routeTask} onChange={(event) => setRouteTask(event.target.value)} aria-label="Route preview task kind" />
             <Input value={routeModality} onChange={(event) => setRouteModality(event.target.value)} aria-label="Route preview modality" />
             <AppSelect label="Route privacy class" value={routePrivacy} onChange={(value) => setRoutePrivacy(value as PrivacyClass)} options={PRIVACY_CLASSES} />
@@ -577,7 +634,20 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <Checkbox checked={requiresFrontier} onCheckedChange={(checked) => setRequiresFrontier(checked === true)} />
               Requires frontier reasoning
             </label>
-            {route && (
+            <Button
+              type="button"
+              onClick={readRoutePreview}
+              disabled={routePreview.isLoading}
+              title="Read a local route preview. No provider, model, tool, gateway, browser, or install action runs."
+              aria-label="Read local model route preview"
+            >
+              {routePreview.isLoading ? "Reading" : "Read Preview"}
+            </Button>
+            {!routePreviewInput ? (
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                Route preview is local and reads only when requested.
+              </div>
+            ) : route && (
               <div className="space-y-2">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />

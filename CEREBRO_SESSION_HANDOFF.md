@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2130 EDT
+Last updated: 2026-05-15 2319 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2319 EDT - Model Tools Support Lazy Reads
+
+### What Changed
+- Model Tools eval notes no longer read on panel open.
+- The `Eval Note` drawer now starts closed and says `open to read`; opening it
+  reads local eval notes with a 30 second stale cache.
+- `Route Preview` no longer reads as the form changes. It stays quiet until
+  `Read Preview` is pressed, then performs one local route-preview read.
+- Ollama status approval previews now read only after the `Install Status
+  Check` drawer opens.
+
+### Files Touched
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Basement -> Models starts with `Eval Note open to read` and `Route Preview
+  open to read`; pressing `Read Preview` shows the local route receipt; opening
+  `Install Status Check` reads the staged local approval previews.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Model Tools support read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Model Tools UI read-gating
+  slice.
+
+### Front-End Steward Review
+- Basement Models keeps capability rules, local lanes, creative lanes, and the
+  registry visible.
+- Local eval history, route preview work, and Ollama approval previews remain
+  available, but they now read only after the user asks for them.
+- This keeps the support machinery below the surface and protects the fast AI
+  OS shape.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+support-read reduction on another high-traffic drawer, then move back to the
+runtime contract path only if it closes a missing visible action in the Aang ->
+Workbench -> Ledger loop.
 
 ## 2026-05-15 2130 EDT - Hedwig Approval Preview Lazy Read
 

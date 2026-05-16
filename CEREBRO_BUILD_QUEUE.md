@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-15
+Last updated: 2026-05-15 2319 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -216,6 +216,8 @@ Recent Prime slices:
 - 2026-05-15 2130 EDT: gated Hedwig proposal approval-preview reads behind the
   selected proposal's `Approval Previews` drawer. Selected proposals now start
   with `open to read`.
+- 2026-05-15 2319 EDT: gated Model Tools eval notes, route preview reads, and
+  Ollama approval-preview reads behind explicit open/read actions.
 
 ### Frontend Worker
 
