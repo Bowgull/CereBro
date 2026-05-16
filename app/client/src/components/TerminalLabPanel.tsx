@@ -74,17 +74,40 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const selectedTaskNumber = selectedTaskId ? Number(selectedTaskId) : undefined;
   const tasks = trpc.tasks.workQueue.useQuery(
     { limit: 80, focusedTaskId: selectedTaskNumber },
-    { refetchInterval: 10000 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
-  const sessions = trpc.sessions.recent.useQuery({ limit: 25 }, { refetchInterval: 5000 });
-  const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.recent.useQuery(
+    { limit: 25 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const projectOverview = trpc.projectIntelligence.overview.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const terminalEvidence = trpc.workbench.evidenceSummary.useQuery(
     { kind: "terminal_output", latestLimit: 50 },
-    { refetchInterval: 10000 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const workbenchReceipts = trpc.workbench.evidenceSummary.useQuery(
     { groupBy: "project", latestLimit: 1 },
-    { refetchInterval: 10000 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const preview = trpc.terminalLab.previewCommand.useMutation();
   const observeOutput = trpc.terminalLab.observeOutput.useMutation();

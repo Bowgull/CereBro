@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2008 EDT
+Last updated: 2026-05-15 2011 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2011 EDT - Project And Terminal Polling Cleanup
+
+### What Changed
+- Removed the remaining polling timers from Terminal Lab's task, session,
+  project, terminal receipt, and project receipt reads.
+- Removed Project Lab's remaining overview, git status, and project receipt
+  polling timers.
+- Standardized both panels on 30 second stale local reads with focus/reconnect
+  refetch disabled.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Project Lab and Terminal Lab idle polling cleanup.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a two-file UI query-policy slice and the
+  state stayed tightly coupled.
+
+### Front-End Steward Review
+- Terminal Lab still stays proposal-only.
+- Project Lab still shows the project map, git read badge, receipt counts, and
+  selected project inspector.
+- The visible surfaces no longer keep rereading the same local rows on timers
+  while idle.
+
+### Completion Read
+- Overall: 60%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: inspect
+remaining high-traffic surfaces for timer polling or move into the next runtime
+receipt contract if the visible shell is calm enough.
 
 ## 2026-05-15 2008 EDT - Project Lab Detail Read Cache Pass
 

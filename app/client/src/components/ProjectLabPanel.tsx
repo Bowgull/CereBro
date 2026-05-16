@@ -272,11 +272,23 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [pushReceiptSlug, setPushReceiptSlug] = useState<string | null>(null);
   const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
-  const overview = trpc.projectIntelligence.overview.useQuery(undefined, { refetchInterval: 10000 });
-  const projectGitStatus = trpc.projectIntelligence.gitStatus.useQuery(undefined, { refetchInterval: 30000 });
+  const overview = trpc.projectIntelligence.overview.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const projectGitStatus = trpc.projectIntelligence.gitStatus.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const workbenchEvidenceSummary = trpc.workbench.evidenceSummary.useQuery(
     { groupBy: "project", latestLimit: 1 },
-    { refetchInterval: 10000 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const utils = trpc.useUtils();
   const [lastDraftNoteNotice, setLastDraftNoteNotice] = useState<{ draftId: number; noteId: number } | null>(null);
