@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0723 EDT
+Last updated: 2026-05-16 0728 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -698,6 +698,9 @@ Expected shape:
 - Selected Workbench receipt details now use the same low-machinery labels:
   `Receipt Details`, `Assigned Agent`, `Marked Area`, `Preview Reference`, and
   `Preview Storage`.
+- Ledger now uses a copy model for audit-trail language. The nav reads `Audit
+  what happened.`, the overview says `Local audit trail`, route records are
+  `Recent Route Receipts`, and route buttons are `Next Actions`.
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.

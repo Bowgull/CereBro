@@ -43,6 +43,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
+import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
 import { routeActionModel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
@@ -92,7 +93,7 @@ interface ZoneSurface {
 const ZONE_NAV_ITEMS: ZoneNavItem[] = [
   { zone: "keep", id: "home", label: "Keep", glyph: "◆", blurb: "Understand what is active." },
   { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: "Do the work with receipts." },
-  { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: "Prove what happened." },
+  { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: ledgerNavCopy().blurb },
   { zone: "basement", id: "basement", label: "Basement", glyph: "⚙", blurb: "Configure the machine." },
 ];
 
@@ -991,6 +992,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       utils.workbench.evidenceSummary.invalidate();
     },
   });
+  const ledgerCopy = ledgerOverviewCopy();
 
   const overviewCards = ledgerOverview.data?.cards;
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
@@ -1090,7 +1092,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     {
       label: "Routes",
       value: String(overviewCards?.routes.total ?? 0),
-      meta: "Aang to Cortana reads",
+      meta: "route receipts",
       target: "ledger" as NavId,
       tone: C.accent,
     },
@@ -1299,10 +1301,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[12px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                Ledger Overview
+                {ledgerCopy.title}
               </h2>
               <p className="mt-1 max-w-2xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                Local history. Select a receipt to inspect the body, project, validation, and next step.
+                {ledgerCopy.subtitle}
               </p>
             </div>
             <Badge variant="secondary" className="uppercase">read-only</Badge>
@@ -1341,17 +1343,17 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Recent route records">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Recent Route Reads
+              {ledgerCopy.routeSectionTitle}
             </div>
             <Badge variant="secondary" className="uppercase">local only</Badge>
           </div>
           {ledgerOverview.isLoading ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Reading local route records.
+              {ledgerCopy.routeLoadingText}
             </div>
           ) : latestRouteRows.length === 0 ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No route records yet. Ask Aang to read a request, then save the route before work starts.
+              {ledgerCopy.routeEmptyText}
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
@@ -1386,14 +1388,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       )}
                       {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">receipt #{routeEvidenceId}</span></Badge>}
                     </div>
-                    <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
-                      {item.originalText}
+                    <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={ledgerRouteText(item.originalText)}>
+                      {ledgerRouteText(item.originalText)}
                     </div>
-                    <div className="mt-1 line-clamp-2 text-[11px] leading-snug" style={{ color: C.textMuted }} title={item.nextAction}>
-                      {item.nextAction}
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-snug" style={{ color: C.textMuted }} title={ledgerRouteText(item.nextAction)}>
+                      {ledgerRouteText(item.nextAction)}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] leading-none" style={{ color: C.textMuted }}>
-                      <span>Aang read</span>
+                      <span>Aang</span>
                       <span style={{ color: C.border }}>/</span>
                       <span>{item.mode}</span>
                       <span style={{ color: C.border }}>/</span>
@@ -1402,10 +1404,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} safe actions`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <div className="mb-1 flex items-center justify-between gap-2">
                         <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-                          Safe actions
+                          {ledgerCopy.routeActionsTitle}
                         </span>
                         <span className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                          no execution
+                          {ledgerCopy.noExecutionText}
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
@@ -1455,28 +1457,28 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench receipts">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              {ledgerFocusProject ? `${ledgerFocusProject.name ?? "Focused Project"} Workbench Receipts` : "Latest Workbench Receipts"}
+              {ledgerFocusProject ? `${ledgerFocusProject.name ?? "Focused Project"} Workbench Receipts` : ledgerCopy.receiptSectionTitle}
             </div>
             <Button
               type="button"
               onClick={() => onNavigate("workbench")}
               variant="outline"
               size="sm"
-              title="Open Workbench. Ledger stays read-only."
-              aria-label="Open Workbench receipt bodies. Ledger stays read-only."
+              title={ledgerCopy.workbenchButtonTitle}
+              aria-label={ledgerCopy.workbenchButtonAria}
             >
-              Open Workbench Bodies
+              {ledgerCopy.workbenchButton}
             </Button>
           </div>
           {ledgerOverview.isLoading ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Reading local Workbench receipts.
+              {ledgerCopy.receiptLoadingText}
             </div>
           ) : latestEvidenceRows.length === 0 ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
               {ledgerFocusProject
-                ? `No local Workbench receipts are linked to ${ledgerFocusProject.name ?? "this project"} in the current Ledger read.`
-                : "No Workbench receipts yet. Open Workbench Bodies and save the first local receipt."}
+                ? ledgerCopy.focusedReceiptEmptyText(ledgerFocusProject.name)
+                : ledgerCopy.receiptEmptyText}
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
@@ -1494,7 +1496,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     <span className="flex flex-wrap items-center gap-1">
                       <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">#{item.id}</span></Badge>
                       <Badge variant={item.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
-                        <span className="min-w-0 truncate">{item.kind.replace(/_/g, " ")}</span>
+                        <span className="min-w-0 truncate">{ledgerKindLabel(item.kind)}</span>
                       </Badge>
                       <Badge variant={item.validationStatus === "needs_review" ? "warning" : "success"} className="uppercase">
                         <span className="min-w-0 truncate">{item.validationStatus.replace(/_/g, " ")}</span>
@@ -1505,7 +1507,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       {item.title}
                     </span>
                     <span className="mt-1 block line-clamp-2 text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>
-                      {item.summary}
+                      {ledgerReceiptSummary(item.summary)}
                     </span>
                   </span>
                 </Button>
@@ -1513,7 +1515,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           )}
           {selectedEvidence && (
-            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Selected Workbench receipt preview">
+            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label={ledgerCopy.selectedAriaLabel}>
               {ledgerFocusNotice && (
                 <div className="mb-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
                   <span className="min-w-0">{ledgerFocusNotice}</span>
@@ -1531,7 +1533,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 <div className="flex flex-wrap items-center gap-1">
                   <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">receipt #{selectedEvidence.id}</span></Badge>
                   <Badge variant={selectedEvidence.kind === "terminal_output" ? "warning" : "default"} className="uppercase">
-                    <span className="min-w-0 truncate">{selectedEvidence.kind.replace(/_/g, " ")}</span>
+                    <span className="min-w-0 truncate">{ledgerKindLabel(selectedEvidence.kind)}</span>
                   </Badge>
                   <Badge variant={selectedEvidence.sensitive ? "destructive" : "success"} className="uppercase">
                     <span className="min-w-0 truncate">{selectedEvidence.sensitive ? "sensitive" : "local"}</span>
@@ -1567,10 +1569,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
                 <Badge variant="secondary" className="uppercase">
-                  <span className="min-w-0 truncate">audit read only</span>
+                  <span className="min-w-0 truncate">{ledgerCopy.auditReadBadge}</span>
                 </Badge>
                 <span className="min-w-0">
-                  Receipt path: Workbench holds the body. Ledger holds the audit trail. Project Lab reads push context.
+                  {ledgerCopy.receiptPath}
                 </span>
               </div>
               <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-5" aria-label="Selected receipt audit read">
@@ -1591,7 +1593,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     {selectedEvidence.title}
                   </div>
                   <div className="mt-1 line-clamp-3 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    {selectedEvidence.summary}
+                    {ledgerReceiptSummary(selectedEvidence.summary)}
                   </div>
                 </div>
                 <div className="grid min-w-0 gap-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
@@ -1609,11 +1611,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
         <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Ledger Rules
+            {ledgerCopy.rulesTitle}
           </summary>
           <div className="mt-2 grid gap-2">
             <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Receipt before summary. Workbench holds bodies. Ledger holds the audit trail. Project Lab reads push context.
+              {ledgerCopy.rulesBody}
             </div>
             <div className="grid gap-1.5 md:grid-cols-3">
               <LedgerRule title="External action" body="Needs an approval receipt before it runs." tone={C.warning} />

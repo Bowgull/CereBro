@@ -21342,3 +21342,82 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench selected receipt details now use low-machinery labels, and recent rows no longer surface metadata/media wording. Next best slice: move to Ledger receipt/audit copy and make sure Ledger reads as the audit trail, not a technical proof dump. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0728 EDT - Ledger audit trail copy model
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Ledger visible-copy slice.
+
+What changed:
+
+- Added `ledgerCopyModel` to guard Ledger language.
+- Ledger nav now says `Audit what happened.` instead of proof language.
+- Ledger header now says `Local audit trail`.
+- `Recent Route Reads` now reads as `Recent Route Receipts`.
+- Route card controls now read `Next Actions` instead of `Safe actions`.
+- Route count card now says `route receipts` instead of `Aang to Cortana
+  reads`.
+- Old saved route text containing `proof` is softened for Ledger display as
+  `audit note`; stored rows are not rewritten.
+- Ledger receipt summaries share the same low-machinery cleanup pattern as
+  Workbench for old `Metadata-only` preview notes.
+
+Files touched in this slice:
+
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/ledgerCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/ledgerCopyModel.test.ts` passed,
+  3 tests.
+- `git diff --check -- app/client/src/pages/Home.tsx
+  app/client/src/lib/ledgerCopyModel.ts app/server/ledgerCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, and confirmed
+  `Local audit trail`, `Recent Route Receipts`, `Next Actions`, `route
+  receipts`, and `staged route receipt audit note`; old `Aang to Cortana
+  reads`, `Safe actions`, `Route Reads`, and `staged route receipt proof` were
+  absent from the visible Ledger text.
+
+Drift check:
+
+- On path because Ledger is the approved receipts and audit-trail surface after
+  Workbench.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Ledger still has dense route action mechanics. Next best pass should inspect
+  whether those controls need grouping or calmer labels, without hiding the
+  actual route-to-task/body/gate path.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Ledger now has an audit-trail copy model and no longer defaults to proof/route-read wording. Next best slice: continue Ledger by reviewing route action controls for low-machinery grouping and labels, or move to Sessions/Ledger run history if the route cards look acceptable in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
