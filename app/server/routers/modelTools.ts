@@ -490,46 +490,114 @@ const capabilityMap = [
   },
 ] as const;
 
-export const modelToolsRouter = router({
-  policy: publicProcedure.query(async () => ({
-    mode: "proposal_only",
-    writesExternal: false,
-    callsExternalModels: false,
-    installsDependencies: false,
-    browsesOrFetches: false,
-    routingStance: "Fast local-first, not local-only. Use Ollama/local lanes when possible, then escalate only when quality or size requires it.",
-    speedStance: "Instant shell, rule-based previews, small local models for small jobs, and visible background work for anything slow.",
-    registryStatus: "local_proposal_records_only",
-    gatewayCandidates: ["CereBro-native gateway", "LiteLLM", "OpenRouter", "direct provider SDKs"],
-    registryShape: {
-      required: [
-        "provider",
-        "tool/model name",
-        "access method",
-        "free tier/rate limit/cost",
-        "modality",
-        "privacy class",
-        "prompt style",
-        "eval status",
-        "source URLs",
-        "last verified date",
-      ],
-      rule: "A capability is a proposal until source-verified or eval-tested.",
+function countValue(row: Record<string, unknown> | undefined, key: string) {
+  return Number(row?.[key] ?? 0);
+}
+
+async function readCapabilityMapSummary() {
+  const db = await getCerebroDb();
+  const [totals, evalTotals, mapCounts] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN eval_status = 'untested' THEN 1 ELSE 0 END) AS untested,
+          SUM(CASE WHEN eval_status IN ('tested_pass', 'tested_mixed', 'tested_fail') THEN 1 ELSE 0 END) AS tested,
+          SUM(CASE WHEN access_method != 'local' THEN 1 ELSE 0 END) AS external,
+          SUM(CASE WHEN privacy_class = 'blocked_sensitive' OR approval_level = 'blocked' THEN 1 ELSE 0 END) AS blocked
+        FROM model_tool_capabilities
+      `,
+      args: [],
+    }),
+    db.execute({
+      sql: "SELECT COUNT(*) AS total FROM model_tool_evals",
+      args: [],
+    }),
+    db.execute({
+      sql: `
+        SELECT
+          SUM(CASE WHEN access_method = 'local' THEN 1 ELSE 0 END) AS local_first,
+          SUM(CASE WHEN access_method != 'local' OR capability_kind = 'gateway' THEN 1 ELSE 0 END) AS external_gateway,
+          SUM(CASE WHEN capability_kind IN ('image_generation', 'video_frames') AND privacy_class != 'blocked_sensitive' THEN 1 ELSE 0 END) AS creative_normal,
+          SUM(CASE WHEN privacy_class = 'blocked_sensitive' OR approval_level = 'blocked' THEN 1 ELSE 0 END) AS creative_sealed
+        FROM model_tool_capabilities
+      `,
+      args: [],
+    }),
+  ]);
+
+  const totalRow = totals.rows[0] as Record<string, unknown> | undefined;
+  const evalRow = evalTotals.rows[0] as Record<string, unknown> | undefined;
+  const mapRow = mapCounts.rows[0] as Record<string, unknown> | undefined;
+
+  return {
+    totalRecords: countValue(totalRow, "total"),
+    untestedRecords: countValue(totalRow, "untested"),
+    testedRecords: countValue(totalRow, "tested"),
+    externalRecords: countValue(totalRow, "external"),
+    blockedRecords: countValue(totalRow, "blocked"),
+    evalNotes: countValue(evalRow, "total"),
+    mapCounts: {
+      local_first: countValue(mapRow, "local_first"),
+      external_gateway: countValue(mapRow, "external_gateway"),
+      creative_normal: countValue(mapRow, "creative_normal"),
+      creative_sealed: countValue(mapRow, "creative_sealed"),
     },
-    capabilityMap,
-    evalTasks,
-    gates: [
-      "Surfer may propose model/tool discoveries only with source URLs and date checked.",
-      "Cortana routes, Batman risk-reviews, Spock/Oak validate, and Piccolo watches cost/rate-limit/staleness.",
-      "External model/tool use requires visible approval and a summary of data leaving the machine.",
-      "No model/tool becomes a recommended default without an eval or an explicit untested label.",
-      "Ollama stays on the core local-first path, but install, pulls, deletes, and background inference still need approval.",
-      "Raven outputs stay outside normal CereBro memory, RAG, galleries, Workbench, Ledger, and vault lanes unless the user approves a scrubbed bridge summary.",
+    noActionTaken: [
+      "Summary reads local registry rows only.",
+      "No provider, model, gateway, browser, install, pull, or external tool ran.",
     ],
-    ollamaSetupPlan,
-    localModelLanes,
-    creativeLanes,
-  })),
+  };
+}
+
+export const modelToolsRouter = router({
+  policy: publicProcedure.query(async () => {
+    const capabilityMapSummary = await readCapabilityMapSummary();
+
+    return {
+      mode: "proposal_only",
+      writesExternal: false,
+      callsExternalModels: false,
+      installsDependencies: false,
+      browsesOrFetches: false,
+      routingStance: "Fast local-first, not local-only. Use Ollama/local lanes when possible, then escalate only when quality or size requires it.",
+      speedStance: "Instant shell, rule-based previews, small local models for small jobs, and visible background work for anything slow.",
+      registryStatus: "local_proposal_records_only",
+      gatewayCandidates: ["CereBro-native gateway", "LiteLLM", "OpenRouter", "direct provider SDKs"],
+      registryShape: {
+        required: [
+          "provider",
+          "tool/model name",
+          "access method",
+          "free tier/rate limit/cost",
+          "modality",
+          "privacy class",
+          "prompt style",
+          "eval status",
+          "source URLs",
+          "last verified date",
+        ],
+        rule: "A capability is a proposal until source-verified or eval-tested.",
+      },
+      capabilityMap: capabilityMap.map((lane) => ({
+        ...lane,
+        registryRecordCount: capabilityMapSummary.mapCounts[lane.id],
+      })),
+      capabilityMapSummary,
+      evalTasks,
+      gates: [
+        "Surfer may propose model/tool discoveries only with source URLs and date checked.",
+        "Cortana routes, Batman risk-reviews, Spock/Oak validate, and Piccolo watches cost/rate-limit/staleness.",
+        "External model/tool use requires visible approval and a summary of data leaving the machine.",
+        "No model/tool becomes a recommended default without an eval or an explicit untested label.",
+        "Ollama stays on the core local-first path, but install, pulls, deletes, and background inference still need approval.",
+        "Raven outputs stay outside normal CereBro memory, RAG, galleries, Workbench, Ledger, and vault lanes unless the user approves a scrubbed bridge summary.",
+      ],
+      ollamaSetupPlan,
+      localModelLanes,
+      creativeLanes,
+    };
+  }),
 
   capabilities: publicProcedure
     .input(

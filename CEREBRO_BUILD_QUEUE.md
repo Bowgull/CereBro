@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1544 EDT
+Last updated: 2026-05-16 1555 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -814,3 +814,7 @@ Expected shape:
   Continue by adding compact live registry/eval counts or tightening the
   registry proposal/eval read. Do not install, pull, run models, call external
   providers, or route Raven content into CereBro.
+- Model Tools now reads live local registry/eval counts and groups duplicate
+  capability rows in the visible list. The next item 9 slice should add a
+  source-verified proposal path or approved Ollama status/capability read. Do
+  not clean the repeated dev DB rows without a separate data-cleanup approval.

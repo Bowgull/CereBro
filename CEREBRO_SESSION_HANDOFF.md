@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0102 EDT
+Last updated: 2026-05-16 1555 EDT
 
 ## Current North Star
 
@@ -22816,4 +22816,95 @@ Next-session starter prompt:
 
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 on the build path. Model Tools now has a read-only Basement capability map for local-first, external gateway, Gojo creative, and Raven sealed lanes. Next best slice is to add compact live registry/eval counts to that map, or move to the first safe registry proposal/eval read refinement if the map is enough. Keep model/tool setup Basement-only. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, create accounts, add plugins, or route Raven content into CereBro. Run targeted tests, pnpm check, browser-proof if tools allow, update handoff, archive to Obsidian, commit, and push when the slice is clean.
+```
+
+## 2026-05-16 1555 EDT - Model registry live counts and grouping
+
+Completion:
+
+- Overall: 67%
+- Frontend visible loop: 99%
+- Backend/runtime: 62%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+Working read:
+
+- Current health: local dev server returned `200 OK`; TypeScript passed;
+  targeted model/route tests passed before edits.
+- Highest-risk unfinished systems: real agent execution, eval-backed model/tool
+  routing, source/RAG automation, browser safety adapters, and storage
+  lifecycle automation.
+- UI taste audit target: Basement Model Tools. Register is product surface.
+  The issue was not styling. It was the registry reading like policy plus a
+  duplicate row flood instead of a useful capability read.
+- Not changed: Phaser Keep, primary nav, Aang/Cortana route model, Raven
+  boundaries, external installs, model pulls, provider calls, unrelated dirty
+  docs, and database contents.
+
+What changed:
+
+- Added live read-only registry summary counts to `modelTools.policy`.
+- Added per-lane registry counts to the Basement capability map.
+- Updated Model Tools header and capability map to show registry rows, eval
+  notes, untested/tested/external counts, and read-only no-action status.
+- Collapsed duplicate capability rows in the visible registry list into groups,
+  so the local dev DB's repeated `Example AI` records display as one group with
+  a copy count instead of flooding the screen.
+- Added `.gitignore` coverage for local `output/` browser proof artifacts.
+- Added targeted test coverage proving live counts update from local proposal
+  and eval records without running providers or models.
+
+Files touched in this slice:
+
+- `.gitignore`
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+Checks run:
+
+- `pnpm -C app check`
+- `CEREBRO_DB_URL='file:/tmp/cerebro-health-modeltools.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-counts.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-groups.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app build`
+- Playwright browser proof against `http://localhost:3000/`: opened Basement
+  Models and confirmed `306 proposals. 1 visible groups`, `80 copies`, live
+  registry counts, and no-action/read-only map status.
+- Screenshot proof saved locally at
+  `output/playwright/model-tools-capability-map-1544.png`.
+
+Drift check:
+
+- On path. This advances build item 9, Model and Tool Registry as Basement
+  capability map.
+- Taste references were used as product-register pressure: reject duplicate
+  clutter before polishing. No external skill files, repos, dependencies, or
+  generated UI code were installed or copied.
+- No Raven data was read or routed. A stale Playwright tab briefly pointed at a
+  separate local Raven page; it was closed out by explicitly reopening CereBro.
+
+Known risks:
+
+- The dev DB has many repeated `Example AI` capability rows. This pass grouped
+  them in the UI but did not delete or migrate data.
+- Local-first count is currently zero because the app DB has no recorded local
+  model capability rows yet. That is truthful until the approved Ollama/status
+  pass records local capabilities.
+
+Storage impact:
+
+- No schema change.
+- Test databases were written under `/tmp`.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9. Model Tools now has live registry/eval counts and duplicate grouping. Next best slice is either a safe read-only local capability proposal path for Ollama status once the user approves the status check, or a small Source/Model Registry bridge that lets Surfer propose source-verified model/tool rows without calling providers. Keep it Basement-only. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, add dependencies, clean DB rows, or route Raven content into CereBro without explicit approval. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
 ```

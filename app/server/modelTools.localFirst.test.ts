@@ -104,4 +104,43 @@ describe("Model Tools local-first routing policy", () => {
     expect(preview?.costRisk).toBe("local_read_only_command_review");
     expect(preview?.permissionPreflightId).toBe(result.approval?.permissionPreflightId);
   });
+
+  it("returns live registry counts without running a model or provider", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const before = await caller.modelTools.policy();
+    const local = await caller.modelTools.proposeCapability({
+      provider: `Local Test ${stamp}`,
+      toolName: "Small local formatter",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:test",
+    });
+    await caller.modelTools.proposeCapability({
+      provider: `Gateway Test ${stamp}`,
+      toolName: "External gateway candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/gateway",
+    });
+    await caller.modelTools.recordEval({
+      capabilityId: local.capability.id,
+      evalTaskKey: "handoff_prompt_gate",
+      taskSummary: "Local count test. No model ran.",
+      status: "recorded",
+      evaluatorAgent: "spock",
+    });
+
+    const after = await caller.modelTools.policy();
+
+    expect(after.capabilityMapSummary.totalRecords).toBeGreaterThanOrEqual(before.capabilityMapSummary.totalRecords + 2);
+    expect(after.capabilityMapSummary.evalNotes).toBeGreaterThanOrEqual(before.capabilityMapSummary.evalNotes + 1);
+    expect(after.capabilityMap.find((lane) => lane.id === "local_first")?.registryRecordCount).toBeGreaterThanOrEqual(1);
+    expect(after.capabilityMap.find((lane) => lane.id === "external_gateway")?.registryRecordCount).toBeGreaterThanOrEqual(1);
+    expect(after.capabilityMapSummary.noActionTaken.join(" ")).toContain("No provider");
+  });
 });

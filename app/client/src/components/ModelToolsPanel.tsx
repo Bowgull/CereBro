@@ -167,7 +167,28 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   });
 
   const rows = capabilities.data?.items ?? [];
-  const selectedCapability = rows.find((item) => item.id === selectedCapabilityId) ?? rows[0] ?? null;
+  const groupedRows = useMemo(() => {
+    const groups = new Map<string, { key: string; representative: (typeof rows)[number]; count: number }>();
+    for (const item of rows) {
+      const key = [
+        item.provider,
+        item.toolName,
+        item.capabilityKind,
+        item.accessMethod,
+        item.privacyClass,
+        item.approvalLevel,
+        item.evalStatus,
+      ].join("::");
+      const existing = groups.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        groups.set(key, { key, representative: item, count: 1 });
+      }
+    }
+    return Array.from(groups.values());
+  }, [rows]);
+  const selectedCapability = rows.find((item) => item.id === selectedCapabilityId) ?? groupedRows[0]?.representative ?? null;
   const evals = trpc.modelTools.evals.useQuery(
     {
       capabilityId: selectedCapability?.id,
@@ -183,6 +204,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   const policyData = policy.data;
   const localEvalTasks = policyData?.evalTasks ?? [];
   const route = routePreview.data;
+  const summary = policyData?.capabilityMapSummary;
 
   const registryCounts = useMemo(() => {
     const untested = rows.filter((item) => item.evalStatus === "untested").length;
@@ -259,9 +281,9 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-5" aria-label="Model registry status">
           <StatusBlock label="Mode" value={policyData?.mode ?? "proposal_only"} tone={C.textSecondary} />
           <StatusBlock label="External calls" value={policyData?.callsExternalModels ? "yes" : "no"} tone={policyData?.callsExternalModels ? C.danger : C.success} />
-          <StatusBlock label="Untested" value={String(registryCounts.untested)} tone={registryCounts.untested ? C.warning : C.success} />
-          <StatusBlock label="External lanes" value={String(registryCounts.external)} tone={registryCounts.external ? C.warning : C.textSecondary} />
-          <StatusBlock label="Blocked" value={String(registryCounts.blocked)} tone={registryCounts.blocked ? C.danger : C.success} />
+          <StatusBlock label="Registry rows" value={String(summary?.totalRecords ?? rows.length)} tone={summary?.totalRecords ? C.accent : C.textMuted} />
+          <StatusBlock label="Eval notes" value={String(summary?.evalNotes ?? 0)} tone={summary?.evalNotes ? C.success : C.textMuted} />
+          <StatusBlock label="Blocked" value={String(summary?.blockedRecords ?? registryCounts.blocked)} tone={(summary?.blockedRecords ?? registryCounts.blocked) ? C.danger : C.success} />
         </div>
 
         {lastWrite && (
@@ -287,6 +309,12 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             {(policyData?.capabilityMap ?? []).map((lane) => (
               <CapabilityMapCard key={lane.id} lane={lane} />
             ))}
+          </div>
+          <div className="mt-2 grid gap-1.5 sm:grid-cols-4">
+            <StatusBlock label="Untested" value={String(summary?.untestedRecords ?? registryCounts.untested)} tone={(summary?.untestedRecords ?? registryCounts.untested) ? C.warning : C.success} />
+            <StatusBlock label="Tested" value={String(summary?.testedRecords ?? 0)} tone={summary?.testedRecords ? C.success : C.textMuted} />
+            <StatusBlock label="External" value={String(summary?.externalRecords ?? registryCounts.external)} tone={(summary?.externalRecords ?? registryCounts.external) ? C.warning : C.textMuted} />
+            <StatusBlock label="No action" value="read only" tone={C.success} />
           </div>
           <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
             {policyData?.registryShape.rule ?? "A capability is a proposal until source-verified or eval-tested."}
@@ -482,7 +510,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
 
         <section className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
           <div className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <SectionTitle title="Registry" detail={`${rows.length} local proposals`} />
+            <SectionTitle title="Registry" detail={`${summary?.totalRecords ?? rows.length} proposals. ${groupedRows.length} visible groups`} />
             <div className="grid gap-1.5 md:grid-cols-[minmax(0,1fr)_150px_150px]">
               <Input
                 value={providerFilter}
@@ -507,13 +535,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             <div className="grid gap-1.5" role="list" aria-label="Model tool capability proposals">
               {capabilities.isLoading ? (
                 <div className="text-xs" style={{ color: C.textMuted }}>Reading local registry.</div>
-              ) : rows.length === 0 ? (
+              ) : groupedRows.length === 0 ? (
                 <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   No local capability proposals match these filters.
                 </div>
-              ) : rows.map((item) => (
+              ) : groupedRows.map(({ key, representative: item, count }) => (
                 <Button
-                  key={item.id}
+                  key={key}
                   type="button"
                   onClick={() => setSelectedCapabilityId(item.id)}
                   aria-label={`Inspect model tool capability ${item.id}`}
@@ -533,7 +561,10 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                         <span className="block truncate text-xs font-bold uppercase tracking-widest">{item.provider}</span>
                         <span className="mt-1 block truncate text-xs font-semibold" title={item.toolName}>{item.toolName}</span>
                       </span>
-                      <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
+                      <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                        {count > 1 && <Badge label={`${count} copies`} tone={C.warning} />}
+                        <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
+                      </span>
                     </span>
                     <span className="mt-1.5 flex flex-wrap gap-1">
                       <Badge label={labelize(item.capabilityKind)} tone={C.accent} />
@@ -738,6 +769,7 @@ function CapabilityMapCard({
     approvalRule: string;
     uiRule: string;
     noActionTaken: string;
+    registryRecordCount?: number;
   };
 }) {
   const tone = lane.status === "sealed_private" ? C.danger : lane.status === "gated_proposal" ? C.warning : C.success;
@@ -751,6 +783,7 @@ function CapabilityMapCard({
         <Badge label={labelize(lane.status)} tone={tone} />
       </div>
       <div className="mt-2 flex flex-wrap gap-1">
+        <Badge label={`${lane.registryRecordCount ?? 0} records`} tone={(lane.registryRecordCount ?? 0) > 0 ? C.accent : C.textMuted} />
         {lane.laneIds.map((id) => (
           <Badge key={id} label={labelize(id)} tone={C.textSecondary} />
         ))}
