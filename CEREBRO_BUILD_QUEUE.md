@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0645 EDT
+Last updated: 2026-05-16 0648 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0648 EDT: simplified Project Lab push decision wording. Project
+  cards now say `Push Decision`, details say `Decision Details`, and visible
+  manual command blocks say `Manual Commands` with `review first`.
 - 2026-05-16 0645 EDT: started Project Lab low-machinery cleanup. The local
   guide drawer now reads `Project Map`, receipt text stays plain, and push
   decision notes point to Project Map instead of Project Rules.

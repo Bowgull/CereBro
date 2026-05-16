@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
-import { projectLabGuideCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
+import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -411,6 +411,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   };
   const guideCopy = projectLabGuideCopy({ receiptsOpen: projectReceiptsOpen });
   const receiptCopy = projectLabReceiptCopy({ receiptsOpen: projectReceiptsOpen });
+  const pushCopy = projectLabPushCopy();
 
   useEffect(() => {
     if (projects.length === 0) return;
@@ -772,11 +773,11 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         aria-expanded={showPushReceipt}
                         aria-label={`Show push readiness receipt for ${project.name}`}
-                        title="Read the git-state receipt. Project Lab does not run git."
+                        title={pushCopy.buttonTooltip}
                         className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none"
                         style={{ color: pushTone, background: C.surface, borderColor: `${pushTone}66` }}
                       >
-                        Push Readiness
+                        {pushCopy.buttonTitle}
                         <span>{pushReadiness.label}</span>
                       </button>
                       <div className="flex flex-wrap items-center gap-1">
@@ -804,7 +805,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           variant="secondary"
                           size="sm"
                           aria-label={`Open push readiness receipt for ${project.name}`}
-                          title="Open the push decision read. This is not a git action."
+                          title={pushCopy.readButtonTooltip}
                           onClick={() => setPushReceiptSlug(showPushReceipt ? null : project.slug)}
                         >
                           Read
@@ -822,7 +823,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     />
                     <details open={showPushReceipt} className="mt-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                       <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                        Push Details
+                        {pushCopy.detailsTitle}
                       </summary>
                       <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
                         <PushModeStrip autoSelected={autoPushArmed} />
@@ -847,14 +848,14 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                             <div className="flex flex-wrap items-center justify-between gap-1">
                               <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
-                                Manual Push
+                                {pushCopy.manualBlockTitle}
                               </div>
                               <Badge variant="warning" className="uppercase">
-                                <span className="min-w-0 truncate">preview only</span>
+                                <span className="min-w-0 truncate">{pushCopy.manualBlockBadge}</span>
                               </Badge>
                             </div>
                             <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                              Copy or run these outside Project Lab after review. This panel never runs git.
+                              {pushCopy.manualBlockText}
                             </div>
                             <div className="mt-1 grid gap-0.5">
                               {pushReadiness.manualCommands.map((command) => (
@@ -1808,6 +1809,7 @@ function PushDecisionNote({
 }) {
   const readyState = pushState === "push_branch" || pushState === "open_pr" || pushState === "commit_locally";
   const receiptCopy = projectLabReceiptCopy({ receiptsOpen: statsOpen });
+  const pushCopy = projectLabPushCopy();
   const decision = (() => {
     if (!statsOpen) {
       return {
@@ -1827,7 +1829,7 @@ function PushDecisionNote({
       return {
         label: "receipts missing",
         tone: readyState ? C.warning : C.textMuted,
-        text: `No Workbench receipt is linked yet. ${pushLabel} is only a git-state read until a receipt exists.`,
+        text: pushCopy.noReceiptText(pushLabel),
       };
     }
     if (stats.validated > 0 && readyState) {

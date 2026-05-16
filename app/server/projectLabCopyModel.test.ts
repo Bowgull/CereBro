@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectLabGuideCopy, projectLabReceiptCopy } from "../client/src/lib/projectLabCopyModel";
+import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "../client/src/lib/projectLabCopyModel";
 
 describe("projectLabCopyModel", () => {
   it("names the local rule drawer as a project map guide", () => {
@@ -22,5 +22,16 @@ describe("projectLabCopyModel", () => {
     expect(closed.closedValue).toBe("open to read");
     expect(closed.closedPushText).toContain("Project Map");
     expect(closed.closedPushText).not.toContain("Project Rules");
+  });
+
+  it("keeps push decision copy plain and non-executing", () => {
+    const copy = projectLabPushCopy();
+
+    expect(copy.buttonTitle).toBe("Push Decision");
+    expect(copy.detailsTitle).toBe("Decision Details");
+    expect(copy.manualBlockTitle).toBe("Manual Commands");
+    expect(copy.noReceiptText("Push branch")).toBe("No Workbench receipt is linked yet. Push branch is only a local status read until a receipt exists.");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("readiness");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("git-state");
   });
 });

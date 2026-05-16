@@ -20720,3 +20720,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab now says Project Map instead of Project Rules. Next best slice: continue Project Lab low-machinery cleanup around push-readiness wording or detail inspector labels. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0648 EDT - Project Lab push decision copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Project Lab visible-copy pass.
+
+What changed:
+
+- Added `projectLabPushCopy` to the Project Lab copy model.
+- Project cards now say `Push Decision` instead of `Push Readiness`.
+- Push details now say `Decision Details` instead of `Push Details`.
+- Manual command blocks now say `Manual Commands` and `review first` instead
+  of `Manual Push` and `preview only`.
+- Replaced `git-state read` wording with `local status read`.
+
+Files touched in this slice:
+
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/projectLabCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts`
+  failed because `projectLabPushCopy` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts`
+  passed, 3 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Project Lab, confirmed
+  `Push Decision` and `Decision Details`, then opened a decision block and
+  confirmed `Manual Commands`, `review first`, and `Use these after review.
+  This panel never runs git.`
+
+Drift check:
+
+- On path because Project Lab is the current map surface and push decision is
+  already an approved project-card function.
+- Creative UI/UX stayed inside the lane: same surface, no behavior expansion,
+  less machinery, clearer manual-control copy.
+- No new surface, agent, plugin, model, external source, Raven path, or GitHub
+  implementation was added.
+
+Known risks:
+
+- Project Lab still exposes many project signals at once. The next pass should
+  either clean the detail inspector labels or move to Terminal Lab if Project
+  Lab feels stable.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Project Lab map and push decision copy are cleaner and tested. Next best slice: continue Project Lab detail inspector label cleanup, or move to Terminal Lab if Project Lab is stable. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
