@@ -40,6 +40,13 @@ function routeRow(row: Record<string, unknown>) {
       requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
       permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
     },
+    workbenchEvidence: row.workbench_evidence_id == null ? null : {
+      id: Number(row.workbench_evidence_id),
+      kind: String(row.workbench_evidence_kind ?? ""),
+      title: String(row.workbench_evidence_title ?? ""),
+      targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
+      permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
+    },
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
@@ -168,7 +175,12 @@ export const ledgerRouter = router({
               a.status AS approval_status,
               a.action_type AS approval_action_type,
               a.requested_by_agent AS approval_requested_by_agent,
-              a.permission_preflight_id AS approval_permission_preflight_id
+              a.permission_preflight_id AS approval_permission_preflight_id,
+              wer.id AS workbench_evidence_id,
+              wer.kind AS workbench_evidence_kind,
+              wer.title AS workbench_evidence_title,
+              wer.target_uri AS workbench_evidence_target_uri,
+              wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
             FROM runtime_route_records r
             LEFT JOIN approvals a ON a.id = (
               SELECT latest.id
@@ -177,6 +189,13 @@ export const ledgerRouter = router({
                 AND latest.target_id = r.id
                 AND latest.status = 'pending'
               ORDER BY latest.created_at DESC, latest.id DESC
+              LIMIT 1
+            )
+            LEFT JOIN workbench_evidence_records wer ON wer.id = (
+              SELECT latest_evidence.id
+              FROM workbench_evidence_records latest_evidence
+              WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
+              ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
               LIMIT 1
             )
             ORDER BY r.created_at DESC, r.id DESC

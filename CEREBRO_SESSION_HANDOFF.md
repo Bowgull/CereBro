@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2024 EDT
+Last updated: 2026-05-15 2033 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2033 EDT - Route Workbench Receipt Save Contract
+
+### What Changed
+- Added `runtime.createWorkbenchReceiptFromRouteRecord`.
+- Saved route records can now create one local Workbench receipt linked by
+  `target_uri = runtime_route:<id>`.
+- The route-to-Workbench save is idempotent. Repeated saves return the existing
+  local receipt.
+- `runtime.routeRecords` and `ledger.overview` now project linked Workbench
+  receipt ids.
+- Ledger route cards now show `receipt #...`, and the route button changes from
+  `Save Body` to `Receipt #...` after saving.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-workbench-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "saves one local Workbench receipt"` failed because `runtime.createWorkbenchReceiptFromRouteRecord` did not exist.
+- Green phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-workbench-green2.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "saves one local Workbench receipt"` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-workbench-full.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 8 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: route-to-Workbench local receipt save contract.
+- The new route receipt action writes one local Workbench evidence row and one
+  local permission preflight row only.
+- No task creation, approval creation, approval decision, command execution,
+  browser action, model call, package install, DB schema change, file write,
+  external write, storage migration, git action from CereBro, or Raven boundary
+  changed.
+- No worker was used because this was the coupled backend/UI route receipt
+  bridge.
+
+### Front-End Steward Review
+- Route cards now show the route chain progression: task, staged body, saved
+  body receipt, and gate.
+- `Save Body` is a local receipt action only. It does not run routed work.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 49%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: browser-check
+the saved route flow on localhost, then decide whether to add route receipt
+focus into Workbench or move to the next runtime contract.
 
 ## 2026-05-15 2024 EDT - Route Gate Visibility Pass
 

@@ -308,4 +308,60 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.approvalPreview?.status).toBe("pending");
     expect(records.items[0]?.approvalPreview?.permissionPreflightId).toBe(first.approval?.permissionPreflightId);
   });
+
+  it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {
+    const caller = createCaller();
+    const evidenceCountBefore = await countRows("workbench_evidence_records");
+    const preflightCountBefore = await countRows("permission_preflight_records");
+    const taskCountBefore = await countRows("tasks");
+    const approvalCountBefore = await countRows("approvals");
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+
+    const first = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(first.mode).toBe("local_workbench_receipt");
+    expect(first.created).toBe(true);
+    expect(first.writesExternal).toBe(false);
+    expect(first.runsCommand).toBe(false);
+    expect(first.opensBrowser).toBe(false);
+    expect(first.callsModel).toBe(false);
+    expect(first.routeRecordId).toBe(committed.record.id);
+    expect(first.evidence?.id).toBeGreaterThan(0);
+    expect(first.evidence?.kind).toBe("manual_note");
+    expect(first.evidence?.targetUri).toBe(`runtime_route:${committed.record.id}`);
+    expect(first.evidence?.ownerAgent).toBe("tony");
+    expect(first.evidence?.routeAgent).toBe("cortana");
+    expect(first.evidence?.projectName).toBe("CereBro");
+    expect(first.evidence?.permissionPreflightId).toBeGreaterThan(0);
+    expect(first.gates.join(" ")).toContain("local Workbench receipt");
+
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore + 1);
+    expect(await countRows("permission_preflight_records")).toBe(preflightCountBefore + 1);
+    expect(await countRows("tasks")).toBe(taskCountBefore);
+    expect(await countRows("approvals")).toBe(approvalCountBefore);
+
+    const second = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(second.created).toBe(false);
+    expect(second.evidence?.id).toBe(first.evidence?.id);
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore + 1);
+    expect(await countRows("permission_preflight_records")).toBe(preflightCountBefore + 1);
+
+    const records = await caller.runtime.routeRecords({
+      limit: 1,
+      projectSlug: "cerebro",
+      ownerAgent: "tony",
+    });
+    expect(records.items[0]?.id).toBe(committed.record.id);
+    expect(records.items[0]?.workbenchEvidence?.id).toBe(first.evidence?.id);
+    expect(records.items[0]?.workbenchEvidence?.targetUri).toBe(`runtime_route:${committed.record.id}`);
+  });
 });

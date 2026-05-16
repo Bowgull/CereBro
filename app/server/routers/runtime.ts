@@ -67,9 +67,54 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
       requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
       permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
     },
+    workbenchEvidence: row.workbench_evidence_id == null ? null : {
+      id: Number(row.workbench_evidence_id),
+      kind: String(row.workbench_evidence_kind ?? ""),
+      title: String(row.workbench_evidence_title ?? ""),
+      targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
+      permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
+    },
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
+}
+
+function mapRuntimeWorkbenchEvidence(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    kind: String(row.kind),
+    title: String(row.title),
+    summary: String(row.summary),
+    targetUri: row.target_uri == null ? null : String(row.target_uri),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    ownerAgent: String(row.owner_agent),
+    routeAgent: row.route_agent == null ? null : String(row.route_agent),
+    validationStatus: String(row.validation_status),
+    permissionClass: String(row.permission_class),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    createdAt: Number(row.created_at),
+  };
+}
+
+async function runtimeRouteWorkbenchEvidenceByRouteId(routeRecordId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        wer.*,
+        p.name AS project_name
+      FROM workbench_evidence_records wer
+      LEFT JOIN projects p ON p.id = wer.project_id
+      WHERE wer.target_uri = ?
+      ORDER BY wer.created_at DESC, wer.id DESC
+      LIMIT 1
+    `,
+    args: [`runtime_route:${routeRecordId}`],
+  });
+  const row = result.rows[0];
+  return row ? mapRuntimeWorkbenchEvidence(row as Record<string, unknown>) : null;
 }
 
 function mapRuntimeTaskRow(row: Record<string, unknown>): TaskRow {
@@ -468,11 +513,11 @@ export const runtimeRouter = router({
       const where: string[] = [];
       const args: Array<string | number> = [];
       if (input?.projectSlug) {
-        where.push("project_slug = ?");
+        where.push("r.project_slug = ?");
         args.push(input.projectSlug);
       }
       if (input?.ownerAgent) {
-        where.push("owner_agent = ?");
+        where.push("r.owner_agent = ?");
         args.push(input.ownerAgent);
       }
       args.push(input?.limit ?? 10);
@@ -485,7 +530,12 @@ export const runtimeRouter = router({
             a.status AS approval_status,
             a.action_type AS approval_action_type,
             a.requested_by_agent AS approval_requested_by_agent,
-            a.permission_preflight_id AS approval_permission_preflight_id
+            a.permission_preflight_id AS approval_permission_preflight_id,
+            wer.id AS workbench_evidence_id,
+            wer.kind AS workbench_evidence_kind,
+            wer.title AS workbench_evidence_title,
+            wer.target_uri AS workbench_evidence_target_uri,
+            wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
           FROM runtime_route_records r
           LEFT JOIN approvals a ON a.id = (
             SELECT latest.id
@@ -494,6 +544,13 @@ export const runtimeRouter = router({
               AND latest.target_id = r.id
               AND latest.status = 'pending'
             ORDER BY latest.created_at DESC, latest.id DESC
+            LIMIT 1
+          )
+          LEFT JOIN workbench_evidence_records wer ON wer.id = (
+            SELECT latest_evidence.id
+            FROM workbench_evidence_records latest_evidence
+            WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
+            ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
             LIMIT 1
           )
           ${where.length > 0 ? `WHERE ${where.join(" AND ")}` : ""}
@@ -730,6 +787,112 @@ export const runtimeRouter = router({
           "Recorded one local permission preflight audit row for this route approval preview.",
           "It does not execute routed work or approve a future action.",
           "The routed work still needs the normal surface-specific action after approval review.",
+        ],
+      };
+    }),
+  createWorkbenchReceiptFromRouteRecord: publicProcedure
+    .input(
+      z.object({
+        routeRecordId: z.number().int().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const routeResult = await db.execute({
+        sql: `SELECT * FROM runtime_route_records WHERE id = ? LIMIT 1`,
+        args: [input.routeRecordId],
+      });
+      const routeRow = routeResult.rows[0] as Record<string, unknown> | undefined;
+      if (!routeRow) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Route record not found",
+        });
+      }
+
+      const existingEvidence = await runtimeRouteWorkbenchEvidenceByRouteId(input.routeRecordId);
+      if (existingEvidence) {
+        return {
+          mode: "local_workbench_receipt" as const,
+          created: false,
+          writesExternal: false,
+          runsCommand: false,
+          opensBrowser: false,
+          callsModel: false,
+          routeRecordId: input.routeRecordId,
+          evidence: existingEvidence,
+          gates: [
+            "Existing local Workbench receipt returned. No routed work runs.",
+          ],
+        };
+      }
+
+      const route = mapRouteRecordRow(routeRow);
+      const draft = route.workbenchReceiptDraft as {
+        summary?: string;
+        nextAction?: string;
+        permissionClass?: string;
+      };
+      const projectId = route.projectName && route.projectPath ? await getOrCreateProjectByPath(route.projectName, route.projectPath) : null;
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "explicit_context",
+        actionClass: "local_note",
+        requestedByAgent: route.ownerAgent,
+        targetSummary: `workbench route receipt: route #${route.id}`,
+        additionalReasons: [
+          "Runtime route Workbench receipts are local append-only history.",
+          "Saving the route receipt does not approve or run routed work.",
+        ],
+      });
+      const title = `Route #${route.id}: ${route.category.replace(/_/g, " ")}`;
+      const summary = [
+        typeof draft.summary === "string" && draft.summary.trim() ? draft.summary.trim() : route.originalText,
+        "",
+        `Aang read: ${route.aangRead}`,
+        `Route chain: ${route.routeChain.join(" -> ")}`,
+        `Next action: ${typeof draft.nextAction === "string" && draft.nextAction.trim() ? draft.nextAction.trim() : route.nextAction}`,
+        route.approvalGates.length ? `Gates: ${route.approvalGates.join("; ")}` : null,
+      ].filter((part) => part != null).join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, project_id, task_id, session_id,
+            source_id, command_observation_id, artifact_id, owner_agent,
+            route_agent, annotation_text, validation_status,
+            permission_class, permission_preflight_id, sensitive_data_flag
+          )
+          VALUES (
+            'manual_note', ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?,
+            'cortana', ?, 'unvalidated', 'manual_note', ?, 0
+          )
+          RETURNING *
+        `,
+        args: [
+          title,
+          summary,
+          `runtime_route:${route.id}`,
+          projectId,
+          route.taskId,
+          route.ownerAgent,
+          `Saved from runtime route #${route.id}. Review before using as proof.`,
+          Number(preflight.row.id),
+        ],
+      });
+
+      const evidence = result.rows[0] ? await runtimeRouteWorkbenchEvidenceByRouteId(route.id) : null;
+      return {
+        mode: "local_workbench_receipt" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        runsCommand: false,
+        opensBrowser: false,
+        callsModel: false,
+        routeRecordId: input.routeRecordId,
+        evidence,
+        gates: [
+          "Created one local Workbench receipt from the route record.",
+          "Recorded one local permission preflight audit row for this Workbench receipt.",
+          "This did not create a task, approve a gate, run a command, open a browser, call a model, write memory, write files, or write externally.",
         ],
       };
     }),

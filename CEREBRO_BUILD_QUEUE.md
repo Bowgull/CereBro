@@ -196,6 +196,9 @@ Recent Prime slices:
 - 2026-05-15 2024 EDT: projected pending route approval previews into
   `runtime.routeRecords` and `ledger.overview`; Ledger route cards now show
   `gate #...` and open the existing gate.
+- 2026-05-15 2033 EDT: added `runtime.createWorkbenchReceiptFromRouteRecord`;
+  saved routes can now append one local Workbench receipt, and Ledger route
+  cards show `receipt #...` after saving.
 
 ### Frontend Worker
 
@@ -231,8 +234,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  continue the route-to-Workbench receipt save contract, keeping every action
-  local, visible, and explicit.
+  browser-check the saved route flow on localhost, then decide whether to add
+  route receipt focus into Workbench or move to the next runtime contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -565,3 +568,5 @@ Expected shape:
   approval.
 - Runtime route reads now show pending gate ids, and Ledger opens the existing
   gate instead of hiding that state.
+- Runtime route records can now save one local Workbench receipt through
+  `Save Body`; repeated saves reuse the existing receipt.

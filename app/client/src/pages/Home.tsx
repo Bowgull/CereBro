@@ -955,6 +955,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
+  const [creatingRouteReceiptId, setCreatingRouteReceiptId] = useState<number | null>(null);
   const utils = trpc.useUtils();
   const ledgerOverview = trpc.ledger.overview.useQuery(
     { evidenceLimit: 50, routeLimit: 6 },
@@ -980,6 +981,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       utils.approvals.detail.invalidate();
       utils.approvals.list.invalidate();
       utils.companion.localEvents.invalidate();
+    },
+  });
+  const createWorkbenchReceiptFromRoute = trpc.runtime.createWorkbenchReceiptFromRouteRecord.useMutation({
+    onSuccess: () => {
+      utils.ledger.overview.invalidate();
+      utils.runtime.routeRecords.invalidate();
+      utils.workbench.evidence.invalidate();
+      utils.workbench.evidenceSummary.invalidate();
     },
   });
 
@@ -1199,6 +1208,29 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     );
   }
 
+  function createWorkbenchReceiptFromRouteRecord(item: { id: number }) {
+    if (createWorkbenchReceiptFromRoute.isPending) return;
+    setCreatingRouteReceiptId(item.id);
+    createWorkbenchReceiptFromRoute.mutate(
+      {
+        routeRecordId: item.id,
+      },
+      {
+        onSuccess: (result) => {
+          const evidenceId = result.evidence?.id;
+          setLedgerFocusNotice(
+            evidenceId
+              ? `Workbench receipt #${evidenceId} saved for route #${item.id}.`
+              : `Route #${item.id} Workbench receipt could not be read back.`,
+          );
+        },
+        onSettled: () => {
+          setCreatingRouteReceiptId(null);
+        },
+      },
+    );
+  }
+
   function openCreatedRouteTask(taskId: number, routeId: number) {
     try {
       window.sessionStorage.setItem(
@@ -1282,6 +1314,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               {latestRouteRows.map((item) => {
                 const routeTaskId = item.taskId;
                 const routeApprovalId = item.approvalPreview?.id ?? null;
+                const routeEvidenceId = item.workbenchEvidence?.id ?? null;
                 return (
                   <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex flex-wrap items-center gap-1">
@@ -1290,6 +1323,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
                       {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
                       {routeApprovalId && <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">gate #{routeApprovalId}</span></Badge>}
+                      {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">receipt #{routeEvidenceId}</span></Badge>}
                     </div>
                     <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
                       {item.originalText}
@@ -1347,6 +1381,39 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         title="Stage this saved route as a Workbench draft. This does not save evidence or run work."
                       >
                         Stage Body
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={routeEvidenceId ? "secondary" : "outline"}
+                        className="h-6 px-2 text-[10px]"
+                        onClick={() => {
+                          if (routeEvidenceId) {
+                            setSelectedEvidenceId(routeEvidenceId);
+                            setLedgerFocusNotice(`Workbench receipt #${routeEvidenceId} is linked to route #${item.id}.`);
+                            return;
+                          }
+                          createWorkbenchReceiptFromRouteRecord(item);
+                        }}
+                        disabled={creatingRouteReceiptId === item.id}
+                        aria-label={
+                          routeEvidenceId
+                            ? `Inspect Workbench receipt ${routeEvidenceId} linked to route ${item.id}`
+                            : creatingRouteReceiptId === item.id
+                              ? `Saving Workbench receipt for route ${item.id}`
+                              : `Save Workbench receipt for route ${item.id}`
+                        }
+                        title={
+                          routeEvidenceId
+                            ? "Inspect the local Workbench receipt linked to this route."
+                            : "Save this route as one local Workbench receipt. This does not run work."
+                        }
+                      >
+                        {routeEvidenceId
+                          ? `Receipt #${routeEvidenceId}`
+                          : creatingRouteReceiptId === item.id
+                            ? "Saving"
+                            : "Save Body"}
                       </Button>
                       <Button
                         type="button"
