@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0715 EDT
+Last updated: 2026-05-16 0719 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -692,6 +692,9 @@ Expected shape:
 - Temporary Workbench preview now says `Local browser preview. No upload. No
   vault save. No vision model.` and `Choose File`, keeping the no-durable-media
   boundary visible without naming browser-memory machinery.
+- Recent Workbench rows now translate old saved media receipt data into display
+  labels like `preview reference`, `local only`, and `Local image preview note.`
+  The stored receipt body is unchanged.
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.

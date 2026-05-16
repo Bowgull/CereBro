@@ -65,6 +65,56 @@ export function workbenchTemporaryPreviewCopy() {
   };
 }
 
+export function workbenchReceiptKindLabel(kind: string) {
+  const labels: Record<string, string> = {
+    manual_note: "manual note",
+    image_review: "image review",
+    video_frame: "video frame",
+    annotation: "annotation",
+    validation_note: "validation note",
+    terminal_output: "terminal output",
+    before_after: "before after",
+  };
+
+  return labels[kind] ?? kind.replace(/_/g, " ");
+}
+
+export function workbenchPermissionLabel(permissionClass: string) {
+  const labels: Record<string, string> = {
+    manual_note: "manual note",
+    media_review: "preview review",
+    annotation: "annotation",
+    validation: "validation",
+  };
+
+  return labels[permissionClass] ?? permissionClass.replace(/_/g, " ");
+}
+
+export function workbenchReceiptRowSummary(summary: string) {
+  return summary
+    .replace(/^Metadata-only note for a temporary image preview\./i, "Local image preview note.")
+    .replace(/^Metadata-only note for a temporary video frame\./i, "Local video frame note.")
+    .replace(/\bmetadata-only\b/gi, "preview-only");
+}
+
+export function workbenchReceiptPreviewBadges({
+  mediaName,
+  mediaKind,
+  mediaTemporary,
+}: {
+  mediaName?: string | null;
+  mediaKind?: string | null;
+  mediaTemporary?: boolean | null;
+}) {
+  const badges: Array<{ label: string; tone: "accent" | "warning" }> = [];
+
+  if (mediaName) badges.push({ label: "preview reference", tone: "accent" });
+  if (mediaKind) badges.push({ label: workbenchReceiptKindLabel(mediaKind), tone: "accent" });
+  if (mediaTemporary) badges.push({ label: "local only", tone: "warning" });
+
+  return badges;
+}
+
 export function workbenchReceiptChainCopy() {
   return {
     ariaLabel: "Workbench receipt chain",

@@ -13,7 +13,11 @@ import {
   workbenchReceiptDetailCopy,
   workbenchReceiptDetailsCopy,
   workbenchReceiptGroupCopy,
+  workbenchReceiptKindLabel,
   workbenchReceiptListCopy,
+  workbenchReceiptPreviewBadges,
+  workbenchReceiptRowSummary,
+  workbenchPermissionLabel,
   workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
@@ -1332,41 +1336,43 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
                   <div className="grid gap-1.5">
                     {visibleEvidenceItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedEvidenceId(item.id)}
-                      aria-label={`Inspect Workbench receipt ${item.id}`}
-                      title={`Open receipt #${item.id} body in Workbench. No external action runs.`}
-                      className="h-auto justify-start rounded p-2 text-left"
-                      variant="secondary"
-                      style={{
-                        background: selectedEvidenceId === item.id ? C.surfaceRaised : C.surfaceMuted,
-                        border: `1px solid ${selectedEvidenceId === item.id ? C.accent : C.borderSoft}`,
-                      }}
-                    >
-                      <span className="block w-full">
-                        <span className="flex flex-wrap items-center gap-1">
-                          <Chip label={`#${item.id}`} tone={C.textMuted} />
-                          <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
-                          <Chip label={item.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(item.validationStatus)} />
-                          {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
-                          {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
-                          {item.mediaName && <Chip label="media metadata" tone={C.accent} />}
-                          {item.mediaKind && <Chip label={item.mediaKind.replace(/_/g, " ")} tone={C.accent} />}
-                          {item.mediaTemporary && <Chip label="temporary" tone={C.warning} />}
-                          {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
-                          <Chip label="opens body only" tone={C.textMuted} />
-                        </span>
-                        <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</span>
-                        <span className="mt-1 block max-h-[34px] overflow-hidden text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>{item.summary}</span>
-                        {item.targetUri && (
-                          <span className="mt-1 block text-[11px] truncate" style={{ color: C.textMuted }} title={item.targetUri}>
-                            Target: {sourceDisplayName(item.targetUri)}
+                      <Button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedEvidenceId(item.id)}
+                        aria-label={`Inspect Workbench receipt ${item.id}`}
+                        title={`Open receipt #${item.id} body in Workbench. No external action runs.`}
+                        className="h-auto justify-start rounded p-2 text-left"
+                        variant="secondary"
+                        style={{
+                          background: selectedEvidenceId === item.id ? C.surfaceRaised : C.surfaceMuted,
+                          border: `1px solid ${selectedEvidenceId === item.id ? C.accent : C.borderSoft}`,
+                        }}
+                      >
+                        <span className="block w-full">
+                          <span className="flex flex-wrap items-center gap-1">
+                            <Chip label={`#${item.id}`} tone={C.textMuted} />
+                            <Chip label={workbenchReceiptKindLabel(item.kind)} tone={C.accent} />
+                            <Chip label={item.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(item.validationStatus)} />
+                            {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
+                            {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
+                            {workbenchReceiptPreviewBadges(item).map((badge) => (
+                              <Chip key={`${item.id}-${badge.label}`} label={badge.label} tone={badge.tone === "warning" ? C.warning : C.accent} />
+                            ))}
+                            {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
+                            <Chip label="opens body only" tone={C.textMuted} />
                           </span>
-                        )}
-                      </span>
-                    </Button>
+                          <span className="mt-2 block text-xs font-semibold" style={{ color: C.textPrimary }}>{item.title}</span>
+                          <span className="mt-1 block max-h-[34px] overflow-hidden text-[11px] leading-snug whitespace-normal" style={{ color: C.textMuted }}>
+                            {workbenchReceiptRowSummary(item.summary)}
+                          </span>
+                          {item.targetUri && (
+                            <span className="mt-1 block text-[11px] truncate" style={{ color: C.textMuted }} title={item.targetUri}>
+                              Target: {sourceDisplayName(item.targetUri)}
+                            </span>
+                          )}
+                        </span>
+                      </Button>
                     ))}
                     {hiddenEvidenceCount > 0 && (
                       <div className="rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -1734,12 +1740,12 @@ function EvidenceDetailPanel({
     <aside className="rounded p-2" aria-label="Workbench receipt body" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="mb-2 flex flex-wrap gap-1">
         <Chip label={`#${item.id}`} tone={C.textMuted} />
-        <Chip label={item.kind.replace(/_/g, " ")} tone={C.accent} />
-        <Chip label={item.permissionClass.replace(/_/g, " ")} tone={C.gold} />
+        <Chip label={workbenchReceiptKindLabel(item.kind)} tone={C.accent} />
+        <Chip label={workbenchPermissionLabel(item.permissionClass)} tone={C.gold} />
         {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
       </div>
       <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
-      <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{item.summary}</p>
+      <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{workbenchReceiptRowSummary(item.summary)}</p>
       <div className="mt-2 rounded p-2" aria-label="Workbench receipt read" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>

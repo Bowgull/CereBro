@@ -8,7 +8,11 @@ import {
   workbenchReceiptDetailCopy,
   workbenchReceiptDetailsCopy,
   workbenchReceiptGroupCopy,
+  workbenchReceiptKindLabel,
   workbenchReceiptListCopy,
+  workbenchReceiptPreviewBadges,
+  workbenchReceiptRowSummary,
+  workbenchPermissionLabel,
   workbenchTemporaryPreviewCopy,
 } from "../client/src/lib/workbenchCopyModel";
 
@@ -81,6 +85,25 @@ describe("workbenchCopyModel", () => {
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("temporary media");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("browser-memory");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("target metadata");
+  });
+
+  it("keeps recent receipt row labels out of metadata language", () => {
+    expect(workbenchPermissionLabel("media_review")).toBe("preview review");
+    expect(workbenchReceiptKindLabel("image_review")).toBe("image review");
+
+    const summary = workbenchReceiptRowSummary("Metadata-only note for a temporary image preview. Image bytes were not saved.");
+    const badges = workbenchReceiptPreviewBadges({
+      mediaName: "settings-screen.png",
+      mediaKind: "image",
+      mediaTemporary: true,
+    });
+    const combined = `${summary} ${badges.map((badge) => badge.label).join(" ")}`.toLowerCase();
+
+    expect(summary).toBe("Local image preview note. Image bytes were not saved.");
+    expect(badges.map((badge) => badge.label)).toEqual(["preview reference", "image", "local only"]);
+    expect(combined).not.toContain("metadata");
+    expect(combined).not.toContain("temporary");
+    expect(combined).not.toContain("media");
   });
 
   it("keeps receipt grouping plain and out of proof language", () => {

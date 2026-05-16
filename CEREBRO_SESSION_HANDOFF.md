@@ -21189,3 +21189,79 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench drawer copy now says Receipt Details and Temporary Preview, with local-only preview gates intact. Next best slice: clean recent receipt row chips and saved-content display labels so older metadata/media terms do not dominate the default Workbench view, without rewriting historical receipt bodies. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0719 EDT - Workbench recent receipt row labels
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow display-only Workbench slice.
+
+What changed:
+
+- Added Workbench display helpers for receipt kind labels, permission labels,
+  recent-row summaries, and preview badges.
+- Recent Workbench rows now show `preview reference` instead of `media
+  metadata`.
+- Recent Workbench rows now show `local only` instead of raw `temporary`.
+- Recent Workbench row summaries now display `Local image preview note.` or
+  `Local video frame note.` instead of `Metadata-only note...`.
+- Selected receipt headers now use the same display labels for receipt kind,
+  review type, and display summary.
+- Stored receipt bodies are not rewritten.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts` passed,
+  12 tests.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx
+  app/client/src/lib/workbenchCopyModel.ts
+  app/server/workbenchCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop/Workbench, and
+  confirmed the default view no longer contains `media metadata` or
+  `Metadata-only`, while `Local image preview note.` appears.
+
+Drift check:
+
+- On path because Workbench is the approved receipt body and visual proof
+  surface.
+- Creative UI/UX stayed inside the lane: display labels only, no behavior
+  expansion, no stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- The selected receipt detail still has a closed `Receipt Metadata` drawer with
+  raw field names. It is hidden by default, but the next Workbench cleanup can
+  rename that drawer to `Receipt Details` and soften media field labels.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Recent Workbench rows now translate old saved media receipt data into display-only labels without rewriting stored receipt bodies. Next best slice: clean the selected receipt detail's closed metadata drawer labels, or move to Ledger receipt/audit copy if Workbench looks acceptable in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
