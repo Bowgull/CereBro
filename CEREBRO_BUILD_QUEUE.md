@@ -175,6 +175,9 @@ Recent Prime slices:
   the linked receipt selector.
 - 2026-05-15 1957 EDT: gated Workbench comparison `evidencePicker` behind the
   Append Before/After Receipt drawer.
+- 2026-05-15 2008 EDT: removed Project Lab selected-detail 10 second polling;
+  the selected inspector now uses a 30 second stale local read and mutation
+  invalidation.
 
 ### Frontend Worker
 
@@ -210,8 +213,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  deeper Project Lab DB-only summary if the cached git split is still too
-  heavy, or the next runtime receipt contract.
+  Terminal Lab or Project Lab lightweight project label reads if overview is
+  still too broad, or the next runtime receipt contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -528,3 +531,5 @@ Expected shape:
   receipt selector is opened.
 - Workbench now reads comparison receipt candidates only when the Append
   Before/After Receipt drawer is open.
+- Project Lab selected detail no longer polls every 10 seconds while idle; it
+  now uses a 30 second stale local read and explicit mutation invalidation.

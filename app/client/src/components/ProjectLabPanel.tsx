@@ -292,7 +292,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   });
   const detail = trpc.projectIntelligence.detail.useQuery(
     { slug: selectedSlug ?? "" },
-    { enabled: Boolean(selectedSlug), refetchInterval: 10000 },
+    {
+      enabled: Boolean(selectedSlug),
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const data = overview.data;
   const gitRead = projectGitStatus.data ?? data?.gitStatus;
