@@ -141,7 +141,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
     sessionIds: selectedSessionIds,
     limit: 200,
   });
-  const sessions = trpc.sessions.recent.useQuery({ limit: 50 }, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.recent.useQuery(
+    { limit: 50 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const writeVault = trpc.artifacts.writeTextToVault.useMutation({
     onSuccess: () => utils.artifacts.list.invalidate(),
   });

@@ -181,6 +181,9 @@ Recent Prime slices:
 - 2026-05-15 2011 EDT: removed the remaining Project Lab and Terminal Lab
   timer polling reads; both panels now use 30 second stale local reads with
   focus/reconnect refetch disabled.
+- 2026-05-15 2013 EDT: removed drawer/support timer polling from Tasks,
+  Memory, Artifacts, Sessions, and Piccolo; local list reads now use stale
+  caches and mutation invalidation.
 
 ### Frontend Worker
 
@@ -216,8 +219,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  inspect remaining high-traffic surfaces for timer polling, or move into the
-  next runtime receipt contract.
+  inspect Home shell polling separately because those reads include live status,
+  or move into the next runtime receipt contract.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -538,3 +541,5 @@ Expected shape:
   now uses a 30 second stale local read and explicit mutation invalidation.
 - Project Lab and Terminal Lab no longer timer-poll their default project,
   task, session, git, and receipt summary reads while idle.
+- Tasks, Memory, Artifacts, Sessions, and Piccolo no longer timer-poll local
+  list/support reads while their drawers are idle.

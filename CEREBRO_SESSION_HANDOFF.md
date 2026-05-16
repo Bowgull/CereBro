@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2011 EDT
+Last updated: 2026-05-15 2013 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2013 EDT - Drawer List Polling Cleanup
+
+### What Changed
+- Removed timer polling from Tasks project/session link reads.
+- Removed timer polling from Memory and Artifacts session link reads.
+- Removed timer polling from Sessions ledger reads.
+- Removed timer polling from Piccolo hygiene report and storage contract reads.
+- Standardized those drawer surfaces on cached local reads with focus/reconnect
+  refetch disabled.
+
+### Files Touched
+- `app/client/src/components/TasksPanel.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/client/src/components/SessionsPanel.tsx`
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: drawer and support-panel idle polling cleanup.
+- No backend behavior, DB schema, external write, model call, package install,
+  command execution from CereBro, browser action from CereBro, storage
+  migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a mechanical UI query-policy pass across
+  small drawer surfaces.
+
+### Front-End Steward Review
+- Tasks, Memory, Artifacts, Sessions, and Piccolo keep the same visible shape.
+- Local session/project/support reads no longer refresh every 5 to 30 seconds
+  while the drawer is idle.
+
+### Completion Read
+- Overall: 60%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 44%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: inspect Home
+shell polling separately because those reads include live status and need a
+more careful product decision, or move into the next runtime receipt contract.
 
 ## 2026-05-15 2011 EDT - Project And Terminal Polling Cleanup
 

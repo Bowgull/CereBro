@@ -16,8 +16,16 @@ import {
 export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
   const [saveGateOpen, setSaveGateOpen] = useState(false);
-  const report = trpc.piccolo.hygieneReport.useQuery(undefined, { refetchInterval: 10000 });
-  const contract = trpc.piccolo.storageContractReceipt.useQuery(undefined, { refetchInterval: 30000 });
+  const report = trpc.piccolo.hygieneReport.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const contract = trpc.piccolo.storageContractReceipt.useQuery(undefined, {
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const saveReport = trpc.artifacts.writeTextToVault.useMutation({
     onSuccess: () => {
       setSaveGateOpen(false);

@@ -24,7 +24,11 @@ function formatDuration(startSec: number, endSec: number | null): string {
 
 export default function SessionsPanel({ onClose }: { onClose: () => void }) {
   const utils = trpc.useUtils();
-  const list = trpc.sessions.list.useQuery(undefined, { refetchInterval: 5000 });
+  const list = trpc.sessions.list.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const updateLedger = trpc.sessions.updateLedger.useMutation({
     onSuccess: () => {
       utils.sessions.list.invalidate();

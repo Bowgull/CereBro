@@ -54,7 +54,14 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
     sessionIds: selectedSessionIds,
     limit: 100,
   });
-  const sessions = trpc.sessions.recent.useQuery({ limit: 50 }, { refetchInterval: 10000 });
+  const sessions = trpc.sessions.recent.useQuery(
+    { limit: 50 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const propose = trpc.memory.propose.useMutation({
     onSuccess: () => utils.memory.proposals.invalidate(),
   });
