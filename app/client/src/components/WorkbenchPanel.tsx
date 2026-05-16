@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
+import { workbenchReceiptBodyCopy } from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -170,6 +171,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
+  const receiptBodyCopy = workbenchReceiptBodyCopy({ hasDraft: Boolean(stagedDraftNotice) });
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -696,16 +698,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Add Receipt</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">{receiptBodyCopy.title}</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Manual local record. Append-only. No capture.
+                    {receiptBodyCopy.subtitle}
                   </p>
                 </div>
-                <Chip label="local db" tone={C.success} />
+                <Chip label={receiptBodyCopy.badge} tone={C.success} />
               </div>
               {stagedDraftNotice && (
                 <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
-                  <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>Draft staged.</span> {stagedDraftNotice}
+                  <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>{receiptBodyCopy.draftPrefix}</span> {receiptBodyCopy.draftText}
                 </div>
               )}
 

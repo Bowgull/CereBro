@@ -20213,3 +20213,66 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview is now compact: safe destination rail, primary read, and closed proof details. Next best slice: inspect Workbench or Project Lab for the next visible low-machinery cleanup that makes the app feel less like internal machinery. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0605 EDT - Workbench receipt body copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a small Workbench copy and low-machinery pass.
+
+What changed:
+
+- Added `workbenchReceiptBodyCopy` for Workbench body form strings.
+- Renamed `Add Receipt` to `Receipt Body`.
+- Changed the subtitle to `Local body. Review, link, save.`
+- Changed the badge from `local db` to `local only`.
+- Changed staged-draft language from `Draft staged...` plus internal source
+  text to `Body draft. Review it, then save the local receipt.`
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/server/workbenchCopyModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  failed because `workbenchCopyModel` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts`
+  passed, 2 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, previewed
+  `keep building CereBro front end`, opened Body/Workbench from the route
+  preview rail, and confirmed `Receipt Body`, `Local body. Review, link,
+  save.`, and `Body draft. Review it, then save the local receipt.`
+
+Known risks:
+
+- Workbench still has some receipt-chain and project-proof machinery visible.
+  This pass only cleaned the primary body form copy.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Workbench body copy is cleaner. Next best slice: hide or soften remaining Workbench machinery around lane selection, receipt chain, Project Proof, or recent receipt read gates. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

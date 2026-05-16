@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0601 EDT
+Last updated: 2026-05-16 0605 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0605 EDT: Workbench receipt form copy now names the primary
+  object `Receipt Body`. The staged draft state now reads `Body draft. Review
+  it, then save the local receipt.` instead of exposing draft machinery.
 - 2026-05-16 0601 EDT: route preview proof now stays behind a closed
   `Route proof` detail. The primary preview read keeps Aang, Owner, Receipt,
   and Next visible while model/tool/gate proof remains available on request.
