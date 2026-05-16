@@ -22457,3 +22457,155 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Block C now has explicit Obsidian RAG-ready note metadata contracts exposed through integrations.status. Next best slice: move to backend route receipts before agent execution, unless you find a concrete missing contract that blocks it. Do not build RAG automation, browser crawling, GitHub cloning, external writes, folder creation, or note scanning. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 1532 EDT - Runtime execution readiness contract
+
+Overall completion after this pass:
+
+- Overall: 66%
+- Frontend visible loop: 99%
+- Backend/runtime: 60%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Used one read-only explorer worker.
+- Worker confirmed the next safe item 8 slice was computed route readiness,
+  not an executor, UI surface, model call, command runner, or browser action.
+
+What changed:
+
+- Runtime route previews and saved route reads now expose
+  `executionReadiness`.
+- `executionReadiness` reports route id, task id, approval id/status,
+  Workbench evidence id, required records before execution, no-action proof,
+  and a computed status.
+- Saved routes can reach `ready_for_explicit_execution_call` only after local
+  task, Workbench receipt body, and required approval are present.
+- `canExecute` remains `false` in all cases. This pass did not add an executor.
+
+Files touched in this slice:
+
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Unrelated dirty files left untouched:
+
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-readiness.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because `routeRecordId` was placed outside the `commitRoute` scope.
+- Fixed the scope bug.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-readiness-2.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 12 tests.
+- `pnpm -C app check` passed.
+- Browser sanity used the in-app browser at `http://localhost:3000/` and
+  confirmed the shell still renders with Keep, Workshop, and Ledger available.
+
+Drift check:
+
+- On path because this starts item 8: backend route receipts before agent
+  execution.
+- The change is computed, read-only, and server-owned.
+- No executor, agent loop, model call, command runner, browser action, approval
+  bypass, new UI surface, external write, RAG automation, GitHub clone, or
+  Raven path was added.
+
+Known risks:
+
+- Status name `missing_route_record` currently covers a saved route that still
+  lacks its local task record. A later copy/model pass may split that into
+  `missing_task_record` if UI needs finer language.
+- Future executor work must treat `ready_for_explicit_execution_call` as a
+  review precondition, not permission to run.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally outside tests.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Runtime routes now expose computed executionReadiness while canExecute remains false. Next best slice: continue item 8 by tightening backend route receipt status language or surfacing this readiness only where an existing Ledger/route read already owns it. Do not build an executor, agent loop, browser action, command runner, model call, approval bypass, new UI surface, external write, or Raven path. Preserve unrelated dirty docs unless the user asks. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
+
+## 2026-05-16 1531 EDT - design reference taste fold-in
+
+Overall completion after this pass:
+
+- Overall: 65%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Looked into Emil Kowalski's `emilkowalski/skill`, Impeccable, and the
+  "taste kill" design judgment idea the user flagged.
+- Updated root `DESIGN.md` so future UI work uses explicit brand-vs-product
+  register, stronger motion/interaction polish rules, and a "taste with
+  receipts" rejection step before polishing generated directions.
+- Updated `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md` so Impeccable,
+  Emil Kowalski, Uncodixfy, Stitch, v0, and Taste Kill feed one CereBro-native
+  frontend review loop.
+- Updated `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md` with
+  public-site/article reference rows for Impeccable and Taste Kill. No code or
+  article copy was imported.
+
+Files touched in this slice:
+
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Sources checked:
+
+- `https://github.com/emilkowalski/skill`
+- `https://github.com/emilkowalski/skill/blob/main/skills/emil-design-eng/SKILL.md`
+- `https://github.com/pbakaus/impeccable`
+- `https://impeccable.style/`
+- `https://bravedog.co.uk/journal/ai-didnt-kill-designers-killed-lazy-design`
+- `https://www.houseofgai.com/blog/will-ai-replace-graphic-designers-creative`
+
+Checks run:
+
+- `git diff -- DESIGN.md CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+- No app tests were run. This was a docs-only reference intake.
+
+Drift check:
+
+- On path because the user explicitly asked to fold these references into
+  output quality, and the work updates the existing design-law/reference layer.
+- No package install, clone, browser automation, model download, external write,
+  app runtime change, new surface, new agent, or Raven path was added.
+
+Known risks:
+
+- Emil Kowalski's skill still has no detected license in the local matrix, so
+  it remains concepts-only.
+- "Taste Kill" is not treated as a single canonical repo. It is recorded as a
+  design judgment rule backed by current public articles.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- Obsidian session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md first. Continue CereBro on the main build path. The design reference fold-in is docs-only: future UI work must name brand-vs-product register, use Emil-style motion restraint only as concepts, use Impeccable-style critique loops without copying site assets, and apply Taste Kill by rejecting generic generated directions with receipts. Next best slice remains backend route receipts before agent execution unless a concrete Block C storage/source contract still blocks it. Do not install design skills, clone external repos, paste external code, build RAG automation, browse private pages, or create new UI surfaces without explicit approval. Run targeted tests, pnpm check, browser-proof app changes, update handoff, archive to Obsidian, commit, and push.
+```

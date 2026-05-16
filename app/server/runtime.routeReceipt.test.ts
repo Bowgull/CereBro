@@ -74,6 +74,16 @@ describe("runtime route receipt preview", () => {
     expect(preview.receipt.kind).toBe("route_preview");
     expect(preview.receipt.bodyTarget).toBe("workbench");
     expect(preview.receipt.auditTarget).toBe("ledger");
+    expect(preview.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "preview_only",
+      routeRecordId: null,
+      taskId: null,
+      approvalId: null,
+      workbenchEvidenceId: null,
+    });
+    expect(preview.executionReadiness.requiredBeforeExecution).toContain("Workbench receipt body");
+    expect(preview.executionReadiness.noActionTaken).toContain("No command ran.");
     expect(preview.workbenchReceiptDraft.kind).toBe("route_preview");
     expect(preview.workbenchReceiptDraft.stage).toBe("staged");
     expect(preview.workbenchReceiptDraft.saveTarget).toBe("workbench");
@@ -188,6 +198,14 @@ describe("runtime route receipt preview", () => {
     expect(committed.opensBrowser).toBe(false);
     expect(committed.callsModel).toBe(false);
     expect(committed.record.id).toBeGreaterThan(0);
+    expect(committed.record.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "missing_route_record",
+      routeRecordId: committed.record.id,
+      taskId: null,
+      workbenchEvidenceId: null,
+    });
+    expect(committed.record.executionReadiness.requiredBeforeExecution).toContain("future explicit execution call");
     expect(committed.record.category).toBe("project_build");
     expect(committed.record.ownerAgent).toBe("tony");
     expect(committed.record.projectSlug).toBe("cerebro");
@@ -238,6 +256,13 @@ describe("runtime route receipt preview", () => {
       focusSummary: `Open Project Lab for route #${committed.record.id}. No project write is saved.`,
     });
     expect(records.items[0]?.taskDraft.agent).toBe("tony");
+    expect(records.items[0]?.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "missing_route_record",
+      routeRecordId: committed.record.id,
+      taskId: null,
+      workbenchEvidenceId: null,
+    });
     expect(records.items[0]?.createdAt).toBeGreaterThan(0);
   });
 
@@ -366,6 +391,65 @@ describe("runtime route receipt preview", () => {
     expect(decidedOverview.latestRoutes[0]?.id).toBe(committed.record.id);
     expect(decidedOverview.latestRoutes[0]?.approvalPreview?.id).toBe(first.approval?.id);
     expect(decidedOverview.latestRoutes[0]?.approvalPreview?.status).toBe("approved");
+  });
+
+  it("computes execution readiness without creating an executor", async () => {
+    const caller = createCaller();
+    const committed = await caller.runtime.commitRoute({
+      text: "research current Reddit feedback for app builders",
+      mode: "explore",
+    });
+
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const evidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const approval = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Queue gate before any browser work.",
+    });
+
+    const pendingRecords = await caller.runtime.routeRecords({
+      limit: 1,
+      ownerAgent: "surfer",
+    });
+    expect(pendingRecords.items[0]?.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "approval_pending",
+      routeRecordId: committed.record.id,
+      taskId: task.task.id,
+      approvalId: approval.approval?.id,
+      approvalStatus: "pending",
+      workbenchEvidenceId: evidence.evidence?.id,
+      readyForFutureExecutorReview: false,
+    });
+    expect(pendingRecords.items[0]?.executionReadiness.noActionTaken).toContain("No browser opened.");
+
+    const db = await getCerebroDb();
+    await db.execute({
+      sql: `UPDATE approvals SET status = 'approved', decided_at = unixepoch() WHERE id = ?`,
+      args: [approval.approval?.id ?? -1],
+    });
+
+    const approvedRecords = await caller.runtime.routeRecords({
+      limit: 1,
+      ownerAgent: "surfer",
+    });
+    expect(approvedRecords.items[0]?.executionReadiness).toMatchObject({
+      canExecute: false,
+      status: "ready_for_explicit_execution_call",
+      routeRecordId: committed.record.id,
+      taskId: task.task.id,
+      approvalId: approval.approval?.id,
+      approvalStatus: "approved",
+      workbenchEvidenceId: evidence.evidence?.id,
+      readyForFutureExecutorReview: true,
+    });
+    expect(approvedRecords.items[0]?.executionReadiness.requiredBeforeExecution).toContain(
+      "future explicit execution call",
+    );
   });
 
   it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {

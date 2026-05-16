@@ -43,6 +43,25 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
   const projectSlug = row.project_slug == null ? null : String(row.project_slug);
   const projectName = row.project_name == null ? null : String(row.project_name);
   const projectPath = row.project_path == null ? null : String(row.project_path);
+  const approvalGates = parseJsonField<string[]>(row.approval_gates_json, []);
+  const approvalPreview = row.approval_id == null ? null : {
+    id: Number(row.approval_id),
+    taskId: row.approval_task_id == null ? null : Number(row.approval_task_id),
+    status: String(row.approval_status ?? "pending"),
+    actionType: String(row.approval_action_type ?? ""),
+    requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
+    permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
+    decidedAt: row.approval_decided_at == null ? null : Number(row.approval_decided_at),
+  };
+  const workbenchEvidence = row.workbench_evidence_id == null ? null : {
+    id: Number(row.workbench_evidence_id),
+    kind: String(row.workbench_evidence_kind ?? ""),
+    title: String(row.workbench_evidence_title ?? ""),
+    targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
+    taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
+    permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
+  };
+  const taskId = row.task_id == null ? null : Number(row.task_id);
   return {
     id,
     originalText: String(row.original_text ?? ""),
@@ -57,7 +76,7 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
     projectPath,
     permissionClass: String(row.permission_class ?? "local_note"),
     routeChain: parseJsonField<string[]>(row.route_chain_json, []),
-    approvalGates: parseJsonField<string[]>(row.approval_gates_json, []),
+    approvalGates,
     modelProposal: parseJsonField<Record<string, unknown>>(row.model_proposal_json, {}),
     toolProposal: parseJsonField<Record<string, unknown>>(row.tool_proposal_json, {}),
     workbenchReceiptDraft: parseJsonField<Record<string, unknown>>(row.workbench_draft_json, {}),
@@ -74,24 +93,17 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
       focusSummary: `Open Project Lab for route #${id}. No project write is saved.`,
     },
     taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
-    taskId: row.task_id == null ? null : Number(row.task_id),
-    approvalPreview: row.approval_id == null ? null : {
-      id: Number(row.approval_id),
-      taskId: row.approval_task_id == null ? null : Number(row.approval_task_id),
-      status: String(row.approval_status ?? "pending"),
-      actionType: String(row.approval_action_type ?? ""),
-      requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
-      permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
-      decidedAt: row.approval_decided_at == null ? null : Number(row.approval_decided_at),
-    },
-    workbenchEvidence: row.workbench_evidence_id == null ? null : {
-      id: Number(row.workbench_evidence_id),
-      kind: String(row.workbench_evidence_kind ?? ""),
-      title: String(row.workbench_evidence_title ?? ""),
-      targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
-      taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
-      permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
-    },
+    taskId,
+    approvalPreview,
+    workbenchEvidence,
+    executionReadiness: routeExecutionReadiness({
+      routeRecordId: id,
+      taskId,
+      approvalGates,
+      approvalId: approvalPreview?.id ?? null,
+      approvalStatus: approvalPreview?.status ?? null,
+      workbenchEvidenceId: workbenchEvidence?.id ?? null,
+    }),
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
@@ -178,6 +190,66 @@ function mapRuntimeApprovalPreview(row: Record<string, unknown>) {
     },
     createdAt: Number(row.created_at),
     decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+  };
+}
+
+function routeRequiresApproval(approvalGates: string[]) {
+  return approvalGates.some((gate) => gate !== "No external action from route preview.");
+}
+
+function routeExecutionReadiness(input: {
+  routeRecordId: number | null;
+  taskId: number | null;
+  approvalGates: string[];
+  approvalId: number | null;
+  approvalStatus: string | null;
+  workbenchEvidenceId: number | null;
+}) {
+  const approvalRequired = routeRequiresApproval(input.approvalGates);
+  const taskReady = input.taskId != null;
+  const workbenchReady = input.workbenchEvidenceId != null;
+  const approvalReady = !approvalRequired || input.approvalStatus === "approved";
+  const requiredBeforeExecution = [
+    "route record",
+    "local task record",
+    "Workbench receipt body",
+    ...(approvalRequired ? ["approved approval gate"] : []),
+    "future explicit execution call",
+  ];
+  const noActionTaken = [
+    "No command ran.",
+    "No browser opened.",
+    "No model call ran.",
+    "No git action ran.",
+    "No external write ran.",
+  ];
+  let status:
+    | "preview_only"
+    | "missing_route_record"
+    | "missing_workbench_receipt"
+    | "missing_approval"
+    | "approval_pending"
+    | "approval_rejected"
+    | "ready_for_explicit_execution_call" = "ready_for_explicit_execution_call";
+
+  if (input.routeRecordId == null) status = "preview_only";
+  else if (!taskReady) status = "missing_route_record";
+  else if (!workbenchReady) status = "missing_workbench_receipt";
+  else if (approvalRequired && input.approvalStatus == null) status = "missing_approval";
+  else if (approvalRequired && input.approvalStatus === "pending") status = "approval_pending";
+  else if (approvalRequired && input.approvalStatus !== "approved") status = "approval_rejected";
+
+  return {
+    routeRecordId: input.routeRecordId,
+    taskId: input.taskId,
+    approvalId: input.approvalId,
+    approvalStatus: approvalRequired ? input.approvalStatus : "not_required",
+    workbenchEvidenceId: input.workbenchEvidenceId,
+    canExecute: false,
+    status,
+    requiredBeforeExecution,
+    noActionTaken,
+    readyForFutureExecutorReview: input.routeRecordId != null && taskReady && approvalReady && workbenchReady,
   };
 }
 
@@ -426,6 +498,14 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
   if (modelProposal.approvalRequired) approvalGates.push("external model escalation approval");
   const receiptSummary = `${routeChain.join(" -> ")}. ${nextActionFor(category, ownerAgent)}`;
   const projectSlug = project?.slug ?? null;
+  const executionReadiness = routeExecutionReadiness({
+    routeRecordId: null,
+    taskId: null,
+    approvalGates,
+    approvalId: null,
+    approvalStatus: null,
+    workbenchEvidenceId: null,
+  });
 
   return {
     mode: "proposal_only" as const,
@@ -452,6 +532,7 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
       approvalRequired: preflight.approvalRequired,
     },
     approvalGates,
+    executionReadiness,
     receipt: {
       kind: "route_preview",
       ownerAgent,
@@ -601,7 +682,6 @@ export const runtimeRouter = router({
         `,
         args,
       });
-
       return {
         items: result.rows.map((row) => mapRouteRecordRow(row as Record<string, unknown>)),
       };
@@ -1015,6 +1095,15 @@ export const runtimeRouter = router({
           preview.nextAction,
         ],
       });
+      const routeRecordId = Number(result.lastInsertRowid);
+      const executionReadiness = routeExecutionReadiness({
+        routeRecordId,
+        taskId: null,
+        approvalGates: preview.approvalGates,
+        approvalId: null,
+        approvalStatus: null,
+        workbenchEvidenceId: null,
+      });
 
       return {
         mode: "local_route_record" as const,
@@ -1023,7 +1112,7 @@ export const runtimeRouter = router({
         opensBrowser: false,
         callsModel: false,
         record: {
-          id: Number(result.lastInsertRowid),
+          id: routeRecordId,
           originalText: preview.originalText,
           category: preview.category,
           confidence: preview.confidence,
@@ -1036,6 +1125,7 @@ export const runtimeRouter = router({
           permissionClass: preview.permissionClass,
           routeChain: preview.cortanaRoute,
           approvalGates: preview.approvalGates,
+          executionReadiness,
           modelProposal: preview.modelProposal,
           toolProposal: preview.toolProposal,
           workbenchReceiptDraft: preview.workbenchReceiptDraft,
