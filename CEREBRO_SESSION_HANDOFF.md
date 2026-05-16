@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2021 EDT
+Last updated: 2026-05-15 2024 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2024 EDT - Route Gate Visibility Pass
+
+### What Changed
+- `runtime.routeRecords` now includes the pending route approval preview id,
+  status, action type, requested agent, and permission preflight id.
+- `ledger.overview` now includes the same pending gate projection for recent
+  route rows.
+- Ledger route cards show `gate #...` when a route already has a pending gate.
+- The route gate button now opens the existing pending gate instead of queuing
+  another preview.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-route-approval-read-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "stages one local approval preview"` failed because route records did not include `approvalPreview`.
+- Green phase: `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-route-approval-read-green.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false -t "stages one local approval preview"` passed.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-route-approval-read-full.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 7 tests.
+- `pnpm -C app exec tsc --noEmit --pretty false` passed.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: route gate visibility.
+- No new write path, backend schema, external write, model call, command
+  execution, browser action, package install, storage migration, git action from
+  CereBro, or Raven boundary changed.
+- No worker was used because this is a small read-model plus Ledger UI follow-up
+  to the prior runtime gate contract.
+
+### Front-End Steward Review
+- The route card now shows whether a gate already exists.
+- The button label changes from `Queue Gate` to `Gate #...` after a gate is
+  queued, reducing duplicate action ambiguity.
+
+### Completion Read
+- Overall: 61%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 97%.
+- Backend/runtime: 47%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue the
+route-to-Workbench receipt save contract, keeping all actions local, visible,
+and explicit.
 
 ## 2026-05-15 2021 EDT - Runtime Route Approval Preview Contract
 

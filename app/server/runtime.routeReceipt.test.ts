@@ -298,5 +298,14 @@ describe("runtime route receipt preview", () => {
     expect(second.approval?.id).toBe(first.approval?.id);
     expect(await countRows("approvals")).toBe(approvalCountBefore + 1);
     expect(await countRows("permission_preflight_records")).toBe(preflightCountBefore + 1);
+
+    const records = await caller.runtime.routeRecords({
+      limit: 1,
+      ownerAgent: "surfer",
+    });
+    expect(records.items[0]?.id).toBe(committed.record.id);
+    expect(records.items[0]?.approvalPreview?.id).toBe(first.approval?.id);
+    expect(records.items[0]?.approvalPreview?.status).toBe("pending");
+    expect(records.items[0]?.approvalPreview?.permissionPreflightId).toBe(first.approval?.permissionPreflightId);
   });
 });

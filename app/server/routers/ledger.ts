@@ -33,6 +33,13 @@ function routeRow(row: Record<string, unknown>) {
     ledgerFocusDraft: parseJsonField<Record<string, unknown>>(row.ledger_focus_json, {}),
     taskDraft: parseJsonField<Record<string, unknown>>(row.task_draft_json, {}),
     taskId: row.task_id == null ? null : Number(row.task_id),
+    approvalPreview: row.approval_id == null ? null : {
+      id: Number(row.approval_id),
+      status: String(row.approval_status ?? "pending"),
+      actionType: String(row.approval_action_type ?? ""),
+      requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
+      permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
+    },
     nextAction: String(row.next_action ?? ""),
     createdAt: Number(row.created_at ?? 0),
   };
@@ -155,9 +162,24 @@ export const ledgerRouter = router({
         }),
         db.execute({
           sql: `
-            SELECT *
-            FROM runtime_route_records
-            ORDER BY created_at DESC, id DESC
+            SELECT
+              r.*,
+              a.id AS approval_id,
+              a.status AS approval_status,
+              a.action_type AS approval_action_type,
+              a.requested_by_agent AS approval_requested_by_agent,
+              a.permission_preflight_id AS approval_permission_preflight_id
+            FROM runtime_route_records r
+            LEFT JOIN approvals a ON a.id = (
+              SELECT latest.id
+              FROM approvals latest
+              WHERE latest.target_type = 'runtime_route_record'
+                AND latest.target_id = r.id
+                AND latest.status = 'pending'
+              ORDER BY latest.created_at DESC, latest.id DESC
+              LIMIT 1
+            )
+            ORDER BY r.created_at DESC, r.id DESC
             LIMIT ?
           `,
           args: [routeLimit],

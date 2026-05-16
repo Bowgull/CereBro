@@ -193,6 +193,9 @@ Recent Prime slices:
 - 2026-05-15 2021 EDT: added `runtime.createApprovalPreviewFromRouteRecord`
   and a Ledger `Queue Gate` action so saved route records can queue one local
   approval/preflight preview without running routed work.
+- 2026-05-15 2024 EDT: projected pending route approval previews into
+  `runtime.routeRecords` and `ledger.overview`; Ledger route cards now show
+  `gate #...` and open the existing gate.
 
 ### Frontend Worker
 
@@ -228,9 +231,8 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  show queued route approval ids on route records or continue the
-  route-to-Workbench receipt save contract, keeping every action local and
-  explicit.
+  continue the route-to-Workbench receipt save contract, keeping every action
+  local, visible, and explicit.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -561,3 +563,5 @@ Expected shape:
 - Runtime route records can now queue one local approval/preflight preview from
   Ledger through `Queue Gate`; repeated clicks reuse the existing pending
   approval.
+- Runtime route reads now show pending gate ids, and Ledger opens the existing
+  gate instead of hiding that state.

@@ -1281,6 +1281,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
               {latestRouteRows.map((item) => {
                 const routeTaskId = item.taskId;
+                const routeApprovalId = item.approvalPreview?.id ?? null;
                 return (
                   <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex flex-wrap items-center gap-1">
@@ -1288,6 +1289,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
                       <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
                       {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
+                      {routeApprovalId && <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">gate #{routeApprovalId}</span></Badge>}
                     </div>
                     <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
                       {item.originalText}
@@ -1349,18 +1351,35 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <Button
                         type="button"
                         size="sm"
-                        variant="outline"
+                        variant={routeApprovalId ? "secondary" : "outline"}
                         className="h-6 px-2 text-[10px]"
-                        onClick={() => createApprovalFromRouteRecord(item)}
+                        onClick={() => {
+                          if (routeApprovalId) {
+                            setLedgerFocusNotice(`Approval #${routeApprovalId} queued for route #${item.id}.`);
+                            onNavigate("approvals");
+                            return;
+                          }
+                          createApprovalFromRouteRecord(item);
+                        }}
                         disabled={creatingRouteApprovalId === item.id}
                         aria-label={
-                          creatingRouteApprovalId === item.id
+                          routeApprovalId
+                            ? `Open approval ${routeApprovalId} queued for route ${item.id}`
+                            : creatingRouteApprovalId === item.id
                             ? `Queuing approval preview for route ${item.id}`
                             : `Queue approval preview for route ${item.id}`
                         }
-                        title="Queue a local approval/preflight preview for this route. This does not approve or run work."
+                        title={
+                          routeApprovalId
+                            ? "Open the pending approval queued for this route."
+                            : "Queue a local approval/preflight preview for this route. This does not approve or run work."
+                        }
                       >
-                        {creatingRouteApprovalId === item.id ? "Queuing" : "Queue Gate"}
+                        {routeApprovalId
+                          ? `Gate #${routeApprovalId}`
+                          : creatingRouteApprovalId === item.id
+                            ? "Queuing"
+                            : "Queue Gate"}
                       </Button>
                       <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
                         Review before saving.
