@@ -204,6 +204,9 @@ Recent Prime slices:
   #1527, the route row changed from `Save Body` to `Receipt #1527`, and the
   linked receipt button now opens the Workbench body filtered to
   `runtime_route:22`.
+- 2026-05-15 2044 EDT: gated Workbench Project Proof reads behind the closed
+  drawer and switched the opened read to compact `workbench.evidenceSummary`
+  project groups instead of a 100-row receipt body fetch.
 
 ### Frontend Worker
 
@@ -580,3 +583,5 @@ Expected shape:
   Receipt #... loop works on localhost without hidden execution.
 - Route receipt buttons now open the Workbench body directly, preserving
   Ledger as audit trail and Workbench as receipt body.
+- Workbench Project Proof now reads only when opened and uses compact project
+  receipt groups instead of fetching 100 receipt bodies while closed.

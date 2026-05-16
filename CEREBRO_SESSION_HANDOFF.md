@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2040 EDT
+Last updated: 2026-05-15 2044 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2044 EDT - Workbench Project Proof Lazy Read
+
+### What Changed
+- Removed the closed-drawer 100-row Workbench receipt read from Project Proof.
+- Project Proof now shows `open to read` while closed.
+- Opening Project Proof runs the compact `workbench.evidenceSummary` project
+  read instead of fetching full receipt bodies.
+- Browser-checked that Workbench opens with Project Proof closed, then opens
+  the drawer and shows project receipt groups.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Workbench closed Project Proof shows `open to read`; opening it shows compact
+  project receipt groups.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: Workbench read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a single-file Workbench UI read-gating
+  slice.
+
+### Front-End Steward Review
+- Workbench keeps receipt creation and recent receipt inspection primary.
+- Project Proof remains available, but its supporting data is read only after
+  the user asks for it.
+- This keeps the default Workshop surface faster and quieter.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+broad-read reduction on one visible surface, or add the next runtime contract
+only if it closes a missing visible action in the Aang -> Workbench -> Ledger
+loop.
 
 ## 2026-05-15 2040 EDT - Route Workbench Receipt Browser And Focus Check
 

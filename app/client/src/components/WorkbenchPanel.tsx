@@ -59,6 +59,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const plan = trpc.workbench.plan.useQuery();
   const projects = trpc.projectIntelligence.overview.useQuery();
   const [receiptLinksOpen, setReceiptLinksOpen] = useState(false);
+  const [projectProofOpen, setProjectProofOpen] = useState(false);
   const linkOptions = trpc.workbench.linkOptions.useQuery(undefined, {
     enabled: receiptLinksOpen,
     staleTime: 30_000,
@@ -81,9 +82,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     projectId: filterProjectId === "all" ? undefined : filterProjectId,
     query: filterQuery.trim() || undefined,
   });
-  const projectProofEvidence = trpc.workbench.evidence.useQuery({
-    limit: 100,
-  });
+  const projectProofSummary = trpc.workbench.evidenceSummary.useQuery(
+    {
+      groupBy: "project",
+      latestLimit: 1,
+    },
+    {
+      enabled: projectProofOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const utils = trpc.useUtils();
   const createEvidence = trpc.workbench.createEvidence.useMutation({
     onSuccess: () => {
@@ -230,55 +240,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     const projectNames = new Map(
       projectOptions.map((project) => [project.tasks.projectId, project.name] as const),
     );
-    const groups = new Map<
-      string,
-      {
-        key: string;
-        projectId: number | null;
-        label: string;
-        total: number;
-        terminal: number;
-        review: number;
-        validated: number;
-        latestId: number;
-        latestTitle: string;
-        latestAt: number;
-      }
-    >();
-
-    for (const item of projectProofEvidence.data?.items ?? []) {
-      const projectKey = item.projectId == null ? "unlinked" : String(item.projectId);
-      const existing = groups.get(projectKey);
-      const group = existing ?? {
-        key: projectKey,
-        projectId: item.projectId ?? null,
-        label: item.projectName ?? projectNames.get(item.projectId ?? null) ?? "Unlinked receipt",
-        total: 0,
-        terminal: 0,
-        review: 0,
-        validated: 0,
-        latestId: item.id,
-        latestTitle: item.title,
-        latestAt: item.createdAt,
-      };
-      group.total += 1;
-      if (item.kind === "terminal_output") group.terminal += 1;
-      if (item.validationStatus === "needs_review") group.review += 1;
-      if (item.validationStatus === "looks_consistent" || item.validationStatus === "validated_for_local_use") {
-        group.validated += 1;
-      }
-      if (item.createdAt >= group.latestAt) {
-        group.latestId = item.id;
-        group.latestTitle = item.title;
-        group.latestAt = item.createdAt;
-      }
-      groups.set(projectKey, group);
-    }
-
-    return [...groups.values()]
-      .sort((a, b) => b.total - a.total || b.latestAt - a.latestAt)
+    return (projectProofSummary.data?.groups ?? [])
+      .map((group) => {
+        const projectId = group.key === "unlinked" ? null : Number(group.key);
+        return {
+          key: group.key,
+          projectId,
+          label: group.label || projectNames.get(projectId) || "Unlinked receipt",
+          total: group.count,
+          terminal: group.terminal,
+          review: group.needsReview,
+          validated: group.validated,
+          latestAt: group.latestAt,
+        };
+      })
       .slice(0, 6);
-  }, [projectOptions, projectProofEvidence.data?.items]);
+  }, [projectOptions, projectProofSummary.data?.groups]);
   const workbenchLanes = [
     {
       label: "Preview",
@@ -592,7 +569,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               }
             />
 
-            <details className="rounded p-2" aria-label="Project receipt grouping" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <details
+              className="rounded p-2"
+              aria-label="Project receipt grouping"
+              onToggle={(event) => setProjectProofOpen(event.currentTarget.open)}
+              style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+            >
               <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -601,7 +583,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       Receipts that Project Lab can read before push decisions.
                     </p>
                   </div>
-                  <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
+                  <Chip
+                    label={projectProofOpen ? `${projectProofSummary.data?.summary.total ?? 0} receipts` : "open to read"}
+                    tone={C.accent}
+                  />
                 </div>
               </summary>
               <div className="mt-2">
@@ -612,11 +597,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     Local receipt state before push decisions.
                   </p>
                 </div>
-                <Chip label={`${projectProofEvidence.data?.summary.total ?? 0} receipts`} tone={C.accent} />
+                <Chip label={`${projectProofSummary.data?.summary.total ?? 0} receipts`} tone={C.accent} />
               </div>
-              {projectProofEvidence.isLoading ? (
+              {projectProofSummary.isLoading ? (
                 <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  Reading local receipt records.
+                  Reading local receipt summary.
                 </div>
               ) : projectProofGroups.length === 0 ? (
                 <div className="rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
@@ -644,7 +629,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <span className="text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }}>
                             {group.label}
                           </span>
-                          <Chip label={`#${group.latestId}`} tone={C.textMuted} />
+                          <Chip label={`${group.total}`} tone={C.textMuted} />
                         </span>
                         <span className="mt-1 flex flex-wrap gap-1">
                           <Chip label={`${group.total} receipts`} tone={C.accent} />
@@ -652,8 +637,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <Chip label={`${group.review} review`} tone={group.review > 0 ? C.danger : C.textMuted} />
                           <Chip label={`${group.validated} validated`} tone={group.validated > 0 ? C.success : C.textMuted} />
                         </span>
-                        <span className="mt-1 block truncate text-[11px]" style={{ color: C.textMuted }} title={group.latestTitle}>
-                          Latest: {group.latestTitle}
+                        <span className="mt-1 block truncate text-[11px]" style={{ color: C.textMuted }} title={new Date(group.latestAt * 1000).toLocaleString()}>
+                          Latest receipt group read.
                         </span>
                       </span>
                     </Button>
