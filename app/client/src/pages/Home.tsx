@@ -953,6 +953,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
 function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
+  const [ledgerFocusProject, setLedgerFocusProject] = useState<{ id: number; name: string | null } | null>(null);
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
   const [creatingRouteReceiptId, setCreatingRouteReceiptId] = useState<number | null>(null);
@@ -995,7 +996,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const overviewCards = ledgerOverview.data?.cards;
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
-  const latestEvidenceRows = evidenceRows.slice(0, 4);
+  const focusedEvidenceRows = ledgerFocusProject
+    ? evidenceRows.filter((item) => item.projectId === ledgerFocusProject.id)
+    : evidenceRows;
+  const latestEvidenceRows = focusedEvidenceRows.slice(0, 4);
   const latestRouteRows = routeRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = overviewCards?.receipts.terminal ?? 0;
@@ -1032,7 +1036,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     }
     if (!raw) return;
     try {
-      const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; notice?: string };
+      const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; projectId?: number | null; projectName?: string | null; notice?: string };
+      if (typeof draft.projectId === "number") {
+        setLedgerFocusProject({ id: draft.projectId, name: draft.projectName ?? null });
+        if (typeof draft.evidenceId !== "number") setSelectedEvidenceId(null);
+      }
       if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
       setLedgerFocusNotice(draft.notice ?? "Ledger opened a focused receipt.");
     } catch {
@@ -1471,7 +1479,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench receipts">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Latest Workbench Receipts
+              {ledgerFocusProject ? `${ledgerFocusProject.name ?? "Focused Project"} Workbench Receipts` : "Latest Workbench Receipts"}
             </div>
             <Button
               type="button"
@@ -1490,7 +1498,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           ) : latestEvidenceRows.length === 0 ? (
             <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              No Workbench receipts yet. Open Workbench Bodies and save the first local receipt.
+              {ledgerFocusProject
+                ? `No local Workbench receipts are linked to ${ledgerFocusProject.name ?? "this project"} in the current Ledger read.`
+                : "No Workbench receipts yet. Open Workbench Bodies and save the first local receipt."}
             </div>
           ) : (
             <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
@@ -1534,6 +1544,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusNotice(null)} aria-label="Dismiss Ledger focus notice">
                     Dismiss
                   </Button>
+                  {ledgerFocusProject && (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusProject(null)} aria-label="Clear Ledger project focus">
+                      Clear Focus
+                    </Button>
+                  )}
                 </div>
               )}
               <div className="flex flex-wrap items-center justify-between gap-2">

@@ -19543,3 +19543,65 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect whether Ledger should accept project-level focus beyond notice-only, or move to the next visible-loop gap that keeps Project Lab, Terminal Lab, Workbench, and Ledger aligned without new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0259 EDT - Ledger project focus read
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 55%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Ledger UI focus slice.
+
+What changed:
+
+- Ledger now stores project-level focus from `cerebro:ledger-focus` drafts.
+- When a focus draft includes a project id, Ledger scopes the Workbench receipt
+  preview list to that project.
+- Ledger resets stale selected receipt state when opening a project-level focus
+  without an exact receipt id, so the selected preview cannot stay on another
+  project.
+- The receipt section title changes from `Latest Workbench Receipts` to the
+  focused project name, such as `CereBro Workbench Receipts`.
+- Focused Ledger reads expose `Clear Focus` beside the notice.
+- No backend route, schema, execution, git, model, external provider, Notion,
+  Slack, or receipt creation behavior changed.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/pages/Home.tsx` passed.
+- Playwright opened `http://localhost:3000`, opened Workshop > Terminal Lab,
+  clicked Ledger in Terminal Map Read, and confirmed Ledger showed:
+  `CereBro Workbench Receipts`,
+  `Terminal Lab current repo opened Ledger for CereBro.`, and `Clear Focus`.
+
+Known risks:
+
+- Project focus scopes the currently loaded latest receipt rows. It is not a
+  deep historical backend search.
+- Route reads remain separate from Workbench receipt focus in this pass.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect remaining visible-loop gaps now that Terminal Lab focuses Project Lab, Workbench, and Ledger. Prefer receipt validation/read improvements or Project Lab/Workbench consistency over new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

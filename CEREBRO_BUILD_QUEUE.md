@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0241 EDT
+Last updated: 2026-05-16 0259 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0259 EDT: Ledger now honors project-level focus drafts from
+  Terminal Lab. Focused reads scope the Workbench receipt preview list to the
+  matched project and expose a visible Clear Focus control.
 - 2026-05-16 0241 EDT: Terminal Lab Workbench and Ledger buttons now carry
   the matched project/audit context forward. Workbench consumes project focus
   drafts so Terminal Lab opens CereBro receipts directly instead of a generic
