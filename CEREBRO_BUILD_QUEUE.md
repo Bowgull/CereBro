@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0213 EDT
+Last updated: 2026-05-16 0241 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0241 EDT: Terminal Lab Workbench and Ledger buttons now carry
+  the matched project/audit context forward. Workbench consumes project focus
+  drafts so Terminal Lab opens CereBro receipts directly instead of a generic
+  receipt list.
 - 2026-05-16 0213 EDT: Terminal Lab Project button now carries the matched
   project context into Project Lab. Browser proof confirmed the CereBro project
   read opens from Terminal Lab with the notice and Git inspector focused.

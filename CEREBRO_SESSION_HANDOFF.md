@@ -19474,3 +19474,72 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: keep tightening the visible loop from Terminal Lab to Workbench, Project Lab, and Ledger. Prefer small focus handoffs or receipt-read improvements over new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0241 EDT - Terminal Lab Workbench and Ledger focus handoff
+
+Overall completion after this pass:
+
+- Overall: 63%
+- Frontend visible loop: 98%
+- Backend/runtime: 55%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow focus-handoff continuation.
+
+What changed:
+
+- Terminal Lab Workbench button now stages a `cerebro:workbench-filter` draft
+  with the matched project id, project grouping, source `terminal_lab`, and a
+  visible notice.
+- Workbench now accepts `projectId` from a filter draft and applies it to the
+  existing receipt project filter.
+- Terminal Lab Ledger button now stages a `cerebro:ledger-focus` notice with
+  the matched project context before opening Ledger.
+- The rail still shows simple Project, Workbench, and Ledger buttons. The
+  routing context is carried quietly in session storage.
+- No command execution, git execution, receipt creation, approval decision,
+  database migration, model call, Notion call, Slack call, or external write
+  was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check -- app/client/src/components/TerminalLabPanel.tsx app/client/src/components/WorkbenchPanel.tsx`
+  passed.
+- Playwright opened `http://localhost:3000`, opened Workshop > Terminal Lab,
+  clicked Workbench in the Terminal Map Read rail, and confirmed Workbench
+  showed `Draft staged. Terminal Lab current repo opened CereBro Workbench
+  receipts.` with the project filter set to CereBro.
+- Playwright reopened Terminal Lab, clicked Ledger in the Terminal Map Read
+  rail, and confirmed Ledger showed `Terminal Lab current repo opened Ledger
+  for CereBro.` in the selected receipt preview.
+
+Known risks:
+
+- Ledger focus is currently notice-level only when no exact receipt id is
+  passed. That is acceptable for this map-level handoff.
+- Workbench project filtering depends on the project id already returned by
+  Project Intelligence.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Next safe slice: inspect whether Ledger should accept project-level focus beyond notice-only, or move to the next visible-loop gap that keeps Project Lab, Terminal Lab, Workbench, and Ledger aligned without new surfaces. Run checks, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

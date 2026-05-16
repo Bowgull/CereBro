@@ -1324,6 +1324,40 @@ function ProjectContextRail({
     }
     onNavigate("projects");
   }
+  function openWorkbenchContext() {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "terminal_lab",
+          projectId: activeProject.tasks.projectId,
+          groupBy: "project",
+          notice: `Terminal Lab ${contextLabel} opened ${activeProject.name} Workbench receipts.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can inspect receipt bodies manually.
+    }
+    onNavigate("workbench");
+  }
+  function openLedgerContext() {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:ledger-focus",
+        JSON.stringify({
+          source: "terminal_lab",
+          projectId: activeProject.tasks.projectId,
+          projectName: activeProject.name,
+          notice: `Terminal Lab ${contextLabel} opened Ledger for ${activeProject.name}.`,
+        }),
+      );
+    } catch {
+      // Ledger still opens; the user can inspect audit rows manually.
+    }
+    onNavigate("ledger");
+  }
 
   return (
     <section className="rounded p-1.5" aria-label="Project Lab context" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -1400,10 +1434,10 @@ function ProjectContextRail({
           <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openProjectContext} aria-label={`Open ${project.name} in Project Lab`}>
             Project
           </Button>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench receipt bodies">
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openWorkbenchContext} aria-label={`Open ${project.name} Workbench receipts`}>
             Workbench
           </Button>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger audit trail">
+          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openLedgerContext} aria-label={`Open ${project.name} Ledger audit trail`}>
             Ledger
           </Button>
         </div>

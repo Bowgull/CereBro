@@ -43,6 +43,7 @@ type WorkbenchFilterDraft = {
   source?: string;
   evidenceId?: number;
   kind?: EvidenceKind;
+  projectId?: number | null;
   query?: string;
   groupBy?: EvidenceGroupBy;
   notice?: string;
@@ -356,6 +357,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     try {
       const draft = JSON.parse(raw) as WorkbenchFilterDraft;
       if (draft.kind && draft.kind !== "all") setFilterKind(draft.kind);
+      if (draft.projectId != null) setFilterProjectId(draft.projectId);
       if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
       if (draft.query) setFilterQuery(draft.query);
       if (draft.groupBy) setGroupBy(draft.groupBy);
