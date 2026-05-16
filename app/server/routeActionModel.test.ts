@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeActionModel } from "../client/src/lib/routeActionModel";
+import { routeActionModel, routePreviewActionModel } from "../client/src/lib/routeActionModel";
 
 describe("routeActionModel", () => {
   it("keeps saved route actions grouped by safe destination and state", () => {
@@ -34,5 +34,18 @@ describe("routeActionModel", () => {
 
     expect(actions.map((action) => action.label)).toEqual(["Project", "Saving Body", "Queuing Gate", "Creating Task"]);
     expect(actions.map((action) => action.status)).toEqual(["read", "pending", "pending", "pending"]);
+  });
+
+  it("keeps route preview destinations separate from the save route action", () => {
+    const actions = routePreviewActionModel({
+      taskCreated: false,
+      creatingTask: false,
+      approvalRequired: true,
+    });
+
+    expect(actions.map((action) => action.key)).toEqual(["project", "workbench", "gate", "task"]);
+    expect(actions.map((action) => action.destination)).toEqual(["Project", "Body", "Gate", "Task"]);
+    expect(actions.map((action) => action.label)).toEqual(["Project", "Workbench", "Ledger", "Create Task"]);
+    expect(actions.every((action) => action.executes === false)).toBe(true);
   });
 });

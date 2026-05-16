@@ -20081,3 +20081,70 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. The saved-route row now has a compact safe-action rail. Next best slice: polish the runtime route preview modal to match the same Project/Body/Gate/Task mental model, or inspect Workbench/Project Lab for the next visible low-machinery cleanup. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0556 EDT - Route preview safe-destination rail
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a visible polish pass on the runtime route preview.
+
+What changed:
+
+- Added `routePreviewActionModel` beside the saved-route action model.
+- Locked preview actions in test as Project, Body, Gate, and Task.
+- Route preview no longer shows Project, Workbench, Ledger, and Create Task as
+  a flat button strip beside Save Route.
+- Save Route stays the one local route-record action.
+- Project, Body, Gate, and Task now sit in a compact `Safe destinations` rail
+  with `save route first` visible.
+- Gate/Ledger remains clickable because it is a read destination, not a queued
+  approval action from preview.
+
+Files touched in this slice:
+
+- `app/client/src/lib/routeActionModel.ts`
+- `app/server/routeActionModel.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  failed because `routePreviewActionModel` did not exist.
+- Green after patch:
+  `pnpm -C app exec vitest run server/routeActionModel.test.ts`
+  passed, 3 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, previewed
+  `keep building CereBro front end`, confirmed `Safe destinations`, `save route
+  first`, `Project`, `Body`, `Gate`, and `Task`, then clicked Ledger/Gate and
+  confirmed Ledger focused to CereBro receipts.
+
+Known risks:
+
+- Route preview still contains dense route proof fields below the rail. They
+  are useful, but the next polish pass should decide which proof stays visible
+  and which moves behind details.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview and saved route rows now share the Project/Body/Gate/Task mental model. Next best slice: hide excess preview proof behind a compact details section, or inspect Workbench/Project Lab for the next visible low-machinery cleanup. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
+```

@@ -43,7 +43,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
-import { routeActionModel, type RouteAction } from "@/lib/routeActionModel";
+import { routeActionModel, routePreviewActionModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -1977,6 +1977,11 @@ function RuntimeRouteReceipt({
     { label: "Approval", value: result.approvalGates[0] ?? "No gate listed", tone: result.toolProposal.approvalRequired ? C.warning : C.success },
     { label: "Next", value: result.nextAction, tone: C.textSecondary },
   ];
+  const previewActions = routePreviewActionModel({
+    taskCreated,
+    creatingTask: isCreatingTask,
+    approvalRequired: result.toolProposal.approvalRequired,
+  });
 
   function workbenchPermissionClass(permissionClass: string) {
     if (permissionClass === "public_browser") return "public_browser";
@@ -2085,30 +2090,42 @@ function RuntimeRouteReceipt({
             >
               {routeSavedId ? `Route #${routeSavedId}` : isSavingRoute ? "Saving" : "Save Route"}
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={taskCreated ? "secondary" : "outline"}
-              className="h-7 px-2"
-              onClick={onCreateTask}
-              disabled={isCreatingTask}
-              aria-label={taskCreated ? "Task saved from route receipt" : isCreatingTask ? "Saving route task" : `Create task: ${result.taskDraft.title}`}
-              title={result.taskDraft.title}
-            >
-              {taskCreated ? "Task Saved" : isCreatingTask ? "Saving" : "Create Task"}
-            </Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openWorkbenchRouteDraft} aria-label="Stage route receipt draft in Workbench">
-              Workbench
-            </Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openProjectRouteFocus} aria-label="Open Project Lab focused on route preview">
-              Project
-            </Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openLedgerRouteFocus} aria-label="Open Ledger focused on route preview">
-              Ledger
-            </Button>
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">
               Dismiss
             </Button>
+          </div>
+        </div>
+        <div className="mt-2 rounded p-1.5" aria-label="Route preview safe actions" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+              Safe destinations
+            </span>
+            <span className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+              save route first
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4">
+            {previewActions.map((action) => (
+              <RouteActionButton
+                key={action.key}
+                action={action}
+                onClick={() => {
+                  if (action.key === "project") {
+                    openProjectRouteFocus();
+                    return;
+                  }
+                  if (action.key === "workbench") {
+                    openWorkbenchRouteDraft();
+                    return;
+                  }
+                  if (action.key === "gate") {
+                    openLedgerRouteFocus();
+                    return;
+                  }
+                  onCreateTask();
+                }}
+              />
+            ))}
           </div>
         </div>
         <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-6">

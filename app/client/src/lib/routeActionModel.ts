@@ -22,6 +22,12 @@ export type RouteAction = {
   title: string;
 };
 
+export type RoutePreviewActionInput = {
+  taskCreated: boolean;
+  creatingTask: boolean;
+  approvalRequired: boolean;
+};
+
 export function routeActionModel(input: RouteActionInput): RouteAction[] {
   const gateLabel = input.approvalId
     ? `${input.approvalStatus === "approved" ? "Approved" : input.approvalStatus === "pending" ? "Gate" : "Closed"} #${input.approvalId}`
@@ -83,6 +89,47 @@ export function routeActionModel(input: RouteActionInput): RouteAction[] {
       title: input.taskId
         ? "Open the local task created from this route."
         : "Create a local task from this saved route. This does not run the task.",
+    },
+  ];
+}
+
+export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAction[] {
+  return [
+    {
+      key: "project",
+      destination: "Project",
+      label: "Project",
+      status: "read",
+      executes: false,
+      ariaLabel: "Open Project Lab focused on route preview",
+      title: "Open Project Lab for this route preview. No project write is saved.",
+    },
+    {
+      key: "workbench",
+      destination: "Body",
+      label: "Workbench",
+      status: "read",
+      executes: false,
+      ariaLabel: "Stage route receipt draft in Workbench",
+      title: "Stage this route preview as a Workbench draft. This does not save evidence or run work.",
+    },
+    {
+      key: "gate",
+      destination: "Gate",
+      label: "Ledger",
+      status: "read",
+      executes: false,
+      ariaLabel: "Open Ledger focused on route preview",
+      title: "Open Ledger audit focus for this route preview. No audit row is saved.",
+    },
+    {
+      key: "task",
+      destination: "Task",
+      label: input.taskCreated ? "Task Saved" : input.creatingTask ? "Saving Task" : "Create Task",
+      status: input.taskCreated ? "saved" : input.creatingTask ? "pending" : "read",
+      executes: false,
+      ariaLabel: input.taskCreated ? "Task saved from route receipt" : input.creatingTask ? "Saving route task" : "Create task from route preview",
+      title: "Create one local task from this route preview. This does not run the task.",
     },
   ];
 }
