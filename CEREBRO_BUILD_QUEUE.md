@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0605 EDT
+Last updated: 2026-05-16 0608 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -49,6 +49,7 @@ If a proposed task does not serve this order, it waits.
 
 Stop and ask when:
 
+- `CEREBRO_ANTI_DRIFT_LAW.md` marks the slice as major drift
 - product direction changes
 - a new primary surface is proposed
 - a worker needs to cross lane ownership
@@ -84,6 +85,9 @@ Current integration order:
   archive aligned before assigning build workers.
 - Start every longer pass by classifying dirty files as current slice,
   quarantine, generated/local, or blocked.
+- Before edits, state why the slice is on the build path, which surface owns
+  it, and what will not be built.
+- Close each real build pass with a drift check in the handoff.
 - Stage only current-slice files.
 - Integrate worker findings into one next block.
 - Preserve existing unrelated dirty worktree files.
@@ -91,6 +95,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0608 EDT: added the canonical
+  `CEREBRO_ANTI_DRIFT_LAW.md`, mirrored it into Obsidian retrieval, and wired
+  AGENTS plus this queue to treat major drift as a stop condition.
 - 2026-05-16 0605 EDT: Workbench receipt form copy now names the primary
   object `Receipt Body`. The staged draft state now reads `Body draft. Review
   it, then save the local receipt.` instead of exposing draft machinery.

@@ -48,6 +48,10 @@ These live in auto-memory but are repeated here so any Codex reading the repo co
 - Root `DESIGN.md` is active. Read it before UI, motion, prototype, deck, asset,
   or product-copy work. It is the agent-readable design law that prevents
   generic AI output.
+- Root `CEREBRO_ANTI_DRIFT_LAW.md` is active. Read it before planning,
+  implementation, UI work, external tools, workers, automation, model routing,
+  or long keep-going sessions. Major drift stops the pass and requires a user
+  decision.
 - Obsidian note `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
   is active. Read it before app/software UI work. Product screens must hide
   machinery until requested, make the primary object own the screen, put

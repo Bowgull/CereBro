@@ -20276,3 +20276,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Workbench body copy is cleaner. Next best slice: hide or soften remaining Workbench machinery around lane selection, receipt chain, Project Proof, or recent receipt read gates. Run targeted tests, pnpm check, browser-proof localhost, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0608 EDT - Anti-drift law
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 58%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a governance and knowledge pass with no app code.
+
+What changed:
+
+- Added canonical repo law `CEREBRO_ANTI_DRIFT_LAW.md`.
+- Corrected the law after user feedback: GitHub is a standing source lane.
+  CereBro should use relevant repos, patterns, issues, docs, and source notes
+  when they help the build or the user's understanding.
+- Mirrored the law into Obsidian at
+  `20_Knowledge/Playbooks/CereBro Anti-Drift Law.md`.
+- Wired `AGENTS.md` so future planning, implementation, UI, workers,
+  automation, model routing, external tools, and long keep-going sessions must
+  read the law.
+- Updated `CEREBRO_BUILD_QUEUE.md` so major drift is a stop condition.
+- Locked the stance that anti-drift is not a new agent first. It is a law.
+  Aang, Cortana, Spock, and Professor Oak can enforce it later.
+
+Files touched in this slice:
+
+- `CEREBRO_ANTI_DRIFT_LAW.md`
+- `AGENTS.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian mirror:
+  `20_Knowledge/Playbooks/CereBro Anti-Drift Law.md`
+
+Checks run:
+
+- `git diff --check -- AGENTS.md CEREBRO_ANTI_DRIFT_LAW.md CEREBRO_BUILD_QUEUE.md CEREBRO_SESSION_HANDOFF.md`
+  passed.
+- `pnpm -C app check` passed.
+
+Drift check:
+
+- On path because the user asked for a standing anti-drift rule that both Codex
+  and CereBro can follow.
+- No new app surface, lab, plugin, model, service, or agent was added.
+- No Raven content, backend automation, or external tooling was touched.
+- GitHub review remains allowed and useful. Off-path cloning, installing,
+  running, copying, or wiring still needs proof and a clear return to plan.
+- Deferred enforcement inside the product UI until a later approved build
+  slice.
+
+Known risks:
+
+- The law is documentation and memory wiring only. Product enforcement still
+  needs a later route-check contract if CereBro itself should block off-path
+  actions in-app.
+
+Storage impact:
+
+- Added one repo law.
+- Added one active Obsidian playbook note.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Anti-drift law is now active: before edits, state the build-plan item, owning surface, and what not to build. Next best slice: continue low-machinery Workbench or Project Lab cleanup unless the law marks the slice as drift. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```
