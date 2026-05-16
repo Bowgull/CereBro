@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0809 EDT
+Last updated: 2026-05-16 0829 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0829 EDT: cleaned Outputs saved-output copy. The panel now says
+  details keep destination and retention visible, vault writes report `Saved
+  vault output`, fallback rows say `Output #`, and details read `Destination`
+  and `Retention` instead of storage/proof-shaped wording.
 - 2026-05-16 0708 EDT: started Workbench receipt-body clarity. Header now says
   `Save the receipt body for what just happened.`, the first card says
   `Current Body`, the receipt chain says `Aang teaches` / `Workbench body`,

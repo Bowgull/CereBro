@@ -21709,3 +21709,77 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Memory/Ledger now uses Knowledge Notes and reuse-review language instead of receipt/truth wording. Next best slice: continue Ledger low-machinery pass on Approvals or Outputs, choosing the surface with the most visible machinery language in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0829 EDT - Outputs saved outputs copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Outputs/Ledger display-copy slice.
+
+What changed:
+
+- Refined `outputsPanelCopyModel` so Saved Outputs says details keep
+  destination and retention visible.
+- Vault write success now reports `Saved vault output`.
+- Untitled output rows now fall back to `Output #` instead of artifact wording.
+- Output details now label storage fields as `Destination` and `Retention`.
+- Existing output storage behavior, artifact rows, filters, and write routes
+  were left untouched.
+
+Files touched in this slice:
+
+- `app/client/src/lib/outputsPanelCopyModel.ts`
+- `app/client/src/components/ArtifactsPanel.tsx`
+- `app/server/outputsPanelCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/outputsPanelCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/ArtifactsPanel.tsx
+  app/client/src/lib/outputsPanelCopyModel.ts app/server/outputsPanelCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, opened
+  Outputs, confirmed the new destination/retention subtitle, and confirmed old
+  exact phrases `storage proof`, `output receipt`, `vault artifact`, and `file
+  receipt` were absent from the visible page.
+
+Drift check:
+
+- On path because Outputs is part of the Ledger audit trail and saved-output
+  lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- The database and server still use the technical `artifacts` term. That is
+  acceptable for now because this pass only cleaned the user-facing Outputs
+  panel copy.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Outputs/Ledger now uses destination, retention, and saved-output language instead of proof/receipt/artifact wording on the primary surface. Next best slice: continue Ledger low-machinery pass on Approvals, which still exposes preflight/policy/receipt machinery. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

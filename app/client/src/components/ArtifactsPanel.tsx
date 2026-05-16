@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { outputsPanelCopy } from "@/lib/outputsPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,6 +162,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
   const sessionFilters = groupSessionFilters(sessions.data?.items ?? []);
   const isWriting = writeVault.isPending || writeObsidian.isPending;
   const writeCopy = WRITE_KIND_COPY[writeKind];
+  const copy = outputsPanelCopy();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -192,7 +194,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
         approved: true,
       }, {
         onSuccess: (result) => {
-          setLastWrite(result.ok ? `Saved vault artifact: ${result.relativePath}` : result.reason ?? "Vault write failed.");
+          setLastWrite(result.ok ? copy.savedVaultText(result.relativePath) : result.reason ?? "Vault write failed.");
         },
       });
     }
@@ -210,11 +212,11 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Saved Outputs
+            {copy.title}
             <span className="ml-2" style={{ color: C.textSecondary }}>{rows.length}</span>
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Notes, drafts, reports, prompts, and saved files. Details keep the storage proof.
+            {copy.subtitle}
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">
@@ -223,14 +225,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <OutputStat label="Saved" value={String(rows.length)} tone={C.gold} />
-        <OutputStat label="Writing" value={WRITE_KIND_COPY[writeKind].label} tone={C.success} />
-        <OutputStat label="Trail" value={writeCopy.policy} tone={C.accent} />
+        <OutputStat label={copy.stats.saved} value={String(rows.length)} tone={C.gold} />
+        <OutputStat label={copy.stats.writing} value={WRITE_KIND_COPY[writeKind].label} tone={C.success} />
+        <OutputStat label={copy.stats.trail} value={writeCopy.policy} tone={C.accent} />
       </div>
 
       <div
         className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
-        aria-label="Artifact kind filters"
+        aria-label={copy.kindFilterAria}
         style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
       >
         {KIND_OPTIONS.map((k) => {
@@ -251,7 +253,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       </div>
       <div
         className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
-        aria-label="Artifact run filters"
+        aria-label={copy.runFilterAria}
         style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
       >
         <FilterButton
@@ -275,17 +277,17 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
       <form onSubmit={submit} className="space-y-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[145px_145px_minmax(0,1fr)_70px]">
           <AppSelect
-            label="Artifact kind"
+            label={copy.kindLabel}
             value={writeKind}
             onChange={(value) => setWriteKind(value as WriteKind)}
             options={WRITE_KINDS.map((k) => ({ value: k, label: WRITE_KIND_COPY[k].label }))}
           />
           <AppSelect
-            label="Run link"
+            label={copy.runLinkLabel}
             value={writeSessionId}
             onChange={setWriteSessionId}
             options={[
-              { value: "none", label: "No run link" },
+              { value: "none", label: copy.noRunLink },
               ...sessionOptions.map((session) => ({
                 value: String(session.id),
                 label: session.optionLabel,
@@ -295,7 +297,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={`${writeCopy.label} title`}
+            placeholder={copy.titlePlaceholder(writeCopy.label)}
           />
           <Button
             type="submit"
@@ -303,14 +305,14 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
             disabled={!title.trim() || !body.trim() || isWriting}
             title={
               !title.trim() || !body.trim()
-                ? "Add a title and body before saving an output receipt."
+                ? copy.saveTitleEmpty
                 : writeKind === "obsidian_note"
-                  ? "Write a local Obsidian note and record the output receipt."
-                  : "Write a local vault artifact and record the output receipt."
+                  ? copy.saveTitleObsidian
+                  : copy.saveTitleVault
             }
-            aria-label={writeKind === "obsidian_note" ? "Save local Obsidian note" : "Save local vault artifact"}
+            aria-label={writeKind === "obsidian_note" ? copy.saveAriaObsidian : copy.saveAriaVault}
           >
-            {isWriting ? "Saving" : "Save"}
+            {isWriting ? copy.savingText : copy.saveText}
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-1.5">
@@ -322,27 +324,27 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
           />
           <details>
             <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
-              Save Routing
+              {copy.routingTitle}
             </summary>
             <div className="mt-1.5 grid gap-1.5 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_1.2fr]">
             {writeKind === "obsidian_note" ? (
               <Input
                 value={obsidianSubdir}
                 onChange={(e) => setObsidianSubdir(e.target.value)}
-                placeholder="Obsidian subfolder"
+                placeholder={copy.obsidianSubdirPlaceholder}
               />
             ) : (
               <Input
                 value={sourceUri}
                 onChange={(e) => setSourceUri(e.target.value)}
-                placeholder={writeKind === "source_note" ? "Source URL or file path" : "Optional source/context URI"}
+                placeholder={writeKind === "source_note" ? copy.sourcePlaceholder : copy.contextPlaceholder}
               />
             )}
             <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              Owner: {writeCopy.ownerAgent}. {writePolicyCopy(writeCopy.policy)}
+              {copy.ownerPrefix}: {writeCopy.ownerAgent}. {writePolicyCopy(writeCopy.policy)}
             </div>
             <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-              These controls save durable history/drafts/reports. Current-state updates need a separate explicit current-state writer.
+              {copy.historyNote}
             </div>
             {lastWrite && (
               <div className="rounded p-1.5 text-[10px] leading-snug md:col-span-2 xl:col-span-3" style={{ background: C.surfaceRaised, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
@@ -356,10 +358,10 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {artifacts.isLoading ? (
-          <div className="px-2.5 py-1.5 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-2.5 py-1.5 text-[11px]" style={{ color: C.textMuted }}>{copy.loadingText}</div>
         ) : rows.length === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            No saved outputs match this filter. Save a note, draft, report, prompt, or file receipt.
+            {copy.emptyText}
           </div>
         ) : (
           rows.map((artifact) => (
@@ -370,7 +372,7 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
               >
                 <div className="min-w-0">
                   <div className="truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={artifact.title ?? undefined}>
-                    {artifact.title ?? `Artifact ${artifact.id}`}
+                    {artifact.title ?? copy.fallbackTitle(artifact.id)}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-1">
                     <Badge variant="secondary" className="uppercase">
@@ -399,12 +401,12 @@ export default function ArtifactsPanel({ onClose }: { onClose: () => void }) {
                   )}
                   <details className="mt-1">
                     <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
-                      Output Details
+                      {copy.detailsTitle}
                     </summary>
                     <div className="mt-1 grid gap-1 rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                      <span className="truncate" title={artifact.storagePath}>Path: {artifact.storageProvider}:{artifact.storagePath}</span>
-                      <span>Keep: {artifact.retentionRule.replace(/_/g, " ")}</span>
-                      <span>Owner: {artifact.ownerAgent ?? "unassigned"}</span>
+                      <span className="truncate" title={artifact.storagePath}>{copy.locationLabel}: {artifact.storageProvider}:{artifact.storagePath}</span>
+                      <span>{copy.keepLabel}: {artifact.retentionRule.replace(/_/g, " ")}</span>
+                      <span>{copy.ownerLabel}: {artifact.ownerAgent ?? "unassigned"}</span>
                     </div>
                   </details>
                 </div>
