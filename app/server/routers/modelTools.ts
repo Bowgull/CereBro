@@ -281,6 +281,15 @@ const ollamaSetupPlan = {
 } as const;
 
 function rowToCapability(row: Record<string, unknown>) {
+  const sourceReadiness = readSourceReadiness({
+    approvalLevel: String(row.approval_level),
+    evalStatus: String(row.eval_status),
+    privacyClass: String(row.privacy_class),
+    riskReview: row.risk_review == null ? null : String(row.risk_review),
+    sourceUris: row.source_uris == null ? null : String(row.source_uris),
+    validationNotes: row.validation_notes == null ? null : String(row.validation_notes),
+  });
+
   return {
     id: Number(row.id),
     provider: String(row.provider),
@@ -310,9 +319,93 @@ function rowToCapability(row: Record<string, unknown>) {
     validationNotes: row.validation_notes == null ? null : String(row.validation_notes),
     failureNotes: row.failure_notes == null ? null : String(row.failure_notes),
     fallbackSuggestion: row.fallback_suggestion == null ? null : String(row.fallback_suggestion),
+    sourceReadiness,
     status: String(row.status),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
+  };
+}
+
+function splitSourceUris(value: string | null | undefined) {
+  return (value ?? "")
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function readSourceReadiness(input: {
+  approvalLevel: string;
+  evalStatus: string;
+  privacyClass: string;
+  riskReview: string | null;
+  sourceUris: string | null;
+  validationNotes: string | null;
+}) {
+  const sourceUriCount = splitSourceUris(input.sourceUris).length;
+  const hasRiskReview = Boolean(input.riskReview?.trim());
+  const hasValidationNotes = Boolean(input.validationNotes?.trim());
+  const noActionTaken = [
+    "No browser, search, fetch, provider, model, gateway, install, token, or account action ran.",
+    "Readiness is computed from local registry fields only.",
+  ];
+
+  if (input.privacyClass === "blocked_sensitive" || input.approvalLevel === "blocked") {
+    return {
+      status: "blocked" as const,
+      label: "blocked",
+      sourceUriCount,
+      nextStep: "Keep blocked. Do not route without an explicit policy change.",
+      requiredBeforeTrust: ["User approval to change policy.", "Spock review.", "Oak validation notes."],
+      noActionTaken,
+    };
+  }
+
+  if (input.evalStatus === "tested_pass") {
+    return {
+      status: "eval_ready" as const,
+      label: "eval ready",
+      sourceUriCount,
+      nextStep: "Can be considered for a route proposal with a visible approval receipt.",
+      requiredBeforeTrust: sourceUriCount > 0 ? [] : ["Add source URLs for provenance."],
+      noActionTaken,
+    };
+  }
+
+  if (input.evalStatus === "source_verified") {
+    return {
+      status: "source_ready" as const,
+      label: "source ready",
+      sourceUriCount,
+      nextStep: "Run a small CereBro eval before making this a recommended default.",
+      requiredBeforeTrust: ["Local eval note.", "Failure notes if eval is mixed or blocked."],
+      noActionTaken,
+    };
+  }
+
+  if (sourceUriCount === 0) {
+    return {
+      status: "missing_sources" as const,
+      label: "missing sources",
+      sourceUriCount,
+      nextStep: "Add source URLs before Surfer or Oak can validate the claim.",
+      requiredBeforeTrust: ["Source URLs.", "Date checked.", "Risk review.", "Validation notes."],
+      noActionTaken,
+    };
+  }
+
+  return {
+    status: "needs_source_review" as const,
+    label: "needs source review",
+    sourceUriCount,
+    nextStep: hasRiskReview && hasValidationNotes
+      ? "Have Oak mark source verification or run a local eval."
+      : "Have Surfer/Oak review sources, then add risk and validation notes.",
+    requiredBeforeTrust: [
+      ...(hasRiskReview ? [] : ["Risk review."]),
+      ...(hasValidationNotes ? [] : ["Validation notes."]),
+      "Source verification status or eval result.",
+    ],
+    noActionTaken,
   };
 }
 
@@ -504,7 +597,11 @@ async function readCapabilityMapSummary() {
           SUM(CASE WHEN eval_status = 'untested' THEN 1 ELSE 0 END) AS untested,
           SUM(CASE WHEN eval_status IN ('tested_pass', 'tested_mixed', 'tested_fail') THEN 1 ELSE 0 END) AS tested,
           SUM(CASE WHEN access_method != 'local' THEN 1 ELSE 0 END) AS external,
-          SUM(CASE WHEN privacy_class = 'blocked_sensitive' OR approval_level = 'blocked' THEN 1 ELSE 0 END) AS blocked
+          SUM(CASE WHEN privacy_class = 'blocked_sensitive' OR approval_level = 'blocked' THEN 1 ELSE 0 END) AS blocked,
+          SUM(CASE WHEN source_uris IS NULL OR TRIM(source_uris) = '' THEN 1 ELSE 0 END) AS missing_sources,
+          SUM(CASE WHEN source_uris IS NOT NULL AND TRIM(source_uris) != '' AND eval_status NOT IN ('source_verified', 'tested_pass') THEN 1 ELSE 0 END) AS needs_source_review,
+          SUM(CASE WHEN eval_status = 'source_verified' THEN 1 ELSE 0 END) AS source_ready,
+          SUM(CASE WHEN eval_status = 'tested_pass' THEN 1 ELSE 0 END) AS eval_ready
         FROM model_tool_capabilities
       `,
       args: [],
@@ -536,6 +633,12 @@ async function readCapabilityMapSummary() {
     testedRecords: countValue(totalRow, "tested"),
     externalRecords: countValue(totalRow, "external"),
     blockedRecords: countValue(totalRow, "blocked"),
+    sourceReadiness: {
+      missingSources: countValue(totalRow, "missing_sources"),
+      needsSourceReview: countValue(totalRow, "needs_source_review"),
+      sourceReady: countValue(totalRow, "source_ready"),
+      evalReady: countValue(totalRow, "eval_ready"),
+    },
     evalNotes: countValue(evalRow, "total"),
     mapCounts: {
       local_first: countValue(mapRow, "local_first"),
@@ -578,6 +681,26 @@ export const modelToolsRouter = router({
           "last verified date",
         ],
         rule: "A capability is a proposal until source-verified or eval-tested.",
+      },
+      sourceVerificationGate: {
+        register: "product_surface",
+        mode: "read_only",
+        ownerAgent: "surfer",
+        validatorAgents: ["oak", "spock"],
+        trustedStates: ["source_verified", "tested_pass"],
+        requiredFields: [
+          "source URLs",
+          "date checked",
+          "risk review",
+          "validation notes",
+          "privacy class",
+          "approval level",
+        ],
+        nextAction: "Review sources locally in the registry before a capability can become a route default.",
+        noActionTaken: [
+          "No browser, search, fetch, provider, model, gateway, install, token, or account action ran.",
+          "The source gate reads local registry rows only.",
+        ],
       },
       capabilityMap: capabilityMap.map((lane) => ({
         ...lane,

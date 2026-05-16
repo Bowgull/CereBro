@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1602 EDT
+Last updated: 2026-05-16 1632 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1632 EDT: continued item 9 in Basement Model Tools. Capability
+  records now compute local source readiness, policy exposes a read-only
+  Source Verification Gate, and the Models tab shows readiness counts, no-action
+  proof, registry badges, and selected next steps. No browser/search/fetch,
+  provider/model/gateway call, install, token/account action, Ollama status
+  command, schema migration, new surface, external write, or Raven path was
+  added.
 - 2026-05-16 1538 EDT: surfaced item 8 readiness in the existing Ledger route
   read. Runtime and Ledger now share the same `executionReadiness` helper, and
   Ledger route cards show one compact `Readiness: ...` plus `No execution`

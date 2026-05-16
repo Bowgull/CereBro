@@ -143,4 +143,40 @@ describe("Model Tools local-first routing policy", () => {
     expect(after.capabilityMap.find((lane) => lane.id === "external_gateway")?.registryRecordCount).toBeGreaterThanOrEqual(1);
     expect(after.capabilityMapSummary.noActionTaken.join(" ")).toContain("No provider");
   });
+
+  it("computes source readiness from local registry fields only", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const missing = await caller.modelTools.proposeCapability({
+      provider: `Missing Source ${stamp}`,
+      toolName: "Unverified local helper",
+      capabilityKind: "text_reasoning",
+      accessMethod: "manual_copy_paste",
+      privacyClass: "unknown",
+      approvalLevel: "explicit_approval",
+    });
+    const sourced = await caller.modelTools.proposeCapability({
+      provider: `Source Review ${stamp}`,
+      toolName: "Documented helper",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+    });
+
+    expect(missing.capability.sourceReadiness.status).toBe("missing_sources");
+    expect(missing.capability.sourceReadiness.requiredBeforeTrust).toContain("Source URLs.");
+    expect(sourced.capability.sourceReadiness.status).toBe("needs_source_review");
+    expect(sourced.capability.sourceReadiness.sourceUriCount).toBe(1);
+    expect(sourced.capability.sourceReadiness.noActionTaken.join(" ")).toContain("No browser");
+
+    const policy = await caller.modelTools.policy();
+    expect(policy.sourceVerificationGate.mode).toBe("read_only");
+    expect(policy.sourceVerificationGate.trustedStates).toEqual(["source_verified", "tested_pass"]);
+    expect(policy.sourceVerificationGate.noActionTaken.join(" ")).toContain("No browser");
+    expect(policy.capabilityMapSummary.sourceReadiness.missingSources).toBeGreaterThanOrEqual(1);
+    expect(policy.capabilityMapSummary.sourceReadiness.needsSourceReview).toBeGreaterThanOrEqual(1);
+  });
 });

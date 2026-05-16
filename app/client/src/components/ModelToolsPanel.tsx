@@ -67,6 +67,13 @@ function toneForPrivacy(value: string) {
   return C.textMuted;
 }
 
+function toneForSourceReadiness(value: string) {
+  if (value === "eval_ready" || value === "source_ready") return C.success;
+  if (value === "blocked") return C.danger;
+  if (value === "needs_source_review") return C.warning;
+  return C.textMuted;
+}
+
 export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "approvals") => void }) {
   const utils = trpc.useUtils();
   const [kind, setKind] = useState<CapabilityKind | "all">("all");
@@ -321,6 +328,28 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
+        <section className="rounded p-2" aria-label="Model tool source verification gate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Source Verification Gate" detail={policyData?.sourceVerificationGate?.mode ?? "read only"} />
+          <div className="mt-2 grid gap-1.5 md:grid-cols-4">
+            <StatusBlock label="Missing sources" value={String(summary?.sourceReadiness?.missingSources ?? 0)} tone={(summary?.sourceReadiness?.missingSources ?? 0) > 0 ? C.warning : C.success} />
+            <StatusBlock label="Needs review" value={String(summary?.sourceReadiness?.needsSourceReview ?? 0)} tone={(summary?.sourceReadiness?.needsSourceReview ?? 0) > 0 ? C.warning : C.success} />
+            <StatusBlock label="Source ready" value={String(summary?.sourceReadiness?.sourceReady ?? 0)} tone={(summary?.sourceReadiness?.sourceReady ?? 0) > 0 ? C.success : C.textMuted} />
+            <StatusBlock label="Eval ready" value={String(summary?.sourceReadiness?.evalReady ?? 0)} tone={(summary?.sourceReadiness?.evalReady ?? 0) > 0 ? C.success : C.textMuted} />
+          </div>
+          <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <MachineRule
+              title="Trust Rule"
+              body={policyData?.sourceVerificationGate?.nextAction ?? "Review sources locally before a capability can become a route default."}
+              tone={C.warning}
+            />
+            <MachineRule
+              title="No Action"
+              body={policyData?.sourceVerificationGate?.noActionTaken?.join(" ") ?? "No browser, search, fetch, provider, model, gateway, install, token, or account action ran."}
+              tone={C.success}
+            />
+          </div>
+        </section>
+
         <section className="rounded p-2" aria-label="Local model lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Local Model Lanes" detail="fast local first" />
           <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -564,6 +593,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                       <span className="flex shrink-0 flex-wrap justify-end gap-1">
                         {count > 1 && <Badge label={`${count} copies`} tone={C.warning} />}
                         <Badge label={labelize(item.evalStatus)} tone={item.evalStatus === "untested" ? C.warning : C.success} />
+                        <Badge label={labelize(item.sourceReadiness.label)} tone={toneForSourceReadiness(item.sourceReadiness.status)} />
                       </span>
                     </span>
                     <span className="mt-1.5 flex flex-wrap gap-1">
@@ -584,7 +614,10 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Provider" value={selectedCapability.provider} />
                 <Field label="Tool" value={selectedCapability.toolName} />
                 <Field label="Approval" value={labelize(selectedCapability.approvalLevel)} />
+                <Field label="Source read" value={labelize(selectedCapability.sourceReadiness.label)} />
+                <Field label="Next" value={selectedCapability.sourceReadiness.nextStep} />
                 <SourceField value={selectedCapability.sourceUris} />
+                <StatusList title="Required" items={selectedCapability.sourceReadiness.requiredBeforeTrust} tone={toneForSourceReadiness(selectedCapability.sourceReadiness.status)} />
                 <Field label="Strengths" value={selectedCapability.strengths ?? "No strengths recorded."} />
                 <Field label="Weaknesses" value={selectedCapability.weaknesses ?? "No weaknesses recorded."} />
                 <Field label="Risk" value={selectedCapability.riskReview ?? "No risk review recorded."} />
