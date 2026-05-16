@@ -22750,3 +22750,70 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md first. Continue CereBro on the main build path. Taste Skill is now the direct anti-slop frontend reference: use it as MIT-licensed source material for layout variance, typography, spacing, motion, redesign audits, image-to-code workflows, and controlled visual variants, but do not install or copy its skill files without explicit approval. Keep "taste with receipts" only as secondary judgment language. Next best slice remains backend route receipts before agent execution unless a concrete Block C storage/source contract still blocks it. Preserve unrelated dirty app files unless assigned. Run targeted tests, pnpm check, browser-proof app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 1544 EDT - Basement capability map
+
+Completion:
+
+- Overall: 66%
+- Frontend visible loop: 99%
+- Backend/runtime: 61%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+What changed:
+
+- Moved the build path from route-readiness item 8 to item 9, Model and Tool
+  Registry, after a read-only worker check confirmed item 8 is closed enough.
+- Added a read-only `capabilityMap` contract to `modelTools.policy`.
+- Added the first visible Basement Model Tools capability map:
+  `Local First`, `External Gateway`, `Creative Normal`, and `Creative Sealed`.
+- Kept the map proposal-only. It does not install, pull, call models, fetch,
+  browse, authenticate, or route Raven content into CereBro.
+- Added test coverage that local-first stays Basement-owned, external gateway
+  use requires confirmation, and Raven remains sealed.
+
+Files touched in this slice:
+
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/server/modelTools.creativeLanes.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-pass.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `pnpm -C app build`
+- Confirmed the dev server stayed live on `http://localhost:3000/`.
+
+Drift check:
+
+- On path. This continues item 9 in the build queue and keeps model/tool
+  machinery in Basement, not the primary Keep.
+- No command runner, model executor, install button, browser/search/fetch path,
+  external write, account setup, token setup, payment path, or Raven content
+  route was added.
+
+Known risks:
+
+- Browser automation proof was limited by the available browser tools in this
+  turn. TypeScript, targeted server tests, production build, and live dev-server
+  reload all passed.
+- The capability map is static policy for now. It does not yet read live eval
+  totals or installed-runtime status.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- Obsidian session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 on the build path. Model Tools now has a read-only Basement capability map for local-first, external gateway, Gojo creative, and Raven sealed lanes. Next best slice is to add compact live registry/eval counts to that map, or move to the first safe registry proposal/eval read refinement if the map is enough. Keep model/tool setup Basement-only. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, create accounts, add plugins, or route Raven content into CereBro. Run targeted tests, pnpm check, browser-proof if tools allow, update handoff, archive to Obsidian, commit, and push when the slice is clean.
+```

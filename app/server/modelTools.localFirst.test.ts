@@ -24,6 +24,8 @@ describe("Model Tools local-first routing policy", () => {
 
     expect(policy.routingStance).toContain("local-first");
     expect(policy.speedStance).toContain("Instant shell");
+    expect(policy.capabilityMap.find((lane) => lane.id === "local_first")?.uiRule).toContain("Basement readiness");
+    expect(policy.capabilityMap.find((lane) => lane.id === "external_gateway")?.approvalRule).toContain("Confirm each use");
     expect(ollama?.tool).toBe("Ollama");
     expect(ollama?.defaultUse).toContain("summaries");
     expect(ollama?.installStatus).toBe("not_verified");

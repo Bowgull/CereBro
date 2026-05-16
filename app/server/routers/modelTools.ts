@@ -439,6 +439,57 @@ function routePlanForTask(input: {
   };
 }
 
+const capabilityMap = [
+  {
+    id: "local_first",
+    label: "Local First",
+    ownerAgent: "cortana",
+    laneIds: ["ollama_local_fast_lane", "local_embedding_smoke_lane"],
+    status: "proposal_only",
+    defaultUse: "Fast private summaries, small reasoning jobs, embeddings, and low-risk local checks.",
+    escalationRule: "Escalate only when quality, context size, or missing local install makes local work the wrong tool.",
+    approvalRule: "Install, pulls, deletes, and inference need approval until the local runtime is verified.",
+    uiRule: "Show as Basement readiness. Do not put model switches on the Keep.",
+    noActionTaken: "No install, pull, model call, fetch, browser run, account setup, or token use ran.",
+  },
+  {
+    id: "external_gateway",
+    label: "External Gateway",
+    ownerAgent: "spock",
+    laneIds: ["gatewayCandidates"],
+    status: "gated_proposal",
+    defaultUse: "Public-safe or scrubbed work that clearly needs a stronger external model or specific provider tool.",
+    escalationRule: "Use only when local quality is not enough or the requested tool exists only outside CereBro.",
+    approvalRule: "Confirm each use and show what data leaves the machine.",
+    uiRule: "Surface only at the approval/route receipt moment.",
+    noActionTaken: "No external provider, gateway, browser, search, or fetch call ran.",
+  },
+  {
+    id: "creative_normal",
+    label: "Creative Normal",
+    ownerAgent: "gojo",
+    laneIds: ["gojo_comfyui", "realesrgan_upscale", "video_frame_lane"],
+    status: "proposal_only",
+    defaultUse: "CereBro-safe images, upscales, visual drafts, and future video frame work.",
+    escalationRule: "Use a creative tool only when it improves the artifact beyond normal code/UI work.",
+    approvalRule: "Approve install/run/storage path before any tool call or generated output.",
+    uiRule: "Keep setup in Basement. Put finished outputs in the Workbench or vault.",
+    noActionTaken: "No ComfyUI, RealESRGAN, video, model, or media command ran.",
+  },
+  {
+    id: "creative_sealed",
+    label: "Creative Sealed",
+    ownerAgent: "raven",
+    laneIds: ["raven_private_comfyui"],
+    status: "sealed_private",
+    defaultUse: "Raven-only private generation in its own chat and storage boundary.",
+    escalationRule: "Do not route normal CereBro tasks here.",
+    approvalRule: "No Raven content enters CereBro memory, RAG, Ledger, gallery, Workbench, or vault lanes.",
+    uiRule: "CereBro may show a sealed launcher only. It carries no content back.",
+    noActionTaken: "No Raven content was read, written, indexed, summarized, synced, exported, or routed.",
+  },
+] as const;
+
 export const modelToolsRouter = router({
   policy: publicProcedure.query(async () => ({
     mode: "proposal_only",
@@ -465,6 +516,7 @@ export const modelToolsRouter = router({
       ],
       rule: "A capability is a proposal until source-verified or eval-tested.",
     },
+    capabilityMap,
     evalTasks,
     gates: [
       "Surfer may propose model/tool discoveries only with source URLs and date checked.",

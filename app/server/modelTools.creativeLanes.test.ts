@@ -17,6 +17,8 @@ describe("Model Tools creative lanes", () => {
     const gojo = policy.creativeLanes.find((lane) => lane.id === "gojo_comfyui");
     const raven = policy.creativeLanes.find((lane) => lane.id === "raven_private_comfyui");
     const upscale = policy.creativeLanes.find((lane) => lane.id === "realesrgan_upscale");
+    const normalMap = policy.capabilityMap.find((lane) => lane.id === "creative_normal");
+    const sealedMap = policy.capabilityMap.find((lane) => lane.id === "creative_sealed");
 
     expect(gojo?.tool).toBe("ComfyUI");
     expect(gojo?.ownerAgent).toBe("gojo");
@@ -29,6 +31,10 @@ describe("Model Tools creative lanes", () => {
     expect(raven?.outputBoundary).toContain("Raven private");
     expect(raven?.canEnterCereBroMemory).toBe(false);
     expect(raven?.requiresSeparateChat).toBe(true);
+    expect(normalMap?.ownerAgent).toBe("gojo");
+    expect(sealedMap?.ownerAgent).toBe("raven");
+    expect(sealedMap?.approvalRule).toContain("No Raven content enters CereBro memory");
+    expect(sealedMap?.noActionTaken).toContain("No Raven content was read");
 
     expect(upscale?.tool).toBe("RealESRGAN");
     expect(upscale?.approvalGate).toContain("source file");

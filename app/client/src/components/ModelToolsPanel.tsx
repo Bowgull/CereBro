@@ -281,6 +281,18 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
+        <section className="rounded p-2" aria-label="Model tool capability map" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Capability Map" detail={policyData?.registryStatus ? labelize(policyData.registryStatus) : "proposal only"} />
+          <div className="mt-2 grid gap-1.5 xl:grid-cols-4">
+            {(policyData?.capabilityMap ?? []).map((lane) => (
+              <CapabilityMapCard key={lane.id} lane={lane} />
+            ))}
+          </div>
+          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            {policyData?.registryShape.rule ?? "A capability is a proposal until source-verified or eval-tested."}
+          </div>
+        </section>
+
         <section className="rounded p-2" aria-label="Local model lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Local Model Lanes" detail="fast local first" />
           <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -708,6 +720,48 @@ function MachineRule({ title, body, tone }: { title: string; body: string; tone:
     <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{body}</div>
+    </div>
+  );
+}
+
+function CapabilityMapCard({
+  lane,
+}: {
+  lane: {
+    id: string;
+    label: string;
+    ownerAgent: string;
+    laneIds: readonly string[];
+    status: string;
+    defaultUse: string;
+    escalationRule: string;
+    approvalRule: string;
+    uiRule: string;
+    noActionTaken: string;
+  };
+}) {
+  const tone = lane.status === "sealed_private" ? C.danger : lane.status === "gated_proposal" ? C.warning : C.success;
+  return (
+    <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${lane.status === "sealed_private" ? C.danger : C.borderSoft}` }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="truncate text-xs font-bold uppercase tracking-widest" title={lane.label}>{lane.label}</div>
+          <div className="mt-0.5 truncate" style={{ color: C.textMuted }} title={lane.ownerAgent}>{lane.ownerAgent}</div>
+        </div>
+        <Badge label={labelize(lane.status)} tone={tone} />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1">
+        {lane.laneIds.map((id) => (
+          <Badge key={id} label={labelize(id)} tone={C.textSecondary} />
+        ))}
+      </div>
+      <div className="mt-2 space-y-1">
+        <Field label="Use" value={lane.defaultUse} />
+        <Field label="Escalate" value={lane.escalationRule} />
+        <Field label="Gate" value={lane.approvalRule} />
+        <Field label="UI" value={lane.uiRule} />
+        <Field label="Proof" value={lane.noActionTaken} />
+      </div>
     </div>
   );
 }
