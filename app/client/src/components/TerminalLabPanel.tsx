@@ -63,6 +63,8 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const [outputText, setOutputText] = useState("");
   const [exitCode, setExitCode] = useState("0");
   const [copiedDraftKey, setCopiedDraftKey] = useState<string | null>(null);
+  const [receiptDetailsOpen, setReceiptDetailsOpen] = useState(false);
+  const [terminalApprovalPreviewsOpen, setTerminalApprovalPreviewsOpen] = useState(false);
   const plan = trpc.terminalLab.plan.useQuery();
   const observationFilter =
     observationScope === "selectedTask" && selectedTaskId
@@ -104,6 +106,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const workbenchReceipts = trpc.workbench.evidenceSummary.useQuery(
     { groupBy: "project", latestLimit: 1 },
     {
+      enabled: receiptDetailsOpen,
       staleTime: 30_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -117,6 +120,12 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const createApprovalPreview = trpc.terminalLab.createApprovalPreviewFromObservation.useMutation();
   const terminalApprovalPreviews = trpc.terminalLab.approvalPreviews.useQuery(
     selectedObservationId == null ? { limit: 5 } : { observationId: selectedObservationId, limit: 5 },
+    {
+      enabled: terminalApprovalPreviewsOpen,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   );
   const createTaskFromObservation = trpc.terminalLab.createTaskFromObservation.useMutation();
   const createLearningProposal = trpc.terminalLab.createLearningProposalFromObservation.useMutation();
@@ -155,6 +164,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     projectRows[0] ??
     null;
   const contextReceiptStats = (() => {
+    if (!receiptDetailsOpen) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
     const projectId = contextProject?.tasks.projectId;
     if (projectId == null) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
     const group = workbenchReceipts.data?.groups.find((item) => item.key === String(projectId));
@@ -970,6 +980,9 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
               isLoading={projectOverview.isLoading}
               contextLabel={selectedObservation ? `observation #${selectedObservation.id}` : selectedTask ? `task #${selectedTask.id}` : "current repo"}
               receiptStats={contextReceiptStats}
+              receiptStatsOpen={receiptDetailsOpen}
+              receiptStatsReading={workbenchReceipts.isLoading}
+              onReceiptStatsToggle={setReceiptDetailsOpen}
               onNavigate={onNavigate}
             />
 
@@ -1052,10 +1065,24 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 </section>
 
-                <section className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                  <SectionTitle title="Approval Previews" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
+                <details
+                  className="rounded p-1.5"
+                  onToggle={(event) => setTerminalApprovalPreviewsOpen(event.currentTarget.open)}
+                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                >
+                  <summary className="cursor-pointer">
+                    <SectionTitle title="Approval Previews" detail={terminalApprovalPreviewsOpen ? selectedObservationId == null ? "recent" : `#${selectedObservationId}` : "open to read"} />
+                  </summary>
                   <div className="mt-2 space-y-2">
-                    {(terminalApprovalPreviews.data ?? []).length === 0 ? (
+                    {!terminalApprovalPreviewsOpen ? (
+                      <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                        Open to read local command approval previews.
+                      </div>
+                    ) : terminalApprovalPreviews.isLoading ? (
+                      <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
+                        Reading local command approval previews.
+                      </div>
+                    ) : (terminalApprovalPreviews.data ?? []).length === 0 ? (
                       <div className="text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
                         No local command approval previews yet.
                       </div>
@@ -1074,7 +1101,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       ))
                     )}
                   </div>
-                </section>
+                </details>
               </div>
             </details>
           </aside>
@@ -1228,12 +1255,18 @@ function ProjectContextRail({
   isLoading,
   contextLabel,
   receiptStats,
+  receiptStatsOpen,
+  receiptStatsReading,
+  onReceiptStatsToggle,
   onNavigate,
 }: {
   project: TerminalProjectContext | null;
   isLoading: boolean;
   contextLabel: string;
   receiptStats: { total: number; terminal: number; needsReview: number; validated: number };
+  receiptStatsOpen: boolean;
+  receiptStatsReading: boolean;
+  onReceiptStatsToggle: (open: boolean) => void;
   onNavigate?: (route: "projects" | "workbench" | "ledger") => void;
 }) {
   if (isLoading) {
@@ -1264,12 +1297,12 @@ function ProjectContextRail({
       ? C.danger
       : C.success
     : C.warning;
-  const receiptTone = receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
+  const receiptTone = !receiptStatsOpen ? C.textMuted : receiptStats.needsReview > 0 ? C.warning : receiptStats.total > 0 ? C.success : C.textMuted;
   const mapRead = [
     { label: "Branch", value: project.pushReadiness.evidence.branch ?? project.git.branch ?? "unavailable", tone: project.git.branch ? C.textSecondary : C.warning },
     { label: "Dirty", value: project.git.dirty ? `${project.git.dirtyCount} local` : "clean", tone: project.git.dirty ? C.danger : C.success },
     { label: "Push", value: project.pushReadiness.label, tone: pushTone },
-    { label: "Receipts", value: `${receiptStats.total} / ${receiptStats.needsReview} review`, tone: receiptTone },
+    { label: "Receipts", value: receiptStatsOpen ? `${receiptStats.total} / ${receiptStats.needsReview} review` : "open to read", tone: receiptTone },
     { label: "Manual", value: "proposal only", tone: C.gold },
     { label: "Executes", value: project.pushReadiness.executesGit ? "yes" : "no", tone: project.pushReadiness.executesGit ? C.danger : C.success },
   ];
@@ -1298,9 +1331,13 @@ function ProjectContextRail({
         </div>
       </div>
 
-      <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <details
+        className="mt-2 rounded p-1.5"
+        onToggle={(event) => onReceiptStatsToggle(event.currentTarget.open)}
+        style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+      >
         <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-          Receipt Details
+          Receipt Details <span style={{ color: C.textMuted }}>{receiptStatsOpen ? "local" : "open to read"}</span>
         </summary>
         <div className="mt-1.5">
           <div className="flex items-center justify-between gap-2">
@@ -1309,14 +1346,22 @@ function ProjectContextRail({
             </div>
             <Chip label={`${receiptStats.total} total`} tone={receiptStats.total > 0 ? C.accent : C.textMuted} />
           </div>
-          <div className="mt-1 grid grid-cols-3 gap-1">
-            <ContextDatum label="Terminal" value={String(receiptStats.terminal)} tone={receiptStats.terminal > 0 ? C.warning : C.textSecondary} />
-            <ContextDatum label="Review" value={String(receiptStats.needsReview)} tone={receiptStats.needsReview > 0 ? C.danger : C.textSecondary} />
-            <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
-          </div>
-          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-            Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
-          </div>
+          {receiptStatsReading ? (
+            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              Reading Workbench receipt summary.
+            </div>
+          ) : (
+            <>
+              <div className="mt-1 grid grid-cols-3 gap-1">
+                <ContextDatum label="Terminal" value={String(receiptStats.terminal)} tone={receiptStats.terminal > 0 ? C.warning : C.textSecondary} />
+                <ContextDatum label="Review" value={String(receiptStats.needsReview)} tone={receiptStats.needsReview > 0 ? C.danger : C.textSecondary} />
+                <ContextDatum label="Validated" value={String(receiptStats.validated)} tone={receiptStats.validated > 0 ? C.success : C.textSecondary} />
+              </div>
+              <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                Workbench has the body. Ledger has the audit trail. Project Lab reads push context.
+              </div>
+            </>
+          )}
         </div>
       </details>
 

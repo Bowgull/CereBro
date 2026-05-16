@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2319 EDT
+Last updated: 2026-05-15 2323 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2323 EDT - Terminal Lab Support Lazy Reads
+
+### What Changed
+- Terminal Lab no longer reads side-rail Workbench receipt stats on panel open.
+- The Project Context rail now shows `Receipts open to read` until `Receipt
+  Details` is opened.
+- Opening `Receipt Details` reads the local Workbench receipt summary with a 30
+  second stale cache.
+- Terminal command approval previews no longer read while Terminal Rules is
+  closed.
+- The `Approval Previews` drawer now starts closed and says `open to read`;
+  opening it reads local terminal approval previews with a 30 second stale
+  cache.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Workshop -> Terminal Lab starts with `Receipts open to read`; opening
+  `Receipt Details` shows Workbench receipt counts. Terminal Rules starts with
+  `Approval Previews open to read`; opening it shows local command approval
+  previews.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: Terminal Lab support read reduction.
+- No backend code, schema, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install, external
+  write, storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a narrow Terminal Lab UI read-gating
+  slice.
+
+### Front-End Steward Review
+- Terminal Lab keeps command preview, Aang teaching, recent observations, and
+  project push context visible.
+- Receipt stats and approval previews remain available, but they now read only
+  after the user asks for them.
+- This keeps Terminal Lab closer to a teaching surface instead of a machine
+  console dump.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 50%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue
+support-read reduction only where a high-traffic surface still reads hidden
+support data by default; otherwise return to the runtime receipt contract path.
 
 ## 2026-05-15 2319 EDT - Model Tools Support Lazy Reads
 
