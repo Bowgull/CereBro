@@ -6,8 +6,10 @@ import {
   workbenchReceiptBodyCopy,
   workbenchReceiptChainCopy,
   workbenchReceiptDetailCopy,
+  workbenchReceiptDetailsCopy,
   workbenchReceiptGroupCopy,
   workbenchReceiptListCopy,
+  workbenchTemporaryPreviewCopy,
 } from "../client/src/lib/workbenchCopyModel";
 
 describe("workbenchCopyModel", () => {
@@ -54,6 +56,31 @@ describe("workbenchCopyModel", () => {
 
     expect(copy.draftPrefix).toBe("Body draft.");
     expect(copy.draftText).toBe("Review it, then save the local receipt.");
+  });
+
+  it("names receipt setup details without metadata language", () => {
+    const copy = workbenchReceiptDetailsCopy();
+
+    expect(copy.title).toBe("Receipt Details");
+    expect(copy.routeLabel).toBe("Assigned Agent");
+    expect(copy.permissionLabel).toBe("Review Type");
+    expect(copy.viewportPlaceholder).toContain("Screen size");
+    expect(copy.coordinatesPlaceholder).toContain("Marked area");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("metadata");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("permission class");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("route agent");
+  });
+
+  it("names temporary media as a temporary preview while preserving gates", () => {
+    const copy = workbenchTemporaryPreviewCopy();
+
+    expect(copy.title).toBe("Temporary Preview");
+    expect(copy.statusText).toBe("Local browser preview. No upload. No vault save. No vision model.");
+    expect(copy.chooseButton).toBe("Choose File");
+    expect(copy.selectedText).toContain("It does not save the media bytes.");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("temporary media");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("browser-memory");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("target metadata");
   });
 
   it("keeps receipt grouping plain and out of proof language", () => {

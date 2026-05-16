@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0708 EDT
+Last updated: 2026-05-16 0715 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -685,6 +685,13 @@ Expected shape:
   owner proof sit behind per-output details.
 - Workbench now keeps Add Receipt and Recent Receipts primary while Project
   Proof, receipt grouping, and read gates sit behind closed disclosures.
+- Workbench Add Receipt now says `Receipt Details` and `Temporary Preview`
+  instead of metadata/media language. Assigned agent, review type, viewport,
+  marked area, target, note, sensitive flag, and temporary-file gates remain in
+  the same drawers.
+- Temporary Workbench preview now says `Local browser preview. No upload. No
+  vault save. No vision model.` and `Choose File`, keeping the no-durable-media
+  boundary visible without naming browser-memory machinery.
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.

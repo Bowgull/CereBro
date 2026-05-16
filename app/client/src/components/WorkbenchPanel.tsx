@@ -11,8 +11,10 @@ import {
   workbenchReceiptBodyCopy,
   workbenchReceiptChainCopy,
   workbenchReceiptDetailCopy,
+  workbenchReceiptDetailsCopy,
   workbenchReceiptGroupCopy,
   workbenchReceiptListCopy,
+  workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -183,6 +185,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const receiptBodyCopy = workbenchReceiptBodyCopy({ hasDraft: Boolean(stagedDraftNotice) });
   const headerCopy = workbenchHeaderCopy({ isLoading: plan.isLoading });
   const currentBodyCopy = workbenchCurrentBodyCopy();
+  const receiptDetailsCopy = workbenchReceiptDetailsCopy();
+  const temporaryPreviewCopy = workbenchTemporaryPreviewCopy();
   const receiptGroupCopy = workbenchReceiptGroupCopy();
   const receiptListCopy = workbenchReceiptListCopy();
   const data = plan.data;
@@ -865,11 +869,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
                 <details className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                    Receipt Metadata
+                    {receiptDetailsCopy.title}
                   </summary>
                   <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
                     <AppSelect
-                      label="Route agent"
+                      label={receiptDetailsCopy.routeLabel}
                       value={routeAgent}
                       onChange={setRouteAgent}
                       options={[
@@ -883,7 +887,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       ]}
                     />
                     <AppSelect
-                      label="Permission class"
+                      label={receiptDetailsCopy.permissionLabel}
                       value={permissionClass}
                       onChange={(value) => setPermissionClass(value as PermissionClass)}
                       options={[
@@ -896,26 +900,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     <Input
                       value={viewport}
                       onChange={(event) => setViewport(event.target.value)}
-                      placeholder="Viewport, such as 1440x900."
+                      placeholder={receiptDetailsCopy.viewportPlaceholder}
                       aria-label="Receipt viewport"
                     />
                     <Input
                       value={coordinates}
                       onChange={(event) => setCoordinates(event.target.value)}
-                      placeholder="Coordinates, such as x=120 y=80 w=300 h=140."
+                      placeholder={receiptDetailsCopy.coordinatesPlaceholder}
                       aria-label="Receipt coordinates"
                     />
                     <Input
                       value={targetUri}
                       onChange={(event) => setTargetUri(event.target.value)}
-                      placeholder="Optional target URL, file path, artifact id, or panel."
+                      placeholder={receiptDetailsCopy.targetPlaceholder}
                       aria-label="Receipt target"
                       className="sm:col-span-2"
                     />
                     <Input
                       value={annotationText}
                       onChange={(event) => setAnnotationText(event.target.value)}
-                      placeholder="Annotation note, optional."
+                      placeholder={receiptDetailsCopy.notePlaceholder}
                       aria-label="Receipt annotation text"
                       className="sm:col-span-2"
                     />
@@ -925,7 +929,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         onCheckedChange={(checked) => setSensitive(checked === true)}
                         aria-label="Mark receipt as sensitive"
                       />
-                      Sensitive
+                      {receiptDetailsCopy.sensitiveLabel}
                     </label>
                   </div>
                 </details>
@@ -933,11 +937,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
               <details
                 className="mt-2 rounded p-2"
-                aria-label="Temporary media intake"
+                aria-label={temporaryPreviewCopy.ariaLabel}
                 style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
               >
                 <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                  Temporary Media
+                  {temporaryPreviewCopy.title}
                 </summary>
                 <div
                   className="mt-2 rounded p-2"
@@ -952,18 +956,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                      Browser-memory preview. No upload. No vault save. No vision model.
+                      {temporaryPreviewCopy.statusText}
                     </p>
                     <label
                       className="inline-flex cursor-pointer items-center rounded px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider"
                       style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
                     >
-                      Choose Media
+                      {temporaryPreviewCopy.chooseButton}
                       <Input
                         type="file"
                         accept="image/*,video/*"
                         className="sr-only"
-                        aria-label="Choose temporary Workbench media"
+                        aria-label={temporaryPreviewCopy.chooseAria}
                         onChange={(event) => {
                           stageTemporaryMedia(event.target.files?.item(0) ?? null);
                           event.currentTarget.value = "";
@@ -977,7 +981,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         className="relative overflow-hidden rounded"
                         role="button"
                         tabIndex={0}
-                        aria-label="Mark annotation coordinates on temporary media"
+                        aria-label={temporaryPreviewCopy.markAria}
                         onPointerDown={markTemporaryMedia}
                         onKeyDown={(event) => {
                           if (event.key !== "Enter" && event.key !== " ") return;
@@ -1048,7 +1052,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           />
                         )}
                         <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                          Click the preview to record annotation coordinates. Saving records title, notes, frame timing, and target metadata. It does not save the media bytes.
+                          {temporaryPreviewCopy.selectedText}
                         </div>
                         <Button
                           type="button"
@@ -1058,13 +1062,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           size="sm"
                           className="w-fit"
                         >
-                          Clear
+                          {temporaryPreviewCopy.clearButton}
                         </Button>
                       </div>
                     </div>
                   ) : (
                     <div className="mt-2 rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                      Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.
+                      {temporaryPreviewCopy.emptyText}
                     </div>
                   )}
                 </div>

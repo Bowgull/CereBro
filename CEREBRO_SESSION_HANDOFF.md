@@ -21110,3 +21110,82 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench now uses receipt-body language at the header, current body card, receipt chain, and project receipts drawer. Next best slice: continue Workbench media/metadata drawer clarity if browser review shows machinery, otherwise move to Ledger receipts and audit trail. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0715 EDT - Workbench receipt details and temporary preview
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench drawer-copy slice.
+
+What changed:
+
+- Added Workbench copy helpers for receipt details and temporary preview.
+- `Receipt Metadata` now reads as `Receipt Details`.
+- `Route agent` now reads as `Assigned Agent`.
+- `Permission class` now reads as `Review Type`.
+- Viewport and coordinate placeholders now speak in plain terms: screen size
+  and marked area.
+- `Temporary Media` now reads as `Temporary Preview`.
+- Temporary preview status now says `Local browser preview. No upload. No vault
+  save. No vision model.`
+- `Choose Media` now reads as `Choose File`.
+- Temporary preview help now states that saving records title, notes, frame
+  timing, and review target. It does not save media bytes.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts` passed,
+  11 tests.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx
+  app/client/src/lib/workbenchCopyModel.ts
+  app/server/workbenchCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop/Workbench, and
+  confirmed `Receipt Details`, `Temporary Preview`, `Local browser preview. No
+  upload. No vault save. No vision model.`, and `Choose File`.
+
+Drift check:
+
+- On path because Workbench is the approved receipt body and visual proof
+  surface.
+- Creative UI/UX stayed inside the lane: same surface, no behavior expansion,
+  less machinery wording, and the same local-only gates.
+- No new surface, agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Recent receipt rows still show older saved content such as `media metadata`
+  chips and `Metadata-only` summaries because those are existing receipt data.
+  Next pass should clean display labels for those rows without rewriting
+  historical receipt bodies.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench drawer copy now says Receipt Details and Temporary Preview, with local-only preview gates intact. Next best slice: clean recent receipt row chips and saved-content display labels so older metadata/media terms do not dominate the default Workbench view, without rewriting historical receipt bodies. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

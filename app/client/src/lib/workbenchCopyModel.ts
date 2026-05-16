@@ -38,6 +38,33 @@ export function workbenchReceiptBodyCopy({ hasDraft }: { hasDraft: boolean }) {
   };
 }
 
+export function workbenchReceiptDetailsCopy() {
+  return {
+    title: "Receipt Details",
+    routeLabel: "Assigned Agent",
+    permissionLabel: "Review Type",
+    viewportPlaceholder: "Screen size, such as 1440x900.",
+    coordinatesPlaceholder: "Marked area, such as x=120 y=80 w=300 h=140.",
+    targetPlaceholder: "Optional target URL, file path, artifact id, or panel.",
+    notePlaceholder: "Annotation note, optional.",
+    sensitiveLabel: "Sensitive",
+  };
+}
+
+export function workbenchTemporaryPreviewCopy() {
+  return {
+    title: "Temporary Preview",
+    ariaLabel: "Temporary Workbench preview",
+    statusText: "Local browser preview. No upload. No vault save. No vision model.",
+    chooseButton: "Choose File",
+    chooseAria: "Choose temporary Workbench preview file",
+    markAria: "Mark a review point on the temporary preview",
+    selectedText: "Click the preview to mark a review point. Saving records title, notes, frame timing, and review target. It does not save the media bytes.",
+    emptyText: "Drop an image or video here, or choose one. The selected file stays temporary until a later approved durable-save flow exists.",
+    clearButton: "Clear",
+  };
+}
+
 export function workbenchReceiptChainCopy() {
   return {
     ariaLabel: "Workbench receipt chain",
