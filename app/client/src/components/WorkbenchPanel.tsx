@@ -4,7 +4,16 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
-import { workbenchReceiptBodyCopy, workbenchReceiptDetailCopy, workbenchReceiptGroupCopy, workbenchReceiptListCopy } from "@/lib/workbenchCopyModel";
+import {
+  workbenchCurrentBodyCopy,
+  workbenchHeaderCopy,
+  workbenchProjectReceiptCopy,
+  workbenchReceiptBodyCopy,
+  workbenchReceiptChainCopy,
+  workbenchReceiptDetailCopy,
+  workbenchReceiptGroupCopy,
+  workbenchReceiptListCopy,
+} from "@/lib/workbenchCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -172,6 +181,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
   const receiptBodyCopy = workbenchReceiptBodyCopy({ hasDraft: Boolean(stagedDraftNotice) });
+  const headerCopy = workbenchHeaderCopy({ isLoading: plan.isLoading });
+  const currentBodyCopy = workbenchCurrentBodyCopy();
   const receiptGroupCopy = workbenchReceiptGroupCopy();
   const receiptListCopy = workbenchReceiptListCopy();
   const data = plan.data;
@@ -288,6 +299,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       })
       .slice(0, 6);
   }, [projectOptions, projectProofSummary.data?.groups]);
+  const projectReceiptCopy = workbenchProjectReceiptCopy({
+    open: projectProofOpen,
+    total: projectProofSummary.data?.summary.total ?? 0,
+  });
   const workbenchLanes = [
     {
       label: "Preview",
@@ -535,7 +550,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
             <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-              Save the proof for what just happened.
+              {headerCopy.subtitle}
             </p>
           </div>
           <Button
@@ -549,7 +564,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </Button>
         </div>
         <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
-          {plan.isLoading ? "Reading Workbench state." : "Local receipts only. Risky moves still go through Security Gate."}
+          {headerCopy.statusText}
         </div>
       </header>
 
@@ -564,15 +579,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-                    Current Move
+                    {currentBodyCopy.label}
                   </div>
-                  <Chip label="manual receipt" tone={C.warning} />
+                  <Chip label={currentBodyCopy.badge} tone={C.warning} />
                 </div>
                 <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
-                  Write a receipt before summary.
+                  {currentBodyCopy.title}
                 </div>
                 <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
-                  Pick a lane. Record the observation. Append a receipt.
+                  {currentBodyCopy.text}
                 </p>
               </div>
 
@@ -627,13 +642,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Proof</h3>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">{projectReceiptCopy.title}</h3>
                     <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                      Receipts that Project Lab can read before push decisions.
+                      {projectReceiptCopy.subtitle}
                     </p>
                   </div>
                   <Chip
-                    label={projectProofOpen ? `${projectProofSummary.data?.summary.total ?? 0} receipts` : "open to read"}
+                    label={projectReceiptCopy.badge}
                     tone={C.accent}
                   />
                 </div>
@@ -641,20 +656,20 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               <div className="mt-2">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Project Receipts</h3>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">{projectReceiptCopy.readTitle}</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Local receipt state before push decisions.
+                    {projectReceiptCopy.readSubtitle}
                   </p>
                 </div>
-                <Chip label={`${projectProofSummary.data?.summary.total ?? 0} receipts`} tone={C.accent} />
+                <Chip label={projectReceiptCopy.openBadge} tone={C.accent} />
               </div>
               {projectProofSummary.isLoading ? (
                 <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  Reading local receipt summary.
+                  {projectReceiptCopy.loadingText}
                 </div>
               ) : projectProofGroups.length === 0 ? (
                 <div className="rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-                  No project receipts exist yet. Save a local receipt, then link it to a project before using it for push context.
+                  {projectReceiptCopy.emptyText}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2 xl:grid-cols-3">
@@ -1424,30 +1439,31 @@ function WorkbenchReceiptChainStrip({
   const evidenceId = selectedEvidence?.id ?? selectedEvidenceId;
   const linkedProject = selectedEvidence?.projectName ?? projectLabel ?? (draft?.projectId == null ? null : "linked project");
   const validationStatus = selectedEvidence?.validationStatus ?? null;
+  const copy = workbenchReceiptChainCopy();
   const steps = [
     {
-      label: routeTarget ? "Route reads" : "Terminal explains",
-      value: routeTarget ? sourceDisplayName(routeTarget) : commandObservationId == null ? "no command link" : `observation #${commandObservationId}`,
+      label: copy.sourceStepLabel(Boolean(routeTarget)),
+      value: routeTarget ? sourceDisplayName(routeTarget) : commandObservationId == null ? copy.emptySourceText : `observation #${commandObservationId}`,
       tone: routeTarget || commandObservationId != null ? C.gold : C.textMuted,
     },
     {
-      label: "Workbench stores",
+      label: copy.bodyStepLabel,
       value: evidenceId == null
         ? draft
-          ? "draft body staged"
-          : "select or save a receipt"
+          ? copy.draftBodyText
+          : copy.emptyBodyText
         : `receipt #${evidenceId} ${validationStatus?.replace(/_/g, " ") ?? "open"}`,
       tone: evidenceId == null ? draft ? C.warning : C.textMuted : validationStatus === "needs_review" ? C.warning : C.success,
     },
     {
-      label: "Project Lab reads",
-      value: linkedProject ?? "project not linked",
+      label: copy.projectStepLabel,
+      value: linkedProject ?? copy.emptyProjectText,
       tone: linkedProject ? C.accent : C.warning,
     },
   ];
 
   return (
-    <section className="rounded p-1.5" aria-label="Workbench receipt chain" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <section className="rounded p-1.5" aria-label={copy.ariaLabel} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="grid gap-1 md:grid-cols-3">
         {steps.map((step) => (
           <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -1461,7 +1477,7 @@ function WorkbenchReceiptChainStrip({
         ))}
       </div>
       <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-        Body lives here. Ledger audits it. Project Lab reads the linked project and push context.
+        {copy.footer}
       </div>
     </section>
   );

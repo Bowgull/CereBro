@@ -1,3 +1,33 @@
+export function workbenchHeaderCopy({ isLoading }: { isLoading: boolean }) {
+  return {
+    subtitle: "Save the receipt body for what just happened.",
+    statusText: isLoading ? "Reading Workbench state." : "Local receipts only. Risky moves still go through Security Gate.",
+  };
+}
+
+export function workbenchCurrentBodyCopy() {
+  return {
+    label: "Current Body",
+    badge: "manual receipt",
+    title: "Write the body before summary.",
+    text: "Pick a receipt type. Record the observation. Save the body.",
+  };
+}
+
+export function workbenchProjectReceiptCopy({ open, total }: { open: boolean; total: number }) {
+  return {
+    title: "Project Receipts",
+    subtitle: "Receipts that Project Lab can read before push decisions.",
+    closedBadge: "open to read",
+    openBadge: `${total} receipts`,
+    readTitle: "Project Receipt Read",
+    readSubtitle: "Local receipt state before push decisions.",
+    loadingText: "Reading local receipt summary.",
+    emptyText: "No project receipts exist yet. Save a local receipt, then link it to a project before using it for push context.",
+    badge: open ? `${total} receipts` : "open to read",
+  };
+}
+
 export function workbenchReceiptBodyCopy({ hasDraft }: { hasDraft: boolean }) {
   return {
     title: "Receipt Body",
@@ -5,6 +35,20 @@ export function workbenchReceiptBodyCopy({ hasDraft }: { hasDraft: boolean }) {
     badge: "local only",
     draftPrefix: hasDraft ? "Body draft." : "",
     draftText: hasDraft ? "Review it, then save the local receipt." : "",
+  };
+}
+
+export function workbenchReceiptChainCopy() {
+  return {
+    ariaLabel: "Workbench receipt chain",
+    sourceStepLabel: (hasRouteTarget: boolean) => (hasRouteTarget ? "Route reads" : "Aang teaches"),
+    emptySourceText: "no command link",
+    bodyStepLabel: "Workbench body",
+    draftBodyText: "draft body staged",
+    emptyBodyText: "select or save a receipt",
+    projectStepLabel: "Project Lab reads",
+    emptyProjectText: "project not linked",
+    footer: "Receipt body lives here. Ledger audits it. Project Lab reads the linked project before push decisions.",
   };
 }
 

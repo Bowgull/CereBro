@@ -21029,3 +21029,84 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Terminal Lab now has Aang-first header, project read rail, receipt chain, and observation next-step copy. Next best slice: move to Workbench visual proof/body clarity unless browser review shows one last Terminal Lab density issue. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0708 EDT - Workbench receipt body clarity
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench visible-copy slice.
+
+What changed:
+
+- Added Workbench copy helpers for header, current body card, project receipt
+  drawer, and receipt chain.
+- Workbench header now says `Save the receipt body for what just happened.`
+  instead of proof language.
+- The first card now says `Current Body`, `Write the body before summary.`, and
+  `Pick a receipt type. Record the observation. Save the body.`
+- Workbench receipt chain now says `Aang teaches`, `Workbench body`, and
+  `Project Lab reads`.
+- Receipt chain footer now says `Receipt body lives here. Ledger audits it.
+  Project Lab reads the linked project before push decisions.`
+- `Project Proof` is now `Project Receipts`; expanded title is `Project
+  Receipt Read`.
+- Copy tests now block `proof` and `terminal explains` regressions on these
+  top Workbench reads.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts` passed,
+  9 tests.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx
+  app/client/src/lib/workbenchCopyModel.ts
+  app/server/workbenchCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop/Workbench, and
+  confirmed `Save the receipt body for what just happened.`, `Current Body`,
+  `Aang teaches`, `Workbench body`, `Project Receipts`, and `Receipt body lives
+  here. Ledger audits it. Project Lab reads the linked project before push
+  decisions.`
+
+Drift check:
+
+- On path because Workbench is the approved receipt body and visual proof
+  surface after Terminal Lab.
+- Creative UI/UX stayed inside the lane: same surface, no behavior expansion,
+  less proof/machinery wording, clearer receipt-body ownership.
+- No new surface, agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Workbench still has dense media and metadata drawers. Next pass should clean
+  those labels if browser review shows they are still too machine-facing.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench now uses receipt-body language at the header, current body card, receipt chain, and project receipts drawer. Next best slice: continue Workbench media/metadata drawer clarity if browser review shows machinery, otherwise move to Ledger receipts and audit trail. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

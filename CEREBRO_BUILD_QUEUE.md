@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0704 EDT
+Last updated: 2026-05-16 0708 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0708 EDT: started Workbench receipt-body clarity. Header now says
+  `Save the receipt body for what just happened.`, the first card says
+  `Current Body`, the receipt chain says `Aang teaches` / `Workbench body`,
+  and the project drawer says `Project Receipts` instead of `Project Proof`.
 - 2026-05-16 0704 EDT: cleaned Terminal Lab observation actions. The closed
   drawer now says `Observation Next Steps`; groups now read `Status`,
   `Approval`, `Connect`, and `Teach + Receipt`; buttons use plain next-action

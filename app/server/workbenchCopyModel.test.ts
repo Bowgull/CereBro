@@ -1,7 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { workbenchReceiptBodyCopy, workbenchReceiptDetailCopy, workbenchReceiptGroupCopy, workbenchReceiptListCopy } from "../client/src/lib/workbenchCopyModel";
+import {
+  workbenchCurrentBodyCopy,
+  workbenchHeaderCopy,
+  workbenchProjectReceiptCopy,
+  workbenchReceiptBodyCopy,
+  workbenchReceiptChainCopy,
+  workbenchReceiptDetailCopy,
+  workbenchReceiptGroupCopy,
+  workbenchReceiptListCopy,
+} from "../client/src/lib/workbenchCopyModel";
 
 describe("workbenchCopyModel", () => {
+  it("keeps the Workbench header focused on receipt bodies", () => {
+    const ready = workbenchHeaderCopy({ isLoading: false });
+    const loading = workbenchHeaderCopy({ isLoading: true });
+
+    expect(ready.subtitle).toBe("Save the receipt body for what just happened.");
+    expect(ready.statusText).toContain("Local receipts only");
+    expect(loading.statusText).toBe("Reading Workbench state.");
+    expect(Object.values(ready).join(" ").toLowerCase()).not.toContain("proof");
+  });
+
+  it("keeps the current move card named as the current body", () => {
+    const copy = workbenchCurrentBodyCopy();
+
+    expect(copy.label).toBe("Current Body");
+    expect(copy.title).toBe("Write the body before summary.");
+    expect(copy.text).toBe("Pick a receipt type. Record the observation. Save the body.");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof");
+  });
+
+  it("names project receipt reads without proof language", () => {
+    const closed = workbenchProjectReceiptCopy({ open: false, total: 12 });
+    const open = workbenchProjectReceiptCopy({ open: true, total: 12 });
+
+    expect(closed.title).toBe("Project Receipts");
+    expect(closed.badge).toBe("open to read");
+    expect(open.badge).toBe("12 receipts");
+    expect(open.readTitle).toBe("Project Receipt Read");
+    expect(Object.values(open).join(" ").toLowerCase()).not.toContain("proof");
+  });
+
   it("names the primary Workbench form as a receipt body", () => {
     const copy = workbenchReceiptBodyCopy({ hasDraft: false });
 
@@ -43,5 +82,16 @@ describe("workbenchCopyModel", () => {
     const copy = workbenchReceiptListCopy();
 
     expect(copy.readRulesTitle).toBe("Read Gates");
+  });
+
+  it("keeps the Workbench chain Aang-first for command-linked receipts", () => {
+    const copy = workbenchReceiptChainCopy();
+
+    expect(copy.sourceStepLabel(false)).toBe("Aang teaches");
+    expect(copy.sourceStepLabel(true)).toBe("Route reads");
+    expect(copy.bodyStepLabel).toBe("Workbench body");
+    expect(copy.footer).toBe("Receipt body lives here. Ledger audits it. Project Lab reads the linked project before push decisions.");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("terminal explains");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof");
   });
 });
