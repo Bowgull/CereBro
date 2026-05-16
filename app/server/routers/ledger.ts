@@ -40,6 +40,7 @@ function routeRow(row: Record<string, unknown>) {
       actionType: String(row.approval_action_type ?? ""),
       requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
       permissionPreflightId: row.approval_permission_preflight_id == null ? null : Number(row.approval_permission_preflight_id),
+      decidedAt: row.approval_decided_at == null ? null : Number(row.approval_decided_at),
     },
     workbenchEvidence: row.workbench_evidence_id == null ? null : {
       id: Number(row.workbench_evidence_id),
@@ -179,6 +180,7 @@ export const ledgerRouter = router({
               a.action_type AS approval_action_type,
               a.requested_by_agent AS approval_requested_by_agent,
               a.permission_preflight_id AS approval_permission_preflight_id,
+              a.decided_at AS approval_decided_at,
               wer.id AS workbench_evidence_id,
               wer.kind AS workbench_evidence_kind,
               wer.title AS workbench_evidence_title,
@@ -191,7 +193,6 @@ export const ledgerRouter = router({
               FROM approvals latest
               WHERE latest.target_type = 'runtime_route_record'
                 AND latest.target_id = r.id
-                AND latest.status = 'pending'
               ORDER BY latest.created_at DESC, latest.id DESC
               LIMIT 1
             )

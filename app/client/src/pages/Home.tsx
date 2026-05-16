@@ -1317,6 +1317,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               {latestRouteRows.map((item) => {
                 const routeTaskId = item.taskId;
                 const routeApprovalId = item.approvalPreview?.id ?? null;
+                const routeApprovalStatus = item.approvalPreview?.status ?? null;
+                const routeApprovalDone = routeApprovalStatus != null && routeApprovalStatus !== "pending";
                 const routeEvidence = item.workbenchEvidence;
                 const routeEvidenceId = routeEvidence?.id ?? null;
                 return (
@@ -1326,7 +1328,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
                       <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">{item.category.replace(/_/g, " ")}</span></Badge>
                       {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}><span className="min-w-0 truncate">{item.projectName}</span></Badge>}
-                      {routeApprovalId && <Badge variant="warning" className="uppercase"><span className="min-w-0 truncate">gate #{routeApprovalId}</span></Badge>}
+                      {routeApprovalId && (
+                        <Badge variant={routeApprovalDone ? routeApprovalStatus === "approved" ? "success" : "destructive" : "warning"} className="uppercase">
+                          <span className="min-w-0 truncate">{routeApprovalDone ? `${routeApprovalStatus} gate #${routeApprovalId}` : `gate #${routeApprovalId}`}</span>
+                        </Badge>
+                      )}
                       {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">receipt #{routeEvidenceId}</span></Badge>}
                     </div>
                     <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={item.originalText}>
@@ -1425,7 +1431,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         className="h-6 px-2 text-[10px]"
                         onClick={() => {
                           if (routeApprovalId) {
-                            setLedgerFocusNotice(`Approval #${routeApprovalId} queued for route #${item.id}.`);
+                            setLedgerFocusNotice(`Approval #${routeApprovalId} ${routeApprovalStatus ?? "recorded"} for route #${item.id}.`);
                             onNavigate("approvals");
                             return;
                           }
@@ -1434,19 +1440,19 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         disabled={creatingRouteApprovalId === item.id}
                         aria-label={
                           routeApprovalId
-                            ? `Open approval ${routeApprovalId} queued for route ${item.id}`
+                            ? `Open ${routeApprovalStatus ?? "recorded"} approval ${routeApprovalId} for route ${item.id}`
                             : creatingRouteApprovalId === item.id
                             ? `Queuing approval preview for route ${item.id}`
                             : `Queue approval preview for route ${item.id}`
                         }
                         title={
                           routeApprovalId
-                            ? "Open the pending approval queued for this route."
+                            ? "Open the local approval record for this route."
                             : "Queue a local approval/preflight preview for this route. This does not approve or run work."
                         }
                       >
                         {routeApprovalId
-                          ? `Gate #${routeApprovalId}`
+                          ? `${routeApprovalStatus === "pending" ? "Gate" : routeApprovalStatus === "approved" ? "Approved" : "Closed"} #${routeApprovalId}`
                           : creatingRouteApprovalId === item.id
                             ? "Queuing"
                             : "Queue Gate"}

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0009 EDT
+Last updated: 2026-05-16 0012 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0012 EDT - Route Approval Decision Visibility
+
+### What Changed
+- Runtime route reads now keep the latest route-linked approval even after it
+  is approved, rejected, or cancelled.
+- Ledger overview route reads now keep the same decided approval link.
+- Route approval read models now expose `decidedAt`.
+- Ledger route cards now label pending approvals as `Gate #...`, approved
+  approvals as `Approved #...`, and other closed approvals as `Closed #...`.
+- Added test coverage proving a route approval remains visible after its status
+  changes from `pending` to `approved`.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/routers/ledger.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-runtime-route-approval-visibility.db" pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-foundations-approval-visibility.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: Ledger
+  overview and Recent Route Reads rendered cleanly after the route-card label
+  change.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: route approval decision visibility.
+- No schema, task execution, approval decision from CereBro, command execution,
+  browser action from CereBro, model call, package install, external write,
+  storage migration, git action from CereBro, or Raven boundary changed.
+- No worker was used because this was a narrow read-model and label slice.
+
+### Front-End Steward Review
+- The route card remains compact.
+- Decided gates no longer vanish from the route chain.
+- The user gets a plain read of the approval state without adding another
+  panel or exposing raw machinery.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 53%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: route child
+idempotency hardening or Project Lab/Workbench route-chain visibility polish.
+Keep the pass narrow and preserve the hidden-machinery rule.
 
 ## 2026-05-16 0009 EDT - Staged Route Draft Target Link
 

@@ -307,6 +307,28 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.approvalPreview?.id).toBe(first.approval?.id);
     expect(records.items[0]?.approvalPreview?.status).toBe("pending");
     expect(records.items[0]?.approvalPreview?.permissionPreflightId).toBe(first.approval?.permissionPreflightId);
+
+    const db = await getCerebroDb();
+    await db.execute({
+      sql: `UPDATE approvals SET status = 'approved', decided_at = unixepoch() WHERE id = ?`,
+      args: [first.approval?.id ?? -1],
+    });
+    const decidedRecords = await caller.runtime.routeRecords({
+      limit: 1,
+      ownerAgent: "surfer",
+    });
+    expect(decidedRecords.items[0]?.id).toBe(committed.record.id);
+    expect(decidedRecords.items[0]?.approvalPreview?.id).toBe(first.approval?.id);
+    expect(decidedRecords.items[0]?.approvalPreview?.status).toBe("approved");
+    expect(decidedRecords.items[0]?.approvalPreview?.decidedAt).toBeGreaterThan(0);
+
+    const decidedOverview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 1,
+    });
+    expect(decidedOverview.latestRoutes[0]?.id).toBe(committed.record.id);
+    expect(decidedOverview.latestRoutes[0]?.approvalPreview?.id).toBe(first.approval?.id);
+    expect(decidedOverview.latestRoutes[0]?.approvalPreview?.status).toBe("approved");
   });
 
   it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0009 EDT
+Last updated: 2026-05-16 0012 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0012 EDT: kept route-linked approvals visible after approval
+  decisions. Ledger route cards now distinguish pending, approved, and closed
+  gate records.
 - 2026-05-16 0009 EDT: preserved runtime route targets in Workbench drafts
   staged from saved Ledger routes. Stage Body now carries `runtime_route:<id>`
   instead of a project path.
