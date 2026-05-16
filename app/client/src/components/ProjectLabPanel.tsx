@@ -81,6 +81,14 @@ type ProjectLabFocusDraft = {
   source?: string;
   projectId?: number | null;
   projectName?: string | null;
+  projectPath?: string | null;
+  projectFocus?: {
+    projectId?: number | null;
+    projectSlug?: string | null;
+    projectName?: string | null;
+    projectPath?: string | null;
+    focusSummary?: string;
+  } | null;
   evidenceId?: number;
   notice?: string;
 };
@@ -414,8 +422,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
     try {
       const draft = JSON.parse(raw) as ProjectLabFocusDraft;
       const focusedProject = projects.find((project) => {
-        if (draft.projectId != null && project.tasks.projectId === draft.projectId) return true;
-        if (draft.projectName && project.name === draft.projectName) return true;
+        const projectId = draft.projectFocus?.projectId ?? draft.projectId;
+        const projectName = draft.projectFocus?.projectName ?? draft.projectName;
+        const projectPath = draft.projectFocus?.projectPath ?? draft.projectPath;
+        if (projectId != null && project.tasks.projectId === projectId) return true;
+        if (projectName && project.name === projectName) return true;
+        if (projectPath && project.localPath === projectPath) return true;
         return false;
       });
       setProjectFilter("all");

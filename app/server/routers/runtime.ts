@@ -496,6 +496,18 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
       },
       focusSummary: `Focus Ledger on ${ownerAgent} ${category.replace(/_/g, " ")} route preview. No audit row is saved.`,
     },
+    projectFocusDraft: {
+      kind: "route_preview_project_focus",
+      focusTarget: "project_lab",
+      autosave: false,
+      projectSlug,
+      projectName: project?.label ?? null,
+      projectPath: project?.localPath ?? null,
+      projectId: null,
+      focusSummary: project?.label
+        ? `Open Project Lab for ${project.label} route preview context. No project write is saved.`
+        : "Open Project Lab for route preview context. No project write is saved.",
+    },
     taskDraft: {
       title: taskTitleFor(input.text, category, project?.label ?? null),
       agent: ownerAgent,

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0516 EDT
+Last updated: 2026-05-16 0539 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0539 EDT: `runtime.previewRoute` now includes a Project Lab
+  focus draft. Ask Aang route previews expose a compact Project action beside
+  Workbench and Ledger, and Project Lab can resolve preview focus by project
+  id, name, or local path.
 - 2026-05-16 0516 EDT: `runtime.previewRoute` Workbench drafts now carry a
   formal `projectFocus` object with CereBro name/path proof. The route preview
   Workbench action forwards that object, and Workbench resolves it after

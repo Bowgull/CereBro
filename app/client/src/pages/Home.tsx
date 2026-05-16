@@ -1946,6 +1946,16 @@ function RuntimeRouteReceipt({
       };
       focusSummary: string;
     };
+    projectFocusDraft?: {
+      kind: string;
+      focusTarget: string;
+      autosave: boolean;
+      projectSlug: string | null;
+      projectName: string | null;
+      projectPath: string | null;
+      projectId: number | null;
+      focusSummary: string;
+    };
     taskDraft: { title: string; agent: string; projectName: string | null; projectPath: string | null };
     nextAction: string;
     gates: string[];
@@ -2026,6 +2036,26 @@ function RuntimeRouteReceipt({
     onNavigate("ledger");
   }
 
+  function openProjectRouteFocus() {
+    try {
+      const draft = result.projectFocusDraft;
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "runtime_route",
+          projectId: draft?.projectId ?? null,
+          projectName: draft?.projectName ?? result.taskDraft.projectName,
+          projectPath: draft?.projectPath ?? result.taskDraft.projectPath,
+          projectFocus: draft,
+          notice: draft?.focusSummary ?? "Route preview opened Project Lab. No project write is saved.",
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the user can select the project manually.
+    }
+    onNavigate("projects");
+  }
+
   return (
     <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
       <section className="rounded p-2" aria-label="Runtime route receipt preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -2069,6 +2099,9 @@ function RuntimeRouteReceipt({
             </Button>
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openWorkbenchRouteDraft} aria-label="Stage route receipt draft in Workbench">
               Workbench
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openProjectRouteFocus} aria-label="Open Project Lab focused on route preview">
+              Project
             </Button>
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={openLedgerRouteFocus} aria-label="Open Ledger focused on route preview">
               Ledger

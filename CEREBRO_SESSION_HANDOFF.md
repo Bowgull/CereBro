@@ -19872,3 +19872,73 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. The route preview handoffs now preserve project focus into Ledger and Workbench. Next safe slice: inspect Project Lab route/project reads for any remaining client-side assumptions, then continue backend/runtime receipt contracts only where they make the visible loop clearer. Run red/green targeted tests, pnpm check, browser-proof localhost if UI changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0539 EDT - Runtime Project Lab focus contract
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 57%
+- Foundation/docs/planning: 93%
+- Knowledge/storage/source: 36%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow runtime contract and visible route-preview
+  handoff slice.
+
+What changed:
+
+- `runtime.previewRoute` now returns a `projectFocusDraft`.
+- The draft is preview-only, autosave false, and carries CereBro slug, name,
+  path, and null project id.
+- The route preview modal now exposes a compact `Project` action beside
+  Workbench and Ledger.
+- The Project action stages `cerebro:project-lab-focus` and opens Project Lab
+  without saving a route, project, task, receipt, approval, or audit row.
+- Project Lab focus resolution now accepts project id, project name, or local
+  path from the focus object.
+
+Files touched in this slice:
+
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- Red first:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-project-lab-focus-red.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because `projectFocusDraft` was undefined.
+- Green after patch:
+  `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-project-lab-focus-green.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 11 tests.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000`, set Ask Aang to Build,
+  previewed `keep building CereBro front end`, clicked Project, and confirmed
+  Project Lab opened with `Open Project Lab for CereBro route preview context.
+  No project write is saved.` plus the CereBro Project Read.
+
+Known risks:
+
+- The route preview modal remains visible after navigation, matching the
+  existing Workbench/Ledger behavior. It can be dismissed manually.
+- Project Lab focus still depends on the locked project profile list for
+  project path/name resolution.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md and CEREBRO_BUILD_QUEUE.md first. Continue CereBro on the main build path. Route preview now has safe Project, Workbench, and Ledger exits. Next safe slice: tighten any remaining saved-route-to-Project-Lab handoff gaps, or move to the next backend/runtime receipt contract that directly supports the visible loop. Run red/green targeted tests, pnpm check, browser-proof localhost if UI changes, update handoff, archive to Obsidian, commit, and push.
+```

@@ -103,6 +103,16 @@ describe("runtime route receipt preview", () => {
       bodyTarget: "workbench",
     });
     expect(preview.ledgerFocusDraft.focusSummary).toContain("tony");
+    expect(preview.projectFocusDraft).toEqual({
+      kind: "route_preview_project_focus",
+      focusTarget: "project_lab",
+      autosave: false,
+      projectSlug: "cerebro",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+      projectId: null,
+      focusSummary: "Open Project Lab for CereBro route preview context. No project write is saved.",
+    });
     expect(preview.taskDraft.agent).toBe("tony");
     expect(preview.taskDraft.projectName).toBe("CereBro");
     expect(preview.taskDraft.title).toContain("project build");
