@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0032 EDT
+Last updated: 2026-05-16 0102 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0102 EDT: Workbench receipt chain strip now shows
+  `Route reads` / `Route #<id>` for route-linked receipts instead of saying
+  there is no command link.
 - 2026-05-16 0032 EDT: route targets now display as `Route #<id>` through the
   shared display-label helper while keeping raw `runtime_route:<id>` proof in
   titles.

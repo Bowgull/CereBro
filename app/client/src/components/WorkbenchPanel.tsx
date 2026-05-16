@@ -1375,6 +1375,7 @@ function WorkbenchReceiptChainStrip({
   selectedEvidence: {
     id: number;
     title: string;
+    targetUri: string | null;
     projectName: string | null;
     commandObservationId: number | null;
     validationStatus: string;
@@ -1382,14 +1383,16 @@ function WorkbenchReceiptChainStrip({
   projectLabel: string | null;
 }) {
   const commandObservationId = selectedEvidence?.commandObservationId ?? draft?.commandObservationId ?? null;
+  const targetUri = selectedEvidence?.targetUri ?? draft?.targetUri ?? null;
+  const routeTarget = targetUri?.startsWith("runtime_route:") ? targetUri : null;
   const evidenceId = selectedEvidence?.id ?? selectedEvidenceId;
   const linkedProject = selectedEvidence?.projectName ?? projectLabel ?? (draft?.projectId == null ? null : "linked project");
   const validationStatus = selectedEvidence?.validationStatus ?? null;
   const steps = [
     {
-      label: "Terminal explains",
-      value: commandObservationId == null ? "no command link" : `observation #${commandObservationId}`,
-      tone: commandObservationId == null ? C.textMuted : C.gold,
+      label: routeTarget ? "Route reads" : "Terminal explains",
+      value: routeTarget ? sourceDisplayName(routeTarget) : commandObservationId == null ? "no command link" : `observation #${commandObservationId}`,
+      tone: routeTarget || commandObservationId != null ? C.gold : C.textMuted,
     },
     {
       label: "Workbench stores",

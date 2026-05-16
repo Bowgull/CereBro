@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0032 EDT
+Last updated: 2026-05-16 0102 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0102 EDT - Workbench Route Chain Strip
+
+### What Changed
+- Workbench receipt chain strip now reads route-linked receipt targets.
+- When the selected receipt or staged draft has `runtime_route:<id>`, the first
+  chain tile now says `Route reads` and shows `Route #<id>`.
+- Non-route receipts keep the existing `Terminal explains` tile.
+- The chain remains compact at three tiles: route/terminal, Workbench, Project
+  Lab.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/displayLabels.test.ts` passed.
+- Browser proof with Playwright CLI against `http://localhost:3000/`: selected
+  route-linked Workbench receipt #1527 and verified the chain strip rendered
+  `Route reads` / `Route #22`, `Workbench stores` / `receipt #1527
+  unvalidated`, and `Project Lab reads` / `CereBro`.
+
+### Cleanliness Read
+- Current slice: Workbench route chain strip.
+- No server code, schema migration, route mutation, task execution, approval
+  decision, command execution, model call, package install, external write,
+  storage migration, git action from CereBro, or Raven boundary changed.
+- Browser proof only read the local running app.
+- No worker was used because this was a single-component visual proof slice.
+
+### Front-End Steward Review
+- The chain now names the route as the first-class source of the receipt when a
+  receipt came from Ledger route flow.
+- It removes the misleading `no command link` read for route bodies.
+- The UI stays low-machinery: the user sees `Route #22`, not raw URI syntax.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 55%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: Ledger to
+Workbench to Project Lab end-to-end proof, then stop changing this route loop
+unless proof exposes a specific gap.
 
 ## 2026-05-16 0032 EDT - Route Target Display Labels
 
