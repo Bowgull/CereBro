@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2347 EDT
+Last updated: 2026-05-15 2352 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2352 EDT - Runtime Route Task Link Backfill
+
+### What Changed
+- `runtime.createTaskFromRouteRecord` now backfills the created task id into
+  existing route-linked approval previews.
+- `runtime.createTaskFromRouteRecord` now backfills the created task id into
+  existing route-linked Workbench receipts.
+- Runtime and Ledger route read models now expose task ids on linked approval
+  previews and Workbench receipts.
+- Added tests for both child-before-task orders: gate then receipt then task,
+  and receipt then gate then task.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-runtime-route-serial-3.db" pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-foundations-serial-2.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app test -- runtime.routeReceipt.test.ts` was attempted first and
+  failed because Vitest ran multiple DB test files in parallel against the
+  default SQLite DB, producing `SQLITE_BUSY: database is locked`. This was a
+  harness isolation issue, not an assertion failure.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: runtime route receipt contract repair.
+- One read-only worker was used to audit the next safest runtime receipt gap.
+  It confirmed the ordering gap and did not edit files.
+- No schema, command execution from CereBro, browser action from CereBro, model
+  call, package install, external write, storage migration, git action from
+  CereBro, frontend surface behavior, or Raven boundary changed.
+- Existing Workbench receipt rows can now receive `task_id` when the task is
+  created later. This mutates current linkage only; receipt text stays
+  append-only.
+
+### Front-End Steward Review
+- No visible UI was changed.
+- Ledger route reads now receive stronger linkage data, so later UI can show a
+  route's task/gate/body chain without inference.
+- This supports the hidden-machinery rule by making the proof chain reliable
+  before adding more front-end controls.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 52%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: choose
+between route child idempotency hardening, decided approval visibility in
+Ledger route cards, or fixing generic Workbench staged route drafts so manual
+save preserves `runtime_route:<id>`.
 
 ## 2026-05-15 2347 EDT - Aang Companion Event Strip Lazy Read
 

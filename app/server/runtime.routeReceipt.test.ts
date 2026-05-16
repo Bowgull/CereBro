@@ -364,4 +364,82 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.workbenchEvidence?.id).toBe(first.evidence?.id);
     expect(records.items[0]?.workbenchEvidence?.targetUri).toBe(`runtime_route:${committed.record.id}`);
   });
+
+  it("backfills route task links into existing approval previews and Workbench receipts", async () => {
+    const caller = createCaller();
+    const taskCountBefore = await countRows("tasks");
+    const evidenceCountBefore = await countRows("workbench_evidence_records");
+    const approvalCountBefore = await countRows("approvals");
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+
+    const approval = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Queue gate before task exists.",
+    });
+    const evidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(approval.approval?.taskId).toBeNull();
+    expect(evidence.evidence?.taskId).toBeNull();
+
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(task.created).toBe(true);
+    expect(await countRows("tasks")).toBe(taskCountBefore + 1);
+    expect(await countRows("workbench_evidence_records")).toBe(evidenceCountBefore + 1);
+    expect(await countRows("approvals")).toBe(approvalCountBefore + 1);
+
+    const records = await caller.runtime.routeRecords({
+      limit: 1,
+      projectSlug: "cerebro",
+      ownerAgent: "tony",
+    });
+    expect(records.items[0]?.id).toBe(committed.record.id);
+    expect(records.items[0]?.taskId).toBe(task.task.id);
+    expect(records.items[0]?.approvalPreview?.id).toBe(approval.approval?.id);
+    expect(records.items[0]?.approvalPreview?.taskId).toBe(task.task.id);
+    expect(records.items[0]?.workbenchEvidence?.id).toBe(evidence.evidence?.id);
+    expect(records.items[0]?.workbenchEvidence?.taskId).toBe(task.task.id);
+
+    const overview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 1,
+    });
+    expect(overview.latestRoutes[0]?.id).toBe(committed.record.id);
+    expect(overview.latestRoutes[0]?.workbenchEvidence?.taskId).toBe(task.task.id);
+
+    const secondCommitted = await caller.runtime.commitRoute({
+      text: "continue CereBro route contract build work",
+      mode: "build",
+    });
+    const secondEvidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: secondCommitted.record.id,
+    });
+    const secondApproval = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: secondCommitted.record.id,
+      reason: "Queue gate after receipt but before task exists.",
+    });
+    const secondTask = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: secondCommitted.record.id,
+    });
+    const secondRecords = await caller.runtime.routeRecords({
+      limit: 1,
+      projectSlug: "cerebro",
+      ownerAgent: "tony",
+    });
+
+    expect(secondEvidence.evidence?.taskId).toBeNull();
+    expect(secondApproval.approval?.taskId).toBeNull();
+    expect(secondRecords.items[0]?.id).toBe(secondCommitted.record.id);
+    expect(secondRecords.items[0]?.taskId).toBe(secondTask.task.id);
+    expect(secondRecords.items[0]?.approvalPreview?.taskId).toBe(secondTask.task.id);
+    expect(secondRecords.items[0]?.workbenchEvidence?.taskId).toBe(secondTask.task.id);
+  });
 });

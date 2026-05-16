@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-15 2347 EDT
+Last updated: 2026-05-15 2352 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-15 2352 EDT: repaired runtime route task linkage so existing
+  route-linked approval previews and Workbench receipts receive the created
+  task id when task creation happens after them.
 - 2026-05-15 2347 EDT: gated Aang Companion local event counts behind the
   Local Event Strip drawer.
 - 2026-05-14 2149 EDT: collapsed Piccolo cleanup rules/storage contract,

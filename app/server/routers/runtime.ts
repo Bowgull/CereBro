@@ -62,6 +62,7 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
     taskId: row.task_id == null ? null : Number(row.task_id),
     approvalPreview: row.approval_id == null ? null : {
       id: Number(row.approval_id),
+      taskId: row.approval_task_id == null ? null : Number(row.approval_task_id),
       status: String(row.approval_status ?? "pending"),
       actionType: String(row.approval_action_type ?? ""),
       requestedByAgent: row.approval_requested_by_agent == null ? null : String(row.approval_requested_by_agent),
@@ -72,6 +73,7 @@ function mapRouteRecordRow(row: Record<string, unknown>) {
       kind: String(row.workbench_evidence_kind ?? ""),
       title: String(row.workbench_evidence_title ?? ""),
       targetUri: row.workbench_evidence_target_uri == null ? null : String(row.workbench_evidence_target_uri),
+      taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
       permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
     },
     nextAction: String(row.next_action ?? ""),
@@ -527,6 +529,7 @@ export const runtimeRouter = router({
           SELECT
             r.*,
             a.id AS approval_id,
+            a.task_id AS approval_task_id,
             a.status AS approval_status,
             a.action_type AS approval_action_type,
             a.requested_by_agent AS approval_requested_by_agent,
@@ -535,6 +538,7 @@ export const runtimeRouter = router({
             wer.kind AS workbench_evidence_kind,
             wer.title AS workbench_evidence_title,
             wer.target_uri AS workbench_evidence_target_uri,
+            wer.task_id AS workbench_evidence_task_id,
             wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
           FROM runtime_route_records r
           LEFT JOIN approvals a ON a.id = (
@@ -653,6 +657,25 @@ export const runtimeRouter = router({
       await db.execute({
         sql: `UPDATE runtime_route_records SET task_id = ? WHERE id = ?`,
         args: [taskId, input.routeRecordId],
+      });
+      await db.execute({
+        sql: `
+          UPDATE approvals
+          SET task_id = ?
+          WHERE target_type = 'runtime_route_record'
+            AND target_id = ?
+            AND task_id IS NULL
+        `,
+        args: [taskId, input.routeRecordId],
+      });
+      await db.execute({
+        sql: `
+          UPDATE workbench_evidence_records
+          SET task_id = ?
+          WHERE target_uri = ?
+            AND task_id IS NULL
+        `,
+        args: [taskId, `runtime_route:${input.routeRecordId}`],
       });
 
       const task = await getRuntimeTaskById(taskId);
