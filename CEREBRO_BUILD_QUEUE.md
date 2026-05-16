@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1943 EDT
+Last updated: 2026-05-16 1951 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1951 EDT: continued item 9 in Basement Model Tools. Added an
+  explicit local Status Decision action for capability proposals. The action
+  can set source-verified, tested-pass, tested-mixed, tested-fail, or stale
+  status with required validation notes. The selected proposal detail now has
+  a Status Decision drawer. No pass eval is auto-promoted, no route default
+  changes, and no provider/model/tool call, install, browser/search/fetch,
+  token/account action, Ollama status command, schema migration, new surface,
+  external write, command runner, dependency, or Raven path was added.
 - 2026-05-16 1943 EDT: continued item 9 in Basement Model Tools. Capability
   reads now include latest local eval evidence from `model_tool_evals`, and
   source readiness can show `eval recorded` or `eval blocked` without changing

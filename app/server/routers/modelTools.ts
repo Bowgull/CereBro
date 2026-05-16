@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { getCerebroDb } from "../cerebroDb";
 import { recordPermissionPreflight } from "../permissionPolicy";
 import { publicProcedure, router } from "../_core/trpc";
@@ -20,6 +21,7 @@ const capabilityKinds = [
 const accessMethods = ["local", "direct_api", "gateway", "web_handoff", "browser_assisted", "manual_copy_paste"] as const;
 const privacyClasses = ["local_private", "public_safe", "limited_external", "sensitive_review", "blocked_sensitive", "unknown"] as const;
 const evalStatuses = ["untested", "source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
+const localStatusChangeStatuses = ["source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
 const approvalLevels = ["none", "confirm_each_use", "explicit_approval", "account_setup_required", "blocked"] as const;
 
 const evalTasks = [
@@ -987,6 +989,77 @@ export const modelToolsRouter = router({
         gates: [
           "Recorded one local eval note.",
           "This did not run a model/tool or mark any capability as a recommended default.",
+        ],
+      };
+    }),
+
+  updateCapabilityStatus: publicProcedure
+    .input(
+      z.object({
+        capabilityId: z.number().int().positive(),
+        evalStatus: z.enum(localStatusChangeStatuses),
+        validationNotes: z.string().min(1).max(1600),
+        failureNotes: z.string().max(1200).optional(),
+        sourceCheckedAt: z.number().int().positive().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const now = Math.floor(Date.now() / 1000);
+      const existing = await db.execute({
+        sql: "SELECT id, source_uris, eval_status FROM model_tool_capabilities WHERE id = ? LIMIT 1",
+        args: [input.capabilityId],
+      });
+      const row = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Capability proposal not found.",
+        });
+      }
+      const sourceUris = row.source_uris == null ? "" : String(row.source_uris).trim();
+      if ((input.evalStatus === "source_verified" || input.evalStatus === "tested_pass") && !sourceUris) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Source URLs are required before this capability can be marked source verified or tested pass.",
+        });
+      }
+
+      const nextVerifiedAt = input.sourceCheckedAt ?? (input.evalStatus === "source_verified" || input.evalStatus === "tested_pass" ? now : null);
+      const result = await db.execute({
+        sql: `
+          UPDATE model_tool_capabilities
+          SET eval_status = ?,
+              validation_notes = ?,
+              failure_notes = COALESCE(?, failure_notes),
+              last_verified_at = COALESCE(?, last_verified_at),
+              updated_at = ?
+          WHERE id = ?
+          RETURNING *
+        `,
+        args: [
+          input.evalStatus,
+          input.validationNotes,
+          input.failureNotes ?? null,
+          nextVerifiedAt,
+          now,
+          input.capabilityId,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "local_registry_status_update" as const,
+        writesExternal: false,
+        callsExternalModels: false,
+        installsDependencies: false,
+        browsesOrFetches: false,
+        previousEvalStatus: String(row.eval_status),
+        capability: rowToCapability(result.rows[0]!),
+        gates: [
+          "Updated one local capability status.",
+          "This did not call a model/tool, browse/search/fetch, install a gateway, or change route defaults.",
+          "A tested or source-verified status is still registry evidence, not automatic external approval.",
         ],
       };
     }),

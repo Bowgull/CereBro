@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1943 EDT
+Last updated: 2026-05-16 1951 EDT
 
 ## Current North Star
 
@@ -20,6 +20,100 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 1951 EDT - Model Tool Status Decision
+
+### What Changed
+- Added an explicit local trust-status update action for Model Tools capability
+  proposals.
+- Status decisions now support `source_verified`, `tested_pass`,
+  `tested_mixed`, `tested_fail`, and `stale`.
+- Source-verified and tested-pass decisions require a source URL on the
+  proposal.
+- The update returns a local-only receipt that states no provider, model, tool,
+  gateway, browser, search, fetch, install, token, route-default change, or
+  external write occurred.
+- The Basement Models surface now has a `Status Decision` drawer beside
+  Propose, Eval Note, and Route Preview. It updates local registry evidence
+  only.
+- Pass evals still do not auto-promote capabilities. Trusted status remains an
+  explicit local decision.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-status-current.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-status-final.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `git diff --check` passed.
+- Browser proof used the Playwright CLI wrapper against the local app at
+  `http://localhost:3001/` because a stale dev server was already using port
+  3000.
+- Browser proof opened Basement → Models, filtered the local QA proposal,
+  opened Status Decision, filled validation notes, clicked Update Local Status,
+  and verified the row/detail changed to `source verified` and `source ready`.
+- Screenshot proof: `output/playwright/model-tools-status-decision-1951.png`.
+
+### Cleanliness Read
+- Current slice: Model Tools status decision.
+- Product surface register: Basement capability registry.
+- Dirty file at start: `app/server/routers/modelTools.ts` already contained
+  the first half of this mutation. It was treated as current-slice work and
+  integrated rather than reverted.
+- Local development database now has one QA proposal named
+  `Status Decision Visual 1778975297450`. This is local proof data only.
+- A stale CereBro dev server was listening on port 3000 before browser proof.
+  It was closed after proof. The server started for this slice on port 3001 was
+  also closed. No local server remains on ports 3000, 3001, or 24678.
+- No Ollama status command, provider/model/tool/gateway/search/fetch call,
+  install, token, account action, model pull, external write, schema migration,
+  dependency, new primary surface, route default change, automatic eval
+  promotion, or Raven path was added.
+- No worker was used because the slice had one owner surface and one tRPC
+  contract.
+
+### Front-End Steward Review
+- Surface: Basement Model Registry.
+- Register: product surface.
+- Primary object: local capability proposal.
+- User question: can Oak/Spock mark the local trust state without running the
+  tool.
+- Route visible: Aang and Cortana remain in the shell context.
+- Receipt/proof visible: the drawer states the action is local registry only.
+- Approval/risk visible: external use and route defaults remain gated.
+- Machinery hidden until needed: the status action lives in an existing drawer,
+  not a new dashboard or Keep-facing model switcher.
+- Generic UI rejected: no model marketplace, score wall, plugin launcher, or
+  automatic recommender was added.
+- Screenshot proof: `output/playwright/model-tools-status-decision-1951.png`.
+- Remaining taste risk: Models remains dense. Targeted polish only.
+
+### Completion Read
+- Overall: 71%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 66%.
+- Knowledge/storage/source: 44%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Next best path: add a compact
+policy/readback summary for status decisions, then consider whether Model Tools
+item 9 is complete enough to move back to route receipts or Knowledge
+contracts. Do not run Ollama status checks, installs, pulls, external searches,
+provider calls, or model calls without explicit approval.
 
 ## 2026-05-16 1943 EDT - Model Tool Eval Evidence
 

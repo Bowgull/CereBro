@@ -256,4 +256,46 @@ describe("Model Tools local-first routing policy", () => {
     ]);
     expect(item?.sourceReadiness.nextStep).toContain("does not mark this trusted");
   });
+
+  it("updates capability trust status locally without running providers or changing route defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Status Update ${stamp}`,
+      toolName: "Status candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+
+    const update = await caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "source_verified",
+      validationNotes: "Oak verified the source record and limits. Local status update only.",
+    });
+
+    expect(update.ok).toBe(true);
+    expect(update.mode).toBe("local_registry_status_update");
+    expect(update.callsExternalModels).toBe(false);
+    expect(update.browsesOrFetches).toBe(false);
+    expect(update.previousEvalStatus).toBe("untested");
+    expect(update.capability.evalStatus).toBe("source_verified");
+    expect(update.capability.sourceReadiness.status).toBe("source_ready");
+    expect(update.gates.join(" ")).toContain("did not call a model/tool");
+
+    const capabilities = await caller.modelTools.capabilities({
+      provider: `Status Update ${stamp}`,
+      limit: 5,
+    });
+    const item = capabilities.items.find((row) => row.id === proposal.capability.id);
+    expect(item?.evalStatus).toBe("source_verified");
+    expect(item?.sourceReadiness.status).toBe("source_ready");
+  });
 });

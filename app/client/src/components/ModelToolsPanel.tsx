@@ -34,6 +34,7 @@ const PRIVACY_CLASSES = ["local_private", "public_safe", "limited_external", "se
 const APPROVAL_LEVELS = ["none", "confirm_each_use", "explicit_approval", "account_setup_required", "blocked"] as const;
 const EVAL_STATUS_FILTERS = ["all", "untested", "source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
 const EVAL_OUTCOMES = ["recorded", "pass", "mixed", "fail", "blocked"] as const;
+const STATUS_DECISIONS = ["source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
 
 type CapabilityKind = (typeof CAPABILITY_KINDS)[number];
 type EvalStatusFilter = (typeof EVAL_STATUS_FILTERS)[number];
@@ -110,6 +111,9 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   const [evalSummary, setEvalSummary] = useState("");
   const [evalOutcome, setEvalOutcome] = useState<(typeof EVAL_OUTCOMES)[number]>("recorded");
   const [evalNotes, setEvalNotes] = useState("");
+  const [statusDecision, setStatusDecision] = useState<(typeof STATUS_DECISIONS)[number]>("source_verified");
+  const [statusDecisionNotes, setStatusDecisionNotes] = useState("");
+  const [statusFailureNotes, setStatusFailureNotes] = useState("");
   const [evalNotesOpen, setEvalNotesOpen] = useState(false);
   const [ollamaStatusOpen, setOllamaStatusOpen] = useState(false);
   const [routePreviewInput, setRoutePreviewInput] = useState<{
@@ -170,6 +174,15 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       setEvalSummary("");
       setEvalNotes("");
       utils.modelTools.evals.invalidate();
+    },
+  });
+  const updateCapabilityStatus = trpc.modelTools.updateCapabilityStatus.useMutation({
+    onSuccess: (result) => {
+      setLastWrite(`Updated local capability status ${result.capability.id} to ${labelize(result.capability.evalStatus)}.`);
+      setStatusDecisionNotes("");
+      setStatusFailureNotes("");
+      utils.modelTools.capabilities.invalidate();
+      utils.modelTools.policy.invalidate();
     },
   });
   const createOllamaStatusApproval = trpc.modelTools.createOllamaStatusApprovalPreview.useMutation({
@@ -297,6 +310,18 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       evaluatorAgent: "spock",
       validationNotes: evalNotes.trim() || undefined,
       privacyNotes: "Local eval note only. No provider call was made.",
+    });
+  }
+
+  function submitStatusDecision(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmedNotes = statusDecisionNotes.trim();
+    if (!selectedCapability || !trimmedNotes || updateCapabilityStatus.isPending) return;
+    updateCapabilityStatus.mutate({
+      capabilityId: selectedCapability.id,
+      evalStatus: statusDecision,
+      validationNotes: trimmedNotes,
+      failureNotes: statusFailureNotes.trim() || undefined,
     });
   }
 
@@ -690,7 +715,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </aside>
         </section>
 
-        <section className="grid gap-2 xl:grid-cols-3">
+        <section className="grid gap-2 xl:grid-cols-4">
           <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
             <summary className="cursor-pointer">
               <SectionTitle title="Propose" detail="local only" />
@@ -770,6 +795,29 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 </div>
               ))}
             </div>
+            </form>
+          </details>
+
+          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <summary className="cursor-pointer">
+              <SectionTitle title="Status Decision" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "select proposal"} />
+            </summary>
+            <form onSubmit={submitStatusDecision} className="mt-2 space-y-2" aria-label="Update local model tool trust status">
+              <AppSelect label="Local status" value={statusDecision} onChange={(value) => setStatusDecision(value as typeof statusDecision)} options={STATUS_DECISIONS} />
+              <Textarea value={statusDecisionNotes} onChange={(event) => setStatusDecisionNotes(event.target.value)} aria-label="Model tool status decision notes" placeholder="Why this status is correct. Required." rows={4} />
+              <Textarea value={statusFailureNotes} onChange={(event) => setStatusFailureNotes(event.target.value)} aria-label="Model tool status failure notes" placeholder="Failure notes for mixed, failed, stale, or blocked cases." rows={3} />
+              <Button
+                type="submit"
+                disabled={!selectedCapability || !statusDecisionNotes.trim() || updateCapabilityStatus.isPending}
+                title={!selectedCapability ? "Select a proposal before changing local status." : !statusDecisionNotes.trim() ? "Add validation notes before changing local status." : "Update the local registry status. No route default or provider call changes."}
+                aria-label="Update local model tool trust status"
+                className="w-full"
+              >
+                {updateCapabilityStatus.isPending ? "Updating" : "Update Local Status"}
+              </Button>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                Local registry update only. This does not approve external use, change route defaults, run a model, or run a provider call.
+              </div>
             </form>
           </details>
 
