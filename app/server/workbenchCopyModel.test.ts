@@ -121,9 +121,18 @@ describe("workbenchCopyModel", () => {
 
     expect(copy.readTitle).toBe("Receipt Read");
     expect(copy.readBadge).toBe("local only");
+    expect(copy.detailTitle).toBe("Receipt Details");
+    expect(copy.assignedAgentLabel).toBe("Assigned Agent");
+    expect(copy.coordinatesLabel).toBe("Marked Area");
+    expect(copy.previewNameLabel).toBe("Preview Reference");
+    expect(copy.previewStorageLabel).toBe("Preview Storage");
+    expect(copy.localPreviewStorageText).toBe("local preview only");
     expect(copy.readRulesTitle).toBe("Read Gates");
     expect(copy.securityTitle).toBe("Security Check");
     expect(copy.noSecurityText).toContain("Open Security Gate");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("metadata");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("route agent");
+    expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("media storage");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("preflight");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("proof read");
   });

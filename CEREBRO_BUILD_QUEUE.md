@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0719 EDT
+Last updated: 2026-05-16 0723 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -695,6 +695,9 @@ Expected shape:
 - Recent Workbench rows now translate old saved media receipt data into display
   labels like `preview reference`, `local only`, and `Local image preview note.`
   The stored receipt body is unchanged.
+- Selected Workbench receipt details now use the same low-machinery labels:
+  `Receipt Details`, `Assigned Agent`, `Marked Area`, `Preview Reference`, and
+  `Preview Storage`.
 - Project Lab now reads git status through a cached read-only model and shows a
   compact Git read/cached badge instead of silently shelling out on every
   overview/detail refresh.

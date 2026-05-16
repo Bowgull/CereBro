@@ -21265,3 +21265,80 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Recent Workbench rows now translate old saved media receipt data into display-only labels without rewriting stored receipt bodies. Next best slice: clean the selected receipt detail's closed metadata drawer labels, or move to Ledger receipt/audit copy if Workbench looks acceptable in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0723 EDT - Workbench selected receipt details copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Workbench selected-detail display slice.
+
+What changed:
+
+- Selected receipt detail drawer now reads `Receipt Details` instead of
+  `Receipt Metadata`.
+- Raw labels were softened in the selected receipt drawer:
+  `Route Agent` -> `Assigned Agent`, `Coordinates` -> `Marked Area`,
+  `Annotation` -> `Note`, `Media Name` -> `Preview Reference`, and
+  `Media Storage` -> `Preview Storage`.
+- Preview storage now says `local preview only` or `no local preview`.
+- Preview kind uses the shared Workbench receipt kind label helper.
+- Workbench copy tests now guard against metadata, route-agent, and media-storage
+  wording returning to selected receipt detail copy.
+
+Files touched in this slice:
+
+- `app/client/src/lib/workbenchCopyModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/workbenchCopyModel.test.ts` passed,
+  12 tests.
+- `git diff --check -- app/client/src/components/WorkbenchPanel.tsx
+  app/client/src/lib/workbenchCopyModel.ts
+  app/server/workbenchCopyModel.test.ts` passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Workshop/Workbench,
+  selected receipt `#1518`, opened the selected receipt details drawer, and
+  confirmed `Receipt Details`, `Assigned Agent`, `Marked Area`, `Preview
+  Reference`, and `Preview Storage`.
+
+Drift check:
+
+- On path because Workbench is the approved receipt body and visual proof
+  surface.
+- Creative UI/UX stayed inside the lane: closed detail drawer labels only, no
+  behavior expansion, no stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Workbench now looks acceptable for this low-machinery pass. Next best build
+  path is Ledger receipt/audit copy unless browser review finds another
+  Workbench machinery leak.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Workbench selected receipt details now use low-machinery labels, and recent rows no longer surface metadata/media wording. Next best slice: move to Ledger receipt/audit copy and make sure Ledger reads as the audit trail, not a technical proof dump. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

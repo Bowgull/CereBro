@@ -1806,30 +1806,30 @@ function EvidenceDetailPanel({
       )}
       <details className="mt-2 rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Receipt Metadata
+          {detailCopy.detailTitle}
         </summary>
         <div className="mt-2 grid gap-1">
-          <Meta label="Owner" value={item.ownerAgent} />
-          <Meta label="Route Agent" value={item.routeAgent ?? "unrouted"} />
-          <Meta label="Project" value={item.projectName ?? "unlinked"} />
-          <Meta label="Task" value={item.taskTitle ?? (item.taskId == null ? "unlinked" : `Task #${item.taskId}`)} />
-          <Meta label="Session" value={item.sessionDisplayName ?? (item.sessionId == null ? "unlinked" : `Run #${item.sessionId}`)} />
+          <Meta label={detailCopy.ownerLabel} value={item.ownerAgent} />
+          <Meta label={detailCopy.assignedAgentLabel} value={item.routeAgent ?? "unrouted"} />
+          <Meta label={detailCopy.projectLabel} value={item.projectName ?? "unlinked"} />
+          <Meta label={detailCopy.taskLabel} value={item.taskTitle ?? (item.taskId == null ? "unlinked" : `Task #${item.taskId}`)} />
+          <Meta label={detailCopy.sessionLabel} value={item.sessionDisplayName ?? (item.sessionId == null ? "unlinked" : `Run #${item.sessionId}`)} />
           <Meta
-            label="Source"
+            label={detailCopy.sourceLabel}
             value={item.sourceTitle ?? (item.sourceUri ? sourceDisplayName(item.sourceUri) : item.sourceId == null ? "unlinked" : `Source #${item.sourceId}`)}
             title={item.sourceUri ?? undefined}
           />
           <Meta
-            label="Command"
+            label={detailCopy.commandLabel}
             value={item.command ? compactCommandLabel(item.command) : item.commandObservationId == null ? "unlinked" : `Command observation #${item.commandObservationId}`}
             title={item.command ?? undefined}
           />
           <Meta
-            label="Artifact"
+            label={detailCopy.artifactLabel}
             value={item.artifactTitle ?? (item.artifactPath ? compactPathLabel(item.artifactPath) : item.artifactId == null ? "unlinked" : `Artifact #${item.artifactId}`)}
             title={item.artifactPath ?? undefined}
           />
-          <Meta label="Target" value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
+          <Meta label={detailCopy.targetLabel} value={item.targetUri ? sourceDisplayName(item.targetUri) : "none"} title={item.targetUri ?? undefined} />
           {item.targetUri && (
             <Button
               type="button"
@@ -1844,19 +1844,19 @@ function EvidenceDetailPanel({
               Security Gate
             </Button>
           )}
-          <Meta label="Viewport" value={item.viewport ?? "none"} />
-          <Meta label="Coordinates" value={item.coordinates ?? "none"} />
-          <Meta label="Annotation" value={item.annotationText ?? "none"} />
-          <Meta label="Media Name" value={item.mediaName ?? "none"} />
-          <Meta label="Media Kind" value={item.mediaKind == null ? "none" : item.mediaKind.replace(/_/g, " ")} />
-          <Meta label="Media Type" value={item.mediaMimeType ?? "none"} />
-          <Meta label="Media Size" value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
-          <Meta label="Frame Time" value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
-          <Meta label="Duration" value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
-          <Meta label="Media Storage" value={item.mediaTemporary ? "temporary browser preview only" : "not a temporary media record"} />
-          <Meta label="Before Receipt" value={item.beforeEvidenceId == null ? "none" : `Receipt #${item.beforeEvidenceId}`} />
-          <Meta label="After Receipt" value={item.afterEvidenceId == null ? "none" : `Receipt #${item.afterEvidenceId}`} />
-          <Meta label="Comparison Result" value={item.comparisonResult ?? "none"} />
+          <Meta label={detailCopy.viewportLabel} value={item.viewport ?? "none"} />
+          <Meta label={detailCopy.coordinatesLabel} value={item.coordinates ?? "none"} />
+          <Meta label={detailCopy.annotationLabel} value={item.annotationText ?? "none"} />
+          <Meta label={detailCopy.previewNameLabel} value={item.mediaName ?? "none"} />
+          <Meta label={detailCopy.previewKindLabel} value={item.mediaKind == null ? "none" : workbenchReceiptKindLabel(item.mediaKind)} />
+          <Meta label={detailCopy.previewTypeLabel} value={item.mediaMimeType ?? "none"} />
+          <Meta label={detailCopy.previewSizeLabel} value={item.mediaByteSize == null ? "none" : formatBytes(item.mediaByteSize)} />
+          <Meta label={detailCopy.frameTimeLabel} value={item.mediaFrameTimeSec == null ? "none" : formatSeconds(item.mediaFrameTimeSec)} />
+          <Meta label={detailCopy.durationLabel} value={item.mediaDurationSec == null ? "none" : formatSeconds(item.mediaDurationSec)} />
+          <Meta label={detailCopy.previewStorageLabel} value={item.mediaTemporary ? detailCopy.localPreviewStorageText : detailCopy.noPreviewStorageText} />
+          <Meta label={detailCopy.beforeReceiptLabel} value={item.beforeEvidenceId == null ? "none" : `Receipt #${item.beforeEvidenceId}`} />
+          <Meta label={detailCopy.afterReceiptLabel} value={item.afterEvidenceId == null ? "none" : `Receipt #${item.afterEvidenceId}`} />
+          <Meta label={detailCopy.comparisonLabel} value={item.comparisonResult ?? "none"} />
         </div>
       </details>
       <details className="mt-2 rounded p-2" aria-label="Workbench security check" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
