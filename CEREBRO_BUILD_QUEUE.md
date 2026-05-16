@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0358 EDT
+Last updated: 2026-05-16 0516 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0516 EDT: `runtime.previewRoute` Workbench drafts now carry a
+  formal `projectFocus` object with CereBro name/path proof. The route preview
+  Workbench action forwards that object, and Workbench resolves it after
+  project options load so the receipt chain shows `Project Lab reads CereBro`
+  before any receipt is saved.
 - 2026-05-16 0358 EDT: `runtime.previewRoute` Ledger focus drafts now carry
   project name as well as slug. Ledger accepts project-name focus for
   preview-only routes, so Ask Aang route preview can open CereBro-scoped Ledger

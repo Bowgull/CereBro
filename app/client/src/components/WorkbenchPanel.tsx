@@ -31,7 +31,16 @@ type WorkbenchDraft = {
   title?: string;
   summary?: string;
   targetUri?: string | null;
+  projectName?: string | null;
   projectPath?: string | null;
+  projectFocus?: {
+    projectId?: number | null;
+    projectSlug?: string | null;
+    projectName?: string | null;
+    projectPath?: string | null;
+    resolution?: string;
+    autosave?: boolean;
+  } | null;
   routeAgent?: string | null;
   permissionClass?: PermissionClass;
   projectId?: number | null;
@@ -157,6 +166,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [artifactLinkQuery, setArtifactLinkQuery] = useState("");
   const [stagedDraftNotice, setStagedDraftNotice] = useState<string | null>(null);
   const [stagedDraftChain, setStagedDraftChain] = useState<WorkbenchDraft | null>(null);
+  const [pendingProjectFocusDraft, setPendingProjectFocusDraft] = useState<WorkbenchDraft | null>(null);
   const [temporaryMedia, setTemporaryMedia] = useState<TemporaryMediaPreview | null>(null);
   const [mediaFrameTimeSec, setMediaFrameTimeSec] = useState("");
   const [annotationMarker, setAnnotationMarker] = useState<{ xPct: number; yPct: number } | null>(null);
@@ -168,6 +178,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     () => (projects.data?.projects ?? []).filter((project) => project.tasks.projectId != null),
     [projects.data?.projects],
   );
+  function resolveDraftProjectId(draft: WorkbenchDraft): number | "none" {
+    const exactId = draft.projectFocus?.projectId ?? draft.projectId;
+    if (exactId != null) return exactId;
+
+    const wantedName = (draft.projectFocus?.projectName ?? draft.projectName ?? "").trim().toLowerCase();
+    const wantedPath = (draft.projectFocus?.projectPath ?? draft.projectPath ?? "").trim();
+    const matchedProject = projectOptions.find((project) => {
+      const projectId = project.tasks.projectId;
+      if (projectId == null) return false;
+      if (wantedName && project.name.trim().toLowerCase() === wantedName) return true;
+      return Boolean(wantedPath && project.localPath === wantedPath);
+    });
+
+    return matchedProject?.tasks.projectId ?? "none";
+  }
   const taskLinkOptions = useMemo(() => {
     const normalizedQuery = taskLinkQuery.trim().toLowerCase();
     return (linkOptions.data?.tasks ?? [])
@@ -326,7 +351,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setTargetUri(draft.targetUri ?? "");
       setRouteAgent(draft.routeAgent ?? "tony");
       setPermissionClass(draft.permissionClass ?? "manual_note");
-      setProjectId(draft.projectId == null ? "none" : draft.projectId);
+      const draftProjectId = resolveDraftProjectId(draft);
+      setProjectId(draftProjectId);
+      setPendingProjectFocusDraft(draftProjectId === "none" ? draft : null);
       setTaskId(draft.taskId == null ? "none" : draft.taskId);
       setSessionId(draft.sessionId == null ? "none" : draft.sessionId);
       setCommandObservationId(draft.commandObservationId == null ? "none" : draft.commandObservationId);
@@ -343,7 +370,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     } catch {
       setStagedDraftNotice("Workbench draft could not be read. Add the receipt manually.");
     }
-  }, []);
+  }, [projectOptions]);
+
+  useEffect(() => {
+    if (!pendingProjectFocusDraft) return;
+    const draftProjectId = resolveDraftProjectId(pendingProjectFocusDraft);
+    if (draftProjectId === "none") return;
+    setProjectId(draftProjectId);
+    setPendingProjectFocusDraft(null);
+  }, [pendingProjectFocusDraft, projectOptions]);
 
   useEffect(() => {
     let raw: string | null = null;

@@ -81,6 +81,14 @@ describe("runtime route receipt preview", () => {
     expect(preview.workbenchReceiptDraft.summary).toBe(preview.receipt.summary);
     expect(preview.workbenchReceiptDraft.routeChain).toEqual(preview.cortanaRoute);
     expect(preview.workbenchReceiptDraft.gates).toContain("No external action from route preview.");
+    expect(preview.workbenchReceiptDraft.projectFocus).toEqual({
+      projectSlug: "cerebro",
+      projectName: "CereBro",
+      projectPath: "/Users/lindsaybell/Desktop/CereBro",
+      projectId: null,
+      resolution: "name_or_path_preview",
+      autosave: false,
+    });
     expect(preview.ledgerFocusDraft.kind).toBe("route_preview_audit_focus");
     expect(preview.ledgerFocusDraft.focusTarget).toBe("ledger");
     expect(preview.ledgerFocusDraft.autosave).toBe(false);

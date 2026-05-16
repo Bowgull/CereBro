@@ -1908,6 +1908,14 @@ function RuntimeRouteReceipt({
       projectSlug: string | null;
       projectName: string | null;
       projectPath: string | null;
+      projectFocus?: {
+        projectSlug: string | null;
+        projectName: string | null;
+        projectPath: string | null;
+        projectId: number | null;
+        resolution: string;
+        autosave: boolean;
+      };
       summary: string;
       routeChain: string[];
       gates: string[];
@@ -1983,6 +1991,9 @@ function RuntimeRouteReceipt({
           routeAgent: draft.ownerAgent,
           permissionClass: workbenchPermissionClass(draft.permissionClass),
           targetUri: draft.projectPath,
+          projectName: draft.projectName,
+          projectPath: draft.projectPath,
+          projectFocus: draft.projectFocus,
           routeChain: draft.routeChain,
           gates: draft.gates,
           nextAction: draft.nextAction,
