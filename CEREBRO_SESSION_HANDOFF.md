@@ -21636,3 +21636,76 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Tasks/Ledger work queue now uses Work Queue and audit-trail language without task-receipt wording. Next best slice: continue Ledger low-machinery pass on Approvals, Outputs, or Memory, choosing the surface with the most visible proof/machinery language in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 0809 EDT - Memory knowledge notes copy
+
+Overall completion after this pass:
+
+- Overall: 64%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 37%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- No worker used. This was a narrow Memory/Ledger knowledge display slice.
+
+What changed:
+
+- Added `memoryPanelCopyModel` to guard knowledge-note language.
+- `Ledger Knowledge Receipts` now reads as `Knowledge Notes`.
+- Header copy now says `Saved and proposed notes. Source, approval, and Oak
+  review decide what can be reused.`
+- `Trusted` stat now reads as `Ready`.
+- Proposal disclosure now reads as `Note Routing`.
+- Stage/delete copy no longer names memory receipts.
+- Delete hard gate remains intact.
+
+Files touched in this slice:
+
+- `app/client/src/lib/memoryPanelCopyModel.ts`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/server/memoryPanelCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/memoryPanelCopyModel.test.ts` passed,
+  1 test.
+- `git diff --check -- app/client/src/components/MemoryPanel.tsx
+  app/client/src/lib/memoryPanelCopyModel.ts app/server/memoryPanelCopyModel.test.ts`
+  passed.
+- `pnpm -C app check` passed.
+- Browser proof opened `http://localhost:3000/`, opened Ledger, opened Memory,
+  and confirmed `KNOWLEDGE NOTES`, `Saved and proposed notes`, and `READY`;
+  old `Ledger Knowledge Receipts`, `become truth`, and `memory receipt` were
+  absent from the visible Memory text.
+
+Drift check:
+
+- On path because Memory is part of the Ledger and knowledge-contract lane.
+- Creative UI/UX stayed inside the lane: copy/display only, no new behavior, no
+  stored-data rewrite, and no new surface.
+- No new agent, plugin, model, external source, Raven path, GitHub
+  implementation, backend behavior, or command execution feature was added.
+
+Known risks:
+
+- Memory still depends on future knowledge contracts before it can become a
+  true retrieval surface. This pass only cleaned the current visible shell.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Memory/Ledger now uses Knowledge Notes and reuse-review language instead of receipt/truth wording. Next best slice: continue Ledger low-machinery pass on Approvals or Outputs, choosing the surface with the most visible machinery language in browser. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { memoryPanelCopy } from "@/lib/memoryPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -89,6 +90,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
   const sessionOptions = disambiguateSessionOptions(sessions.data?.items ?? []);
   const sessionFilters = groupSessionFilters(sessions.data?.items ?? []);
   const trusted = entries.filter((entry) => entry.kind === "fact" || entry.kind === "reference").length;
+  const copy = memoryPanelCopy();
 
   return (
     <div
@@ -101,14 +103,14 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
       >
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Ledger Knowledge Receipts
+            {copy.title}
             <span className="ml-2" style={{ color: C.textSecondary }}>{entries.length}</span>
             {proposals.length > 0 && (
               <span className="ml-2" style={{ color: C.warning }}>{proposals.length} proposed</span>
             )}
           </div>
           <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>
-            Memory entries need source, approval, and Oak status before they become truth.
+            {copy.subtitle}
           </div>
         </div>
         <Button type="button" onClick={onClose} variant="outline" size="sm">
@@ -117,9 +119,9 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="grid grid-cols-3 gap-1.5 px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <MemoryStat label="Saved" value={String(entries.length)} tone={C.gold} />
-        <MemoryStat label="Trusted" value={String(trusted)} tone={C.success} />
-        <MemoryStat label="Proposed" value={String(proposals.length)} tone={proposals.length > 0 ? C.warning : C.textMuted} />
+        <MemoryStat label={copy.stats.saved} value={String(entries.length)} tone={C.gold} />
+        <MemoryStat label={copy.stats.trusted} value={String(trusted)} tone={C.success} />
+        <MemoryStat label={copy.stats.proposed} value={String(proposals.length)} tone={proposals.length > 0 ? C.warning : C.textMuted} />
       </div>
       <div
         className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
@@ -144,7 +146,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search."
+            placeholder={copy.searchPlaceholder}
             className="ml-auto w-44 shrink-0"
           />
       </div>
@@ -154,7 +156,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         style={{ borderBottom: `1px solid ${C.borderSoft}`, scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
       >
         <FilterButton
-          label="All Runs"
+          label={copy.allRunsLabel}
           active={sessionFilter === "all"}
           count={entries.length + proposals.length}
           onClick={() => setSessionFilter("all")}
@@ -178,35 +180,35 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         <Input
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="New memory proposal. Enter to stage."
+          placeholder={copy.inputPlaceholder}
           className="flex-1"
         />
         <Button
           type="submit"
           size="sm"
           disabled={!body.trim() || propose.isPending}
-          title={!body.trim() ? "Enter a memory proposal before staging it." : "Stage a local memory proposal for review. It is not canonical memory yet."}
-          aria-label="Propose local memory receipt"
+          title={!body.trim() ? copy.stageTitleEmpty : copy.stageTitleReady}
+          aria-label={copy.stageAria}
         >
           Propose
         </Button>
         <details className="sm:col-span-2">
           <summary className="cursor-pointer list-none text-[10px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
-            Proposal Routing
+            {copy.routingTitle}
           </summary>
           <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-[120px_145px_minmax(0,1fr)]">
             <AppSelect
-              label="Memory proposal kind"
+              label={copy.kindLabel}
               value={kind}
               onChange={(value) => setKind(value as Kind)}
               options={KINDS.map((k) => ({ value: k, label: k }))}
             />
             <AppSelect
-              label="Run link"
+              label={copy.runLinkLabel}
               value={proposalSessionId}
               onChange={setProposalSessionId}
               options={[
-                { value: "none", label: "No run link" },
+                { value: "none", label: copy.noRunLink },
                 ...sessionOptions.map((session) => ({
                   value: String(session.id),
                   label: session.optionLabel,
@@ -216,7 +218,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
             <Input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              placeholder="tags, comma-sep"
+              placeholder={copy.tagsPlaceholder}
               className="w-full"
             />
           </div>
@@ -227,7 +229,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         {proposals.length > 0 && (
           <div style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
             <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.warning, background: C.surface }}>
-              Proposed
+              {copy.proposedTitle}
             </div>
             {proposals.map((p) => (
               <div key={p.id} className="px-2.5 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
@@ -241,7 +243,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                     </Badge>
                   )}
                   <span className="text-xs" style={{ color: C.textMuted }}>
-                    Oak: {p.oakStatus}
+                    {copy.oakLabel}: {p.oakStatus}
                   </span>
                 </div>
                 <div className="line-clamp-3 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
@@ -252,10 +254,10 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
         {list.isLoading ? (
-          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>Loading.</div>
+          <div className="px-3 py-2 text-[11px]" style={{ color: C.textMuted }}>{copy.loadingText}</div>
         ) : entries.length === 0 ? (
           <div className="mx-2 my-2 rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
-            No entries. Memory grows as you save facts, notes, references, and feedback.
+            {copy.emptyText}
           </div>
         ) : (
           entries.map((m) => (
@@ -286,7 +288,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   variant="destructive"
                   size="sm"
                   aria-label={`Delete memory entry ${m.body.slice(0, 80)}`}
-                  title="Open the hard-gate confirmation before deleting this local memory receipt."
+                  title={copy.deleteTitle}
                 >
                   Delete
                 </Button>
@@ -302,9 +304,9 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
       <Dialog open={deleteGate != null} onOpenChange={(open) => !open && setDeleteGate(null)}>
         <DialogContent gate showCloseButton>
           <DialogHeader>
-            <DialogTitle>Delete Memory Receipt</DialogTitle>
+            <DialogTitle>{copy.deleteDialogTitle}</DialogTitle>
             <DialogDescription>
-              This removes a saved local memory entry. Cancel keeps the knowledge receipt visible.
+              {copy.deleteDialogDescription}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded p-3 text-xs" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
@@ -319,7 +321,7 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
             <Button
               type="button"
               onClick={() => setDeleteGate(null)}
-              title="Keep the memory receipt visible."
+              title={copy.cancelDeleteTitle}
               variant="ghost"
             >
               Cancel
@@ -334,11 +336,11 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
                   { onSuccess: () => setDeleteGate(null) },
                 );
               }}
-              title="Permanently delete this local memory receipt after confirmation."
-              aria-label="Confirm delete memory receipt"
+              title={copy.confirmDeleteTitle}
+              aria-label={copy.confirmDeleteAria}
               variant="destructive"
             >
-              {del.isPending ? "Deleting" : "Delete Receipt"}
+              {del.isPending ? copy.deletingText : copy.deleteButton}
             </Button>
           </DialogFooter>
         </DialogContent>
