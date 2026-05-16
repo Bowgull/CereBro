@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 0012 EDT
+Last updated: 2026-05-16 0015 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -91,6 +91,9 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 0015 EDT: hardened route child creation so duplicate approval
+  preview and Workbench receipt calls return one child row instead of creating
+  duplicate route children.
 - 2026-05-16 0012 EDT: kept route-linked approvals visible after approval
   decisions. Ledger route cards now distinguish pending, approved, and closed
   gate records.

@@ -777,7 +777,14 @@ export const runtimeRouter = router({
             status, reason, context_summary, sensitive_data_flag, cost_risk,
             permission_preflight_id
           )
-          VALUES (?, ?, 'runtime_route_record', ?, ?, 'pending', ?, ?, 0, ?, ?)
+          SELECT ?, ?, 'runtime_route_record', ?, ?, 'pending', ?, ?, 0, ?, ?
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM approvals
+            WHERE target_type = 'runtime_route_record'
+              AND target_id = ?
+              AND status = 'pending'
+          )
           RETURNING id, task_id, action_type, target_type, target_id,
                     requested_by_agent, status, reason, context_summary,
                     sensitive_data_flag, cost_risk, permission_preflight_id,
@@ -792,11 +799,12 @@ export const runtimeRouter = router({
           contextSummary,
           actionClass === "local_note" || actionClass === "code_edit" ? "local_route_review" : "route_action_requires_explicit_review",
           Number(preflight.row.id),
+          route.id,
         ],
       });
 
       const row = result.rows[0] as Record<string, unknown> | undefined;
-      const approval = row ? await runtimeRouteApprovalByRouteId(route.id) : null;
+      const approval = await runtimeRouteApprovalByRouteId(route.id);
       return {
         mode: "local_approval_preview" as const,
         created: Boolean(row),
@@ -885,9 +893,13 @@ export const runtimeRouter = router({
             route_agent, annotation_text, validation_status,
             permission_class, permission_preflight_id, sensitive_data_flag
           )
-          VALUES (
+          SELECT
             'manual_note', ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?,
             'cortana', ?, 'unvalidated', 'manual_note', ?, 0
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM workbench_evidence_records
+            WHERE target_uri = ?
           )
           RETURNING *
         `,
@@ -900,10 +912,11 @@ export const runtimeRouter = router({
           route.ownerAgent,
           `Saved from runtime route #${route.id}. Review before using as proof.`,
           Number(preflight.row.id),
+          `runtime_route:${route.id}`,
         ],
       });
 
-      const evidence = result.rows[0] ? await runtimeRouteWorkbenchEvidenceByRouteId(route.id) : null;
+      const evidence = await runtimeRouteWorkbenchEvidenceByRouteId(route.id);
       return {
         mode: "local_workbench_receipt" as const,
         created: Boolean(result.rows[0]),

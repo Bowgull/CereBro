@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 0012 EDT
+Last updated: 2026-05-16 0015 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 0015 EDT - Route Child Idempotency Hardening
+
+### What Changed
+- Route approval-preview creation now uses a conditional insert that only
+  writes when no pending route approval already exists.
+- Route Workbench receipt creation now uses a conditional insert that only
+  writes when no receipt for `runtime_route:<id>` already exists.
+- Both mutation paths still read back the existing child row, so repeated
+  clicks return the same approval or receipt instead of creating a duplicate.
+- Added duplicate-call coverage for route approval previews and Workbench
+  receipts.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-runtime-child-idempotency.db" pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL="file:/tmp/cerebro-foundations-child-idempotency.db" pnpm -C app exec vitest run server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `git diff --check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Current slice: route child idempotency hardening.
+- No frontend UI, schema migration, task execution, approval decision, command
+  execution, browser action from CereBro, model call, package install,
+  external write, storage migration, git action from CereBro, or Raven boundary
+  changed.
+- No worker was used because this was a narrow backend mutation-contract
+  slice.
+
+### Front-End Steward Review
+- No visible UI changed.
+- The existing `Queue Gate` and `Save Body` buttons are now safer under repeated
+  clicks or duplicate mutation calls.
+- This keeps the user-facing route chain simple while making the receipt body
+  underneath harder to duplicate.
+
+### Completion Read
+- Overall: 63%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 54%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: Project
+Lab/Workbench route-chain visibility polish, or a narrow route receipt
+contract test around manual Workbench saves with `runtime_route:<id>`.
 
 ## 2026-05-16 0012 EDT - Route Approval Decision Visibility
 

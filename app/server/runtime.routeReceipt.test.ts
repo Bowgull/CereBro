@@ -16,6 +16,12 @@ async function countRows(table: string) {
   return Number(result.rows[0]?.count ?? 0);
 }
 
+async function countRowsWhere(sql: string, args: (string | number)[] = []) {
+  const db = await getCerebroDb();
+  const result = await db.execute({ sql, args });
+  return Number(result.rows[0]?.count ?? 0);
+}
+
 const previewMutationTables = [
   "tasks",
   "sessions",
@@ -385,6 +391,53 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.id).toBe(committed.record.id);
     expect(records.items[0]?.workbenchEvidence?.id).toBe(first.evidence?.id);
     expect(records.items[0]?.workbenchEvidence?.targetUri).toBe(`runtime_route:${committed.record.id}`);
+  });
+
+  it("keeps duplicate route child creation to one approval and one Workbench receipt", async () => {
+    const caller = createCaller();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "research current Reddit feedback for app builders",
+      mode: "explore",
+    });
+
+    const [firstApproval, secondApproval] = await Promise.all([
+      caller.runtime.createApprovalPreviewFromRouteRecord({
+        routeRecordId: committed.record.id,
+        reason: "Queue the route gate once.",
+      }),
+      caller.runtime.createApprovalPreviewFromRouteRecord({
+        routeRecordId: committed.record.id,
+        reason: "Do not duplicate the route gate.",
+      }),
+    ]);
+
+    expect(firstApproval.approval?.id).toBeGreaterThan(0);
+    expect(secondApproval.approval?.id).toBe(firstApproval.approval?.id);
+    expect(
+      await countRowsWhere(
+        "SELECT COUNT(*) AS count FROM approvals WHERE target_type = 'runtime_route_record' AND target_id = ? AND status = 'pending'",
+        [committed.record.id],
+      ),
+    ).toBe(1);
+
+    const [firstEvidence, secondEvidence] = await Promise.all([
+      caller.runtime.createWorkbenchReceiptFromRouteRecord({
+        routeRecordId: committed.record.id,
+      }),
+      caller.runtime.createWorkbenchReceiptFromRouteRecord({
+        routeRecordId: committed.record.id,
+      }),
+    ]);
+
+    expect(firstEvidence.evidence?.id).toBeGreaterThan(0);
+    expect(secondEvidence.evidence?.id).toBe(firstEvidence.evidence?.id);
+    expect(
+      await countRowsWhere(
+        "SELECT COUNT(*) AS count FROM workbench_evidence_records WHERE target_uri = ?",
+        [`runtime_route:${committed.record.id}`],
+      ),
+    ).toBe(1);
   });
 
   it("backfills route task links into existing approval previews and Workbench receipts", async () => {
