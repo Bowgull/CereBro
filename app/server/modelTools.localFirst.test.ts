@@ -188,4 +188,30 @@ describe("Model Tools local-first routing policy", () => {
     expect(route.decisionPath.find((step) => step.step === "Source")?.status).toBe("required_before_trust");
     expect(route.decisionPath.find((step) => step.step === "Eval")?.ownerAgent).toBe("spock");
   });
+
+  it("uses source check date, risk review, and validation notes in proposal readiness", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Reviewed Source ${stamp}`,
+      toolName: "Reviewed candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "No install. Public docs only.",
+      validationNotes: "Docs identify owner, limits, and current fit.",
+    });
+
+    expect(proposal.capability.lastVerifiedAt).toBe(checkedAt);
+    expect(proposal.capability.sourceReadiness.status).toBe("needs_source_review");
+    expect(proposal.capability.sourceReadiness.requiredBeforeTrust).toEqual([
+      "Source verification status or eval result.",
+    ]);
+    expect(proposal.capability.sourceReadiness.nextStep).toContain("Oak mark source verification");
+  });
 });

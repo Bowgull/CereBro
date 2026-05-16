@@ -1,6 +1,6 @@
 # CereBro External Reference Integration Plan
 
-Last updated: 2026-05-08
+Last updated: 2026-05-16
 
 ## Purpose
 
@@ -28,6 +28,7 @@ decision.
 | Reference | Source | Current license read | CereBro use |
 |---|---|---|---|
 | Impeccable | https://github.com/pbakaus/impeccable | Apache-2.0 | Design command grammar, anti-pattern checks, `PRODUCT.md` and `DESIGN.md` setup, browser critique loop. |
+| Impeccable site | https://impeccable.style/ | Public site | Product-vs-brand register split, shared design memory, production-codebase critique loop, command vocabulary. |
 | Awesome DESIGN.md | https://github.com/VoltAgent/awesome-design-md | MIT | Pattern for root design source files. Use as structure, not brand cloning. |
 | getdesign.md | https://getdesign.md/about | Directory/site | Browsable reference for DESIGN.md practice. Treat listed brand systems as inspiration only. |
 | Huashu Design | https://github.com/alchaincyf/huashu-design | Personal use license. Commercial/team integration needs authorization. | Workflow reference only. Asset protocol, design directions, critique, HTML deliverables. Do not integrate code/assets without permission. |
@@ -40,6 +41,8 @@ decision.
 | Docling | https://github.com/docling-project/docling | MIT | Preferred document-intelligence candidate. Local document conversion, layout-aware extraction, tables, OCR, structured exports, Source Library and RAG input. |
 | AirLLM | https://github.com/lyogavin/airllm | Apache-2.0 | Model-router research. Hardware realism, profile testing, fallback lanes. Not a V1 dependency. |
 | Emil Kowalski Skill | https://github.com/emilkowalski/skill | GitHub API: no license detected 2026-05-08 | Use as design taste reference only. No copying until license is confirmed. |
+| Taste Skill | https://www.tasteskill.dev/ and https://github.com/Leonxlnx/taste-skill | MIT | Anti-slop frontend skill family. Study `design-taste-frontend`, `gpt-taste`, `image-to-code`, `redesign-existing-projects`, and visual-style variants. Do not install without approval. |
+| Taste with receipts | https://bravedog.co.uk/journal/ai-didnt-kill-designers-killed-lazy-design and https://www.houseofgai.com/blog/will-ai-replace-graphic-designers-creative | Article references | Secondary decision discipline. Generated range is cheap; the valuable work is rejecting weak directions with visible rationale. |
 | Anthropic Frontend Design Skill | https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md | GitHub API: no license detected 2026-05-08 | Anti-generic frontend reference. Use through CereBro `DESIGN.md`, not as a replacement. |
 | Karpathy Skills | https://github.com/forrestchang/andrej-karpathy-skills | GitHub API: no license detected 2026-05-08 | Coding-agent discipline reference. Fold into Tony/Spock/Oak checks using original wording. |
 | Addy Osmani Agent Skills | https://github.com/addyosmani/agent-skills | MIT | Production engineering skill reference. Strong candidate for Tony/Oak/Spock skill rules. |
@@ -163,18 +166,25 @@ The review should catch:
 
 ### Frontend Taste References
 
-Use Emil Kowalski's skill, Anthropic's frontend-design skill, UI UX Pro Max,
-Uncodixfy, Stitch, and v0 as inputs to one CereBro review loop.
+Use Emil Kowalski's skill, Impeccable, Taste Skill, Anthropic's frontend-design
+skill, UI UX Pro Max, Uncodixfy, Stitch, v0, and taste-with-receipts as inputs
+to one CereBro review loop.
 
 The merged rule:
 
 - pick a clear product job before picking an aesthetic
+- name the register before judging the work: brand or product
 - avoid default AI layout rhythm
 - avoid fake premium styling
 - use real assets and data
 - make the interface specific to CereBro's Keep, Workshop, Ledger, or Settings
 - rebuild generated ideas in local components
+- reject weak generated directions with receipts before polishing one direction
 - inspect screenshots before calling the UI done
+
+Impeccable-style register discipline is now a standing rule. Brand surfaces can
+carry story and atmosphere. Product surfaces serve the task, show state, and
+stay inside CereBro tokens and components.
 
 Anthropic-style boldness is useful for public artifacts and one-off creative
 pages. CereBro internal tools stay dense, quiet, and proof-led.
@@ -182,6 +192,17 @@ pages. CereBro internal tools stay dense, quiet, and proof-led.
 Emil-style taste is useful for spacing, hierarchy, motion restraint, and
 micro-interaction judgment. Do not copy article text unless a license review
 allows it.
+
+Taste Skill is the direct reference the user meant. It is MIT, agent-oriented,
+and split into focused skills. For CereBro, use it as a source for anti-slop
+frontend discipline, stricter GPT/Codex layout direction, existing-project UI
+audits, image-to-code workflows, and controlled visual variants. Do not install
+or copy files into this repo without approval.
+
+Taste with receipts means the design pass must be able to say what it killed:
+an unearned gradient, a generic SaaS card rhythm, a motion flourish, a fake
+metric, a landing-page composition inside a tool, or an output that fit the
+prompt but not the product.
 
 ### Brand Asset Protocol
 

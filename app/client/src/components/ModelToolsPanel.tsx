@@ -59,6 +59,12 @@ function formatTime(unixSec: number) {
   });
 }
 
+function dateInputToUnix(value: string) {
+  if (!value) return undefined;
+  const parsed = new Date(`${value}T12:00:00Z`).getTime();
+  return Number.isFinite(parsed) ? Math.floor(parsed / 1000) : undefined;
+}
+
 function toneForPrivacy(value: string) {
   if (value === "local_private") return C.success;
   if (value === "public_safe") return C.accent;
@@ -89,8 +95,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   const [privacyClass, setPrivacyClass] = useState<PrivacyClass>("unknown");
   const [approvalLevel, setApprovalLevel] = useState<(typeof APPROVAL_LEVELS)[number]>("explicit_approval");
   const [sourceUris, setSourceUris] = useState("");
+  const [sourceCheckedDate, setSourceCheckedDate] = useState("");
   const [strengths, setStrengths] = useState("");
   const [weaknesses, setWeaknesses] = useState("");
+  const [riskReview, setRiskReview] = useState("");
+  const [validationNotes, setValidationNotes] = useState("");
 
   const [routeTask, setRouteTask] = useState("screenshot vision review");
   const [routeModality, setRouteModality] = useState("image");
@@ -147,8 +156,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       setProvider("");
       setToolName("");
       setSourceUris("");
+      setSourceCheckedDate("");
       setStrengths("");
       setWeaknesses("");
+      setRiskReview("");
+      setValidationNotes("");
       utils.modelTools.capabilities.invalidate();
     },
   });
@@ -258,9 +270,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       privacyClass,
       approvalLevel,
       sourceUris: sourceUris.trim() || undefined,
+      sourceCheckedAt: dateInputToUnix(sourceCheckedDate),
       strengths: strengths.trim() || undefined,
       weaknesses: weaknesses.trim() || undefined,
-      riskReview: privacyClass === "sensitive_review" ? "Oak/Spock review required before use." : undefined,
+      riskReview: riskReview.trim() || (privacyClass === "sensitive_review" ? "Oak/Spock review required before use." : undefined),
+      validationNotes: validationNotes.trim() || undefined,
     });
   }
 
@@ -652,11 +666,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Approval" value={labelize(selectedCapability.approvalLevel)} />
                 <Field label="Source read" value={labelize(selectedCapability.sourceReadiness.label)} />
                 <Field label="Next" value={selectedCapability.sourceReadiness.nextStep} />
+                <Field label="Checked" value={selectedCapability.lastVerifiedAt ? formatTime(selectedCapability.lastVerifiedAt) : "No source check date recorded."} />
                 <SourceField value={selectedCapability.sourceUris} />
                 <StatusList title="Required" items={selectedCapability.sourceReadiness.requiredBeforeTrust} tone={toneForSourceReadiness(selectedCapability.sourceReadiness.status)} />
                 <Field label="Strengths" value={selectedCapability.strengths ?? "No strengths recorded."} />
                 <Field label="Weaknesses" value={selectedCapability.weaknesses ?? "No weaknesses recorded."} />
                 <Field label="Risk" value={selectedCapability.riskReview ?? "No risk review recorded."} />
+                <Field label="Validate" value={selectedCapability.validationNotes ?? "No validation notes recorded."} />
                 <Field label="Eval" value={selectedCapability.evalStatus === "untested" ? "No local eval recorded." : labelize(selectedCapability.evalStatus)} />
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
               </div>
@@ -681,8 +697,19 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <AppSelect label="Approval level" value={approvalLevel} onChange={(value) => setApprovalLevel(value as typeof approvalLevel)} options={APPROVAL_LEVELS} />
             </div>
             <Textarea value={sourceUris} onChange={(event) => setSourceUris(event.target.value)} aria-label="Model tool source URLs" placeholder="Source URLs. Required before trust, but still not verified here." rows={2} />
+            <label className="grid gap-1 text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+              Source check date
+              <Input
+                type="date"
+                value={sourceCheckedDate}
+                onChange={(event) => setSourceCheckedDate(event.target.value)}
+                aria-label="Model tool source check date"
+              />
+            </label>
             <Textarea value={strengths} onChange={(event) => setStrengths(event.target.value)} aria-label="Model tool strengths" placeholder="Strengths." rows={2} />
             <Textarea value={weaknesses} onChange={(event) => setWeaknesses(event.target.value)} aria-label="Model tool weaknesses" placeholder="Weaknesses or failure risks." rows={2} />
+            <Textarea value={riskReview} onChange={(event) => setRiskReview(event.target.value)} aria-label="Model tool risk review" placeholder="Risk review. Data, cost, install, account, and boundary notes." rows={3} />
+            <Textarea value={validationNotes} onChange={(event) => setValidationNotes(event.target.value)} aria-label="Model tool validation notes" placeholder="Validation notes. What the source actually proves." rows={3} />
             <Button
               type="submit"
               disabled={!provider.trim() || !toolName.trim() || createCapability.isPending}

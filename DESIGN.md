@@ -1,6 +1,6 @@
 # CereBro Design.md
 
-Last updated: 2026-05-09
+Last updated: 2026-05-16
 
 ## Purpose
 
@@ -17,11 +17,21 @@ Primary reference:
 Critical external references:
 
 - Emil Kowalski Skill: UI taste reference for spacing, hierarchy, motion
-  restraint, and interaction polish. Concepts only until license is confirmed.
+  restraint, and interaction polish. Use it as craft vocabulary. Concepts only
+  until license is confirmed.
+- Impeccable: register-aware design workflow. Use its product-vs-brand split,
+  shared design memory pattern, and browser critique loop as references.
 - Anthropic Frontend Design Skill: anti-generic frontend reference. Use it
   under CereBro's stricter product rules.
 - Uncodixfy: anti-generic UI judgment. Use it as a review rule, not a visual
   style to copy.
+- Taste Skill: anti-slop frontend framework and skill family. Use it as a
+  reference for stronger layout variance, typography, spacing, motion,
+  redesign audits, and image-to-code workflows. MIT. Do not install without
+  approval.
+- Taste with receipts: generated output must be edited down. Keep the direction
+  that fits the audience, constraints, and product surface. Reject the rest
+  with receipts.
 - Addy Osmani Agent Skills and AIDLC Workflows: engineering and lifecycle
   references for build quality, validation, and closeout.
 - Google Stitch: high-fidelity UI exploration. Use it for alternate directions,
@@ -49,6 +59,16 @@ The UI should answer one question at a time:
 - What will happen next.
 - What needs approval.
 - What changed.
+
+Design register is explicit:
+
+- Brand work: marketing, editorial, portfolio, launch, story. Design can carry
+  the message.
+- Product work: Keep, Workshop, Ledger, Settings, tools, dashboards. Design
+  serves the task.
+
+CereBro internal surfaces default to product register. Do not import landing
+page drama into dense work surfaces.
 
 ## Visual Register
 
@@ -241,6 +261,7 @@ Allowed:
 - drawer transitions
 - before and after comparison reveal
 - loading state tied to a real operation
+- interruptible feedback when the user can change direction
 
 Not allowed:
 
@@ -249,8 +270,18 @@ Not allowed:
 - fake background energy
 - motion that moves text under the cursor
 - animation that hides status or receipts
+- frequent keyboard actions or repeated tool toggles
 
 Respect reduced-motion settings.
+
+Interaction polish rules:
+
+- Pressable controls need a subtle pressed state.
+- Avoid `transition: all`; animate named properties.
+- Prefer transform and opacity for motion.
+- Do not animate from nothing. Start with visible scale or opacity context.
+- Popovers should feel anchored to their trigger. Modals stay centered.
+- Reduce movement before removing useful state feedback.
 
 ## Pixel Art Rules
 
@@ -293,14 +324,18 @@ Every material UI change follows this order:
 
 1. Read the renderer and touched components.
 2. Inventory existing assets and tokens.
-3. If using Stitch or v0, write the constraints first: user question, data,
+3. Pick the register: brand or product.
+4. If using Stitch or v0, write the constraints first: user question, data,
    receipt, route, tokens, forbidden patterns, and target surface.
-4. State the achievable scope.
-5. Build the smallest complete slice.
-6. Run the app or relevant checks.
-7. Inspect screenshots when visual behavior changed.
-8. Apply the anti-slop review.
-9. Record the result in the session handoff.
+5. State the achievable scope.
+6. Build the smallest complete slice.
+7. Run the app or relevant checks.
+8. Inspect screenshots when visual behavior changed.
+9. Kill generic directions before polishing.
+10. Name the receipts: audience, constraints, source, screenshot, rejected
+    alternative, or product reason.
+11. Apply the anti-slop review.
+12. Record the result in the session handoff.
 
 ## Anti-Slop Review
 
@@ -309,6 +344,7 @@ Before delivery, check:
 - Does this look like CereBro, or a generic AI dashboard.
 - Did I reject the default AI move when it appeared.
 - Did I use real project tokens.
+- Did I name the product or brand register before judging it.
 - Did I make the Keep or workbench clearer.
 - Did I hide receipts behind summary.
 - Did I use fake charts, fake data, or fake activity.
@@ -318,6 +354,8 @@ Before delivery, check:
 - Did I run visual checks when UI changed.
 
 If the answer is wrong, fix it before delivery.
+
+Taste is not vibes. A good design decision should say what it rejected and why.
 
 ## Document Intelligence
 

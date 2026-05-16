@@ -284,6 +284,7 @@ function rowToCapability(row: Record<string, unknown>) {
   const sourceReadiness = readSourceReadiness({
     approvalLevel: String(row.approval_level),
     evalStatus: String(row.eval_status),
+    lastVerifiedAt: row.last_verified_at == null ? null : Number(row.last_verified_at),
     privacyClass: String(row.privacy_class),
     riskReview: row.risk_review == null ? null : String(row.risk_review),
     sourceUris: row.source_uris == null ? null : String(row.source_uris),
@@ -336,12 +337,14 @@ function splitSourceUris(value: string | null | undefined) {
 function readSourceReadiness(input: {
   approvalLevel: string;
   evalStatus: string;
+  lastVerifiedAt: number | null;
   privacyClass: string;
   riskReview: string | null;
   sourceUris: string | null;
   validationNotes: string | null;
 }) {
   const sourceUriCount = splitSourceUris(input.sourceUris).length;
+  const hasCheckedDate = input.lastVerifiedAt != null;
   const hasRiskReview = Boolean(input.riskReview?.trim());
   const hasValidationNotes = Boolean(input.validationNotes?.trim());
   const noActionTaken = [
@@ -388,7 +391,12 @@ function readSourceReadiness(input: {
       label: "missing sources",
       sourceUriCount,
       nextStep: "Add source URLs before Surfer or Oak can validate the claim.",
-      requiredBeforeTrust: ["Source URLs.", "Date checked.", "Risk review.", "Validation notes."],
+      requiredBeforeTrust: [
+        "Source URLs.",
+        ...(hasCheckedDate ? [] : ["Date checked."]),
+        ...(hasRiskReview ? [] : ["Risk review."]),
+        ...(hasValidationNotes ? [] : ["Validation notes."]),
+      ],
       noActionTaken,
     };
   }
@@ -401,6 +409,7 @@ function readSourceReadiness(input: {
       ? "Have Oak mark source verification or run a local eval."
       : "Have Surfer/Oak review sources, then add risk and validation notes.",
     requiredBeforeTrust: [
+      ...(hasCheckedDate ? [] : ["Date checked."]),
       ...(hasRiskReview ? [] : ["Risk review."]),
       ...(hasValidationNotes ? [] : ["Validation notes."]),
       "Source verification status or eval result.",
@@ -809,6 +818,7 @@ export const modelToolsRouter = router({
         dataAllowed: z.string().max(1200).optional(),
         approvalLevel: z.enum(approvalLevels).optional(),
         sourceUris: z.string().max(2000).optional(),
+        sourceCheckedAt: z.number().int().positive().optional(),
         discoveredByAgent: z.string().max(80).optional(),
         riskReview: z.string().max(1200).optional(),
         validationNotes: z.string().max(1200).optional(),
@@ -824,10 +834,10 @@ export const modelToolsRouter = router({
             provider, tool_name, capability_kind, access_method, account_required,
             free_tier, rate_limit, cost_notes, context_window, modalities,
             strengths, weaknesses, prompt_style, privacy_class, data_allowed,
-            approval_level, source_uris, discovered_by_agent, risk_review,
+            approval_level, source_uris, last_verified_at, discovered_by_agent, risk_review,
             validation_notes, failure_notes, fallback_suggestion
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING *
         `,
         args: [
@@ -848,6 +858,7 @@ export const modelToolsRouter = router({
           input.dataAllowed ?? null,
           input.approvalLevel ?? "explicit_approval",
           input.sourceUris ?? null,
+          input.sourceCheckedAt ?? null,
           input.discoveredByAgent ?? "surfer",
           input.riskReview ?? null,
           input.validationNotes ?? null,

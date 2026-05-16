@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1637 EDT
+Last updated: 2026-05-16 1931 EDT
 
 ## Current North Star
 
@@ -20,6 +20,96 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 1931 EDT - Model Tool Proposal Fields
+
+### What Changed
+- Model Tools proposal creation now accepts a source check date.
+- Source readiness now reads `last_verified_at`, risk review, and validation
+  notes together.
+- Proposals with source URLs, checked date, risk review, and validation notes
+  now show only `Source verification status or eval result.` as the remaining
+  trust requirement.
+- Basement Model Registry detail now shows the checked date and validation
+  notes for the selected proposal.
+- The Propose drawer now records source check date, risk review, and validation
+  notes from the existing form.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `DESIGN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`
+
+### Checks Run
+- Red test first:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-source-fields-red.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed on missing `lastVerifiedAt`.
+- Green targeted tests:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-source-fields-green.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Combined targeted tests:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-source-fields-final.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `git diff --check` passed.
+- Browser proof used the Playwright CLI wrapper against `http://localhost:3000/`.
+  Basement to Models opened, the Propose drawer opened, and the new source
+  check date, risk review, and validation notes fields were visible.
+- Screenshot proof: `output/playwright/model-tools-proposal-fields-1931.png`.
+
+### Cleanliness Read
+- Current slice: Model Tools proposal trust fields.
+- Product surface register: Basement capability registry.
+- Pre-existing design-reference doc updates were present before this slice and
+  were carried forward in the closeout because they match the approved design
+  audit direction:
+  `DESIGN.md`, `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`, and
+  `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md`.
+- No provider/model/tool/gateway/browser/search/fetch call, install, token,
+  account action, Ollama status command, schema migration, new primary surface,
+  external write, command runner, dependency, or Raven path was added.
+- No worker was used because the slice had one owner surface and one tRPC
+  contract.
+
+### Front-End Steward Review
+- Surface: Basement Model Registry.
+- Register: product surface.
+- Primary object: local capability proposal.
+- User question: what source and validation facts must exist before a
+  capability can be trusted.
+- Route visible: Aang and Cortana remain in the shell context.
+- Receipt/proof visible: no-action proof remains visible on the registry and
+  route preview.
+- Approval/risk visible: selected proposal detail shows approval, risk, and
+  required fields.
+- Machinery hidden until needed: new fields stay inside the existing Propose
+  drawer.
+- Generic UI rejected: no new model dashboard, metric spread, provider picker,
+  or Keep-level model switcher.
+- Screenshot proof: `output/playwright/model-tools-proposal-fields-1931.png`.
+- Remaining taste risk: the Models surface is dense. Targeted polish only.
+
+### Completion Read
+- Overall: 69%.
+- Foundation/docs/planning: 95%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 64%.
+- Knowledge/storage/source: 43%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and
+`CEREBRO_SESSION_HANDOFF.md`. Continue in CereBro Prime mode. Start with a
+dirty-file read. Next best path: finish item 9 by connecting eval-note outcomes
+back to capability readiness without auto-promoting anything to trusted. Do not
+run Ollama status checks, installs, pulls, external searches, provider calls,
+or model calls without explicit approval.
 
 ## 2026-05-16 1637 EDT - Model Tool Decision Path
 
