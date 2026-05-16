@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-15 2033 EDT
+Last updated: 2026-05-15 2040 EDT
 
 ## Current North Star
 
@@ -20,6 +20,75 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-15 2040 EDT - Route Workbench Receipt Browser And Focus Check
+
+### What Changed
+- Browser-checked the saved route flow on localhost.
+- Created a build-mode route preview from the Ask Aang command bar.
+- Saved route #22 as a local route record from the preview.
+- Opened Ledger from the route preview and verified the saved route row showed
+  `Save Body`.
+- Clicked `Save Body` and verified Ledger created Workbench receipt #1527,
+  changed the route row to `Receipt #1527`, selected the new receipt, and
+  showed `runtime_route:22` as the receipt target.
+- Changed linked route receipt buttons so `Receipt #...` opens the Workbench
+  body directly instead of only selecting the audit preview inside Ledger.
+- Browser-checked that `Receipt #1527` opens Workbench with the filtered receipt
+  body for `runtime_route:22`.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Ask Aang preview -> Save Route -> Ledger -> Save Body -> Receipt #1527.
+- Browser proof with Playwright CLI against `http://localhost:3000/`:
+  Ledger `Receipt #1527` -> Workbench filtered to `runtime_route:22` with
+  receipt body visible.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-workbench-browser-check.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 8 tests.
+- `CEREBRO_DB_URL=file:/tmp/cerebro-runtime-workbench-focus.db pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --fileParallelism=false` passed. 1 file. 8 tests.
+- `pnpm -C app check` passed.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `git diff --check` passed.
+
+### Cleanliness Read
+- Current slice: browser proof plus Workbench focus for the route receipt loop.
+- The verified UI action wrote one local route record and one local Workbench
+  evidence row from the browser.
+- The code change is a local navigation/focus handoff only.
+- No task execution, approval decision, command execution, model call, package
+  install, external write, storage migration, git action from CereBro, or Raven
+  boundary changed.
+- No worker was used because this was a browser verification pass on the
+  already-built route loop.
+
+### Front-End Steward Review
+- The user can now see the route read, save the route, save the Workbench body,
+  and inspect the linked receipt from Ledger without guessing what happened.
+- Linked route receipt buttons now honor the split: Ledger points to the audit
+  trail, Workbench opens the receipt body.
+- The route card still keeps execution closed. It saves receipts and gates only.
+
+### Completion Read
+- Overall: 62%.
+- Foundation/docs/planning: 93%.
+- Frontend visible loop: 98%.
+- Backend/runtime: 49%.
+- Knowledge/storage/source: 36%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `DESIGN.md`, `CEREBRO_FRONTEND_SYSTEM.md`,
+`CEREBRO_UX_SYSTEM.md`, `CEREBRO_BUILD_QUEUE.md`,
+`CEREBRO_MASTER_BUILD_PLAN.md`, and `CEREBRO_SESSION_HANDOFF.md`. Continue in
+CereBro Prime mode. Start with a dirty-file read. Next best path: continue the
+route receipt contract family only if another visible link is missing;
+otherwise move to the next runtime contract or the next broad-read reduction
+that keeps CereBro fast.
 
 ## 2026-05-15 2033 EDT - Route Workbench Receipt Save Contract
 

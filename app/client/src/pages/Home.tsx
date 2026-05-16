@@ -1314,7 +1314,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               {latestRouteRows.map((item) => {
                 const routeTaskId = item.taskId;
                 const routeApprovalId = item.approvalPreview?.id ?? null;
-                const routeEvidenceId = item.workbenchEvidence?.id ?? null;
+                const routeEvidence = item.workbenchEvidence;
+                const routeEvidenceId = routeEvidence?.id ?? null;
                 return (
                   <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                     <div className="flex flex-wrap items-center gap-1">
@@ -1388,9 +1389,8 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         variant={routeEvidenceId ? "secondary" : "outline"}
                         className="h-6 px-2 text-[10px]"
                         onClick={() => {
-                          if (routeEvidenceId) {
-                            setSelectedEvidenceId(routeEvidenceId);
-                            setLedgerFocusNotice(`Workbench receipt #${routeEvidenceId} is linked to route #${item.id}.`);
+                          if (routeEvidence) {
+                            openWorkbenchEvidence(routeEvidence);
                             return;
                           }
                           createWorkbenchReceiptFromRouteRecord(item);
@@ -1398,14 +1398,14 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         disabled={creatingRouteReceiptId === item.id}
                         aria-label={
                           routeEvidenceId
-                            ? `Inspect Workbench receipt ${routeEvidenceId} linked to route ${item.id}`
+                            ? `Open Workbench receipt ${routeEvidenceId} linked to route ${item.id}`
                             : creatingRouteReceiptId === item.id
                               ? `Saving Workbench receipt for route ${item.id}`
                               : `Save Workbench receipt for route ${item.id}`
                         }
                         title={
                           routeEvidenceId
-                            ? "Inspect the local Workbench receipt linked to this route."
+                            ? "Open the local Workbench body linked to this route."
                             : "Save this route as one local Workbench receipt. This does not run work."
                         }
                       >

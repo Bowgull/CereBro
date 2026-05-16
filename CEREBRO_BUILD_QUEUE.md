@@ -199,6 +199,11 @@ Recent Prime slices:
 - 2026-05-15 2033 EDT: added `runtime.createWorkbenchReceiptFromRouteRecord`;
   saved routes can now append one local Workbench receipt, and Ledger route
   cards show `receipt #...` after saving.
+- 2026-05-15 2040 EDT: browser-checked the route-to-Workbench receipt flow on
+  localhost. Ask Aang preview saved route #22, Ledger saved Workbench receipt
+  #1527, the route row changed from `Save Body` to `Receipt #1527`, and the
+  linked receipt button now opens the Workbench body filtered to
+  `runtime_route:22`.
 
 ### Frontend Worker
 
@@ -234,8 +239,9 @@ Checks:
 Next block:
 
 - Build compact read models before broad UI growth. Highest-value order:
-  browser-check the saved route flow on localhost, then decide whether to add
-  route receipt focus into Workbench or move to the next runtime contract.
+  continue the route receipt contract family only if another visible link is
+  missing; otherwise move to the next runtime contract or broad-read reduction
+  that keeps CereBro fast.
 - Keep Raven outside core CereBro.
 - Keep route receipts and approval previews explicit and preview-only unless
   Prime assigns a mutation.
@@ -570,3 +576,7 @@ Expected shape:
   gate instead of hiding that state.
 - Runtime route records can now save one local Workbench receipt through
   `Save Body`; repeated saves reuse the existing receipt.
+- Browser proof confirms the Ask Aang -> Save Route -> Ledger -> Save Body ->
+  Receipt #... loop works on localhost without hidden execution.
+- Route receipt buttons now open the Workbench body directly, preserving
+  Ledger as audit trail and Workbench as receipt body.
