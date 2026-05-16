@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1519 EDT
+Last updated: 2026-05-16 1525 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -98,6 +98,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 1525 EDT: finished the next Block C contract slice. Knowledge
+  contracts now define Obsidian RAG-ready note metadata values, route defaults,
+  required fields, readiness rules, and helpers. `integrations.status` exposes
+  the contract for future backend and worker use. Kept the full metadata
+  contract out of Settings after read-only worker review. No note scanning,
+  frontmatter generation, RAG automation, folder creation, external write, or
+  Raven path was added.
 - 2026-05-16 1519 EDT: continued Block C storage/source visibility in
   Basement Settings. Machine Status now shows compact Vault and Obsidian
   readiness from `integrations.status`. Read-only worker placement review moved

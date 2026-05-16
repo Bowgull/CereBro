@@ -11,7 +11,12 @@ import {
   getObsidianStatus,
   getVaultLayout,
   getVaultStatus,
+  OBSIDIAN_CANONICAL_STATUSES,
+  OBSIDIAN_PRIVACY_CLASSES,
+  OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT,
+  OBSIDIAN_RAG_READY_CRITERIA,
   OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+  OBSIDIAN_RETRIEVAL_STATUSES,
 } from "../integrations/vault";
 
 export const integrationsRouter = router({
@@ -27,6 +32,14 @@ export const integrationsRouter = router({
       obsidian,
       vaultLayout: getVaultLayout(),
       obsidianKnowledgeRoutes: getObsidianKnowledgeRoutes(),
+      obsidianRetrievalContract: {
+        fields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+        canonicalStatuses: OBSIDIAN_CANONICAL_STATUSES,
+        retrievalStatuses: OBSIDIAN_RETRIEVAL_STATUSES,
+        privacyClasses: OBSIDIAN_PRIVACY_CLASSES,
+        ragReadyCriteria: OBSIDIAN_RAG_READY_CRITERIA,
+        ragReadyNoteMetadataContract: OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT,
+      },
       obsidianRetrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
     };
   }),

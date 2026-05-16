@@ -159,6 +159,142 @@ export const OBSIDIAN_RETRIEVAL_METADATA_FIELDS = [
   "privacy_class",
 ] as const;
 
+export type ObsidianRetrievalMetadataField =
+  (typeof OBSIDIAN_RETRIEVAL_METADATA_FIELDS)[number];
+
+export const OBSIDIAN_CANONICAL_STATUSES = [
+  "draft",
+  "current",
+  "superseded",
+  "archived",
+] as const;
+
+export type ObsidianCanonicalStatus =
+  (typeof OBSIDIAN_CANONICAL_STATUSES)[number];
+
+export const OBSIDIAN_RETRIEVAL_STATUSES = [
+  "inactive",
+  "needs_validation",
+  "active",
+  "archive_only",
+] as const;
+
+export type ObsidianRetrievalStatus =
+  (typeof OBSIDIAN_RETRIEVAL_STATUSES)[number];
+
+export const OBSIDIAN_PRIVACY_CLASSES = [
+  "public",
+  "internal",
+  "private",
+  "restricted",
+] as const;
+
+export type ObsidianPrivacyClass =
+  (typeof OBSIDIAN_PRIVACY_CLASSES)[number];
+
+export interface ObsidianRetrievalMetadataTemplate {
+  canonical_status: ObsidianCanonicalStatus;
+  retrieval_status: ObsidianRetrievalStatus;
+  llm_summary: string;
+  source_ids: string[];
+  related_notes: string[];
+  privacy_class: ObsidianPrivacyClass;
+}
+
+export const OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT = {
+  requiredFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+  canonicalStatuses: OBSIDIAN_CANONICAL_STATUSES,
+  retrievalStatuses: OBSIDIAN_RETRIEVAL_STATUSES,
+  privacyClasses: OBSIDIAN_PRIVACY_CLASSES,
+  defaultsByRouteKey: {
+    atlas: {
+      canonical_status: "draft",
+      retrieval_status: "inactive",
+      privacy_class: "internal",
+    },
+    projects: {
+      canonical_status: "draft",
+      retrieval_status: "needs_validation",
+      privacy_class: "internal",
+    },
+    knowledge: {
+      canonical_status: "draft",
+      retrieval_status: "needs_validation",
+      privacy_class: "internal",
+    },
+    media: {
+      canonical_status: "draft",
+      retrieval_status: "inactive",
+      privacy_class: "internal",
+    },
+    templates: {
+      canonical_status: "draft",
+      retrieval_status: "inactive",
+      privacy_class: "internal",
+    },
+    archive: {
+      canonical_status: "archived",
+      retrieval_status: "archive_only",
+      privacy_class: "internal",
+    },
+  } satisfies Record<
+    ObsidianKnowledgeRoute["key"],
+    Pick<
+      ObsidianRetrievalMetadataTemplate,
+      "canonical_status" | "retrieval_status" | "privacy_class"
+    >
+  >,
+  rules: [
+    "Normal retrieval requires canonical_status=current.",
+    "Normal retrieval requires retrieval_status=active.",
+    "Normal retrieval requires a non-empty llm_summary.",
+    "Normal retrieval allows only public or internal privacy classes.",
+    "Archive route notes stay archive_only unless the user asks for history.",
+    "Raven private data never enters this contract.",
+  ],
+} as const;
+
+export const OBSIDIAN_RAG_READY_CRITERIA = {
+  canonicalStatus: "current",
+  retrievalStatus: "active",
+  requiredSummary: true,
+  allowedPrivacyClasses: ["public", "internal"] as const,
+  excludedRouteDefaults: ["archive_only", "exclude"] as const,
+} as const;
+
+export function createObsidianRetrievalMetadataTemplate(
+  overrides: Partial<ObsidianRetrievalMetadataTemplate> = {},
+): ObsidianRetrievalMetadataTemplate {
+  return {
+    canonical_status: "draft",
+    retrieval_status: "needs_validation",
+    llm_summary: "",
+    source_ids: [],
+    related_notes: [],
+    privacy_class: "internal",
+    ...overrides,
+  };
+}
+
+export function isRagReadyObsidianMetadata(
+  metadata: ObsidianRetrievalMetadataTemplate,
+  route: ObsidianKnowledgeRoute,
+): boolean {
+  if (
+    (OBSIDIAN_RAG_READY_CRITERIA.excludedRouteDefaults as readonly ObsidianRetrievalDefault[])
+      .includes(route.retrievalDefault)
+  ) {
+    return false;
+  }
+  return (
+    metadata.canonical_status === OBSIDIAN_RAG_READY_CRITERIA.canonicalStatus &&
+    metadata.retrieval_status === OBSIDIAN_RAG_READY_CRITERIA.retrievalStatus &&
+    metadata.llm_summary.trim().length > 0 &&
+    (OBSIDIAN_RAG_READY_CRITERIA.allowedPrivacyClasses as readonly ObsidianPrivacyClass[])
+      .includes(metadata.privacy_class)
+  );
+}
+
 export const GITHUB_PROJECT_BRIDGE_PATH = "10_Projects/<Project>/<Project>.md";
 export const GITHUB_REPOSITORY_SOURCE_PATH =
   "20_Knowledge/Sources/GitHub/<Project> Repository Source.md";

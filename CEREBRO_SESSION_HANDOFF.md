@@ -22377,3 +22377,83 @@ Next-session starter prompt:
 ```text
 Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Basement Settings now shows compact Vault and Obsidian readiness from integrations.status. Next best slice: continue Block C with a focused RAG-ready note metadata contract or move to backend route receipts before agent execution if no more storage contract visibility is needed. Do not build RAG automation, browser crawling, GitHub cloning, external writes, or folder creation. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
 ```
+
+## 2026-05-16 1525 EDT - RAG-ready note metadata contract
+
+Overall completion after this pass:
+
+- Overall: 65%
+- Frontend visible loop: 99%
+- Backend/runtime: 59%
+- Foundation/docs/planning: 94%
+- Knowledge/storage/source: 40%
+- Creative/freelance/watch: 10%
+
+Worker status:
+
+- Used one read-only explorer worker.
+- Worker recommended a contract-only slice and caught that the full metadata
+  contract should not be exposed in Settings. I removed that UI detail and kept
+  the contract behind `integrations.status`.
+
+What changed:
+
+- Added explicit Obsidian RAG-ready note metadata contract values:
+  canonical statuses, retrieval statuses, privacy classes, required fields,
+  route defaults, and rules.
+- Added a read-only `OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT`.
+- Added helpers to create a default metadata template and classify whether a
+  note's metadata is eligible for normal retrieval.
+- `integrations.status` now returns the retrieval contract for future backend
+  and worker use.
+- Basement Settings remains status-only with Vault and Obsidian readiness.
+
+Files touched in this slice:
+
+- `app/server/knowledge/contracts.ts`
+- `app/server/knowledge/contracts.test.ts`
+- `app/server/integrations/vault.ts`
+- `app/server/routers/integrations.ts`
+- `app/server/integrations.status.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `CEREBRO_DB_URL='file:/tmp/cerebro-knowledge-contracts.db' pnpm -C app exec vitest run server/knowledge/contracts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 6 tests.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-integrations-status-2.db' pnpm -C app exec vitest run server/integrations.status.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 1 test.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-piccolo-contract.db' pnpm -C app exec vitest run server/piccolo.storageContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 1 test.
+- `pnpm -C app check` passed.
+- Browser proof used the in-app browser at `http://localhost:3000/`, opened
+  Basement, opened Settings, and confirmed `Machine Status`, `Vault`, and
+  `Obsidian` remain visible.
+
+Drift check:
+
+- On path because this finishes a Block C contract prerequisite before
+  Source Library, Obsidian, or RAG automation expands.
+- Low-machinery rule applied: the full metadata contract is API-visible but not
+  shown on the primary setup surface.
+- No RAG automation, browser crawling, GitHub cloning, folder creation,
+  external write, Obsidian write, Drive write, Notion write, memory write,
+  model install, new agent, or Raven path was added.
+
+Known risks:
+
+- This contract does not parse YAML, scan notes, create frontmatter, or index
+  vectors yet.
+- Future note-writing work must use these defaults rather than inventing new
+  field names or statuses.
+
+Storage impact:
+
+- No schema change.
+- No database rows created intentionally.
+- No external write.
+- Session archive snapshot and index entry appended.
+
+Next-session starter prompt:
+
+```text
+Read CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, and CEREBRO_ANTI_DRIFT_LAW.md first. Continue CereBro on the main build path. Block C now has explicit Obsidian RAG-ready note metadata contracts exposed through integrations.status. Next best slice: move to backend route receipts before agent execution, unless you find a concrete missing contract that blocks it. Do not build RAG automation, browser crawling, GitHub cloning, external writes, folder creation, or note scanning. Run targeted tests, pnpm check, browser-proof localhost for app changes, update handoff, archive to Obsidian, commit, and push.
+```

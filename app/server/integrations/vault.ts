@@ -20,7 +20,16 @@ import {
   type VaultLayoutEntry,
 } from "../knowledge/contracts";
 
-export { OBSIDIAN_RETRIEVAL_METADATA_FIELDS } from "../knowledge/contracts";
+export {
+  OBSIDIAN_CANONICAL_STATUSES,
+  OBSIDIAN_PRIVACY_CLASSES,
+  OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT,
+  OBSIDIAN_RAG_READY_CRITERIA,
+  OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+  OBSIDIAN_RETRIEVAL_STATUSES,
+  createObsidianRetrievalMetadataTemplate,
+  isRagReadyObsidianMetadata,
+} from "../knowledge/contracts";
 
 export interface VaultStatus {
   configured: boolean;

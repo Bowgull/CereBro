@@ -5,15 +5,21 @@ import {
   GITHUB_PROJECT_MAP_PATH,
   GITHUB_REPOSITORY_SOURCE_PATH,
   GITHUB_SOURCES_INDEX_PATH,
+  OBSIDIAN_CANONICAL_STATUSES,
   OBSIDIAN_KNOWLEDGE_ROUTES,
+  OBSIDIAN_PRIVACY_CLASSES,
+  OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT,
   OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+  OBSIDIAN_RETRIEVAL_STATUSES,
   RETENTION_RULES,
   VAULT_LAYOUT,
   VAULT_TEXT_TARGETS,
+  createObsidianRetrievalMetadataTemplate,
   defaultArtifactState,
   defaultRetentionRule,
   githubProjectBridgePath,
   githubRepositorySourcePath,
+  isRagReadyObsidianMetadata,
 } from "./contracts";
 
 describe("knowledge contracts", () => {
@@ -46,6 +52,48 @@ describe("knowledge contracts", () => {
       "related_notes",
       "privacy_class",
     ]);
+  });
+
+  it("pins the RAG-ready note metadata contract before retrieval automation", () => {
+    expect(OBSIDIAN_CANONICAL_STATUSES).toEqual(["draft", "current", "superseded", "archived"]);
+    expect(OBSIDIAN_RETRIEVAL_STATUSES).toEqual(["inactive", "needs_validation", "active", "archive_only"]);
+    expect(OBSIDIAN_PRIVACY_CLASSES).toEqual(["public", "internal", "private", "restricted"]);
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.requiredFields).toEqual(
+      OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+    );
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.defaultsByRouteKey.knowledge).toMatchObject({
+      canonical_status: "draft",
+      retrieval_status: "needs_validation",
+      privacy_class: "internal",
+    });
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.defaultsByRouteKey.projects).toMatchObject({
+      canonical_status: "draft",
+      retrieval_status: "needs_validation",
+    });
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.defaultsByRouteKey.archive).toMatchObject({
+      canonical_status: "archived",
+      retrieval_status: "archive_only",
+    });
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.rules.join(" ")).toContain("Raven private data never enters");
+  });
+
+  it("classifies RAG-ready metadata without scanning or writing notes", () => {
+    const knowledgeRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "knowledge");
+    const archiveRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "archive");
+    expect(knowledgeRoute).toBeDefined();
+    expect(archiveRoute).toBeDefined();
+
+    const ready = createObsidianRetrievalMetadataTemplate({
+      canonical_status: "current",
+      retrieval_status: "active",
+      llm_summary: "Current validated source summary.",
+      source_ids: ["source:1"],
+      privacy_class: "internal",
+    });
+    expect(isRagReadyObsidianMetadata(ready, knowledgeRoute!)).toBe(true);
+    expect(isRagReadyObsidianMetadata(ready, archiveRoute!)).toBe(false);
+    expect(isRagReadyObsidianMetadata({ ...ready, llm_summary: "" }, knowledgeRoute!)).toBe(false);
+    expect(isRagReadyObsidianMetadata({ ...ready, privacy_class: "private" }, knowledgeRoute!)).toBe(false);
   });
 
   it("pins the Drive vault and GitHub project bridge paths", () => {

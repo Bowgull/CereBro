@@ -52,6 +52,18 @@ describe("integrations status", () => {
       expect(status.vaultLayout.map((entry) => entry.relativePath)).toContain("07_Knowledge/obsidian-vault");
       expect(status.obsidianKnowledgeRoutes.map((route) => route.relativePath)).toContain("20_Knowledge");
       expect(status.obsidianRetrievalMetadataFields).toContain("canonical_status");
+      expect(status.obsidianRetrievalContract.fields).toEqual(status.obsidianRetrievalMetadataFields);
+      expect(status.obsidianRetrievalContract.ragReadyNoteMetadataContract.defaultsByRouteKey.archive).toMatchObject({
+        canonical_status: "archived",
+        retrieval_status: "archive_only",
+      });
+      expect(status.obsidianRetrievalContract.ragReadyNoteMetadataContract.defaultsByRouteKey.knowledge).toMatchObject({
+        canonical_status: "draft",
+        retrieval_status: "needs_validation",
+      });
+      expect(status.obsidianRetrievalContract.ragReadyNoteMetadataContract.rules.join(" ")).toContain(
+        "Normal retrieval requires",
+      );
 
       expect(await countRows("artifacts")).toBe(before.artifacts);
       expect(await countRows("approvals")).toBe(before.approvals);
