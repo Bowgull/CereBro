@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1712 EDT
+Last updated: 2026-05-17 1718 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,17 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1718 EDT: added durable local Browser action proposals.
+  `browser_action_proposals` stores staged Browser action proposals locally,
+  and Workbench Browser page actions now expose `Stage Proposal`. Staging
+  writes one local proposal record and shows `Browser proposal #... saved. Not
+  run.` The proposal remains `proposal_blocked`, `not_run`, and
+  `can_execute = 0`. Route tests prove no approval, Workbench evidence, or
+  source rows are written. No browser runner, browser automation, real browser
+  tab, page open, page fetch, search request, history entry, bookmark, source
+  save, Workbench capture, shelf save, project pin, explanation route,
+  clipboard write, credential action, download, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 1712 EDT: added the first backend Browser action proposal
   contract. `browserActionProposalModel` and
   `workbench.browserActionProposalPreview` return a read-only

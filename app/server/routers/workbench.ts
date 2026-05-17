@@ -381,6 +381,59 @@ export const workbenchRouter = router({
     )
     .query(({ input }) => browserActionProposalModel(input)),
 
+  createBrowserActionProposal: publicProcedure
+    .input(
+      z.object({
+        actionLabel: z.string().min(1).max(80),
+        target: z.string().max(1000),
+        draftKind: z.enum(browserDraftKinds),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const proposal = browserActionProposalModel(input);
+      const db = await getCerebroDb();
+      const receiptBody = [
+        `${proposal.actionLabel} Browser action proposal.`,
+        `Target: ${proposal.target}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        "Status: proposal blocked.",
+        proposal.noActionTaken.join(" "),
+      ].join("\n");
+      const saved = await db.execute({
+        sql: `
+          INSERT INTO browser_action_proposals (
+            action_label, target, draft_kind, risk_class, executor_agent,
+            required_gates, blockers, receipt_body, status, result_state,
+            can_execute
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'proposal_blocked', 'not_run', 0)
+          RETURNING *
+        `,
+        args: [
+          proposal.actionLabel,
+          proposal.target,
+          proposal.draftKind,
+          proposal.riskClass,
+          proposal.executorAgent,
+          proposal.requiredGates.join("\n"),
+          proposal.blockers.join("\n"),
+          receiptBody,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        proposal: {
+          ...proposal,
+          id: Number(saved.rows[0]!.id),
+          createdAt: Number(saved.rows[0]!.created_at),
+          updatedAt: Number(saved.rows[0]!.updated_at),
+        },
+        noActionTaken: proposal.noActionTaken,
+      };
+    }),
+
   evidence: publicProcedure
     .input(
       z

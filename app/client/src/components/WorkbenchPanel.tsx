@@ -163,6 +163,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
     },
   });
+  const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation();
+  const [browserProposalNotice, setBrowserProposalNotice] = useState<string | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -796,6 +798,37 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           </div>
                           <div className="mt-1">
                             {browserActionProposal.data?.requiredGates.join(" / ") ?? "Reading backend proposal gates."}
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-1">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              disabled={createBrowserActionProposal.isPending}
+                              title="Create a durable local Browser action proposal. This does not approve or run it."
+                              onClick={() => {
+                                createBrowserActionProposal.mutate(
+                                  {
+                                    actionLabel: browserActionPreview.label,
+                                    target: browserDraft.raw,
+                                    draftKind: browserDraft.kind,
+                                  },
+                                  {
+                                    onSuccess: (result) => {
+                                      setBrowserProposalNotice(`Browser proposal #${result.proposal.id} saved. Not run.`);
+                                    },
+                                  },
+                                );
+                              }}
+                            >
+                              Stage Proposal
+                            </Button>
+                            {browserProposalNotice && (
+                              <span className="text-[10px]" style={{ color: C.textMuted }}>
+                                {browserProposalNotice}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

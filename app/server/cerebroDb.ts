@@ -448,6 +448,23 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_execution_action_proposals_source ON execution_action_proposals(source_type, source_id)`,
       `CREATE INDEX IF NOT EXISTS idx_execution_action_proposals_approval ON execution_action_proposals(approval_id)`,
       `CREATE INDEX IF NOT EXISTS idx_execution_action_proposals_created ON execution_action_proposals(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS browser_action_proposals (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         action_label TEXT NOT NULL,
+         target TEXT NOT NULL,
+         draft_kind TEXT NOT NULL,
+         risk_class TEXT NOT NULL,
+         executor_agent TEXT NOT NULL,
+         required_gates TEXT NOT NULL,
+         blockers TEXT NOT NULL,
+         receipt_body TEXT NOT NULL,
+         status TEXT NOT NULL DEFAULT 'proposal_blocked',
+         result_state TEXT NOT NULL DEFAULT 'not_run',
+         can_execute INTEGER NOT NULL DEFAULT 0,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_browser_action_proposals_created ON browser_action_proposals(created_at DESC)`,
       `CREATE TABLE IF NOT EXISTS execution_action_results (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          proposal_id INTEGER REFERENCES execution_action_proposals(id) ON DELETE SET NULL,

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1712 EDT
+Last updated: 2026-05-17 1718 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1718 EDT - Workbench Browser Durable Proposal
+
+### What Changed
+- Added local `browser_action_proposals` storage.
+- Added `workbench.createBrowserActionProposal`.
+- Browser action menu now has `Stage Proposal`.
+- Staging writes one local Browser action proposal record and shows
+  `Browser proposal #... saved. Not run.`
+- The proposal remains `proposal_blocked`, `not_run`, and `can_execute = 0`.
+- Route tests prove no approval, Workbench evidence, or source rows are
+  written.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/browserActionProposalModel.ts`
+- `app/server/browserActionProposalModel.test.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, typed `https://example.com/durable-proposal`, opened page
+  actions, selected `Save to Sources`, clicked `Stage Proposal`, and confirmed
+  the saved proposal notice, `SERVER CONTRACT`, `PROPOSAL BLOCKED`, `NOT_RUN`,
+  and staged URL.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-durable-proposal.png`.
+
+### Drift Check
+- On path. This makes Browser action proposals durable while keeping execution
+  false.
+- No approval was created, no Workbench evidence was written, no source row was
+  written, and no browser action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Workbench
+  capture, shelf save, project pin, explanation route, clipboard write,
+  credential action, download, external write, paid service, provider call,
+  model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Browser action proposals are durable local records, but they are not yet
+  listed outside the saved notice.
+- Approval linking and Workbench body linking remain future slices.
+
+### Storage Impact
+- Added local SQLite table `browser_action_proposals`.
+- Local app proof created one Browser action proposal in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has durable local browser_action_proposals through Stage Proposal. Next best slice is browser proposal readback/listing in Workbench or approval preview linkage, keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1712 EDT - Workbench Browser Proposal Contract
 
