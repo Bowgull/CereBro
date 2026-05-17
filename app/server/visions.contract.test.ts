@@ -137,6 +137,39 @@ describe("visions contract", () => {
     expect(detail.receiptTrail.join(" ")).toContain("Approval");
   });
 
+  it("creates one Vision from a saved Aang route receipt and returns the existing link on repeat", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const route = await caller.runtime.commitRoute({
+      text: `Build route-linked Vision ${stamp} for CereBro`,
+      mode: "build",
+    });
+
+    const first = await caller.visions.createFromRouteRecord({
+      routeRecordId: route.record.id,
+    });
+
+    expect(first.created).toBe(true);
+    expect(first.wouldExecute).toBe(false);
+    expect(first.opensBrowser).toBe(false);
+    expect(first.callsProvider).toBe(false);
+    expect(first.writesExternal).toBe(false);
+    expect(first.vision.routeRecordId).toBe(route.record.id);
+    expect(first.vision.projectId).toBeTypeOf("number");
+    expect(first.vision.intent).toContain("build request");
+
+    const second = await caller.visions.createFromRouteRecord({
+      routeRecordId: route.record.id,
+    });
+
+    expect(second.created).toBe(false);
+    expect(second.vision.id).toBe(first.vision.id);
+
+    const detail = await caller.visions.detail({ id: first.vision.id });
+    expect(detail.route?.id).toBe(route.record.id);
+    expect(detail.receiptTrail.join(" ")).toContain("Cortana route");
+  });
+
   it("adds Vision counts and latest Vision rows to Ledger without side effects", async () => {
     const caller = createCaller();
     const stamp = Date.now();

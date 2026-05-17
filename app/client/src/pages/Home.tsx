@@ -202,6 +202,12 @@ export default function Home() {
       utils.ledger.overview.invalidate();
     },
   });
+  const createVisionFromRoute = trpc.visions.createFromRouteRecord.useMutation({
+    onSuccess: () => {
+      utils.visions.list.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
   const createTask = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
@@ -537,6 +543,7 @@ export default function Home() {
           onDismiss={() => {
             routePreview.reset();
             commitRoute.reset();
+            createVisionFromRoute.reset();
             setLastRouteRequest(null);
           }}
           onNavigate={setNav}
@@ -544,9 +551,16 @@ export default function Home() {
           taskCreated={Boolean(createTask.data)}
           isSavingRoute={commitRoute.isPending}
           routeSavedId={commitRoute.data?.record.id ?? null}
+          isCreatingVision={createVisionFromRoute.isPending}
+          routeVisionId={createVisionFromRoute.data?.vision.id ?? null}
           onSaveRoute={() => {
             if (!lastRouteRequest || commitRoute.isPending) return;
             commitRoute.mutate(lastRouteRequest);
+          }}
+          onCreateVision={() => {
+            const routeRecordId = commitRoute.data?.record.id;
+            if (!routeRecordId || createVisionFromRoute.isPending) return;
+            createVisionFromRoute.mutate({ routeRecordId });
           }}
           onCreateTask={() => {
             const draft = routePreview.data?.taskDraft;
@@ -2272,10 +2286,13 @@ function RuntimeRouteReceipt({
   onDismiss,
   onNavigate,
   onSaveRoute,
+  onCreateVision,
   onCreateTask,
   isSavingRoute,
+  isCreatingVision,
   isCreatingTask,
   routeSavedId,
+  routeVisionId,
   taskCreated,
 }: {
   result: {
@@ -2392,10 +2409,13 @@ function RuntimeRouteReceipt({
   onDismiss: () => void;
   onNavigate: (id: NavId) => void;
   onSaveRoute: () => void;
+  onCreateVision: () => void;
   onCreateTask: () => void;
   isSavingRoute: boolean;
+  isCreatingVision: boolean;
   isCreatingTask: boolean;
   routeSavedId: number | null;
+  routeVisionId: number | null;
   taskCreated: boolean;
 }) {
   const routePreviewProof = routePreviewProofModel({
@@ -2527,6 +2547,26 @@ function RuntimeRouteReceipt({
               title="Save this Aang to Cortana route read locally. No routed work runs."
             >
               {routeSavedId ? `Route #${routeSavedId}` : isSavingRoute ? "Saving" : "Save Route"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={routeVisionId ? "secondary" : "outline"}
+              className="h-7 px-2"
+              onClick={onCreateVision}
+              disabled={!routeSavedId || isCreatingVision || routeVisionId != null}
+              aria-label={
+                routeVisionId
+                  ? `Vision saved as contract ${routeVisionId}`
+                  : !routeSavedId
+                    ? "Save the route before creating a Vision"
+                    : isCreatingVision
+                      ? "Creating Vision from route"
+                      : "Create Vision from saved route"
+              }
+              title="Create one local Vision contract from this saved Aang route. No work runs."
+            >
+              {routeVisionId ? `Vision #${routeVisionId}` : isCreatingVision ? "Creating" : "Create Vision"}
             </Button>
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">
               Dismiss

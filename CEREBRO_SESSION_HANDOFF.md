@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0813 EDT
+Last updated: 2026-05-17 0822 EDT
 
 ## Current North Star
 
@@ -20,6 +20,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0822 EDT - Aang Route Vision Link Pass
+
+### What Changed
+- Added `visions.createFromRouteRecord`.
+- A saved Aang route receipt can now create one linked local Vision contract.
+- Repeated creation for the same route returns the existing Vision instead of duplicating it.
+- Runtime route receipt UI now shows a `Create Vision` action after the route is saved.
+- The action records only local contract metadata. It does not run routed work.
+- Cleaned duplicate CereBro dev-server processes and restarted one preview server on `http://localhost:3000/`.
+
+### Files Touched
+- `app/server/routers/visions.ts`
+- `app/server/visions.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/visions.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed a route-linked Vision reads back in the Keep right rail with owner, stop rule, and active status.
+- Screenshot proof saved locally at:
+  - `output/playwright/aang-route-create-vision-readback.png`
+
+### Drift Check
+- On path. This connects Aang route receipts to the Vision contract layer without adding a new primary surface.
+- No autonomous continuation loop was added.
+- No command, browser automation lane, provider call, external write, install, paid service, destructive action, git-write runner, or Raven path was added.
+
+### Known Risks
+- Browser input automation could not type into the command bar in this environment, so proof used the same local tRPC route/vision calls and browser-verified the live UI readback.
+- The local dev DB now has additional test/proof Vision and route rows.
+
+### Storage Impact
+- Targeted tests wrote local dev DB rows.
+- One browser screenshot was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/visions.ts, app/server/routers/runtime.ts, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Current checkpoint includes Visions as local outcome contracts, Aang route receipts can create one linked Vision after saving the route, Keep/Ledger Vision readback, and Ledger git-write trail readback. Next best slice is to link route-created Vision records to route task/body/gate actions as those are created, or add a compact Vision read inside Ledger route rows. Keep Ledger read-only, Project Lab as push context, Terminal Lab as preview surface, and no autonomous continuation loop. Do not add git-write runners, provider calls, external writes, installs, paid services, destructive actions, or Raven paths without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0813 EDT - Vision And Ledger Integration Checkpoint
 

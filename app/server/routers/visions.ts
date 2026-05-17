@@ -53,6 +53,53 @@ async function inferProjectFromTask(taskId: number | null) {
   return row?.project_id == null ? null : Number(row.project_id);
 }
 
+async function readExistingVisionForRoute(routeRecordId: number): Promise<VisionRow | null> {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT *
+      FROM visions
+      WHERE route_record_id = ?
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = result.rows[0];
+  return row ? rowToVision(row as Record<string, unknown>) : null;
+}
+
+async function readRouteForVision(routeRecordId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        id, original_text, mode, category, aang_read, owner_agent,
+        project_name, project_path, task_id, next_action, created_at
+      FROM runtime_route_records
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = result.rows[0];
+  return row
+    ? {
+        id: Number(row.id),
+        originalText: String(row.original_text),
+        mode: String(row.mode),
+        category: String(row.category),
+        aangRead: String(row.aang_read),
+        ownerAgent: String(row.owner_agent),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        projectPath: row.project_path == null ? null : String(row.project_path),
+        taskId: row.task_id == null ? null : Number(row.task_id),
+        nextAction: String(row.next_action),
+        createdAt: Number(row.created_at),
+      }
+    : null;
+}
+
 async function readVisionTask(taskId: number | null) {
   if (taskId == null) return null;
   const db = await getCerebroDb();
@@ -301,6 +348,91 @@ export const visionsRouter = router({
           "Vision creation writes a local contract row only.",
           "Optional task creation writes a local task row only.",
           "No command, browser, provider, approval, or external write ran.",
+        ],
+      };
+    }),
+
+  createFromRouteRecord: publicProcedure
+    .input(
+      z.object({
+        routeRecordId: z.number().int().min(1),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const existing = await readExistingVisionForRoute(input.routeRecordId);
+      if (existing) {
+        return {
+          mode: "local_vision_contract" as const,
+          created: false,
+          vision: existing,
+          routeRecordId: input.routeRecordId,
+          wouldExecute: false,
+          opensBrowser: false,
+          callsProvider: false,
+          writesExternal: false,
+          gates: [
+            "Existing Vision contract returned for this route.",
+            "No command, browser, provider, approval, memory write, or external write ran.",
+          ],
+        };
+      }
+
+      const route = await readRouteForVision(input.routeRecordId);
+      if (!route) {
+        throw new TRPCError({ code: "NOT_FOUND", message: `No route record ${input.routeRecordId}` });
+      }
+
+      const projectId =
+        route.projectName && route.projectPath
+          ? await getOrCreateProjectByPath(route.projectName, route.projectPath)
+          : await inferProjectFromTask(route.taskId);
+      const titleSeed = route.projectName ? `${route.projectName}: ${route.category.replace(/_/g, " ")}` : route.category.replace(/_/g, " ");
+      const title = `Vision from route #${route.id}: ${titleSeed}`.slice(0, 240);
+      const successCriteria = [
+        "Route is reviewed.",
+        "Task, Workbench body, approval gate, and Ledger receipt are linked before execution.",
+        "Stop when the next safe action is explicit.",
+      ].join("\n");
+      const stopRule = "Stop when the route has a clear next safe action or a required gate blocks progress.";
+      const db = await getCerebroDb();
+      const inserted = await db.execute({
+        sql: `
+          INSERT INTO visions (
+            title, intent, status, owner_agent, project_id, task_id,
+            route_record_id, stop_rule, success_criteria, risk_note
+          )
+          VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?, ?)
+          RETURNING *
+        `,
+        args: [
+          title,
+          route.aangRead || route.originalText,
+          route.ownerAgent,
+          projectId,
+          route.taskId,
+          route.id,
+          stopRule,
+          successCriteria,
+          "Created from Aang route receipt. Local contract only.",
+        ],
+      });
+      const row = inserted.rows[0];
+      if (!row) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Vision insert returned no row" });
+      }
+
+      return {
+        mode: "local_vision_contract" as const,
+        created: true,
+        vision: rowToVision(row as Record<string, unknown>),
+        routeRecordId: input.routeRecordId,
+        wouldExecute: false,
+        opensBrowser: false,
+        callsProvider: false,
+        writesExternal: false,
+        gates: [
+          "Vision creation wrote one local contract row linked to the route.",
+          "No command, browser, provider, approval, memory write, or external write ran.",
         ],
       };
     }),
