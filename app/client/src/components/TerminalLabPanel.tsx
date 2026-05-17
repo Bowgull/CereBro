@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
 import { terminalLabObservationActionCopy, terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "@/lib/terminalLabCopyModel";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,8 @@ type TerminalProjectContext = {
     };
   };
 };
+
+const G = T.graphiteCandle;
 
 export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "projects" | "security" | "workbench" | "ledger") => void }) {
   const terminalCopy = terminalLabProjectReadCopy();
@@ -475,10 +477,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
       <div
         className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
-        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+        style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}
       >
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -498,7 +500,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
         </Button>
       </div>
 
-      <form onSubmit={submit} className="px-2 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <form onSubmit={submit} className="px-2 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-1.5">
           <Input
             value={command}
@@ -571,7 +573,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
             {preview.data && (
               <section className="space-y-2">
                 <SectionTitle title="Command Preview" detail={preview.data.risk.replace(/_/g, " ")} />
-                <div className="rounded p-2 space-y-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 space-y-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                   <div className="flex flex-wrap gap-1">
                     <Chip label={preview.data.risk.replace(/_/g, " ")} tone={toneForRisk(preview.data.risk)} />
                     <Chip label={`agent ${preview.data.suggestedAgent}`} tone={C.gold} />
@@ -581,7 +583,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                   <div
                     className="text-[11px] rounded px-2 py-1 overflow-x-auto"
-                    style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}
+                    style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textPrimary }}
                   >
                     <code>{preview.data.command}</code>
                   </div>
@@ -602,7 +604,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </Button>
                 </div>
 
-                <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                   <SectionTitle title="Gates" detail="before run" />
                   <div className="mt-2 space-y-1">
                     {preview.data.gates.map((gate) => (
@@ -1160,10 +1162,10 @@ function AangTeachingFrame({
     <section
       className="shrink-0 px-2 py-1.5"
       aria-label="Aang teaching frame"
-      style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+      style={{ background: G.slabRaised, borderBottom: `1px solid ${G.lineSoft}` }}
     >
       <div className="grid gap-1.5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
           <div className="flex items-center justify-between gap-2">
             <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: frame.tone }}>
               Aang Teaching
@@ -1183,7 +1185,7 @@ function AangTeachingFrame({
       </div>
       <div className="mt-1.5 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <TeachingBlock title="Next Safe Step" body={frame.next} tone={C.success} />
-        <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <div className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
           <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.warning }}>
             Not Yet
           </div>
@@ -1234,10 +1236,10 @@ function TerminalReceiptChainStrip({
   ];
 
   return (
-    <section className="shrink-0 px-2 py-1.5" aria-label={copy.ariaLabel} style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+    <section className="shrink-0 px-2 py-1.5" aria-label={copy.ariaLabel} style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
       <div className="grid gap-1 md:grid-cols-3">
         {steps.map((step) => (
-          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
             <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
               {step.label}
             </div>
@@ -1456,7 +1458,7 @@ function ProjectContextRail({
 
 function ContextDatum({ label, value, tone = C.textSecondary }: { label: string; value: string; tone?: string }) {
   return (
-    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
         {label}
       </div>
@@ -1469,7 +1471,7 @@ function ContextDatum({ label, value, tone = C.textSecondary }: { label: string;
 
 function TeachingBlock({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
-    <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone }}>
         {title}
       </div>

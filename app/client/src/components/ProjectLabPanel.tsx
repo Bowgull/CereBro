@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,8 @@ const AGENT_LABELS: Record<string, string> = {
   surfer: "Silver Surfer",
   tony: "Tony",
 };
+
+const G = T.graphiteCandle;
 
 function toneForStatus(statusText: string, exists: boolean): string {
   if (!exists || statusText === "unavailable") return C.warning;
@@ -460,10 +462,10 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   }, [projects]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
+    <div className="flex h-full flex-col overflow-hidden" role="region" aria-label="Project Lab" aria-busy={overview.isLoading} style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
       <div
         className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
-        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+        style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}
       >
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -482,7 +484,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <div className="grid grid-cols-2 gap-1 px-2 py-1.5 shrink-0 md:grid-cols-5" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
         {primaryStats.map((stat) => (
           <StatusBlock
             key={stat.label}
@@ -494,7 +496,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <div className="px-2 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="px-2 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slab }}>
         <div className="flex flex-wrap items-center gap-1">
           {projectFilters.map((filter) => (
             <Button
@@ -533,7 +535,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
         {ledgerFocusNotice && (
-          <div className="flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+          <div className="flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}>
             <span className="min-w-0">{ledgerFocusNotice}</span>
             <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusNotice(null)} aria-label="Dismiss Ledger focus notice">
               Dismiss
@@ -590,7 +592,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         <details
           className="rounded p-1.5"
           onToggle={(event) => setProjectReceiptsOpen(event.currentTarget.open)}
-          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+          style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}
         >
           <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             {guideCopy.title} <span style={{ color: C.textMuted }}>{guideCopy.status}</span>
@@ -705,7 +707,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                   key={project.slug}
                   aria-label={`${project.name} project card`}
                   className="min-w-0 rounded p-2"
-                  style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+                  style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -777,7 +779,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                     </div>
                   </div>
 
-                  <div className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="mt-2 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                     <div className="flex flex-wrap items-center justify-between gap-1.5">
                       <button
                         type="button"
@@ -786,7 +788,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                         aria-label={pushCopy.buttonAria(project.name)}
                         title={pushCopy.buttonTooltip}
                         className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none transition-[border-color,box-shadow] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:outline-none"
-                        style={{ color: pushTone, background: C.surface, borderColor: `${pushTone}66` }}
+                        style={{ color: pushTone, background: G.slab, borderColor: `${pushTone}66` }}
                       >
                         {pushCopy.buttonTitle}
                         <span>{pushReadiness.label}</span>
@@ -832,7 +834,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       pushLabel={pushReadiness.label}
                       pushState={pushReadiness.state}
                     />
-                    <details open={showPushReceipt} className="mt-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <details open={showPushReceipt} className="mt-1.5 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.line}` }}>
                       <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                         {pushCopy.detailsTitle}
                       </summary>
@@ -1606,7 +1608,7 @@ function StatusBlock({ label, value, tone, onSelect }: { label: string; value: s
         aria-label={`Show ${label} project view`}
         className="h-auto min-w-0 justify-start rounded p-1.5 text-left"
         variant="secondary"
-        style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+        style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}
       >
         {content}
       </Button>
@@ -1619,7 +1621,7 @@ function StatusBlock({ label, value, tone, onSelect }: { label: string; value: s
       role="status"
       aria-label={`${label}: ${labelize(value)}. Informational only.`}
       title={`${label}: ${labelize(value)}. Informational only.`}
-      style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+      style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}
     >
       {content}
     </div>

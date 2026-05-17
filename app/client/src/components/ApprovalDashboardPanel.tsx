@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { approvalPanelCopy } from "@/lib/approvalPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,8 @@ const statuses: Array<{ id: StatusFilter; label: string }> = [
   { id: "rejected", label: "Rejected" },
   { id: "cancelled", label: "Cancelled" },
 ];
+
+const G = T.graphiteCandle;
 
 function labelize(value: string | null | undefined) {
   if (!value) return "unknown";
@@ -131,8 +133,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -213,7 +215,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           className="mt-2 rounded p-2"
           aria-label={copy.groupsAria}
           onToggle={(event) => setGroupsOpen(event.currentTarget.open)}
-          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+          style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}
         >
           <summary className="cursor-pointer list-none">
             <span className="flex items-center justify-between gap-2">
@@ -300,7 +302,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           className="mt-2 rounded p-2"
           aria-label={copy.checksAria}
           onToggle={(event) => setPreflightsOpen(event.currentTarget.open)}
-          style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+          style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}
         >
           <summary className="cursor-pointer list-none">
             <span className="flex items-start justify-between gap-3">
@@ -371,13 +373,13 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
       <div className="flex-1 grid gap-0 overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px]" style={{ minHeight: 0 }}>
         <section className="overflow-y-auto p-2" aria-label={copy.listAria}>
           {(approvals.data?.gates ?? []).map((gate) => (
-            <div key={gate} className="mb-2 rounded px-2.5 py-1.5 text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div key={gate} className="mb-2 rounded px-2.5 py-1.5 text-xs" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {gate}
             </div>
           ))}
 
           {items.length === 0 ? (
-            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {copy.empty}
             </div>
           ) : (
@@ -391,8 +393,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   className="h-auto w-full justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
-                    background: selectedPreview?.id === item.id ? C.surfaceRaised : C.surface,
-                    border: `1px solid ${selectedPreview?.id === item.id ? C.accent : C.borderSoft}`,
+                    background: selectedPreview?.id === item.id ? G.slabRaised : G.slab,
+                    border: `1px solid ${selectedPreview?.id === item.id ? G.candleSoft : G.lineSoft}`,
                     color: C.textPrimary,
                   }}
                 >
@@ -426,17 +428,17 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           )}
         </section>
 
-        <aside className="overflow-y-auto p-2" aria-label={copy.detailAria} style={{ borderLeft: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <aside className="overflow-y-auto p-2" aria-label={copy.detailAria} style={{ borderLeft: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
           {!selectedPreview ? (
-            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {copy.selectEmpty}
             </div>
           ) : selectedDetail.isLoading ? (
-            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {copy.selectedLoading}
             </div>
           ) : !selected ? (
-            <div className="rounded p-2 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {copy.selectedMissing}
             </div>
           ) : (
@@ -573,7 +575,7 @@ function FilterButton({ active, label, onClick }: { active: boolean; label: stri
 
 function ReceiptStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
         {label}
       </div>
@@ -784,7 +786,7 @@ function AppSelect({
 
 function Section({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
   return (
-    <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <section className="rounded p-2" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</h3>
         <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{detail}</span>
@@ -796,7 +798,7 @@ function Section({ title, detail, children }: { title: string; detail: string; c
 
 function DetailSection({ title, detail, children }: { title: string; detail: string; children: React.ReactNode }) {
   return (
-    <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <details className="rounded p-2" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
       <summary className="cursor-pointer list-none">
         <span className="flex items-center justify-between gap-2">
           <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{title}</span>

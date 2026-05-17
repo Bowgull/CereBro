@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0700 EDT
+Last updated: 2026-05-17 0710 EDT
 
 ## Current North Star
 
@@ -20,6 +20,96 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0710 EDT - Graphite Candle Surface Sweep
+
+### What Changed
+- Continued the controlled V1 redesign slice from
+  `CEREBRO_UI_REDESIGN_CONTRACT.md`.
+- Applied Graphite Candle surface treatment to Project Lab, Terminal Lab, and
+  Approvals without changing their routing or execution behavior.
+- Project Lab now uses graphite slabs for the surface frame, stat strip,
+  filter strip, project cards, push-readiness area, and push receipt details.
+- Terminal Lab now uses graphite slabs for the frame, command preview form,
+  Aang teaching frame, command preview cards, gate cards, and receipt chain.
+- Approvals now uses graphite slabs for the queue frame, header, summary
+  stats, group/check disclosures, approval rows, detail rail, and selected
+  receipt sections.
+- Updated the shared dialog primitive so hard-gate modals use Graphite Candle
+  material with candle-warning border and hard-gate ring.
+- No execution runner, command runner, approval mutation, route default,
+  provider call, browser automation, install, external write, dependency,
+  schema change, castle change, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/ui/dialog.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof used headless Chrome against `http://127.0.0.1:3000/`.
+- Screenshot proof saved to:
+  - `output/playwright/ui-redesign-project-lab-graphite-candle.png`
+  - `output/playwright/ui-redesign-terminal-lab-graphite-candle.png`
+  - `output/playwright/ui-redesign-approvals-graphite-candle.png`
+  - `output/playwright/ui-redesign-hard-gate-dialog-graphite-candle.png`
+- Targeted Vitest was not run because no router, schema, execution, model,
+  ledger, approval mutation, or storage behavior changed.
+
+### Front-End Steward Review
+- Surfaces: Project Lab, Terminal Lab, Approvals, hard-gate modal.
+- Register: product surface.
+- Primary objects: project state, command preview, approval queue, hard gate.
+- Hidden machinery: raw model/tool internals, execution runners, provider
+  calls, install paths, and debug-only proof remain hidden.
+- Visible control: push readiness, command preview, approval queue labels,
+  Security Gate links, receipt chains, and no-run language remain visible.
+- Screenshot proof: listed above.
+- Remaining taste risk: Workbench, Ledger Overview, Sources, Basement, and
+  Model Registry still need the controlled Graphite Candle pass.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice UI files and handoff only.
+- Worker used: none. The slice touched four tightly coupled frontend files and
+  did not need parallel ownership.
+- The dev server remains running at `http://localhost:3000/`.
+
+### Drift Check
+- On path because the slice directly followed the active redesign rollout
+  order: Project Lab, Terminal Lab, Approvals, and hard-gate modal shape.
+- The patch did not touch `KeepScene.tsx`, chamber data, agent count, floor
+  count, route execution, command execution, external services, or Raven.
+- Deferred: Workbench validation body, Ledger receipt readability, Sources,
+  Basement/Model Registry, execution contracts, and approval-gated local
+  command lane.
+
+### Completion Read
+- Overall: 80%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 28%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue the controlled redesign surface sweep.
+Start with a dirty-file read. Project Lab, Terminal Lab, Approvals, and
+hard-gate modal shape have their first Graphite Candle pass. Next best slice is
+Workbench validation body and Ledger receipt readability. Do not touch
+`KeepScene.tsx`, chamber data, agent count, floor count, execution runners,
+provider calls, browser automation, installs, paid services, or Raven paths.
+Run `pnpm -C app check` and browser-proof material UI changes.
 
 ## 2026-05-17 0700 EDT - UI Redesign Contract And Shell Foundation
 
