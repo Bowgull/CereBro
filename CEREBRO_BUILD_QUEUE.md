@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0445 EDT
+Last updated: 2026-05-17 0453 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0453 EDT: continued item 9 Model and Tool Registry hardening.
+  Surfaced `modelTools.registryAudit` inside the existing Basement Model
+  Registry panel. Added a compact Registry Audit proof section with register,
+  owner, record/eval counts, trust/source counts, blocked action proof, lane
+  counts, and no-action text. Capability, eval, and status mutations now
+  invalidate the audit read. Browser proof used an isolated temp DB and
+  headless Playwright, saving
+  `output/playwright/model-registry-audit-basement.png`. No new dashboard,
+  route default change, executor, provider/model call, browser/fetch action,
+  install, pull, dependency, external write, or Raven path was added.
 - 2026-05-17 0445 EDT: continued item 9 Model and Tool Registry hardening.
   Added `modelTools.registryAudit`, a read-only backend contract that reports
   capability count, eval note count, trust distribution, source readiness, lane

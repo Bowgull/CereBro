@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0445 EDT
+Last updated: 2026-05-17 0453 EDT
 
 ## Current North Star
 
@@ -20,6 +20,91 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0453 EDT - Basement Registry Audit Surface
+
+### What Changed
+- Continued item 9 Model and Tool Registry hardening.
+- Surfaced `modelTools.registryAudit` inside the existing Basement Model
+  Registry panel.
+- Added a compact Registry Audit proof section after the Capability Map.
+- The section shows register, owner, records, eval notes, route-default state,
+  external write state, trust counts, source counts, blocked action proof, lane
+  counts, and no-action proof.
+- Capability proposal, eval note, and local status mutation success handlers
+  now invalidate the audit read.
+- No new dashboard, primary surface, route default change, executor, provider
+  call, model call, local inference call, browser/fetch action, install, pull,
+  dependency, external write, storage migration, schema migration, or Raven path
+  was added.
+
+### Files Touched
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-model-registry-audit-ui.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Browser proof used an isolated server:
+  `PORT=3320 CEREBRO_DB_URL='file:/tmp/cerebro-model-registry-audit-ui-browser.db' pnpm -C app dev`.
+- Headless Playwright opened Basement, opened Models, confirmed Registry Audit,
+  Blocked Actions, `provider no`, and no-action proof were visible.
+- Screenshot proof saved to ignored local output:
+  `output/playwright/model-registry-audit-basement.png`.
+- The isolated proof server was stopped after screenshot proof.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice Model Tools UI and docs.
+- No dev server was left running.
+- No worker was used because this was one existing UI surface and one existing
+  backend read.
+
+### Front-End Steward Review
+- Surface: Basement Model Registry.
+- Register: product surface.
+- Primary object: model/tool capability registry trust state.
+- User question: what is in the registry, what can be trusted, and what did not
+  run.
+- Route visible: audit read appears below the capability map, inside Basement.
+- Receipt/proof visible: trust/source/lane counts and blocked action/no-action
+  proof are visible without opening a second panel.
+- Approval/risk visible: route defaults read unchanged; provider/model/install
+  actions read no.
+- Machinery hidden until needed: no executor, provider runner, model runner,
+  browser runner, install runner, or route-default control was exposed.
+- Generic UI rejected: no new dashboard, fake readiness score, metric hero, or
+  model-switch surface was added.
+- Screenshot proof: `output/playwright/model-registry-audit-basement.png`.
+- Remaining taste risk: the Basement panel is dense. That is acceptable for
+  this register, but later polish should reduce repeated proof text without
+  hiding the audit chain.
+
+### Completion Read
+- Overall: 79%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Model Tools now has a read-only
+backend audit and a Basement UI proof section. Next best path is item 9
+source/eval status hardening, likely tightening how source-ready/eval-ready
+capabilities become route candidates without changing route defaults. Do not
+run Ollama status checks, installs, pulls, external searches, provider calls,
+model calls, note scans, vector indexing, source fetches, cleanup actions,
+command execution runners, route saves, task creation, or vault writes without
+explicit approval.
 
 ## 2026-05-17 0445 EDT - Model Registry Audit Contract
 

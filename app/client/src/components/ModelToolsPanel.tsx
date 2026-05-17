@@ -152,6 +152,11 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       refetchOnReconnect: false,
     },
   );
+  const registryAudit = trpc.modelTools.registryAudit.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
   const createCapability = trpc.modelTools.proposeCapability.useMutation({
     onSuccess: (result) => {
@@ -166,6 +171,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       setRiskReview("");
       setValidationNotes("");
       utils.modelTools.capabilities.invalidate();
+      utils.modelTools.registryAudit.invalidate();
     },
   });
   const recordEval = trpc.modelTools.recordEval.useMutation({
@@ -174,6 +180,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       setEvalSummary("");
       setEvalNotes("");
       utils.modelTools.evals.invalidate();
+      utils.modelTools.registryAudit.invalidate();
     },
   });
   const updateCapabilityStatus = trpc.modelTools.updateCapabilityStatus.useMutation({
@@ -183,6 +190,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       setStatusFailureNotes("");
       utils.modelTools.capabilities.invalidate();
       utils.modelTools.policy.invalidate();
+      utils.modelTools.registryAudit.invalidate();
     },
   });
   const createOllamaStatusApproval = trpc.modelTools.createOllamaStatusApprovalPreview.useMutation({
@@ -234,6 +242,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
     },
   );
   const policyData = policy.data;
+  const auditData = registryAudit.data;
   const localEvalTasks = policyData?.evalTasks ?? [];
   const route = routePreview.data;
   const summary = policyData?.capabilityMapSummary;
@@ -370,7 +379,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading}>
+      <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading || registryAudit.isLoading}>
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
@@ -396,6 +405,59 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
             {policyData?.registryShape.rule ?? "A capability is a proposal until source-verified or eval-tested."}
           </div>
+        </section>
+
+        <section className="rounded p-2" aria-label="Model registry audit proof" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Registry Audit" detail={auditData?.mode ? labelize(auditData.mode) : "reading"} />
+          {registryAudit.isLoading ? (
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Reading local registry audit.
+            </div>
+          ) : auditData ? (
+            <div className="mt-2 grid gap-2">
+              <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-6">
+                <StatusBlock label="Register" value={labelize(auditData.register)} tone={C.textSecondary} />
+                <StatusBlock label="Owner" value={auditData.ownerAgent} tone={C.accentViolet} />
+                <StatusBlock label="Records" value={String(auditData.totalRecords)} tone={auditData.totalRecords ? C.accent : C.textMuted} />
+                <StatusBlock label="Eval notes" value={String(auditData.evalNotes)} tone={auditData.evalNotes ? C.success : C.textMuted} />
+                <StatusBlock label="Defaults" value={auditData.routeDefaultsChanged ? "changed" : "unchanged"} tone={auditData.routeDefaultsChanged ? C.danger : C.success} />
+                <StatusBlock label="External write" value={auditData.writesExternal ? "yes" : "no"} tone={auditData.writesExternal ? C.danger : C.success} />
+              </div>
+              <div className="grid gap-1.5 md:grid-cols-3">
+                <AuditProofStrip title="Trust" items={[
+                  { label: "source", value: auditData.trust.sourceReady, tone: C.success },
+                  { label: "eval", value: auditData.trust.evalReady, tone: C.success },
+                  { label: "mixed", value: auditData.trust.mixed, tone: C.warning },
+                  { label: "failed", value: auditData.trust.failed, tone: C.danger },
+                  { label: "stale", value: auditData.trust.stale, tone: C.warning },
+                  { label: "blocked", value: auditData.trust.blocked, tone: C.danger },
+                ]} />
+                <AuditProofStrip title="Source" items={[
+                  { label: "missing", value: auditData.source.missingSources, tone: C.warning },
+                  { label: "review", value: auditData.source.needsSourceReview, tone: C.warning },
+                ]} />
+                <AuditProofStrip title="Blocked Actions" items={[
+                  { label: "provider", value: auditData.callsExternalModels ? "yes" : "no", tone: auditData.callsExternalModels ? C.danger : C.success },
+                  { label: "local model", value: auditData.callsLocalModels ? "yes" : "no", tone: auditData.callsLocalModels ? C.danger : C.success },
+                  { label: "install", value: auditData.installsDependencies ? "yes" : "no", tone: auditData.installsDependencies ? C.danger : C.success },
+                  { label: "pull", value: auditData.pullsModels ? "yes" : "no", tone: auditData.pullsModels ? C.danger : C.success },
+                  { label: "fetch", value: auditData.browsesOrFetches ? "yes" : "no", tone: auditData.browsesOrFetches ? C.danger : C.success },
+                ]} />
+              </div>
+              <div className="grid gap-1.5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                <StatusList
+                  title="Lanes"
+                  items={Object.entries(auditData.lanes).map(([lane, count]) => `${labelize(lane)}: ${count}`)}
+                  tone={C.accent}
+                />
+                <MachineRule title="No Action" body={auditData.noActionTaken.join(" ")} tone={C.success} />
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Registry audit did not return a local read.
+            </div>
+          )}
         </section>
 
         <section className="rounded p-2" aria-label="Model tool source verification gate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
@@ -971,6 +1033,25 @@ function StatusBlock({ label, value, tone }: { label: string; value: string; ton
     <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
       <div className="mt-0.5 truncate text-[11px] font-semibold" title={value} style={{ color: tone }}>{value}</div>
+    </div>
+  );
+}
+
+function AuditProofStrip({
+  title,
+  items,
+}: {
+  title: string;
+  items: Array<{ label: string; value: number | string; tone: string }>;
+}) {
+  return (
+    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
+      <div className="mt-1.5 flex flex-wrap gap-1">
+        {items.map((item) => (
+          <Badge key={item.label} label={`${item.label} ${item.value}`} tone={item.tone} />
+        ))}
+      </div>
     </div>
   );
 }
