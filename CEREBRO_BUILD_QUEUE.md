@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 2334 EDT
+Last updated: 2026-05-16 2338 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 2338 EDT: continued item 7 Knowledge/source contracts. Project
+  Lab Project Read now shows the project's Knowledge Route: bridge note,
+  repository source note, Project Map, archive retrieval, no external write,
+  and the explicit write gate. No note scan, vector index, source fetch,
+  Obsidian/Notion/Drive/memory write, route default change, schema migration,
+  new surface, command runner, dependency, or Raven path was added.
 - 2026-05-16 2334 EDT: continued item 7 Knowledge/source contracts. Research
   now shows a compact local Source Receipt with source totals, trusted count,
   review count, scrub count, stale count, source-event count, route unchanged,

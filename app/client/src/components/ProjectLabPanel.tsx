@@ -93,6 +93,16 @@ type ProjectLabFocusDraft = {
   evidenceId?: number;
   notice?: string;
 };
+type ProjectKnowledgeRouteRead = {
+  mode?: string;
+  projectBridgePath?: string | null;
+  repositorySourcePath?: string | null;
+  projectMapPath?: string | null;
+  archiveLane?: string | null;
+  archiveRetrieval?: string | null;
+  writesExternalSystems?: boolean;
+  approvalGate?: string | null;
+};
 
 function projectSignalScore(project: {
   localExists?: boolean;
@@ -1277,6 +1287,10 @@ function ProjectDetailInspector({
             ))}
           </div>
 
+          {detail?.knowledgeRoute && (
+            <ProjectKnowledgeRoute route={detail.knowledgeRoute} />
+          )}
+
           <div className="mt-1.5 grid grid-cols-1 gap-1.5 xl:grid-cols-[minmax(180px,1fr)_minmax(0,2fr)_auto] xl:items-center">
             <Input
               type="search"
@@ -1620,6 +1634,51 @@ function MetaBlock({ label, value }: { label: string; value: string }) {
         {value}
       </div>
     </div>
+  );
+}
+
+function ProjectKnowledgeRoute({ route }: { route: ProjectKnowledgeRouteRead }) {
+  const rows = [
+    { label: "Bridge", value: route.projectBridgePath ?? "not set", tone: C.accent },
+    { label: "Source", value: route.repositorySourcePath ?? "not set", tone: C.gold },
+    { label: "Map", value: route.projectMapPath ?? "not set", tone: C.textSecondary },
+    { label: "Archive", value: route.archiveRetrieval ?? "archive_only", tone: C.warning },
+  ];
+
+  return (
+    <section className="mt-1.5 rounded p-1.5" aria-label="Project knowledge route" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.accent }}>
+          Knowledge Route
+        </div>
+        <Badge variant="secondary" className="uppercase">
+          {route.mode === "read_only" ? "read only" : labelize(route.mode ?? "local")}
+        </Badge>
+      </div>
+      <div className="mt-1 grid grid-cols-2 gap-1 xl:grid-cols-4">
+        {rows.map((row) => (
+          <div key={row.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: row.tone }}>
+              {row.label}
+            </div>
+            <div className="mt-0.5 truncate text-[10px] leading-tight" title={row.value} style={{ color: C.textSecondary }}>
+              {row.value}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 flex flex-wrap gap-1">
+        <Badge variant={route.writesExternalSystems ? "warning" : "success"} className="uppercase">
+          {route.writesExternalSystems ? "write gated" : "no external write"}
+        </Badge>
+        <Badge variant="warning" className="uppercase">
+          {labelize(route.archiveLane ?? "90_Archive")} {labelize(route.archiveRetrieval ?? "archive_only")}
+        </Badge>
+      </div>
+      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+        {route.approvalGate ?? "Knowledge writes require explicit approval."}
+      </div>
+    </section>
   );
 }
 

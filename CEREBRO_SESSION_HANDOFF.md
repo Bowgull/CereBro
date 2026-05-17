@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2334 EDT
+Last updated: 2026-05-16 2338 EDT
 
 ## Current North Star
 
@@ -20,6 +20,80 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2338 EDT - Project Knowledge Route Read
+
+### What Changed
+- Continued item 7 Knowledge/source contracts.
+- Added a compact `Knowledge Route` block to Project Lab's existing Project
+  Read inspector.
+- The block shows the project bridge note path, repository source note path,
+  Project Map path, archive retrieval lane, no-external-write status, and the
+  explicit write gate.
+- This exposes the already-existing project knowledge route contract without
+  adding a new surface, writing Obsidian, scanning notes, fetching sources,
+  indexing vectors, or changing routing defaults.
+- No provider, model, tool, gateway, browser, search, fetch, install, token,
+  account action, model pull, external write, schema migration, dependency,
+  route default change, new primary surface, command runner, or Raven path was
+  added.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-project-knowledge-route-ui.db' pnpm -C app exec vitest run server/projectIntelligence.knowledgeRoute.test.ts server/workbench.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `curl` readback confirmed CereBro Project Detail returns
+  `knowledgeRoute.projectBridgePath = 10_Projects/CereBro/CereBro.md` and
+  `writesExternalSystems = false`.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dev server restarted and remains running at `http://localhost:3000/` for
+  preview.
+- No worker was used because this was one existing Project Lab readout.
+
+### Front-End Steward Review
+- Surface: Project Lab.
+- Register: product surface.
+- Primary object: project map and project read.
+- User question: where does this project enter CereBro knowledge without raw
+  code dumps.
+- Route visible: bridge, source, map, archive, and write gate are visible.
+- Receipt/proof visible: no external write and archive-only history are shown.
+- Machinery hidden until needed: no note editor, RAG dashboard, vector store,
+  or source automation UI was added.
+- Generic UI rejected: no generic knowledge dashboard or plugin control panel
+  was added.
+- Remaining taste risk: Project Read is dense. Future work should collapse
+  proof into cleaner grouped lanes, not add more rows.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 47%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Project Lab now exposes the
+knowledge route in the Project Read inspector. Next best path is source save
+receipt readback or a small Workbench knowledge-route polish pass, depending on
+dirty files. Do not run Ollama status checks, installs, pulls, external
+searches, provider calls, model calls, note scans, vector indexing, source
+fetches, or vault writes without explicit approval.
 
 ## 2026-05-16 2334 EDT - Source Library Receipt
 
