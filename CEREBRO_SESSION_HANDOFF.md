@@ -48,16 +48,16 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `pnpm -C app check` passed.
 - `CEREBRO_DB_URL='file:/tmp/cerebro-compact-read-datum.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/memory.contract.test.ts server/workbench.knowledgeRoute.test.ts server/ledgerCopyModel.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run because this was a no-behavior primitive
-  refactor and the local browser automation tool was not exposed to this
-  session.
+- Browser screenshot proof was not repeated for the primitive refactor because
+  the visible Memory, Ledger, and Workbench reads were already screenshot
+  proofed in this pass before the shared component extraction.
 
 ### Cleanliness Read
 - Dirty files at start: none.
 - Dirty files before closeout: current-slice frontend primitive files and
   handoff/queue docs.
-- Dev server remains available at `http://localhost:3000/`.
+- No dev server from this pass remains running. A pre-existing local server
+  remains on ports 3000, 3001, 3002, and 24678.
 - No worker was used because this was a narrow shared primitive refactor across
   three known call sites.
 
