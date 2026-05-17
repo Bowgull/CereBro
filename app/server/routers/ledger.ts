@@ -110,6 +110,70 @@ function executionResultRow(row: Record<string, unknown>) {
   };
 }
 
+function gitWriteObservationRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    command: String(row.command),
+    cwd: row.cwd == null ? null : String(row.cwd),
+    risk: String(row.risk),
+    suggestedAgent: row.suggested_agent == null ? null : String(row.suggested_agent),
+    explanation: row.explanation == null ? "" : String(row.explanation),
+    gates: String(row.gates ?? "").split("\n").filter(Boolean),
+    status: String(row.status),
+    outputSummary: row.output_summary == null ? null : String(row.output_summary),
+    createdAt: Number(row.created_at),
+  };
+}
+
+function projectPushContractRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    sourceType: String(row.source_type),
+    sourceId: Number(row.source_id),
+    actionType: String(row.action_type),
+    riskClass: String(row.risk_class),
+    requiredApprovals: String(row.required_approvals ?? "").split("\n").filter(Boolean),
+    executorAgent: String(row.executor_agent),
+    command: row.command == null ? null : String(row.command),
+    cwd: row.cwd == null ? null : String(row.cwd),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    approvalId: row.approval_id == null ? null : Number(row.approval_id),
+    approvalStatus: row.approval_status == null ? null : String(row.approval_status),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    resultState: String(row.result_state),
+    status: String(row.status),
+    receiptBody: String(row.receipt_body),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function visionRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    title: String(row.title),
+    intent: String(row.intent),
+    status: String(row.status),
+    statusNote: row.status_note == null ? null : String(row.status_note),
+    ownerAgent: String(row.owner_agent),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    routeRecordId: row.route_record_id == null ? null : Number(row.route_record_id),
+    stopRule: String(row.stop_rule),
+    successCriteria: String(row.success_criteria),
+    riskNote: row.risk_note == null ? null : String(row.risk_note),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+    completedAt: row.completed_at == null ? null : Number(row.completed_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -212,9 +276,15 @@ export const ledgerRouter = router({
         evidenceCounts,
         routeCount,
         executionResultCount,
+        gitWriteObservationCount,
+        projectPushContractCount,
+        visionCounts,
         latestEvidence,
         latestExecutionResults,
+        latestGitWriteObservations,
+        latestProjectPushContracts,
         latestRoutes,
+        latestVisions,
         memoryContract,
         routeReceiptContract,
       ] = await Promise.all([
@@ -254,6 +324,38 @@ export const ledgerRouter = router({
         }),
         countOne("SELECT COUNT(*) AS value FROM runtime_route_records"),
         countOne("SELECT COUNT(*) AS value FROM execution_action_results"),
+        countOne(`
+          SELECT COUNT(*) AS value
+          FROM command_observations
+          WHERE LOWER(TRIM(command)) LIKE 'git add%'
+             OR LOWER(TRIM(command)) LIKE 'git commit%'
+             OR LOWER(TRIM(command)) LIKE 'git push%'
+             OR LOWER(TRIM(command)) LIKE 'git checkout%'
+             OR LOWER(TRIM(command)) LIKE 'git reset%'
+             OR LOWER(TRIM(command)) LIKE 'git clean%'
+             OR LOWER(TRIM(command)) LIKE 'git merge%'
+             OR LOWER(TRIM(command)) LIKE 'git rebase%'
+             OR LOWER(TRIM(command)) LIKE 'git tag%'
+             OR LOWER(TRIM(command)) LIKE 'git branch -d%'
+             OR LOWER(TRIM(command)) LIKE 'git branch --delete%'
+        `),
+        countOne(`
+          SELECT COUNT(*) AS value
+          FROM execution_action_proposals
+          WHERE source_type = 'project_push'
+             OR action_type = 'project_manual_push'
+             OR risk_class = 'git_remote_write'
+        `),
+        db.execute({
+          sql: `
+            SELECT
+              COUNT(*) AS total,
+              SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_count,
+              SUM(CASE WHEN status = 'blocked' THEN 1 ELSE 0 END) AS blocked_count,
+              SUM(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) AS paused_count
+            FROM visions
+          `,
+        }),
         db.execute({
           sql: `
             SELECT
@@ -285,6 +387,46 @@ export const ledgerRouter = router({
             SELECT *
             FROM execution_action_results
             ORDER BY created_at DESC, id DESC
+            LIMIT ?
+          `,
+          args: [Math.min(evidenceLimit, 10)],
+        }),
+        db.execute({
+          sql: `
+            SELECT
+              co.*,
+              p.name AS project_name
+            FROM command_observations co
+            LEFT JOIN projects p ON p.id = co.project_id
+            WHERE LOWER(TRIM(co.command)) LIKE 'git add%'
+               OR LOWER(TRIM(co.command)) LIKE 'git commit%'
+               OR LOWER(TRIM(co.command)) LIKE 'git push%'
+               OR LOWER(TRIM(co.command)) LIKE 'git checkout%'
+               OR LOWER(TRIM(co.command)) LIKE 'git reset%'
+               OR LOWER(TRIM(co.command)) LIKE 'git clean%'
+               OR LOWER(TRIM(co.command)) LIKE 'git merge%'
+               OR LOWER(TRIM(co.command)) LIKE 'git rebase%'
+               OR LOWER(TRIM(co.command)) LIKE 'git tag%'
+               OR LOWER(TRIM(co.command)) LIKE 'git branch -d%'
+               OR LOWER(TRIM(co.command)) LIKE 'git branch --delete%'
+            ORDER BY co.created_at DESC, co.id DESC
+            LIMIT ?
+          `,
+          args: [Math.min(evidenceLimit, 10)],
+        }),
+        db.execute({
+          sql: `
+            SELECT
+              eap.*,
+              a.status AS approval_status,
+              p.name AS project_name
+            FROM execution_action_proposals eap
+            LEFT JOIN approvals a ON a.id = eap.approval_id
+            LEFT JOIN projects p ON p.id = eap.project_id
+            WHERE eap.source_type = 'project_push'
+               OR eap.action_type = 'project_manual_push'
+               OR eap.risk_class = 'git_remote_write'
+            ORDER BY eap.updated_at DESC, eap.id DESC
             LIMIT ?
           `,
           args: [Math.min(evidenceLimit, 10)],
@@ -327,6 +469,24 @@ export const ledgerRouter = router({
           `,
           args: [routeLimit],
         }),
+        db.execute({
+          sql: `
+            SELECT *
+            FROM visions
+            ORDER BY
+              CASE status
+                WHEN 'active' THEN 0
+                WHEN 'blocked' THEN 1
+                WHEN 'paused' THEN 2
+                WHEN 'budget_limited' THEN 3
+                WHEN 'unmet' THEN 4
+                WHEN 'achieved' THEN 5
+              END,
+              updated_at DESC,
+              id DESC
+            LIMIT 5
+          `,
+        }),
         readMemoryContract(),
         readRouteReceiptContract(),
       ]);
@@ -334,6 +494,7 @@ export const ledgerRouter = router({
       const taskRow = taskCounts.rows[0] ?? {};
       const sessionRow = sessionCounts.rows[0] ?? {};
       const evidenceRowCounts = evidenceCounts.rows[0] ?? {};
+      const visionRowCounts = visionCounts.rows[0] ?? {};
 
       return {
         mode: "read_only" as const,
@@ -366,10 +527,23 @@ export const ledgerRouter = router({
           execution: {
             total: executionResultCount,
           },
+          gitWrites: {
+            terminalPreviews: gitWriteObservationCount,
+            projectPushContracts: projectPushContractCount,
+          },
+          visions: {
+            total: Number(visionRowCounts.total ?? 0),
+            active: Number(visionRowCounts.active_count ?? 0),
+            blocked: Number(visionRowCounts.blocked_count ?? 0),
+            paused: Number(visionRowCounts.paused_count ?? 0),
+          },
         },
         latestEvidence: latestEvidence.rows.map((row) => evidenceRow(row as Record<string, unknown>)),
         latestExecutionResults: latestExecutionResults.rows.map((row) => executionResultRow(row as Record<string, unknown>)),
+        latestGitWriteObservations: latestGitWriteObservations.rows.map((row) => gitWriteObservationRow(row as Record<string, unknown>)),
+        latestProjectPushContracts: latestProjectPushContracts.rows.map((row) => projectPushContractRow(row as Record<string, unknown>)),
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
+        latestVisions: latestVisions.rows.map((row) => visionRow(row as Record<string, unknown>)),
         memoryContract,
         routeReceiptContract,
         gates: [

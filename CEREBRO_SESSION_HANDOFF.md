@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0803 EDT
+Last updated: 2026-05-17 0813 EDT
 
 ## Current North Star
 
@@ -20,6 +20,169 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0813 EDT - Vision And Ledger Integration Checkpoint
+
+### What Changed
+- Reviewed and accepted the uncommitted Vision contract slice from the parallel chat.
+- Verified the Vision slice is local-only and fits the current build path.
+- Verified the Ledger git-write trail slice works with Vision readback in the same UI.
+- The current checkpoint now includes:
+  - Visions as overall outcome contracts.
+  - Keep context rail active Vision readback.
+  - Ledger latest Vision readback.
+  - Ledger git-write preview and Project Lab push contract readback.
+
+### Files Touched
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `app/server/cerebroDb.ts`
+- `app/server/routers.ts`
+- `app/server/routers/visions.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/visions.contract.test.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/ledgerCopyModel.ts`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/visions.contract.test.ts server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Ledger shows latest Visions, active Vision in the right rail, Git Write Trail, Project Lab contracts, approval status, and no-run state.
+- Screenshot proof saved locally at:
+  - `output/playwright/visions-ledger-git-write-integration.png`
+
+### Drift Check
+- On path. Visions add outcome discipline without autonomous continuation.
+- Ledger stays read-only. Project Lab stays the push context. Terminal Lab stays the preview surface.
+- No git-write runner, provider call, browser automation lane, external write, install, paid service, destructive action, or Raven path was added.
+
+### Known Risks
+- The dev database contains test-created Vision, route, task, approval, and execution rows.
+- Vision UI is still readback-only. Creation from Aang is the next likely slice.
+
+### Storage Impact
+- Local schema adds `visions`.
+- Targeted tests wrote local dev DB rows.
+- One integration screenshot was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/visions.ts, app/server/routers/ledger.ts, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Current checkpoint includes Visions as local overall-outcome contracts, Keep/Ledger Vision readback, and Ledger git-write trail readback for terminal previews and Project Lab push contracts. Next best slice is to let Aang create or link a Vision from the command bar route receipt, without adding an autonomous continuation loop. Keep Ledger read-only, Project Lab as push context, and Terminal Lab as preview surface. Do not add git-write runners, provider calls, external writes, installs, paid services, destructive actions, or Raven paths without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
+
+## 2026-05-17 0811 EDT - Ledger Git Write Trail Pass
+
+### What Changed
+- Added Ledger readback for terminal git-write previews.
+- Added Ledger readback for Project Lab push action contracts.
+- Ledger now shows git write preview count and Project Lab push contract count.
+- Ledger now shows the safe chain: Terminal preview -> Project Lab contract -> Spock approval state -> result state.
+- Added a Ledger button that routes a push contract back to Project Lab without running git.
+- No git command runner behavior changed.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Ledger shows Git Write Trail, terminal previews, Project Lab contracts, approval status, and no-run state.
+- Screenshot proof saved locally at:
+  - `output/playwright/ledger-git-write-project-push-trail.png`
+
+### Drift Check
+- On path. This strengthens the audit trail for approval-gated autonomy without adding a runner.
+- Project Lab remains the push context surface. Ledger remains read-only.
+- No provider call, install, paid service, external write, destructive action, or Raven path was added.
+
+### Known Risks
+- The worktree contains overlapping uncommitted Vision contract changes from another chat in shared files.
+- Do not stage or push a mixed commit until the Vision slice is either accepted as part of the same checkpoint or separated.
+
+### Storage Impact
+- Targeted tests and browser proof used the local dev database and existing preview rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/ledger.ts, app/client/src/pages/Home.tsx, and app/server/execution.contract.test.ts first. Continue the approval-gated autonomy audit lane. Ledger now reads terminal git-write previews and Project Lab push action contracts, showing the preview -> contract -> Spock gate -> no-run result chain. Before committing, inspect the overlapping uncommitted Vision contract changes from another chat and separate or intentionally accept that slice. Do not add git-write runners, provider calls, browser automation, external writes, installs, paid services, or Raven paths without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, then commit and push only clean scoped files.
+```
+
+## 2026-05-17 0808 EDT - Visions Contract V1 Pass
+
+### What Changed
+- Added CereBro-native Visions as the `/goal`-style contract layer.
+- `visions` now stores the overall outcome, intent, success criteria, stop
+  rule, owner agent, links to project/session/task/route, status note, risk
+  note, and timestamps.
+- Added `visions.create`, `visions.list`, `visions.detail`, and
+  `visions.setStatus`.
+- Vision creation can optionally create the first local task, but it does not
+  run commands, open browsers, call providers, create approvals, or write
+  externally.
+- Vision detail reads linked task, Cortana route, Workbench body, approval
+  gate, and execution result summaries as a receipt trail.
+- Ledger Overview now includes Vision counts and latest Vision rows.
+- Keep right context rail now reads the active Vision, owner, stop rule, and
+  linked task.
+- `CEREBRO_MASTER_BUILD_PLAN.md` now records that Codex `/goal` inspired the
+  pattern, while CereBro owns the Visions language and keeps V1 contract-only.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/visions.ts`
+- `app/server/routers.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/visions.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/visions.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed active
+  Vision readback in the Keep context rail and latest Visions readback in
+  Ledger.
+- Screenshot proof saved locally at:
+  - `output/playwright/visions-keep-readback.png`
+  - `output/playwright/visions-ledger-readback.png`
+
+### Drift Check
+- On path. This adds the objective contract layer needed for long-running work
+  without adding an autonomous loop or new primary surface.
+- Tasks remain work units. Runtime routes remain Cortana receipts. Workbench
+  remains the body. Ledger remains the audit trail.
+- No git-write runner, provider call, external write, install, paid service,
+  destructive action, or Raven path was added.
+
+### Known Risks
+- Visions are local contract records only. No continuation loop exists yet.
+- Existing local dev DB now contains Vision rows created by targeted tests.
+- The first UI readback is compact. A richer Vision inspector belongs in a
+  later slice after the contract proves useful.
+
+### Storage Impact
+- Local schema adds the `visions` table and indexes.
+- Targeted tests wrote local `visions` rows and a small number of local task,
+  route, Workbench, and approval rows in the development database.
+- Two local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/visions.ts, and app/client/src/pages/Home.tsx first. Continue the Visions contract lane. Visions now store overall outcomes, success criteria, stop rules, owner route links, state, and receipt trails, and they read back in Keep and Ledger. Next best slice is to let Aang create a Vision from the command bar route receipt or link a Vision to new route/task receipts without starting an autonomous loop. Do not add continuation loops, git-write runners, provider calls, browser automation, external writes, installs, paid services, or Raven paths without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0803 EDT - Terminal Git Write Project Route Pass
 

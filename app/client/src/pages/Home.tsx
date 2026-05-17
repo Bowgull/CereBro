@@ -1021,7 +1021,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const routeReceiptContractProof = routeReceiptContract ? routeReceiptContractProofModel(routeReceiptContract) : [];
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const executionRows = ledgerOverview.data?.latestExecutionResults ?? [];
+  const gitWriteRows = ledgerOverview.data?.latestGitWriteObservations ?? [];
+  const projectPushContractRows = ledgerOverview.data?.latestProjectPushContracts ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
+  const visionRows = ledgerOverview.data?.latestVisions ?? [];
   const focusedEvidenceRows = ledgerFocusProject
     ? evidenceRows.filter((item) => (
         ledgerFocusProject.id != null
@@ -1031,7 +1034,10 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     : evidenceRows;
   const latestEvidenceRows = focusedEvidenceRows.slice(0, 4);
   const latestExecutionRows = executionRows.slice(0, 4);
+  const latestGitWriteRows = gitWriteRows.slice(0, 3);
+  const latestProjectPushContractRows = projectPushContractRows.slice(0, 3);
   const latestRouteRows = routeRows.slice(0, 4);
+  const latestVisionRows = visionRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = overviewCards?.receipts.terminal ?? 0;
   const activeSessions = overviewCards?.sessions.active ?? 0;
@@ -1088,6 +1094,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: C.warning,
     },
     {
+      label: "Visions",
+      value: String(overviewCards?.visions.active ?? 0),
+      meta: `${overviewCards?.visions.total ?? 0} overall objective${(overviewCards?.visions.total ?? 0) === 1 ? "" : "s"}`,
+      target: "ledger" as NavId,
+      tone: (overviewCards?.visions.active ?? 0) > 0 ? C.gold : C.textMuted,
+    },
+    {
       label: "Sessions",
       value: String(activeSessions),
       meta: ledgerCopy.cardMeta.sessions(overviewCards?.sessions.recent ?? 0),
@@ -1130,6 +1143,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: (overviewCards?.execution?.total ?? 0) > 0 ? C.success : C.textMuted,
     },
     {
+      label: "Git Writes",
+      value: String(overviewCards?.gitWrites?.terminalPreviews ?? 0),
+      meta: ledgerCopy.cardMeta.gitWrites(overviewCards?.gitWrites?.projectPushContracts ?? 0),
+      target: "ledger" as NavId,
+      tone: (overviewCards?.gitWrites?.projectPushContracts ?? 0) > 0 ? C.warning : C.textMuted,
+    },
+    {
       label: "Memory",
       value: String(overviewCards?.memory.total ?? 0),
       meta: ledgerCopy.cardMeta.memory(overviewCards?.memory.proposed ?? 0),
@@ -1169,6 +1189,26 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           notice: item.projectName
             ? `Ledger receipt #${item.id} opened ${item.projectName} push context.`
             : `Ledger receipt #${item.id} has no linked project.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens; the user can inspect project push context manually.
+    }
+    onNavigate("projects");
+  }
+
+  function openProjectPushContract(item: { id: number; projectId: number | null; projectName: string | null; sourceId: number }) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "ledger_project_push_contract",
+          proposalId: item.id,
+          projectId: item.projectId ?? item.sourceId,
+          projectName: item.projectName,
+          notice: item.projectName
+            ? `Ledger opened ${item.projectName} push contract #${item.id}.`
+            : `Ledger opened push contract #${item.id}.`,
         }),
       );
     } catch {
@@ -1344,7 +1384,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 gap-1.5 lg:grid-cols-4 xl:grid-cols-7" aria-label={ledgerCopy.cardsAria}>
+        <section className="grid grid-cols-2 gap-1.5 lg:grid-cols-5 xl:grid-cols-10" aria-label={ledgerCopy.cardsAria}>
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -1431,6 +1471,164 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           </section>
         )}
+
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Git write audit trail">
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Git Write Trail
+              </div>
+              <div className="mt-0.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                Terminal previews route to Project Lab. Ledger records the contract. Nothing runs here.
+              </div>
+            </div>
+            <Badge variant="warning" className="uppercase">
+              blocked by default
+            </Badge>
+          </div>
+          {ledgerOverview.isLoading ? (
+            <div className="rounded p-2 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+              Reading git write audit trail.
+            </div>
+          ) : latestGitWriteRows.length === 0 && latestProjectPushContractRows.length === 0 ? (
+            <div className="rounded p-2 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+              No git write previews or Project Lab push contracts yet.
+            </div>
+          ) : (
+            <div className="grid gap-1.5 xl:grid-cols-2">
+              <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Terminal Preview
+                  </span>
+                  <Badge variant="secondary" className="uppercase">
+                    no git ran
+                  </Badge>
+                </div>
+                {latestGitWriteRows.length === 0 ? (
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    No terminal git-write previews are saved.
+                  </div>
+                ) : (
+                  <div className="grid gap-1.5">
+                    {latestGitWriteRows.map((item) => (
+                      <div key={item.id} className="rounded p-1.5" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <Badge variant="secondary" className="uppercase">terminal #{item.id}</Badge>
+                          <Badge variant="warning" className="uppercase">{item.risk.replace(/_/g, " ")}</Badge>
+                          {item.projectName && <Badge variant="secondary" className="uppercase" title={item.projectName}>{item.projectName}</Badge>}
+                        </div>
+                        <div className="mt-1 truncate rounded px-2 py-1 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textPrimary }} title={item.command}>
+                          <code>{compactCommandLabel(item.command)}</code>
+                        </div>
+                        <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.explanation}>
+                          {item.explanation || "Git write preview saved. Project Lab must read push context before any write."}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Project Lab Contract
+                  </span>
+                  <Badge variant="warning" className="uppercase">
+                    Spock gate
+                  </Badge>
+                </div>
+                {latestProjectPushContractRows.length === 0 ? (
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    No Project Lab push contract has been created.
+                  </div>
+                ) : (
+                  <div className="grid gap-1.5">
+                    {latestProjectPushContractRows.map((item) => (
+                      <div key={item.id} className="rounded p-1.5" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <Badge variant="secondary" className="uppercase">proposal #{item.id}</Badge>
+                          <Badge variant="destructive" className="uppercase">{item.riskClass.replace(/_/g, " ")}</Badge>
+                          <Badge variant={item.approvalStatus === "approved" ? "success" : item.approvalStatus === "rejected" ? "destructive" : "warning"} className="uppercase">
+                            {item.approvalStatus ?? "no approval"}
+                          </Badge>
+                          <Badge variant="secondary" className="uppercase">{item.resultState.replace(/_/g, " ")}</Badge>
+                          {item.projectName && <Badge variant="warning" className="uppercase" title={item.projectName}>{item.projectName}</Badge>}
+                        </div>
+                        <div className="mt-1 grid gap-1 sm:grid-cols-3">
+                          <CompactReadDatum label="Executor" value={item.executorAgent} tone={C.accent} />
+                          <CompactReadDatum label="Body" value={item.workbenchEvidenceId ? `#${item.workbenchEvidenceId}` : "missing"} tone={item.workbenchEvidenceId ? C.success : C.warning} />
+                          <CompactReadDatum label="Task" value={item.taskId ? `#${item.taskId}` : "missing"} tone={item.taskId ? C.success : C.warning} />
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openProjectPushContract(item)}
+                            title="Open this Project Lab push context. Ledger does not run git."
+                            aria-label={`Open Project Lab push contract ${item.id}`}
+                          >
+                            Open Project Lab
+                          </Button>
+                          <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                            Manual push stays blocked until the Project Lab gate is explicit.
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Latest Vision contracts">
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Latest Visions
+              </div>
+              <div className="mt-0.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                Overall objectives. Tasks remain the work units. Ledger keeps the audit trail.
+              </div>
+            </div>
+            <Badge variant="secondary" className="uppercase">
+              contract layer
+            </Badge>
+          </div>
+          {latestVisionRows.length === 0 ? (
+            <div className="rounded p-2 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+              No Vision contracts yet. Create one from Aang when the overall outcome needs a stop rule.
+            </div>
+          ) : (
+            <div className="grid gap-1.5 lg:grid-cols-2">
+              {latestVisionRows.map((vision) => (
+                <div key={vision.id} className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={vision.title}>
+                        {vision.title}
+                      </div>
+                      <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                        {vision.intent}
+                      </div>
+                    </div>
+                    <Badge variant={vision.status === "active" ? "warning" : vision.status === "achieved" ? "success" : "secondary"} className="shrink-0 uppercase">
+                      {vision.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                  <div className="mt-1.5 grid gap-1 sm:grid-cols-3">
+                    <CompactReadDatum label="Owner" value={vision.ownerAgent} tone={C.accent} />
+                    <CompactReadDatum label="Task" value={vision.taskId ? `#${vision.taskId}` : "unlinked"} tone={vision.taskId ? C.success : C.warning} />
+                    <CompactReadDatum label="Stop" value={vision.stopRule} tone={C.gold} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Recent route records">
           <div className="flex items-center justify-between gap-2">
@@ -2432,6 +2630,15 @@ function ContextPanel({
   const owner = route[2] ?? "Cortana";
   const activeSurface = activeSurfaceLabel(nav);
   const nextAction = nextActionForSurface(nav, heroes.length, mode);
+  const activeVisions = trpc.visions.list.useQuery(
+    { status: "active", limit: 1 },
+    {
+      staleTime: 15_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const activeVision = activeVisions.data?.items[0] ?? null;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -2496,6 +2703,31 @@ function ContextPanel({
         <RailRow label="Owner" value={owner} tone={C.accent} />
         <RailRow label="Receipt" value="Workbench body. Ledger audit." tone={C.gold} />
         <RailRow label="Approval" value="Spock gates external or risky action." tone={C.warning} />
+      </div>
+
+      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Vision
+          </div>
+          <Badge variant={activeVision ? "warning" : "secondary"} className="px-1.5 py-0.5 uppercase" style={{ color: activeVision ? C.gold : C.textMuted, background: shellFrame.shellSoft, border: `1px solid ${shellFrame.shellLineSoft}` }}>
+            {activeVision ? activeVision.status.replace(/_/g, " ") : "none"}
+          </Badge>
+        </div>
+        {activeVision ? (
+          <>
+            <div className="truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={activeVision.title}>
+              {activeVision.title}
+            </div>
+            <RailRow label="Owner" value={activeVision.ownerAgent} tone={C.accent} />
+            <RailRow label="Stop" value={activeVision.stopRule} tone={C.gold} />
+            <RailRow label="Next" value={activeVision.taskId ? `Task #${activeVision.taskId}` : "Create first task"} tone={activeVision.taskId ? C.success : C.warning} />
+          </>
+        ) : (
+          <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+            No active Vision. Use one when the overall outcome needs a stop rule.
+          </div>
+        )}
       </div>
 
       {/* Tool Permissions */}

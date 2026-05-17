@@ -16,6 +16,7 @@ export function ledgerOverviewCopy() {
       outputs: "saved outputs",
       workbench: (terminal: number) => `${terminal} terminal notes`,
       routes: "saved route reads",
+      gitWrites: (contracts: number) => `${contracts} Project Lab contract${contracts === 1 ? "" : "s"}`,
       memory: (proposed: number) => `${proposed} proposed`,
     },
     routeSectionTitle: "Recent Route Reads",

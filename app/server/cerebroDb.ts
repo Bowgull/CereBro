@@ -41,6 +41,28 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)`,
       `CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id)`,
       `CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_path ON projects(path) WHERE path IS NOT NULL`,
+      `CREATE TABLE IF NOT EXISTS visions (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         title TEXT NOT NULL,
+         intent TEXT NOT NULL,
+         status TEXT NOT NULL DEFAULT 'active',
+         status_note TEXT,
+         owner_agent TEXT NOT NULL DEFAULT 'aang',
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         session_id INTEGER REFERENCES sessions(id) ON DELETE SET NULL,
+         task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL,
+         route_record_id INTEGER REFERENCES runtime_route_records(id) ON DELETE SET NULL,
+         stop_rule TEXT NOT NULL,
+         success_criteria TEXT NOT NULL,
+         risk_note TEXT,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         completed_at INTEGER
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_visions_status ON visions(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_visions_project ON visions(project_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_visions_task ON visions(task_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_visions_route ON visions(route_record_id)`,
       `CREATE TABLE IF NOT EXISTS sessions (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          claude_session_id TEXT NOT NULL UNIQUE,
@@ -1350,6 +1372,27 @@ export async function getCerebroDb(): Promise<Client> {
 }
 
 export type TaskStatus = "open" | "in_progress" | "done" | "cancelled";
+
+export type VisionStatus = "active" | "paused" | "blocked" | "achieved" | "unmet" | "budget_limited";
+
+export interface VisionRow {
+  id: number;
+  title: string;
+  intent: string;
+  status: VisionStatus;
+  statusNote: string | null;
+  ownerAgent: string;
+  projectId: number | null;
+  sessionId: number | null;
+  taskId: number | null;
+  routeRecordId: number | null;
+  stopRule: string;
+  successCriteria: string;
+  riskNote: string | null;
+  createdAt: number;
+  updatedAt: number;
+  completedAt: number | null;
+}
 
 export interface TaskRow {
   id: number;

@@ -171,6 +171,14 @@ describe("execution action contract", () => {
     expect(preview.projectLabRouteReason).toContain("Project Lab push context");
     expect(preview.gates.join(" ")).toContain("Git write commands route to Project Lab push context");
     expect(preview.projectId).toBeGreaterThan(0);
+
+    const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
+    const gitWritePreview = ledger.latestGitWriteObservations.find((item) => item.id === preview.observationId);
+    expect(gitWritePreview?.command).toBe("git push");
+    expect(gitWritePreview?.risk).toBe("mutating_or_external");
+    expect(gitWritePreview?.projectName).toBe("CereBro");
+    expect(gitWritePreview?.gates.join(" ")).toContain("Project Lab push context");
+    expect(ledger.cards.gitWrites.terminalPreviews).toBeGreaterThan(0);
   });
 
   it("creates a Project Lab push contract but keeps git remote writes blocked", async () => {
@@ -252,6 +260,15 @@ describe("execution action contract", () => {
     });
     expect(projectApprovalGroups.groups.map((group) => group.key)).toContain("git_remote_write");
     expect(projectApprovalGroups.gates.join(" ")).toContain("does not approve");
+
+    const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
+    const pushContract = ledger.latestProjectPushContracts.find((item) => item.id === ready.proposalId);
+    expect(pushContract?.actionType).toBe("project_manual_push");
+    expect(pushContract?.riskClass).toBe("git_remote_write");
+    expect(pushContract?.projectName).toBe("CereBro");
+    expect(pushContract?.approvalStatus).toBe(approvalStatus === "pending" ? "approved" : approvalStatus);
+    expect(pushContract?.workbenchEvidenceId).toBeGreaterThan(0);
+    expect(ledger.cards.gitWrites.projectPushContracts).toBeGreaterThan(0);
 
     const blocked = await caller.execution.runApprovedAction({
       proposalId: ready.proposalId,
