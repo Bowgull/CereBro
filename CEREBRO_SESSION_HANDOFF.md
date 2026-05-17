@@ -34,9 +34,10 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   not say run, execute, start, or dispatch.
 - Runtime route logic remains unchanged. `routeExecutionReadiness` still
   returns `canExecute: false`.
-- No route executor, command runner, browser action, model call, provider call,
-  git action, Obsidian write, Notion write, Drive write, memory write, install,
-  dependency, schema migration, new primary surface, or Raven path was added.
+- No route executor, command runner, external browser/search automation, model
+  call, provider call, git action, Obsidian write, Notion write, Drive write,
+  memory write, install, dependency, schema migration, new primary surface, or
+  Raven path was added.
 
 ### Files Touched
 - `app/client/src/lib/routeActionModel.ts`
@@ -49,13 +50,17 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `pnpm -C app check` passed.
 - `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-readiness-proof.db' pnpm -C app exec vitest run server/routeActionModel.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run for this slice because the browser
-  automation tool is not currently exposed in this turn and Playwright is not
-  installed through `pnpm -C app exec playwright`.
+- Playwright CLI opened `http://localhost:3000/`, opened Ledger Overview, and
+  confirmed saved route rows render compact execution readiness cells:
+  Readiness, Task, Body, Gate, and Execution.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/ledger-route-readiness-proof-compact-read.png`.
 
 ### Cleanliness Read
-- Dirty files at start: none.
+- Dirty files at start: `app/client/src/lib/routeActionModel.ts` and
+  `app/client/src/pages/Home.tsx` appeared after the runtime receipt proof
+  slice. They matched item 8 route-readiness hardening and were treated as a
+  bounded slice.
 - Dirty files before closeout: current-slice route action model, Home, tests,
   and docs.
 - Dev server remains available at `http://localhost:3000/`.
@@ -101,8 +106,8 @@ execution readiness proof and still do not execute. Next best path is more item
 read-only backend receipt audit if the visible route contract is stable. Do
 not run Ollama status checks, installs, pulls, external searches, provider
 calls, model calls, note scans, vector indexing, source fetches, cleanup
-actions, command execution runners, browser actions, or vault writes without
-explicit approval.
+actions, command execution runners, route saves, task creation, or vault writes
+without explicit approval.
 
 ## 2026-05-17 0016 EDT - Runtime Receipt Compact Read
 

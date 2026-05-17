@@ -107,7 +107,9 @@ Recent Prime slices:
   `CompactReadDatum`. Execution reads only as `blocked` or `future review
   only`; route logic still returns `canExecute: false`. No route executor,
   command runner, browser action, model/provider call, git action, external
-  write, new surface, dependency, or Raven path was added.
+  write, new surface, dependency, or Raven path was added. Browser proof opened
+  Ledger Overview and saved
+  `output/playwright/ledger-route-readiness-proof-compact-read.png`.
 - 2026-05-17 0016 EDT: moved to item 8 backend route receipts, read-only
   visible proof first. Ledger selected body audit read and Runtime route
   preview primary proof now use shared `CompactReadDatum`; the local
