@@ -86,6 +86,18 @@ describe("execution action contract", () => {
     expect(runnerGuard.stdoutSummary).toContain("/Users/lindsaybell/Desktop/CereBro");
     expect(runnerGuard.gates.join(" ")).toContain("Shell was disabled");
 
+    const approvalDetail = await caller.approvals.detail({ id: approvalId });
+    expect(approvalDetail.found).toBe(true);
+    expect(approvalDetail.writesExternal).toBe(false);
+    expect(approvalDetail.wouldApprove).toBe(false);
+    const approvalExecutionLink = approvalDetail.approval?.executionLinks.find((item) => item.proposalId === ready.proposal?.id);
+    expect(approvalExecutionLink?.sourceType).toBe("command_observation");
+    expect(approvalExecutionLink?.sourceId).toBe(preview.observationId);
+    expect(approvalExecutionLink?.workbenchEvidenceId).toBe(evidence.evidence.id);
+    expect(approvalExecutionLink?.resultId).toBe(runnerGuard.resultId);
+    expect(approvalExecutionLink?.resultStatus).toBe("completed");
+    expect(approvalExecutionLink?.resultExitCode).toBe(0);
+
     const results = await caller.execution.results({
       proposalId: ready.proposal?.id ?? -1,
       limit: 5,

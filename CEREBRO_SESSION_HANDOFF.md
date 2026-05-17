@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0953 EDT
+Last updated: 2026-05-17 0958 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0958 EDT - Approval Execution Link Readback
+
+### What Changed
+- Approval detail now reads execution proposals and latest execution results
+  linked to the selected approval receipt.
+- The existing Approvals receipt chain now shows linked proposal id, risk,
+  result state, latest result id, exit code, and command label when present.
+- Linked approval execution receipts can open Terminal Lab context or the
+  linked Workbench receipt body.
+- These controls are read-only routes. They do not approve, rerun, execute,
+  browse, call providers, or write externally.
+- Regression coverage now proves approval detail returns the linked execution
+  proposal, Workbench body id, result id, result status, and exit code after an
+  approved read-only local command.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Approvals,
+  switched to approved approvals, selected a linked approval, and confirmed
+  `Approval linked execution receipts`, proposal/result chips, `Open Terminal`,
+  and `Open Body`.
+- Screenshot proof saved locally at
+  `output/playwright/approval-execution-links.png`.
+
+### Drift Check
+- On path. This closes more of the approval receipt readback loop across
+  Approvals, Terminal Lab, Workbench, and Ledger.
+- No new surface, runner broadening, git-write runner, install, destructive
+  action, browser automation, provider call, external write, paid service, or
+  Raven path was added.
+
+### Known Risks
+- Approval detail only shows the latest execution result per linked proposal.
+  This is intentional for compact readback. Full result history remains in
+  Terminal Lab and Ledger.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/approvals.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/terminalLab.ts, app/server/execution.contract.test.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Approvals now read linked execution proposals/results and route to Terminal Lab or Workbench bodies without executing. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is a compact final audit read across Terminal Lab, Workbench, Ledger, and Approvals, then move to the next build-plan lane only if no receipt loop gap remains. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0953 EDT - Workbench Execution Validation Controls
 

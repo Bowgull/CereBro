@@ -64,6 +64,27 @@ function rowToApproval(row: Record<string, unknown>) {
   };
 }
 
+function rowToApprovalExecutionLink(row: Record<string, unknown>) {
+  return {
+    proposalId: Number(row.proposal_id),
+    sourceType: String(row.source_type),
+    sourceId: Number(row.source_id),
+    actionType: String(row.action_type),
+    riskClass: String(row.risk_class),
+    executorAgent: String(row.executor_agent),
+    command: row.command == null ? null : String(row.command),
+    cwd: row.cwd == null ? null : String(row.cwd),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    proposalResultState: String(row.proposal_result_state),
+    proposalStatus: String(row.proposal_status),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    resultId: row.result_id == null ? null : Number(row.result_id),
+    resultStatus: row.result_status == null ? null : String(row.result_status),
+    resultExitCode: row.result_exit_code == null ? null : Number(row.result_exit_code),
+    resultCreatedAt: row.result_created_at == null ? null : Number(row.result_created_at),
+  };
+}
+
 function rowToApprovalPreview(row: Record<string, unknown>) {
   const targetType = row.target_type == null ? null : String(row.target_type);
   const actionType = String(row.action_type);
@@ -519,14 +540,50 @@ export const approvalsRouter = router({
         args: [input.id],
       });
       const row = result.rows[0];
+      const executionLinks = row
+        ? await db.execute({
+            sql: `
+              SELECT
+                eap.id AS proposal_id,
+                eap.source_type,
+                eap.source_id,
+                eap.action_type,
+                eap.risk_class,
+                eap.executor_agent,
+                eap.command,
+                eap.cwd,
+                eap.workbench_evidence_id,
+                eap.result_state AS proposal_result_state,
+                eap.status AS proposal_status,
+                eap.recovery_note,
+                ear.id AS result_id,
+                ear.status AS result_status,
+                ear.exit_code AS result_exit_code,
+                ear.created_at AS result_created_at
+              FROM execution_action_proposals eap
+              LEFT JOIN execution_action_results ear ON ear.id = (
+                SELECT latest.id
+                FROM execution_action_results latest
+                WHERE latest.proposal_id = eap.id
+                ORDER BY latest.created_at DESC, latest.id DESC
+                LIMIT 1
+              )
+              WHERE eap.approval_id = ?
+              ORDER BY eap.created_at DESC, eap.id DESC
+              LIMIT 12
+            `,
+            args: [input.id],
+          })
+        : { rows: [] };
       return {
         mode: "read_only" as const,
         writesExternal: false,
         wouldApprove: false,
         found: Boolean(row),
-        approval: row ? rowToApproval(row) : null,
+        approval: row ? { ...rowToApproval(row), executionLinks: executionLinks.rows.map(rowToApprovalExecutionLink) } : null,
         gates: [
           "Approval detail reads one local approval preview.",
+          "Linked execution proposals and results are read-only receipt references.",
           "It does not approve, reject, execute commands, browse, fetch, schedule, send, or write externally.",
         ],
       };

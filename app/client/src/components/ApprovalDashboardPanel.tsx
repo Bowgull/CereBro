@@ -643,6 +643,24 @@ type ApprovalChainItem = {
     targetSummary: string | null;
   } | null;
   costRisk: string | null;
+  executionLinks?: Array<{
+    proposalId: number;
+    sourceType: string;
+    sourceId: number;
+    actionType: string;
+    riskClass: string;
+    executorAgent: string;
+    command: string | null;
+    cwd: string | null;
+    workbenchEvidenceId: number | null;
+    proposalResultState: string;
+    proposalStatus: string;
+    recoveryNote: string | null;
+    resultId: number | null;
+    resultStatus: string | null;
+    resultExitCode: number | null;
+    resultCreatedAt: number | null;
+  }>;
 };
 
 function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route: ApprovalRoute | null; reason: string } {
@@ -706,6 +724,7 @@ function ApprovalReceiptChain({
 }) {
   const copy = approvalPanelCopy();
   const nextSurface = nextSurfaceForApproval(selected);
+  const executionLinks = selected.executionLinks ?? [];
   const preflightTone = selected.permissionPreflight == null
     ? C.warning
     : selected.permissionPreflight.decision === "blocked_by_hard_gate"
@@ -740,6 +759,44 @@ function ApprovalReceiptChain({
       tone: C.success,
     },
   ];
+  function openTerminalLink(link: NonNullable<ApprovalChainItem["executionLinks"]>[number]) {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:terminal-focus",
+        JSON.stringify({
+          source: "approval_execution_link",
+          resultId: link.resultId,
+          observationId: link.sourceType === "command_observation" ? link.sourceId : null,
+          command: link.command ?? "",
+          notice: `Approvals opened Terminal Lab context for proposal #${link.proposalId}.`,
+        }),
+      );
+    } catch {
+      // Terminal Lab still opens; the user can inspect recent results manually.
+    }
+    onNavigate("terminal");
+  }
+
+  function openWorkbenchLink(link: NonNullable<ApprovalChainItem["executionLinks"]>[number]) {
+    if (!onNavigate || link.workbenchEvidenceId == null) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "approval_execution_link",
+          evidenceId: link.workbenchEvidenceId,
+          kind: "terminal_output",
+          query: link.command ?? `#${link.workbenchEvidenceId}`,
+          groupBy: "command",
+          notice: `Approvals opened Workbench body #${link.workbenchEvidenceId} from proposal #${link.proposalId}.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can inspect recent terminal receipts manually.
+    }
+    onNavigate("workbench");
+  }
 
   return (
     <Section title={copy.chainTitle} detail={copy.chainDetail}>
@@ -782,6 +839,48 @@ function ApprovalReceiptChain({
           Security Gate
         </Button>
       </div>
+      {executionLinks.length > 0 && (
+        <div className="grid gap-1" aria-label="Approval linked execution receipts">
+          {executionLinks.map((link) => (
+            <div key={link.proposalId} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex flex-wrap items-center gap-1">
+                <Chip label={`proposal #${link.proposalId}`} tone={C.accent} />
+                <Chip label={labelize(link.riskClass)} tone={link.riskClass === "read_only" ? C.success : C.danger} />
+                <Chip label={labelize(link.proposalResultState)} tone={link.proposalResultState === "not_run" ? C.warning : C.textMuted} />
+                {link.resultId != null && <Chip label={`result #${link.resultId}`} tone={link.resultStatus === "completed" ? C.success : C.warning} />}
+                {link.resultExitCode != null && <Chip label={`exit ${link.resultExitCode}`} tone={link.resultExitCode === 0 ? C.success : C.warning} />}
+              </div>
+              <div className="mt-1 truncate text-[10px]" title={link.command ?? link.actionType} style={{ color: C.textMuted }}>
+                {link.command ?? labelize(link.actionType)}
+              </div>
+              <div className="mt-1 flex flex-wrap gap-1">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openTerminalLink(link)}
+                  disabled={!onNavigate}
+                  title="Open Terminal Lab context for this linked execution proposal. No command runs."
+                  aria-label={`Open Terminal Lab for execution proposal ${link.proposalId}`}
+                >
+                  Open Terminal
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openWorkbenchLink(link)}
+                  disabled={!onNavigate || link.workbenchEvidenceId == null}
+                  title="Open the linked Workbench receipt body. No action runs."
+                  aria-label={`Open Workbench body for execution proposal ${link.proposalId}`}
+                >
+                  Open Body
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </Section>
   );
 }

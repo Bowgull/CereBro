@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0953 EDT
+Last updated: 2026-05-17 0958 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0958 EDT: Approval detail now reads execution proposals and
+  latest execution results linked to the selected approval receipt. The
+  existing Approvals receipt chain shows proposal/result chips and read-only
+  `Open Terminal` / `Open Body` routes. Regression coverage proves approval
+  detail returns the linked proposal, Workbench body id, result id, status, and
+  exit code after an approved read-only local command.
 - 2026-05-17 0953 EDT: Workbench execution-linked receipt bodies now show
   quick Spock validation controls inside `Append Validation Receipt`.
   `Mark Looks Consistent` and `Mark Blocked` prepare local append-only
