@@ -416,11 +416,65 @@ function taskTitleFor(text: string, category: RouteCategory, projectLabel: strin
   return `${prefix}${category.replace(/_/g, " ")} - ${shortText}`;
 }
 
-function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
+type RuntimeModelLaneProposal = ReturnType<typeof modelLaneProposalFor>;
+
+function routeShapeForInput(input: { text: string; mode: RuntimeMode }) {
   const normalized = input.text.toLowerCase().replace(/\s+/g, " ").trim();
   const category = classifyRoute(normalized, input.mode);
+  return {
+    normalized,
+    category,
+    ownerAgent: ownerFor(category),
+  };
+}
+
+function emptyModelRegistryRead(modelProposal: RuntimeModelLaneProposal) {
+  return {
+    mode: "local_registry_read" as const,
+    laneId: modelProposal.laneId,
+    provider: modelProposal.provider,
+    totalRecords: 0,
+    trustedEvidenceCount: 0,
+    cautionCount: 0,
+    blockedOrFailedCount: 0,
+    routeDefaultsChanged: false,
+    rule: "Registry evidence does not approve external use or make a route default.",
+    noActionTaken: [
+      "No provider, model, gateway, browser, fetch, install, pull, account, token, command, or external write ran.",
+      "Runtime route preview reads local registry rows only.",
+    ],
+  };
+}
+
+async function readModelRegistryForRoute(modelProposal: RuntimeModelLaneProposal) {
+  const db = await getCerebroDb();
+  const localLane = modelProposal.laneId === "ollama_local_fast_lane";
+  const result = await db.execute({
+    sql: `
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN eval_status IN ('source_verified', 'tested_pass') THEN 1 ELSE 0 END) AS trusted,
+        SUM(CASE WHEN eval_status IN ('tested_mixed', 'stale') THEN 1 ELSE 0 END) AS caution,
+        SUM(CASE WHEN eval_status = 'tested_fail' OR privacy_class = 'blocked_sensitive' OR approval_level = 'blocked' THEN 1 ELSE 0 END) AS blocked
+      FROM model_tool_capabilities
+      WHERE ${localLane ? "(access_method = 'local' OR provider LIKE ?)" : "(access_method != 'local' OR capability_kind = 'gateway')"}
+    `,
+    args: localLane ? [`%${modelProposal.provider}%`] : [],
+  });
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+
+  return {
+    ...emptyModelRegistryRead(modelProposal),
+    totalRecords: Number(row?.total ?? 0),
+    trustedEvidenceCount: Number(row?.trusted ?? 0),
+    cautionCount: Number(row?.caution ?? 0),
+    blockedOrFailedCount: Number(row?.blocked ?? 0),
+  };
+}
+
+function buildRoutePreview(input: { text: string; mode: RuntimeMode }, modelRegistryRead?: Awaited<ReturnType<typeof readModelRegistryForRoute>>) {
+  const { normalized, category, ownerAgent } = routeShapeForInput(input);
   const project = detectProject(normalized);
-  const ownerAgent = ownerFor(category);
   const supportAgents = supportAgentsFor(category, project?.slug ?? null);
   const permission = permissionShape(category);
   const preflight = decidePermissionPreflight({
@@ -432,7 +486,11 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
     persistsMemory: permission.persistsMemory,
   });
   const routeChain = ["Aang reads mode", "Cortana routes", `${ownerAgent} owns`, ...supportAgents.map((agent) => `${agent} supports`)];
-  const modelProposal = modelLaneProposalFor(ownerAgent, category);
+  const baseModelProposal = modelLaneProposalFor(ownerAgent, category);
+  const modelProposal = {
+    ...baseModelProposal,
+    registryRead: modelRegistryRead ?? emptyModelRegistryRead(baseModelProposal),
+  };
   const approvalGates = preflight.requiredApprovals.length > 0
     ? preflight.requiredApprovals
     : ["No external action from route preview."];
@@ -513,6 +571,7 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }) {
         modelClass: modelProposal.modelClass,
         status: modelProposal.status,
         reason: modelProposal.reason,
+        registryRead: modelProposal.registryRead,
       },
     },
     ledgerFocusDraft: {
@@ -634,8 +693,10 @@ export const runtimeRouter = router({
         mode: z.enum(runtimeModes).default("quick"),
       }),
     )
-    .mutation(({ input }) => {
-      return buildRoutePreview(input);
+    .mutation(async ({ input }) => {
+      const routeShape = routeShapeForInput(input);
+      const modelProposal = modelLaneProposalFor(routeShape.ownerAgent, routeShape.category);
+      return buildRoutePreview(input, await readModelRegistryForRoute(modelProposal));
     }),
   createTaskFromRouteRecord: publicProcedure
     .input(
@@ -999,7 +1060,9 @@ export const runtimeRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      const preview = buildRoutePreview(input);
+      const routeShape = routeShapeForInput(input);
+      const previewModelProposal = modelLaneProposalFor(routeShape.ownerAgent, routeShape.category);
+      const preview = buildRoutePreview(input, await readModelRegistryForRoute(previewModelProposal));
       const db = await getCerebroDb();
       const result = await db.execute({
         sql: `

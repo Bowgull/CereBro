@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 2001 EDT
+Last updated: 2026-05-16 2322 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 2322 EDT: returned to item 8 backend route receipts. Runtime
+  route previews now read local Model/Tool Registry evidence for the proposed
+  model lane and carry that read into saved route receipt drafts. The existing
+  Runtime Route Receipt surface shows compact registry row/trusted counts and
+  unchanged route defaults in route details. No provider/model/tool/gateway
+  call, route default change, install, browser/search/fetch, token/account
+  action, Ollama status command, schema migration, new surface, external write,
+  command runner, dependency, or Raven path was added.
 - 2026-05-16 2001 EDT: continued item 9 in Basement Model Tools. Added a
   compact local status-decision readback to policy and route preview. The
   Models tab now shows source-ready, eval-ready, mixed, failed, stale, and

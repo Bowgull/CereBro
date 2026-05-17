@@ -52,6 +52,13 @@ export type RoutePreviewProofInput = {
   dataLeavingMachine: boolean;
   laneId: string;
   laneSummary: string;
+  registryRead?: {
+    totalRecords: number;
+    trustedEvidenceCount: number;
+    cautionCount: number;
+    blockedOrFailedCount: number;
+    routeDefaultsChanged: boolean;
+  };
 };
 
 export type RoutePreviewProofField = {
@@ -182,6 +189,11 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
 }
 
 export function routePreviewProofModel(input: RoutePreviewProofInput) {
+  const registry = input.registryRead;
+  const registryLabel = registry
+    ? `registry ${registry.totalRecords} rows, ${registry.trustedEvidenceCount} trusted`
+    : "registry not read";
+
   return {
     primary: [
       { label: "Aang", value: input.aangRead, tone: "gold" },
@@ -201,6 +213,14 @@ export function routePreviewProofModel(input: RoutePreviewProofInput) {
       { label: input.approvalGate, tone: input.toolApprovalRequired ? "warning" : "success" },
       { label: `model ${input.modelClass}`, tone: "muted" },
       { label: input.provider, tone: "gold" },
+      {
+        label: registryLabel,
+        tone: registry && registry.trustedEvidenceCount > 0 ? "success" : registry && registry.totalRecords > 0 ? "warning" : "muted",
+      },
+      {
+        label: registry?.routeDefaultsChanged ? "route default changed" : "route defaults unchanged",
+        tone: registry?.routeDefaultsChanged ? "danger" : "success",
+      },
       { label: input.modelStatus.replace(/_/g, " "), tone: input.modelStatus === "approval_required" ? "warning" : "success" },
       { label: `tool ${input.toolAction}`, tone: "muted" },
       { label: input.toolApprovalRequired ? "approval required" : "local only", tone: input.toolApprovalRequired ? "warning" : "success" },

@@ -167,7 +167,13 @@ describe("runtime route receipt preview", () => {
     expect(quickPreview.modelProposal.installRequired).toBe(true);
     expect(quickPreview.modelProposal.status).toBe("not_verified_no_install");
     expect(quickPreview.modelProposal.reason).toContain("fast local-first");
+    expect(quickPreview.modelProposal.registryRead.mode).toBe("local_registry_read");
+    expect(quickPreview.modelProposal.registryRead.laneId).toBe("ollama_local_fast_lane");
+    expect(quickPreview.modelProposal.registryRead.routeDefaultsChanged).toBe(false);
+    expect(quickPreview.modelProposal.registryRead.noActionTaken.join(" ")).toContain("No provider");
+    expect(quickPreview.modelProposal.registryRead.rule).toContain("does not approve");
     expect(quickPreview.workbenchReceiptDraft.modelLane?.laneId).toBe("ollama_local_fast_lane");
+    expect(quickPreview.workbenchReceiptDraft.modelLane?.registryRead.mode).toBe("local_registry_read");
     expect(quickPreview.ledgerFocusDraft.auditFilters.modelLaneId).toBe("ollama_local_fast_lane");
     expect(quickPreview.gates.join(" ")).toContain("No Ollama install");
 
@@ -180,6 +186,9 @@ describe("runtime route receipt preview", () => {
     expect(buildPreview.modelProposal.approvalRequired).toBe(true);
     expect(buildPreview.modelProposal.dataLeavingMachine).toBe(true);
     expect(buildPreview.modelProposal.reason).toContain("local lane may not be strong enough");
+    expect(buildPreview.modelProposal.registryRead.mode).toBe("local_registry_read");
+    expect(buildPreview.modelProposal.registryRead.laneId).toBe("frontier_or_codex_escalation");
+    expect(buildPreview.modelProposal.registryRead.routeDefaultsChanged).toBe(false);
     expect(buildPreview.approvalGates).toContain("external model escalation approval");
   });
 

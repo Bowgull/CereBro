@@ -65,11 +65,21 @@ describe("routeActionModel", () => {
       dataLeavingMachine: true,
       laneId: "frontier_or_codex_escalation",
       laneSummary: "Use local planning first.",
+      registryRead: {
+        mode: "local_registry_read",
+        totalRecords: 4,
+        trustedEvidenceCount: 1,
+        cautionCount: 0,
+        blockedOrFailedCount: 0,
+        routeDefaultsChanged: false,
+      },
     });
 
     expect(proof.primary.map((field) => field.label)).toEqual(["Aang", "Owner", "Receipt", "Next"]);
     expect(proof.detailsSummary).toBe("Route Details");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("model local_code_helper");
+    expect(proof.detailChips.map((chip) => chip.label)).toContain("registry 4 rows, 1 trusted");
+    expect(proof.detailChips.map((chip) => chip.label)).toContain("route defaults unchanged");
     expect(proof.detailChips.map((chip) => chip.label)).toContain("data leaves machine");
   });
 

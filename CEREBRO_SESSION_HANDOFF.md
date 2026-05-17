@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2001 EDT
+Last updated: 2026-05-16 2322 EDT
 
 ## Current North Star
 
@@ -20,6 +20,89 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2322 EDT - Runtime Registry Read Receipts
+
+### What Changed
+- Continued item 8 backend route receipts after confirming item 9 Model Tools
+  is complete enough for this stage.
+- Runtime route preview now reads local model/tool registry evidence for the
+  proposed model lane before showing the Aang to Cortana receipt.
+- The receipt carries row count, trusted-evidence count, caution count,
+  blocked/failed count, and the rule that registry evidence does not approve
+  external use or change route defaults.
+- Saved route records persist the same model registry read inside the
+  Workbench receipt draft.
+- The route preview detail chips now show compact registry evidence and
+  unchanged route defaults inside the existing Runtime Route Receipt surface.
+- No provider, model, tool, gateway, browser, search, fetch, install, token,
+  account action, model pull, external write, schema migration, dependency,
+  route default change, new primary surface, command runner, or Raven path was
+  added.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/lib/routeActionModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-registry-read.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app exec vitest run server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Full in-app browser automation tool was not exposed in this session after
+  tool discovery. Server proof was completed by HTTP readback.
+
+### Cleanliness Read
+- Dirty files at start: `app/server/routers/runtime.ts` and
+  `app/server/runtime.routeReceipt.test.ts`.
+- They were coherent current-slice work for route receipt registry evidence and
+  were completed rather than reverted.
+- Dev server is running at `http://localhost:3000/` for preview.
+- No worker was used because this was a single owner route-receipt slice with a
+  narrow UI chip readout.
+
+### Front-End Steward Review
+- Surface: Runtime Route Receipt.
+- Register: product surface.
+- Primary object: Aang to Cortana route receipt.
+- User question: what model lane is being proposed, what local evidence exists,
+  and whether anything changed automatically.
+- Route visible: Aang read, Cortana route, owner, Workbench body, Ledger audit.
+- Receipt/proof visible: registry count and unchanged defaults are visible in
+  the route details.
+- Machinery hidden until needed: this is a compact detail read, not a model
+  dashboard or provider launcher.
+- Generic UI rejected: no model marketplace, auto-router, plugin gallery, or
+  generic AI control wall was added.
+- Remaining taste risk: route details are dense but bounded. Keep compact until
+  a larger Runtime Receipt polish pass.
+
+### Completion Read
+- Overall: 72%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 44%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Model Tools item 9 is complete enough
+for now. Runtime route receipts now read local model registry evidence without
+execution. Next best path is Knowledge contracts/source storage, unless the
+dirty read shows a route-receipt regression. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, or model calls without
+explicit approval.
 
 ## 2026-05-16 2001 EDT - Model Tool Status Readback
 

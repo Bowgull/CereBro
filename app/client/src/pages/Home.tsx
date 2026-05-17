@@ -1906,6 +1906,18 @@ function RuntimeRouteReceipt({
       installRequired: boolean;
       reason: string;
       userFacingSummary: string;
+      registryRead?: {
+        mode: string;
+        laneId: string;
+        provider: string;
+        totalRecords: number;
+        trustedEvidenceCount: number;
+        cautionCount: number;
+        blockedOrFailedCount: number;
+        routeDefaultsChanged: boolean;
+        rule: string;
+        noActionTaken: string[];
+      };
     };
     toolProposal: { actionClass: string; perceptionClass: string; externalTarget: boolean; approvalRequired: boolean };
     approvalGates: string[];
@@ -1940,6 +1952,18 @@ function RuntimeRouteReceipt({
         modelClass: string;
         status: string;
         reason: string;
+        registryRead?: {
+          mode: string;
+          laneId: string;
+          provider: string;
+          totalRecords: number;
+          trustedEvidenceCount: number;
+          cautionCount: number;
+          blockedOrFailedCount: number;
+          routeDefaultsChanged: boolean;
+          rule: string;
+          noActionTaken: string[];
+        };
       };
     };
     ledgerFocusDraft: {
@@ -1998,6 +2022,7 @@ function RuntimeRouteReceipt({
     dataLeavingMachine: result.modelProposal.dataLeavingMachine,
     laneId: result.modelProposal.laneId,
     laneSummary: result.modelProposal.userFacingSummary,
+    registryRead: result.modelProposal.registryRead,
   });
   const previewActions = routePreviewActionModel({
     taskCreated,
