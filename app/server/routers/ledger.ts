@@ -261,6 +261,75 @@ async function readRouteReceiptContract() {
   };
 }
 
+async function readExecutionReceiptLoopAudit() {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        COUNT(DISTINCT eap.id) AS proposals,
+        COUNT(DISTINCT CASE WHEN eap.approval_id IS NOT NULL THEN eap.id END) AS approval_linked,
+        COUNT(DISTINCT CASE WHEN a.status = 'approved' THEN eap.id END) AS approved,
+        COUNT(DISTINCT CASE WHEN eap.workbench_evidence_id IS NOT NULL THEN eap.id END) AS body_linked,
+        COUNT(DISTINCT CASE WHEN eap.task_id IS NOT NULL THEN eap.id END) AS task_linked,
+        COUNT(DISTINCT CASE WHEN eap.risk_class = 'read_only' THEN eap.id END) AS read_only,
+        COUNT(DISTINCT CASE WHEN eap.risk_class != 'read_only' THEN eap.id END) AS blocked_risk,
+        COUNT(DISTINCT CASE WHEN ear.id IS NOT NULL THEN eap.id END) AS result_linked,
+        COUNT(DISTINCT CASE WHEN ear.status = 'completed' THEN eap.id END) AS completed,
+        COUNT(DISTINCT CASE WHEN eap.source_type = 'command_observation' THEN eap.id END) AS terminal_source,
+        COUNT(DISTINCT v.id) AS validation_notes
+      FROM execution_action_proposals eap
+      LEFT JOIN approvals a ON a.id = eap.approval_id
+      LEFT JOIN execution_action_results ear ON ear.id = (
+        SELECT latest.id
+        FROM execution_action_results latest
+        WHERE latest.proposal_id = eap.id
+        ORDER BY latest.created_at DESC, latest.id DESC
+        LIMIT 1
+      )
+      LEFT JOIN workbench_evidence_records v ON v.target_uri = 'evidence:' || eap.workbench_evidence_id
+        AND v.kind = 'validation_note'
+    `,
+  });
+  const row = result.rows[0] ?? {};
+  const proposals = Number(row.proposals ?? 0);
+  const approvalLinked = Number(row.approval_linked ?? 0);
+  const approved = Number(row.approved ?? 0);
+  const bodyLinked = Number(row.body_linked ?? 0);
+  const taskLinked = Number(row.task_linked ?? 0);
+  const readOnly = Number(row.read_only ?? 0);
+  const blockedRisk = Number(row.blocked_risk ?? 0);
+  const resultLinked = Number(row.result_linked ?? 0);
+  const completed = Number(row.completed ?? 0);
+  const terminalSource = Number(row.terminal_source ?? 0);
+  const validationNotes = Number(row.validation_notes ?? 0);
+  const readyToReview = Math.min(approvalLinked, approved, bodyLinked, taskLinked, readOnly);
+  return {
+    mode: "read_only" as const,
+    ownerAgent: "spock" as const,
+    proposals,
+    terminalSource,
+    approvalLinked,
+    approved,
+    bodyLinked,
+    taskLinked,
+    readOnly,
+    blockedRisk,
+    readyToReview,
+    resultLinked,
+    completed,
+    validationNotes,
+    canExecuteFromAudit: false,
+    gates: [
+      "Execution receipt loop audit reads local records only.",
+      "Approval, Workbench, Terminal, and Ledger links are evidence. They are not permission to run new work.",
+      "The audit does not approve, reject, execute commands, browse, fetch, call models, stage git, push, or write externally.",
+    ],
+    nextAction: validationNotes < resultLinked
+      ? "Append or inspect validation receipts for completed execution bodies."
+      : "Receipt loop is inspectable. Keep runner scope unchanged.",
+  };
+}
+
 export const ledgerRouter = router({
   overview: publicProcedure
     .input(
@@ -295,6 +364,7 @@ export const ledgerRouter = router({
         latestRoutes,
         memoryContract,
         routeReceiptContract,
+        executionReceiptLoopAudit,
       ] = await Promise.all([
         db.execute({
           sql: `
@@ -493,6 +563,7 @@ export const ledgerRouter = router({
         }),
         readMemoryContract(),
         readRouteReceiptContract(),
+        readExecutionReceiptLoopAudit(),
       ]);
 
       const taskRow = taskCounts.rows[0] ?? {};
@@ -542,6 +613,7 @@ export const ledgerRouter = router({
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
         memoryContract,
         routeReceiptContract,
+        executionReceiptLoopAudit,
         gates: [
           "Ledger overview is read-only.",
           "This read model does not open browsers, run commands, call models, approve gates, or write externally.",

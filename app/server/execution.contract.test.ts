@@ -156,6 +156,14 @@ describe("execution action contract", () => {
 
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.mode).toBe("read_only");
+    expect(ledger.executionReceiptLoopAudit.canExecuteFromAudit).toBe(false);
+    expect(ledger.executionReceiptLoopAudit.proposals).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.approved).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.bodyLinked).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.resultLinked).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.validationNotes).toBeGreaterThan(0);
+    expect(ledger.executionReceiptLoopAudit.gates.join(" ")).toContain("does not approve");
     expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);
     const ledgerResult = ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId);
     expect(ledgerResult?.command).toBe("pwd");

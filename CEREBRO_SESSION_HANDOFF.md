@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0958 EDT
+Last updated: 2026-05-17 1003 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1003 EDT - Ledger Execution Receipt Loop Audit
+
+### What Changed
+- Ledger overview now includes a read-only `executionReceiptLoopAudit`.
+- The audit counts local execution proposals, Terminal sources, approval
+  links, approved receipts, Workbench body links, task links, read-only
+  contracts, blocked risk contracts, result links, completed results, and
+  validation notes.
+- Ledger now shows an `Execution Receipt Loop` section with compact proof for
+  Terminal, Approval, Workbench, Ledger, and validation linkage.
+- The audit explicitly reports `canExecuteFromAudit: false`.
+- Regression coverage now proves the audit reads the approved read-only command
+  loop without granting execution.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3001/` after the dev server
+  auto-bumped from busy port `3000`: opened Ledger and confirmed
+  `Execution Receipt Loop`, proposal/body/result/validation proof, `Can
+  Execute`, `no execution`, and the no-approve/no-run guard text.
+- Screenshot proof saved locally at
+  `output/playwright/ledger-execution-receipt-loop-audit.png`.
+
+### Drift Check
+- On path. This completes a compact read across Terminal Lab, Approvals,
+  Workbench, Ledger, and validation receipts without adding a new surface.
+- No runner broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, or Raven path was
+  added.
+
+### Known Risks
+- The audit reports aggregate counts. It does not replace the per-result cards
+  or detailed Approvals and Workbench receipt bodies.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/approvals.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/terminalLab.ts, app/server/execution.contract.test.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Ledger now has an Execution Receipt Loop audit proving Terminal, Approval, Workbench, Ledger, result, and validation links are readable while canExecuteFromAudit stays false. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best move is to decide whether the receipt loop is complete enough to move to the next build-plan lane, or add only a small missing readback if the audit exposes a real gap. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0958 EDT - Approval Execution Link Readback
 

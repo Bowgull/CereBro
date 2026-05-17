@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0958 EDT
+Last updated: 2026-05-17 1003 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1003 EDT: Ledger overview now includes a read-only
+  `executionReceiptLoopAudit` and a compact `Execution Receipt Loop` section.
+  It counts execution proposals, Terminal sources, approval/body/task links,
+  approved receipts, read-only and blocked-risk contracts, result links,
+  completed results, and validation notes while reporting
+  `canExecuteFromAudit: false`. Regression coverage proves the approved
+  read-only command loop is readable without granting execution.
 - 2026-05-17 0958 EDT: Approval detail now reads execution proposals and
   latest execution results linked to the selected approval receipt. The
   existing Approvals receipt chain shows proposal/result chips and read-only

@@ -1018,6 +1018,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const overviewCards = ledgerOverview.data?.cards;
   const memoryContract = ledgerOverview.data?.memoryContract;
   const routeReceiptContract = ledgerOverview.data?.routeReceiptContract;
+  const executionReceiptLoopAudit = ledgerOverview.data?.executionReceiptLoopAudit;
   const routeReceiptContractProof = routeReceiptContract ? routeReceiptContractProofModel(routeReceiptContract) : [];
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const executionRows = ledgerOverview.data?.latestExecutionResults ?? [];
@@ -1517,6 +1518,41 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
             <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               {routeReceiptContract.gates[2]}
+            </div>
+          </section>
+        )}
+
+        {executionReceiptLoopAudit && (
+          <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Execution receipt loop audit">
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                  Execution Receipt Loop
+                </div>
+                <div className="mt-0.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                  Terminal, Approval, Workbench, and Ledger links. Read-only audit.
+                </div>
+              </div>
+              <Badge variant="secondary" className="uppercase">
+                no execution
+              </Badge>
+            </div>
+            <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
+              <CompactReadDatum label="Proposals" value={String(executionReceiptLoopAudit.proposals)} tone={C.accent} />
+              <CompactReadDatum label="Approved" value={`${executionReceiptLoopAudit.approved}/${executionReceiptLoopAudit.approvalLinked}`} tone={executionReceiptLoopAudit.approved > 0 ? C.success : C.warning} />
+              <CompactReadDatum label="Bodies" value={String(executionReceiptLoopAudit.bodyLinked)} tone={executionReceiptLoopAudit.bodyLinked > 0 ? C.success : C.warning} />
+              <CompactReadDatum label="Results" value={`${executionReceiptLoopAudit.completed}/${executionReceiptLoopAudit.resultLinked}`} tone={executionReceiptLoopAudit.completed > 0 ? C.success : C.textMuted} />
+              <CompactReadDatum label="Validation" value={String(executionReceiptLoopAudit.validationNotes)} tone={executionReceiptLoopAudit.validationNotes >= executionReceiptLoopAudit.resultLinked ? C.success : C.warning} />
+              <CompactReadDatum label="Blocked Risk" value={String(executionReceiptLoopAudit.blockedRisk)} tone={executionReceiptLoopAudit.blockedRisk > 0 ? C.danger : C.textMuted} />
+            </div>
+            <div className="mt-1.5 grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
+              <CompactReadDatum label="Terminal Source" value={String(executionReceiptLoopAudit.terminalSource)} tone={C.accent} />
+              <CompactReadDatum label="Task Links" value={String(executionReceiptLoopAudit.taskLinked)} tone={executionReceiptLoopAudit.taskLinked > 0 ? C.success : C.warning} />
+              <CompactReadDatum label="Ready Review" value={String(executionReceiptLoopAudit.readyToReview)} tone={executionReceiptLoopAudit.readyToReview > 0 ? C.success : C.warning} />
+              <CompactReadDatum label="Can Execute" value={executionReceiptLoopAudit.canExecuteFromAudit ? "yes" : "no"} tone={executionReceiptLoopAudit.canExecuteFromAudit ? C.danger : C.success} />
+            </div>
+            <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              {executionReceiptLoopAudit.gates[2]} Next: {executionReceiptLoopAudit.nextAction}
             </div>
           </section>
         )}
