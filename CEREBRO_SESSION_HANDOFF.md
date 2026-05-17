@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0838 EDT
+Last updated: 2026-05-17 0849 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0849 EDT - Terminal Execution Contract Copy Correction
+
+### What Changed
+- Corrected Terminal Lab execution readback after the read-only runner landed.
+- Ready read-only contracts now say they can run one approved local command and
+  record a Ledger receipt.
+- Blocked, mutating, external, destructive, and git-write contracts still show
+  as gate reads, not runnable actions.
+- The run button now labels the ready read-only path as `Run Approved Read`.
+- The same button stays `Read Run Gate` for blocked or non-read-only proposals.
+- Successful read-only runs now surface the result id, exit code, and redacted
+  stdout/stderr summary in Terminal Lab.
+- Execution proposal, execution result, and Ledger overview reads are
+  invalidated after a run attempt.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts server/terminalLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Terminal Lab
+  renders `Execution Contract`, shows `Read Run Gate` for the current blocked
+  proposal, and no longer renders the stale `Runner adapter is still blocked in
+  this slice` copy.
+- Screenshot proof saved locally at
+  `output/playwright/terminal-execution-contract-run-copy.png`.
+
+### Drift Check
+- On path. This fixes stale copy around the existing first execution lane.
+- Terminal Lab remains the command teaching and approval-gated local execution
+  lane.
+- The UI now reflects the actual contract: only approved read-only local
+  commands can run through the V1 runner.
+- Git writes, installs, destructive commands, browser automation, provider
+  calls, external writes, paid services, and Raven paths remain blocked.
+
+### Known Risks
+- Browser proof used current local DB data, which had a blocked proposal visible.
+  The ready `Run Approved Read` state is covered by
+  `server/execution.contract.test.ts`.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, and app/client/src/components/TerminalLabPanel.tsx first. Continue the approval-gated autonomy build path. Terminal Lab now accurately distinguishes blocked run gates from ready approved read-only contracts. Keep the first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to make the Ledger execution receipt or Workbench receipt body easier to inspect from the existing Terminal Lab loop. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0838 EDT - Vision Operating Contract Correction
 

@@ -401,7 +401,13 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     if (runApprovedAction.isPending) return;
     runApprovedAction.mutate(
       { proposalId, approved: true },
-      { onSuccess: () => utils.execution.proposals.invalidate() },
+      {
+        onSuccess: () => {
+          utils.execution.proposals.invalidate();
+          utils.execution.results.invalidate();
+          utils.ledger.overview.invalidate();
+        },
+      },
     );
   }
 
@@ -1129,39 +1135,59 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                     No action contract yet. Create one from an observation after the approval preview and Workbench receipt are visible.
                   </div>
                 ) : (
-                  executionProposals.data?.items.map((proposal) => (
-                    <div key={proposal.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                      <div className="flex flex-wrap gap-1">
-                        <Chip label={`action #${proposal.id}`} tone={C.textMuted} />
-                        <Chip label={proposal.riskClass.replace(/_/g, " ")} tone={toneForRisk(proposal.riskClass)} />
-                        <Chip label={proposal.approvalStatus ?? "no approval"} tone={proposal.approvalStatus === "approved" ? C.success : C.warning} />
-                        <Chip label={proposal.readiness.canExecute ? "contract ready" : "blocked"} tone={proposal.readiness.canExecute ? C.success : C.warning} />
-                        <Chip label={proposal.resultState.replace(/_/g, " ")} tone={C.textSecondary} />
+                  executionProposals.data?.items.map((proposal) => {
+                    const canRunReadOnly = proposal.readiness.canExecute && proposal.actionType === "local_read_only_command" && proposal.riskClass === "read_only";
+                    const runButtonLabel = canRunReadOnly ? "Run Approved Read" : "Read Run Gate";
+                    return (
+                      <div key={proposal.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                        <div className="flex flex-wrap gap-1">
+                          <Chip label={`action #${proposal.id}`} tone={C.textMuted} />
+                          <Chip label={proposal.riskClass.replace(/_/g, " ")} tone={toneForRisk(proposal.riskClass)} />
+                          <Chip label={proposal.approvalStatus ?? "no approval"} tone={proposal.approvalStatus === "approved" ? C.success : C.warning} />
+                          <Chip label={proposal.readiness.canExecute ? "contract ready" : "blocked"} tone={proposal.readiness.canExecute ? C.success : C.warning} />
+                          <Chip label={proposal.resultState.replace(/_/g, " ")} tone={C.textSecondary} />
+                        </div>
+                        <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+                          {proposal.readiness.canExecute
+                            ? canRunReadOnly
+                              ? "Approved read-only contract is ready. This button runs one allowlisted local command and records a Ledger receipt."
+                              : "Contract is complete, but this action is not eligible for the V1 read-only runner."
+                            : proposal.readiness.missing.join("; ")}
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          <Button
+                            type="button"
+                            onClick={() => readRunGuard(proposal.id)}
+                            disabled={runApprovedAction.isPending}
+                            title={
+                              canRunReadOnly
+                                ? "Run one approved read-only local command and record the result receipt."
+                                : "Read the run gate. Blocked, mutating, external, and git-write contracts do not run."
+                            }
+                            aria-label={`${runButtonLabel} for execution action proposal ${proposal.id}`}
+                            variant={canRunReadOnly ? "default" : "risk"}
+                            size="sm"
+                          >
+                            {runButtonLabel}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
-                        {proposal.readiness.canExecute
-                          ? "Task, Workbench body, and approval receipt are present. Runner adapter is still blocked in this slice."
-                          : proposal.readiness.missing.join("; ")}
-                      </div>
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        <Button
-                          type="button"
-                          onClick={() => readRunGuard(proposal.id)}
-                          disabled={runApprovedAction.isPending}
-                          title="Read the run guard. This does not execute a command in this slice."
-                          aria-label={`Read run guard for execution action proposal ${proposal.id}`}
-                          variant="risk"
-                          size="sm"
-                        >
-                          Read Run Gate
-                        </Button>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
                 {runApprovedAction.data && (
-                  <div className="rounded p-1.5 text-[10px] leading-snug" role="status" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.warning }}>
-                    {runApprovedAction.data.reason}
+                  <div
+                    className="rounded p-1.5 text-[10px] leading-snug"
+                    role="status"
+                    style={{
+                      background: C.surfaceMuted,
+                      border: `1px solid ${C.borderSoft}`,
+                      color: runApprovedAction.data.ok ? C.success : C.warning,
+                    }}
+                  >
+                    {runApprovedAction.data.ok
+                      ? `Result #${runApprovedAction.data.resultId} recorded. Exit ${runApprovedAction.data.exitCode ?? "none"}. ${runApprovedAction.data.stdoutSummary || runApprovedAction.data.stderrSummary || "No output."}`
+                      : runApprovedAction.data.reason}
                   </div>
                 )}
               </div>

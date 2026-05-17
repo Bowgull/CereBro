@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0618 EDT
+Last updated: 2026-05-17 0849 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0849 EDT: corrected Terminal Lab execution contract copy after
+  the read-only runner landed. Ready read-only contracts now show
+  `Run Approved Read`; blocked, mutating, external, destructive, and git-write
+  proposals stay on `Read Run Gate`. Successful read-only runs surface result
+  id, exit code, and redacted output summary in the existing Terminal Lab
+  status area. No new surface, git-write runner, install, destructive command,
+  browser automation, provider call, external write, paid service, or Raven
+  path was added.
 - 2026-05-17 0453 EDT: continued item 9 Model and Tool Registry hardening.
   Surfaced `modelTools.registryAudit` inside the existing Basement Model
   Registry panel. Added a compact Registry Audit proof section with register,
