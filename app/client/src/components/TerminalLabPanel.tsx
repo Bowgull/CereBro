@@ -131,6 +131,18 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       refetchOnReconnect: false,
     },
   );
+  const executionProposals = trpc.execution.proposals.useQuery(
+    selectedObservationId == null
+      ? { limit: 5 }
+      : { sourceType: "command_observation", sourceId: selectedObservationId, limit: 5 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const createExecutionProposal = trpc.execution.proposeFromCommandObservation.useMutation();
+  const runApprovedAction = trpc.execution.runApprovedAction.useMutation();
   const createTaskFromObservation = trpc.terminalLab.createTaskFromObservation.useMutation();
   const createLearningProposal = trpc.terminalLab.createLearningProposalFromObservation.useMutation();
   const utils = trpc.useUtils();
@@ -347,6 +359,27 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           utils.terminalLab.approvalPreviews.invalidate();
         },
       },
+    );
+  }
+
+  function stageExecutionContract(observationId: number) {
+    if (createExecutionProposal.isPending) return;
+    createExecutionProposal.mutate(
+      { observationId },
+      {
+        onSuccess: () => {
+          setSelectedObservationId(observationId);
+          utils.execution.proposals.invalidate();
+        },
+      },
+    );
+  }
+
+  function readRunGuard(proposalId: number) {
+    if (runApprovedAction.isPending) return;
+    runApprovedAction.mutate(
+      { proposalId, approved: true },
+      { onSuccess: () => utils.execution.proposals.invalidate() },
     );
   }
 
@@ -874,6 +907,17 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                               </Button>
                               <Button
                                 type="button"
+                                onClick={() => stageExecutionContract(item.id)}
+                                disabled={createExecutionProposal.isPending}
+                                title={createExecutionProposal.isPending ? "Creating local execution contract." : "Create a local action proposal contract. This does not run the command."}
+                                aria-label={`Create local execution action proposal for observation ${item.id}`}
+                                variant="risk"
+                                size="sm"
+                              >
+                                Action Contract
+                              </Button>
+                              <Button
+                                type="button"
                                 onClick={() => openSecurityGateForCommand(item.command)}
                                 disabled={!onNavigate}
                                 title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target."}
@@ -1024,6 +1068,54 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                 Saves a redacted local summary. No command execution.
               </div>
             </form>
+
+            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Execution contract readback">
+              <SectionTitle title="Execution Contract" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
+              <div className="mt-2 space-y-1.5">
+                {executionProposals.isLoading ? (
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>Reading local action proposals.</div>
+                ) : executionProposals.data?.items.length === 0 ? (
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    No action contract yet. Create one from an observation after the approval preview and Workbench receipt are visible.
+                  </div>
+                ) : (
+                  executionProposals.data?.items.map((proposal) => (
+                    <div key={proposal.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="flex flex-wrap gap-1">
+                        <Chip label={`action #${proposal.id}`} tone={C.textMuted} />
+                        <Chip label={proposal.riskClass.replace(/_/g, " ")} tone={toneForRisk(proposal.riskClass)} />
+                        <Chip label={proposal.approvalStatus ?? "no approval"} tone={proposal.approvalStatus === "approved" ? C.success : C.warning} />
+                        <Chip label={proposal.readiness.canExecute ? "contract ready" : "blocked"} tone={proposal.readiness.canExecute ? C.success : C.warning} />
+                        <Chip label={proposal.resultState.replace(/_/g, " ")} tone={C.textSecondary} />
+                      </div>
+                      <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+                        {proposal.readiness.canExecute
+                          ? "Task, Workbench body, and approval receipt are present. Runner adapter is still blocked in this slice."
+                          : proposal.readiness.missing.join("; ")}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        <Button
+                          type="button"
+                          onClick={() => readRunGuard(proposal.id)}
+                          disabled={runApprovedAction.isPending}
+                          title="Read the run guard. This does not execute a command in this slice."
+                          aria-label={`Read run guard for execution action proposal ${proposal.id}`}
+                          variant="risk"
+                          size="sm"
+                        >
+                          Read Run Gate
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+                {runApprovedAction.data && (
+                  <div className="rounded p-1.5 text-[10px] leading-snug" role="status" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.warning }}>
+                    {runApprovedAction.data.reason}
+                  </div>
+                )}
+              </div>
+            </section>
 
             <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>

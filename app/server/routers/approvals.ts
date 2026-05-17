@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { getCerebroDb } from "../cerebroDb";
 import { publicProcedure, router } from "../_core/trpc";
 
@@ -188,6 +189,79 @@ function validationPreviewForApproval(input: {
 }
 
 export const approvalsRouter = router({
+  decide: publicProcedure
+    .input(
+      z.object({
+        id: z.number().int(),
+        decision: z.enum(["approved", "rejected", "cancelled"]),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const current = await db.execute({
+        sql: `
+          SELECT a.*, p.name AS project_name, p.path AS project_path
+          FROM approvals a
+          LEFT JOIN tasks t ON t.id = a.task_id
+          LEFT JOIN projects p ON p.id = t.project_id
+          WHERE a.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      const existing = current.rows[0];
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: `No approval ${input.id}` });
+      if (String(existing.status) !== "pending") {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Only pending approvals can be decided." });
+      }
+
+      const reason = input.reason?.trim();
+      const existingReason = existing.reason == null ? null : String(existing.reason);
+      const decisionReason = reason
+        ? [existingReason, `Decision note: ${reason}`].filter(Boolean).join("\n")
+        : existingReason;
+      const result = await db.execute({
+        sql: `
+          UPDATE approvals
+          SET status = ?,
+              reason = ?,
+              decided_at = unixepoch()
+          WHERE id = ?
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [input.decision, decisionReason, input.id],
+      });
+      const row = result.rows[0]!;
+      return {
+        ok: true as const,
+        approval: rowToApprovalPreview(row),
+        writesExternal: false,
+        wouldExecute: false,
+        opensBrowser: false,
+        callsModel: false,
+        receipt: {
+          approvalId: Number(row.id),
+          status: String(row.status),
+          actionType: String(row.action_type),
+          targetType: row.target_type == null ? null : String(row.target_type),
+          targetId: row.target_id == null ? null : Number(row.target_id),
+          decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+          note: input.decision === "approved"
+            ? "Approval receipt recorded. Execution still requires a separate approved action contract."
+            : "Gate closed. Linked actions remain blocked.",
+        },
+        gates: [
+          "Approval decision recorded as local metadata.",
+          "This did not run a command, open a browser, call a model, fetch a source, schedule, send, or write externally.",
+          "Execution still requires a separate action proposal and run request.",
+        ],
+      };
+    }),
+
   permissionPreflights: publicProcedure
     .input(
       z

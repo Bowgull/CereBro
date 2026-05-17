@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0725 EDT
+Last updated: 2026-05-17 0733 EDT
 
 ## Current North Star
 
@@ -20,6 +20,100 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0733 EDT - Execution Contract Guard Pass
+
+### What Changed
+- Continued the approved V1 autonomy path after the first redesign sweep.
+- Added a narrow `approvals.decide` mutation for explicit local approval
+  receipts.
+- Added a new `execution` router for local action proposal contracts.
+- Added `execution_action_proposals` storage for source, action type, risk,
+  required approvals, executor agent, command target, approval receipt,
+  Workbench body, result state, and recovery note.
+- Added `execution.proposeFromCommandObservation`.
+- Added `execution.proposals` readback.
+- Added `execution.runApprovedAction` as a hard guard. It reads the contract
+  and blocks execution when requirements are missing. When requirements are
+  present, it still stops with `contract_ready_no_runner` because the shell
+  runner adapter is not wired in this slice.
+- Added Terminal Lab readback for execution contracts and run-gate reads.
+- Added targeted tests proving incomplete contracts block, approval receipts do
+  not execute, ready contracts still stop at the unwired runner, and approval
+  receipts cannot be decided twice.
+- No command runner, shell adapter, browser automation, provider call, install,
+  dependency, external write, castle change, or Raven path was added.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/routers/execution.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Browser proof used the Codex in-app browser against `http://localhost:3000/`.
+- Screenshot proof saved to:
+  - `output/playwright/execution-contract-terminal-lab-readback.png`
+- Full serial Vitest was not run because this bounded slice touched one new
+  router, one existing approval router, one schema table, and one UI readback.
+
+### Front-End Steward Review
+- Surface: Terminal Lab.
+- Register: product surface.
+- Primary object: local action proposal contract.
+- Hidden machinery: shell runner internals, command output streams, provider
+  calls, installs, and execution logs remain hidden because no runner exists.
+- Visible control: approval receipt, Workbench body requirement, missing-gate
+  reasons, no-action labels, and run-gate readback are visible.
+- Screenshot proof: listed above.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current execution/router/UI files and handoff
+  only.
+- Worker used: yes. One read-only explorer mapped current execution and
+  approval state. It made no edits.
+- The dev server remains running at `http://localhost:3000/`.
+
+### Drift Check
+- On path because the slice directly followed the handoff next action:
+  approval-gated execution core, action proposal shape, approval receipt,
+  `canExecute` guard, and Terminal Lab readback.
+- The patch did not add a real shell runner yet. That is intentional.
+- The patch did not touch `KeepScene.tsx`, chamber data, agent count, floor
+  count, provider calls, installs, paid services, external services, or Raven.
+- Deferred: local read-only command runner, output capture, Ledger execution
+  receipt, and Project Lab push execution lane.
+
+### Completion Read
+- Overall: 83%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 52%.
+- Backend/runtime: 80%.
+- Knowledge/storage/source: 54%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue in CereBro Prime mode. Start with a
+dirty-file read. The execution contract guard exists, approval receipts can be
+decided locally, and Terminal Lab can show action proposal readiness. Next best
+slice is the local read-only runner design: allowlist, cwd containment, timeout,
+stdout/stderr capture, result row, Ledger receipt, and tests proving
+unapproved or incomplete actions cannot run. Do not touch `KeepScene.tsx`,
+chamber data, agent count, floor count, provider calls, installs, paid
+services, external writes, destructive commands, or Raven paths.
 
 ## 2026-05-17 0725 EDT - Sources Basement Settings Graphite Pass
 
