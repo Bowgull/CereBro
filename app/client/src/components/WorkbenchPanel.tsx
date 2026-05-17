@@ -219,6 +219,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
   const browserReadiness = workbenchBrowserReadinessModel(browserDraft);
+  const browserActionProposal = trpc.workbench.browserActionProposalPreview.useQuery(
+    {
+      actionLabel: browserActionPreview.label,
+      target: browserDraft.raw,
+      draftKind: browserDraft.kind,
+    },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -773,6 +785,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         <div className="mt-1 break-all">{browserActionPreview.targetLabel}</div>
                         <div className="mt-1">{browserActionPreview.routeLabel}</div>
                         <div className="mt-1">{browserActionPreview.noActionText}</div>
+                        <div className="mt-1 rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                          <div className="flex flex-wrap items-center gap-1">
+                            <Chip label="server contract" tone={C.accent} />
+                            <Chip
+                              label={browserActionProposal.data?.statusLabel ?? "reading"}
+                              tone={browserActionProposal.data?.canExecute ? C.danger : C.warning}
+                            />
+                            <Chip label={browserActionProposal.data?.resultState ?? "not run"} tone={C.textMuted} />
+                          </div>
+                          <div className="mt-1">
+                            {browserActionProposal.data?.requiredGates.join(" / ") ?? "Reading backend proposal gates."}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </details>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
+import { browserActionProposalModel } from "../browserActionProposalModel";
 import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import {
   GITHUB_PROJECT_MAP_PATH,
@@ -27,6 +28,7 @@ const permissionClasses = ["manual_note", "local_preview", "public_browser", "me
 const validationAgents = ["oak", "spock"] as const;
 const evidenceGroupBys = ["project", "task", "session", "kind", "source", "command", "artifact", "validation_status"] as const;
 const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
+const browserDraftKinds = ["empty", "url", "search"] as const;
 
 function rowToEvidence(row: Record<string, unknown>) {
   return {
@@ -368,6 +370,16 @@ export const workbenchRouter = router({
       "Browser, media capture, durable saves, external tools, and command execution each need explicit approval when implemented.",
     ],
   })),
+
+  browserActionProposalPreview: publicProcedure
+    .input(
+      z.object({
+        actionLabel: z.string().min(1).max(80),
+        target: z.string().max(1000),
+        draftKind: z.enum(browserDraftKinds),
+      }),
+    )
+    .query(({ input }) => browserActionProposalModel(input)),
 
   evidence: publicProcedure
     .input(
