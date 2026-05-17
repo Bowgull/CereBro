@@ -228,6 +228,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       );
       utils.approvals.list.invalidate();
       utils.approvals.permissionPreflights.invalidate();
+      utils.modelTools.capabilityApprovalPreviews.invalidate();
     },
   });
 
@@ -254,6 +255,18 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
     return Array.from(groups.values());
   }, [rows]);
   const selectedCapability = rows.find((item) => item.id === selectedCapabilityId) ?? groupedRows[0]?.representative ?? null;
+  const capabilityApprovalPreviews = trpc.modelTools.capabilityApprovalPreviews.useQuery(
+    {
+      capabilityId: selectedCapability?.id ?? 0,
+      limit: 5,
+    },
+    {
+      enabled: selectedCapability != null,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const evals = trpc.modelTools.evals.useQuery(
     {
       capabilityId: selectedCapability?.id,
@@ -890,6 +903,51 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Eval" value={selectedCapability.evalStatus === "untested" ? "No local eval recorded." : labelize(selectedCapability.evalStatus)} />
                 <Field label="Evidence" value={selectedCapability.latestEval ? `${labelize(selectedCapability.latestEval.status)}. ${selectedCapability.latestEval.summary ?? "Local eval note recorded."}` : "No eval evidence recorded."} />
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
+                <div className="grid gap-1.5 rounded p-2" aria-label="Selected model tool approval previews" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>Approval Readback</div>
+                      <div className="mt-0.5 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                        Local route previews for this capability.
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      <Badge label={`pending ${capabilityApprovalPreviews.data?.counts.pending ?? 0}`} tone={(capabilityApprovalPreviews.data?.counts.pending ?? 0) > 0 ? C.warning : C.textMuted} />
+                      <Badge label="no run" tone={C.success} />
+                    </div>
+                  </div>
+                  {capabilityApprovalPreviews.isLoading ? (
+                    <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      Reading local model/tool approval previews.
+                    </div>
+                  ) : (capabilityApprovalPreviews.data?.items ?? []).length === 0 ? (
+                    <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      No route approval preview staged for this capability.
+                    </div>
+                  ) : (
+                    <div className="grid gap-1">
+                      {capabilityApprovalPreviews.data?.items.map((item) => (
+                        <div key={item.id} className="rounded p-1.5 text-[11px] leading-snug" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Approval #{item.id}</span>
+                            <Badge label={labelize(item.status)} tone={item.status === "pending" ? C.warning : item.status === "approved" ? C.success : C.danger} />
+                          </div>
+                          <div className="mt-1" style={{ color: C.textMuted }}>
+                            {item.reason ?? "Local approval preview only."}
+                          </div>
+                          {item.costRisk && (
+                            <div className="mt-1">
+                              <Badge label={labelize(item.costRisk)} tone={C.accent} />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {capabilityApprovalPreviews.data?.noActionTaken.join(" ") ?? "No model/tool, provider, gateway, browser, install, pull, route default, memory write, or external write runs."}
+                  </div>
+                </div>
                 <div className="grid gap-1.5 rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <Button
                     type="button"

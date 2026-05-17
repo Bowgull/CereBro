@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1428 EDT
+Last updated: 2026-05-17 1634 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1634 EDT: added selected-capability approval readback to Basement
+  Model Registry. `modelTools.capabilityApprovalPreviews` reads local
+  approval preview rows for one model/tool capability without running
+  providers, local models, browser fetches, installs, pulls, route defaults,
+  file writes, memory writes, or external writes. Basement detail now shows
+  `Approval Readback`, pending count, approval id, cost/risk label, and
+  no-action proof for the selected capability.
 - 2026-05-17 1428 EDT: added Approval Queue readback polish for model/tool
   approvals. Approvals now recognize `model_tools` as a first-class origin,
   the queue has a `Models` filter, model/tool approval rows show provider/tool

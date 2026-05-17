@@ -560,4 +560,59 @@ describe("Model Tools local-first routing policy", () => {
     expect(await countRows("permission_preflight_records")).toBe(before.preflights + 1);
     expect(await countRows("model_tool_call_logs")).toBe(before.calls);
   });
+
+  it("reads capability approval previews without running the tool or changing defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Capability Preview ${stamp}`,
+      toolName: "Approval readback candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      sourceUris: "https://example.com/capability-preview",
+      riskReview: "External gateway candidate. Approval readback only.",
+      validationNotes: "Source identifies the tool shape. Not trusted for default routing.",
+    });
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "browser source review",
+      dataSummary: "Public-safe route summary only.",
+      reason: "Review this capability before use.",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+      calls: await countRows("model_tool_call_logs"),
+    };
+
+    const previews = await caller.modelTools.capabilityApprovalPreviews({
+      capabilityId: proposal.capability.id,
+      limit: 5,
+    });
+
+    expect(previews).toMatchObject({
+      mode: "read_only",
+      register: "model_tool_capability_approvals",
+      writesExternal: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      routeDefaultsChanged: false,
+    });
+    expect(previews.capabilityId).toBe(proposal.capability.id);
+    expect(previews.counts.pending).toBeGreaterThanOrEqual(1);
+    expect(previews.items.map((item) => item.id)).toContain(staged.approval?.id);
+    expect(previews.items.find((item) => item.id === staged.approval?.id)?.status).toBe("pending");
+    expect(previews.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(previews.gates.join(" ")).toContain("approval receipts");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights);
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+  });
 });

@@ -1357,6 +1357,68 @@ export const modelToolsRouter = router({
       };
     }),
 
+  capabilityApprovalPreviews: publicProcedure
+    .input(
+      z.object({
+        capabilityId: z.number().int().positive(),
+        status: z.enum(["pending", "approved", "rejected"]).optional(),
+        limit: z.number().int().min(1).max(50).optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where = ["target_type = 'model_tool_capability'", "target_id = ?"];
+      const args: (string | number)[] = [input.capabilityId];
+      if (input.status) {
+        where.push("status = ?");
+        args.push(input.status);
+      }
+      args.push(input.limit ?? 10);
+      const result = await db.execute({
+        sql: `
+          SELECT id, task_id, action_type, target_type, target_id,
+                 requested_by_agent, status, reason, context_summary,
+                 sensitive_data_flag, cost_risk, permission_preflight_id,
+                 decided_at, created_at
+          FROM approvals
+          WHERE ${where.join(" AND ")}
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+      const items = result.rows.map(rowToApprovalPreview);
+      const counts = {
+        pending: items.filter((item) => item.status === "pending").length,
+        approved: items.filter((item) => item.status === "approved").length,
+        rejected: items.filter((item) => item.status === "rejected").length,
+      };
+
+      return {
+        mode: "read_only" as const,
+        register: "model_tool_capability_approvals" as const,
+        capabilityId: input.capabilityId,
+        writesExternal: false,
+        callsExternalModels: false,
+        callsLocalModels: false,
+        installsDependencies: false,
+        pullsModels: false,
+        browsesOrFetches: false,
+        routeDefaultsChanged: false,
+        items,
+        counts,
+        gates: [
+          "This reads local model/tool capability approval receipts only.",
+          "Pending approval receipts do not approve use.",
+          "Approved previews still do not run a model/tool without a separate action contract.",
+        ],
+        noActionTaken: [
+          "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, route default, file write, memory write, or external write ran.",
+          "Capability approval previews are read from local approvals rows only.",
+        ],
+      };
+    }),
+
   evals: publicProcedure
     .input(
       z
