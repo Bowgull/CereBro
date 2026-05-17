@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1407 EDT
+Last updated: 2026-05-17 1414 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1414 EDT - Model Tool Route Approval Preview
+
+### What Changed
+- Added `modelTools.createCapabilityRouteApprovalPreview`.
+- Basement Model Registry selected capability details now include
+  `Stage Route Approval`.
+- The action creates one pending local approval preview for a model/tool
+  capability and one permission preflight record.
+- Duplicate staging returns the existing pending approval preview instead of
+  creating another approval.
+- The receipt states that no model/tool, provider, gateway, browser, fetch,
+  install, pull, local inference, route default, file write, memory write, or
+  external write ran.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL=file:./tmp/model-tools-route-approval-test.db pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Basement ->
+  Models, confirmed `Stage Route Approval`, clicked it, and confirmed the
+  staged approval receipt plus no-action copy.
+- Screenshot proof saved locally at
+  `output/playwright/model-tool-route-approval-preview.png`.
+
+### Drift Check
+- On path. This advances Basement readiness toward approval-gated model/tool
+  use without creating execution, provider, or automation behavior.
+- No provider call, local model call, browser fetch, install, pull, account
+  setup, paid service, new primary surface, route default change, external
+  write, memory write, Obsidian data import, or Raven path was added.
+
+### Known Risks
+- This is still a preview receipt. It does not execute a model/tool and it does
+  not prove a provider is safe, useful, free, current, or installed.
+- Browser proof created one local pending approval preview in the dev DB.
+
+### Storage Impact
+- No schema change.
+- Test runs used `app/tmp/model-tools-route-approval-test.db`.
+- Browser proof wrote one local approval row and one local permission preflight
+  row in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue CereBro on the stable build path. Model/Tool Registry now has local call receipt readback and local route approval previews for selected capabilities. Next best slice is either Approval Queue readback polish for model_tool_capability receipts or the next build-queue surface with a higher-risk unfinished receipt loop. Do not run providers, local models, installs, pulls, browser automation, external writes, paid services, new primary surfaces, or Raven paths. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1407 EDT - Model Tool Call Receipt Readback
 

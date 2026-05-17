@@ -219,6 +219,17 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
       utils.approvals.permissionPreflights.invalidate();
     },
   });
+  const createCapabilityRouteApproval = trpc.modelTools.createCapabilityRouteApprovalPreview.useMutation({
+    onSuccess: (result) => {
+      setLastWrite(
+        result.approval
+          ? `Staged model/tool route approval preview ${result.approval.id}.`
+          : "Model/tool route approval preview did not return a record.",
+      );
+      utils.approvals.list.invalidate();
+      utils.approvals.permissionPreflights.invalidate();
+    },
+  });
 
   const rows = capabilities.data?.items ?? [];
   const groupedRows = useMemo(() => {
@@ -879,6 +890,38 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 <Field label="Eval" value={selectedCapability.evalStatus === "untested" ? "No local eval recorded." : labelize(selectedCapability.evalStatus)} />
                 <Field label="Evidence" value={selectedCapability.latestEval ? `${labelize(selectedCapability.latestEval.status)}. ${selectedCapability.latestEval.summary ?? "Local eval note recorded."}` : "No eval evidence recorded."} />
                 <Field label="Updated" value={formatTime(selectedCapability.updatedAt)} />
+                <div className="grid gap-1.5 rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => createCapabilityRouteApproval.mutate({
+                      capabilityId: selectedCapability.id,
+                      taskKind: routeTask.trim() || "general model/tool route review",
+                      dataSummary: "No payload attached. Local approval preview only.",
+                      reason: "Review this model/tool capability before any use.",
+                    })}
+                    disabled={createCapabilityRouteApproval.isPending}
+                    title="Stage a local approval preview. This does not call the model/tool, change route defaults, install, pull, browse, fetch, or write externally."
+                    aria-label="Stage model tool route approval preview"
+                  >
+                    {createCapabilityRouteApproval.isPending ? "Staging" : "Stage Route Approval"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onNavigate?.("approvals")}
+                    disabled={!onNavigate}
+                    title="Open the approval queue. This does not approve or run the model/tool."
+                    aria-label="Open approval queue for model tool route previews"
+                  >
+                    Open Approval Queue
+                  </Button>
+                  <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    Local preview only. No model/tool, provider, gateway, browser, install, pull, route default, memory write, or external write runs.
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-[11px]" style={{ color: C.textMuted }}>Select a capability proposal.</div>

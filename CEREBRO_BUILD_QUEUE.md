@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1407 EDT
+Last updated: 2026-05-17 1414 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1414 EDT: added local model/tool route approval previews.
+  `modelTools.createCapabilityRouteApprovalPreview` stages a pending local
+  approval plus permission preflight for a selected capability without running
+  providers, local models, browser fetches, installs, pulls, route defaults,
+  file writes, memory writes, or external writes. Basement selected capability
+  details now expose `Stage Route Approval` and `Open Approval Queue`.
 - 2026-05-17 1407 EDT: added Basement Model/Tool call receipt readback.
   `modelTools.callLogAudit` and `modelTools.callLogs` read local
   `model_tool_call_logs` rows without running providers, local models, browser

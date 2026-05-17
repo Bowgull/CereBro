@@ -490,6 +490,27 @@ function rowToApprovalPreview(row: Record<string, unknown>) {
   };
 }
 
+async function modelToolApprovalByCapabilityId(capabilityId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, task_id, action_type, target_type, target_id,
+             requested_by_agent, status, reason, context_summary,
+             sensitive_data_flag, cost_risk, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'model_tool_capability'
+        AND target_id = ?
+        AND status = 'pending'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [capabilityId],
+  });
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+  return row ? rowToApprovalPreview(row) : null;
+}
+
 function rowToCallLog(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -1203,6 +1224,135 @@ export const modelToolsRouter = router({
           "Updated one local capability status.",
           "This did not call a model/tool, browse/search/fetch, install a gateway, or change route defaults.",
           "A tested or source-verified status is still registry evidence, not automatic external approval.",
+        ],
+      };
+    }),
+
+  createCapabilityRouteApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        capabilityId: z.number().int().positive(),
+        taskKind: z.string().min(1).max(240),
+        dataSummary: z.string().max(1200).optional(),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const capabilityResult = await db.execute({
+        sql: "SELECT * FROM model_tool_capabilities WHERE id = ? LIMIT 1",
+        args: [input.capabilityId],
+      });
+      const row = capabilityResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Capability proposal not found.",
+        });
+      }
+
+      const existingApproval = await modelToolApprovalByCapabilityId(input.capabilityId);
+      if (existingApproval) {
+        return {
+          ok: true as const,
+          mode: "local_model_tool_route_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          callsExternalModels: false,
+          callsLocalModels: false,
+          installsDependencies: false,
+          pullsModels: false,
+          browsesOrFetches: false,
+          routeDefaultsChanged: false,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local model/tool approval preview returned.",
+            "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, route default, file write, memory write, or external write ran.",
+          ],
+        };
+      }
+
+      const capability = rowToCapability(row);
+      const externalTarget = capability.accessMethod !== "local" || capability.privacyClass !== "local_private";
+      const sensitiveData = capability.privacyClass === "sensitive_review" || capability.privacyClass === "blocked_sensitive";
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: externalTarget ? "public_browser" : "explicit_context",
+        actionClass: externalTarget ? "external_write" : "local_note",
+        externalTarget,
+        sensitiveData,
+        requestedByAgent: "spock",
+        targetSummary: `Model/tool route approval preview: ${capability.provider} ${capability.toolName}`,
+        additionalReasons: [
+          "Model/tool route approval previews are local metadata only.",
+          "The model/tool still needs a separate explicit use approval before any provider, gateway, browser, local model, install, or pull runs.",
+          "Route defaults remain unchanged.",
+        ],
+      });
+      const contextSummary = [
+        `Capability #${capability.id}: ${capability.provider} / ${capability.toolName}`,
+        `Task: ${input.taskKind}`,
+        `Capability kind: ${capability.capabilityKind}`,
+        `Access method: ${capability.accessMethod}`,
+        `Privacy class: ${capability.privacyClass}`,
+        `Approval level: ${capability.approvalLevel}`,
+        `Eval status: ${capability.evalStatus}`,
+        capability.sourceUris ? `Sources: ${capability.sourceUris}` : "Sources: not recorded",
+        input.dataSummary ? `Data summary: ${input.dataSummary}` : "Data summary: not provided",
+        capability.riskReview ? `Risk: ${capability.riskReview}` : null,
+        capability.validationNotes ? `Validation: ${capability.validationNotes}` : null,
+      ].filter(Boolean).join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          SELECT NULL, 'model_tool_route_review', 'model_tool_capability', ?, 'spock',
+                 'pending', ?, ?, ?, ?, ?
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM approvals
+            WHERE target_type = 'model_tool_capability'
+              AND target_id = ?
+              AND status = 'pending'
+          )
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          capability.id,
+          input.reason ?? "Local model/tool route approval preview only. This does not run or approve the model/tool.",
+          contextSummary,
+          sensitiveData ? 1 : 0,
+          externalTarget ? "model_tool_external_use_review" : "model_tool_local_use_review",
+          Number(preflight.row.id),
+          capability.id,
+        ],
+      });
+      const approval = result.rows[0]
+        ? rowToApprovalPreview(result.rows[0] as Record<string, unknown>)
+        : await modelToolApprovalByCapabilityId(capability.id);
+
+      return {
+        ok: Boolean(approval),
+        mode: "local_model_tool_route_approval_preview" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        callsExternalModels: false,
+        callsLocalModels: false,
+        installsDependencies: false,
+        pullsModels: false,
+        browsesOrFetches: false,
+        routeDefaultsChanged: false,
+        approval,
+        gates: [
+          "Created one pending local model/tool route approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, route default, file write, memory write, or external write ran.",
+          "A later model/tool use still requires a separate explicit action receipt.",
         ],
       };
     }),

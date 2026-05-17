@@ -487,4 +487,63 @@ describe("Model Tools local-first routing policy", () => {
     expect(await countRows("model_tool_evals")).toBe(before.evals);
     expect(await countRows("approvals")).toBe(before.approvals);
   });
+
+  it("stages a model tool route approval preview without running the tool or changing defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Route Approval ${stamp}`,
+      toolName: "Route approval candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      sourceUris: "https://example.com/route-approval",
+      riskReview: "External gateway candidate. Confirm data leaving the machine before use.",
+      validationNotes: "Source identifies the tool shape. Not trusted for default routing.",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+      calls: await countRows("model_tool_call_logs"),
+    };
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "research current model options",
+      dataSummary: "Public-safe prompt summary only.",
+      reason: "Review this gateway candidate before any provider use.",
+    });
+
+    expect(staged).toMatchObject({
+      ok: true,
+      mode: "local_model_tool_route_approval_preview",
+      created: true,
+      writesExternal: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      routeDefaultsChanged: false,
+    });
+    expect(staged.approval?.actionType).toBe("model_tool_route_review");
+    expect(staged.approval?.targetType).toBe("model_tool_capability");
+    expect(staged.approval?.targetId).toBe(proposal.capability.id);
+    expect(staged.approval?.requestedByAgent).toBe("spock");
+    expect(staged.approval?.contextSummary).toContain("Route approval candidate");
+    expect(staged.approval?.contextSummary).toContain("Data summary: Public-safe prompt summary only.");
+    expect(staged.gates.join(" ")).toContain("No model/tool");
+
+    const duplicate = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "research current model options",
+    });
+    expect(duplicate.created).toBe(false);
+    expect(duplicate.approval?.id).toBe(staged.approval?.id);
+
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights + 1);
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+  });
 });
