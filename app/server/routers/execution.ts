@@ -575,10 +575,15 @@ export const executionRouter = router({
       args.push(input?.limit ?? 20);
       const result = await db.execute({
         sql: `
-          SELECT *
-          FROM execution_action_results
+          SELECT
+            ear.*,
+            eap.workbench_evidence_id,
+            eap.source_id AS proposal_source_id,
+            eap.source_type AS proposal_source_type
+          FROM execution_action_results ear
+          LEFT JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-          ORDER BY created_at DESC, id DESC
+          ORDER BY ear.created_at DESC, ear.id DESC
           LIMIT ?
         `,
         args,
@@ -589,7 +594,10 @@ export const executionRouter = router({
         items: result.rows.map((row) => ({
           id: Number(row.id),
           proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+          proposalSourceType: row.proposal_source_type == null ? null : String(row.proposal_source_type),
+          proposalSourceId: row.proposal_source_id == null ? null : Number(row.proposal_source_id),
           approvalId: row.approval_id == null ? null : Number(row.approval_id),
+          workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
           executorAgent: String(row.executor_agent),
           command: String(row.command),
           cwd: String(row.cwd),

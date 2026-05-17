@@ -94,6 +94,9 @@ describe("execution action contract", () => {
     expect(results.items[0]?.status).toBe("completed");
     expect(results.items[0]?.receiptBody).toContain(`action proposal #${ready.proposal?.id}`);
     expect(results.items[0]?.recoveryNote).toBe("No recovery needed for a read-only command.");
+    expect(results.items[0]?.workbenchEvidenceId).toBe(evidence.evidence.id);
+    expect(results.items[0]?.proposalSourceType).toBe("command_observation");
+    expect(results.items[0]?.proposalSourceId).toBe(preview.observationId);
 
     const workbenchDetail = await caller.workbench.evidenceDetail({
       id: evidence.evidence.id,

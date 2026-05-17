@@ -498,6 +498,26 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     onNavigate("workbench");
   }
 
+  function openExecutionResultWorkbenchBody(input: { resultId: number; evidenceId: number | null }) {
+    if (!onNavigate || input.evidenceId == null) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "terminal_execution_result",
+          evidenceId: input.evidenceId,
+          kind: "terminal_output",
+          query: `#${input.evidenceId}`,
+          groupBy: "command",
+          notice: `Terminal Lab opened Workbench body #${input.evidenceId} from execution result #${input.resultId}.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can inspect recent terminal receipts manually.
+    }
+    onNavigate("workbench");
+  }
+
   function openLedgerReceipt(observationId: number, evidenceId: number) {
     if (!onNavigate) return;
     try {
@@ -1294,6 +1314,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             <Chip label={`result #${result.id}`} tone={result.status === "completed" ? C.success : C.warning} />
                             <Chip label={`exit ${result.exitCode ?? "none"}`} tone={result.exitCode === 0 ? C.success : C.warning} />
                             <Chip label={result.timedOut ? "timed out" : result.status.replace(/_/g, " ")} tone={result.timedOut ? C.danger : C.textMuted} />
+                            <Chip label={result.workbenchEvidenceId == null ? "body missing" : `body #${result.workbenchEvidenceId}`} tone={result.workbenchEvidenceId == null ? C.warning : C.gold} />
                           </div>
                           <div className="mt-1 truncate text-[10px]" style={{ color: C.textSecondary }} title={result.command}>
                             {result.command}
@@ -1306,6 +1327,27 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                               Recovery: {result.recoveryNote}
                             </div>
                           )}
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <Button
+                              type="button"
+                              onClick={() => openExecutionResultWorkbenchBody({ resultId: result.id, evidenceId: result.workbenchEvidenceId })}
+                              disabled={!onNavigate || result.workbenchEvidenceId == null}
+                              title={
+                                result.workbenchEvidenceId == null
+                                  ? "No Workbench body is linked to this result."
+                                  : "Open the linked Workbench body. This does not rerun the command."
+                              }
+                              aria-label={
+                                result.workbenchEvidenceId == null
+                                  ? `Execution result ${result.id} has no Workbench body`
+                                  : `Open Workbench body ${result.workbenchEvidenceId} for execution result ${result.id}`
+                              }
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Open Body
+                            </Button>
+                          </div>
                         </div>
                       ))
                     )}
