@@ -202,12 +202,6 @@ export default function Home() {
       utils.ledger.overview.invalidate();
     },
   });
-  const createVisionFromRoute = trpc.visions.createFromRouteRecord.useMutation({
-    onSuccess: () => {
-      utils.visions.list.invalidate();
-      utils.ledger.overview.invalidate();
-    },
-  });
   const createTask = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
@@ -543,7 +537,6 @@ export default function Home() {
           onDismiss={() => {
             routePreview.reset();
             commitRoute.reset();
-            createVisionFromRoute.reset();
             setLastRouteRequest(null);
           }}
           onNavigate={setNav}
@@ -551,16 +544,9 @@ export default function Home() {
           taskCreated={Boolean(createTask.data)}
           isSavingRoute={commitRoute.isPending}
           routeSavedId={commitRoute.data?.record.id ?? null}
-          isCreatingVision={createVisionFromRoute.isPending}
-          routeVisionId={createVisionFromRoute.data?.vision.id ?? null}
           onSaveRoute={() => {
             if (!lastRouteRequest || commitRoute.isPending) return;
             commitRoute.mutate(lastRouteRequest);
-          }}
-          onCreateVision={() => {
-            const routeRecordId = commitRoute.data?.record.id;
-            if (!routeRecordId || createVisionFromRoute.isPending) return;
-            createVisionFromRoute.mutate({ routeRecordId });
           }}
           onCreateTask={() => {
             const draft = routePreview.data?.taskDraft;
@@ -1038,7 +1024,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const gitWriteRows = ledgerOverview.data?.latestGitWriteObservations ?? [];
   const projectPushContractRows = ledgerOverview.data?.latestProjectPushContracts ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
-  const visionRows = ledgerOverview.data?.latestVisions ?? [];
   const focusedEvidenceRows = ledgerFocusProject
     ? evidenceRows.filter((item) => (
         ledgerFocusProject.id != null
@@ -1051,7 +1036,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const latestGitWriteRows = gitWriteRows.slice(0, 3);
   const latestProjectPushContractRows = projectPushContractRows.slice(0, 3);
   const latestRouteRows = routeRows.slice(0, 4);
-  const latestVisionRows = visionRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = overviewCards?.receipts.terminal ?? 0;
   const activeSessions = overviewCards?.sessions.active ?? 0;
@@ -1106,13 +1090,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       meta: ledgerCopy.cardMeta.tasks(taskTotal),
       target: "tasks" as NavId,
       tone: C.warning,
-    },
-    {
-      label: "Visions",
-      value: String(overviewCards?.visions.active ?? 0),
-      meta: `${overviewCards?.visions.total ?? 0} overall objective${(overviewCards?.visions.total ?? 0) === 1 ? "" : "s"}`,
-      target: "ledger" as NavId,
-      tone: (overviewCards?.visions.active ?? 0) > 0 ? C.gold : C.textMuted,
     },
     {
       label: "Sessions",
@@ -1594,52 +1571,6 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   </div>
                 )}
               </div>
-            </div>
-          )}
-        </section>
-
-        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Latest Vision contracts">
-          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                Latest Visions
-              </div>
-              <div className="mt-0.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                Overall objectives. Tasks remain the work units. Ledger keeps the audit trail.
-              </div>
-            </div>
-            <Badge variant="secondary" className="uppercase">
-              contract layer
-            </Badge>
-          </div>
-          {latestVisionRows.length === 0 ? (
-            <div className="rounded p-2 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
-              No Vision contracts yet. Create one from Aang when the overall outcome needs a stop rule.
-            </div>
-          ) : (
-            <div className="grid gap-1.5 lg:grid-cols-2">
-              {latestVisionRows.map((vision) => (
-                <div key={vision.id} className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={vision.title}>
-                        {vision.title}
-                      </div>
-                      <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                        {vision.intent}
-                      </div>
-                    </div>
-                    <Badge variant={vision.status === "active" ? "warning" : vision.status === "achieved" ? "success" : "secondary"} className="shrink-0 uppercase">
-                      {vision.status.replace(/_/g, " ")}
-                    </Badge>
-                  </div>
-                  <div className="mt-1.5 grid gap-1 sm:grid-cols-3">
-                    <CompactReadDatum label="Owner" value={vision.ownerAgent} tone={C.accent} />
-                    <CompactReadDatum label="Task" value={vision.taskId ? `#${vision.taskId}` : "unlinked"} tone={vision.taskId ? C.success : C.warning} />
-                    <CompactReadDatum label="Stop" value={vision.stopRule} tone={C.gold} />
-                  </div>
-                </div>
-              ))}
             </div>
           )}
         </section>
@@ -2319,13 +2250,10 @@ function RuntimeRouteReceipt({
   onDismiss,
   onNavigate,
   onSaveRoute,
-  onCreateVision,
   onCreateTask,
   isSavingRoute,
-  isCreatingVision,
   isCreatingTask,
   routeSavedId,
-  routeVisionId,
   taskCreated,
 }: {
   result: {
@@ -2442,13 +2370,10 @@ function RuntimeRouteReceipt({
   onDismiss: () => void;
   onNavigate: (id: NavId) => void;
   onSaveRoute: () => void;
-  onCreateVision: () => void;
   onCreateTask: () => void;
   isSavingRoute: boolean;
-  isCreatingVision: boolean;
   isCreatingTask: boolean;
   routeSavedId: number | null;
-  routeVisionId: number | null;
   taskCreated: boolean;
 }) {
   const routePreviewProof = routePreviewProofModel({
@@ -2580,26 +2505,6 @@ function RuntimeRouteReceipt({
               title="Save this Aang to Cortana route read locally. No routed work runs."
             >
               {routeSavedId ? `Route #${routeSavedId}` : isSavingRoute ? "Saving" : "Save Route"}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={routeVisionId ? "secondary" : "outline"}
-              className="h-7 px-2"
-              onClick={onCreateVision}
-              disabled={!routeSavedId || isCreatingVision || routeVisionId != null}
-              aria-label={
-                routeVisionId
-                  ? `Vision saved as contract ${routeVisionId}`
-                  : !routeSavedId
-                    ? "Save the route before creating a Vision"
-                    : isCreatingVision
-                      ? "Creating Vision from route"
-                      : "Create Vision from saved route"
-              }
-              title="Create one local Vision contract from this saved Aang route. No work runs."
-            >
-              {routeVisionId ? `Vision #${routeVisionId}` : isCreatingVision ? "Creating" : "Create Vision"}
             </Button>
             <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">
               Dismiss
@@ -2781,7 +2686,7 @@ function ContextPanel({
       <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}>
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Vision
+            Operating Contract
           </div>
           <Badge variant={activeVision ? "warning" : "secondary"} className="px-1.5 py-0.5 uppercase" style={{ color: activeVision ? C.gold : C.textMuted, background: shellFrame.shellSoft, border: `1px solid ${shellFrame.shellLineSoft}` }}>
             {activeVision ? activeVision.status.replace(/_/g, " ") : "none"}
@@ -2798,7 +2703,7 @@ function ContextPanel({
           </>
         ) : (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No active Vision. Use one when the overall outcome needs a stop rule.
+            No active contract. Aang should hold one when the outcome needs a stop rule.
           </div>
         )}
       </div>

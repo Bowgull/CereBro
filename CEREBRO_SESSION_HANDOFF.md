@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0832 EDT
+Last updated: 2026-05-17 0838 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0838 EDT - Vision Operating Contract Correction
+
+### What Changed
+- Corrected Visions back to an operating contract, not an app or standalone
+  product layer.
+- Removed the Ledger `Visions` card.
+- Removed the Ledger `Latest Visions` collection section.
+- Removed the route receipt `Create Vision` button from the primary receipt UI.
+- Kept compact current Vision readback in the Keep right rail, now labeled
+  `Operating Contract`.
+- Kept route-bound Vision proof where it explains a route receipt. That stays
+  attached to the route audit, not exposed as a separate Vision surface.
+- Updated the master build plan to say Visions must not become an app,
+  dashboard, primary navigation surface, or standalone product layer.
+- Updated regression coverage so Ledger fails if it exposes Visions as its own
+  collection again.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/visions.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/visions.contract.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed
+  `Operating Contract` appears, while `Latest Visions`, `Create Vision`, and
+  a standalone `Visions` card do not appear.
+- Screenshot proof saved locally at
+  `output/playwright/vision-operating-contract-correction.png`.
+
+### Drift Check
+- On path. This corrects a product framing mistake before it hardens into a
+  surface.
+- Vision remains a session/workstream operating contract.
+- Tasks remain work units. Workbench remains proof. Ledger remains audit.
+  Approvals remain gates.
+- No new app, dashboard, primary nav, continuation loop, git-write runner,
+  provider call, external write, install, paid service, destructive action, or
+  Raven path was added.
+
+### Known Risks
+- Existing local dev DB still contains Vision test/proof rows from prior
+  passes. The UI no longer treats them as a standalone Ledger collection.
+- `visions.createFromRouteRecord` still exists server-side from the earlier
+  pass. It should be treated as an internal operating-contract helper, not a
+  product button.
+
+### Storage Impact
+- No schema change in this correction.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/visions.ts, app/server/routers/ledger.ts, and app/client/src/pages/Home.tsx first. Continue with Visions as an operating contract only. Do not build a Vision app, dashboard, primary nav, standalone layer, or generic goals surface. Keep only compact current Vision readback where it helps Aang/Cortana route discipline, and keep route-bound Vision proof attached to route audit. Tasks are work units. Workbench is proof. Ledger is audit. Approvals are gates. No continuation loop, git-write runner, provider call, browser automation, external write, install, paid service, destructive action, or Raven path without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0832 EDT - Route Audit Vision Proof Pass
 

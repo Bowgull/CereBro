@@ -42,11 +42,11 @@ Current build instruction:
   Workshop, agent, memory, permission, and receipt model.
 - Build autonomy in stages. First make the work visible and recoverable. Then
   move repeated, proven steps into CereBro itself.
-- Visions are the CereBro-native `/goal` lesson. A Vision is the overall
-  outcome contract that holds intent, success criteria, stop rule, owner route,
-  state, and receipt trail. Codex `/goal` inspired the pattern, but CereBro
-  owns the product language and keeps the first slice as a local contract
-  layer, not an autonomous continuation loop.
+- Visions are the CereBro-native `/goal` lesson. A Vision is the operating
+  contract for the current session or workstream: intent, success criteria,
+  stop rule, owner route, state, and receipt trail. Codex `/goal` inspired the
+  pattern, but CereBro owns the product language. Do not build a Vision app,
+  dashboard, primary navigation surface, or standalone product layer.
 - Build sessions use the CereBro Prime model. This chat acts as Prime:
   product architect, integrator, checker, archivist, and commit owner. Workers
   handle bounded frontend, backend, knowledge, or QA lanes with explicit file

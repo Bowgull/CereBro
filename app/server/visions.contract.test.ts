@@ -208,7 +208,7 @@ describe("visions contract", () => {
     expect(detail.receiptTrail.join(" ")).toContain("Approval");
   });
 
-  it("adds Vision counts and latest Vision rows to Ledger without side effects", async () => {
+  it("keeps Vision out of standalone Ledger collection readback", async () => {
     const caller = createCaller();
     const stamp = Date.now();
     const before = {
@@ -226,10 +226,8 @@ describe("visions contract", () => {
 
     const ledger = await caller.ledger.overview({ evidenceLimit: 5, routeLimit: 3 });
 
-    expect(ledger.cards.visions.total).toBeGreaterThan(0);
-    expect(ledger.cards.visions.active).toBeGreaterThan(0);
-    expect(ledger.latestVisions.map((item) => item.id)).toContain(vision.vision.id);
-    expect(ledger.latestVisions.find((item) => item.id === vision.vision.id)?.title).toContain("Ledger Vision");
+    expect("visions" in ledger.cards).toBe(false);
+    expect("latestVisions" in ledger).toBe(false);
 
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("workbench_evidence_records")).toBe(before.evidence);

@@ -163,26 +163,6 @@ function projectPushContractRow(row: Record<string, unknown>) {
   };
 }
 
-function visionRow(row: Record<string, unknown>) {
-  return {
-    id: Number(row.id),
-    title: String(row.title),
-    intent: String(row.intent),
-    status: String(row.status),
-    statusNote: row.status_note == null ? null : String(row.status_note),
-    ownerAgent: String(row.owner_agent),
-    projectId: row.project_id == null ? null : Number(row.project_id),
-    taskId: row.task_id == null ? null : Number(row.task_id),
-    routeRecordId: row.route_record_id == null ? null : Number(row.route_record_id),
-    stopRule: String(row.stop_rule),
-    successCriteria: String(row.success_criteria),
-    riskNote: row.risk_note == null ? null : String(row.risk_note),
-    createdAt: Number(row.created_at),
-    updatedAt: Number(row.updated_at),
-    completedAt: row.completed_at == null ? null : Number(row.completed_at),
-  };
-}
-
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -300,13 +280,11 @@ export const ledgerRouter = router({
         executionResultCount,
         gitWriteObservationCount,
         projectPushContractCount,
-        visionCounts,
         latestEvidence,
         latestExecutionResults,
         latestGitWriteObservations,
         latestProjectPushContracts,
         latestRoutes,
-        latestVisions,
         memoryContract,
         routeReceiptContract,
       ] = await Promise.all([
@@ -368,16 +346,6 @@ export const ledgerRouter = router({
              OR action_type = 'project_manual_push'
              OR risk_class = 'git_remote_write'
         `),
-        db.execute({
-          sql: `
-            SELECT
-              COUNT(*) AS total,
-              SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active_count,
-              SUM(CASE WHEN status = 'blocked' THEN 1 ELSE 0 END) AS blocked_count,
-              SUM(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) AS paused_count
-            FROM visions
-          `,
-        }),
         db.execute({
           sql: `
             SELECT
@@ -504,24 +472,6 @@ export const ledgerRouter = router({
           `,
           args: [routeLimit],
         }),
-        db.execute({
-          sql: `
-            SELECT *
-            FROM visions
-            ORDER BY
-              CASE status
-                WHEN 'active' THEN 0
-                WHEN 'blocked' THEN 1
-                WHEN 'paused' THEN 2
-                WHEN 'budget_limited' THEN 3
-                WHEN 'unmet' THEN 4
-                WHEN 'achieved' THEN 5
-              END,
-              updated_at DESC,
-              id DESC
-            LIMIT 5
-          `,
-        }),
         readMemoryContract(),
         readRouteReceiptContract(),
       ]);
@@ -529,7 +479,6 @@ export const ledgerRouter = router({
       const taskRow = taskCounts.rows[0] ?? {};
       const sessionRow = sessionCounts.rows[0] ?? {};
       const evidenceRowCounts = evidenceCounts.rows[0] ?? {};
-      const visionRowCounts = visionCounts.rows[0] ?? {};
 
       return {
         mode: "read_only" as const,
@@ -566,19 +515,12 @@ export const ledgerRouter = router({
             terminalPreviews: gitWriteObservationCount,
             projectPushContracts: projectPushContractCount,
           },
-          visions: {
-            total: Number(visionRowCounts.total ?? 0),
-            active: Number(visionRowCounts.active_count ?? 0),
-            blocked: Number(visionRowCounts.blocked_count ?? 0),
-            paused: Number(visionRowCounts.paused_count ?? 0),
-          },
         },
         latestEvidence: latestEvidence.rows.map((row) => evidenceRow(row as Record<string, unknown>)),
         latestExecutionResults: latestExecutionResults.rows.map((row) => executionResultRow(row as Record<string, unknown>)),
         latestGitWriteObservations: latestGitWriteObservations.rows.map((row) => gitWriteObservationRow(row as Record<string, unknown>)),
         latestProjectPushContracts: latestProjectPushContracts.rows.map((row) => projectPushContractRow(row as Record<string, unknown>)),
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
-        latestVisions: latestVisions.rows.map((row) => visionRow(row as Record<string, unknown>)),
         memoryContract,
         routeReceiptContract,
         gates: [
