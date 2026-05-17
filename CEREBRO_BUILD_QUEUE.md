@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1333 EDT
+Last updated: 2026-05-17 1346 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1346 EDT: added local Source validation in Research. Saved
+  sources can now be marked `Trusted`, `Review`, or `Reject` from the existing
+  `Source Rules` drawer. The backend writes only local source trust notes and
+  `source_validation` events, returning a receipt that states no browser,
+  search, fetch, model, memory, Obsidian, Notion, Drive, retrieval, or external
+  tool ran. This advances Research/Sources validation without source
+  automation.
 - 2026-05-17 1333 EDT: locked the approved Browser V1 source-truth shape into
   `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`. Browser first pass now requires an
   honest buildable shell: generic real page tabs only, one URL/search field,

@@ -40,6 +40,9 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   const ingestUrl = trpc.surfer.ingestPublicUrl.useMutation({
     onSuccess: () => utils.surfer.panel.invalidate(),
   });
+  const validateSource = trpc.surfer.validateSource.useMutation({
+    onSuccess: () => utils.surfer.panel.invalidate(),
+  });
   const data = panel.data;
   const savedSources = data?.savedSources ?? [];
   const sourceEvents = data?.recentSourceEvents ?? [];
@@ -82,6 +85,16 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
       // Ignore storage failure. The Security Gate form still opens.
     }
     onNavigate("security");
+  }
+
+  function markSource(sourceId: number, decision: "trusted" | "needs_review" | "rejected") {
+    const reviewer = decision === "rejected" ? "spock" : "oak";
+    const note = decision === "trusted"
+      ? "User marked this saved source trusted from Research."
+      : decision === "needs_review"
+        ? "User kept this saved source in review from Research."
+        : "User rejected this saved source from Research.";
+    validateSource.mutate({ sourceId, decision, reviewer, note });
   }
 
   return (
@@ -223,6 +236,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                 savedSources.map((source) => (
                   <SourceCard
                     key={source.id}
+                    sourceId={source.id}
                     title={source.title ?? source.uri}
                     sourceType={source.sourceType ?? source.kind}
                     trustLevel={source.trustLevel ?? "unknown"}
@@ -234,6 +248,8 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     sourceUri={source.uri}
                     requiredApproval={source.trustNotes ?? "Already saved in the Source Library."}
                     scrubNotes={source.scrubNotes ?? undefined}
+                    onValidate={markSource}
+                    validationPending={validateSource.isPending && validateSource.variables?.sourceId === source.id}
                   />
                 ))
               )}
@@ -460,6 +476,9 @@ function SourceCard({
   requiredApproval,
   scrubNotes,
   sourceUri,
+  sourceId,
+  onValidate,
+  validationPending = false,
 }: {
   title: string;
   sourceType: string;
@@ -472,6 +491,9 @@ function SourceCard({
   requiredApproval: string;
   scrubNotes?: string;
   sourceUri?: string;
+  sourceId?: number;
+  onValidate?: (sourceId: number, decision: "trusted" | "needs_review" | "rejected") => void;
+  validationPending?: boolean;
 }) {
   return (
     <article className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
@@ -514,6 +536,19 @@ function SourceCard({
           {scrubNotes && (
             <div className="text-[10px] leading-snug mt-1.5" style={{ color: C.textMuted }}>
               {scrubNotes}
+            </div>
+          )}
+          {sourceId != null && onValidate && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              <Button type="button" size="sm" variant="secondary" disabled={validationPending} onClick={() => onValidate(sourceId, "trusted")}>
+                Trusted
+              </Button>
+              <Button type="button" size="sm" variant="outline" disabled={validationPending} onClick={() => onValidate(sourceId, "needs_review")}>
+                Review
+              </Button>
+              <Button type="button" size="sm" variant="risk" disabled={validationPending} onClick={() => onValidate(sourceId, "rejected")}>
+                Reject
+              </Button>
             </div>
           )}
         </details>

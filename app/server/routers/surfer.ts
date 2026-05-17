@@ -11,6 +11,19 @@ import {
 import { publicProcedure, router } from "../_core/trpc";
 
 const TRUST_LEVELS = ["official", "primary", "high", "medium", "low", "unknown"] as const;
+const SOURCE_VALIDATION_DECISIONS = ["trusted", "needs_review", "rejected"] as const;
+const SOURCE_VALIDATION_REVIEWERS = ["oak", "spock"] as const;
+
+function validationDecisionToTrustLevel(decision: (typeof SOURCE_VALIDATION_DECISIONS)[number]) {
+  if (decision === "trusted") return "high";
+  if (decision === "rejected") return "low";
+  return "unknown";
+}
+
+function validationDecisionToFreshness(decision: (typeof SOURCE_VALIDATION_DECISIONS)[number], currentFreshness: string) {
+  if (decision === "rejected") return "stale";
+  return currentFreshness || "unknown";
+}
 
 function rowToSource(r: Record<string, unknown>): SourceRow {
   const uri = String(r.uri);
@@ -433,6 +446,106 @@ export const surferRouter = router({
           "Private/logged-in browsing requires explicit per-session approval.",
           "Saved source records and screenshots require approval.",
         ],
+      };
+    }),
+
+  validateSource: publicProcedure
+    .input(
+      z.object({
+        sourceId: z.number().int().positive(),
+        decision: z.enum(SOURCE_VALIDATION_DECISIONS),
+        reviewer: z.enum(SOURCE_VALIDATION_REVIEWERS),
+        note: z.string().min(1).max(700),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT
+            id, kind, uri, title, summary, source_type, trust_level,
+            freshness_status, content_type, word_count, sensitive_data_flag,
+            scrub_notes, trust_notes, last_scrubbed_at, project_id, fetched_at,
+            created_at
+          FROM sources
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.sourceId],
+      });
+      const current = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!current) {
+        return { ok: false as const, reason: "Source record was not found." };
+      }
+
+      const nextTrustLevel = validationDecisionToTrustLevel(input.decision);
+      const nextFreshness = validationDecisionToFreshness(input.decision, String(current.freshness_status ?? "unknown"));
+      const validationNote = `${input.reviewer.toUpperCase()} ${input.decision.replace(/_/g, " ")}: ${input.note}`;
+      const updated = await db.execute({
+        sql: `
+          UPDATE sources
+          SET trust_level = ?,
+              freshness_status = ?,
+              trust_notes = ?
+          WHERE id = ?
+          RETURNING
+            id, kind, uri, title, summary, source_type, trust_level,
+            freshness_status, content_type, word_count, sensitive_data_flag,
+            scrub_notes, trust_notes, last_scrubbed_at, project_id, fetched_at,
+            created_at
+        `,
+        args: [nextTrustLevel, nextFreshness, validationNote, input.sourceId],
+      });
+      const row = updated.rows[0];
+      if (!row) {
+        return { ok: false as const, reason: "Source validation write returned no row." };
+      }
+      const source = rowToSource(row);
+      const sourceEventId = await recordSourceEvent({
+        sourceId: source.id,
+        uri: source.uri,
+        eventType: "source_validation",
+        title: source.title,
+        summary: source.summary,
+        sourceType: source.sourceType,
+        trustLevel: source.trustLevel,
+        freshnessStatus: source.freshnessStatus,
+        contentType: source.contentType,
+        wordCount: source.wordCount,
+        sensitiveDataFlag: source.sensitiveDataFlag,
+        scrubNotes: source.scrubNotes,
+        trustNotes: validationNote,
+        projectId: source.projectId,
+        ownerAgent: input.reviewer,
+        sourceLabel: `${input.reviewer}_${input.decision}`,
+      });
+
+      return {
+        ok: true as const,
+        source,
+        sourceEventId,
+        sourceValidationReceipt: {
+          mode: "local_source_validation" as const,
+          sourceId: source.id,
+          sourceEventId,
+          decision: input.decision,
+          reviewer: input.reviewer,
+          trustLevel: source.trustLevel,
+          freshnessStatus: source.freshnessStatus,
+          browserOpened: false,
+          searchRan: false,
+          fetchRan: false,
+          writesLocalRecords: true,
+          writesExternalSystems: false,
+          writesMemory: false,
+          routeDefaultsChanged: false,
+          retrievalAutomationEnabled: false,
+          nextAction: "Use this validation as local evidence only. Memory, Obsidian, Notion, Drive, browsing, and retrieval still require their own approval.",
+          noActionTaken: [
+            "No browser, search, fetch, parser, model, vector index, Obsidian write, Notion write, Drive write, memory write, or external tool ran.",
+            "Only the local source trust note and source validation event were written.",
+          ],
+        },
       };
     }),
 

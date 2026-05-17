@@ -121,4 +121,67 @@ describe("Surfer Source Library route", () => {
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("memory_entries")).toBe(before.memoryEntries);
   });
+
+  it("records local source validation without browsing or external writes", async () => {
+    const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+    const inserted = await db.execute({
+      sql: `
+        INSERT INTO sources (
+          kind, uri, title, summary, source_type, trust_level,
+          freshness_status, sensitive_data_flag, trust_notes
+        )
+        VALUES ('url', ?, 'Validation source fixture', 'Validation source summary.', 'public_url', 'unknown', 'fresh', 0, 'fixture')
+        RETURNING id
+      `,
+      args: [`https://example.com/cerebro-validation-${stamp}`],
+    });
+    const sourceId = Number(inserted.rows[0]?.id);
+    const before = {
+      artifacts: await countRows("artifacts"),
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+    };
+
+    const result = await caller.surfer.validateSource({
+      sourceId,
+      decision: "trusted",
+      reviewer: "oak",
+      note: "Official docs matched the claim in this fixture.",
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected source validation to succeed.");
+    expect(result.source.trustLevel).toBe("high");
+    expect(result.sourceValidationReceipt.mode).toBe("local_source_validation");
+    expect(result.sourceValidationReceipt.decision).toBe("trusted");
+    expect(result.sourceValidationReceipt.reviewer).toBe("oak");
+    expect(result.sourceValidationReceipt.browserOpened).toBe(false);
+    expect(result.sourceValidationReceipt.searchRan).toBe(false);
+    expect(result.sourceValidationReceipt.fetchRan).toBe(false);
+    expect(result.sourceValidationReceipt.writesExternalSystems).toBe(false);
+    expect(result.sourceValidationReceipt.writesMemory).toBe(false);
+    expect(result.sourceValidationReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(result.sourceValidationReceipt.noActionTaken.join(" ")).toContain("No browser");
+
+    const events = await db.execute({
+      sql: `
+        SELECT event_type, owner_agent, source_label, trust_level, trust_notes
+        FROM source_events
+        WHERE source_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      args: [sourceId],
+    });
+    expect(events.rows[0]?.event_type).toBe("source_validation");
+    expect(events.rows[0]?.owner_agent).toBe("oak");
+    expect(events.rows[0]?.source_label).toBe("oak_trusted");
+    expect(events.rows[0]?.trust_level).toBe("high");
+    expect(String(events.rows[0]?.trust_notes ?? "")).toContain("Official docs matched");
+    expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
 });

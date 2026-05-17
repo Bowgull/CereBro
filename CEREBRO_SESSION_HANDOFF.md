@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1333 EDT
+Last updated: 2026-05-17 1346 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1346 EDT - Source Validation Controls
+
+### What Changed
+- Added `surfer.validateSource`.
+- Saved sources can now be locally marked `Trusted`, `Review`, or `Reject`.
+- The backend updates only the local source trust/freshness note and appends a
+  `source_validation` event.
+- The returned source validation receipt states that no browser, search, fetch,
+  parser, model, vector index, memory write, Obsidian write, Notion write,
+  Drive write, retrieval automation, or external tool ran.
+- Research UI now exposes compact validation controls inside each saved
+  source's `Source Rules` drawer.
+- Tests now prove local source validation writes a source event without
+  creating approvals, artifacts, or memory entries.
+
+### Files Touched
+- `app/server/routers/surfer.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3002/` after the dev server
+  auto-bumped from busy port `3000`: opened Workshop -> Research, opened
+  `Source Rules`, and confirmed `Trusted`, `Review`, and `Reject` controls.
+- Screenshot proof saved locally at
+  `output/playwright/source-validation-controls.png`.
+
+### Drift Check
+- On path. This completes the next Research/Sources local validation step
+  without building browser automation or retrieval.
+- No external write, model call, browser fetch, provider call, source
+  automation, install, paid service, new primary surface, or Raven path was
+  added.
+
+### Known Risks
+- The existing source tests use the local dev DB, so repeated fixture source
+  records are visible in the Research panel. This pass did not clean or migrate
+  dev data.
+- `Trusted`, `Review`, and `Reject` are immediate local user actions. They do
+  not yet have a separate undo control.
+
+### Storage Impact
+- No schema change.
+- Local dev DB can receive test fixture source rows and validation events when
+  tests run with the default DB URL.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/SurferSourcesPanel.tsx first. Continue CereBro on the stable build path. Research/Sources now has local source validation: saved sources can be marked Trusted, Review, or Reject from Source Rules, and the backend writes only local source notes plus source_validation events. Next best slice is either a small validation-read cleanup for the Research panel or move to Model/Tool Registry readiness. Do not build browser automation, retrieval automation, external writes, provider calls, installs, model downloads, new primary surfaces, or Raven paths. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1333 EDT - Browser V1 Source Truth
 
