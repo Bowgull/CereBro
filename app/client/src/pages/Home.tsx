@@ -961,6 +961,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [creatingRouteTaskId, setCreatingRouteTaskId] = useState<number | null>(null);
   const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
   const [creatingRouteReceiptId, setCreatingRouteReceiptId] = useState<number | null>(null);
+  const [selectedRouteAuditId, setSelectedRouteAuditId] = useState<number | null>(null);
   const utils = trpc.useUtils();
   const ledgerOverview = trpc.ledger.overview.useQuery(
     { evidenceLimit: 50, routeLimit: 6 },
@@ -996,6 +997,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       utils.workbench.evidenceSummary.invalidate();
     },
   });
+  const routeReceiptAudit = trpc.runtime.routeReceiptAudit.useQuery(
+    { routeRecordId: selectedRouteAuditId ?? 0 },
+    {
+      enabled: selectedRouteAuditId != null,
+      staleTime: 15_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const ledgerCopy = ledgerOverviewCopy();
 
   const overviewCards = ledgerOverview.data?.cards;
@@ -1431,6 +1441,16 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 const routeEvidence = item.workbenchEvidence;
                 const routeEvidenceId = routeEvidence?.id ?? null;
                 const readiness = item.executionReadiness;
+                const routeAudit = selectedRouteAuditId === item.id ? routeReceiptAudit.data : null;
+                const routeAuditProof = routeAudit
+                  ? [
+                      { label: "Task", value: routeAudit.proof.hasTask ? "linked" : "missing", tone: routeAudit.proof.hasTask ? C.success : C.warning },
+                      { label: "Body", value: routeAudit.proof.hasWorkbenchBody ? "linked" : "missing", tone: routeAudit.proof.hasWorkbenchBody ? C.success : C.warning },
+                      { label: "Gate", value: routeAudit.proof.approvalStatus ?? "not queued", tone: routeAudit.proof.hasApprovalPreview ? C.gold : C.textMuted },
+                      { label: "Executor", value: routeAudit.executorStatus.replace(/_/g, " "), tone: C.gold },
+                      { label: "Execute", value: routeAudit.canExecute ? "enabled" : "blocked", tone: routeAudit.canExecute ? C.danger : C.gold },
+                    ]
+                  : [];
                 const readinessProof = readiness
                   ? routeExecutionReadinessProofModel({
                       status: readiness.status,
@@ -1477,7 +1497,50 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <span>{item.mode}</span>
                       <span style={{ color: C.border }}>/</span>
                       <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                      <button
+                        type="button"
+                        className="ml-auto rounded px-1.5 py-0.5 uppercase tracking-wider"
+                        onClick={() => {
+                          setSelectedRouteAuditId(item.id);
+                          setLedgerFocusNotice(`Reading local audit chain for route #${item.id}.`);
+                        }}
+                        style={{ color: C.accent, border: `1px solid ${C.borderSoft}`, background: C.surface }}
+                      >
+                        Read Audit
+                      </button>
                     </div>
+                    {selectedRouteAuditId === item.id && (
+                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} receipt audit read`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                            Receipt Audit
+                          </span>
+                          <span className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+                            {routeReceiptAudit.isLoading ? "reading" : "read-only"}
+                          </span>
+                        </div>
+                        {routeReceiptAudit.isError ? (
+                          <div className="text-[10px] leading-snug" style={{ color: C.warning }}>
+                            Route audit could not be read.
+                          </div>
+                        ) : routeAudit ? (
+                          <>
+                            <div className="grid grid-cols-2 gap-1 lg:grid-cols-5">
+                              {routeAuditProof.map((field) => (
+                                <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={field.tone} />
+                              ))}
+                            </div>
+                            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                              {routeAudit.gates[2]}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                            Reading local route proof.
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {readiness && (
                       <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} execution readiness`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                         <div className="mb-1 flex items-center justify-between gap-2">

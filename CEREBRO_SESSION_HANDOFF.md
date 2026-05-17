@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0436 EDT
+Last updated: 2026-05-17 0441 EDT
 
 ## Current North Star
 
@@ -20,6 +20,80 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0441 EDT - Ledger Route Audit Strip
+
+### What Changed
+- Finished item 8 by surfacing the existing `runtime.routeReceiptAudit` read
+  inside the existing Ledger route card.
+- Added a `Read Audit` control on saved route cards.
+- The selected route card now shows a compact Receipt Audit strip with Task,
+  Body, Gate, Executor, and Execute.
+- The strip reads from the backend audit query and keeps execution blocked.
+- No new primary surface, route executor, command runner, browser action, model
+  call, provider call, git action, Obsidian write, Notion write, Drive write,
+  memory write, install, dependency, schema migration, or Raven path was added.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-route-audit-ui.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Browser proof used an isolated server:
+  `PORT=3319 CEREBRO_DB_URL='file:/tmp/cerebro-route-audit-ui-browser.db' pnpm -C app dev`.
+- In that isolated database, Playwright created one throwaway route through
+  the app, opened Ledger, clicked `Read Audit`, and confirmed the Receipt Audit
+  strip rendered Task, Body, Gate, Executor `not built`, and Execute `blocked`.
+- Screenshot proof saved to ignored local output:
+  `output/playwright/ledger-route-receipt-audit-read.png`.
+- The isolated proof server was stopped after screenshot proof.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice Ledger route card UI and docs.
+- No dev server was left running on the isolated proof port.
+- No worker was used because this was one existing Ledger card call site.
+
+### Front-End Steward Review
+- Surface: Ledger Overview route card.
+- Register: product surface.
+- Primary object: one saved route and its local audit chain.
+- User question: what proof exists for this route, and can it run.
+- Route visible: task/body/gate/executor/execute proof appears only after the
+  user asks to read the audit.
+- Gate visible: executor reads `not built`; Execute reads `blocked`.
+- Machinery hidden until needed: no executor, dispatch button, provider runner,
+  model runner, browser runner, command runner, or git runner was exposed.
+- Generic UI rejected: no new dashboard, fake progress, agent theater, or
+  extra route analytics panel was added.
+
+### Completion Read
+- Overall: 77%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 75%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Item 8 route receipt contracts now
+have aggregate Ledger proof, single-route backend audit proof, Runtime approval
+origin, and an on-demand Ledger route-card audit strip. Next best path is item
+9 Model and Tool Registry hardening, unless a route receipt bug appears. Do not
+build an executor yet. Do not run Ollama status checks, installs, pulls,
+external searches, provider calls, model calls, note scans, vector indexing,
+source fetches, cleanup actions, command execution runners, route saves, task
+creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0436 EDT - Route Receipt Audit Read
 

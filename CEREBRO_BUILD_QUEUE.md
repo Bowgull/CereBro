@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0441 EDT: finished item 8 by surfacing
+  `runtime.routeReceiptAudit` inside the existing Ledger route card. Saved
+  routes now have a `Read Audit` control that renders Task, Body, Gate,
+  Executor, and Execute proof on demand. Browser proof used an isolated temp
+  DB, created one throwaway route through the app, clicked `Read Audit`, and
+  saved `output/playwright/ledger-route-receipt-audit-read.png`. No route
+  executor, command runner, browser action, model/provider call, git action,
+  external write, new primary surface, dependency, or Raven path was added.
 - 2026-05-17 0436 EDT: continued item 8 backend route receipts before agent
   execution. Added `runtime.routeReceiptAudit`, a read-only single-route audit
   query that returns the saved route, task link, Workbench body link, approval
