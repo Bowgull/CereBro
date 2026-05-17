@@ -161,15 +161,26 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             One approved public fetch. Use Spock for unfamiliar URLs.
           </div>
           {ingestUrl.data && (
-            <div className="text-[10px] leading-snug break-all" style={{ color: ingestUrl.data.ok ? C.success : C.warning }}>
-              {ingestUrl.data.ok && ingestUrl.data.source
-                ? `Saved source: ${
-                    ingestUrl.data.source.title ??
-                    ingestUrl.data.source.sourceDisplayName ??
-                    sourceDisplayName(ingestUrl.data.source.uri)
-                  }`
-                : ingestUrl.data.reason ?? "URL ingestion failed."}
-            </div>
+            ingestUrl.data.ok && ingestUrl.data.source && ingestUrl.data.sourceSaveReceipt ? (
+              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+                <div className="font-semibold truncate" style={{ color: C.success }} title={ingestUrl.data.source.uri}>
+                  Saved source #{ingestUrl.data.sourceSaveReceipt.sourceId}: {ingestUrl.data.source.title ?? ingestUrl.data.source.sourceDisplayName ?? sourceDisplayName(ingestUrl.data.source.uri)}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <MiniBadge label={`event ${ingestUrl.data.sourceSaveReceipt.sourceEventId}`} tone={C.accent} />
+                  <MiniBadge label={`artifact ${ingestUrl.data.sourceSaveReceipt.artifactId}`} tone={C.gold} />
+                  <MiniBadge label={ingestUrl.data.sourceSaveReceipt.browserOpened ? "browser opened" : "no browser"} tone={ingestUrl.data.sourceSaveReceipt.browserOpened ? C.warning : C.success} />
+                  <MiniBadge label={ingestUrl.data.sourceSaveReceipt.retrievalAutomationEnabled ? "retrieval on" : "retrieval off"} tone={ingestUrl.data.sourceSaveReceipt.retrievalAutomationEnabled ? C.warning : C.textMuted} />
+                </div>
+                <div className="mt-1" style={{ color: C.textMuted }}>
+                  {ingestUrl.data.sourceSaveReceipt.nextAction}
+                </div>
+              </div>
+            ) : (
+              <div className="text-[10px] leading-snug break-all" style={{ color: C.warning }}>
+                {ingestUrl.data.reason ?? "URL ingestion failed."}
+              </div>
+            )
           )}
         </form>
       </div>

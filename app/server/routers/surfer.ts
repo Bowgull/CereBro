@@ -490,6 +490,27 @@ export const surferRouter = router({
           sourceEventId,
           status: response.status,
           contentType,
+          sourceSaveReceipt: {
+            mode: "approved_public_url_ingest" as const,
+            sourceId: source.id,
+            artifactId,
+            sourceEventId,
+            status: response.status,
+            contentType,
+            fetchRan: true,
+            browserOpened: false,
+            searchRan: false,
+            writesLocalRecords: true,
+            writesExternalSystems: false,
+            writesMemory: false,
+            routeDefaultsChanged: false,
+            retrievalAutomationEnabled: false,
+            nextAction: "Review the saved source before retrieval, memory, Obsidian, or project knowledge reuse.",
+            noActionTaken: [
+              "No browser, search, model, vector index, Obsidian write, Notion write, Drive write, memory write, route default change, or external write ran.",
+              "Only the approved public URL fetch and local source/artifact/event records were created.",
+            ],
+          },
         };
       } catch (error) {
         return {

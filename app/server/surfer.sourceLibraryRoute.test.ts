@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { getCerebroDb } from "./cerebroDb";
 import { appRouter } from "./routers";
 
@@ -9,6 +9,10 @@ function createCaller() {
     res: {} as never,
   });
 }
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 async function countRows(table: string) {
   const db = await getCerebroDb();
@@ -66,6 +70,43 @@ describe("Surfer Source Library route", () => {
     expect(panel.sourceLibraryReceipt.noActionTaken.join(" ")).toContain("No browser");
 
     expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
+
+  it("returns a source save receipt after an approved public URL ingest", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      "<html><head><title>CereBro Source Fixture</title><meta name=\"description\" content=\"Fixture source description.\"></head><body>Fixture body.</body></html>",
+      {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      },
+    )));
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+    };
+
+    const saved = await caller.surfer.ingestPublicUrl({
+      url: `https://docs.example.com/cerebro-save-receipt-${Date.now()}`,
+      approved: true,
+    });
+
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) throw new Error("Expected source ingest to succeed.");
+    expect(saved.sourceSaveReceipt.mode).toBe("approved_public_url_ingest");
+    expect(saved.sourceSaveReceipt.fetchRan).toBe(true);
+    expect(saved.sourceSaveReceipt.browserOpened).toBe(false);
+    expect(saved.sourceSaveReceipt.searchRan).toBe(false);
+    expect(saved.sourceSaveReceipt.writesExternalSystems).toBe(false);
+    expect(saved.sourceSaveReceipt.writesLocalRecords).toBe(true);
+    expect(saved.sourceSaveReceipt.sourceId).toBe(saved.source.id);
+    expect(saved.sourceSaveReceipt.artifactId).toBe(saved.artifactId);
+    expect(saved.sourceSaveReceipt.sourceEventId).toBe(saved.sourceEventId);
+    expect(saved.sourceSaveReceipt.routeDefaultsChanged).toBe(false);
+    expect(saved.sourceSaveReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(saved.sourceSaveReceipt.noActionTaken.join(" ")).toContain("No browser");
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("memory_entries")).toBe(before.memoryEntries);
   });

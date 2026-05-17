@@ -51,11 +51,17 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `curl` readback confirmed CereBro Project Detail returns
   `knowledgeRoute.projectBridgePath = 10_Projects/CereBro/CereBro.md` and
   `writesExternalSystems = false`.
+- Browser proof used the Playwright CLI wrapper headlessly against
+  `http://localhost:3001/`.
+- Browser proof opened Workshop -> Project Lab -> Inspect CereBro and verified
+  `Knowledge Route`, bridge/source paths, `no external write`, archive-only
+  status, and the explicit write gate.
+- Screenshot proof: `output/playwright/project-knowledge-route-read-open.png`.
 
 ### Cleanliness Read
 - Dirty files at start: none.
-- Dev server restarted and remains running at `http://localhost:3000/` for
-  preview.
+- Dev servers started for browser proof were closed. No local server remains on
+  ports 3000, 3001, 3002, or 24678.
 - No worker was used because this was one existing Project Lab readout.
 
 ### Front-End Steward Review
