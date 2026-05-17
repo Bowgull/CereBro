@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2349 EDT
+Last updated: 2026-05-16 2353 EDT
 
 ## Current North Star
 
@@ -20,6 +20,90 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2353 EDT - Memory Reuse Contract Read
+
+### What Changed
+- Continued item 7 Knowledge/source contracts before knowledge automation.
+- Added a read-only `memory.contract` endpoint.
+- The contract reports saved notes, reusable candidates, proposal counts,
+  pending proposals, Oak-validated proposals, normal knowledge route, archive
+  route, required metadata fields, write flags, route-default status, gates,
+  and next action.
+- Knowledge Notes now shows a compact `Reuse Contract` strip using that local
+  contract read.
+- The strip keeps the primary Memory surface focused on notes while making the
+  reuse gate visible: validation before retrieval or export.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/memory.ts`
+- `app/server/memory.contract.test.ts`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/lib/memoryPanelCopyModel.ts`
+- `app/server/memoryPanelCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-memory-contract-red.db' pnpm -C app exec vitest run server/memory.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `memory.contract` did not exist.
+- Green check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-memory-contract-final.db' pnpm -C app exec vitest run server/memory.contract.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice Memory files, new memory contract
+  test, and handoff/queue docs.
+- Existing handoff edits for the previous Workbench browser proof were
+  preserved.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one backend read contract plus one
+  existing Memory panel readback.
+
+### Front-End Steward Review
+- Surface: Knowledge Notes.
+- Register: product surface.
+- Primary object: saved and proposed knowledge notes.
+- User question: what can be reused, and what still needs validation.
+- Route visible: normal knowledge route and archive route are visible.
+- Gate visible: retrieval automation is off, Oak validation is required, and
+  the next action is visible.
+- Machinery hidden until needed: no RAG dashboard, vector controls, note
+  scanner, Obsidian writer, or source automation was added.
+- Generic UI rejected: no fake metric cards, generic AI memory dashboard, or
+  plugin marketplace was added.
+- Remaining taste risk: Memory now has one more dense strip. Future work should
+  consolidate source, memory, and route gates into shared read patterns.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 50%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Memory now exposes a read-only reuse
+contract in Knowledge Notes. Next best path is a small Ledger alignment for
+knowledge/memory receipts or the next source contract slice if dirty files are
+clean. Do not run Ollama status checks, installs, pulls, external searches,
+provider calls, model calls, note scans, vector indexing, source fetches, or
+vault writes without explicit approval.
 
 ## 2026-05-16 2349 EDT - Workbench Knowledge Route Read
 
@@ -54,15 +138,20 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   `CEREBRO_DB_URL='file:/tmp/cerebro-workbench-route-map-green.db' pnpm -C app exec vitest run server/workbench.knowledgeRoute.test.ts server/projectIntelligence.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app check` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Interactive screenshot proof was not available in this pass because the
-  in-app browser tool was not exposed to this session and Playwright is not
-  installed in the app workspace. The local preview stayed live.
+- Playwright CLI opened `http://localhost:3001/`, opened Workshop, selected
+  Workbench receipt `#1527`, and confirmed `Knowledge Route Read` showed the
+  bridge note, repository source note, Project Map, GitHub sources index,
+  archive lane, write gate, and no-action proof.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/workbench-knowledge-route-polish.png`.
+- Dev console showed existing Vite HMR websocket errors caused by a stale
+  server already using ports 24678 and 3000. The Workbench route read rendered.
 
 ### Cleanliness Read
 - Dirty files at start: none.
 - Dirty files before closeout: current-slice Workbench/test/docs files only.
-- Dev server remains available at `http://localhost:3000/`.
+- The temporary dev server used for browser proof was closed. A pre-existing
+  local server remains on ports 3000 and 24678.
 - No worker was used because this was one existing Workbench readout and one
   test contract.
 

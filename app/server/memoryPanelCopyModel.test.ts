@@ -9,6 +9,8 @@ describe("memoryPanelCopyModel", () => {
       copy.subtitle,
       copy.inputPlaceholder,
       copy.stageTitleReady,
+      copy.contractTitle,
+      copy.contractNoWrite,
       copy.deleteDialogTitle,
       copy.deleteDialogDescription,
       copy.confirmDeleteTitle,
@@ -17,6 +19,7 @@ describe("memoryPanelCopyModel", () => {
     expect(copy.title).toBe("Knowledge Notes");
     expect(copy.subtitle).toContain("Oak review");
     expect(copy.stats.trusted).toBe("Ready");
+    expect(copy.contractTitle).toBe("Reuse Contract");
     expect(copy.routingTitle).toBe("Note Routing");
     expect(combined).not.toContain("truth");
     expect(combined).not.toContain("receipt");

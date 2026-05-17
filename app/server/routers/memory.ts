@@ -10,10 +10,61 @@ import {
   type MemoryRow,
 } from "../cerebroDb";
 import { writeObsidianNote } from "../integrations/vault";
+import { OBSIDIAN_KNOWLEDGE_ROUTES, OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT } from "../knowledge/contracts";
 import { sessionDisplayName } from "./sessions";
 
 const KINDS = ["fact", "note", "reference", "feedback"] as const;
 const kindSchema = z.enum(KINDS);
+
+async function readMemoryContract() {
+  const db = await getCerebroDb();
+  const [entries, proposals] = await Promise.all([
+    db.execute(`
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN kind IN ('fact', 'reference') THEN 1 ELSE 0 END) AS reusable_candidates
+      FROM memory_entries
+    `),
+    db.execute(`
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN oak_status = 'validated' THEN 1 ELSE 0 END) AS oak_validated,
+        SUM(CASE WHEN status = 'written' THEN 1 ELSE 0 END) AS written
+      FROM memory_proposals
+    `),
+  ]);
+  const entryRow = entries.rows[0] ?? {};
+  const proposalRow = proposals.rows[0] ?? {};
+  const normalRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "knowledge");
+  const archiveRoute = OBSIDIAN_KNOWLEDGE_ROUTES.find((route) => route.key === "archive");
+
+  return {
+    mode: "read_only" as const,
+    ownerAgent: "oak" as const,
+    supportAgents: ["aang", "spock", "c3po"] as const,
+    savedNotes: Number(entryRow.total ?? 0),
+    reusableCandidates: Number(entryRow.reusable_candidates ?? 0),
+    proposedNotes: Number(proposalRow.total ?? 0),
+    pendingProposals: Number(proposalRow.pending ?? 0),
+    oakValidatedProposals: Number(proposalRow.oak_validated ?? 0),
+    writtenProposals: Number(proposalRow.written ?? 0),
+    normalRoute: normalRoute?.relativePath ?? "20_Knowledge",
+    archiveRoute: archiveRoute?.relativePath ?? "90_Archive",
+    canAutomateRetrieval: false,
+    writesExternalSystems: false,
+    writesObsidian: false,
+    writesMemory: false,
+    routeDefaultsChanged: false,
+    requiredMetadataFields: OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.requiredFields,
+    gates: [
+      "Memory proposals require Oak validation before approval.",
+      "Reusable notes require current canonical status, active retrieval status, summary, source ids, related notes, and privacy class.",
+      "No vector indexing, note scanning, Obsidian write, Notion write, Drive write, model call, or route default change runs from this read.",
+    ],
+    nextAction: "Validate notes before retrieval or durable knowledge export.",
+  };
+}
 
 function rowToMemory(r: Record<string, unknown>): MemoryRow {
   const sessionId = r.session_id == null ? null : Number(r.session_id);
@@ -65,6 +116,8 @@ function sessionLabelFromRow(sessionId: number | null, r: Record<string, unknown
 }
 
 export const memoryRouter = router({
+  contract: publicProcedure.query(readMemoryContract),
+
   list: publicProcedure
     .input(
       z

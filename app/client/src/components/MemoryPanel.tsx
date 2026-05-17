@@ -51,6 +51,11 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
     sessionIds: selectedSessionIds,
     search: search.trim() || undefined,
   });
+  const contract = trpc.memory.contract.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const proposalsQuery = trpc.memory.proposals.useQuery({
     sessionIds: selectedSessionIds,
     limit: 100,
@@ -123,6 +128,51 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
         <MemoryStat label={copy.stats.trusted} value={String(trusted)} tone={C.success} />
         <MemoryStat label={copy.stats.proposed} value={String(proposals.length)} tone={proposals.length > 0 ? C.warning : C.textMuted} />
       </div>
+      <section className="shrink-0 px-2.5 py-1.5" aria-label="Memory reuse contract" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              {copy.contractTitle}
+            </div>
+            <Badge variant="warning" className="uppercase">
+              {copy.contractNoWrite}
+            </Badge>
+          </div>
+          {contract.isLoading ? (
+            <div className="text-[11px]" style={{ color: C.textMuted }}>{copy.contractLoading}</div>
+          ) : contract.data ? (
+            <>
+              <div className="grid grid-cols-2 gap-1">
+                <MemoryContractDatum
+                  label={copy.contractRouteLabel}
+                  value={copy.contractRouteValue(contract.data.normalRoute, contract.data.archiveRoute)}
+                  tone={C.accent}
+                />
+                <MemoryContractDatum
+                  label={copy.contractReviewLabel}
+                  value={copy.contractReviewValue(contract.data.pendingProposals, contract.data.oakValidatedProposals)}
+                  tone={contract.data.pendingProposals > 0 ? C.warning : C.success}
+                />
+                <MemoryContractDatum
+                  label={copy.contractGateLabel}
+                  value={contract.data.canAutomateRetrieval ? "retrieval allowed" : "validation required"}
+                  tone={contract.data.canAutomateRetrieval ? C.danger : C.gold}
+                />
+                <MemoryContractDatum
+                  label={copy.contractNextLabel}
+                  value={contract.data.nextAction}
+                  tone={C.textSecondary}
+                />
+              </div>
+              <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                {contract.data.gates[2]}
+              </div>
+            </>
+          ) : (
+            <div className="text-[11px]" style={{ color: C.danger }}>Reuse contract unavailable.</div>
+          )}
+        </div>
+      </section>
       <div
         className="flex items-center gap-1 overflow-x-auto px-2.5 py-1.5 shrink-0"
         aria-label="Memory kind filters"
@@ -386,6 +436,19 @@ function MemoryStat({ label, value, tone }: { label: string; value: string; tone
         {label}
       </div>
       <div className="mt-0.5 text-[11px] font-semibold" style={{ color: tone }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function MemoryContractDatum({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>
+        {label}
+      </div>
+      <div className="mt-0.5 truncate text-[10px] leading-snug" style={{ color: tone }} title={value}>
         {value}
       </div>
     </div>
