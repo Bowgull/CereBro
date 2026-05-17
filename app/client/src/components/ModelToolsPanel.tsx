@@ -158,6 +158,19 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const callLogAudit = trpc.modelTools.callLogAudit.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const callLogs = trpc.modelTools.callLogs.useQuery(
+    { limit: 5 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
 
   const createCapability = trpc.modelTools.proposeCapability.useMutation({
     onSuccess: (result) => {
@@ -244,6 +257,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   );
   const policyData = policy.data;
   const auditData = registryAudit.data;
+  const callAuditData = callLogAudit.data;
   const localEvalTasks = policyData?.evalTasks ?? [];
   const route = routePreview.data;
   const summary = policyData?.capabilityMapSummary;
@@ -380,7 +394,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading || registryAudit.isLoading}>
+      <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading || registryAudit.isLoading || callLogAudit.isLoading}>
         <section className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
@@ -457,6 +471,76 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           ) : (
             <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               Registry audit did not return a local read.
+            </div>
+          )}
+        </section>
+
+        <section className="rounded p-2" aria-label="Model tool call receipts" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+          <SectionTitle title="Call Receipts" detail={callAuditData?.mode ? labelize(callAuditData.mode) : "reading"} />
+          {callLogAudit.isLoading ? (
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+              Reading local model/tool call receipts.
+            </div>
+          ) : callAuditData ? (
+            <div className="mt-2 grid gap-2">
+              <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-6">
+                <StatusBlock label="Register" value={labelize(callAuditData.register)} tone={C.textSecondary} />
+                <StatusBlock label="Owner" value={callAuditData.ownerAgent} tone={C.accentViolet} />
+                <StatusBlock label="Calls" value={String(callAuditData.totalCalls)} tone={callAuditData.totalCalls ? C.accent : C.textMuted} />
+                <StatusBlock label="Approval" value={String(callAuditData.withApproval)} tone={callAuditData.withApproval ? C.success : C.textMuted} />
+                <StatusBlock label="Capability" value={String(callAuditData.withCapability)} tone={callAuditData.withCapability ? C.success : C.textMuted} />
+                <StatusBlock label="Defaults" value={callAuditData.routeDefaultsChanged ? "changed" : "unchanged"} tone={callAuditData.routeDefaultsChanged ? C.danger : C.success} />
+              </div>
+              <div className="grid gap-1.5 md:grid-cols-3">
+                <AuditProofStrip title="Status" items={[
+                  { label: "logged", value: callAuditData.byStatus.logged, tone: C.textSecondary },
+                  { label: "complete", value: callAuditData.byStatus.completed, tone: C.success },
+                  { label: "failed", value: callAuditData.byStatus.failed, tone: C.danger },
+                  { label: "blocked", value: callAuditData.byStatus.blocked, tone: C.warning },
+                ]} />
+                <AuditProofStrip title="Blocked Actions" items={[
+                  { label: "provider", value: callAuditData.callsExternalModels ? "yes" : "no", tone: callAuditData.callsExternalModels ? C.danger : C.success },
+                  { label: "local model", value: callAuditData.callsLocalModels ? "yes" : "no", tone: callAuditData.callsLocalModels ? C.danger : C.success },
+                  { label: "install", value: callAuditData.installsDependencies ? "yes" : "no", tone: callAuditData.installsDependencies ? C.danger : C.success },
+                  { label: "pull", value: callAuditData.pullsModels ? "yes" : "no", tone: callAuditData.pullsModels ? C.danger : C.success },
+                  { label: "fetch", value: callAuditData.browsesOrFetches ? "yes" : "no", tone: callAuditData.browsesOrFetches ? C.danger : C.success },
+                ]} />
+                <MachineRule title="No Action" body={callAuditData.noActionTaken.join(" ")} tone={C.success} />
+              </div>
+              <div className="grid gap-1.5" aria-label="Recent model tool call receipt rows">
+                {callLogs.isLoading ? (
+                  <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                    Reading recent local call receipts.
+                  </div>
+                ) : (callLogs.data?.items ?? []).length === 0 ? (
+                  <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                    No model/tool call receipts recorded yet.
+                  </div>
+                ) : callLogs.data?.items.map((item) => (
+                  <div key={item.id} className="rounded p-2 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-bold uppercase tracking-widest" title={item.taskKind}>{item.taskKind}</div>
+                        <div className="mt-0.5 truncate" style={{ color: C.textMuted }} title={`${item.provider ?? "unknown provider"}. ${item.toolName ?? "unknown tool"}.`}>
+                          {item.provider ?? "unknown provider"}. {item.toolName ?? "unknown tool"}.
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap justify-end gap-1">
+                        <Badge label={labelize(item.resultStatus)} tone={item.resultStatus === "failed" ? C.danger : item.resultStatus === "blocked" ? C.warning : C.success} />
+                        {item.agentId && <Badge label={item.agentId} tone={C.accentViolet} />}
+                      </div>
+                    </div>
+                    <div className="mt-1 grid gap-1 md:grid-cols-2">
+                      <Field label="Input" value={item.inputSummary ?? "No input summary recorded."} />
+                      <Field label="Output" value={item.outputSummary ?? "No output summary recorded."} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+              Call receipt audit did not return a local read.
             </div>
           )}
         </section>

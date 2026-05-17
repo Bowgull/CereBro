@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1356 EDT
+Last updated: 2026-05-17 1407 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1407 EDT: added Basement Model/Tool call receipt readback.
+  `modelTools.callLogAudit` and `modelTools.callLogs` read local
+  `model_tool_call_logs` rows without running providers, local models, browser
+  fetches, installs, pulls, route defaults, file writes, memory writes, or
+  external writes. The Basement Model Registry now shows compact `Call
+  Receipts` counts and recent receipt summaries.
 - 2026-05-17 1356 EDT: added source validation readback to the Research audit.
   `sourceResearchLoopAudit` now counts `source_validation` events and the
   Research panel shows a compact `Validated` datum. This keeps Oak/Spock local

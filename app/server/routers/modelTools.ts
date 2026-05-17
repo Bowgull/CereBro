@@ -490,6 +490,27 @@ function rowToApprovalPreview(row: Record<string, unknown>) {
   };
 }
 
+function rowToCallLog(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    capabilityId: row.capability_id == null ? null : Number(row.capability_id),
+    provider: row.provider == null ? null : String(row.provider),
+    toolName: row.tool_name == null ? null : String(row.tool_name),
+    taskKind: String(row.task_kind),
+    agentId: row.agent_id == null ? null : String(row.agent_id),
+    approvalId: row.approval_id == null ? null : Number(row.approval_id),
+    promptOrHandoffId: row.prompt_or_handoff_id == null ? null : Number(row.prompt_or_handoff_id),
+    inputSummary: row.input_summary == null ? null : String(row.input_summary),
+    outputSummary: row.output_summary == null ? null : String(row.output_summary),
+    tokenOrInputSize: row.token_or_input_size == null ? null : String(row.token_or_input_size),
+    costOrFreeTierNote: row.cost_or_free_tier_note == null ? null : String(row.cost_or_free_tier_note),
+    resultStatus: String(row.result_status),
+    failureNotes: row.failure_notes == null ? null : String(row.failure_notes),
+    validationNotes: row.validation_notes == null ? null : String(row.validation_notes),
+    createdAt: Number(row.created_at),
+  };
+}
+
 function approvalForPrivacy(privacyClass: string) {
   if (privacyClass === "local_private") return "No external model/tool approval needed for the route preview itself.";
   if (privacyClass === "public_safe") return "Confirm before sending public-safe context to any external model/tool.";
@@ -784,8 +805,60 @@ async function readCapabilityMapSummary() {
   };
 }
 
+async function readCallLogAudit() {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN result_status = 'logged' THEN 1 ELSE 0 END) AS logged,
+        SUM(CASE WHEN result_status = 'completed' THEN 1 ELSE 0 END) AS completed,
+        SUM(CASE WHEN result_status = 'failed' THEN 1 ELSE 0 END) AS failed,
+        SUM(CASE WHEN result_status = 'blocked' THEN 1 ELSE 0 END) AS blocked,
+        SUM(CASE WHEN approval_id IS NOT NULL THEN 1 ELSE 0 END) AS with_approval,
+        SUM(CASE WHEN capability_id IS NOT NULL THEN 1 ELSE 0 END) AS with_capability
+      FROM model_tool_call_logs
+    `,
+    args: [],
+  });
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+
+  return {
+    mode: "read_only" as const,
+    register: "basement_model_tool_call_logs" as const,
+    ownerAgent: "spock" as const,
+    routeDefaultsChanged: false,
+    callsExternalModels: false,
+    callsLocalModels: false,
+    installsDependencies: false,
+    pullsModels: false,
+    browsesOrFetches: false,
+    writesExternal: false,
+    totalCalls: countValue(row, "total"),
+    withApproval: countValue(row, "with_approval"),
+    withCapability: countValue(row, "with_capability"),
+    byStatus: {
+      logged: countValue(row, "logged"),
+      completed: countValue(row, "completed"),
+      failed: countValue(row, "failed"),
+      blocked: countValue(row, "blocked"),
+    },
+    gates: [
+      "Call logs are receipts only.",
+      "A call-log row does not approve future model/tool use.",
+      "Route defaults stay unchanged until a separate route policy is approved.",
+    ],
+    noActionTaken: [
+      "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, account, payment, route default, file write, memory write, or external write ran.",
+      "Call-log audit reads local model_tool_call_logs rows only.",
+    ],
+  };
+}
+
 export const modelToolsRouter = router({
   registryAudit: publicProcedure.query(async () => registryAuditFromSummary(await readCapabilityMapSummary())),
+
+  callLogAudit: publicProcedure.query(async () => readCallLogAudit()),
 
   policy: publicProcedure.query(async () => {
     const capabilityMapSummary = await readCapabilityMapSummary();
@@ -1173,6 +1246,56 @@ export const modelToolsRouter = router({
         writesExternal: false,
         callsExternalModels: false,
         items: result.rows.map(rowToEval),
+      };
+    }),
+
+  callLogs: publicProcedure
+    .input(
+      z
+        .object({
+          capabilityId: z.number().int().optional(),
+          resultStatus: z.string().max(80).optional(),
+          limit: z.number().int().min(1).max(100).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where: string[] = [];
+      const args: (string | number)[] = [];
+      if (input?.capabilityId !== undefined) {
+        where.push("capability_id = ?");
+        args.push(input.capabilityId);
+      }
+      if (input?.resultStatus) {
+        where.push("result_status = ?");
+        args.push(input.resultStatus);
+      }
+      args.push(input?.limit ?? 20);
+      const result = await db.execute({
+        sql: `
+          SELECT *
+          FROM model_tool_call_logs
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+
+      return {
+        mode: "read_only" as const,
+        writesExternal: false,
+        callsExternalModels: false,
+        callsLocalModels: false,
+        installsDependencies: false,
+        pullsModels: false,
+        browsesOrFetches: false,
+        items: result.rows.map(rowToCallLog),
+        noActionTaken: [
+          "No provider, model, tool, gateway, browser, search, fetch, install, token, pull, local inference, account, payment, route default, file write, memory write, or external write ran.",
+          "Call logs are read from local model_tool_call_logs rows only.",
+        ],
       };
     }),
 

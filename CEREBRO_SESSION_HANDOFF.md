@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1356 EDT
+Last updated: 2026-05-17 1407 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1407 EDT - Model Tool Call Receipt Readback
+
+### What Changed
+- Added `modelTools.callLogAudit`.
+- Added `modelTools.callLogs`.
+- Basement Model Registry now shows a compact `Call Receipts` readback.
+- The readback counts local model/tool call receipt rows, linked approvals,
+  linked capabilities, status counts, and recent receipt summaries.
+- The route is read-only and states that no model/tool, provider, gateway,
+  browser, fetch, install, pull, local inference, account, payment, route
+  default, file write, memory write, or external write ran.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Basement ->
+  Models and confirmed `Call Receipts`, `basement model tool call logs`,
+  `Calls`, `Defaults unchanged`, and blocked-action `no` readback.
+- Screenshot proof saved locally at
+  `output/playwright/model-tools-call-receipts.png`.
+
+### Drift Check
+- On path. This advances the Basement Model/Tool Registry as a capability
+  receipt map before any provider, model, install, or execution lane.
+- No provider call, local model call, browser fetch, install, pull, account
+  setup, paid service, new primary surface, route default change, external
+  write, memory write, Obsidian data import, or Raven path was added.
+
+### Known Risks
+- The local dev DB contains fixture model/tool registry rows from existing
+  tests. This pass exposes call receipt counts honestly instead of cleaning dev
+  fixtures.
+- Call receipt rows are readback only. There is no execution runner behind this
+  Basement panel.
+
+### Storage Impact
+- No schema change.
+- Test runs can create local `model_tool_capabilities` and
+  `model_tool_call_logs` fixture rows in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue CereBro on the stable build path. Model/Tool Registry now has read-only call receipt audit/readback through modelTools.callLogAudit and modelTools.callLogs, surfaced in Basement as Call Receipts. Next best slice is to continue Basement readiness toward approval-gated model/tool route receipts, or move to the next build-queue surface if a higher-risk unfinished loop appears. Do not run providers, local models, installs, pulls, browser automation, external writes, paid services, new primary surfaces, or Raven paths. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1356 EDT - Source Validation Audit Readback
 

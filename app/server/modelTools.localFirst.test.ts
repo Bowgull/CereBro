@@ -412,4 +412,79 @@ describe("Model Tools local-first routing policy", () => {
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("permission_preflight_records")).toBe(before.preflights);
   });
+
+  it("reads model tool call receipts without running models, providers, installs, or writes", async () => {
+    const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Call Receipt ${stamp}`,
+      toolName: "Call receipt candidate",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:call-receipt",
+      riskReview: "Local receipt readback only.",
+      validationNotes: "Test fixture for call-log receipt readback.",
+    });
+    await db.execute({
+      sql: `
+        INSERT INTO model_tool_call_logs (
+          capability_id, provider, tool_name, task_kind, agent_id,
+          input_summary, output_summary, token_or_input_size,
+          cost_or_free_tier_note, result_status, validation_notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        proposal.capability.id,
+        `Call Receipt ${stamp}`,
+        "Call receipt candidate",
+        "local eval receipt read",
+        "spock",
+        "Fixture input summary. No model ran.",
+        "Fixture output summary. No model ran.",
+        "0 tokens",
+        "No cost.",
+        "logged",
+        "Readback fixture only.",
+      ],
+    });
+
+    const before = {
+      calls: await countRows("model_tool_call_logs"),
+      capabilities: await countRows("model_tool_capabilities"),
+      evals: await countRows("model_tool_evals"),
+      approvals: await countRows("approvals"),
+    };
+    const audit = await caller.modelTools.callLogAudit();
+    const logs = await caller.modelTools.callLogs({ limit: 5 });
+
+    expect(audit).toMatchObject({
+      mode: "read_only",
+      register: "basement_model_tool_call_logs",
+      ownerAgent: "spock",
+      routeDefaultsChanged: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      writesExternal: false,
+    });
+    expect(audit.totalCalls).toBeGreaterThanOrEqual(1);
+    expect(audit.byStatus.logged).toBeGreaterThanOrEqual(1);
+    expect(audit.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(logs.mode).toBe("read_only");
+    expect(logs.items.some((item) => item.capabilityId === proposal.capability.id)).toBe(true);
+    expect(logs.items.find((item) => item.capabilityId === proposal.capability.id)?.resultStatus).toBe("logged");
+    expect(logs.noActionTaken.join(" ")).toContain("No provider");
+
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+    expect(await countRows("model_tool_capabilities")).toBe(before.capabilities);
+    expect(await countRows("model_tool_evals")).toBe(before.evals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+  });
 });
