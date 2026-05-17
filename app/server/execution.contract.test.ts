@@ -10,7 +10,7 @@ function createCaller() {
 }
 
 describe("execution action contract", () => {
-  it("keeps command execution blocked until the local contract is complete, then stops at the unwired runner", async () => {
+  it("keeps command execution blocked until the local contract is complete, then runs one approved read-only command", async () => {
     const caller = createCaller();
     const task = await caller.tasks.create({
       title: "Execution contract test task",
@@ -78,11 +78,70 @@ describe("execution action contract", () => {
       proposalId: ready.proposal?.id ?? -1,
       approved: true,
     });
-    expect(runnerGuard.ok).toBe(false);
-    expect(runnerGuard.wouldExecute).toBe(false);
+    expect(runnerGuard.ok).toBe(true);
+    expect(runnerGuard.wouldExecute).toBe(true);
     expect(runnerGuard.writesExternal).toBe(false);
-    expect(runnerGuard.resultState).toBe("contract_ready_no_runner");
-    expect(runnerGuard.reason).toContain("shell runner adapter is not installed");
+    expect(runnerGuard.resultState).toBe("completed");
+    expect(runnerGuard.exitCode).toBe(0);
+    expect(runnerGuard.stdoutSummary).toContain("/Users/lindsaybell/Desktop/CereBro");
+    expect(runnerGuard.gates.join(" ")).toContain("Shell was disabled");
+
+    const results = await caller.execution.results({
+      proposalId: ready.proposal?.id ?? -1,
+      limit: 5,
+    });
+    expect(results.writesExternal).toBe(false);
+    expect(results.items[0]?.status).toBe("completed");
+    expect(results.items[0]?.receiptBody).toContain(`action proposal #${ready.proposal?.id}`);
+
+    const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
+    expect(ledger.cards.execution.total).toBeGreaterThan(0);
+    expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);
+    expect(ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId)?.command).toBe("pwd");
+  });
+
+  it("blocks approved contracts that are not read-only allowlisted commands", async () => {
+    const caller = createCaller();
+    const task = await caller.tasks.create({
+      title: "Execution mutating contract test task",
+      agent: "tony",
+    });
+    const preview = await caller.terminalLab.previewCommand({
+      command: "rm -rf app/client/public/sprites",
+      cwd: "/Users/lindsaybell/Desktop/CereBro",
+      taskId: task.id,
+    });
+    const approvalPreview = await caller.terminalLab.createApprovalPreviewFromObservation({
+      observationId: preview.observationId,
+    });
+    const approvalId = approvalPreview.approval?.id ?? -1;
+    await caller.approvals.decide({ id: approvalId, decision: "approved" });
+    const evidence = await caller.workbench.createEvidence({
+      kind: "terminal_output",
+      title: "Blocked destructive command receipt",
+      summary: "Receipt body exists so the runner policy is the deciding gate.",
+      targetUri: `terminal_lab:observation:${preview.observationId}`,
+      taskId: task.id,
+      commandObservationId: preview.observationId,
+      ownerAgent: "tony",
+      routeAgent: "tony",
+      permissionClass: "manual_note",
+    });
+    const proposal = await caller.execution.proposeFromCommandObservation({
+      observationId: preview.observationId,
+      approvalId,
+      workbenchEvidenceId: evidence.evidence.id,
+    });
+    expect(proposal.proposal?.readiness.canExecute).toBe(true);
+
+    const blocked = await caller.execution.runApprovedAction({
+      proposalId: proposal.proposal?.id ?? -1,
+      approved: true,
+    });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.wouldExecute).toBe(false);
+    expect(blocked.resultState).toBe("blocked_by_runner_policy");
+    expect(blocked.reason).toContain("Only approved read-only command contracts");
   });
 
   it("does not allow approval receipts to be decided twice", async () => {

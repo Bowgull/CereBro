@@ -1,14 +1,164 @@
 import { TRPCError } from "@trpc/server";
+import { spawn } from "node:child_process";
+import path from "node:path";
 import { z } from "zod";
 import { getCerebroDb } from "../cerebroDb";
 import { publicProcedure, router } from "../_core/trpc";
 
 const proposalStatusOptions = ["proposed", "approved", "blocked", "contract_ready", "run_blocked"] as const;
+const allowedReadOnlyCommands = new Set(["cat", "date", "find", "git", "ls", "pwd", "rg", "sed", "stat", "tail", "wc", "which"]);
+const allowedGitSubcommands = new Set(["branch", "diff", "log", "rev-parse", "show", "status"]);
+const runnerTimeoutMs = 5000;
 
 type ProposalJoinRow = Record<string, unknown>;
 
 function splitLines(value: unknown) {
   return value == null ? [] : String(value).split("\n").filter(Boolean);
+}
+
+function summarizeOutput(value: string) {
+  return value
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[redacted-email]")
+    .replace(/\b(token|secret|password|api[_-]?key)\s*[:=]\s*\S+/gi, "$1=[redacted]")
+    .slice(0, 4000);
+}
+
+function parseCommand(command: string) {
+  const text = command.trim();
+  if (!text) return { ok: false as const, reason: "Command is empty." };
+  if (/[\n\r|&;<>()`$]/.test(text) || text.includes(">")) {
+    return { ok: false as const, reason: "Shell operators, redirects, command substitution, and chained commands are blocked." };
+  }
+
+  const tokens: string[] = [];
+  let current = "";
+  let quote: "'" | "\"" | null = null;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index]!;
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      } else if (char === "\\" && quote === "\"" && index + 1 < text.length) {
+        index += 1;
+        current += text[index]!;
+      } else {
+        current += char;
+      }
+      continue;
+    }
+    if (char === "'" || char === "\"") {
+      quote = char;
+      continue;
+    }
+    if (/\s/.test(char)) {
+      if (current) {
+        tokens.push(current);
+        current = "";
+      }
+      continue;
+    }
+    if (char === "\\") {
+      return { ok: false as const, reason: "Backslash escapes are blocked in the read-only runner." };
+    }
+    current += char;
+  }
+  if (quote) return { ok: false as const, reason: "Unclosed quote in command." };
+  if (current) tokens.push(current);
+  if (tokens.length === 0) return { ok: false as const, reason: "Command is empty." };
+  return { ok: true as const, file: tokens[0]!, args: tokens.slice(1) };
+}
+
+function runnerPolicyForCommand(command: string) {
+  const parsed = parseCommand(command);
+  if (!parsed.ok) return parsed;
+  if (!allowedReadOnlyCommands.has(parsed.file)) {
+    return { ok: false as const, reason: `Command ${parsed.file} is not in the read-only runner allowlist.` };
+  }
+  const args = parsed.args.map((arg) => arg.toLowerCase());
+  if (parsed.file === "git") {
+    const subcommand = args.find((arg) => !arg.startsWith("-"));
+    if (!subcommand || !allowedGitSubcommands.has(subcommand)) {
+      return { ok: false as const, reason: "Only read-only git status, diff, log, show, branch, and rev-parse are allowed." };
+    }
+  }
+  if (parsed.file === "find" && args.some((arg) => arg === "-delete" || arg === "-exec" || arg === "-execdir")) {
+    return { ok: false as const, reason: "find delete and exec forms are blocked." };
+  }
+  if (parsed.file === "sed" && args.some((arg) => arg === "-i" || arg.startsWith("-i"))) {
+    return { ok: false as const, reason: "sed in-place edits are blocked." };
+  }
+  return parsed;
+}
+
+function containedCwd(cwd: string | null, projectPath: string | null) {
+  if (!cwd) return { ok: false as const, reason: "Missing cwd." };
+  const resolved = path.resolve(cwd);
+  const allowedRoots = [
+    projectPath ? path.resolve(projectPath) : null,
+    "/Users/lindsaybell/Desktop/CereBro",
+  ].filter(Boolean) as string[];
+  const matched = allowedRoots.some((root) => resolved === root || resolved.startsWith(`${root}${path.sep}`));
+  if (!matched) {
+    return { ok: false as const, reason: "cwd is outside the approved project boundary." };
+  }
+  return { ok: true as const, cwd: resolved };
+}
+
+function runReadOnlyCommand(input: { file: string; args: string[]; cwd: string }) {
+  return new Promise<{
+    exitCode: number | null;
+    stdout: string;
+    stderr: string;
+    durationMs: number;
+    timedOut: boolean;
+  }>((resolve) => {
+    const startedAt = Date.now();
+    let stdout = "";
+    let stderr = "";
+    let timedOut = false;
+    const child = spawn(input.file, input.args, {
+      cwd: input.cwd,
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        PATH: process.env.PATH ?? "/usr/bin:/bin:/usr/sbin:/sbin",
+        HOME: process.env.HOME ?? "/Users/lindsaybell",
+        LC_ALL: "C",
+      },
+    });
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGTERM");
+    }, runnerTimeoutMs);
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString("utf8");
+      if (stdout.length > 12000) stdout = stdout.slice(0, 12000);
+    });
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString("utf8");
+      if (stderr.length > 12000) stderr = stderr.slice(0, 12000);
+    });
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      resolve({
+        exitCode: null,
+        stdout,
+        stderr: `${stderr}\n${error.message}`.trim(),
+        durationMs: Date.now() - startedAt,
+        timedOut,
+      });
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      resolve({
+        exitCode: code,
+        stdout,
+        stderr,
+        durationMs: Date.now() - startedAt,
+        timedOut,
+      });
+    });
+  });
 }
 
 function rowToProposal(row: ProposalJoinRow) {
@@ -37,6 +187,7 @@ function rowToProposal(row: ProposalJoinRow) {
     command: row.command == null ? null : String(row.command),
     cwd: row.cwd == null ? null : String(row.cwd),
     projectId: row.project_id == null ? null : Number(row.project_id),
+    projectPath: row.project_path == null ? null : String(row.project_path),
     taskId,
     approvalId,
     approvalStatus,
@@ -75,9 +226,11 @@ async function proposalById(id: number) {
     sql: `
       SELECT eap.*,
              a.status AS approval_status,
-             a.decided_at AS approval_decided_at
+             a.decided_at AS approval_decided_at,
+             p.path AS project_path
       FROM execution_action_proposals eap
       LEFT JOIN approvals a ON a.id = eap.approval_id
+      LEFT JOIN projects p ON p.id = eap.project_id
       WHERE eap.id = ?
       LIMIT 1
     `,
@@ -243,9 +396,11 @@ export const executionRouter = router({
         sql: `
           SELECT eap.*,
                  a.status AS approval_status,
-                 a.decided_at AS approval_decided_at
+                 a.decided_at AS approval_decided_at,
+                 p.path AS project_path
           FROM execution_action_proposals eap
           LEFT JOIN approvals a ON a.id = eap.approval_id
+          LEFT JOIN projects p ON p.id = eap.project_id
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
           ORDER BY eap.created_at DESC, eap.id DESC
           LIMIT ?
@@ -277,20 +432,177 @@ export const executionRouter = router({
           gates: proposal.readiness.requiredBeforeExecution,
         };
       }
+      if (proposal.actionType !== "local_read_only_command" || proposal.riskClass !== "read_only") {
+        return {
+          ok: false as const,
+          blocked: true,
+          proposal,
+          writesExternal: false,
+          wouldExecute: false,
+          resultState: "blocked_by_runner_policy",
+          reason: "Only approved read-only command contracts can run in this V1 slice.",
+          gates: ["Mutating, external, git write, install, and destructive actions remain blocked."],
+        };
+      }
+      if (!proposal.command) {
+        return {
+          ok: false as const,
+          blocked: true,
+          proposal,
+          writesExternal: false,
+          wouldExecute: false,
+          resultState: "blocked_by_runner_policy",
+          reason: "Action proposal has no command.",
+          gates: proposal.readiness.requiredBeforeExecution,
+        };
+      }
+      const policy = runnerPolicyForCommand(proposal.command);
+      if (!policy.ok) {
+        return {
+          ok: false as const,
+          blocked: true,
+          proposal,
+          writesExternal: false,
+          wouldExecute: false,
+          resultState: "blocked_by_runner_policy",
+          reason: policy.reason,
+          gates: ["Read-only runner allowlist blocked this command before execution."],
+        };
+      }
+      const cwdCheck = containedCwd(proposal.cwd, (proposal as typeof proposal & { projectPath?: string | null }).projectPath ?? null);
+      if (!cwdCheck.ok) {
+        return {
+          ok: false as const,
+          blocked: true,
+          proposal,
+          writesExternal: false,
+          wouldExecute: false,
+          resultState: "blocked_by_cwd_policy",
+          reason: cwdCheck.reason,
+          gates: ["cwd containment blocked this command before execution."],
+        };
+      }
 
-      return {
-        ok: false as const,
-        blocked: true,
-        proposal,
-        writesExternal: false,
-        wouldExecute: false,
-        resultState: "contract_ready_no_runner",
-        reason: "The approval-gated execution contract is ready, but the shell runner adapter is not installed in this V1 slice.",
-        gates: [
-          "Contract passed task, Workbench body, and approval receipt checks.",
-          "No command ran because the runner adapter is not wired yet.",
-          "Next slice must add the local read-only runner with output capture and Ledger receipt before live execution.",
+      const result = await runReadOnlyCommand({ file: policy.file, args: policy.args, cwd: cwdCheck.cwd });
+      const db = await getCerebroDb();
+      const status = result.timedOut ? "timed_out" : result.exitCode === 0 ? "completed" : "failed";
+      const receiptBody = [
+        `Execution result for action proposal #${proposal.id}.`,
+        `Command: ${proposal.command}`,
+        `cwd: ${cwdCheck.cwd}`,
+        `Status: ${status}`,
+        `Exit code: ${result.exitCode ?? "none"}`,
+        `Duration: ${result.durationMs}ms`,
+        "Runner: read-only allowlist, shell disabled.",
+      ].join("\n");
+      const inserted = await db.execute({
+        sql: `
+          INSERT INTO execution_action_results (
+            proposal_id, approval_id, executor_agent, command, cwd, exit_code,
+            stdout_summary, stderr_summary, duration_ms, timed_out, status,
+            receipt_body, recovery_note
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING id
+        `,
+        args: [
+          proposal.id,
+          proposal.approvalId,
+          proposal.executorAgent,
+          proposal.command,
+          cwdCheck.cwd,
+          result.exitCode,
+          summarizeOutput(result.stdout),
+          summarizeOutput(result.stderr),
+          result.durationMs,
+          result.timedOut ? 1 : 0,
+          status,
+          receiptBody,
+          status === "completed" ? "No recovery needed for a read-only command." : "Review stderr/stdout before proposing another command.",
         ],
+      });
+      await db.execute({
+        sql: `
+          UPDATE execution_action_proposals
+          SET result_state = ?,
+              status = ?,
+              updated_at = unixepoch()
+          WHERE id = ?
+        `,
+        args: [status, status === "completed" ? "contract_ready" : "run_blocked", proposal.id],
+      });
+      const updatedProposal = await proposalById(proposal.id);
+      return {
+        ok: true as const,
+        blocked: false,
+        proposal: updatedProposal ?? proposal,
+        writesExternal: false,
+        wouldExecute: true,
+        resultId: Number(inserted.rows[0]!.id),
+        resultState: status,
+        exitCode: result.exitCode,
+        stdoutSummary: summarizeOutput(result.stdout),
+        stderrSummary: summarizeOutput(result.stderr),
+        durationMs: result.durationMs,
+        timedOut: result.timedOut,
+        receiptBody,
+        gates: [
+          "Ran one approved read-only local command.",
+          "Shell was disabled.",
+          "Result receipt was recorded locally.",
+          "No browser opened, model called, git write ran, install ran, or external write occurred.",
+        ],
+      };
+    }),
+
+  results: publicProcedure
+    .input(
+      z
+        .object({
+          proposalId: z.number().int().optional(),
+          limit: z.number().int().min(1).max(100).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const where: string[] = [];
+      const args: (number | string)[] = [];
+      if (input?.proposalId !== undefined) {
+        where.push("proposal_id = ?");
+        args.push(input.proposalId);
+      }
+      args.push(input?.limit ?? 20);
+      const result = await db.execute({
+        sql: `
+          SELECT *
+          FROM execution_action_results
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+      return {
+        mode: "local_execution_results" as const,
+        writesExternal: false,
+        items: result.rows.map((row) => ({
+          id: Number(row.id),
+          proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+          approvalId: row.approval_id == null ? null : Number(row.approval_id),
+          executorAgent: String(row.executor_agent),
+          command: String(row.command),
+          cwd: String(row.cwd),
+          exitCode: row.exit_code == null ? null : Number(row.exit_code),
+          stdoutSummary: row.stdout_summary == null ? "" : String(row.stdout_summary),
+          stderrSummary: row.stderr_summary == null ? "" : String(row.stderr_summary),
+          durationMs: Number(row.duration_ms),
+          timedOut: Boolean(row.timed_out),
+          status: String(row.status),
+          receiptBody: String(row.receipt_body),
+          recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+          createdAt: Number(row.created_at),
+        })),
       };
     }),
 });

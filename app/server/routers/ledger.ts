@@ -90,6 +90,26 @@ function evidenceRow(row: Record<string, unknown>) {
   };
 }
 
+function executionResultRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    approvalId: row.approval_id == null ? null : Number(row.approval_id),
+    executorAgent: String(row.executor_agent),
+    command: String(row.command),
+    cwd: String(row.cwd),
+    exitCode: row.exit_code == null ? null : Number(row.exit_code),
+    stdoutSummary: row.stdout_summary == null ? "" : String(row.stdout_summary),
+    stderrSummary: row.stderr_summary == null ? "" : String(row.stderr_summary),
+    durationMs: Number(row.duration_ms),
+    timedOut: Boolean(row.timed_out),
+    status: String(row.status),
+    receiptBody: String(row.receipt_body),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    createdAt: Number(row.created_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -191,7 +211,9 @@ export const ledgerRouter = router({
         proposalCount,
         evidenceCounts,
         routeCount,
+        executionResultCount,
         latestEvidence,
+        latestExecutionResults,
         latestRoutes,
         memoryContract,
         routeReceiptContract,
@@ -231,6 +253,7 @@ export const ledgerRouter = router({
           `,
         }),
         countOne("SELECT COUNT(*) AS value FROM runtime_route_records"),
+        countOne("SELECT COUNT(*) AS value FROM execution_action_results"),
         db.execute({
           sql: `
             SELECT
@@ -256,6 +279,15 @@ export const ledgerRouter = router({
             LIMIT ?
           `,
           args: [evidenceLimit],
+        }),
+        db.execute({
+          sql: `
+            SELECT *
+            FROM execution_action_results
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+          `,
+          args: [Math.min(evidenceLimit, 10)],
         }),
         db.execute({
           sql: `
@@ -331,8 +363,12 @@ export const ledgerRouter = router({
           routes: {
             total: routeCount,
           },
+          execution: {
+            total: executionResultCount,
+          },
         },
         latestEvidence: latestEvidence.rows.map((row) => evidenceRow(row as Record<string, unknown>)),
+        latestExecutionResults: latestExecutionResults.rows.map((row) => executionResultRow(row as Record<string, unknown>)),
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
         memoryContract,
         routeReceiptContract,

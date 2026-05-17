@@ -42,7 +42,7 @@ import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
-import { sourceDisplayName } from "@/lib/displayLabels";
+import { compactCommandLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel";
 import { FLOORS, cerebroColors as C, cerebroTheme as T, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
@@ -1020,6 +1020,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const routeReceiptContract = ledgerOverview.data?.routeReceiptContract;
   const routeReceiptContractProof = routeReceiptContract ? routeReceiptContractProofModel(routeReceiptContract) : [];
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
+  const executionRows = ledgerOverview.data?.latestExecutionResults ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const focusedEvidenceRows = ledgerFocusProject
     ? evidenceRows.filter((item) => (
@@ -1029,6 +1030,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       ))
     : evidenceRows;
   const latestEvidenceRows = focusedEvidenceRows.slice(0, 4);
+  const latestExecutionRows = executionRows.slice(0, 4);
   const latestRouteRows = routeRows.slice(0, 4);
   const selectedEvidence = evidenceRows.find((item) => item.id === selectedEvidenceId) ?? latestEvidenceRows[0] ?? null;
   const terminalEvidenceCount = overviewCards?.receipts.terminal ?? 0;
@@ -1119,6 +1121,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       meta: ledgerCopy.cardMeta.routes,
       target: "ledger" as NavId,
       tone: C.accent,
+    },
+    {
+      label: "Runs",
+      value: String(overviewCards?.execution?.total ?? 0),
+      meta: "approved local read results",
+      target: "ledger" as NavId,
+      tone: (overviewCards?.execution?.total ?? 0) > 0 ? C.success : C.textMuted,
     },
     {
       label: "Memory",
@@ -1614,6 +1623,47 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Latest execution results">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Execution Results
+            </div>
+            <Badge variant="secondary" className="uppercase">
+              read-only lane
+            </Badge>
+          </div>
+          {ledgerOverview.isLoading ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+              Reading local execution receipts.
+            </div>
+          ) : latestExecutionRows.length === 0 ? (
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+              No execution result receipts yet. Approved read-only commands will appear here after the run gate records output.
+            </div>
+          ) : (
+            <div className="mt-2 grid gap-1.5 xl:grid-cols-2">
+              {latestExecutionRows.map((item) => (
+                <div key={item.id} className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <Badge variant="secondary" className="uppercase">result #{item.id}</Badge>
+                    <Badge variant={item.status === "completed" ? "success" : item.status === "timed_out" ? "warning" : "destructive"} className="uppercase">
+                      {item.status.replace(/_/g, " ")}
+                    </Badge>
+                    <Badge variant="warning" className="uppercase">proposal #{item.proposalId ?? "none"}</Badge>
+                    <Badge variant="secondary" className="uppercase">{item.durationMs}ms</Badge>
+                  </div>
+                  <div className="mt-1 truncate rounded px-2 py-1 text-[11px]" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textPrimary }} title={item.command}>
+                    <code>{compactCommandLabel(item.command)}</code>
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>
+                    {item.stdoutSummary || item.stderrSummary || item.receiptBody}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>

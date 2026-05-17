@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0733 EDT
+Last updated: 2026-05-17 0740 EDT
 
 ## Current North Star
 
@@ -20,6 +20,107 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0740 EDT - Read-Only Runner And Ledger Receipt Pass
+
+### What Changed
+- Continued the approval-gated execution path.
+- Added a real local read-only runner behind the existing execution contract.
+- The runner only runs when the action proposal has a task, Workbench body,
+  approved approval receipt, read-only risk, and explicit run request.
+- Added command allowlist checks for `cat`, `date`, `find`, `git`, `ls`,
+  `pwd`, `rg`, `sed`, `stat`, `tail`, `wc`, and `which`.
+- Added extra git subcommand limits for read-only git forms.
+- Added shell-operator, redirect, chained-command, `find -delete/-exec`, and
+  `sed -i` blocks.
+- Added cwd containment so commands run only inside the approved project path
+  or CereBro repo boundary.
+- Added 5s timeout, shell-disabled execution, stdout/stderr capture, output
+  redaction, result state, duration, exit code, timeout flag, and recovery note.
+- Added `execution_action_results` storage.
+- Added `execution.results` readback.
+- Added Ledger Overview visibility for execution result receipts.
+- Added a Ledger card for approved local read results.
+- Updated targeted tests to prove incomplete contracts block, approved
+  read-only commands can run, result receipts are written and readable through
+  Ledger, mutating/destructive contracts stay blocked, and approval receipts
+  cannot be decided twice.
+- No browser automation runner, provider call, install, dependency, external
+  write, destructive command lane, castle change, or Raven path was added.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/execution.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Browser proof used the Codex in-app browser against `http://localhost:3000/`.
+- Screenshot proof saved to:
+  - `output/playwright/read-only-runner-terminal-lab.png`
+  - `output/playwright/read-only-runner-ledger-results.png`
+- Full serial Vitest was not run because this bounded slice touched one runner
+  path, Ledger readback, and targeted execution tests.
+
+### Front-End Steward Review
+- Surfaces: Terminal Lab and Ledger Overview.
+- Register: product surface.
+- Primary objects: approved read-only action result and Ledger audit receipt.
+- Hidden machinery: raw process management, shell internals, environment
+  details, and runner adapter implementation remain hidden.
+- Visible control: approval requirement, Workbench body requirement, result
+  status, exit code, duration, receipt id, stdout/stderr summary, and Ledger
+  audit count are visible.
+- Screenshot proof: listed above.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current runner/router/UI files and handoff only.
+- Worker used: no new worker in this pass. The prior read-only worker finding
+  guided the implementation path.
+- The dev server remains running at `http://localhost:3000/`.
+
+### Drift Check
+- On path because the slice directly followed the previous handoff: local
+  read-only runner, allowlist, cwd containment, timeout, stdout/stderr capture,
+  result row, Ledger receipt, and tests proving unapproved or incomplete
+  actions cannot run.
+- The runner is intentionally read-only only. It does not support mutating,
+  external, install, git write, destructive, browser, provider, or Raven work.
+- The patch did not touch `KeepScene.tsx`, chamber data, agent count, floor
+  count, provider calls, installs, paid services, external writes, destructive
+  actions, or Raven.
+- Deferred: Project Lab push execution lane, richer result drilldown, and
+  broader serial regression.
+
+### Completion Read
+- Overall: 84%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 52%.
+- Backend/runtime: 83%.
+- Knowledge/storage/source: 55%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue in CereBro Prime mode. Start with a
+dirty-file read. The local read-only runner exists behind action proposals,
+approval receipts, Workbench bodies, cwd containment, allowlist policy,
+timeout, and Ledger result receipts. Next best slice is Project Lab push
+execution readiness: manual push action contract, approval gate, git-status
+proof, and a blocked-by-default push runner design. Do not touch `KeepScene.tsx`,
+chamber data, agent count, floor count, provider calls, installs, paid
+services, external writes, destructive commands, or Raven paths.
 
 ## 2026-05-17 0733 EDT - Execution Contract Guard Pass
 
