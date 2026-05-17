@@ -1189,6 +1189,9 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             ? executionActions.readyText
                             : executionActions.readyText}
                         </div>
+                        <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: executionActions.canRunReadOnly ? C.success : C.textMuted }}>
+                          {executionActions.runnerBoundary}
+                        </div>
                         <div className="mt-1 flex flex-wrap gap-1">
                           {executionActions.showStageApproval ? (
                             <Button

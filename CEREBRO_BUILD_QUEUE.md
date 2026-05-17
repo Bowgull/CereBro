@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0921 EDT
+Last updated: 2026-05-17 0925 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0925 EDT: added Terminal Lab runner boundary readback to the
+  existing execution contract cards. Ready read-only actions state the local
+  allowlisted shell-disabled boundary. Blocked actions state the gate remains
+  closed until contract, risk, and allowlist checks pass. Model tests now cover
+  both states.
 - 2026-05-17 0921 EDT: extracted Terminal Lab execution contract button and
   readiness logic into `terminalExecutionActionModel`. Added tests for ready
   approved read-only, blocked missing pieces, and complete but non-runnable

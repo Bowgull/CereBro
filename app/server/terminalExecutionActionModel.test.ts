@@ -15,6 +15,7 @@ describe("terminalExecutionActionModel", () => {
     expect(model.canRunReadOnly).toBe(true);
     expect(model.runButtonLabel).toBe("Run Approved Read");
     expect(model.readyText).toContain("records a Ledger receipt");
+    expect(model.runnerBoundary).toContain("Shell disabled");
     expect(model.showOpenApproval).toBe(true);
     expect(model.showOpenBody).toBe(true);
     expect(model.showStageApproval).toBe(false);
@@ -34,6 +35,7 @@ describe("terminalExecutionActionModel", () => {
     expect(model.canRunReadOnly).toBe(false);
     expect(model.runButtonLabel).toBe("Read Run Gate");
     expect(model.readyText).toBe("Workbench receipt body; approval receipt");
+    expect(model.runnerBoundary).toContain("blocked");
     expect(model.showStageApproval).toBe(true);
     expect(model.showStageBody).toBe(true);
     expect(model.showOpenApproval).toBe(false);
@@ -53,6 +55,7 @@ describe("terminalExecutionActionModel", () => {
     expect(model.canRunReadOnly).toBe(false);
     expect(model.runButtonLabel).toBe("Read Run Gate");
     expect(model.readyText).toContain("not eligible");
+    expect(model.runnerBoundary).toContain("blocked");
     expect(model.showOpenApproval).toBe(true);
     expect(model.showOpenBody).toBe(true);
   });
