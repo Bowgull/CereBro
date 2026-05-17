@@ -52,10 +52,11 @@ V1 manual browser must support:
 - open pages
 - multiple tabs
 - tab switching
+- URL/search in one address field
 - browser history
 - bookmarks
 - project pins
-- trusted site profiles
+- automatic quiet safety
 - capture current page to Sources
 - attach current page or screenshot to Workbench
 - send current page to Aang for explanation
@@ -65,18 +66,91 @@ Manual browsing does not require an agent approval gate. The user is acting.
 
 Agent browsing does require gates.
 
+### Browser V1 Source-Truth Shape
+
+The approved Browser V1 first pass is honest and buildable.
+
+It shows the browser shell and local CereBro controls without pretending
+advanced browser automation, persisted service sessions, or media tracking are
+already solved.
+
+Default layout:
+
+- left rail: Keep, Browser, Work, Sources, Ledger, Basement
+- Browser is active
+- no Watch item in the left rail
+- main header: CereBro mark, Browser, Online
+- browser chrome: back, forward, reload, URL/search field, shield icon,
+  Watch Shelf button, three-dot page menu
+- tab row: real browser pages only, starting with generic labels such as
+  `Tab 1`, `Tab 2`, `New Tab`, and `+`
+- no fake default site tabs such as YouTube, Goodreads, Reddit, or Anime
+  Search until those are actual user-opened pages
+- optional bookmark/project row with user-created items only
+- no fake default bookmark folders
+- main viewport is the browser page or first-run start page
+- Watch Shelf opens as a drawer inside Browser
+- Aang lives beside the bottom Ask bar, not in a full right rail
+- the bottom bar shows `Ask Aang`, one compact mode pill/dropdown, and quiet
+  status such as `Manual browsing`
+
+The Browser first pass must not show:
+
+- a right Aang route rail
+- a full route chain
+- a Search tab
+- a Manual Browser button
+- visible browser profile picker
+- fake persisted service state
+- fake streaming progress
+- fake external website content presented as real
+- Spock popover unless the risk interaction is actually being designed
+- VPN, proxy, download manager, install, clone, or repo-run controls
+- giant policy panels, route matrices, source cards, or debug proof
+
+### Page Actions Menu
+
+The three-dot page menu is the home for contextual browser actions.
+
+Initial menu items:
+
+- Add to Watch
+- Save to Sources
+- Attach to Workbench
+- Annotate
+- Pin to Project
+- Explain with Aang
+- Copy Link
+
+Unwired actions should be visibly disabled or labeled as planned in the first
+build pass. Do not show them as working actions until their contracts exist.
+
 ## Browser Safety Profiles
 
-CereBro keeps browser safety visible but quiet.
+CereBro keeps browser safety automatic and quiet.
 
-Profiles:
+The user does not manage browser profiles in normal use.
 
-- Trusted service: known user-approved services. Login stays local.
-- Normal public page: public page opened manually or after low-risk approval.
-- Research review: Surfer opens or inspects sources after approval.
-- Risky page: Spock gates before deeper browsing.
-- Isolated page: popups, downloads, camera, mic, location, notifications,
-  third-party cookies, and credential entry blocked by default.
+Internal policy can treat pages as trusted, normal, research review, risky, or
+strict, but the UI does not expose a profile picker or profile manager.
+
+Default user-facing shape:
+
+- normal browsing shows only a small shield icon or no visible warning
+- risk changes open a small Spock warning
+- Basement owns browser safety settings
+- override controls appear only when something is blocked
+
+Spock warning V1:
+
+- small Spock sprite
+- plain risk sentence
+- `Keep blocked`
+- `Allow once`
+- `Always allow here` only for safe repeat permissions
+- `Why?`
+
+Do not show `Open isolated` in the V1 UI. Isolation can exist internally.
 
 No stealth, bot bypass, paywall bypass, login-wall bypass, terms bypass, proxy
 rotation, cookie extraction, or hidden browser automation enters V1 without a
@@ -88,8 +162,10 @@ Watch mode is normal entertainment and media continuation.
 
 Supported V1 intent examples:
 
-- resume a trusted service page
-- find the likely service or saved bookmark for a show
+- open a saved service page, playlist, channel, or source
+- add the current page to Watch from the page menu
+- add the current page to Watch by asking Aang
+- find the likely saved bookmark or source for a show
 - remember approved preferences such as dub-only anime
 - search for public source options when the user asks
 - surface options with source/risk notes
@@ -99,6 +175,47 @@ CereBro does not steal credentials, bypass access controls, download media, or
 hide platform risk. Legit services stay in trusted local browser state.
 
 Raven is not part of Watch mode. Raven stays sealed and separate.
+
+### Watch Shelf
+
+Watch Shelf is not a primary surface and not a browser tab.
+
+It opens from:
+
+- Browser toolbar button
+- page menu
+- Aang command
+
+V1 shelf categories:
+
+- Watching
+- Want
+- YouTube
+- Twitch
+- Anime
+- Finished
+
+These categories are shelf filters, not separate apps.
+
+Default row shape:
+
+- title
+- source note
+- optional preference chip such as `Dub Only`
+- `Open`
+
+Use `Open` unless CereBro has a saved last-known page, episode, playlist, or
+progress note. Use `Resume` only when the saved data supports it.
+
+No thumbnails by default in the first build pass. Covers can come later after
+storage, copyright, and source handling are clear.
+
+First-run shelf state:
+
+- no fake saved services
+- no fake progress
+- no real platform logos
+- show a plain empty state and `Add current page` when a page is open
 
 ## Agent Responsibilities
 

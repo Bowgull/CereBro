@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1142 EDT
+Last updated: 2026-05-17 1333 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1333 EDT: locked the approved Browser V1 source-truth shape into
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`. Browser first pass now requires an
+  honest buildable shell: generic real page tabs only, one URL/search field,
+  Watch Shelf as a toolbar drawer, page actions in the three-dot menu, Aang
+  beside the bottom Ask bar, quiet shield safety, no visible profile picker, no
+  Search tab, no Manual Browser button, no right Aang rail, no fake services,
+  no fake streaming progress, and no Spock popover until that interaction is
+  implemented.
 - 2026-05-17 1142 EDT: added `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md` and
   wired it into the master build path. CereBro now explicitly treats manual
   browser, tabs, history, bookmarks, project pins, trusted site profiles,

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1142 EDT
+Last updated: 2026-05-17 1333 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1333 EDT - Browser V1 Source Truth
+
+### What Changed
+- Updated `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md` with the approved Browser V1
+  source-truth shape from the mockup pass.
+- Browser first pass is now explicitly honest and buildable:
+  generic real page tabs only, one URL/search field, Watch Shelf as a toolbar
+  drawer, page actions in the three-dot menu, Aang beside the bottom Ask bar,
+  quiet shield safety, and no right rail.
+- Watch Shelf is no longer a primary surface or browser tab. It opens from the
+  toolbar, page menu, or Aang command.
+- Watch Shelf categories are locked for V1 as filters: Watching, Want,
+  YouTube, Twitch, Anime, Finished.
+- Browser safety is now explicitly automatic and quiet. No user-facing profile
+  picker, profile manager, `Open isolated`, or visible trusted/normal/isolated
+  labels in normal browsing.
+- The first pass must not show fake service tabs, fake persisted services, fake
+  streaming progress, fake external site content, Search tab, Manual Browser
+  button, route chain, giant policy panels, or Spock popover until the actual
+  interaction is being built.
+
+### Files Touched
+- `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git diff --check`
+- No app tests were run. This was a docs/contracts slice only.
+
+### Drift Check
+- On path. This corrects the Browser mockup direction so it reflects what
+  CereBro can actually build first.
+- No app code, browser automation, install, model download, external write,
+  paid service, new primary surface, or Raven path was added.
+- Raven remains sealed and separate.
+
+### Known Risks
+- Browser UI implementation has not started.
+- The final browser engine choice and Electron/WebView/runtime details still
+  need a separate implementation pass.
+
+### Storage Impact
+- No schema change.
+- No database rows created.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/SurferSourcesPanel.tsx first. Continue CereBro on the stable build path. Browser V1 source truth is now locked: generic real page tabs only, one URL/search field, Watch Shelf as toolbar drawer, page actions in three-dot menu, Aang beside the bottom Ask bar, quiet shield safety, no visible profiles, no Search tab, no Manual Browser button, no right rail, no fake services, no fake streaming progress. Next best code slice remains Research/Sources local validation unless the user explicitly asks to begin Browser V1 shell implementation. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1142 EDT - Daily OS Browser Contract
 
