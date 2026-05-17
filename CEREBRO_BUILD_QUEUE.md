@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0851 EDT
+Last updated: 2026-05-17 0857 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0857 EDT: strengthened Ledger execution result rows by joining
+  result receipts back to their action proposals. Ledger now exposes and shows
+  action type, risk class, project, task, and Workbench receipt body id on the
+  existing execution result cards. This keeps the Terminal Lab -> Workbench ->
+  Ledger loop inspectable without broadening the read-only runner.
 - 2026-05-17 0851 EDT: added compact `Recent Results` readback to Terminal
   Lab's existing Execution Contract section. It reads local execution result
   receipts with result id, exit code, timeout/status, command, and redacted

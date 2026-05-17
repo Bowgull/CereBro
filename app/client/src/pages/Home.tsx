@@ -1835,6 +1835,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   <div className="mt-1 truncate rounded px-2 py-1 text-[11px]" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textPrimary }} title={item.command}>
                     <code>{compactCommandLabel(item.command)}</code>
                   </div>
+                  <div className="mt-1 grid gap-1 sm:grid-cols-3">
+                    <CompactReadDatum
+                      label="Risk"
+                      value={item.riskClass?.replace(/_/g, " ") ?? "unknown"}
+                      tone={item.riskClass === "read_only" ? C.success : item.riskClass === "git_remote_write" ? C.danger : C.warning}
+                    />
+                    <CompactReadDatum label="Body" value={item.workbenchEvidenceId ? `#${item.workbenchEvidenceId}` : "missing"} tone={item.workbenchEvidenceId ? C.success : C.warning} />
+                    <CompactReadDatum label="Task" value={item.taskId ? `#${item.taskId}` : "missing"} tone={item.taskId ? C.success : C.warning} />
+                  </div>
                   <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>
                     {item.stdoutSummary || item.stderrSummary || item.receiptBody}
                   </div>

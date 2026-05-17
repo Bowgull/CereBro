@@ -104,6 +104,12 @@ function executionResultRow(row: Record<string, unknown>) {
     id: Number(row.id),
     proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
     approvalId: row.approval_id == null ? null : Number(row.approval_id),
+    actionType: row.action_type == null ? null : String(row.action_type),
+    riskClass: row.risk_class == null ? null : String(row.risk_class),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
     executorAgent: String(row.executor_agent),
     command: String(row.command),
     cwd: String(row.cwd),
@@ -374,9 +380,18 @@ export const ledgerRouter = router({
         }),
         db.execute({
           sql: `
-            SELECT *
-            FROM execution_action_results
-            ORDER BY created_at DESC, id DESC
+            SELECT
+              ear.*,
+              eap.action_type,
+              eap.risk_class,
+              eap.project_id,
+              eap.task_id,
+              eap.workbench_evidence_id,
+              p.name AS project_name
+            FROM execution_action_results ear
+            LEFT JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+            LEFT JOIN projects p ON p.id = eap.project_id
+            ORDER BY ear.created_at DESC, ear.id DESC
             LIMIT ?
           `,
           args: [Math.min(evidenceLimit, 10)],

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0851 EDT
+Last updated: 2026-05-17 0857 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0857 EDT - Ledger Execution Result Contract Proof
+
+### What Changed
+- Ledger execution result rows now join back to their action proposal.
+- Ledger execution results now expose action type, risk class, project, task,
+  and Workbench receipt body id.
+- Existing Ledger execution result cards now show compact `Risk`, `Body`, and
+  `Task` proof fields.
+- Added regression coverage proving execution result audit rows preserve the
+  read-only action contract, task link, and Workbench body link.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Ledger
+  renders `Execution Results`, `read-only lane`, `Risk`, `Body`, `Task`, result
+  rows, and proposal rows.
+- Screenshot proof saved locally at
+  `output/playwright/ledger-execution-result-contract-proof.png`.
+
+### Drift Check
+- On path. This strengthens Ledger as the audit trail for approved read-only
+  execution without adding a new surface.
+- Terminal Lab remains the teaching/run lane. Workbench remains the receipt
+  body. Ledger remains the audit trail.
+- No runner broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, new primary surface,
+  or Raven path was added.
+
+### Known Risks
+- Local browser proof depends on existing local execution receipts. The backend
+  regression creates and verifies the complete route from proposal to result
+  audit row.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Ledger execution result rows now preserve action type, risk class, task, and Workbench body proof from the action proposal. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to improve Workbench receipt body creation/linking for execution contracts or add a small existing-surface route from a Ledger execution result to its Workbench body. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0851 EDT - Terminal Result Receipt Readback
 

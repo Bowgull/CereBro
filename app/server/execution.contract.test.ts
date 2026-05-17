@@ -97,7 +97,12 @@ describe("execution action contract", () => {
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
     expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);
-    expect(ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId)?.command).toBe("pwd");
+    const ledgerResult = ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId);
+    expect(ledgerResult?.command).toBe("pwd");
+    expect(ledgerResult?.riskClass).toBe("read_only");
+    expect(ledgerResult?.actionType).toBe("local_read_only_command");
+    expect(ledgerResult?.taskId).toBe(task.id);
+    expect(ledgerResult?.workbenchEvidenceId).toBe(evidence.evidence.id);
   });
 
   it("blocks approved contracts that are not read-only allowlisted commands", async () => {
