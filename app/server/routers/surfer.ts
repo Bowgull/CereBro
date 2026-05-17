@@ -187,6 +187,51 @@ function sourceLibraryRouteContract() {
   };
 }
 
+function countValue(row: Record<string, unknown> | undefined, key: string) {
+  return Number(row?.[key] ?? 0);
+}
+
+async function readSourceLibraryReceipt() {
+  const db = await getCerebroDb();
+  const [sourceTotals, eventTotals] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN trust_level IN ('official', 'primary', 'high') THEN 1 ELSE 0 END) AS trusted,
+          SUM(CASE WHEN trust_level IN ('low', 'unknown') THEN 1 ELSE 0 END) AS needs_review,
+          SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS needs_scrub,
+          SUM(CASE WHEN freshness_status = 'stale' THEN 1 ELSE 0 END) AS stale
+        FROM sources
+      `,
+      args: [],
+    }),
+    db.execute({
+      sql: "SELECT COUNT(*) AS total FROM source_events",
+      args: [],
+    }),
+  ]);
+  const sourceRow = sourceTotals.rows[0] as Record<string, unknown> | undefined;
+  const eventRow = eventTotals.rows[0] as Record<string, unknown> | undefined;
+
+  return {
+    mode: "local_read" as const,
+    totalSources: countValue(sourceRow, "total"),
+    trustedSources: countValue(sourceRow, "trusted"),
+    needsReview: countValue(sourceRow, "needs_review"),
+    needsScrub: countValue(sourceRow, "needs_scrub"),
+    staleSources: countValue(sourceRow, "stale"),
+    sourceEvents: countValue(eventRow, "total"),
+    routeDefaultsChanged: false,
+    retrievalAutomationEnabled: false,
+    nextAction: "Review low-trust, unknown, sensitive, or stale source records before retrieval use.",
+    noActionTaken: [
+      "No browser, search, fetch, parser, model, vector index, Obsidian write, Notion write, Drive write, memory write, or external tool ran.",
+      "Source Library receipt reads local SQLite rows only.",
+    ],
+  };
+}
+
 export const surferRouter = router({
   panel: publicProcedure
     .input(
@@ -263,6 +308,7 @@ export const surferRouter = router({
           limit: input?.limit ?? 25,
         },
         sourceLibraryRoute: sourceLibraryRouteContract(),
+        sourceLibraryReceipt: await readSourceLibraryReceipt(),
       };
     }),
 

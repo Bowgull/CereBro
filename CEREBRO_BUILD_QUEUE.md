@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 2327 EDT
+Last updated: 2026-05-16 2334 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 2334 EDT: continued item 7 Knowledge/source contracts. Research
+  now shows a compact local Source Receipt with source totals, trusted count,
+  review count, scrub count, stale count, source-event count, route unchanged,
+  and retrieval off. `surfer.panel` computes that read from local SQLite only.
+  No browser/search/fetch/parser/model/vector index, Obsidian/Notion/Drive/
+  memory write, route default change, schema migration, new surface, command
+  runner, dependency, or Raven path was added.
 - 2026-05-16 2327 EDT: returned to item 7 Knowledge contracts before knowledge
   automation. `integrations.status` now exposes a read-only
   `knowledgeReadiness` summary with vault route count, Obsidian lane count,

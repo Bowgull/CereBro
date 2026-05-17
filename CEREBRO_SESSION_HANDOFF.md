@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2327 EDT
+Last updated: 2026-05-16 2334 EDT
 
 ## Current North Star
 
@@ -20,6 +20,87 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2334 EDT - Source Library Receipt
+
+### What Changed
+- Continued item 7 Knowledge/source contracts before source automation.
+- Completed the local Source Library receipt already started in
+  `app/server/routers/surfer.ts`.
+- `surfer.panel` now returns source totals, trusted count, review count,
+  scrub count, stale count, source-event count, route-default status, and
+  retrieval-automation status.
+- Research now shows a compact `Source Receipt` block beside Source Route.
+- The read proves the source library state without browsing, searching,
+  fetching, parsing, calling a model, indexing vectors, writing Obsidian,
+  writing Notion, writing Drive, writing memory, or changing route defaults.
+- No provider, model, tool, gateway, browser, search, fetch, install, token,
+  account action, model pull, external write, schema migration, dependency,
+  route default change, new primary surface, command runner, or Raven path was
+  added.
+
+### Files Touched
+- `app/server/routers/surfer.ts`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-library-receipt.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-library-receipt-final3.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/integrations.status.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` initially failed on a duplicate `ReceiptStat` helper, then passed after the helper was folded down to one implementation.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `curl` readback confirmed live `sourceLibraryReceipt` values: 1 source, 0
+  trusted, 1 review, 0 scrub, 0 stale, 390 source events, route unchanged, and
+  retrieval off.
+
+### Cleanliness Read
+- Dirty files at start: `app/server/routers/surfer.ts` and
+  `app/server/surfer.sourceLibraryRoute.test.ts`.
+- They were coherent current-slice work for source-library receipt evidence and
+  were completed rather than reverted.
+- Dev server remains running at `http://localhost:3000/` for preview.
+- No worker was used because this was a single source-library contract plus one
+  existing Research readout.
+
+### Front-End Steward Review
+- Surface: Research.
+- Register: product surface.
+- Primary object: local source library state.
+- User question: what source material exists and what needs review before
+  retrieval.
+- Route visible: Source Route remains separate and read-only.
+- Receipt/proof visible: local counts and route/retrieval status are visible.
+- Machinery hidden until needed: no note scanner, RAG dashboard, browser
+  ladder expansion, vector store, or source automation UI was added.
+- Generic UI rejected: no generic research dashboard, plugin grid, or AI source
+  marketplace was added.
+- Remaining taste risk: Research is dense. Keep future work focused on
+  collapsing source proof behind better grouped reads.
+
+### Completion Read
+- Overall: 72%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 46%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Source Library now has a local
+read-only receipt in Research. Next best path is Project Lab knowledge bridge
+visibility or source save receipt readback, depending on dirty files. Do not
+run Ollama status checks, installs, pulls, external searches, provider calls,
+model calls, note scans, vector indexing, source fetches, or vault writes
+without explicit approval.
 
 ## 2026-05-16 2327 EDT - Knowledge Readiness Contract
 

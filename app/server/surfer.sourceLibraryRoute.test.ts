@@ -19,6 +19,23 @@ async function countRows(table: string) {
 describe("Surfer Source Library route", () => {
   it("shows source and GitHub knowledge routes without durable writes", async () => {
     const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+    await db.execute({
+      sql: `
+        INSERT INTO sources (
+          kind, uri, title, summary, source_type, trust_level,
+          freshness_status, sensitive_data_flag, trust_notes
+        )
+        VALUES
+          ('url', ?, 'Trusted source receipt fixture', 'Trusted source summary.', 'official_docs', 'official', 'fresh', 0, 'fixture'),
+          ('url', ?, 'Unknown source receipt fixture', 'Unknown source summary.', 'public_url', 'unknown', 'stale', 1, 'fixture')
+      `,
+      args: [
+        `https://docs.example.com/cerebro-source-${stamp}`,
+        `https://example.com/cerebro-source-${stamp}`,
+      ],
+    });
     const before = {
       artifacts: await countRows("artifacts"),
       approvals: await countRows("approvals"),
@@ -38,6 +55,15 @@ describe("Surfer Source Library route", () => {
     expect(panel.sourceLibraryRoute.retrievalMetadataFields).toContain("canonical_status");
     expect(panel.sourceLibraryRoute.writesExternalSystems).toBe(false);
     expect(panel.sourceLibraryRoute.approvalGate).toContain("explicit approval");
+    expect(panel.sourceLibraryReceipt.mode).toBe("local_read");
+    expect(panel.sourceLibraryReceipt.totalSources).toBeGreaterThanOrEqual(2);
+    expect(panel.sourceLibraryReceipt.trustedSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.needsReview).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.needsScrub).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.staleSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.routeDefaultsChanged).toBe(false);
+    expect(panel.sourceLibraryReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(panel.sourceLibraryReceipt.noActionTaken.join(" ")).toContain("No browser");
 
     expect(await countRows("artifacts")).toBe(before.artifacts);
     expect(await countRows("approvals")).toBe(before.approvals);

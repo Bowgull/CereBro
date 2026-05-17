@@ -301,6 +301,27 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </section>
 
+            {data?.sourceLibraryReceipt && (
+              <section className="rounded p-1.5" aria-label="Source Library receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <SectionTitle title="Source Receipt" detail={data.sourceLibraryReceipt.mode.replace(/_/g, " ")} />
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  <ReceiptStat label="Total" value={data.sourceLibraryReceipt.totalSources} tone={C.accent} />
+                  <ReceiptStat label="Trusted" value={data.sourceLibraryReceipt.trustedSources} tone={C.success} />
+                  <ReceiptStat label="Review" value={data.sourceLibraryReceipt.needsReview} tone={data.sourceLibraryReceipt.needsReview > 0 ? C.warning : C.textMuted} />
+                  <ReceiptStat label="Scrub" value={data.sourceLibraryReceipt.needsScrub} tone={data.sourceLibraryReceipt.needsScrub > 0 ? C.warning : C.textMuted} />
+                  <ReceiptStat label="Stale" value={data.sourceLibraryReceipt.staleSources} tone={data.sourceLibraryReceipt.staleSources > 0 ? C.warning : C.textMuted} />
+                  <ReceiptStat label="Events" value={data.sourceLibraryReceipt.sourceEvents} tone={C.textSecondary} />
+                </div>
+                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  {data.sourceLibraryReceipt.nextAction}
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  <MiniBadge label={data.sourceLibraryReceipt.routeDefaultsChanged ? "route changed" : "route unchanged"} tone={data.sourceLibraryReceipt.routeDefaultsChanged ? C.danger : C.success} />
+                  <MiniBadge label={data.sourceLibraryReceipt.retrievalAutomationEnabled ? "retrieval on" : "retrieval off"} tone={data.sourceLibraryReceipt.retrievalAutomationEnabled ? C.warning : C.textMuted} />
+                </div>
+              </section>
+            )}
+
             {data?.sourceLibraryRoute && (
               <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />
@@ -365,6 +386,19 @@ function SectionTitle({ title, detail }: { title: string; detail: string }) {
       </div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>
         {detail}
+      </div>
+    </div>
+  );
+}
+
+function ReceiptStat({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <div className="rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="mt-0.5 text-[13px] font-semibold leading-none" style={{ color: tone }}>
+        {value}
       </div>
     </div>
   );
