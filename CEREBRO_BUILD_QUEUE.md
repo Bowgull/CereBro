@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0436 EDT: continued item 8 backend route receipts before agent
+  execution. Added `runtime.routeReceiptAudit`, a read-only single-route audit
+  query that returns the saved route, task link, Workbench body link, approval
+  link, execution readiness, proof booleans, gate text, no-action proof,
+  executor `not_built`, and `canExecute: false`. Test coverage proves the read
+  does not mutate local records. No route executor, command runner, browser
+  action, model/provider call, git action, route save, task creation, external
+  write, new UI surface, dependency, or Raven path was added.
 - 2026-05-17 0431 EDT: continued item 8 backend route receipts before agent
   execution. Added `routeReceiptContractProofModel` so Ledger route contract
   fields use the same typed proof-model pattern as route execution readiness.

@@ -544,6 +544,66 @@ describe("runtime route receipt preview", () => {
     });
   });
 
+  it("reads one route receipt audit without mutating local records", async () => {
+    const caller = createCaller();
+    const rowCountsBefore = await countPreviewMutationRows();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "research current Reddit feedback for app builders",
+      mode: "explore",
+    });
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const evidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const approval = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Queue gate before any browser work.",
+    });
+    const db = await getCerebroDb();
+    await db.execute({
+      sql: `UPDATE approvals SET status = 'approved', decided_at = unixepoch() WHERE id = ?`,
+      args: [approval.approval?.id ?? -1],
+    });
+
+    const rowCountsAfterSetup = await countPreviewMutationRows();
+    const audit = await caller.runtime.routeReceiptAudit({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(audit).toMatchObject({
+      mode: "read_only",
+      routeRecordId: committed.record.id,
+      ownerAgent: "surfer",
+      bodySurface: "workbench",
+      auditSurface: "ledger",
+      executorStatus: "not_built",
+      canExecute: false,
+    });
+    expect(audit.route.id).toBe(committed.record.id);
+    expect(audit.route.taskId).toBe(task.task.id);
+    expect(audit.route.workbenchEvidence?.id).toBe(evidence.evidence?.id);
+    expect(audit.route.approvalPreview?.id).toBe(approval.approval?.id);
+    expect(audit.proof).toMatchObject({
+      hasTask: true,
+      hasWorkbenchBody: true,
+      hasApprovalPreview: true,
+      approvalStatus: "approved",
+      readyForFutureExecutorReview: true,
+      executionStatus: "ready_for_explicit_execution_call",
+    });
+    expect(audit.gates.join(" ")).toContain("Execution remains blocked");
+    expect(audit.noActionTaken).toContain("No command ran.");
+    expect(audit.noActionTaken.join(" ")).toContain("No task");
+
+    for (const table of previewMutationTables) {
+      expect(await countRows(table)).toBe(rowCountsAfterSetup.get(table));
+    }
+    expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
+  });
+
   it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {
     const caller = createCaller();
     const evidenceCountBefore = await countRows("workbench_evidence_records");

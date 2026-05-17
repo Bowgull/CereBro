@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0431 EDT
+Last updated: 2026-05-17 0436 EDT
 
 ## Current North Star
 
@@ -20,6 +20,86 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0436 EDT - Route Receipt Audit Read
+
+### What Changed
+- Continued item 8 backend route receipts before agent execution.
+- Added `runtime.routeReceiptAudit`, a read-only backend query for one saved
+  runtime route record.
+- The audit read returns route, task link, Workbench body link, approval link,
+  execution readiness, proof booleans, gate text, and no-action proof.
+- The audit read reports Workbench as body surface, Ledger as audit surface,
+  executor status as `not_built`, and `canExecute: false`.
+- Added test coverage proving the route receipt audit read does not mutate
+  tasks, approvals, Workbench receipts, route records, memory, outputs,
+  sessions, sources, or permission preflights.
+- No route executor, command runner, browser action, model call, provider call,
+  git action, Obsidian write, Notion write, Drive write, memory write, route
+  save, task creation, approval creation, Workbench receipt creation, install,
+  dependency, schema migration, UI surface, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-route-receipt-audit.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-route-receipt-audit-full.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/ledger.memoryContract.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Browser screenshot proof was not run because this was a backend read-only
+  contract with no UI change.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice runtime router, runtime route
+  receipt test, and docs.
+- No dev server was started or left running for this slice.
+- No worker was used because this was one backend contract endpoint plus one
+  focused test.
+
+### Front-End Steward Review
+- Surface: no UI surface changed.
+- Register: backend contract for existing Ledger/route surfaces.
+- Primary object: one saved runtime route receipt and its local proof chain.
+- User question: what proof exists for this exact route, and can it run.
+- Route visible to backend callers: task, Workbench body, approval preview,
+  readiness, and blocked execution are returned in one audit read.
+- Gate visible: `canExecute: false`, executor `not_built`, and no-action proof
+  are returned by the query.
+- Machinery hidden until needed: no executor, dispatch button, provider runner,
+  model runner, browser runner, command runner, or git runner was exposed.
+- Generic UI rejected: no dashboard, fake progress, agent theater, or new
+  visual surface was added.
+
+### Completion Read
+- Overall: 76%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 74%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Runtime now has
+`routeReceiptAudit`, a read-only single-route proof chain. Ledger has the
+aggregate route receipt contract. Approval Queue has a Runtime origin lane.
+Next best path is either finish item 8 by surfacing this single-route audit
+where an existing route card already owns it, or move to item 9 Model and Tool
+Registry if route receipt contracts are sufficient. Do not build an executor
+yet. Do not run Ollama status checks, installs, pulls, external searches,
+provider calls, model calls, note scans, vector indexing, source fetches,
+cleanup actions, command execution runners, route saves, task creation, or
+vault writes without explicit approval.
 
 ## 2026-05-17 0431 EDT - Route Contract Proof Model
 

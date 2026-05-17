@@ -252,6 +252,50 @@ async function getRuntimeTaskById(id: number): Promise<TaskRow | null> {
   return row ? mapRuntimeTaskRow(row as Record<string, unknown>) : null;
 }
 
+async function readRuntimeRouteRecordById(routeRecordId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        r.*,
+        a.id AS approval_id,
+        a.task_id AS approval_task_id,
+        a.status AS approval_status,
+        a.action_type AS approval_action_type,
+        a.requested_by_agent AS approval_requested_by_agent,
+        a.permission_preflight_id AS approval_permission_preflight_id,
+        a.decided_at AS approval_decided_at,
+        wer.id AS workbench_evidence_id,
+        wer.kind AS workbench_evidence_kind,
+        wer.title AS workbench_evidence_title,
+        wer.target_uri AS workbench_evidence_target_uri,
+        wer.task_id AS workbench_evidence_task_id,
+        wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
+      FROM runtime_route_records r
+      LEFT JOIN approvals a ON a.id = (
+        SELECT latest.id
+        FROM approvals latest
+        WHERE latest.target_type = 'runtime_route_record'
+          AND latest.target_id = r.id
+        ORDER BY latest.created_at DESC, latest.id DESC
+        LIMIT 1
+      )
+      LEFT JOIN workbench_evidence_records wer ON wer.id = (
+        SELECT latest_evidence.id
+        FROM workbench_evidence_records latest_evidence
+        WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
+        ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
+        LIMIT 1
+      )
+      WHERE r.id = ?
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = result.rows[0];
+  return row ? mapRouteRecordRow(row as Record<string, unknown>) : null;
+}
+
 const projectHints = [
   { slug: "cerebro", label: "CereBro", localPath: "/Users/lindsaybell/Desktop/CereBro", aliases: ["cerebro", "keep", "aang", "cortana", "terminal lab", "workbench", "ledger"] },
   { slug: "declyne", label: "Declyne", localPath: "/Users/lindsaybell/Developer/Declyne", aliases: ["declyne", "plaid", "finance", "budget", "bank"] },
@@ -621,6 +665,53 @@ function buildRoutePreview(input: { text: string; mode: RuntimeMode }, modelRegi
 }
 
 export const runtimeRouter = router({
+  routeReceiptAudit: publicProcedure
+    .input(
+      z.object({
+        routeRecordId: z.number().int().min(1),
+      }),
+    )
+    .query(async ({ input }) => {
+      const route = await readRuntimeRouteRecordById(input.routeRecordId);
+      if (!route) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Route record not found",
+        });
+      }
+
+      return {
+        mode: "read_only" as const,
+        routeRecordId: route.id,
+        ownerAgent: route.ownerAgent,
+        bodySurface: "workbench" as const,
+        auditSurface: "ledger" as const,
+        executorStatus: "not_built" as const,
+        canExecute: false,
+        route,
+        proof: {
+          hasTask: route.taskId != null,
+          hasWorkbenchBody: route.workbenchEvidence != null,
+          hasApprovalPreview: route.approvalPreview != null,
+          approvalStatus: route.approvalPreview?.status ?? route.executionReadiness.approvalStatus,
+          readyForFutureExecutorReview: route.executionReadiness.readyForFutureExecutorReview,
+          executionStatus: route.executionReadiness.status,
+        },
+        gates: [
+          "Route receipt audit reads one local route record.",
+          "Workbench holds the body. Ledger holds the audit trail.",
+          "Execution remains blocked. A future executor must be designed separately.",
+        ],
+        noActionTaken: [
+          "No command ran.",
+          "No browser opened.",
+          "No model call ran.",
+          "No git action ran.",
+          "No route was saved from this read.",
+          "No task, approval, Workbench receipt, memory row, file, or external write was created.",
+        ],
+      };
+    }),
   routeRecords: publicProcedure
     .input(
       z.object({
