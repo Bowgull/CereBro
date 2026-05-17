@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
+  workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
 } from "../client/src/lib/workbenchBrowserModel";
 
@@ -70,5 +71,31 @@ describe("workbenchBrowserModel", () => {
     expect(emptyDraft.kind).toBe("empty");
     expect(emptyDraft.displayTarget).toBe("No page draft.");
     expect(emptyDraft.tabLabel).toBe("Tab 1");
+  });
+
+  it("reads Watch Shelf draft state without saving fake media state", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/watch/episode-1");
+    const searchDraft = workbenchBrowserDraftModel("dub anime to watch");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const urlShelf = workbenchWatchShelfDraftModel(urlDraft, "Anime");
+    const searchShelf = workbenchWatchShelfDraftModel(searchDraft, "Want");
+    const emptyShelf = workbenchWatchShelfDraftModel(emptyDraft, "Watching");
+
+    expect(urlShelf.selectedCategory).toBe("Anime");
+    expect(urlShelf.candidateLabel).toBe("Page draft");
+    expect(urlShelf.candidateTarget).toBe("https://example.com/watch/episode-1");
+    expect(urlShelf.canSave).toBe(false);
+    expect(urlShelf.saveLabel).toBe("Save after page opens");
+    expect(urlShelf.noActionText).toContain("No fake progress");
+
+    expect(searchShelf.selectedCategory).toBe("Want");
+    expect(searchShelf.candidateLabel).toBe("Search draft");
+    expect(searchShelf.candidateTarget).toBe("dub anime to watch");
+    expect(searchShelf.canSave).toBe(false);
+
+    expect(emptyShelf.candidateLabel).toBe("No open page");
+    expect(emptyShelf.candidateTarget).toBe("Open a page before saving to Watch Shelf.");
+    expect(emptyShelf.canSave).toBe(false);
   });
 });

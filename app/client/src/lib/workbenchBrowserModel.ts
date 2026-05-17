@@ -18,6 +18,15 @@ export type WorkbenchBrowserDraft = {
   noActionText: string;
 };
 
+export type WorkbenchWatchShelfDraft = {
+  selectedCategory: string;
+  candidateLabel: "No open page" | "Page draft" | "Search draft";
+  candidateTarget: string;
+  canSave: boolean;
+  saveLabel: string;
+  noActionText: string;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -80,5 +89,32 @@ export function workbenchWatchShelfModel() {
     emptyBody: "Save the current page after the manual browser runner and shelf storage are wired.",
     emptyAction: "Add current page",
     noActionText: "No fake progress, service session, thumbnail, platform state, media file action, or source search is created here.",
+  };
+}
+
+export function workbenchWatchShelfDraftModel(
+  draft: WorkbenchBrowserDraft,
+  selectedCategory: string,
+): WorkbenchWatchShelfDraft {
+  const noActionText = "No fake progress, service session, thumbnail, platform state, media file action, source search, or durable save is created from this drawer.";
+
+  if (draft.kind === "empty") {
+    return {
+      selectedCategory,
+      candidateLabel: "No open page",
+      candidateTarget: "Open a page before saving to Watch Shelf.",
+      canSave: false,
+      saveLabel: "Add current page",
+      noActionText,
+    };
+  }
+
+  return {
+    selectedCategory,
+    candidateLabel: draft.kind === "url" ? "Page draft" : "Search draft",
+    candidateTarget: draft.displayTarget,
+    canSave: false,
+    saveLabel: "Save after page opens",
+    noActionText,
   };
 }

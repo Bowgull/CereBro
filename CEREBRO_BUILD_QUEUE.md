@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1649 EDT
+Last updated: 2026-05-17 1654 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1654 EDT: added Watch Shelf draft readback inside Workbench.
+  The drawer now has local category selection and shows Browser draft state as
+  `Page draft`, `Search draft`, or `No open page`. Save remains disabled with
+  `Save after page opens` for drafts. No browser automation, page fetch, search
+  request, persisted shelf item, service login, resume automation, media
+  progress, source save, Workbench capture, credential action, download,
+  external write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 1649 EDT: added local Browser address/search draft state inside
   Workbench. Typed URL-like drafts show `Page Draft`; search-like drafts show
   `Search Draft`; both show staged target, kind, `open blocked`, and no-action

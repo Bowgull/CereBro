@@ -21,7 +21,12 @@ import {
   workbenchPermissionLabel,
   workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
-import { workbenchBrowserDraftModel, workbenchBrowserShellModel, workbenchWatchShelfModel } from "@/lib/workbenchBrowserModel";
+import {
+  workbenchBrowserDraftModel,
+  workbenchBrowserShellModel,
+  workbenchWatchShelfDraftModel,
+  workbenchWatchShelfModel,
+} from "@/lib/workbenchBrowserModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -104,6 +109,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [executionLinkedOnly, setExecutionLinkedOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<EvidenceGroupBy>("project");
   const [watchShelfOpen, setWatchShelfOpen] = useState(false);
+  const [watchShelfCategory, setWatchShelfCategory] = useState("Watching");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const evidence = trpc.workbench.evidence.useQuery({
     limit: 30,
@@ -205,6 +211,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
   const watchShelf = workbenchWatchShelfModel();
+  const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -787,21 +794,45 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
                         <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Drawer. Not a browser tab.</div>
                       </div>
-                      <Button type="button" size="sm" variant="outline" disabled title="Requires a real open page before it can save.">
-                        {watchShelf.emptyAction}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!watchShelfDraft.canSave}
+                        title="Requires a real open page before it can save."
+                      >
+                        {watchShelfDraft.saveLabel}
                       </Button>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {watchShelf.categories.map((category) => (
-                        <Chip key={category} label={category} tone={category === "Anime" ? C.warning : C.textMuted} />
+                        <Button
+                          key={category}
+                          type="button"
+                          size="sm"
+                          variant={watchShelfDraft.selectedCategory === category ? "secondary" : "outline"}
+                          className="h-7 px-2"
+                          onClick={() => setWatchShelfCategory(category)}
+                          aria-pressed={watchShelfDraft.selectedCategory === category}
+                        >
+                          {category}
+                        </Button>
                       ))}
                     </div>
                     <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-                      <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>{watchShelf.emptyTitle}</div>
-                      <div className="mt-1" style={{ color: C.textMuted }}>{watchShelf.emptyBody}</div>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                          {watchShelfDraft.candidateLabel}
+                        </div>
+                        <Chip label={watchShelfDraft.selectedCategory} tone={watchShelfDraft.selectedCategory === "Anime" ? C.warning : C.accent} />
+                      </div>
+                      <div className="mt-1 break-all" style={{ color: C.textMuted }}>{watchShelfDraft.candidateTarget}</div>
+                      <div className="mt-1" style={{ color: C.textMuted }}>
+                        {browserDraft.kind === "empty" ? watchShelf.emptyBody : "This is only a local shelf readback. It cannot save until a real page is open."}
+                      </div>
                     </div>
                     <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                      {watchShelf.noActionText}
+                      {watchShelfDraft.noActionText}
                     </div>
                   </div>
                 )}

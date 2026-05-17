@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1649 EDT
+Last updated: 2026-05-17 1654 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1654 EDT - Workbench Watch Shelf Draft Readback
+
+### What Changed
+- Added `workbenchWatchShelfDraftModel`.
+- Watch Shelf drawer now shows a local category selection and candidate
+  readback from the current Browser draft.
+- URL drafts show `Page draft`, the staged URL, selected shelf category, and
+  `Save after page opens`.
+- Search drafts show `Search draft` without pretending a page or service item
+  exists.
+- Empty state remains `No open page`.
+- The save action remains disabled until a real open page, shelf storage, and
+  approval/receipt contracts exist.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, typed `https://example.com/watch/episode-1`, opened Watch Shelf,
+  selected `Anime`, and confirmed drawer readback, `PAGE DRAFT`, staged URL,
+  `Save after page opens`, and no-fake-progress copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-watch-shelf-draft.png`.
+
+### Drift Check
+- On path. This advances Daily OS Watch Shelf shape inside Workbench without
+  adding a new Browser surface or fake streaming service state.
+- No browser runner, browser automation, page fetch, search request, persisted
+  shelf item, service login, resume automation, media progress, source save,
+  Workbench capture, credential action, download, external write, paid service,
+  provider call, model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Watch Shelf category selection is local UI state only.
+- Nothing persists, opens, resumes, or captures yet. That requires the later
+  browser runner, storage, Spock gate, and receipt contracts.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the stable Daily OS browser path. Workbench Browser has local address/search drafts and Watch Shelf drawer readback with category selection, but no page open, save, capture, source write, or media automation. Next best slice is a small browser tab-state model or page-action proposal preview that remains blocked until runner and approval contracts exist. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1649 EDT - Workbench Browser Address Draft
 
