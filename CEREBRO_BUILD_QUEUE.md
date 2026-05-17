@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0009 EDT
+Last updated: 2026-05-17 0013 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0013 EDT: continued item 7 Knowledge/source contract cleanup.
+  Piccolo `Automation Hygiene` now uses shared `CompactReadDatum` for storage
+  status, contract counts, Obsidian lanes, and Project Bridge/Source examples.
+  The cleanup report hard gate and approval wording remain unchanged. No note
+  scan, vector index, source fetch, Obsidian/Notion/Drive/memory write,
+  model/provider/tool call, route default change, new surface, cleanup action
+  runner, dependency, or Raven path was added.
 - 2026-05-17 0009 EDT: continued item 7 Knowledge/source contract cleanup.
   Project Lab `Knowledge Route` now uses shared `CompactReadDatum`, shows the
   source index path, and keeps the explicit write gate visible. No note scan,

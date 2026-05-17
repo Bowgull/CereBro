@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0009 EDT
+Last updated: 2026-05-17 0013 EDT
 
 ## Current North Star
 
@@ -20,6 +20,83 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0013 EDT - Piccolo Storage Contract Compact Read
+
+### What Changed
+- Continued item 7 Knowledge/source contract cleanup.
+- Piccolo `Automation Hygiene` now uses shared `CompactReadDatum` cells for
+  Vault, Obsidian, Artifacts, Mode, storage contract counts, Obsidian lanes,
+  and Project Bridge/Source path examples.
+- Removed local `StatusBlock` and `MiniMetric` helpers from Piccolo.
+- Kept the existing save hard gate, cleanup report flow, hygiene findings,
+  storage contract receipt, and approval copy unchanged.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, cleanup
+  action runner, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/PiccoloPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed after fixing explicit tone props.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-piccolo-compact-read.db' pnpm -C app exec vitest run server/piccolo.storageContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Playwright CLI was not available through `pnpm -C app exec playwright`, so no
+  screenshot proof was added for this compact-read-only slice.
+
+### Cleanliness Read
+- Dirty files at start: none after the prior Project Lab checkpoint was
+  committed and pushed as `ba941c2`.
+- Dirty files before closeout: current-slice Piccolo component and docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one existing Piccolo panel call site.
+
+### Front-End Steward Review
+- Surface: Piccolo Automation Hygiene.
+- Register: product surface.
+- Primary object: storage and cleanup contract receipt.
+- User question: what can Piccolo report, what can it write, and what remains
+  approval-gated.
+- Route visible: vault status, Obsidian status, artifact count, read-only mode,
+  artifact kinds, lifecycle states, retention rules, Obsidian lanes, bridge
+  path, and source path are visible.
+- Gate visible: durable cleanup report save still uses the hard-gate modal.
+- Machinery hidden until needed: no cleanup runner, scheduler, file mover,
+  delete control, note editor, or source scanner was added.
+- Generic UI rejected: no new dashboard, restyle, fake score, or decorative
+  analytics layer was added.
+- Remaining taste risk: Piccolo still exposes a dense contract details drawer.
+  That is acceptable because it is under `details`; later work can improve the
+  open-state hierarchy if screenshots show crowding.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Piccolo storage contract now uses the
+shared compact read primitive. Next best path is to close any remaining item 7
+read consistency gaps or move to item 8 backend route receipts if source and
+storage contracts are sufficiently visible. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, model calls, note scans,
+vector indexing, source fetches, cleanup actions, or vault writes without
+explicit approval.
 
 ## 2026-05-17 0009 EDT - Project Knowledge Route Compact Read
 

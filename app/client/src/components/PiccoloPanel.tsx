@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -119,10 +120,10 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 px-2 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <StatusBlock label="Vault" value={data?.vault.exists ? "Ready" : "Needs setup"} tone={data?.vault.exists ? C.success : C.warning} />
-        <StatusBlock label="Obsidian" value={data?.obsidian.exists ? "Ready" : "Needs setup"} tone={data?.obsidian.exists ? C.success : C.warning} />
-        <StatusBlock label="Artifacts" value={String(data?.artifactCounts.artifacts ?? 0)} tone={C.accent} />
-        <StatusBlock label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
+        <CompactReadDatum label="Vault" value={data?.vault.exists ? "Ready" : "Needs setup"} tone={data?.vault.exists ? C.success : C.warning} />
+        <CompactReadDatum label="Obsidian" value={data?.obsidian.exists ? "Ready" : "Needs setup"} tone={data?.obsidian.exists ? C.success : C.warning} />
+        <CompactReadDatum label="Artifacts" value={String(data?.artifactCounts.artifacts ?? 0)} tone={C.accent} />
+        <CompactReadDatum label="Mode" value={data?.mode ?? "read_only"} tone={C.textSecondary} />
       </div>
 
       <details className="shrink-0 px-2 py-1.5 group" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -145,9 +146,9 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
               </Badge>
             </div>
             <div className="mt-1 grid grid-cols-3 gap-1">
-              <MiniMetric label="Kinds" value={String(contractData?.counts.artifactKinds ?? 0)} />
-              <MiniMetric label="States" value={String(contractData?.counts.lifecycleStates ?? 0)} />
-              <MiniMetric label="Rules" value={String(contractData?.counts.retentionRules ?? 0)} />
+              <CompactReadDatum label="Kinds" value={String(contractData?.counts.artifactKinds ?? 0)} tone={C.textPrimary} />
+              <CompactReadDatum label="States" value={String(contractData?.counts.lifecycleStates ?? 0)} tone={C.textPrimary} />
+              <CompactReadDatum label="Rules" value={String(contractData?.counts.retentionRules ?? 0)} tone={C.textPrimary} />
             </div>
             <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               Piccolo reports. Oak validates knowledge shape. Spock gates writes.
@@ -160,14 +161,13 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
             </div>
             <div className="mt-1 grid grid-cols-2 gap-1">
               {(contractData?.obsidianContract.routes ?? []).map((route) => (
-                <div key={route.key} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-                  <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: route.retrievalDefault === "archive_only" ? C.warning : C.textSecondary }} title={route.relativePath}>
-                    {route.relativePath}
-                  </div>
-                  <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
-                    {route.retrievalDefault.replace(/_/g, " ")}
-                  </div>
-                </div>
+                <CompactReadDatum
+                  key={route.key}
+                  label={route.retrievalDefault.replace(/_/g, " ")}
+                  value={route.relativePath}
+                  tone={route.retrievalDefault === "archive_only" ? C.warning : C.textSecondary}
+                  wrap
+                />
               ))}
             </div>
           </div>
@@ -179,19 +179,9 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
             <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               Active projects enter memory through a bridge note, not a raw code dump.
             </div>
-            <div
-              className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
-              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
-              title={contractData?.githubProjectPaths.bridgeExample}
-            >
-              {contractData?.githubProjectPaths.bridgeExample ?? "10_Projects/<Project>/<Project>.md"}
-            </div>
-            <div
-              className="mt-1 truncate rounded px-1.5 py-1 text-[10px]"
-              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}
-              title={contractData?.githubProjectPaths.sourceExample}
-            >
-              {contractData?.githubProjectPaths.sourceExample ?? "20_Knowledge/Sources/GitHub/<Project> Repository Source.md"}
+            <div className="mt-1 grid gap-1">
+              <CompactReadDatum label="Bridge" value={contractData?.githubProjectPaths.bridgeExample ?? "10_Projects/<Project>/<Project>.md"} tone={C.textSecondary} wrap />
+              <CompactReadDatum label="Source" value={contractData?.githubProjectPaths.sourceExample ?? "20_Knowledge/Sources/GitHub/<Project> Repository Source.md"} tone={C.textMuted} wrap />
             </div>
           </div>
         </div>
@@ -279,32 +269,6 @@ export default function PiccoloPanel({ onClose }: { onClose: () => void }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-        {label}
-      </div>
-      <div className="text-[11px] font-semibold truncate" style={{ color: tone }} title={value}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-        {label}
-      </div>
-      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
-        {value}
-      </div>
     </div>
   );
 }
