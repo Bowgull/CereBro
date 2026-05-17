@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0007 EDT
+Last updated: 2026-05-17 0008 EDT
 
 ## Current North Star
 
@@ -45,18 +45,21 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ### Checks Run
 - `pnpm -C app check` passed.
-- `CEREBRO_DB_URL='file:/tmp/cerebro-source-route-compact.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/workbench.knowledgeRoute.test.ts server/projectIntelligence.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-route-compact-read.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/knowledge/contracts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run because this was a no-behavior compact
-  read consolidation and localhost proof passed.
+- Playwright CLI opened `http://localhost:3000/`, opened Workshop > Research,
+  and confirmed `Source Library route` rendered compact Source notes, GitHub
+  source, Project Map, Source index, Archive, and Writes cells.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/source-route-compact-read.png`.
 
 ### Cleanliness Read
 - Dirty files at start: none after the file-state blip cleared.
 - Existing docs edits for the previous Source Receipt browser proof were
   preserved.
 - Dirty files before closeout: current-slice Research component and docs only.
-- Dev server remains available at `http://localhost:3000/`.
+- No dev server was started for this pass. Existing local servers remained on
+  their prior ports.
 - No worker was used because this was one existing Research readback call site.
 
 ### Front-End Steward Review

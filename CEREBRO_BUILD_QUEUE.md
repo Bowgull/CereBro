@@ -107,7 +107,8 @@ Recent Prime slices:
   and write status. Browser Ladder and Policy remain rail lines. No note scan,
   vector index, source fetch, Obsidian/Notion/Drive/memory write,
   model/provider/tool call, route default change, new surface, command runner,
-  dependency, or Raven path was added.
+  dependency, or Raven path was added. Browser proof opened Workshop > Research
+  and saved `output/playwright/source-route-compact-read.png`.
 - 2026-05-17 0004 EDT: continued item 7 Knowledge/source contract cleanup.
   Research `Source Receipt` stat cards now use shared `CompactReadDatum`, and
   the local `ReceiptStat` helper was removed. Same source counts, route state,
