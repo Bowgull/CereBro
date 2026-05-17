@@ -1168,6 +1168,26 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("workbench");
   }
 
+  function openExecutionWorkbenchBody(item: { id: number; workbenchEvidenceId: number | null; command: string }) {
+    if (item.workbenchEvidenceId == null) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-filter",
+        JSON.stringify({
+          source: "ledger_execution_result",
+          evidenceId: item.workbenchEvidenceId,
+          kind: "terminal_output",
+          query: item.command,
+          groupBy: "command",
+          notice: `Ledger opened Workbench body #${item.workbenchEvidenceId} from execution result #${item.id}.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; the user can inspect recent terminal receipts manually.
+    }
+    onNavigate("workbench");
+  }
+
   function openProjectPushContext(item: { id: number; projectId: number | null; projectName: string | null }) {
     try {
       window.sessionStorage.setItem(
@@ -1843,6 +1863,28 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     />
                     <CompactReadDatum label="Body" value={item.workbenchEvidenceId ? `#${item.workbenchEvidenceId}` : "missing"} tone={item.workbenchEvidenceId ? C.success : C.warning} />
                     <CompactReadDatum label="Task" value={item.taskId ? `#${item.taskId}` : "missing"} tone={item.taskId ? C.success : C.warning} />
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2"
+                      onClick={() => openExecutionWorkbenchBody(item)}
+                      disabled={item.workbenchEvidenceId == null}
+                      title={
+                        item.workbenchEvidenceId
+                          ? `Open Workbench body #${item.workbenchEvidenceId}. Ledger keeps the execution audit read-only.`
+                          : "No Workbench body is linked to this execution result."
+                      }
+                      aria-label={
+                        item.workbenchEvidenceId
+                          ? `Open Workbench body ${item.workbenchEvidenceId} for execution result ${item.id}`
+                          : `Execution result ${item.id} has no Workbench body`
+                      }
+                    >
+                      Open Body
+                    </Button>
                   </div>
                   <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>
                     {item.stdoutSummary || item.stderrSummary || item.receiptBody}

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0857 EDT
+Last updated: 2026-05-17 0900 EDT
 
 ## Current North Star
 
@@ -20,6 +20,54 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0900 EDT - Ledger Execution Body Jump
+
+### What Changed
+- Added an `Open Body` action to existing Ledger execution result cards.
+- The action stages a Workbench filter for the linked terminal-output receipt
+  body and opens Workbench.
+- The action is disabled when an execution result has no linked Workbench body.
+- The path keeps Ledger read-only and uses the existing Workbench receipt body
+  surface.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Ledger
+  execution result cards expose `Open Body`; clicking a linked result opens
+  Workbench, filters to terminal-output receipts, and selects the linked body.
+- Screenshot proof saved locally at
+  `output/playwright/ledger-execution-open-workbench-body.png`.
+
+### Drift Check
+- On path. This connects Ledger execution audit to Workbench receipt body
+  without creating a new surface or exposing machinery.
+- Ledger remains read-only. Workbench remains the receipt body.
+- No runner broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, or Raven path was
+  added.
+
+### Known Risks
+- The staged Workbench notice did not appear in the browser snapshot, but the
+  receipt focus itself worked: Workbench selected the linked body and showed the
+  terminal-output receipt.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Ledger execution result cards now show contract proof and can open the linked Workbench body without mutating anything. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to improve Workbench's visible staged-filter notice/focus readback or deepen execution receipt recovery notes in the existing Ledger card. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0857 EDT - Ledger Execution Result Contract Proof
 

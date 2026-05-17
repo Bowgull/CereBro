@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0857 EDT
+Last updated: 2026-05-17 0900 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0900 EDT: added an `Open Body` action to existing Ledger
+  execution result cards. Linked execution results can now open Workbench with
+  the terminal-output receipt body selected. Ledger stays read-only and
+  Workbench remains the receipt body surface.
 - 2026-05-17 0857 EDT: strengthened Ledger execution result rows by joining
   result receipts back to their action proposals. Ledger now exposes and shows
   action type, risk class, project, task, and Workbench receipt body id on the
