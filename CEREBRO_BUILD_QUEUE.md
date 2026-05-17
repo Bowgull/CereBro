@@ -111,11 +111,14 @@ Recent Prime slices:
 - 2026-05-16 2353 EDT: continued item 7 Knowledge/source contracts through
   Memory. Added a read-only `memory.contract` endpoint and a compact Knowledge
   Notes `Reuse Contract` strip with normal route, archive route, proposal
-  review counts, validation gate, and no-retrieval-automation status. No note
-  scan, vector index, source fetch, Obsidian/Notion/Drive/memory write,
+  review counts, validation gate, and no-retrieval-automation status. Ledger
+  Overview now reads the same contract as a compact audit block. No note scan,
+  vector index, source fetch, Obsidian/Notion/Drive/memory write,
   model/provider/tool call, route default change, new surface, command runner,
   dependency, or Raven path was added. Browser proof opened Ledger > Memory and
-  saved the local screenshot at `output/playwright/memory-reuse-contract.png`.
+  Ledger Overview, saving local screenshots at
+  `output/playwright/memory-reuse-contract.png` and
+  `output/playwright/ledger-memory-reuse-read.png`.
 - 2026-05-16 2349 EDT: continued item 7 Knowledge/source contracts through
   Workbench. Evidence detail now shows a fuller Knowledge Route Read with
   bridge note, repository source note, Project Map, GitHub sources index,

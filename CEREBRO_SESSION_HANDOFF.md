@@ -121,6 +121,8 @@ indexing, source fetches, or vault writes without explicit approval.
   and next action.
 - Knowledge Notes now shows a compact `Reuse Contract` strip using that local
   contract read.
+- Ledger Overview now reads the same memory contract into a compact
+  `Memory Reuse Read` audit block.
 - The strip keeps the primary Memory surface focused on notes while making the
   reuse gate visible: validation before retrieval or export.
 - No note scan, vector index, source fetch, Obsidian write, Notion write,
@@ -135,6 +137,11 @@ indexing, source fetches, or vault writes without explicit approval.
 - `app/client/src/components/MemoryPanel.tsx`
 - `app/client/src/lib/memoryPanelCopyModel.ts`
 - `app/server/memoryPanelCopyModel.test.ts`
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/server/ledgerCopyModel.test.ts`
 - `CEREBRO_BUILD_QUEUE.md`
 - `CEREBRO_SESSION_HANDOFF.md`
 
@@ -145,6 +152,8 @@ indexing, source fetches, or vault writes without explicit approval.
   `CEREBRO_DB_URL='file:/tmp/cerebro-memory-contract-final.db' pnpm -C app exec vitest run server/memory.contract.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - Final focused check:
   `CEREBRO_DB_URL='file:/tmp/cerebro-memory-panel-final.db' pnpm -C app exec vitest run server/memory.contract.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Ledger focused check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-memory-contract.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/ledgerCopyModel.test.ts server/memory.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app check` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
 - Final `pnpm -C app check` passed.
@@ -154,13 +163,18 @@ indexing, source fetches, or vault writes without explicit approval.
   next action, and no-automation proof.
 - Screenshot proof was saved to ignored local output:
   `output/playwright/memory-reuse-contract.png`.
+- Playwright CLI opened `http://localhost:3005/`, opened Ledger, and confirmed
+  the `Ledger memory reuse read` region rendered route, review, gate, next
+  action, and no-automation proof.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/ledger-memory-reuse-read.png`.
 - Dev console showed existing Vite HMR websocket errors caused by a stale
   server already using ports 24678 and 3000. The Memory contract read rendered.
 
 ### Cleanliness Read
 - Dirty files at start: none.
-- Dirty files before closeout: current-slice Memory files, new memory contract
-  test, and handoff/queue docs.
+- Dirty files before closeout: current-slice Memory/Ledger files, new memory
+  contract tests, and handoff/queue docs.
 - Existing handoff edits for the previous Workbench browser proof were
   preserved.
 - The temporary dev server used for browser proof was closed. A pre-existing
@@ -170,6 +184,7 @@ indexing, source fetches, or vault writes without explicit approval.
 
 ### Front-End Steward Review
 - Surface: Knowledge Notes.
+- Surface: Ledger Overview.
 - Register: product surface.
 - Primary object: saved and proposed knowledge notes.
 - User question: what can be reused, and what still needs validation.
@@ -180,8 +195,9 @@ indexing, source fetches, or vault writes without explicit approval.
   scanner, Obsidian writer, or source automation was added.
 - Generic UI rejected: no fake metric cards, generic AI memory dashboard, or
   plugin marketplace was added.
-- Remaining taste risk: Memory now has one more dense strip. Future work should
-  consolidate source, memory, and route gates into shared read patterns.
+- Remaining taste risk: Memory and Ledger now both carry compact contract
+  strips. Future work should consolidate source, memory, and route gates into
+  shared read patterns.
 
 ### Completion Read
 - Overall: 73%.
