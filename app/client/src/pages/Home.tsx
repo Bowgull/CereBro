@@ -47,7 +47,7 @@ import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
-import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
+import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -1001,6 +1001,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const overviewCards = ledgerOverview.data?.cards;
   const memoryContract = ledgerOverview.data?.memoryContract;
   const routeReceiptContract = ledgerOverview.data?.routeReceiptContract;
+  const routeReceiptContractProof = routeReceiptContract ? routeReceiptContractProofModel(routeReceiptContract) : [];
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const focusedEvidenceRows = ledgerFocusProject
@@ -1395,12 +1396,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </Badge>
             </div>
             <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
-              <CompactReadDatum label="Routes" value={String(routeReceiptContract.totalRoutes)} tone={C.accent} />
-              <CompactReadDatum label="Tasks" value={String(routeReceiptContract.taskLinkedRoutes)} tone={routeReceiptContract.taskLinkedRoutes > 0 ? C.success : C.textMuted} />
-              <CompactReadDatum label="Bodies" value={String(routeReceiptContract.workbenchBodyLinkedRoutes)} tone={routeReceiptContract.workbenchBodyLinkedRoutes > 0 ? C.success : C.textMuted} />
-              <CompactReadDatum label="Gates" value={`${routeReceiptContract.approvedGateRoutes}/${routeReceiptContract.approvalPreviewRoutes}`} tone={routeReceiptContract.approvalPreviewRoutes > routeReceiptContract.approvedGateRoutes ? C.warning : C.textMuted} />
-              <CompactReadDatum label="Future" value={String(routeReceiptContract.futureReviewOnlyRoutes)} tone={routeReceiptContract.futureReviewOnlyRoutes > 0 ? C.gold : C.textMuted} />
-              <CompactReadDatum label="Execute" value={routeReceiptContract.canExecute ? "enabled" : "blocked"} tone={routeReceiptContract.canExecute ? C.danger : C.gold} />
+              {routeReceiptContractProof.map((field) => (
+                <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
+              ))}
             </div>
             <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               {routeReceiptContract.gates[2]}

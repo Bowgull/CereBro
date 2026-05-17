@@ -87,6 +87,22 @@ export type RoutePreviewProofChip = {
   tone: "gold" | "accent" | "warning" | "success" | "danger" | "muted";
 };
 
+export type RouteReceiptContractInput = {
+  totalRoutes: number;
+  taskLinkedRoutes: number;
+  workbenchBodyLinkedRoutes: number;
+  approvalPreviewRoutes: number;
+  approvedGateRoutes: number;
+  futureReviewOnlyRoutes: number;
+  canExecute: boolean;
+};
+
+export type RouteReceiptContractField = {
+  label: string;
+  value: string;
+  tone: "gold" | "accent" | "warning" | "success" | "danger" | "muted";
+};
+
 export function routeActionModel(input: RouteActionInput): RouteAction[] {
   const gateLabel = input.approvalId
     ? `${input.approvalStatus === "approved" ? "Approved" : input.approvalStatus === "pending" ? "Gate" : "Closed"} #${input.approvalId}`
@@ -196,6 +212,41 @@ export function routeExecutionReadinessProofModel(input: RouteExecutionReadiness
       tone: input.readyForFutureExecutorReview ? "gold" : "danger",
     },
   ] satisfies RouteExecutionReadinessProofField[];
+}
+
+export function routeReceiptContractProofModel(input: RouteReceiptContractInput) {
+  return [
+    {
+      label: "Routes",
+      value: String(input.totalRoutes),
+      tone: "accent",
+    },
+    {
+      label: "Tasks",
+      value: String(input.taskLinkedRoutes),
+      tone: input.taskLinkedRoutes > 0 ? "success" : "muted",
+    },
+    {
+      label: "Bodies",
+      value: String(input.workbenchBodyLinkedRoutes),
+      tone: input.workbenchBodyLinkedRoutes > 0 ? "success" : "muted",
+    },
+    {
+      label: "Gates",
+      value: `${input.approvedGateRoutes}/${input.approvalPreviewRoutes}`,
+      tone: input.approvalPreviewRoutes > input.approvedGateRoutes ? "warning" : "muted",
+    },
+    {
+      label: "Future",
+      value: String(input.futureReviewOnlyRoutes),
+      tone: input.futureReviewOnlyRoutes > 0 ? "gold" : "muted",
+    },
+    {
+      label: "Execute",
+      value: input.canExecute ? "enabled" : "blocked",
+      tone: input.canExecute ? "danger" : "gold",
+    },
+  ] satisfies RouteReceiptContractField[];
 }
 
 export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAction[] {

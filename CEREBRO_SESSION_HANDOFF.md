@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0029 EDT
+Last updated: 2026-05-17 0429 EDT
 
 ## Current North Star
 
@@ -20,6 +20,91 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0429 EDT - Runtime Approval Queue Lane
+
+### What Changed
+- Continued item 8 backend route receipts before agent execution.
+- Added `runtime` as an Approval Queue origin for approvals created from
+  runtime route records.
+- Runtime route approvals now resolve `targetLabel` to `runtime_route:<id>` so
+  the existing display label renders them as `Route #<id>`.
+- Approval queue, approval detail, approval list, and approval groups now join
+  runtime route records for search and target labels.
+- Approval Dashboard now exposes a Runtime origin filter.
+- No route executor, command runner, browser action, model call, provider call,
+  git action, Obsidian write, Notion write, Drive write, memory write, route
+  save, task creation, approval creation, Workbench receipt creation, install,
+  dependency, schema migration, new primary surface, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/runtime.routeReceipt.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-approval-lane.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Initial `curl -I --max-time 5 http://localhost:3000/` failed because no
+  server was running.
+- Started `pnpm -C app dev`; server reported `Server running on
+  http://localhost:3000/`.
+- Dev server also reported `WebSocket server error: Port 24678 is already in
+  use`; HTTP preview still responded.
+- Final `curl -I --max-time 5 http://localhost:3000/` returned
+  `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run for this slice.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice approval router, approval panel,
+  runtime route receipt test, and docs.
+- Dev server is running at `http://localhost:3000/`.
+- No worker was used because this was one backend approval routing slice plus
+  one existing approval filter.
+
+### Front-End Steward Review
+- Surface: Approval Dashboard.
+- Register: product surface.
+- Primary object: local approval previews linked to runtime route records.
+- User question: where is the gate for this route receipt.
+- Route visible: Runtime filter, route target labels, project name when
+  present, permission preflight, and detail read are visible.
+- Gate visible: approval queue still reads local previews only and does not
+  approve or execute.
+- Machinery hidden until needed: no executor, dispatch button, provider runner,
+  model runner, browser runner, command runner, or git runner was exposed.
+- Generic UI rejected: no new dashboard, fake progress, or new approval
+  product surface was added.
+- Remaining taste risk: Approval Dashboard is dense. This pass only fixed
+  route labeling and filtering; broader hierarchy cleanup should wait until
+  route receipt contracts are stable.
+
+### Completion Read
+- Overall: 74%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 72%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Approval Queue now has a Runtime
+origin lane for route-record approvals and still does not execute. Next best
+path is item 8 route receipt hardening or a read-only backend receipt audit. Do
+not build an executor yet. Do not run Ollama status checks, installs, pulls,
+external searches, provider calls, model calls, note scans, vector indexing,
+source fetches, cleanup actions, command execution runners, route saves, task
+creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0023 EDT - Ledger Route Receipt Contract
 

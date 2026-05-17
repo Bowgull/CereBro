@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0029 EDT
+Last updated: 2026-05-17 0429 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0429 EDT: continued item 8 backend route receipts before agent
+  execution. Added `runtime` as an Approval Queue origin for approvals created
+  from runtime route records. Runtime route approval labels now resolve to
+  `runtime_route:<id>` so the UI shows `Route #<id>`, and queue/detail/list/
+  group reads join runtime route records for search and labels. Approval
+  Dashboard now has a Runtime filter. No route executor, command runner,
+  browser action, model/provider call, git action, route save, task creation,
+  external write, new surface, dependency, or Raven path was added.
 - 2026-05-17 0023 EDT: continued item 8 backend route receipts before agent
   execution. Added a read-only Ledger route receipt contract and surfaced it
   in Ledger Overview with route count, task links, Workbench body links, gate

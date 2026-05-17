@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeActionModel, routeExecutionReadinessLabel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
+import { routeActionModel, routeExecutionReadinessLabel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel } from "../client/src/lib/routeActionModel";
 
 describe("routeActionModel", () => {
   it("keeps saved route actions grouped by safe destination and state", () => {
@@ -123,5 +123,28 @@ describe("routeActionModel", () => {
       value: "future review only",
       tone: "gold",
     });
+  });
+
+  it("shows the route receipt contract as receipt counts and blocked execution", () => {
+    const fields = routeReceiptContractProofModel({
+      totalRoutes: 4,
+      taskLinkedRoutes: 3,
+      workbenchBodyLinkedRoutes: 2,
+      approvalPreviewRoutes: 2,
+      approvedGateRoutes: 1,
+      futureReviewOnlyRoutes: 1,
+      canExecute: false,
+    });
+
+    expect(fields.map((field) => field.label)).toEqual(["Routes", "Tasks", "Bodies", "Gates", "Future", "Execute"]);
+    expect(fields.find((field) => field.label === "Gates")).toMatchObject({
+      value: "1/2",
+      tone: "warning",
+    });
+    expect(fields.find((field) => field.label === "Execute")).toMatchObject({
+      value: "blocked",
+      tone: "gold",
+    });
+    expect(fields.map((field) => field.value)).not.toContain("run");
   });
 });

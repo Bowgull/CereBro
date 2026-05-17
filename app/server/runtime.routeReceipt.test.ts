@@ -434,6 +434,20 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.approvalPreview?.status).toBe("pending");
     expect(records.items[0]?.approvalPreview?.permissionPreflightId).toBe(first.approval?.permissionPreflightId);
 
+    const runtimeQueue = await caller.approvals.queue({
+      status: "pending",
+      origin: "runtime",
+      limit: 10,
+    });
+    const queuedRuntimeApproval = runtimeQueue.items.find((item) => item.id === first.approval?.id);
+    expect(queuedRuntimeApproval?.origin).toBe("runtime");
+    expect(queuedRuntimeApproval?.targetLabel).toBe(`runtime_route:${committed.record.id}`);
+    expect(queuedRuntimeApproval?.projectName).toBeNull();
+
+    const runtimeDetail = await caller.approvals.detail({ id: first.approval?.id ?? -1 });
+    expect(runtimeDetail.approval?.origin).toBe("runtime");
+    expect(runtimeDetail.approval?.targetLabel).toBe(`runtime_route:${committed.record.id}`);
+
     const db = await getCerebroDb();
     await db.execute({
       sql: `UPDATE approvals SET status = 'approved', decided_at = unixepoch() WHERE id = ?`,
