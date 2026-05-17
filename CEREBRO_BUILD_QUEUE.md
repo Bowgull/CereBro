@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0917 EDT
+Last updated: 2026-05-17 0921 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0921 EDT: extracted Terminal Lab execution contract button and
+  readiness logic into `terminalExecutionActionModel`. Added tests for ready
+  approved read-only, blocked missing pieces, and complete but non-runnable
+  git-write/mutating contracts. This locks the UI model without adding seed
+  endpoints or broadening the runner.
 - 2026-05-17 0917 EDT: Terminal Lab execution contract cards now show direct
   missing-piece actions. Blocked contracts can stage missing approval previews
   or Workbench bodies; linked contracts can open existing approval/body

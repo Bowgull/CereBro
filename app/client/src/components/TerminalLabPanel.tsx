@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
+import { terminalExecutionActionModel } from "@/lib/terminalExecutionActionModel";
 import { terminalLabObservationActionCopy, terminalLabProjectReadCopy, terminalLabReceiptChainCopy } from "@/lib/terminalLabCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1164,13 +1165,16 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   </div>
                 ) : (
                   executionProposals.data?.items.map((proposal) => {
-                    const canRunReadOnly = proposal.readiness.canExecute && proposal.actionType === "local_read_only_command" && proposal.riskClass === "read_only";
-                    const runButtonLabel = canRunReadOnly ? "Run Approved Read" : "Read Run Gate";
                     const proposalObservation = observationRows.find((item) => item.id === proposal.sourceId) ?? null;
                     const proposalEvidence = evidenceByObservationId.get(proposal.sourceId) ?? null;
-                    const missingText = proposal.readiness.missing.join("; ");
-                    const needsApproval = missingText.includes("approval receipt");
-                    const needsWorkbenchBody = missingText.includes("Workbench receipt body");
+                    const executionActions = terminalExecutionActionModel({
+                      canExecute: proposal.readiness.canExecute,
+                      actionType: proposal.actionType,
+                      riskClass: proposal.riskClass,
+                      missing: proposal.readiness.missing,
+                      approvalId: proposal.approvalId,
+                      workbenchEvidenceId: proposalEvidence?.id ?? proposal.workbenchEvidenceId ?? null,
+                    });
                     return (
                       <div key={proposal.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                         <div className="flex flex-wrap gap-1">
@@ -1182,13 +1186,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                         </div>
                         <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
                           {proposal.readiness.canExecute
-                            ? canRunReadOnly
-                              ? "Approved read-only contract is ready. This button runs one allowlisted local command and records a Ledger receipt."
-                              : "Contract is complete, but this action is not eligible for the V1 read-only runner."
-                            : missingText}
+                            ? executionActions.readyText
+                            : executionActions.readyText}
                         </div>
                         <div className="mt-1 flex flex-wrap gap-1">
-                          {needsApproval ? (
+                          {executionActions.showStageApproval ? (
                             <Button
                               type="button"
                               onClick={() => stageCommandApprovalPreview(proposal.sourceId)}
@@ -1200,7 +1202,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             >
                               Stage Approval
                             </Button>
-                          ) : proposal.approvalId != null ? (
+                          ) : executionActions.showOpenApproval && proposal.approvalId != null ? (
                             <Button
                               type="button"
                               onClick={() => openApprovalReceipt({ approvalId: proposal.approvalId!, observationId: proposal.sourceId, status: proposal.approvalStatus })}
@@ -1213,7 +1215,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                               Open Approval
                             </Button>
                           ) : null}
-                          {needsWorkbenchBody && proposalObservation ? (
+                          {executionActions.showStageBody && proposalObservation ? (
                             <Button
                               type="button"
                               onClick={() => stageWorkbenchProof(proposalObservation)}
@@ -1225,7 +1227,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             >
                               Stage Body
                             </Button>
-                          ) : proposalEvidence ? (
+                          ) : executionActions.showOpenBody && proposalEvidence ? (
                             <Button
                               type="button"
                               onClick={() => openWorkbenchProof(proposal.sourceId, proposalEvidence.id)}
@@ -1243,15 +1245,15 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             onClick={() => readRunGuard(proposal.id)}
                             disabled={runApprovedAction.isPending}
                             title={
-                              canRunReadOnly
+                              executionActions.canRunReadOnly
                                 ? "Run one approved read-only local command and record the result receipt."
                                 : "Read the run gate. Blocked, mutating, external, and git-write contracts do not run."
                             }
-                            aria-label={`${runButtonLabel} for execution action proposal ${proposal.id}`}
-                            variant={canRunReadOnly ? "default" : "risk"}
+                            aria-label={`${executionActions.runButtonLabel} for execution action proposal ${proposal.id}`}
+                            variant={executionActions.canRunReadOnly ? "default" : "risk"}
                             size="sm"
                           >
-                            {runButtonLabel}
+                            {executionActions.runButtonLabel}
                           </Button>
                         </div>
                       </div>
