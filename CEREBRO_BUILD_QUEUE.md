@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0936 EDT
+Last updated: 2026-05-17 0940 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0940 EDT: Workbench receipt filters now include an
+  `Execution Linked` toggle. The receipt list and receipt groups can narrow to
+  local receipt bodies linked to execution results. Regression coverage proves
+  the filtered read returns linked rows only.
 - 2026-05-17 0936 EDT: Workbench recent receipt rows now show execution
   result badges for terminal receipt bodies linked to execution results.
   The Workbench list read returns latest execution result id, status, and exit

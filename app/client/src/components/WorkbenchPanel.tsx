@@ -100,18 +100,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [filterKind, setFilterKind] = useState<EvidenceKind>("all");
   const [filterProjectId, setFilterProjectId] = useState<number | "all">("all");
   const [filterQuery, setFilterQuery] = useState("");
+  const [executionLinkedOnly, setExecutionLinkedOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<EvidenceGroupBy>("project");
   const evidence = trpc.workbench.evidence.useQuery({
     limit: 30,
     kind: filterKind === "all" ? undefined : filterKind,
     projectId: filterProjectId === "all" ? undefined : filterProjectId,
     query: filterQuery.trim() || undefined,
+    executionLinked: executionLinkedOnly || undefined,
   });
   const evidenceGroups = trpc.workbench.evidenceGroups.useQuery({
     groupBy,
     kind: filterKind === "all" ? undefined : filterKind,
     projectId: filterProjectId === "all" ? undefined : filterProjectId,
     query: filterQuery.trim() || undefined,
+    executionLinked: executionLinkedOnly || undefined,
   });
   const projectProofSummary = trpc.workbench.evidenceSummary.useQuery(
     {
@@ -1188,7 +1191,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
                 <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
               </div>
-              <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto]">
+              <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto_auto]">
                 <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
@@ -1225,10 +1228,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 />
                 <Button
                   type="button"
+                  onClick={() => setExecutionLinkedOnly((value) => !value)}
+                  aria-pressed={executionLinkedOnly}
+                  aria-label={executionLinkedOnly ? "Show all Workbench receipts" : "Show only execution-linked Workbench receipts"}
+                  title="Filter to receipt bodies linked to local execution results. No command runs."
+                  variant={executionLinkedOnly ? "default" : "secondary"}
+                  size="sm"
+                >
+                  Execution Linked
+                </Button>
+                <Button
+                  type="button"
                   onClick={() => {
                     setFilterQuery("");
                     setFilterKind("all");
                     setFilterProjectId("all");
+                    setExecutionLinkedOnly(false);
                   }}
                   aria-label="Reset Workbench receipt filters"
                   title="Clear receipt filters. This does not delete or change receipts."

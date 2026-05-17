@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0936 EDT
+Last updated: 2026-05-17 0940 EDT
 
 ## Current North Star
 
@@ -20,6 +20,55 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0940 EDT - Workbench Execution Linked Filter
+
+### What Changed
+- Workbench receipt filters now include an `Execution Linked` toggle.
+- The toggle narrows Workbench receipt rows to bodies linked to local execution
+  results.
+- Workbench receipt groups now respect the same execution-linked filter.
+- Regression coverage now proves execution-linked Workbench filtering returns
+  the linked terminal receipt body and only rows with execution result ids.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workbench,
+  toggled `Execution Linked`, and confirmed filtered rows show completed
+  execution result badges.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-execution-linked-filter.png`.
+
+### Drift Check
+- On path. This improves Workbench scanning for execution-linked receipt bodies
+  without adding a surface or changing execution.
+- No endpoint that runs actions, fake seed data, new primary surface, runner
+  broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, or Raven path was
+  added.
+
+### Known Risks
+- The execution-linked filter uses an `EXISTS` subquery. Acceptable for current
+  V1 list sizes.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Workbench can now filter receipt rows to execution-linked terminal bodies, and groups respect that filter. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is Ledger-to-Terminal result focus or Workbench validation status controls for execution-linked bodies. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0936 EDT - Workbench Execution Result Badges
 

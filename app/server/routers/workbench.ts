@@ -199,6 +199,7 @@ function evidenceWhere(input?: {
   projectId?: number;
   kind?: (typeof evidenceKinds)[number];
   query?: string;
+  executionLinked?: boolean;
 }) {
   const where: string[] = [];
   const args: (number | string)[] = [];
@@ -209,6 +210,16 @@ function evidenceWhere(input?: {
   if (input?.kind !== undefined) {
     where.push("wer.kind = ?");
     args.push(input.kind);
+  }
+  if (input?.executionLinked) {
+    where.push(`
+      EXISTS (
+        SELECT 1
+        FROM execution_action_results ear
+        INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+        WHERE eap.workbench_evidence_id = wer.id
+      )
+    `);
   }
   const query = input?.query?.trim();
   if (query) {
@@ -365,6 +376,7 @@ export const workbenchRouter = router({
           projectId: z.number().int().optional(),
           kind: z.enum(evidenceKinds).optional(),
           query: z.string().max(200).optional(),
+          executionLinked: z.boolean().optional(),
           limit: z.number().int().min(1).max(100).optional(),
         })
         .optional(),
@@ -512,6 +524,7 @@ export const workbenchRouter = router({
           projectId: z.number().int().optional(),
           kind: z.enum(evidenceKinds).optional(),
           query: z.string().max(200).optional(),
+          executionLinked: z.boolean().optional(),
         })
         .optional(),
     )

@@ -118,6 +118,13 @@ describe("execution action contract", () => {
     expect(listedBody?.executionResultId).toBe(runnerGuard.resultId);
     expect(listedBody?.executionResultStatus).toBe("completed");
     expect(listedBody?.executionResultExitCode).toBe(0);
+    const executionLinkedWorkbenchList = await caller.workbench.evidence({
+      kind: "terminal_output",
+      executionLinked: true,
+      limit: 20,
+    });
+    expect(executionLinkedWorkbenchList.items.map((item) => item.id)).toContain(evidence.evidence.id);
+    expect(executionLinkedWorkbenchList.items.every((item) => item.executionResultId != null)).toBe(true);
 
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
