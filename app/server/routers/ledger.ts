@@ -33,6 +33,14 @@ function routeRow(row: Record<string, unknown>) {
     taskId: row.workbench_evidence_task_id == null ? null : Number(row.workbench_evidence_task_id),
     permissionPreflightId: row.workbench_evidence_permission_preflight_id == null ? null : Number(row.workbench_evidence_permission_preflight_id),
   };
+  const linkedVision = row.vision_id == null ? null : {
+    id: Number(row.vision_id),
+    title: String(row.vision_title ?? ""),
+    status: String(row.vision_status ?? "active"),
+    ownerAgent: String(row.vision_owner_agent ?? "aang"),
+    taskId: row.vision_task_id == null ? null : Number(row.vision_task_id),
+    stopRule: String(row.vision_stop_rule ?? ""),
+  };
   return {
     id: Number(row.id),
     originalText: String(row.original_text ?? ""),
@@ -56,6 +64,7 @@ function routeRow(row: Record<string, unknown>) {
     taskId,
     approvalPreview,
     workbenchEvidence,
+    linkedVision,
     executionReadiness: routeExecutionReadiness({
       routeRecordId: Number(row.id),
       taskId,
@@ -198,7 +207,13 @@ async function readRouteReceiptContract() {
         wer.title AS workbench_evidence_title,
         wer.target_uri AS workbench_evidence_target_uri,
         wer.task_id AS workbench_evidence_task_id,
-        wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
+        wer.permission_preflight_id AS workbench_evidence_permission_preflight_id,
+        v.id AS vision_id,
+        v.title AS vision_title,
+        v.status AS vision_status,
+        v.owner_agent AS vision_owner_agent,
+        v.task_id AS vision_task_id,
+        v.stop_rule AS vision_stop_rule
       FROM runtime_route_records r
       LEFT JOIN approvals a ON a.id = (
         SELECT latest.id
@@ -213,6 +228,13 @@ async function readRouteReceiptContract() {
         FROM workbench_evidence_records latest_evidence
         WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
         ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
+        LIMIT 1
+      )
+      LEFT JOIN visions v ON v.id = (
+        SELECT latest_vision.id
+        FROM visions latest_vision
+        WHERE latest_vision.route_record_id = r.id
+        ORDER BY latest_vision.updated_at DESC, latest_vision.id DESC
         LIMIT 1
       )
       ORDER BY r.created_at DESC, r.id DESC
@@ -447,7 +469,13 @@ export const ledgerRouter = router({
               wer.title AS workbench_evidence_title,
               wer.target_uri AS workbench_evidence_target_uri,
               wer.task_id AS workbench_evidence_task_id,
-              wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
+              wer.permission_preflight_id AS workbench_evidence_permission_preflight_id,
+              v.id AS vision_id,
+              v.title AS vision_title,
+              v.status AS vision_status,
+              v.owner_agent AS vision_owner_agent,
+              v.task_id AS vision_task_id,
+              v.stop_rule AS vision_stop_rule
             FROM runtime_route_records r
             LEFT JOIN approvals a ON a.id = (
               SELECT latest.id
@@ -462,6 +490,13 @@ export const ledgerRouter = router({
               FROM workbench_evidence_records latest_evidence
               WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
               ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
+              LIMIT 1
+            )
+            LEFT JOIN visions v ON v.id = (
+              SELECT latest_vision.id
+              FROM visions latest_vision
+              WHERE latest_vision.route_record_id = r.id
+              ORDER BY latest_vision.updated_at DESC, latest_vision.id DESC
               LIMIT 1
             )
             ORDER BY r.created_at DESC, r.id DESC

@@ -1668,6 +1668,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 const routeApprovalDone = routeApprovalStatus != null && routeApprovalStatus !== "pending";
                 const routeEvidence = item.workbenchEvidence;
                 const routeEvidenceId = routeEvidence?.id ?? null;
+                const linkedVision = item.linkedVision;
                 const readiness = item.executionReadiness;
                 const routeAudit = selectedRouteAuditId === item.id ? routeReceiptAudit.data : null;
                 const routeAuditProof = routeAudit
@@ -1712,6 +1713,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         </Badge>
                       )}
                       {routeEvidenceId && <Badge variant="success" className="uppercase"><span className="min-w-0 truncate">body #{routeEvidenceId}</span></Badge>}
+                      {linkedVision && (
+                        <Badge variant={linkedVision.status === "active" ? "warning" : linkedVision.status === "achieved" ? "success" : "secondary"} className="uppercase" title={linkedVision.title}>
+                          <span className="min-w-0 truncate">vision #{linkedVision.id}</span>
+                        </Badge>
+                      )}
                     </div>
                     <div className="mt-1 line-clamp-2 text-[12px] font-semibold leading-snug" style={{ color: C.textPrimary }} title={ledgerRouteText(item.originalText)}>
                       {ledgerRouteText(item.originalText)}
@@ -1783,6 +1789,24 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                           {readinessProof.map((field) => (
                             <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
                           ))}
+                        </div>
+                      </div>
+                    )}
+                    {linkedVision && (
+                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} linked Vision read`} style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                            Vision Link
+                          </span>
+                          <span className="text-[9px] uppercase tracking-wider" style={{ color: linkedVision.status === "active" ? C.gold : C.textMuted }}>
+                            {linkedVision.status.replace(/_/g, " ")}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 lg:grid-cols-4">
+                          <CompactReadDatum label="Vision" value={`#${linkedVision.id}`} tone={C.gold} />
+                          <CompactReadDatum label="Owner" value={linkedVision.ownerAgent} tone={C.accent} />
+                          <CompactReadDatum label="Task" value={linkedVision.taskId ? `#${linkedVision.taskId}` : "unlinked"} tone={linkedVision.taskId ? C.success : C.warning} />
+                          <CompactReadDatum label="Stop" value={linkedVision.stopRule} tone={C.textSecondary} />
                         </div>
                       </div>
                     )}

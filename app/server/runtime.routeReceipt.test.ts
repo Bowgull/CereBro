@@ -604,6 +604,43 @@ describe("runtime route receipt preview", () => {
     expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
   });
 
+  it("shows linked Vision context on Ledger route rows without mutating records", async () => {
+    const caller = createCaller();
+    const rowCountsBefore = await countPreviewMutationRows();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "build Ledger route Vision readback for CereBro",
+      mode: "build",
+    });
+    const vision = await caller.visions.createFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    const rowCountsAfterSetup = await countPreviewMutationRows();
+    const overview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 5,
+    });
+    const route = overview.latestRoutes.find((item) => item.id === committed.record.id);
+
+    expect(route?.linkedVision).toMatchObject({
+      id: vision.vision.id,
+      status: "active",
+      ownerAgent: "tony",
+      taskId: task.task.id,
+    });
+    expect(route?.linkedVision?.title).toContain(`route #${committed.record.id}`);
+    expect(route?.linkedVision?.stopRule).toContain("Stop when the route");
+
+    for (const table of previewMutationTables) {
+      expect(await countRows(table)).toBe(rowCountsAfterSetup.get(table));
+    }
+    expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
+  });
+
   it("saves one local Workbench receipt from a committed route record and exposes the link", async () => {
     const caller = createCaller();
     const evidenceCountBefore = await countRows("workbench_evidence_records");
