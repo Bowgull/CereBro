@@ -336,6 +336,42 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </section>
             )}
 
+            {data?.sourceResearchLoopAudit && (
+              <section className="rounded p-1.5" aria-label="Source research loop audit" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                <SectionTitle title="Source Loop Audit" detail={data.sourceResearchLoopAudit.mode.replace(/_/g, " ")} />
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  <CompactReadDatum label="Sources" value={data.sourceResearchLoopAudit.totalSources} tone={C.accent} />
+                  <CompactReadDatum label="Trusted" value={data.sourceResearchLoopAudit.trustedSources} tone={C.success} />
+                  <CompactReadDatum label="Review" value={data.sourceResearchLoopAudit.reviewSources} tone={data.sourceResearchLoopAudit.reviewSources > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Stale" value={data.sourceResearchLoopAudit.staleSources} tone={data.sourceResearchLoopAudit.staleSources > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Scrub" value={data.sourceResearchLoopAudit.sensitiveSources} tone={data.sourceResearchLoopAudit.sensitiveSources > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Fetched" value={data.sourceResearchLoopAudit.fetchedSources} tone={C.textSecondary} />
+                  <CompactReadDatum label="GitHub" value={data.sourceResearchLoopAudit.githubSources} tone={C.gold} />
+                  <CompactReadDatum label="Community" value={data.sourceResearchLoopAudit.communitySources} tone={C.textSecondary} />
+                  <CompactReadDatum label="Surfer" value={data.sourceResearchLoopAudit.surferEvents} tone={C.textSecondary} />
+                  <CompactReadDatum label="Hedwig" value={data.sourceResearchLoopAudit.hedwigEvents} tone={C.textSecondary} />
+                </div>
+                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  {data.sourceResearchLoopAudit.nextAction}
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  <MiniBadge label={data.sourceResearchLoopAudit.canBrowseFromAudit ? "browse allowed" : "no browse"} tone={data.sourceResearchLoopAudit.canBrowseFromAudit ? C.danger : C.success} />
+                  <MiniBadge label={data.sourceResearchLoopAudit.canWriteMemoryFromAudit ? "memory write" : "no memory write"} tone={data.sourceResearchLoopAudit.canWriteMemoryFromAudit ? C.danger : C.success} />
+                  <MiniBadge label={data.sourceResearchLoopAudit.retrievalAutomationEnabled ? "retrieval on" : "retrieval off"} tone={data.sourceResearchLoopAudit.retrievalAutomationEnabled ? C.warning : C.textMuted} />
+                </div>
+                <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                    Audit Gates
+                  </summary>
+                  <div className="mt-1.5 grid gap-1">
+                    {data.sourceResearchLoopAudit.gates.map((gate) => (
+                      <RailLine key={gate} marker="G" text={gate} />
+                    ))}
+                  </div>
+                </details>
+              </section>
+            )}
+
             {data?.sourceLibraryRoute && (
               <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />

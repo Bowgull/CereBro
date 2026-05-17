@@ -232,6 +232,76 @@ async function readSourceLibraryReceipt() {
   };
 }
 
+async function readSourceResearchLoopAudit() {
+  const db = await getCerebroDb();
+  const [sourceTotals, eventTotals] = await Promise.all([
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN trust_level IN ('official', 'primary', 'high') THEN 1 ELSE 0 END) AS trusted,
+          SUM(CASE WHEN trust_level IN ('low', 'unknown') THEN 1 ELSE 0 END) AS review,
+          SUM(CASE WHEN freshness_status = 'stale' THEN 1 ELSE 0 END) AS stale,
+          SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+          SUM(CASE WHEN fetched_at IS NOT NULL THEN 1 ELSE 0 END) AS fetched,
+          SUM(CASE WHEN source_type LIKE '%github%' OR uri LIKE '%github.com/%' THEN 1 ELSE 0 END) AS github,
+          SUM(CASE WHEN source_type = 'community_signal' OR uri LIKE '%reddit.%' OR uri LIKE '%news.ycombinator.%' THEN 1 ELSE 0 END) AS community
+        FROM sources
+      `,
+      args: [],
+    }),
+    db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN owner_agent = 'surfer' THEN 1 ELSE 0 END) AS surfer,
+          SUM(CASE WHEN owner_agent = 'hedwig' THEN 1 ELSE 0 END) AS hedwig,
+          SUM(CASE WHEN event_type = 'surfer_public_url_ingest' OR source_label = 'approved_public_url' THEN 1 ELSE 0 END) AS approved_public_ingests,
+          SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive
+        FROM source_events
+      `,
+      args: [],
+    }),
+  ]);
+  const sourceRow = sourceTotals.rows[0] as Record<string, unknown> | undefined;
+  const eventRow = eventTotals.rows[0] as Record<string, unknown> | undefined;
+  const reviewSources = countValue(sourceRow, "review");
+  const staleSources = countValue(sourceRow, "stale");
+  const sensitiveSources = countValue(sourceRow, "sensitive");
+  const needsReviewBeforeRetrieval = reviewSources + staleSources + sensitiveSources;
+
+  return {
+    mode: "read_only" as const,
+    ownerAgent: "surfer" as const,
+    totalSources: countValue(sourceRow, "total"),
+    trustedSources: countValue(sourceRow, "trusted"),
+    reviewSources,
+    staleSources,
+    sensitiveSources,
+    fetchedSources: countValue(sourceRow, "fetched"),
+    githubSources: countValue(sourceRow, "github"),
+    communitySources: countValue(sourceRow, "community"),
+    sourceEvents: countValue(eventRow, "total"),
+    surferEvents: countValue(eventRow, "surfer"),
+    hedwigEvents: countValue(eventRow, "hedwig"),
+    approvedPublicIngests: countValue(eventRow, "approved_public_ingests"),
+    sensitiveEvents: countValue(eventRow, "sensitive"),
+    needsReviewBeforeRetrieval,
+    canBrowseFromAudit: false,
+    canWriteMemoryFromAudit: false,
+    retrievalAutomationEnabled: false,
+    nextAction:
+      needsReviewBeforeRetrieval > 0
+        ? "Review low-trust, unknown, stale, or sensitive sources before research reuse."
+        : "Sources are locally readable. Approval is still required before browsing, memory, Obsidian, Notion, Drive, or retrieval automation.",
+    gates: [
+      "Source loop audit reads local source and source-event records only.",
+      "Source records and events are evidence. They are not truth.",
+      "The audit does not browse, fetch, search, call models, write memory, write Obsidian, write Notion, write Drive, or enable retrieval.",
+    ],
+  };
+}
+
 export const surferRouter = router({
   panel: publicProcedure
     .input(
@@ -309,6 +379,7 @@ export const surferRouter = router({
         },
         sourceLibraryRoute: sourceLibraryRouteContract(),
         sourceLibraryReceipt: await readSourceLibraryReceipt(),
+        sourceResearchLoopAudit: await readSourceResearchLoopAudit(),
       };
     }),
 

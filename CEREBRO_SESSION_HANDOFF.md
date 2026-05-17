@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1003 EDT
+Last updated: 2026-05-17 1013 EDT
 
 ## Current North Star
 
@@ -20,6 +20,63 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1013 EDT - Source Research Loop Audit
+
+### What Changed
+- Surfer panel now returns a read-only `sourceResearchLoopAudit`.
+- The audit counts local source records, trusted/review/stale/sensitive source
+  state, fetched sources, GitHub and community lanes, Surfer/Hedwig source
+  events, approved public URL ingests, and retrieval blockers.
+- Research now shows `Source Loop Audit` inside the existing Source surface.
+- The audit explicitly reports no browsing, no memory write, and retrieval off.
+- Targeted coverage now proves the audit reads local source state without
+  creating approvals, artifacts, memory entries, browser work, or external
+  writes.
+
+### Files Touched
+- `app/server/routers/surfer.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3001/` after the dev server
+  auto-bumped from busy port `3000`: opened Workshop -> Research and confirmed
+  `Source Loop Audit`, no-browse, no-memory-write, retrieval-off, and local
+  source/event counts.
+- Screenshot proof saved locally at
+  `output/playwright/source-research-loop-audit-visible.png`.
+
+### Drift Check
+- On path. This advances the Research/Sources lane after the execution receipt
+  loop by adding local readback before any source automation.
+- No browsing, search, fetch, parser run, model call, source write, memory
+  write, Obsidian write, Notion write, Drive write, install, paid service, new
+  primary surface, or Raven path was added.
+- Machinery stays inside the existing Research source surface.
+
+### Known Risks
+- The local dev DB has many Hedwig source events, so counts are high. This pass
+  reports them truthfully and does not clean data.
+- The source panel still has dense scroll behavior. This pass did not redesign
+  the source layout.
+
+### Storage Impact
+- No schema change.
+- No durable source, artifact, approval, memory, Obsidian, Notion, or Drive
+  data was created by the feature.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/SurferSourcesPanel.tsx first. Continue the Research/Sources lane. Source Research now has local read-only loop audit counts and explicit no-browse/no-memory/no-retrieval gates. Next best slice is a safe source validation proposal path that lets Oak/Spock mark saved sources as needs-review/trusted/rejected without browsing, retrieval automation, memory writes, Obsidian writes, Notion writes, Drive writes, provider calls, installs, or Raven routing. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1003 EDT - Ledger Execution Receipt Loop Audit
 

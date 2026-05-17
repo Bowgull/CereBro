@@ -68,6 +68,17 @@ describe("Surfer Source Library route", () => {
     expect(panel.sourceLibraryReceipt.routeDefaultsChanged).toBe(false);
     expect(panel.sourceLibraryReceipt.retrievalAutomationEnabled).toBe(false);
     expect(panel.sourceLibraryReceipt.noActionTaken.join(" ")).toContain("No browser");
+    expect(panel.sourceResearchLoopAudit.mode).toBe("read_only");
+    expect(panel.sourceResearchLoopAudit.ownerAgent).toBe("surfer");
+    expect(panel.sourceResearchLoopAudit.totalSources).toBeGreaterThanOrEqual(2);
+    expect(panel.sourceResearchLoopAudit.trustedSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.reviewSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.staleSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.sensitiveSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.canBrowseFromAudit).toBe(false);
+    expect(panel.sourceResearchLoopAudit.canWriteMemoryFromAudit).toBe(false);
+    expect(panel.sourceResearchLoopAudit.retrievalAutomationEnabled).toBe(false);
+    expect(panel.sourceResearchLoopAudit.gates.join(" ")).toContain("does not browse");
 
     expect(await countRows("artifacts")).toBe(before.artifacts);
     expect(await countRows("approvals")).toBe(before.approvals);

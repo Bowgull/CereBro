@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1003 EDT
+Last updated: 2026-05-17 1013 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -1154,6 +1154,12 @@ Expected shape:
 - Workbench Project Proof now reads only when opened and uses compact project
   receipt groups instead of fetching 100 receipt bodies while closed.
 - Security Gate source links now read only when the `Source Link` drawer opens.
+- Source Research now has a read-only local loop audit for source/source-event
+  records. It reports trusted/review/stale/sensitive/fetched/GitHub/community
+  counts plus Surfer/Hedwig events while explicitly keeping browser, memory
+  writes, and retrieval automation off. Next Research/Sources slice should add
+  a local source validation proposal path for Oak/Spock without browsing,
+  retrieval, external writes, provider calls, installs, or Raven routing.
 - Model Tools now has a read-only Basement capability map for `Local First`,
   `External Gateway`, `Creative Normal`, and `Creative Sealed`. Item 9 is active.
   Continue by adding compact live registry/eval counts or tightening the
