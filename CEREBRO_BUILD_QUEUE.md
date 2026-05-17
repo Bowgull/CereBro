@@ -101,6 +101,17 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0431 EDT: continued item 8 backend route receipts before agent
+  execution. Added `routeReceiptContractProofModel` so Ledger route contract
+  fields use the same typed proof-model pattern as route execution readiness.
+  Kept Execute as `blocked`. Also carried the Runtime approval origin lane:
+  route-record approvals now filter under Runtime and resolve route labels in
+  queue/detail/list/group reads. Browser proof saved
+  `output/playwright/ledger-route-contract-proof-model.png` and
+  `output/playwright/approvals-runtime-origin-filter.png`. No route executor,
+  command runner, browser action, model/provider call, git action, route save,
+  task creation, external write, new surface, dependency, or Raven path was
+  added.
 - 2026-05-17 0429 EDT: continued item 8 backend route receipts before agent
   execution. Added `runtime` as an Approval Queue origin for approvals created
   from runtime route records. Runtime route approval labels now resolve to

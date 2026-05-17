@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0429 EDT
+Last updated: 2026-05-17 0431 EDT
 
 ## Current North Star
 
@@ -21,10 +21,16 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
-## 2026-05-17 0429 EDT - Runtime Approval Queue Lane
+## 2026-05-17 0431 EDT - Route Contract Proof Model
 
 ### What Changed
 - Continued item 8 backend route receipts before agent execution.
+- Added a shared `routeReceiptContractProofModel` for the Ledger route
+  receipt contract.
+- Ledger Overview now renders Route Receipt Contract fields from the same
+  typed proof-model pattern used by route execution readiness.
+- Added test coverage that route contract fields show counts and blocked
+  execution without implying a run action.
 - Added `runtime` as an Approval Queue origin for approvals created from
   runtime route records.
 - Runtime route approvals now resolve `targetLabel` to `runtime_route:<id>` so
@@ -38,6 +44,9 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   dependency, schema migration, new primary surface, or Raven path was added.
 
 ### Files Touched
+- `app/client/src/lib/routeActionModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/routeActionModel.test.ts`
 - `app/server/routers/approvals.ts`
 - `app/server/runtime.routeReceipt.test.ts`
 - `app/client/src/components/ApprovalDashboardPanel.tsx`
@@ -45,36 +54,43 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `CEREBRO_SESSION_HANDOFF.md`
 
 ### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-route-contract-proof-model.db' pnpm -C app exec vitest run server/routeActionModel.test.ts server/ledger.memoryContract.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-route-contract-runtime-approval.db' pnpm -C app exec vitest run server/routeActionModel.test.ts server/ledger.memoryContract.test.ts server/runtime.routeReceipt.test.ts server/cerebro-foundations.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app check` passed.
-- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-approval-lane.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- Initial `curl -I --max-time 5 http://localhost:3000/` failed because no
-  server was running.
-- Started `pnpm -C app dev`; server reported `Server running on
-  http://localhost:3000/`.
-- Dev server also reported `WebSocket server error: Port 24678 is already in
-  use`; HTTP preview still responded.
-- Final `curl -I --max-time 5 http://localhost:3000/` returned
-  `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run for this slice.
+- Started an isolated proof server with
+  `PORT=3318 CEREBRO_DB_URL='file:/tmp/cerebro-route-contract-proof-model-browser.db' pnpm -C app dev`.
+- Playwright CLI opened `http://localhost:3318/`, opened Ledger Overview, and
+  confirmed Route Receipt Contract rendered Routes, Tasks, Bodies, Gates,
+  Future, and Execute `blocked`.
+- Screenshot proof saved to ignored local output:
+  `output/playwright/ledger-route-contract-proof-model.png`.
+- Playwright CLI opened Approvals and confirmed the Runtime origin filter is
+  visible.
+- Screenshot proof saved to ignored local output:
+  `output/playwright/approvals-runtime-origin-filter.png`.
+- The isolated proof server was stopped after screenshots.
 
 ### Cleanliness Read
-- Dirty files at start: none.
-- Dirty files before closeout: current-slice approval router, approval panel,
-  runtime route receipt test, and docs.
-- Dev server is running at `http://localhost:3000/`.
-- No worker was used because this was one backend approval routing slice plus
-  one existing approval filter.
+- Dirty files at start: none in git status; docs already contained the
+  runtime approval lane read from the in-progress pass.
+- Dirty files before closeout: current-slice route contract proof model,
+  approval router, approval panel, runtime route receipt test, and docs.
+- No dev server was left running on the isolated proof port.
+- No worker was used because this was one shared model extraction plus one
+  existing approval filter.
 
 ### Front-End Steward Review
-- Surface: Approval Dashboard.
+- Surface: Ledger Overview and Approval Dashboard.
 - Register: product surface.
-- Primary object: local approval previews linked to runtime route records.
-- User question: where is the gate for this route receipt.
-- Route visible: Runtime filter, route target labels, project name when
-  present, permission preflight, and detail read are visible.
-- Gate visible: approval queue still reads local previews only and does not
-  approve or execute.
+- Primary object: route receipt contract and local approval previews linked to
+  runtime route records.
+- User question: what exists for this route receipt, where is the gate, and
+  can it run.
+- Route visible: Ledger contract counts, Runtime filter, route target labels,
+  project name when present, permission preflight, and detail read are visible.
+- Gate visible: Execute still reads `blocked`; approval queue still reads local
+  previews only and does not approve or execute.
 - Machinery hidden until needed: no executor, dispatch button, provider runner,
   model runner, browser runner, command runner, or git runner was exposed.
 - Generic UI rejected: no new dashboard, fake progress, or new approval
@@ -84,10 +100,10 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   route receipt contracts are stable.
 
 ### Completion Read
-- Overall: 74%.
+- Overall: 75%.
 - Foundation/docs/planning: 96%.
 - Frontend visible loop: 99%.
-- Backend/runtime: 72%.
+- Backend/runtime: 73%.
 - Knowledge/storage/source: 53%.
 - Creative/freelance/watch: 10%.
 - Confidence: medium.
@@ -98,13 +114,14 @@ Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
 `CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
 `CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
 `20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
-Prime mode. Start with a dirty-file read. Approval Queue now has a Runtime
-origin lane for route-record approvals and still does not execute. Next best
-path is item 8 route receipt hardening or a read-only backend receipt audit. Do
-not build an executor yet. Do not run Ollama status checks, installs, pulls,
-external searches, provider calls, model calls, note scans, vector indexing,
-source fetches, cleanup actions, command execution runners, route saves, task
-creation, or vault writes without explicit approval.
+Prime mode. Start with a dirty-file read. Ledger route contract fields now use
+a shared proof model, and Approval Queue now has a Runtime origin lane for
+route-record approvals. Both still read local records only and do not execute.
+Next best path is item 8 route receipt hardening or a read-only backend receipt
+audit. Do not build an executor yet. Do not run Ollama status checks, installs,
+pulls, external searches, provider calls, model calls, note scans, vector
+indexing, source fetches, cleanup actions, command execution runners, route
+saves, task creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0023 EDT - Ledger Route Receipt Contract
 
