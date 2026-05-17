@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0004 EDT
+Last updated: 2026-05-17 0007 EDT
 
 ## Current North Star
 
@@ -20,6 +20,81 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0007 EDT - Source Route Compact Read
+
+### What Changed
+- Continued item 7 Knowledge/source contract cleanup.
+- Research `Source Route` now uses the shared `CompactReadDatum` primitive for
+  source notes, GitHub repository source, Project Map, GitHub sources index,
+  archive lane, and write status.
+- Added the previously hidden `githubSourcesIndexPath` to the visible Source
+  Route read.
+- Kept Browser Ladder and Policy on the existing rail-line pattern because
+  those are process rails, not compact route facts.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-route-compact.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/workbench.knowledgeRoute.test.ts server/projectIntelligence.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run because this was a no-behavior compact
+  read consolidation and localhost proof passed.
+
+### Cleanliness Read
+- Dirty files at start: none after the file-state blip cleared.
+- Existing docs edits for the previous Source Receipt browser proof were
+  preserved.
+- Dirty files before closeout: current-slice Research component and docs only.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one existing Research readback call site.
+
+### Front-End Steward Review
+- Surface: Research.
+- Register: product surface.
+- Primary object: Source Route.
+- User question: where source records go before any knowledge automation.
+- Route visible: source notes, GitHub source, Project Map, source index,
+  archive lane, and write gate are visible.
+- Gate visible: writes remain approval gated.
+- Machinery hidden until needed: Write Gate details still live inside the
+  existing disclosure.
+- Generic UI rejected: no new dashboard, visual restyle, fake metrics, or
+  decorative card layer was added.
+- Remaining taste risk: Research is dense. Future work should avoid adding more
+  always-open machinery and should prefer shared read patterns.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 52%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Research Source Route now shows the
+full local route using shared compact read cells. Next best path is the next
+source contract slice or a small route/read consistency audit across Project
+Lab, Workbench, Research, Memory, and Ledger. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, model calls, note scans,
+vector indexing, source fetches, or vault writes without explicit approval.
 
 ## 2026-05-17 0004 EDT - Source Receipt Compact Read
 
@@ -43,18 +118,21 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ### Checks Run
 - `pnpm -C app check` passed.
-- `CEREBRO_DB_URL='file:/tmp/cerebro-source-compact-read.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/ledger.memoryContract.test.ts server/memory.contract.test.ts server/workbench.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-compact-read.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/knowledge/contracts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run because this was a no-behavior primitive
-  consolidation using an already checked component pattern.
+- Playwright CLI opened `http://localhost:3000/`, opened Workshop > Research,
+  and confirmed `Source Library receipt` rendered the compact Total, Trusted,
+  Review, Scrub, Stale, and Events read cells.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/source-receipt-compact-read.png`.
 
 ### Cleanliness Read
 - Dirty files at start: `CEREBRO_SESSION_HANDOFF.md` appeared dirty in
   status, but `git diff` showed no content diff. It was treated as a harmless
   file-state blip and preserved.
 - Dirty files before closeout: current-slice Research component and docs only.
-- Dev server remains available at `http://localhost:3000/`.
+- No dev server was started for this pass. Existing local servers remained on
+  their prior ports.
 - No worker was used because this was one existing Research readback call site.
 
 ### Front-End Steward Review

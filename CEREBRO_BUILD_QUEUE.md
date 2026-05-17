@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0004 EDT
+Last updated: 2026-05-17 0007 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,13 +101,21 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0007 EDT: continued item 7 Knowledge/source contract cleanup.
+  Research `Source Route` now uses shared `CompactReadDatum` for source notes,
+  GitHub repository source, Project Map, GitHub sources index, archive lane,
+  and write status. Browser Ladder and Policy remain rail lines. No note scan,
+  vector index, source fetch, Obsidian/Notion/Drive/memory write,
+  model/provider/tool call, route default change, new surface, command runner,
+  dependency, or Raven path was added.
 - 2026-05-17 0004 EDT: continued item 7 Knowledge/source contract cleanup.
   Research `Source Receipt` stat cards now use shared `CompactReadDatum`, and
   the local `ReceiptStat` helper was removed. Same source counts, route state,
   retrieval state, and next action remain visible. No note scan, vector index,
   source fetch, Obsidian/Notion/Drive/memory write, model/provider/tool call,
   route default change, new surface, command runner, dependency, or Raven path
-  was added.
+  was added. Browser proof opened Workshop > Research and saved
+  `output/playwright/source-receipt-compact-read.png`.
 - 2026-05-17 0002 EDT: continued item 7 Knowledge/source contract cleanup.
   Added shared `CompactReadDatum` frontend primitive and replaced duplicate
   compact datum components in Knowledge Notes, Ledger, and Workbench. Same

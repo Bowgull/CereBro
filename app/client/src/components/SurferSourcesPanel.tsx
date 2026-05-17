@@ -337,11 +337,18 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             {data?.sourceLibraryRoute && (
               <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />
-                <div className="mt-2 grid gap-1">
-                  <RailLine marker="Source notes" text={data.sourceLibraryRoute.sourceNoteLane} tone={C.accent} />
-                  <RailLine marker="GitHub source" text={data.sourceLibraryRoute.githubRepositorySourcePath} tone={C.gold} />
-                  <RailLine marker="Project map" text={data.sourceLibraryRoute.githubProjectMapPath} tone={C.textSecondary} />
-                  <RailLine marker="Archive" text={data.sourceLibraryRoute.archiveRetrieval} tone={C.warning} />
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  <CompactReadDatum label="Source notes" value={data.sourceLibraryRoute.sourceNoteLane} tone={C.accent} wrap />
+                  <CompactReadDatum label="GitHub source" value={data.sourceLibraryRoute.githubRepositorySourcePath} tone={C.gold} wrap />
+                  <CompactReadDatum label="Project map" value={data.sourceLibraryRoute.githubProjectMapPath} tone={C.textSecondary} wrap />
+                  <CompactReadDatum label="Source index" value={data.sourceLibraryRoute.githubSourcesIndexPath} tone={C.textSecondary} wrap />
+                  <CompactReadDatum label="Archive" value={data.sourceLibraryRoute.archiveRetrieval} tone={C.warning} wrap />
+                  <CompactReadDatum
+                    label="Writes"
+                    value={data.sourceLibraryRoute.writesExternalSystems ? "enabled" : "approval gated"}
+                    tone={data.sourceLibraryRoute.writesExternalSystems ? C.danger : C.gold}
+                    wrap
+                  />
                 </div>
                 <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
