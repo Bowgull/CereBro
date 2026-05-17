@@ -36,6 +36,15 @@ export type WorkbenchBrowserTabState = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserActionPreview = {
+  label: string;
+  targetLabel: string;
+  canPropose: boolean;
+  statusLabel: "no page" | "blocked";
+  routeLabel: string;
+  noActionText: string;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -108,6 +117,20 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
         ? "Tab 1 is the only active local page frame."
         : "Draft tab is staged beside Tab 1. No page is open.",
     noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
+  };
+}
+
+export function workbenchBrowserActionPreviewModel(
+  action: WorkbenchBrowserAction,
+  draft: WorkbenchBrowserDraft,
+): WorkbenchBrowserActionPreview {
+  return {
+    label: action.label,
+    targetLabel: draft.kind === "empty" ? "No page draft." : draft.displayTarget,
+    canPropose: false,
+    statusLabel: draft.kind === "empty" ? "no page" : "blocked",
+    routeLabel: draft.kind === "empty" ? "Open or stage a page first." : "Needs runner and approval contract.",
+    noActionText: "No page action, browser automation, page fetch, source save, Workbench capture, shelf save, project pin, explanation route, clipboard write, or external write runs from this preview.",
   };
 }
 

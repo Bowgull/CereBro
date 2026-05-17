@@ -22,6 +22,7 @@ import {
   workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
 import {
+  workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
@@ -112,6 +113,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [watchShelfOpen, setWatchShelfOpen] = useState(false);
   const [watchShelfCategory, setWatchShelfCategory] = useState("Watching");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
+  const [browserActionLabel, setBrowserActionLabel] = useState("Add to Watch");
   const evidence = trpc.workbench.evidence.useQuery({
     limit: 30,
     kind: filterKind === "all" ? undefined : filterKind,
@@ -212,6 +214,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
   const browserTabState = workbenchBrowserTabStateModel(browserDraft);
+  const browserAction =
+    browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
+  const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -743,12 +748,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         <Button
                           key={action.label}
                           type="button"
-                          variant="ghost"
+                          variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
                           size="sm"
-                          disabled={!action.enabled}
                           className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
                           title={action.plannedReason}
                           role="menuitem"
+                          onClick={() => setBrowserActionLabel(action.label)}
                         >
                           <span className="block">
                             <span className="block text-[11px] font-semibold">{action.label}</span>
@@ -756,6 +761,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           </span>
                         </Button>
                       ))}
+                      <div className="mt-1 rounded p-1.5 text-[10px] leading-snug" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                            {browserActionPreview.label}
+                          </span>
+                          <Chip label={browserActionPreview.statusLabel} tone={browserActionPreview.statusLabel === "no page" ? C.textMuted : C.warning} />
+                        </div>
+                        <div className="mt-1 break-all">{browserActionPreview.targetLabel}</div>
+                        <div className="mt-1">{browserActionPreview.routeLabel}</div>
+                        <div className="mt-1">{browserActionPreview.noActionText}</div>
+                      </div>
                     </div>
                   </details>
                 </div>

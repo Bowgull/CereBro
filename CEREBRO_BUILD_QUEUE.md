@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1657 EDT
+Last updated: 2026-05-17 1702 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1702 EDT: added blocked Browser page-action previews inside
+  Workbench. The three-dot action menu now supports local action selection and
+  shows label, target draft, `no page` or `blocked` status, route requirement,
+  and no-action receipt text. No browser runner, browser automation, real
+  browser tab, page fetch, search request, history entry, bookmark, persisted
+  tab state, source save, Workbench capture, shelf save, project pin,
+  explanation route, clipboard write, credential action, download, external
+  write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 1657 EDT: added Browser tab-state readback inside Workbench.
   The tab rail now reads from `workbenchBrowserTabStateModel`: `Tab 1` is the
   only active local page frame, `New Tab` remains planned/blocked, and Browser

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
@@ -117,5 +118,26 @@ describe("workbenchBrowserModel", () => {
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(emptyTabs.tabSummary).toBe("Tab 1 is the only active local page frame.");
     expect(emptyTabs.canCreateTab).toBe(false);
+  });
+
+  it("reads blocked page action previews without running page actions", () => {
+    const shell = workbenchBrowserShellModel();
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const watchPreview = workbenchBrowserActionPreviewModel(shell.actions[0], urlDraft);
+    const emptyPreview = workbenchBrowserActionPreviewModel(shell.actions[1], emptyDraft);
+
+    expect(watchPreview.label).toBe("Add to Watch");
+    expect(watchPreview.targetLabel).toBe("https://example.com/path");
+    expect(watchPreview.canPropose).toBe(false);
+    expect(watchPreview.statusLabel).toBe("blocked");
+    expect(watchPreview.routeLabel).toBe("Needs runner and approval contract.");
+    expect(watchPreview.noActionText).toContain("No page action");
+
+    expect(emptyPreview.label).toBe("Save to Sources");
+    expect(emptyPreview.targetLabel).toBe("No page draft.");
+    expect(emptyPreview.statusLabel).toBe("no page");
+    expect(emptyPreview.canPropose).toBe(false);
   });
 });
