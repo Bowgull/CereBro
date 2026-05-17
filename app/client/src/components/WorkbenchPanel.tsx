@@ -640,9 +640,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               projectLabel={
                 projectId !== "none"
                   ? projectOptions.find((project) => project.tasks.projectId === projectId)?.name ?? "linked project"
-                  : null
+                : null
               }
             />
+            {stagedDraftNotice && (
+              <div
+                className="rounded p-1.5 text-[11px] leading-snug"
+                role="status"
+                style={{ background: G.slab, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}
+              >
+                <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>Focus</span> {stagedDraftNotice}
+              </div>
+            )}
 
             <details
               className="rounded p-2"
@@ -735,7 +744,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
               {stagedDraftNotice && (
                 <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}>
-                  <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>{receiptBodyCopy.draftPrefix}</span> {receiptBodyCopy.draftText}
+                  <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>{receiptBodyCopy.draftPrefix}</span> {stagedDraftNotice}
                 </div>
               )}
 

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0900 EDT
+Last updated: 2026-05-17 0904 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0904 EDT: fixed Workbench staged focus readback. Ledger-to-
+  Workbench jumps now show the exact `Focus Ledger opened Workbench body...`
+  notice near the receipt chain, and the receipt creation panel repeats the
+  exact staged notice instead of generic draft copy.
 - 2026-05-17 0900 EDT: added an `Open Body` action to existing Ledger
   execution result cards. Linked execution results can now open Workbench with
   the terminal-output receipt body selected. Ledger stays read-only and
