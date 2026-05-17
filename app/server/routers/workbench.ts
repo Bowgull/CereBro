@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { browserActionProposalModel } from "../browserActionProposalModel";
 import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
@@ -68,6 +69,45 @@ function rowToBrowserActionProposal(row: Record<string, unknown>) {
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
   };
+}
+
+function rowToBrowserApprovalPreview(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    actionType: String(row.action_type),
+    targetType: row.target_type == null ? null : String(row.target_type),
+    targetId: row.target_id == null ? null : Number(row.target_id),
+    requestedByAgent: row.requested_by_agent == null ? null : String(row.requested_by_agent),
+    status: String(row.status),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    sensitiveDataFlag: Boolean(row.sensitive_data_flag),
+    costRisk: row.cost_risk == null ? null : String(row.cost_risk),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+    createdAt: Number(row.created_at),
+  };
+}
+
+async function pendingBrowserApprovalByProposalId(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, task_id, action_type, target_type, target_id,
+             requested_by_agent, status, reason, context_summary,
+             sensitive_data_flag, cost_risk, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND status = 'pending'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  return result.rows[0] ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>) : null;
 }
 
 function rowToEvidence(row: Record<string, unknown>) {
@@ -497,6 +537,117 @@ export const workbenchRouter = router({
       return {
         items: result.rows.map(rowToBrowserActionProposal),
         noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  createBrowserActionApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const existingApproval = await pendingBrowserApprovalByProposalId(input.proposalId);
+      if (existingApproval) {
+        return {
+          ok: true as const,
+          mode: "local_browser_action_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          opensBrowser: false,
+          wouldExecute: false,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local Browser approval preview returned.",
+            "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
+          ],
+        };
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "public_browser",
+        actionClass: proposal.riskClass === "browser_write" ? "external_write" : "browser_or_media_capture",
+        externalTarget: proposal.draftKind !== "empty",
+        sensitiveData: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `Browser action approval preview: ${proposal.actionLabel} ${proposal.target}`,
+        additionalReasons: [
+          "Browser approval previews are local metadata only.",
+          "The browser proposal still needs runner, Spock gate, Workbench body, result receipt, and recovery note before execution can be considered.",
+          "This preview does not open, fetch, search, save, capture, or write externally.",
+        ],
+      });
+      const contextSummary = [
+        `Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Result state: ${proposal.resultState}`,
+        `Required gates: ${proposal.requiredGates.join(", ")}`,
+        `Blockers: ${proposal.blockers.join(", ")}`,
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'browser_action_review', 'browser_action_proposal', ?, ?,
+                  'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          proposal.id,
+          proposal.executorAgent,
+          input.reason ?? "Local Browser action approval preview only. This does not run or approve browser work.",
+          contextSummary,
+          proposal.riskClass,
+          Number(preflight.row.id),
+        ],
+      });
+      const approval = result.rows[0]
+        ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>)
+        : await pendingBrowserApprovalByProposalId(proposal.id);
+
+      return {
+        ok: Boolean(approval),
+        mode: "local_browser_action_approval_preview" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        opensBrowser: false,
+        wouldExecute: false,
+        approval,
+        gates: [
+          "Created one pending local Browser approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
+          "Approval preview is not execution permission.",
+        ],
       };
     }),
 

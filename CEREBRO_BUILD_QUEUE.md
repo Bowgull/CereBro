@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1727 EDT
+Last updated: 2026-05-17 1733 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,18 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1733 EDT: added Workbench Browser approval previews.
+  `workbench.createBrowserActionApprovalPreview` stages one pending local
+  approval preview for a durable Browser proposal and records one local
+  permission preflight row. Re-staging returns the existing pending approval
+  instead of duplicating it. Workbench Browser recent proposals now expose
+  `Stage Approval` and show `Browser approval #... staged. Not run.` No
+  Workbench evidence, source row, or execution output is written. No browser
+  runner, browser automation, real browser tab, page open, page fetch, search
+  request, history entry, bookmark, source save, Workbench capture, shelf save,
+  project pin, explanation route, clipboard write, credential action,
+  download, external write, provider/model call, install, pull, or Raven path
+  was added.
 - 2026-05-17 1727 EDT: added Workbench Browser proposal readback.
   `workbench.browserActionProposals` reads recent durable
   `browser_action_proposals` and the Workbench Browser shell now shows a

@@ -169,6 +169,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     },
   });
   const [browserProposalNotice, setBrowserProposalNotice] = useState<string | null>(null);
+  const createBrowserActionApprovalPreview = trpc.workbench.createBrowserActionApprovalPreview.useMutation({
+    onSuccess: (result) => {
+      setBrowserProposalNotice(
+        result.approval
+          ? `Browser approval #${result.approval.id} staged. Not run.`
+          : "Browser approval preview was not staged.",
+      );
+    },
+  });
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -901,6 +910,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <div className="flex flex-wrap items-center gap-1 md:justify-end">
                             <Chip label={proposal.statusLabel} tone={proposal.canExecute ? C.danger : C.warning} />
                             <Chip label={proposal.resultState} tone={C.textMuted} />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              disabled={createBrowserActionApprovalPreview.isPending}
+                              title="Stage a local approval preview for this Browser proposal. This does not approve or run it."
+                              onClick={() => {
+                                createBrowserActionApprovalPreview.mutate({
+                                  proposalId: proposal.id,
+                                  reason: "Local Browser action approval preview only. This does not approve or run browser work.",
+                                });
+                              }}
+                            >
+                              Stage Approval
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -913,6 +938,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <div className="text-[10px]" style={{ color: C.textMuted }}>
                     No saved Browser proposal runs from this list.
                   </div>
+                  {browserProposalNotice && (
+                    <div className="text-[10px]" style={{ color: C.textMuted }}>
+                      {browserProposalNotice}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1 overflow-x-auto rounded p-1" aria-label="Browser page tabs" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>

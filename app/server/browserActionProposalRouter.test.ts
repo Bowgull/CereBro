@@ -108,4 +108,65 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("creates one pending approval preview for a Browser proposal without running it", async () => {
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-approval",
+      draftKind: "url",
+    });
+
+    const approvalPreview = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+      reason: "Test Browser proposal approval preview only.",
+    });
+
+    expect(approvalPreview.ok).toBe(true);
+    expect(approvalPreview.created).toBe(true);
+    expect(approvalPreview.writesExternal).toBe(false);
+    expect(approvalPreview.opensBrowser).toBe(false);
+    expect(approvalPreview.wouldExecute).toBe(false);
+    expect(approvalPreview.approval?.status).toBe("pending");
+    expect(approvalPreview.approval?.targetType).toBe("browser_action_proposal");
+    expect(approvalPreview.approval?.targetId).toBe(created.proposal.id);
+    expect(approvalPreview.approval?.actionType).toBe("browser_action_review");
+    expect(approvalPreview.approval?.requestedByAgent).toBe("surfer");
+    expect(approvalPreview.approval?.contextSummary).toContain("https://example.com/browser-approval");
+    expect(approvalPreview.gates).toContain("No browser opened, page fetched, source saved, Workbench capture created, or external write ran.");
+
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights + 1);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("returns an existing pending Browser proposal approval preview without duplicating it", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Add to Watch",
+      target: "https://example.com/watch-approval",
+      draftKind: "url",
+    });
+
+    const first = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    const beforeApprovals = await countRows("approvals");
+    const second = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+
+    expect(first.approval?.id).toBe(second.approval?.id);
+    expect(second.created).toBe(false);
+    expect(second.gates).toContain("Existing pending local Browser approval preview returned.");
+    expect(await countRows("approvals")).toBe(beforeApprovals);
+  });
 });

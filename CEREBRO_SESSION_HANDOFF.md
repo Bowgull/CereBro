@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1727 EDT
+Last updated: 2026-05-17 1733 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1733 EDT - Workbench Browser Approval Preview
+
+### What Changed
+- Added `workbench.createBrowserActionApprovalPreview`.
+- A saved Browser proposal can now stage one pending local approval preview.
+- The approval preview targets `browser_action_proposal`, records
+  `browser_action_review`, and records a local permission preflight.
+- Re-staging the same Browser proposal returns the existing pending approval
+  instead of duplicating it.
+- Workbench Browser recent proposals now expose `Stage Approval`.
+- UI notice confirms `Browser approval #... staged. Not run.`
+
+### Files Touched
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.createBrowserActionApprovalPreview`.
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, confirmed `Stage Approval`, clicked it, and confirmed
+  `Browser approval #... staged. Not run.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-approval-preview.png`.
+
+### Drift Check
+- On path. This links Browser proposals to approval previews while keeping
+  execution false.
+- Approval preview creation writes one local approval row and one local
+  permission preflight row only.
+- No Workbench evidence was written, no source row was written, and no browser
+  action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Workbench
+  capture, shelf save, project pin, explanation route, clipboard write,
+  credential action, download, external write, paid service, provider call,
+  model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Browser approval previews now exist, but they are not yet surfaced as a
+  dedicated Browser filter in the Approval Queue.
+- `can_execute` remains false because Workbench body, Spock gate, result
+  receipt, recovery note, and runner contract are still missing.
+
+### Storage Impact
+- No schema change.
+- Local app proof created or returned one pending local Browser approval
+  preview in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/approvals.ts, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now stages durable local browser_action_proposals, lists recent blocked proposals, and can stage pending local Browser approval previews. Next best slice is Approval Queue Browser-origin readback/filter or Workbench body linkage for a Browser proposal, keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1727 EDT - Workbench Browser Proposal Readback
 
