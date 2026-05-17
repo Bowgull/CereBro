@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0453 EDT
+Last updated: 2026-05-17 0506 EDT
 
 ## Current North Star
 
@@ -20,6 +20,77 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0506 EDT - Overall Build Audit
+
+### What Changed
+- Audit-only pass after the user reported another chat had built on top of the
+  active CereBro work.
+- Confirmed the worktree is clean on `codex/cerebro-stabilization-checkpoint`.
+- Confirmed the stacked commits after `b2a7d40` stayed on the current build
+  path:
+  - `8b6ea44` updated route contract proof handoff.
+  - `7296c76` added the read-only route receipt audit backend query.
+  - `f5d3c91` surfaced route receipt audit in the existing Ledger route card.
+  - `01ecb42` added the read-only model registry audit backend query.
+  - `892e4e9` surfaced model registry audit in the existing Basement Model
+    Registry panel.
+- Verified the additions stayed inside existing route receipt and Basement
+  registry surfaces. They did not add a route executor, command runner, browser
+  action, model/provider call, install/pull path, new primary surface, storage
+  migration, schema migration, external write, or private Raven content path.
+- Noted one boundary watch: the Basement registry still contains a
+  policy-only sealed Raven lane. That is not private Raven content, but future
+  work should not expand it inside core CereBro.
+
+### Files Touched
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index only.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Targeted suite passed:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-overall-audit.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/routeActionModel.test.ts server/modelTools.localFirst.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed with 4 files and 33 tests.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- A first full-suite attempt through `pnpm -C app test -- ...` was malformed by
+  the package-script handoff and triggered known shared SQLite `SQLITE_BUSY`
+  lock failures. This was not treated as product failure.
+- Direct serial full suite passed:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-full-audit-serial.db' pnpm -C app exec vitest run --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed with 28 files and 128 tests.
+- Localhost check: `http://localhost:3000/` returned HTTP 200. Port `3002` was
+  not serving.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: handoff and Obsidian audit record only.
+- No app code changed in this pass.
+- No worker was used. This was a bounded audit with no independent write set.
+
+### Completion Read
+- Overall: 79%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue item 9 Model
+and Tool Registry on the current build path. Start with a dirty-file read. The
+latest stacked work appears aligned and tests pass when run through direct
+serial Vitest. Next best slice is source/eval status hardening for capability
+records, likely tightening how source-ready/eval-ready capabilities become
+route candidates without changing route defaults. Do not run Ollama status
+checks, installs, pulls, external searches, provider calls, model calls, note
+scans, vector indexing, source fetches, cleanup actions, command execution
+runners, route saves, task creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0453 EDT - Basement Registry Audit Surface
 
