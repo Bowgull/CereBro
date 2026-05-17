@@ -1588,8 +1588,11 @@ function EvidenceDetailPanel({
           createdAt: number;
         }>;
         knowledgeRoute: {
+          mode: string;
           projectBridgePath: string;
           repositorySourcePath: string;
+          projectMapPath: string;
+          sourcesIndexPath: string;
           archiveLane: string;
           archiveRetrieval: string;
           writesExternalSystems: boolean;
@@ -1782,18 +1785,29 @@ function EvidenceDetailPanel({
         )}
       </div>
       {detail.knowledgeRoute && (
-        <details className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-          <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-            Knowledge Route
+        <details className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} open>
+          <summary
+            className="cursor-pointer rounded text-[10px] font-bold uppercase tracking-widest focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ color: C.textPrimary, ["--tw-ring-color" as string]: C.accent, ["--tw-ring-offset-color" as string]: C.surface }}
+          >
+            Knowledge Route Read
           </summary>
-          <div className="mt-2 flex flex-wrap gap-1">
-            <Chip label="read only" tone={C.gold} />
+          <div className="mt-2 flex flex-wrap gap-1" aria-label="Workbench knowledge route badges">
+            <Chip label={detail.knowledgeRoute.mode === "read_only" ? "read only" : detail.knowledgeRoute.mode.replace(/_/g, " ")} tone={C.gold} />
+            <Chip label={detail.knowledgeRoute.writesExternalSystems ? "external write" : "no external write"} tone={detail.knowledgeRoute.writesExternalSystems ? C.danger : C.success} />
+            <Chip label={detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")} tone={C.accent} />
           </div>
-          <div className="grid gap-1">
-            <Meta label="Bridge" value={detail.knowledgeRoute.projectBridgePath} tone={C.success} />
-            <Meta label="Source" value={detail.knowledgeRoute.repositorySourcePath} tone={C.accent} />
-            <Meta label="Archive" value={`${detail.knowledgeRoute.archiveLane} / ${detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")}`} tone={C.warning} />
-            <Meta
+          <div className="mt-2 grid grid-cols-2 gap-1">
+            <KnowledgeRouteCard label="Bridge" value={detail.knowledgeRoute.projectBridgePath} tone={C.success} />
+            <KnowledgeRouteCard label="Source" value={detail.knowledgeRoute.repositorySourcePath} tone={C.accent} />
+            <KnowledgeRouteCard label="Map" value={detail.knowledgeRoute.projectMapPath} tone={C.textSecondary} />
+            <KnowledgeRouteCard label="Index" value={detail.knowledgeRoute.sourcesIndexPath} tone={C.textSecondary} />
+            <KnowledgeRouteCard
+              label="Archive"
+              value={`${detail.knowledgeRoute.archiveLane} / ${detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")}`}
+              tone={C.warning}
+            />
+            <KnowledgeRouteCard
               label="Writes"
               value={detail.knowledgeRoute.writesExternalSystems ? "enabled" : "approval gated"}
               tone={detail.knowledgeRoute.writesExternalSystems ? C.danger : C.gold}
@@ -1801,6 +1815,9 @@ function EvidenceDetailPanel({
           </div>
           <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
             {detail.knowledgeRoute.approvalGate}
+          </div>
+          <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+            No note scan, vector index, source fetch, Obsidian/Notion/Drive/memory write, or route default change ran from this read.
           </div>
         </details>
       )}
@@ -2174,6 +2191,15 @@ function Meta({ label, value, title, tone = C.textSecondary }: { label: string; 
     <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
       <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
       <div className="break-words" style={{ color: tone }} title={title}>{value}</div>
+    </div>
+  );
+}
+
+function KnowledgeRouteCard({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="mt-1 break-words text-[10px] leading-snug" style={{ color: tone }} title={value}>{value}</div>
     </div>
   );
 }

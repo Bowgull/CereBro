@@ -66,6 +66,8 @@ describe("Workbench knowledge route context", () => {
     expect(detail.knowledgeRoute?.repositorySourcePath).toBe(
       "20_Knowledge/Sources/GitHub/CereBro Repository Source.md",
     );
+    expect(detail.knowledgeRoute?.projectMapPath).toBe("00_Atlas/GitHub Project Map.md");
+    expect(detail.knowledgeRoute?.sourcesIndexPath).toBe("20_Knowledge/Sources/GitHub/GitHub Sources.md");
     expect(detail.knowledgeRoute?.archiveRetrieval).toBe("archive_only");
     expect(detail.knowledgeRoute?.writesExternalSystems).toBe(false);
     expect(detail.knowledgeRoute?.approvalGate).toContain("explicit write approval");
