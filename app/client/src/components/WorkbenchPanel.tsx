@@ -1368,6 +1368,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             <Chip label={item.validationStatus.replace(/_/g, " ")} tone={toneForValidationStatus(item.validationStatus)} />
                             {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
                             {item.routeAgent && <Chip label={`to ${item.routeAgent}`} tone={C.textMuted} />}
+                            {item.executionResultId != null && (
+                              <Chip
+                                label={`result #${item.executionResultId} ${item.executionResultStatus?.replace(/_/g, " ") ?? "recorded"}`}
+                                tone={item.executionResultStatus === "completed" ? C.success : C.warning}
+                              />
+                            )}
                             {workbenchReceiptPreviewBadges(item).map((badge) => (
                               <Chip key={`${item.id}-${badge.label}`} label={badge.label} tone={badge.tone === "warning" ? C.warning : C.accent} />
                             ))}

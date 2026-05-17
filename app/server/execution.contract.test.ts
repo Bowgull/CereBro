@@ -110,6 +110,15 @@ describe("execution action contract", () => {
       expect(workbenchDetail.executionResult?.recoveryNote).toBe("No recovery needed for a read-only command.");
     }
 
+    const workbenchList = await caller.workbench.evidence({
+      kind: "terminal_output",
+      limit: 20,
+    });
+    const listedBody = workbenchList.items.find((item) => item.id === evidence.evidence.id);
+    expect(listedBody?.executionResultId).toBe(runnerGuard.resultId);
+    expect(listedBody?.executionResultStatus).toBe("completed");
+    expect(listedBody?.executionResultExitCode).toBe(0);
+
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
     expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);

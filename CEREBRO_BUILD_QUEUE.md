@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0933 EDT
+Last updated: 2026-05-17 0936 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0936 EDT: Workbench recent receipt rows now show execution
+  result badges for terminal receipt bodies linked to execution results.
+  The Workbench list read returns latest execution result id, status, and exit
+  code. Regression coverage proves the read shape after an approved read-only
+  run.
 - 2026-05-17 0933 EDT: Terminal Lab recent result receipts now show the
   linked Workbench body id and include an `Open Body` action. The execution
   result read now returns Workbench evidence id and source proposal metadata.

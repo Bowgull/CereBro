@@ -79,6 +79,9 @@ function rowToEvidence(row: Record<string, unknown>) {
     command: row.command == null ? null : String(row.command),
     artifactTitle: row.artifact_title == null ? null : String(row.artifact_title),
     artifactPath: row.storage_path == null ? null : String(row.storage_path),
+    executionResultId: row.execution_result_id == null ? null : Number(row.execution_result_id),
+    executionResultStatus: row.execution_result_status == null ? null : String(row.execution_result_status),
+    executionResultExitCode: row.execution_result_exit_code == null ? null : Number(row.execution_result_exit_code),
   };
 }
 
@@ -372,7 +375,33 @@ export const workbenchRouter = router({
       args.push(input?.limit ?? 30);
       const result = await db.execute({
         sql: `
-          SELECT wer.*, p.name AS project_name
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            (
+              SELECT ear.id
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_id,
+            (
+              SELECT ear.status
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_status,
+            (
+              SELECT ear.exit_code
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_exit_code
           FROM workbench_evidence_records wer
           LEFT JOIN projects p ON p.id = wer.project_id
           LEFT JOIN tasks t ON t.id = wer.task_id
