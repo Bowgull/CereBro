@@ -280,14 +280,23 @@ describe("runtime route receipt preview", () => {
     const rowCountsBefore = await countPreviewMutationRows();
 
     const committed = await caller.runtime.commitRoute({
-      text: "keep building CereBro front end",
-      mode: "build",
+      text: "research current Reddit feedback for app builders",
+      mode: "explore",
     });
     const task = await caller.runtime.createTaskFromRouteRecord({
       routeRecordId: committed.record.id,
     });
     const evidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
       routeRecordId: committed.record.id,
+    });
+    const approval = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: committed.record.id,
+      reason: "Queue gate before any browser work.",
+    });
+    const db = await getCerebroDb();
+    await db.execute({
+      sql: `UPDATE approvals SET status = 'approved', decided_at = unixepoch() WHERE id = ?`,
+      args: [approval.approval?.id ?? -1],
     });
 
     const rowCountsAfterSetup = await countPreviewMutationRows();
@@ -307,6 +316,7 @@ describe("runtime route receipt preview", () => {
     expect(overview.routeReceiptContract.totalRoutes).toBeGreaterThanOrEqual(1);
     expect(overview.routeReceiptContract.taskLinkedRoutes).toBeGreaterThanOrEqual(1);
     expect(overview.routeReceiptContract.workbenchBodyLinkedRoutes).toBeGreaterThanOrEqual(1);
+    expect(overview.routeReceiptContract.approvedGateRoutes).toBeGreaterThanOrEqual(1);
     expect(overview.routeReceiptContract.futureReviewOnlyRoutes).toBeGreaterThanOrEqual(1);
     expect(overview.routeReceiptContract.gates.join(" ")).toContain("Execution remains blocked");
     expect(overview.routeReceiptContract.noActionTaken).toContain("No route was saved from this read.");

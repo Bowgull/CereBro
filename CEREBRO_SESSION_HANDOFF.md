@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0023 EDT
+Last updated: 2026-05-17 0029 EDT
 
 ## Current North Star
 
@@ -41,22 +41,31 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 ### Files Touched
 - `app/server/routers/ledger.ts`
 - `app/server/ledger.memoryContract.test.ts`
+- `app/server/runtime.routeReceipt.test.ts`
 - `app/client/src/pages/Home.tsx`
 - `CEREBRO_BUILD_QUEUE.md`
 - `CEREBRO_SESSION_HANDOFF.md`
 
 ### Checks Run
 - `pnpm -C app check` passed.
-- `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-route-contract.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-route-contract-final.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed after fixing the route contract test setup to approve the gate before expecting `futureReviewOnlyRoutes`.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run for this slice.
+- Browser proof first found the existing `http://localhost:3000/` dev server
+  had a locked SQLite DB. The route read did not complete there.
+- Started an isolated proof server with
+  `PORT=3317 CEREBRO_DB_URL='file:/tmp/cerebro-ledger-route-contract-browser.db' pnpm -C app dev`.
+- Playwright CLI opened `http://localhost:3317/`, opened Ledger Overview, and
+  confirmed `Route Receipt Contract` rendered Routes, Tasks, Bodies, Gates,
+  Future, and Execute `blocked`.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/ledger-route-receipt-contract.png`.
+- The isolated proof server was stopped after the screenshot.
 
 ### Cleanliness Read
 - Dirty files at start: `CEREBRO_BUILD_QUEUE.md` and
   `CEREBRO_SESSION_HANDOFF.md` contained proof corrections from the previous
   route-readiness pass. They were preserved and carried into this checkpoint.
-- Dirty files before closeout: current-slice Ledger route contract files and
+- Dirty files before closeout: current-slice Ledger route contract test fix and
   docs.
 - Dev server remains available at `http://localhost:3000/`.
 - No worker was used because this was one backend read contract plus one

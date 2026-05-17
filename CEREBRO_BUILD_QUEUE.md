@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0023 EDT
+Last updated: 2026-05-17 0029 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -108,7 +108,9 @@ Recent Prime slices:
   Workbench as body surface, Ledger as audit surface, executor `not_built`, and
   `canExecute: false`. No route executor, command runner, browser action,
   model/provider call, git action, route save, task creation, external write,
-  new surface, dependency, or Raven path was added.
+  new surface, dependency, or Raven path was added. Browser proof used an
+  isolated server on port 3317 because the existing 3000 server had a locked
+  SQLite DB, and saved `output/playwright/ledger-route-receipt-contract.png`.
 - 2026-05-17 0019 EDT: continued item 8 backend route receipts before agent
   execution. Added `routeExecutionReadinessProofModel` and showed Ledger route
   readiness, task, body, gate, and execution state through shared
