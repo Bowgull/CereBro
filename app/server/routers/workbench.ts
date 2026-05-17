@@ -777,7 +777,7 @@ export const workbenchRouter = router({
           gates: ["No Workbench evidence record exists for this id."],
         };
       }
-      const [validationHistory, comparisonHistory] = await Promise.all([
+      const [validationHistory, comparisonHistory, executionResult] = await Promise.all([
         db.execute({
           sql: `
             SELECT
@@ -813,7 +813,36 @@ export const workbenchRouter = router({
           `,
           args: [input.id, input.id],
         }),
+        db.execute({
+          sql: `
+            SELECT
+              ear.id,
+              ear.proposal_id,
+              ear.approval_id,
+              ear.executor_agent,
+              ear.command,
+              ear.cwd,
+              ear.exit_code,
+              ear.stdout_summary,
+              ear.stderr_summary,
+              ear.duration_ms,
+              ear.timed_out,
+              ear.status,
+              ear.receipt_body,
+              ear.recovery_note,
+              ear.created_at,
+              eap.action_type,
+              eap.risk_class
+            FROM execution_action_results ear
+            LEFT JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+            WHERE eap.workbench_evidence_id = ?
+            ORDER BY ear.created_at DESC, ear.id DESC
+            LIMIT 1
+          `,
+          args: [input.id],
+        }),
       ]);
+      const executionRow = executionResult.rows[0];
 
       return {
         found: true as const,
@@ -831,6 +860,27 @@ export const workbenchRouter = router({
         },
         validationHistory: validationHistory.rows.map(rowToEvidence),
         comparisonHistory: comparisonHistory.rows.map(rowToEvidence),
+        executionResult: executionRow
+          ? {
+              id: Number(executionRow.id),
+              proposalId: executionRow.proposal_id == null ? null : Number(executionRow.proposal_id),
+              approvalId: executionRow.approval_id == null ? null : Number(executionRow.approval_id),
+              executorAgent: String(executionRow.executor_agent),
+              command: String(executionRow.command),
+              cwd: String(executionRow.cwd),
+              exitCode: executionRow.exit_code == null ? null : Number(executionRow.exit_code),
+              stdoutSummary: executionRow.stdout_summary == null ? "" : String(executionRow.stdout_summary),
+              stderrSummary: executionRow.stderr_summary == null ? "" : String(executionRow.stderr_summary),
+              durationMs: Number(executionRow.duration_ms),
+              timedOut: Boolean(executionRow.timed_out),
+              status: String(executionRow.status),
+              receiptBody: String(executionRow.receipt_body),
+              recoveryNote: executionRow.recovery_note == null ? null : String(executionRow.recovery_note),
+              actionType: executionRow.action_type == null ? null : String(executionRow.action_type),
+              riskClass: executionRow.risk_class == null ? null : String(executionRow.risk_class),
+              createdAt: Number(executionRow.created_at),
+            }
+          : null,
         gates: [
           "This detail view reads local append-only evidence only.",
           "It does not open linked targets, execute commands, fetch sources, capture media, or write externally.",

@@ -1599,6 +1599,25 @@ function EvidenceDetailPanel({
           permissionPreflightId: number | null;
           createdAt: number;
         }>;
+        executionResult: {
+          id: number;
+          proposalId: number | null;
+          approvalId: number | null;
+          executorAgent: string;
+          command: string;
+          cwd: string;
+          exitCode: number | null;
+          stdoutSummary: string;
+          stderrSummary: string;
+          durationMs: number;
+          timedOut: boolean;
+          status: string;
+          receiptBody: string;
+          recoveryNote: string | null;
+          actionType: string | null;
+          riskClass: string | null;
+          createdAt: number;
+        } | null;
         knowledgeRoute: {
           mode: string;
           projectBridgePath: string;
@@ -1736,6 +1755,7 @@ function EvidenceDetailPanel({
     detail.validationHistory.length > 0
       ? `${detail.validationHistory.length} notes`
       : item.validationStatus.replace(/_/g, " ");
+  const linkedExecution = detail.executionResult;
   const ledgerLabel = `receipt #${item.id}`;
   const nextAction =
     item.validationStatus === "needs_review"
@@ -1747,6 +1767,9 @@ function EvidenceDetailPanel({
     { label: "Body", value: item.title, tone: C.textPrimary },
     { label: "Source", value: sourceLabel, tone: item.sourceId == null && !item.sourceUri ? C.warning : C.accent },
     { label: "Project", value: projectLabel, tone: item.projectName ? C.success : C.warning },
+    ...(linkedExecution
+      ? [{ label: "Execution", value: `result #${linkedExecution.id} ${linkedExecution.status.replace(/_/g, " ")}`, tone: linkedExecution.status === "completed" ? C.success : C.warning }]
+      : []),
     { label: "Validation", value: validationLabel, tone: toneForValidationStatus(item.validationStatus) },
     { label: "Ledger", value: ledgerLabel, tone: C.gold },
     { label: "Next", value: nextAction, tone: C.textSecondary },
@@ -1793,6 +1816,25 @@ function EvidenceDetailPanel({
             >
               Security
             </Button>
+          </div>
+        )}
+        {linkedExecution && (
+          <div className="mt-2 rounded p-1.5" aria-label={`Execution result linked to Workbench receipt ${item.id}`} style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="mb-1 flex flex-wrap items-center gap-1">
+              <Chip label={`result #${linkedExecution.id}`} tone={C.gold} />
+              <Chip label={linkedExecution.status.replace(/_/g, " ")} tone={linkedExecution.status === "completed" ? C.success : C.warning} />
+              <Chip label={`exit ${linkedExecution.exitCode ?? "none"}`} tone={linkedExecution.exitCode === 0 ? C.success : C.warning} />
+              <Chip label={linkedExecution.riskClass?.replace(/_/g, " ") ?? "risk unknown"} tone={linkedExecution.riskClass === "read_only" ? C.accent : C.warning} />
+            </div>
+            <div className="grid gap-1 sm:grid-cols-2">
+              <CompactReadDatum label="Command" value={linkedExecution.command} tone={C.textSecondary} wrap />
+              <CompactReadDatum label="Executor" value={linkedExecution.executorAgent} tone={C.accent} />
+              <CompactReadDatum label="Approval" value={linkedExecution.approvalId == null ? "missing" : `#${linkedExecution.approvalId}`} tone={linkedExecution.approvalId == null ? C.warning : C.success} />
+              <CompactReadDatum label="Recovery" value={linkedExecution.recoveryNote ?? "not recorded"} tone={linkedExecution.recoveryNote ? C.textSecondary : C.warning} wrap />
+            </div>
+            <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              Workbench is reading the linked execution receipt. It does not rerun the command.
+            </div>
           </div>
         )}
       </div>

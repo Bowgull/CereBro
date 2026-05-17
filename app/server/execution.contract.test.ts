@@ -95,6 +95,18 @@ describe("execution action contract", () => {
     expect(results.items[0]?.receiptBody).toContain(`action proposal #${ready.proposal?.id}`);
     expect(results.items[0]?.recoveryNote).toBe("No recovery needed for a read-only command.");
 
+    const workbenchDetail = await caller.workbench.evidenceDetail({
+      id: evidence.evidence.id,
+    });
+    expect(workbenchDetail.found).toBe(true);
+    if (workbenchDetail.found) {
+      expect(workbenchDetail.executionResult?.id).toBe(runnerGuard.resultId);
+      expect(workbenchDetail.executionResult?.status).toBe("completed");
+      expect(workbenchDetail.executionResult?.exitCode).toBe(0);
+      expect(workbenchDetail.executionResult?.riskClass).toBe("read_only");
+      expect(workbenchDetail.executionResult?.recoveryNote).toBe("No recovery needed for a read-only command.");
+    }
+
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
     expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);

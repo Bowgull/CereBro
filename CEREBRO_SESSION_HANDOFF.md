@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0925 EDT
+Last updated: 2026-05-17 0929 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0929 EDT - Workbench Execution Result Link
+
+### What Changed
+- Workbench receipt detail now reads the latest linked execution result for a
+  receipt body when an execution proposal used that body.
+- Workbench shows execution result id, status, exit code, risk class, command,
+  executor, approval id, and recovery note inside the existing receipt body
+  panel.
+- The detail panel explicitly states that Workbench is reading the receipt and
+  does not rerun the command.
+- Regression coverage now proves `workbench.evidenceDetail` returns the linked
+  execution result after an approved read-only run.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workbench
+  receipt `#1660` and confirmed the linked execution result section, recovery
+  read, and no-rerun copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-execution-result-link.png`.
+
+### Drift Check
+- On path. This deepens the Terminal Lab -> approval -> Workbench -> Ledger
+  loop without adding a surface or broadening execution.
+- Workbench remains the body surface. Ledger remains the audit surface.
+- No endpoint that runs actions, fake seed data, new primary surface, runner
+  broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, or Raven path was
+  added.
+
+### Known Risks
+- The browser proof depends on local dev DB receipt ids. The backend regression
+  creates a fresh approved read-only run and verifies the Workbench execution
+  link directly.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Workbench receipt detail now shows linked execution result readback without rerunning commands. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to improve approved read result receipt UX from Terminal Lab or add a Workbench validation status filter/read for execution-linked receipt bodies. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0925 EDT - Terminal Runner Boundary Readback
 

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0925 EDT
+Last updated: 2026-05-17 0929 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0929 EDT: Workbench receipt detail now reads linked execution
+  results for receipt bodies used by action proposals. The existing detail
+  panel shows result id, status, exit code, risk class, command, executor,
+  approval id, recovery note, and no-rerun copy. Regression coverage proves
+  the Workbench detail read after an approved read-only run.
 - 2026-05-17 0925 EDT: added Terminal Lab runner boundary readback to the
   existing execution contract cards. Ready read-only actions state the local
   allowlisted shell-disabled boundary. Blocked actions state the gate remains
