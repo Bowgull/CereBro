@@ -1631,14 +1631,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </div>
               <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-5" aria-label="Selected body audit read">
                 {selectedAuditRead.map((item) => (
-                  <div key={item.label} className="rounded px-2 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                    <div className="truncate text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                      {item.label}
-                    </div>
-                    <div className="mt-0.5 line-clamp-2 text-[11px] leading-snug" style={{ color: item.tone }} title={item.value}>
-                      {item.value}
-                    </div>
-                  </div>
+                  <CompactReadDatum key={item.label} label={item.label} value={item.value} tone={item.tone} wrap />
                 ))}
               </div>
               <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_220px]">
@@ -2217,7 +2210,7 @@ function RuntimeRouteReceipt({
         </div>
         <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
           {routePreviewProof.primary.map((field) => (
-            <PreviewField key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
+            <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
           ))}
         </div>
         <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
@@ -2260,19 +2253,6 @@ function proofTone(tone: "gold" | "accent" | "warning" | "success" | "danger" | 
   if (tone === "success") return C.success;
   if (tone === "danger") return C.danger;
   return C.textMuted;
-}
-
-function PreviewField({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0 rounded px-2 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: tone }}>
-        {label}
-      </div>
-      <div className="truncate text-[11px] mt-0.5" style={{ color: C.textSecondary }} title={value}>
-        {value}
-      </div>
-    </div>
-  );
 }
 
 // ── Right context panel ─────────────────────────────────────────────────────

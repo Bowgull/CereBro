@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0013 EDT
+Last updated: 2026-05-17 0016 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,19 +101,29 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0016 EDT: moved to item 8 backend route receipts, read-only
+  visible proof first. Ledger selected body audit read and Runtime route
+  preview primary proof now use shared `CompactReadDatum`; the local
+  `PreviewField` helper was removed. Runtime route logic is unchanged. No
+  route executor, command runner, browser action, model/provider call, git
+  action, external write, new surface, dependency, or Raven path was added.
 - 2026-05-17 0013 EDT: continued item 7 Knowledge/source contract cleanup.
   Piccolo `Automation Hygiene` now uses shared `CompactReadDatum` for storage
   status, contract counts, Obsidian lanes, and Project Bridge/Source examples.
   The cleanup report hard gate and approval wording remain unchanged. No note
   scan, vector index, source fetch, Obsidian/Notion/Drive/memory write,
   model/provider/tool call, route default change, new surface, cleanup action
-  runner, dependency, or Raven path was added.
+  runner, dependency, or Raven path was added. Browser proof opened Basement >
+  Automation, expanded `Cleanup Rules And Storage Contract`, and saved
+  `output/playwright/piccolo-storage-contract-compact-read.png`.
 - 2026-05-17 0009 EDT: continued item 7 Knowledge/source contract cleanup.
   Project Lab `Knowledge Route` now uses shared `CompactReadDatum`, shows the
   source index path, and keeps the explicit write gate visible. No note scan,
   vector index, source fetch, Obsidian/Notion/Drive/memory write,
   model/provider/tool call, route default change, new surface, command runner,
-  dependency, or Raven path was added.
+  dependency, or Raven path was added. Browser proof opened Workshop > Project
+  Lab, inspected CereBro, and saved
+  `output/playwright/project-lab-knowledge-route-compact.png`.
 - 2026-05-17 0007 EDT: continued item 7 Knowledge/source contract cleanup.
   Research `Source Route` now uses shared `CompactReadDatum` for source notes,
   GitHub repository source, Project Map, GitHub sources index, archive lane,
