@@ -4,7 +4,7 @@ import { getCerebroDb } from "../cerebroDb";
 import { publicProcedure, router } from "../_core/trpc";
 
 const statusOptions = ["pending", "approved", "rejected", "cancelled"] as const;
-const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "raven", "other"] as const;
+const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "model_tools", "raven", "other"] as const;
 const groupOptions = ["origin", "project", "action_type", "status", "risk"] as const;
 const preflightDecisions = ["allowed_local", "proposal_only", "approval_required", "blocked_by_hard_gate"] as const;
 const perceptionClasses = ["explicit_context", "local_files", "terminal_logs", "workbench_media", "public_browser"] as const;
@@ -149,6 +149,7 @@ function originForApproval(input: {
   if (input.targetType === "runtime_route_record" || input.actionType.startsWith("runtime_")) return "runtime";
   if (input.targetType === "command_observation" || input.actionType.startsWith("terminal_")) return "terminal";
   if (input.targetType === "source_event" || input.actionType.includes("source")) return "source";
+  if (input.targetType === "model_tool_capability" || input.targetType === "model_tool_ollama_status_check" || input.actionType.includes("model") || input.actionType.includes("ollama")) return "model_tools";
   if (input.targetType === "task" || input.targetType === "project") return "project_lab";
   return "other";
 }
@@ -173,6 +174,10 @@ function validationPreviewForApproval(input: {
   }
   if (input.actionType.includes("source") || input.actionType.includes("browser") || input.actionType.includes("search")) {
     oakNotes.push("Source action. Validate trust, freshness, and scrub status before using the result as evidence.");
+  }
+  if (input.targetType === "model_tool_capability" || input.targetType === "model_tool_ollama_status_check" || input.actionType.includes("model") || input.actionType.includes("ollama")) {
+    oakNotes.push("Model/tool action. Validate source, freshness, privacy class, cost/free-tier claims, and data leaving the machine before use.");
+    spockNotes.push("Model/tool approval preview only. This does not run the capability, call a provider, install, pull, browse, fetch, write memory, or change route defaults.");
   }
   if (input.actionType.includes("destructive")) {
     oakNotes.push("Destructive command class. Require exact command, cwd, expected change, and recovery path.");
@@ -401,6 +406,8 @@ export const approvalsRouter = router({
         where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
+      } else if (origin === "model_tools") {
+        where.push("(a.target_type IN ('model_tool_capability', 'model_tool_ollama_status_check') OR a.action_type LIKE '%model%' OR a.action_type LIKE '%ollama%')");
       } else if (origin === "project_lab") {
         where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
@@ -414,6 +421,9 @@ export const approvalsRouter = router({
           AND a.action_type NOT LIKE 'terminal_%'
           AND COALESCE(a.target_type, '') != 'source_event'
           AND a.action_type NOT LIKE '%source%'
+          AND COALESCE(a.target_type, '') NOT IN ('model_tool_capability', 'model_tool_ollama_status_check')
+          AND a.action_type NOT LIKE '%model%'
+          AND a.action_type NOT LIKE '%ollama%'
         `);
       }
 
@@ -434,10 +444,12 @@ export const approvalsRouter = router({
             OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
+            OR COALESCE(mtc.provider, '') LIKE ?
+            OR COALESCE(mtc.tool_name, '') LIKE ?
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       args.push(input?.limit ?? 40);
@@ -452,7 +464,7 @@ export const approvalsRouter = router({
             ppr.approval_required AS preflight_approval_required,
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -462,6 +474,7 @@ export const approvalsRouter = router({
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
+          LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
@@ -522,7 +535,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -532,6 +545,7 @@ export const approvalsRouter = router({
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
+          LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE a.id = ?
@@ -626,6 +640,8 @@ export const approvalsRouter = router({
         where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
+      } else if (origin === "model_tools") {
+        where.push("(a.target_type IN ('model_tool_capability', 'model_tool_ollama_status_check') OR a.action_type LIKE '%model%' OR a.action_type LIKE '%ollama%')");
       } else if (origin === "project_lab") {
         where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
@@ -639,6 +655,9 @@ export const approvalsRouter = router({
           AND a.action_type NOT LIKE 'terminal_%'
           AND COALESCE(a.target_type, '') != 'source_event'
           AND a.action_type NOT LIKE '%source%'
+          AND COALESCE(a.target_type, '') NOT IN ('model_tool_capability', 'model_tool_ollama_status_check')
+          AND a.action_type NOT LIKE '%model%'
+          AND a.action_type NOT LIKE '%ollama%'
         `);
       }
 
@@ -659,10 +678,12 @@ export const approvalsRouter = router({
             OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
+            OR COALESCE(mtc.provider, '') LIKE ?
+            OR COALESCE(mtc.tool_name, '') LIKE ?
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       args.push(input?.limit ?? 40);
@@ -685,7 +706,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -695,6 +716,7 @@ export const approvalsRouter = router({
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
+          LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
@@ -768,6 +790,8 @@ export const approvalsRouter = router({
         where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
+      } else if (origin === "model_tools") {
+        where.push("(a.target_type IN ('model_tool_capability', 'model_tool_ollama_status_check') OR a.action_type LIKE '%model%' OR a.action_type LIKE '%ollama%')");
       } else if (origin === "project_lab") {
         where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
@@ -781,6 +805,9 @@ export const approvalsRouter = router({
           AND a.action_type NOT LIKE 'terminal_%'
           AND COALESCE(a.target_type, '') != 'source_event'
           AND a.action_type NOT LIKE '%source%'
+          AND COALESCE(a.target_type, '') NOT IN ('model_tool_capability', 'model_tool_ollama_status_check')
+          AND a.action_type NOT LIKE '%model%'
+          AND a.action_type NOT LIKE '%ollama%'
         `);
       }
 
@@ -801,10 +828,12 @@ export const approvalsRouter = router({
             OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
+            OR COALESCE(mtc.provider, '') LIKE ?
+            OR COALESCE(mtc.tool_name, '') LIKE ?
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       const result = await db.execute({
@@ -817,7 +846,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -827,6 +856,7 @@ export const approvalsRouter = router({
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
+          LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC

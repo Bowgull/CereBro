@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type OriginFilter = "all" | "hedwig" | "terminal" | "runtime" | "project_lab" | "source" | "other";
+type OriginFilter = "all" | "hedwig" | "terminal" | "runtime" | "project_lab" | "source" | "model_tools" | "other";
 type StatusFilter = "pending" | "approved" | "rejected" | "cancelled";
 type GroupFilter = "origin" | "project" | "action_type" | "status" | "risk";
 type ApprovalRoute = "security" | "terminal" | "workbench" | "projects" | "sources" | "inbox" | "model_tools";
@@ -34,6 +34,7 @@ const origins: Array<{ id: OriginFilter; label: string }> = [
   { id: "runtime", label: "Runtime" },
   { id: "project_lab", label: "Projects" },
   { id: "source", label: "Sources" },
+  { id: "model_tools", label: "Models" },
   { id: "other", label: "Other" },
 ];
 

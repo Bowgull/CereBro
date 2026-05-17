@@ -535,6 +535,20 @@ describe("Model Tools local-first routing policy", () => {
     expect(staged.approval?.contextSummary).toContain("Data summary: Public-safe prompt summary only.");
     expect(staged.gates.join(" ")).toContain("No model/tool");
 
+    const queued = await caller.approvals.queue({
+      status: "pending",
+      query: `Route Approval ${stamp}`,
+      limit: 5,
+    });
+    const queuedItem = queued.items.find((item) => item.id === staged.approval?.id);
+    expect(queuedItem?.targetLabel).toContain("Route Approval");
+    expect(queuedItem?.targetLabel).toContain("Route approval candidate");
+
+    const detail = await caller.approvals.detail({ id: staged.approval?.id ?? -1 });
+    expect(detail.approval?.targetLabel).toContain("Route Approval");
+    expect(detail.approval?.validationPreview.oakNotes.join(" ")).toContain("Model/tool");
+    expect(detail.approval?.validationPreview.spockNotes.join(" ")).toContain("does not run the capability");
+
     const duplicate = await caller.modelTools.createCapabilityRouteApprovalPreview({
       capabilityId: proposal.capability.id,
       taskKind: "research current model options",

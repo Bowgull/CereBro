@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1414 EDT
+Last updated: 2026-05-17 1428 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1428 EDT: added Approval Queue readback polish for model/tool
+  approvals. Approvals now recognize `model_tools` as a first-class origin,
+  the queue has a `Models` filter, model/tool approval rows show provider/tool
+  labels from `model_tool_capabilities`, search includes provider/tool names,
+  and Oak/Spock notes call out model/tool risk without running or approving any
+  capability.
 - 2026-05-17 1414 EDT: added local model/tool route approval previews.
   `modelTools.createCapabilityRouteApprovalPreview` stages a pending local
   approval plus permission preflight for a selected capability without running

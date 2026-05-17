@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1414 EDT
+Last updated: 2026-05-17 1428 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1428 EDT - Model Tool Approval Queue Readback
+
+### What Changed
+- Approval Queue now treats model/tool approvals as a first-class origin:
+  `model_tools`.
+- Approval Queue origin filters now include `Models`.
+- Model/tool capability approval rows now join `model_tool_capabilities` so
+  the queue and detail panel show provider/tool labels instead of generic
+  fallback text.
+- Approval search now matches model/tool provider and tool name.
+- Oak and Spock deterministic approval notes now call out model/tool risks:
+  source freshness, privacy class, cost/free-tier claims, data leaving the
+  machine, and the fact that the approval preview does not run the capability
+  or change route defaults.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL=file:./tmp/model-tools-approval-readback-test.db pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- Restarted the local dev server on `http://localhost:3000/` so the backend
+  loaded the approval readback changes.
+- In-app browser proof against `http://localhost:3000/`: opened Ledger ->
+  Approvals, selected `Models`, confirmed model/tool origin, provider/tool
+  target label, `Open Model Tools`, and expanded Oak/Spock notes.
+- Screenshot proof saved locally at
+  `output/playwright/model-tool-approval-readback.png`.
+
+### Drift Check
+- On path. This completes the Approval Queue readback polish for the Basement
+  model/tool route approval slice.
+- No provider call, local model call, browser fetch, install, pull, account
+  setup, paid service, new primary surface, route default change, external
+  write, memory write, Obsidian data import, or Raven path was added.
+
+### Known Risks
+- Browser proof seeded one local dev model/tool capability and approval preview
+  so the queue had a current row to display.
+- The Approval Queue still does not approve or execute model/tool use. It only
+  reads local preview receipts.
+
+### Storage Impact
+- No schema change.
+- Test runs used `app/tmp/model-tools-approval-readback-test.db`.
+- Browser proof wrote one local model/tool capability, one local pending
+  approval row, and one permission preflight row in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the stable build path. Model/Tool Registry now has local call receipt readback, route approval previews, and Approval Queue readback with the Models origin, provider/tool labels, and model/tool Oak/Spock notes. Next best slice is to either close remaining Basement readiness readbacks or move to the next build-queue surface with a higher-risk unfinished receipt loop. Do not run providers, local models, installs, pulls, browser automation, external writes, paid services, new primary surfaces, or Raven paths. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1414 EDT - Model Tool Route Approval Preview
 
