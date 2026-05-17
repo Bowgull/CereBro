@@ -103,6 +103,8 @@ function executionResultRow(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
     proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    proposalSourceType: row.proposal_source_type == null ? null : String(row.proposal_source_type),
+    proposalSourceId: row.proposal_source_id == null ? null : Number(row.proposal_source_id),
     approvalId: row.approval_id == null ? null : Number(row.approval_id),
     actionType: row.action_type == null ? null : String(row.action_type),
     riskClass: row.risk_class == null ? null : String(row.risk_class),
@@ -384,6 +386,8 @@ export const ledgerRouter = router({
               ear.*,
               eap.action_type,
               eap.risk_class,
+              eap.source_type AS proposal_source_type,
+              eap.source_id AS proposal_source_id,
               eap.project_id,
               eap.task_id,
               eap.workbench_evidence_id,

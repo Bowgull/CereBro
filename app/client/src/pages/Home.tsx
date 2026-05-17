@@ -1208,6 +1208,24 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("approvals");
   }
 
+  function openExecutionTerminalFocus(item: { id: number; proposalSourceType: string | null; proposalSourceId: number | null; command: string }) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:terminal-focus",
+        JSON.stringify({
+          source: "ledger_execution_result",
+          resultId: item.id,
+          observationId: item.proposalSourceType === "command_observation" ? item.proposalSourceId : null,
+          command: item.command,
+          notice: `Ledger opened Terminal Lab context for execution result #${item.id}.`,
+        }),
+      );
+    } catch {
+      // Terminal Lab still opens; the user can inspect recent results manually.
+    }
+    onNavigate("terminal");
+  }
+
   function openProjectPushContext(item: { id: number; projectId: number | null; projectName: string | null }) {
     try {
       window.sessionStorage.setItem(
@@ -1925,6 +1943,17 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       }
                     >
                       Open Approval
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2"
+                      onClick={() => openExecutionTerminalFocus(item)}
+                      title="Open Terminal Lab context for this result. This does not rerun the command."
+                      aria-label={`Open Terminal Lab context for execution result ${item.id}`}
+                    >
+                      Open Terminal
                     </Button>
                   </div>
                   <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>

@@ -132,6 +132,8 @@ describe("execution action contract", () => {
     const ledgerResult = ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId);
     expect(ledgerResult?.command).toBe("pwd");
     expect(ledgerResult?.approvalId).toBe(approvalId);
+    expect(ledgerResult?.proposalSourceType).toBe("command_observation");
+    expect(ledgerResult?.proposalSourceId).toBe(preview.observationId);
     expect(ledgerResult?.riskClass).toBe("read_only");
     expect(ledgerResult?.actionType).toBe("local_read_only_command");
     expect(ledgerResult?.taskId).toBe(task.id);

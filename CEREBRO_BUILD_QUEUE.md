@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0940 EDT
+Last updated: 2026-05-17 0944 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0944 EDT: Ledger execution result cards now include
+  `Open Terminal`. Ledger result reads preserve proposal source type/id, and
+  Terminal Lab reads a one-time focus notice with command text and linked
+  command observation id. Regression coverage proves the source id readback.
 - 2026-05-17 0940 EDT: Workbench receipt filters now include an
   `Execution Linked` toggle. The receipt list and receipt groups can narrow to
   local receipt bodies linked to execution results. Regression coverage proves

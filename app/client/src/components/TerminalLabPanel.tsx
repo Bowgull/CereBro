@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
@@ -70,6 +70,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const [copiedDraftKey, setCopiedDraftKey] = useState<string | null>(null);
   const [receiptDetailsOpen, setReceiptDetailsOpen] = useState(false);
   const [terminalApprovalPreviewsOpen, setTerminalApprovalPreviewsOpen] = useState(false);
+  const [terminalFocusNotice, setTerminalFocusNotice] = useState<string | null>(null);
   const plan = trpc.terminalLab.plan.useQuery();
   const observationFilter =
     observationScope === "selectedTask" && selectedTaskId
@@ -181,6 +182,29 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       .map((item) => [item.commandObservationId!, item]),
   );
   const selectedEvidence = selectedObservation ? evidenceByObservationId.get(selectedObservation.id) ?? null : null;
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:terminal-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:terminal-focus");
+    } catch {
+      raw = null;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as {
+        resultId?: number;
+        observationId?: number | null;
+        command?: string;
+        notice?: string;
+      };
+      if (typeof draft.observationId === "number") setSelectedObservationId(draft.observationId);
+      if (typeof draft.command === "string" && draft.command.trim()) setCommand(draft.command);
+      setTerminalFocusNotice(draft.notice ?? (typeof draft.resultId === "number" ? `Terminal Lab opened result #${draft.resultId}.` : "Terminal Lab focus opened."));
+    } catch {
+      setTerminalFocusNotice("Terminal Lab focus could not be read. Inspect recent results manually.");
+    }
+  }, []);
   const projectRows = projectOverview.data?.projects ?? [];
   const contextPath = selectedObservation?.cwd ?? "/Users/lindsaybell/Desktop/CereBro";
   const contextProject =
@@ -1176,6 +1200,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
 
             <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Execution contract readback">
               <SectionTitle title="Execution Contract" detail={selectedObservationId == null ? "recent" : `#${selectedObservationId}`} />
+              {terminalFocusNotice && (
+                <div className="mt-2 rounded px-2 py-1.5 text-[10px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.gold }}>
+                  {terminalFocusNotice}
+                </div>
+              )}
               <div className="mt-2 space-y-1.5">
                 {executionProposals.isLoading ? (
                   <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>Reading local action proposals.</div>
