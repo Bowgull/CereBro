@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0008 EDT
+Last updated: 2026-05-17 0009 EDT
 
 ## Current North Star
 
@@ -20,6 +20,79 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0009 EDT - Project Knowledge Route Compact Read
+
+### What Changed
+- Continued item 7 Knowledge/source contract cleanup.
+- Project Lab `Knowledge Route` now uses shared `CompactReadDatum` cells.
+- Added the source index path to the visible Project Lab Knowledge Route read.
+- Added a compact write-status cell while preserving the existing route badges
+  and approval gate text.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-project-route-compact.db' pnpm -C app exec vitest run server/projectIntelligence.knowledgeRoute.test.ts server/workbench.knowledgeRoute.test.ts server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run because this was a no-behavior compact
+  read consolidation and localhost proof passed.
+
+### Cleanliness Read
+- Dirty files at start: `CEREBRO_SESSION_HANDOFF.md` had uncommitted
+  source-route browser proof edits. They were preserved.
+- Dirty files before closeout: current-slice Project Lab component and docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one existing Project Lab readback call
+  site.
+
+### Front-End Steward Review
+- Surface: Project Lab.
+- Register: product surface.
+- Primary object: project knowledge route.
+- User question: where does this project enter the knowledge system before any
+  automation.
+- Route visible: bridge note, source note, Project Map, source index, archive,
+  and write gate are visible.
+- Gate visible: explicit write approval remains visible.
+- Machinery hidden until needed: no note editor, RAG panel, source scanner, or
+  external write control was added.
+- Generic UI rejected: no new dashboard, visual restyle, fake metrics, or
+  decorative card layer was added.
+- Remaining taste risk: Project Lab still has several local read patterns.
+  Future cleanup should only consolidate them when it improves scanning.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 52%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Project Lab Knowledge Route now uses
+the same compact read primitive and shows source index. Next best path is the
+next source contract slice or moving to item 8 backend route receipts if item 7
+read consistency is sufficiently stable. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, model calls, note scans,
+vector indexing, source fetches, or vault writes without explicit approval.
 
 ## 2026-05-17 0007 EDT - Source Route Compact Read
 

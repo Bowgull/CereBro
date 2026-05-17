@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0007 EDT
+Last updated: 2026-05-17 0009 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0009 EDT: continued item 7 Knowledge/source contract cleanup.
+  Project Lab `Knowledge Route` now uses shared `CompactReadDatum`, shows the
+  source index path, and keeps the explicit write gate visible. No note scan,
+  vector index, source fetch, Obsidian/Notion/Drive/memory write,
+  model/provider/tool call, route default change, new surface, command runner,
+  dependency, or Raven path was added.
 - 2026-05-17 0007 EDT: continued item 7 Knowledge/source contract cleanup.
   Research `Source Route` now uses shared `CompactReadDatum` for source notes,
   GitHub repository source, Project Map, GitHub sources index, archive lane,

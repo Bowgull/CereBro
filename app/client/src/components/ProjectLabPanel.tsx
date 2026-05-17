@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,6 +99,7 @@ type ProjectKnowledgeRouteRead = {
   projectBridgePath?: string | null;
   repositorySourcePath?: string | null;
   projectMapPath?: string | null;
+  sourcesIndexPath?: string | null;
   archiveLane?: string | null;
   archiveRetrieval?: string | null;
   writesExternalSystems?: boolean;
@@ -1642,7 +1644,9 @@ function ProjectKnowledgeRoute({ route }: { route: ProjectKnowledgeRouteRead }) 
     { label: "Bridge", value: route.projectBridgePath ?? "not set", tone: C.accent },
     { label: "Source", value: route.repositorySourcePath ?? "not set", tone: C.gold },
     { label: "Map", value: route.projectMapPath ?? "not set", tone: C.textSecondary },
+    { label: "Index", value: route.sourcesIndexPath ?? "not set", tone: C.textSecondary },
     { label: "Archive", value: route.archiveRetrieval ?? "archive_only", tone: C.warning },
+    { label: "Writes", value: route.writesExternalSystems ? "enabled" : "approval gated", tone: route.writesExternalSystems ? C.danger : C.gold },
   ];
 
   return (
@@ -1655,16 +1659,9 @@ function ProjectKnowledgeRoute({ route }: { route: ProjectKnowledgeRouteRead }) 
           {route.mode === "read_only" ? "read only" : labelize(route.mode ?? "local")}
         </Badge>
       </div>
-      <div className="mt-1 grid grid-cols-2 gap-1 xl:grid-cols-4">
+      <div className="mt-1 grid grid-cols-2 gap-1 xl:grid-cols-3">
         {rows.map((row) => (
-          <div key={row.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-            <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: row.tone }}>
-              {row.label}
-            </div>
-            <div className="mt-0.5 truncate text-[10px] leading-tight" title={row.value} style={{ color: C.textSecondary }}>
-              {row.value}
-            </div>
-          </div>
+          <CompactReadDatum key={row.label} label={row.label} value={row.value} tone={row.tone} wrap />
         ))}
       </div>
       <div className="mt-1 flex flex-wrap gap-1">
