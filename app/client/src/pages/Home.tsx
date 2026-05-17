@@ -1319,9 +1319,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Ledger overview">
+    <div className="h-full overflow-y-auto p-2" style={{ background: workFrame.slabMuted }} aria-label="Ledger overview">
       <div className="grid gap-2">
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[12px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -1345,7 +1345,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               title={card.meta}
               variant="outline"
               className="h-auto justify-start whitespace-normal p-2 text-left"
-              style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+              style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textSecondary }}
             >
               <span className="block w-full min-w-0">
                 <span className="flex items-start justify-between gap-2">
@@ -1365,7 +1365,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         </section>
 
         {memoryContract && (
-          <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label={ledgerCopy.memoryContractAria}>
+          <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label={ledgerCopy.memoryContractAria}>
             <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
               <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 {ledgerCopy.memoryContractTitle}
@@ -1403,7 +1403,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
         )}
 
         {routeReceiptContract && (
-          <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Route receipt contract">
+          <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Route receipt contract">
             <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
               <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Route Receipt Contract
@@ -1423,7 +1423,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </section>
         )}
 
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Recent route records">
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Recent route records">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
               {ledgerCopy.routeSectionTitle}
@@ -1431,11 +1431,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             <Badge variant="secondary" className="uppercase">local only</Badge>
           </div>
           {ledgerOverview.isLoading ? (
-            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
               {ledgerCopy.routeLoadingText}
             </div>
           ) : latestRouteRows.length === 0 ? (
-            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
               {ledgerCopy.routeEmptyText}
             </div>
           ) : (
@@ -1479,7 +1479,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   creatingApproval: creatingRouteApprovalId === item.id,
                 });
                 return (
-                  <div key={item.id} className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div key={item.id} className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
                     <div className="flex flex-wrap items-center gap-1">
                       <Badge variant="secondary" className="uppercase"><span className="min-w-0 truncate">route #{item.id}</span></Badge>
                       <Badge variant="default" className="uppercase"><span className="min-w-0 truncate">{item.ownerAgent}</span></Badge>
@@ -1511,13 +1511,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                           setSelectedRouteAuditId(item.id);
                           setLedgerFocusNotice(`Reading local audit chain for route #${item.id}.`);
                         }}
-                        style={{ color: C.accent, border: `1px solid ${C.borderSoft}`, background: C.surface }}
+                        style={{ color: C.accent, border: `1px solid ${workFrame.lineSoft}`, background: workFrame.slab }}
                       >
                         Read Audit
                       </button>
                     </div>
                     {selectedRouteAuditId === item.id && (
-                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} receipt audit read`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} receipt audit read`} style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                             Receipt Audit
@@ -1549,7 +1549,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       </div>
                     )}
                     {readiness && (
-                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} execution readiness`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} execution readiness`} style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                             Execution Readiness
@@ -1565,7 +1565,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         </div>
                       </div>
                     )}
-                    <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} safe actions`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                    <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} safe actions`} style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
                       <div className="mb-1 flex items-center justify-between gap-2">
                         <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                           {ledgerCopy.routeActionsTitle}
@@ -1618,7 +1618,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           )}
         </section>
 
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Latest Workbench receipts">
+        <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Latest Workbench receipts">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
               {ledgerFocusProject ? `${ledgerFocusProject.name ?? "Focused Project"} Workbench Receipts` : ledgerCopy.receiptSectionTitle}
@@ -1635,11 +1635,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </Button>
           </div>
           {ledgerOverview.isLoading ? (
-            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
               {ledgerCopy.receiptLoadingText}
             </div>
           ) : latestEvidenceRows.length === 0 ? (
-            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
               {ledgerFocusProject
                 ? ledgerCopy.focusedReceiptEmptyText(ledgerFocusProject.name)
                 : ledgerCopy.receiptEmptyText}
@@ -1654,7 +1654,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   variant="secondary"
                   className="h-auto justify-start rounded p-2 text-left"
                   aria-label={`Preview Workbench body ${item.id}`}
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                  style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}
                 >
                   <span className="block w-full min-w-0">
                     <span className="flex flex-wrap items-center gap-1">
@@ -1679,9 +1679,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
           )}
           {selectedEvidence && (
-            <div className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label={ledgerCopy.selectedAriaLabel}>
+            <div className="mt-2 rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }} aria-label={ledgerCopy.selectedAriaLabel}>
               {ledgerFocusNotice && (
-                <div className="mb-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+                <div className="mb-2 flex items-center justify-between gap-2 rounded px-2 py-1 text-[11px]" style={{ background: workFrame.slab, border: `1px solid ${workFrame.candleSoft}`, color: C.textSecondary }}>
                   <span className="min-w-0">{ledgerFocusNotice}</span>
                   <Button type="button" size="sm" variant="outline" onClick={() => setLedgerFocusNotice(null)} aria-label="Dismiss Ledger focus notice">
                     Dismiss
@@ -1731,7 +1731,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   Project Push Context
                 </Button>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+              <div className="mt-1 flex flex-wrap items-center gap-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
                 <Badge variant="secondary" className="uppercase">
                   <span className="min-w-0 truncate">{ledgerCopy.auditReadBadge}</span>
                 </Badge>
@@ -1766,12 +1766,12 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           )}
         </section>
 
-        <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
           <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             {ledgerCopy.rulesTitle}
           </summary>
           <div className="mt-2 grid gap-2">
-            <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <div className="rounded p-2 text-[11px] leading-snug" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
               {ledgerCopy.rulesBody}
             </div>
             <div className="grid gap-1.5 md:grid-cols-3">

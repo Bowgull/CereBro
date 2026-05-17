@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import {
@@ -74,6 +74,8 @@ type WorkbenchFilterDraft = {
   groupBy?: EvidenceGroupBy;
   notice?: string;
 };
+
+const G = T.graphiteCandle;
 
 type TemporaryMediaPreview = {
   name: string;
@@ -553,8 +555,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
@@ -579,13 +581,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
       <main className="flex-1 overflow-y-auto p-3" aria-label="Workbench plan" aria-busy={plan.isLoading}>
         {!data ? (
-          <div className="rounded p-4 text-sm" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+          <div className="rounded p-4 text-sm" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
             Loading workbench plan.
           </div>
         ) : (
           <div className="grid gap-2">
             <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench receipt lanes">
-              <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
                     {currentBodyCopy.label}
@@ -609,8 +611,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   className="h-auto justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
-                    background: kind === lane.kind ? C.surfaceRaised : C.surface,
-                    border: `1px solid ${kind === lane.kind ? lane.tone : C.borderSoft}`,
+                    background: kind === lane.kind ? G.slabRaised : G.slab,
+                    border: `1px solid ${kind === lane.kind ? lane.tone : G.lineSoft}`,
                     color: C.textSecondary,
                   }}
                 >
@@ -646,7 +648,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               className="rounded p-2"
               aria-label="Project receipt grouping"
               onToggle={(event) => setProjectProofOpen(event.currentTarget.open)}
-              style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+              style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}
             >
               <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
                 <div className="flex items-center justify-between gap-3">
@@ -673,11 +675,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Chip label={projectReceiptCopy.openBadge} tone={C.accent} />
               </div>
               {projectProofSummary.isLoading ? (
-                <div className="rounded px-2 py-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <div className="rounded px-2 py-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
                   {projectReceiptCopy.loadingText}
                 </div>
               ) : projectProofGroups.length === 0 ? (
-                <div className="rounded px-2 py-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                <div className="rounded px-2 py-2 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
                   {projectReceiptCopy.emptyText}
                 </div>
               ) : (
@@ -695,7 +697,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         setGroupBy("project");
                       }}
                       aria-label={`Open Workbench receipts for ${group.label}`}
-                      style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                      style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}
                     >
                       <span className="block w-full">
                         <span className="flex items-start justify-between gap-2">
@@ -721,7 +723,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             </details>
 
-            <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">{receiptBodyCopy.title}</h3>
@@ -732,7 +734,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <Chip label={receiptBodyCopy.badge} tone={C.success} />
               </div>
               {stagedDraftNotice && (
-                <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.gold}66`, color: C.textSecondary }}>
+                <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}>
                   <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>{receiptBodyCopy.draftPrefix}</span> {receiptBodyCopy.draftText}
                 </div>
               )}
@@ -778,12 +780,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <details
                   className="rounded p-2"
                   onToggle={(event) => setReceiptLinksOpen(event.currentTarget.open)}
-                  style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                  style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}
                 >
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                     Receipt Links
                   </summary>
-                  <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                  <div className="mt-2 rounded px-2 py-1.5 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
                     {linkOptions.isLoading ? "Reading local link options." : "Link options read only when this drawer is open."}
                   </div>
                   <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -872,7 +874,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 </details>
 
-                <details className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <details className="rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                     {receiptDetailsCopy.title}
                   </summary>
@@ -1474,10 +1476,10 @@ function WorkbenchReceiptChainStrip({
   ];
 
   return (
-    <section className="rounded p-1.5" aria-label={copy.ariaLabel} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <section className="rounded p-1.5" aria-label={copy.ariaLabel} style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
       <div className="grid gap-1 md:grid-cols-3">
         {steps.map((step) => (
-          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div key={step.label} className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
             <div className="text-[9px] font-semibold uppercase leading-none" style={{ color: step.tone }}>
               {step.label}
             </div>
@@ -1636,21 +1638,21 @@ function EvidenceDetailPanel({
   const detailCopy = workbenchReceiptDetailCopy();
   if (loading) {
     return (
-      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
         Reading receipt body.
       </aside>
     );
   }
   if (!detail) {
     return (
-      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
         Select a receipt to inspect body, links, coordinates, and gates.
       </aside>
     );
   }
   if (!detail.found) {
     return (
-      <aside className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+      <aside className="rounded p-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
         {detail.gates[0]}
       </aside>
     );
@@ -1741,7 +1743,7 @@ function EvidenceDetailPanel({
     { label: "Next", value: nextAction, tone: C.textSecondary },
   ];
   return (
-    <aside className="rounded p-2" aria-label="Workbench receipt body" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <aside className="rounded p-2" aria-label="Workbench receipt body" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
       <div className="mb-2 flex flex-wrap gap-1">
         <Chip label={`#${item.id}`} tone={C.textMuted} />
         <Chip label={workbenchReceiptKindLabel(item.kind)} tone={C.accent} />
@@ -1750,7 +1752,7 @@ function EvidenceDetailPanel({
       </div>
       <h3 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{item.title}</h3>
       <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>{workbenchReceiptRowSummary(item.summary)}</p>
-      <div className="mt-2 rounded p-2" aria-label="Workbench receipt read" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="mt-2 rounded p-2" aria-label="Workbench receipt read" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h4 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             {detailCopy.readTitle}
@@ -1786,7 +1788,7 @@ function EvidenceDetailPanel({
         )}
       </div>
       {detail.knowledgeRoute && (
-        <details className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} open>
+        <details className="mt-2 rounded p-2" aria-label="Workbench project knowledge route" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }} open>
           <summary
             className="cursor-pointer rounded text-[10px] font-bold uppercase tracking-widest focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{ color: C.textPrimary, ["--tw-ring-color" as string]: C.accent, ["--tw-ring-offset-color" as string]: C.surface }}

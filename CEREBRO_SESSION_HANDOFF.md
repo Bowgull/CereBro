@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0710 EDT
+Last updated: 2026-05-17 0717 EDT
 
 ## Current North Star
 
@@ -20,6 +20,90 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0717 EDT - Workbench And Ledger Graphite Pass
+
+### What Changed
+- Continued the controlled V1 redesign surface sweep from
+  `CEREBRO_UI_REDESIGN_CONTRACT.md`.
+- Applied Graphite Candle treatment to Workbench validation/body surfaces.
+- Workbench now uses graphite slabs for the frame, header, receipt lanes,
+  project receipt grouping, receipt body form, receipt links/details, receipt
+  chain, and selected receipt body read.
+- Applied Ledger receipt readability treatment in the existing Ledger Overview.
+- Ledger now uses graphite slabs for overview header, summary buttons, memory
+  reuse read, route receipt contract, recent route reads, route audit/readiness
+  blocks, route action blocks, latest Workbench receipts, selected body audit,
+  and Ledger rules.
+- No route executor, command runner, approval mutation, provider call, browser
+  automation, install, dependency, schema change, castle change, or Raven path
+  was added.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof used headless Chrome against `http://127.0.0.1:3000/`.
+- Screenshot proof saved to:
+  - `output/playwright/ui-redesign-workbench-validation-body-graphite-candle.png`
+  - `output/playwright/ui-redesign-ledger-receipt-readability-graphite-candle.png`
+- Targeted Vitest was not run because no router, schema, execution, model,
+  ledger mutation, approval mutation, or storage behavior changed.
+
+### Front-End Steward Review
+- Surfaces: Workbench and Ledger Overview.
+- Register: product surface.
+- Primary objects: Workbench receipt body and Ledger audit trail.
+- Hidden machinery: execution runners, raw provider/model internals, installs,
+  and debug-only proof remain hidden.
+- Visible control: receipt body, validation status, project/ledger/security
+  links, route receipt contract, route readiness, no-execution labels, and
+  next action blocks remain visible.
+- Screenshot proof: listed above.
+- Remaining taste risk: Sources, Basement, Model Registry, Settings, and any
+  deeper repeated subcomponents still need the controlled Graphite Candle pass.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice Workbench, Ledger/Home, and
+  handoff only.
+- Worker used: none. The slice touched two tightly coupled frontend files.
+- The dev server remains running at `http://localhost:3000/`.
+
+### Drift Check
+- On path because the slice directly followed the active redesign rollout
+  order: Workbench validation body and Ledger receipt readability.
+- The patch did not touch `KeepScene.tsx`, chamber data, agent count, floor
+  count, route execution, command execution, external services, or Raven.
+- Deferred: Sources, Basement/Model Registry, Settings, execution contracts,
+  and approval-gated local command lane.
+
+### Completion Read
+- Overall: 81%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 38%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue the controlled redesign surface sweep.
+Start with a dirty-file read. Workbench and Ledger Overview have their first
+Graphite Candle pass. Next best slice is Sources and Basement/Model Registry,
+then Settings. Do not touch `KeepScene.tsx`, chamber data, agent count, floor
+count, execution runners, provider calls, browser automation, installs, paid
+services, or Raven paths. Run `pnpm -C app check` and browser-proof material UI
+changes.
 
 ## 2026-05-17 0710 EDT - Graphite Candle Surface Sweep
 
