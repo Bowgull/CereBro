@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2322 EDT
+Last updated: 2026-05-16 2327 EDT
 
 ## Current North Star
 
@@ -20,6 +20,86 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2327 EDT - Knowledge Readiness Contract
+
+### What Changed
+- Continued item 7 Knowledge contracts before knowledge automation.
+- Added a read-only `knowledgeReadiness` summary to `integrations.status`.
+- The summary reports vault route count, Obsidian lane count, required RAG
+  metadata field count, included retrieval lane keys, archive-only lane count,
+  and the rule that retrieval automation remains blocked.
+- Basement Configuration now shows a compact `Knowledge Contract` block below
+  Machine Status.
+- The visible read shows route counts and the next validation action without
+  scanning notes, creating a vector index, fetching sources, writing the vault,
+  or adding a new primary surface.
+- No provider, model, tool, gateway, browser, search, fetch, install, token,
+  account action, model pull, external write, schema migration, dependency,
+  route default change, new primary surface, command runner, or Raven path was
+  added.
+
+### Files Touched
+- `app/server/routers/integrations.ts`
+- `app/server/integrations.status.test.ts`
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-knowledge-readiness-red.db' pnpm -C app exec vitest run server/integrations.status.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `knowledgeReadiness` was missing.
+- Green check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-knowledge-readiness-green.db' pnpm -C app exec vitest run server/integrations.status.test.ts server/piccolo.storageContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- `curl` readback confirmed live `knowledgeReadiness` values: 19 vault routes,
+  6 Obsidian lanes, 6 required metadata fields, 5 included route keys, and 1
+  archive-only route.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dev server remains running at `http://localhost:3000/` for preview.
+- No worker was used because this was a single backend contract plus one
+  existing Basement Configuration readout.
+
+### Front-End Steward Review
+- Surface: Basement Configuration.
+- Register: product surface.
+- Primary object: machine and knowledge routing status.
+- User question: is the knowledge layer shaped enough for retrieval later.
+- Route visible: the block sits below machine status, not in the Keep-first
+  primary loop.
+- Receipt/proof visible: counts and included lane keys are visible.
+- Machinery hidden until needed: no note scanner, RAG dashboard, vector store,
+  or source automation UI was added.
+- Generic UI rejected: no plugin grid, AI knowledge dashboard, or abstract
+  automation control wall was added.
+- Remaining taste risk: Basement Configuration is still utilitarian. Keep
+  targeted and compact.
+
+### Completion Read
+- Overall: 72%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 45%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Knowledge readiness is now visible in
+Basement Configuration as read-only contract data. Next best path is either
+source-library local save/read receipts or Project Lab knowledge bridge
+visibility. Do not run Ollama status checks, installs, pulls, external
+searches, provider calls, model calls, note scans, vector indexing, or vault
+writes without explicit approval.
 
 ## 2026-05-16 2322 EDT - Runtime Registry Read Receipts
 

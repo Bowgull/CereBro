@@ -26,12 +26,18 @@ export const integrationsRouter = router({
       getVaultStatus(),
       getObsidianStatus(),
     ]);
+    const vaultLayout = getVaultLayout();
+    const obsidianKnowledgeRoutes = getObsidianKnowledgeRoutes();
+    const archiveOnlyRoutes = obsidianKnowledgeRoutes.filter((route) => route.retrievalDefault === "archive_only").length;
+    const includedRouteKeys = obsidianKnowledgeRoutes
+      .filter((route) => route.retrievalDefault === "include_index" || route.retrievalDefault === "include_when_validated")
+      .map((route) => route.key);
     return {
       notion,
       vault,
       obsidian,
-      vaultLayout: getVaultLayout(),
-      obsidianKnowledgeRoutes: getObsidianKnowledgeRoutes(),
+      vaultLayout,
+      obsidianKnowledgeRoutes,
       obsidianRetrievalContract: {
         fields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
         canonicalStatuses: OBSIDIAN_CANONICAL_STATUSES,
@@ -41,6 +47,17 @@ export const integrationsRouter = router({
         ragReadyNoteMetadataContract: OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT,
       },
       obsidianRetrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
+      knowledgeReadiness: {
+        mode: "read_only" as const,
+        vaultRoutes: vaultLayout.length,
+        obsidianRoutes: obsidianKnowledgeRoutes.length,
+        requiredMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS.length,
+        includedRouteKeys,
+        archiveOnlyRoutes,
+        canAutomateRetrieval: false,
+        rule: "Knowledge contracts are visible before retrieval automation. No note scan, vector index, source fetch, or vault write runs from this read.",
+        nextAction: "Validate notes with current metadata before normal retrieval or source automation.",
+      },
     };
   }),
   notionPollInbox: publicProcedure.mutation(async () => {

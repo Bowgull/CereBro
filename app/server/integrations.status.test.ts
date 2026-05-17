@@ -64,6 +64,16 @@ describe("integrations status", () => {
       expect(status.obsidianRetrievalContract.ragReadyNoteMetadataContract.rules.join(" ")).toContain(
         "Normal retrieval requires",
       );
+      expect(status.knowledgeReadiness).toMatchObject({
+        mode: "read_only",
+        vaultRoutes: status.vaultLayout.length,
+        obsidianRoutes: status.obsidianKnowledgeRoutes.length,
+        requiredMetadataFields: status.obsidianRetrievalMetadataFields.length,
+        archiveOnlyRoutes: 1,
+        canAutomateRetrieval: false,
+      });
+      expect(status.knowledgeReadiness.includedRouteKeys).toContain("knowledge");
+      expect(status.knowledgeReadiness.nextAction).toContain("Validate notes");
 
       expect(await countRows("artifacts")).toBe(before.artifacts);
       expect(await countRows("approvals")).toBe(before.approvals);

@@ -109,6 +109,33 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
             </div>
           </section>
 
+          {integrationStatus?.knowledgeReadiness && (
+            <section>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.gold }}>
+                  Knowledge Contract
+                </h3>
+                <span className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  read only
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+                <KnowledgeTile label="Vault Routes" value={String(integrationStatus.knowledgeReadiness.vaultRoutes)} />
+                <KnowledgeTile label="Obsidian Lanes" value={String(integrationStatus.knowledgeReadiness.obsidianRoutes)} />
+                <KnowledgeTile label="RAG Fields" value={String(integrationStatus.knowledgeReadiness.requiredMetadataFields)} />
+                <KnowledgeTile label="Archive Only" value={String(integrationStatus.knowledgeReadiness.archiveOnlyRoutes)} tone={C.warning} />
+              </div>
+              <div className="mt-2 rounded px-2.5 py-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="truncate" title={integrationStatus.knowledgeReadiness.includedRouteKeys.join(", ")}>
+                  Retrieval lanes: {integrationStatus.knowledgeReadiness.includedRouteKeys.join(", ")}
+                </div>
+                <div className="mt-1" style={{ color: C.textMuted }}>
+                  {integrationStatus.knowledgeReadiness.nextAction}
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Bridge API Key */}
           <section>
             <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: C.gold }}>
@@ -258,6 +285,19 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
             Close
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function KnowledgeTile({ label, value, tone = C.accent }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="rounded px-2.5 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+        {label}
+      </div>
+      <div className="mt-0.5 text-sm font-semibold" style={{ color: tone }}>
+        {value}
       </div>
     </div>
   );

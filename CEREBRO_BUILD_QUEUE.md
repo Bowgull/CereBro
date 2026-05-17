@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 2322 EDT
+Last updated: 2026-05-16 2327 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 2327 EDT: returned to item 7 Knowledge contracts before knowledge
+  automation. `integrations.status` now exposes a read-only
+  `knowledgeReadiness` summary with vault route count, Obsidian lane count,
+  required RAG metadata field count, included retrieval lane keys, and
+  archive-only lane count. Basement Configuration shows the compact Knowledge
+  Contract read below Machine Status. No note scan, vector index, source fetch,
+  vault write, provider/model/tool call, route default change, install,
+  token/account action, schema migration, new surface, command runner,
+  dependency, or Raven path was added.
 - 2026-05-16 2322 EDT: returned to item 8 backend route receipts. Runtime
   route previews now read local Model/Tool Registry evidence for the proposed
   model lane and carry that read into saved route receipt drafts. The existing
