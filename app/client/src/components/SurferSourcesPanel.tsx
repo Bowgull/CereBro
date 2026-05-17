@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ const TRUST_TONES: Record<string, string> = {
   low: C.danger,
   unknown: C.textMuted,
 };
+
+const G = T.graphiteCandle;
 
 export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [query, setQuery] = useState("");
@@ -83,10 +85,10 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
       <div
         className="flex items-center justify-between gap-2 px-2 py-1.5 shrink-0"
-        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+        style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slab }}
       >
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -109,7 +111,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-1.5 px-2 py-1.5 shrink-0 xl:grid-cols-2" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+      <div className="grid grid-cols-1 gap-1.5 px-2 py-1.5 shrink-0 xl:grid-cols-2" style={{ borderBottom: `1px solid ${G.lineSoft}` }}>
         <form onSubmit={submit} className="space-y-1.5">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-1.5">
             <Input
@@ -163,7 +165,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
           </div>
           {ingestUrl.data && (
             ingestUrl.data.ok && ingestUrl.data.source && ingestUrl.data.sourceSaveReceipt ? (
-              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+              <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}>
                 <div className="font-semibold truncate" style={{ color: C.success }} title={ingestUrl.data.source.uri}>
                   Saved source #{ingestUrl.data.sourceSaveReceipt.sourceId}: {ingestUrl.data.source.title ?? ingestUrl.data.source.sourceDisplayName ?? sourceDisplayName(ingestUrl.data.source.uri)}
                 </div>
@@ -203,7 +205,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     requiredApproval={card.requiredApproval}
                   />
                 ))}
-                <div className="text-[11px] leading-snug rounded p-1.5" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="text-[11px] leading-snug rounded p-1.5" style={{ color: C.textSecondary, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   {preview.data.nextStep}
                 </div>
               </section>
@@ -214,7 +216,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               {panel.isLoading ? (
                 <div className="text-[11px]" style={{ color: C.textMuted }}>Reading source library.</div>
               ) : savedSources.length === 0 ? (
-                <div className="text-[11px] leading-snug rounded p-2" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div className="text-[11px] leading-snug rounded p-2" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   No saved source records yet. Approved public sources will appear here.
                 </div>
               ) : (
@@ -239,7 +241,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
           </div>
 
           <aside className="space-y-1.5 min-w-0">
-            <section className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <section className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
               <SectionTitle title="Source History" detail={`${sourceEventGroups.length}/${sourceEvents.length} groups`} />
               <div className="flex flex-wrap gap-1 mt-2">
                 {(["all", "surfer", "hedwig"] as const).map((owner) => (
@@ -269,7 +271,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                   </div>
                 ) : (
                   sourceEventGroups.slice(0, 6).map(({ event, display, title, count }) => (
-                    <div key={`${event.id}-${count}`} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={`${event.id}-${count}`} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-[10px] font-semibold uppercase tracking-wider truncate" style={{ color: C.textSecondary }}>
                           {event.eventType.replace(/_/g, " ")}
@@ -314,7 +316,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             </section>
 
             {data?.sourceLibraryReceipt && (
-              <section className="rounded p-1.5" aria-label="Source Library receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <section className="rounded p-1.5" aria-label="Source Library receipt" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <SectionTitle title="Source Receipt" detail={data.sourceLibraryReceipt.mode.replace(/_/g, " ")} />
                 <div className="mt-2 grid grid-cols-2 gap-1">
                   <CompactReadDatum label="Total" value={data.sourceLibraryReceipt.totalSources} tone={C.accent} />
@@ -324,7 +326,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                   <CompactReadDatum label="Stale" value={data.sourceLibraryReceipt.staleSources} tone={data.sourceLibraryReceipt.staleSources > 0 ? C.warning : C.textMuted} />
                   <CompactReadDatum label="Events" value={data.sourceLibraryReceipt.sourceEvents} tone={C.textSecondary} />
                 </div>
-                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   {data.sourceLibraryReceipt.nextAction}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1">
@@ -335,7 +337,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             )}
 
             {data?.sourceLibraryRoute && (
-              <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />
                 <div className="mt-2 grid grid-cols-2 gap-1">
                   <CompactReadDatum label="Source notes" value={data.sourceLibraryRoute.sourceNoteLane} tone={C.accent} wrap />
@@ -350,7 +352,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     wrap
                   />
                 </div>
-                <details className="mt-2 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                     Write Gate
                   </summary>
@@ -366,7 +368,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </section>
             )}
 
-            <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <details className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
               <summary className="cursor-pointer">
                 <SectionTitle title="Browser Ladder" detail="lowest sufficient rung" />
               </summary>
@@ -377,7 +379,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </div>
             </details>
 
-            <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <details className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
               <summary className="cursor-pointer">
                 <SectionTitle title="Policy" detail="approval-gated" />
               </summary>
@@ -436,7 +438,7 @@ function SourceCard({
   sourceUri?: string;
 }) {
   return (
-    <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <article className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="min-w-0">
           <div className="text-[12px] font-semibold truncate" style={{ color: C.textPrimary }} title={title}>
@@ -464,7 +466,7 @@ function SourceCard({
         {whyItMatters}
       </div>
       {(requiredApproval || scrubNotes) && (
-        <details className="mt-1.5 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <details className="mt-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
           <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
             Source Rules
           </summary>

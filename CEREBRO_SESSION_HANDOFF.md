@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0717 EDT
+Last updated: 2026-05-17 0725 EDT
 
 ## Current North Star
 
@@ -20,6 +20,98 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0725 EDT - Sources Basement Settings Graphite Pass
+
+### What Changed
+- Continued the controlled V1 redesign surface sweep from
+  `CEREBRO_UI_REDESIGN_CONTRACT.md`.
+- Applied Graphite Candle treatment to Research/Sources.
+- Research now uses graphite slabs for the frame, header, preview forms,
+  source cards, source history, source receipt, source route, browser ladder,
+  and policy disclosures.
+- Applied Graphite Candle treatment to Basement Model Registry.
+- Model Registry now uses graphite slabs for the frame, header, status strip,
+  capability map, registry audit proof, source gate, status readback,
+  decision path, local model lanes, Ollama readiness, creative lanes,
+  registry list, detail rail, proposal forms, route preview, and gates.
+- Applied Graphite Candle treatment to Basement Settings.
+- Settings now uses graphite slabs for the frame, machine status,
+  knowledge contract, bridge key, local bridge setup, tracked projects, and
+  footer. The panel now uses system sans by default, with command/code blocks
+  kept monospace.
+- No route executor, command runner, approval mutation, provider call, browser
+  automation, install, dependency, schema change, castle change, or Raven path
+  was added.
+
+### Files Touched
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `app/client/src/components/ConfigPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Browser proof used the Codex in-app browser against `http://localhost:3000/`.
+- Screenshot proof saved to:
+  - `output/playwright/ui-redesign-sources-graphite-candle.png`
+  - `output/playwright/ui-redesign-model-registry-graphite-candle.png`
+  - `output/playwright/ui-redesign-settings-graphite-candle.png`
+- Targeted Vitest was not run because no router, schema, execution, model,
+  ledger mutation, approval mutation, or storage behavior changed.
+
+### Front-End Steward Review
+- Surfaces: Research/Sources, Basement Model Registry, Basement Settings.
+- Register: product surface.
+- Primary objects: saved sources, registry readiness, machine/storage status.
+- Hidden machinery: execution runners, provider/model internals, installs,
+  raw browser automation, and debug-only proof remain hidden.
+- Visible control: source trust, source receipt, model/tool gates, no-action
+  labels, bridge setup disclosure, and knowledge readiness remain visible.
+- Screenshot proof: listed above.
+- Remaining taste risk: repeated subcomponents still need a second detail pass
+  after execution contracts land, but the main V1 redesign surface sweep is now
+  coherent enough to return to autonomy wiring.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice UI files and handoff only.
+- Worker used: none. The slice touched 3 tightly coupled frontend files and
+  was safer as one integration pass.
+- The dev server remains running at `http://localhost:3000/`.
+
+### Drift Check
+- On path because the slice directly followed the active redesign rollout
+  order: Sources, Basement/Model Registry, and Settings.
+- The patch did not touch `KeepScene.tsx`, chamber data, agent count, floor
+  count, route execution, command execution, external services, or Raven.
+- Deferred: execution contracts, approval-gated local command lane, ledger
+  execution receipts, and later castle asset/animation improvements.
+
+### Completion Read
+- Overall: 82%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 52%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 54%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue in CereBro Prime mode. Start with a
+dirty-file read. The shell, Project Lab, Terminal Lab, Approvals, Workbench,
+Ledger Overview, Sources, Model Registry, and Settings have their first
+Graphite Candle pass. Next best slice is returning to the approval-gated
+execution core: local action proposal shape, approval receipt, canExecute
+guard, and Terminal Lab readback. Do not touch `KeepScene.tsx`, chamber data,
+agent count, floor count, provider calls, installs, paid services, or Raven
+paths. Run targeted tests for touched routers/models and `pnpm -C app check`.
 
 ## 2026-05-17 0717 EDT - Workbench And Ledger Graphite Pass
 

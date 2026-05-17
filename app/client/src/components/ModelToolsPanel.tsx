@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { Badge as UiBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +35,7 @@ const APPROVAL_LEVELS = ["none", "confirm_each_use", "explicit_approval", "accou
 const EVAL_STATUS_FILTERS = ["all", "untested", "source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
 const EVAL_OUTCOMES = ["recorded", "pass", "mixed", "fail", "blocked"] as const;
 const STATUS_DECISIONS = ["source_verified", "tested_pass", "tested_mixed", "tested_fail", "stale"] as const;
+const G = T.graphiteCandle;
 
 type CapabilityKind = (typeof CAPABILITY_KINDS)[number];
 type EvalStatusFilter = (typeof EVAL_STATUS_FILTERS)[number];
@@ -344,8 +345,8 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textPrimary }}>
+      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slab }}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest">Basement Model Registry</h2>
@@ -373,14 +374,14 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </div>
 
         {lastWrite && (
-          <div className="mt-2 rounded p-2 text-[11px]" role="status" aria-live="polite" style={{ color: C.success, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mt-2 rounded p-2 text-[11px]" role="status" aria-live="polite" style={{ color: C.success, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             {lastWrite} No model, tool, gateway, browser, fetch, account, token, or install action ran.
           </div>
         )}
       </header>
 
       <main className="flex-1 overflow-y-auto p-3 space-y-2" aria-label="Model Tools registry" aria-busy={policy.isLoading || capabilities.isLoading || registryAudit.isLoading}>
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Configuration Rules" detail="machine boundary" />
           <div className="mt-2 grid gap-1.5 md:grid-cols-3">
             <MachineRule title="Fast Shell" body={policyData?.speedStance ?? "Instant shell. Route first. Run slow work in visible background lanes."} tone={C.success} />
@@ -389,7 +390,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
-        <section className="rounded p-2" aria-label="Model tool capability map" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model tool capability map" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Capability Map" detail={policyData?.registryStatus ? labelize(policyData.registryStatus) : "proposal only"} />
           <div className="mt-2 grid gap-1.5 xl:grid-cols-4">
             {(policyData?.capabilityMap ?? []).map((lane) => (
@@ -402,15 +403,15 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             <StatusBlock label="External" value={String(summary?.externalRecords ?? registryCounts.external)} tone={(summary?.externalRecords ?? registryCounts.external) ? C.warning : C.textMuted} />
             <StatusBlock label="No action" value="read only" tone={C.success} />
           </div>
-          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
             {policyData?.registryShape.rule ?? "A capability is a proposal until source-verified or eval-tested."}
           </div>
         </section>
 
-        <section className="rounded p-2" aria-label="Model registry audit proof" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model registry audit proof" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Registry Audit" detail={auditData?.mode ? labelize(auditData.mode) : "reading"} />
           {registryAudit.isLoading ? (
-            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               Reading local registry audit.
             </div>
           ) : auditData ? (
@@ -454,13 +455,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             </div>
           ) : (
-            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               Registry audit did not return a local read.
             </div>
           )}
         </section>
 
-        <section className="rounded p-2" aria-label="Model tool source verification gate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model tool source verification gate" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Source Verification Gate" detail={policyData?.sourceVerificationGate?.mode ?? "read only"} />
           <div className="mt-2 grid gap-1.5 md:grid-cols-4">
             <StatusBlock label="Missing sources" value={String(summary?.sourceReadiness?.missingSources ?? 0)} tone={(summary?.sourceReadiness?.missingSources ?? 0) > 0 ? C.warning : C.success} />
@@ -482,7 +483,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
-        <section className="rounded p-2" aria-label="Model tool status decision readback" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model tool status decision readback" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Status Readback" detail={policyData?.statusDecisionReadback?.routeDefaultsChanged ? "route changed" : "registry only"} />
           <div className="mt-2 grid gap-1.5 sm:grid-cols-3 xl:grid-cols-6">
             <StatusBlock label="Source" value={String(policyData?.statusDecisionReadback?.sourceReady ?? 0)} tone={(policyData?.statusDecisionReadback?.sourceReady ?? 0) > 0 ? C.success : C.textMuted} />
@@ -506,20 +507,20 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
-        <section className="rounded p-2" aria-label="Model tool decision path" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Model tool decision path" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Decision Path" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "select proposal"} />
           {selectedCapability ? (
             <DecisionPath items={selectedDecisionPath} />
           ) : (
-            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               Select a capability to read source, eval, and approval gates as one path.
             </div>
           )}
         </section>
 
-        <section className="rounded p-2" aria-label="Local model lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Local model lanes" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Local Model Lanes" detail="fast local first" />
-          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
             {policyData?.routingStance ?? "Use local lanes first when they are fast and strong enough. Escalate only with approval."}
           </div>
           <div className="mt-2 grid gap-1.5 lg:grid-cols-2">
@@ -527,7 +528,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <div
                 key={lane.id}
                 className="rounded p-2 text-[11px] leading-snug"
-                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+                style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -555,10 +556,10 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </section>
 
         {policyData?.ollamaSetupPlan && (
-          <section className="rounded p-2" aria-label="Ollama setup readiness" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="rounded p-2" aria-label="Ollama setup readiness" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <SectionTitle title="Ollama Setup" detail={labelize(policyData.ollamaSetupPlan.status)} />
             <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                 <div className="flex flex-wrap gap-1">
                   <Badge label={labelize(policyData.ollamaSetupPlan.executionMode)} tone={C.warning} />
                   <Badge label="no install ran" tone={C.success} />
@@ -569,7 +570,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                   <Field label="UI" value={policyData.ollamaSetupPlan.uiRule} />
                 </div>
               </div>
-              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                 <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>No Action Taken</div>
                 <div className="mt-1 grid gap-1">
                   {policyData.ollamaSetupPlan.noActionTaken.map((item) => (
@@ -582,7 +583,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             <details
               className="mt-2 rounded p-2 text-[11px] leading-snug"
               onToggle={(event) => setOllamaStatusOpen(event.currentTarget.open)}
-              style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}
             >
               <summary className="cursor-pointer">
                 <span className="flex flex-wrap items-start justify-between gap-2">
@@ -637,7 +638,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 ) : (ollamaStatusApprovals.data?.items ?? []).length === 0 ? (
                   <div style={{ color: C.textMuted }}>No local approval previews staged for this check.</div>
                 ) : ollamaStatusApprovals.data?.items.map((item) => (
-                  <div key={item.id} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <div key={item.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Approval #{item.id}</span>
                       <Badge label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textSecondary} />
@@ -648,7 +649,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             </details>
 
-            <details className="mt-2 rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <details className="mt-2 rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Model Batches
               </summary>
@@ -658,7 +659,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               </div>
             </details>
 
-            <details className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+            <details className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
               <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-widest" style={{ color: C.danger }}>Do Not Start With</summary>
               <div className="mt-1 flex flex-wrap gap-1">
                 {policyData.ollamaSetupPlan.blockedFirstInstalls.map((item) => (
@@ -669,7 +670,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </section>
         )}
 
-        <section className="rounded p-2" aria-label="Creative tool lanes" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" aria-label="Creative tool lanes" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <SectionTitle title="Creative Lanes" detail="proposal only" />
           <div className="mt-2 grid gap-1.5 lg:grid-cols-4">
             {(policyData?.creativeLanes ?? []).map((lane) => (
@@ -677,8 +678,8 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 key={lane.id}
                 className="rounded p-2 text-[11px] leading-snug"
                 style={{
-                  background: C.surfaceMuted,
-                  border: `1px solid ${lane.privacyLane === "sealed_private" ? C.danger : C.borderSoft}`,
+                  background: G.slabMuted,
+                  border: `1px solid ${lane.privacyLane === "sealed_private" ? C.danger : G.lineSoft}`,
                 }}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -705,7 +706,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </section>
 
         <section className="grid gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <div className="rounded p-2 space-y-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div className="rounded p-2 space-y-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <SectionTitle title="Registry" detail={`${summary?.totalRecords ?? rows.length} proposals. ${groupedRows.length} visible groups`} />
             <div className="grid gap-1.5 md:grid-cols-[minmax(0,1fr)_150px_150px]">
               <Input
@@ -732,7 +733,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               {capabilities.isLoading ? (
                 <div className="text-xs" style={{ color: C.textMuted }}>Reading local registry.</div>
               ) : groupedRows.length === 0 ? (
-                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   No local capability proposals match these filters.
                 </div>
               ) : groupedRows.map(({ key, representative: item, count }) => (
@@ -748,7 +749,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                   role="listitem"
                   style={{
                     background: selectedCapability?.id === item.id ? C.surfaceRaised : C.surfaceMuted,
-                    border: `1px solid ${selectedCapability?.id === item.id ? C.accent : C.borderSoft}`,
+                    border: `1px solid ${selectedCapability?.id === item.id ? C.accent : G.lineSoft}`,
                   }}
                 >
                   <span className="block w-full min-w-0">
@@ -775,7 +776,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             </div>
           </div>
 
-          <aside className="rounded p-2 space-y-2" aria-label="Selected model tool detail" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <aside className="rounded p-2 space-y-2" aria-label="Selected model tool detail" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <SectionTitle title="Detail" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "none"} />
             {selectedCapability ? (
               <div className="grid gap-1.5">
@@ -802,7 +803,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </section>
 
         <section className="grid gap-2 xl:grid-cols-4">
-          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <details className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <summary className="cursor-pointer">
               <SectionTitle title="Propose" detail="local only" />
             </summary>
@@ -844,7 +845,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           <details
             className="rounded p-2"
             onToggle={(event) => setEvalNotesOpen(event.currentTarget.open)}
-            style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
+            style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}
           >
             <summary className="cursor-pointer">
               <SectionTitle title="Eval Note" detail={evalNotesOpen ? selectedCapability ? `for ${selectedCapability.id}` : "unlinked" : "open to read"} />
@@ -871,7 +872,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               ) : (evals.data?.items ?? []).length === 0 ? (
                 <div className="text-[11px]" style={{ color: C.textMuted }}>No eval notes for this selection.</div>
               ) : evals.data?.items.map((item) => (
-                <div key={item.id} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div key={item.id} className="rounded p-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <div className="font-semibold uppercase tracking-wider">{labelize(item.evalTaskKey)}</div>
                   <div className="mt-1" style={{ color: C.textSecondary }}>{item.taskSummary}</div>
                   <div className="mt-1 flex gap-2">
@@ -884,7 +885,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
             </form>
           </details>
 
-          <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <details className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <summary className="cursor-pointer">
               <SectionTitle title="Status Decision" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "select proposal"} />
             </summary>
@@ -901,13 +902,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               >
                 {updateCapabilityStatus.isPending ? "Updating" : "Update Local Status"}
               </Button>
-              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                 Local registry update only. This does not approve external use, change route defaults, run a model, or run a provider call.
               </div>
             </form>
           </details>
 
-          <section className="rounded p-2 space-y-2" aria-label="Model tool route preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <section className="rounded p-2 space-y-2" aria-label="Model tool route preview" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <SectionTitle title="Route Preview" detail={routePreviewInput ? route?.routeStatus ?? "reading" : "open to read"} />
             <Input value={routeTask} onChange={(event) => setRouteTask(event.target.value)} aria-label="Route preview task kind" />
             <Input value={routeModality} onChange={(event) => setRouteModality(event.target.value)} aria-label="Route preview modality" />
@@ -926,14 +927,14 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               {routePreview.isLoading ? "Reading" : "Read Preview"}
             </Button>
             {!routePreviewInput ? (
-              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                 Route preview is local and reads only when requested.
               </div>
             ) : route && (
               <div className="space-y-2">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />
-                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Status Evidence</span>
                     <Badge label="not default" tone={C.warning} />
@@ -958,14 +959,14 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 />
                 <div className="space-y-1.5">
                   {route.lanes.map((lane) => (
-                    <div key={lane.lane} className="rounded p-2 text-[11px]" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={lane.lane} className="rounded p-2 text-[11px]" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                       <div className="font-semibold uppercase tracking-wider">{labelize(lane.lane)}</div>
                       <div className="mt-1" style={{ color: C.textSecondary }}>{lane.reason}</div>
                       <div className="mt-1" style={{ color: C.textMuted }}>{labelize(lane.approvalLevel)}. {labelize(lane.status)}</div>
                     </div>
                   ))}
                 </div>
-                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textMuted, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   {route.noActionTaken.join(" ")}
                 </div>
               </div>
@@ -973,13 +974,13 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </section>
         </section>
 
-        <details className="rounded p-2" aria-label="Model Tools gates" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <details className="rounded p-2" aria-label="Model Tools gates" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
           <summary className="cursor-pointer">
             <SectionTitle title="Gates" detail="policy" />
           </summary>
           <div className="mt-2 grid gap-1.5 md:grid-cols-2">
             {(policyData?.gates ?? []).map((gate) => (
-              <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div key={gate} className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                 {gate}
               </div>
             ))}
@@ -1004,7 +1005,7 @@ function DecisionPath({
   return (
     <div className="mt-2 grid gap-1.5 md:grid-cols-3">
       {items.map((item) => (
-        <div key={item.step} className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div key={item.step} className="rounded p-2 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: item.tone }}>{item.step}</div>
@@ -1030,7 +1031,7 @@ function SectionTitle({ title, detail }: { title: string; detail?: string }) {
 
 function StatusBlock({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
       <div className="mt-0.5 truncate text-[11px] font-semibold" title={value} style={{ color: tone }}>{value}</div>
     </div>
@@ -1045,7 +1046,7 @@ function AuditProofStrip({
   items: Array<{ label: string; value: number | string; tone: string }>;
 }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
       <div className="mt-1.5 flex flex-wrap gap-1">
         {items.map((item) => (
@@ -1058,7 +1059,7 @@ function AuditProofStrip({
 
 function MachineRule({ title, body, tone }: { title: string; body: string; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textSecondary }}>{body}</div>
     </div>
@@ -1084,7 +1085,7 @@ function CapabilityMapCard({
 }) {
   const tone = lane.status === "sealed_private" ? C.danger : lane.status === "gated_proposal" ? C.warning : C.success;
   return (
-    <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${lane.status === "sealed_private" ? C.danger : C.borderSoft}` }}>
+    <div className="rounded p-2 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${lane.status === "sealed_private" ? C.danger : G.lineSoft}` }}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate text-xs font-bold uppercase tracking-widest" title={lane.label}>{lane.label}</div>
@@ -1117,11 +1118,11 @@ function ModelBatch({
   items: ReadonlyArray<{ model: string; modelClass: string; expectedSize: string; use: string; avoid: string }>;
 }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
       <div className="mt-1 grid gap-1.5">
         {items.map((item) => (
-          <div key={item.model} className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <div key={item.model} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
             <div className="flex flex-wrap items-center gap-1">
               <Badge label={item.model} tone={C.gold} />
               <Badge label={labelize(item.modelClass)} tone={C.accent} />
@@ -1140,7 +1141,7 @@ function ModelBatch({
 
 function StatusList({ title, items, tone }: { title: string; items: readonly string[]; tone: string }) {
   return (
-    <div className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded p-2" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tone }}>{title}</div>
       <div className="mt-1 grid gap-1">
         {items.map((item) => (
@@ -1195,7 +1196,7 @@ function SourceField({ value }: { value: string | null | undefined }) {
             <span
               key={source}
               className="max-w-full truncate rounded px-1.5 py-0.5 text-[10px]"
-              style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              style={{ color: C.textSecondary, background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}
               title={source}
             >
               {sourceDisplayName(source)}

@@ -6,12 +6,14 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel } from "@/lib/displayLabels";
-import { cerebroColors as C } from "@/lib/keepConfig";
+import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { Button } from "@/components/ui/button";
 
 interface ConfigPanelProps {
   onClose: () => void;
 }
+
+const G = T.graphiteCandle;
 
 export default function ConfigPanel({ onClose }: ConfigPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
@@ -53,14 +55,14 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
   return (
     <div
       className="h-full w-full overflow-hidden p-3"
-      style={{ background: C.background }}
+      style={{ background: G.slabMuted }}
     >
       <div
         className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-md"
-        style={{ background: C.background, color: C.textPrimary, border: `1px solid ${C.border}`, fontFamily: "'IBM Plex Mono', monospace" }}
+        style={{ background: G.slab, color: C.textPrimary, border: `1px solid ${G.line}`, fontFamily: "'Inter', 'IBM Plex Sans', system-ui, sans-serif" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
           <div>
             <h2 className="text-[13px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
               Basement Configuration
@@ -96,7 +98,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 storageStatusTile("Vault", integrationStatus?.vault),
                 storageStatusTile("Obsidian", integrationStatus?.obsidian),
               ].map((item) => (
-                <div key={item.label} className="flex items-start gap-2 px-2.5 py-1.5 rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <div key={item.label} className="flex items-start gap-2 px-2.5 py-1.5 rounded" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   <span style={{ color: item.ok ? C.success : C.warning }}>
                     {item.ok ? "✓" : "○"}
                   </span>
@@ -115,7 +117,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.gold }}>
                   Knowledge Contract
                 </h3>
-                <span className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                <span className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   read only
                 </span>
               </div>
@@ -125,7 +127,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                 <KnowledgeTile label="RAG Fields" value={String(integrationStatus.knowledgeReadiness.requiredMetadataFields)} />
                 <KnowledgeTile label="Archive Only" value={String(integrationStatus.knowledgeReadiness.archiveOnlyRoutes)} tone={C.warning} />
               </div>
-              <div className="mt-2 rounded px-2.5 py-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mt-2 rounded px-2.5 py-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                 <div className="truncate" title={integrationStatus.knowledgeReadiness.includedRouteKeys.join(", ")}>
                   Retrieval lanes: {integrationStatus.knowledgeReadiness.includedRouteKeys.join(", ")}
                 </div>
@@ -148,7 +150,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div className="text-xs animate-pulse" style={{ color: C.textMuted }}>Generating key.</div>
             ) : (
               <div className="flex items-center gap-2">
-                <code className="flex-1 px-2.5 py-1.5 text-xs rounded font-mono truncate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.gold }}>
+                <code className="flex-1 px-2.5 py-1.5 text-xs rounded font-mono truncate" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.gold }}>
                   {bridgeKeyLabel}
                 </code>
                 <Button
@@ -159,7 +161,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                   className="shrink-0"
                   title="Copy the local bridge API key. Treat it like a secret."
                   aria-label="Copy local bridge API key"
-                  style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+                  style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}
                 >
                   {copied === "key" ? "Copied" : "Copy"}
                 </Button>
@@ -175,7 +177,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>1. Download the bridge script.</div>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }} title={`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`}>
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.success }} title={`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`}>
                     {compactCommandLabel(`curl -O ${serverUrl}/bridge/claude-dungeon-bridge.mjs`)}
                   </code>
                   <Button
@@ -186,7 +188,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                     className="shrink-0"
                     title="Copy the bridge download command. This button does not run it."
                     aria-label="Copy bridge download command"
-                    style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+                    style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}
                   >
                     {copied === "download" ? "Copied" : "Copy"}
                   </Button>
@@ -196,7 +198,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>2. Run the bridge with Node 22.</div>
                 <div className="flex items-start gap-2">
-                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate leading-relaxed" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
+                  <code className="flex-1 px-2.5 py-1.5 text-xs rounded truncate leading-relaxed" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.success }}>
                     {compactCommandLabel(bridgeCommand)}
                   </code>
                   <Button
@@ -207,7 +209,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
                     className="shrink-0"
                     title="Copy the local bridge command. This button does not run it."
                     aria-label="Copy local bridge run command"
-                    style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+                    style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}
                   >
                     {copied === "cmd" ? "Copied" : "Copy"}
                   </Button>
@@ -216,7 +218,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
 
               <div>
                 <div className="text-xs mb-1" style={{ color: C.textMuted }}>3. Start Claude Code in any project.</div>
-                <code className="block px-2.5 py-1.5 text-xs rounded" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.success }}>
+                <code className="block px-2.5 py-1.5 text-xs rounded" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.success }}>
                   claude  # or claude-code
                 </code>
               </div>
@@ -263,7 +265,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
               </summary>
               <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
                 {status.projects.map((p) => (
-                  <div key={p.encodedName} className="flex items-center justify-between px-2.5 py-1.5 rounded text-xs" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  <div key={p.encodedName} className="flex items-center justify-between px-2.5 py-1.5 rounded text-xs" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                     <span className="truncate flex-1" style={{ color: C.textPrimary }}>{p.realPath}</span>
                     <span className="shrink-0 ml-2" style={{ color: C.textMuted }}>{p.sessionCount} session{p.sessionCount !== 1 ? "s" : ""}</span>
                   </div>
@@ -274,13 +276,13 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 flex justify-end" style={{ borderTop: `1px solid ${C.borderSoft}` }}>
+        <div className="px-5 py-3 flex justify-end" style={{ borderTop: `1px solid ${G.lineSoft}` }}>
           <Button
             type="button"
             onClick={onClose}
             variant="outline"
             size="sm"
-            style={{ border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}
           >
             Close
           </Button>
@@ -292,7 +294,7 @@ export default function ConfigPanel({ onClose }: ConfigPanelProps) {
 
 function KnowledgeTile({ label, value, tone = C.accent }: { label: string; value: string; tone?: string }) {
   return (
-    <div className="rounded px-2.5 py-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="rounded px-2.5 py-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
         {label}
       </div>
