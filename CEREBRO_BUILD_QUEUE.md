@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1654 EDT
+Last updated: 2026-05-17 1657 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1657 EDT: added Browser tab-state readback inside Workbench.
+  The tab rail now reads from `workbenchBrowserTabStateModel`: `Tab 1` is the
+  only active local page frame, `New Tab` remains planned/blocked, and Browser
+  drafts appear as staged draft tabs without opening pages. No browser runner,
+  browser automation, real browser tab, page fetch, search request, history
+  entry, bookmark, persisted tab state, source save, Workbench capture,
+  credential action, download, external write, provider/model call, install,
+  pull, or Raven path was added.
 - 2026-05-17 1654 EDT: added Watch Shelf draft readback inside Workbench.
   The drawer now has local category selection and shows Browser draft state as
   `Page draft`, `Search draft`, or `No open page`. Save remains disabled with

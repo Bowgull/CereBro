@@ -24,6 +24,7 @@ import {
 import {
   workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
+  workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
 } from "@/lib/workbenchBrowserModel";
@@ -210,6 +211,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const receiptListCopy = workbenchReceiptListCopy();
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
+  const browserTabState = workbenchBrowserTabStateModel(browserDraft);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -759,7 +761,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
 
                 <div className="flex items-center gap-1 overflow-x-auto rounded p-1" aria-label="Browser page tabs" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
-                  {browserShell.tabs.map((tab) => (
+                  {browserTabState.visibleTabs.map((tab) => (
                     <Button
                       key={tab.label}
                       type="button"
@@ -768,23 +770,25 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       disabled={!tab.active}
                       className="h-7 shrink-0 px-2"
                       aria-pressed={tab.active}
+                      title={tab.state === "draft" ? "Draft only. No page opened." : tab.state === "planned" ? "Planned until tab state storage exists." : "Active local page frame."}
                     >
                       {tab.label}
                     </Button>
                   ))}
-                  {browserDraft.kind !== "empty" && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      disabled
-                      className="h-7 shrink-0 px-2"
-                      title="Draft only. No page opened."
-                    >
-                      {browserDraft.tabLabel}
-                    </Button>
-                  )}
-                  <Button type="button" size="sm" variant="ghost" disabled className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab planned">+</Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={!browserTabState.canCreateTab}
+                    className="h-7 w-7 shrink-0 px-0"
+                    aria-label="New browser tab planned"
+                    title="New tab is blocked until tab storage and runner contracts exist."
+                  >
+                    +
+                  </Button>
+                  <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
+                    {browserTabState.tabSummary}
+                  </div>
                 </div>
 
                 {watchShelfOpen && (
@@ -850,6 +854,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                   <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
                     {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
+                  </div>
+                  <div className="mx-auto mt-1 max-w-xl text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                    {browserTabState.noActionText}
                   </div>
                 </div>
               </div>

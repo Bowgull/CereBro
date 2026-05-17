@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1654 EDT
+Last updated: 2026-05-17 1657 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1657 EDT - Workbench Browser Tab State Readback
+
+### What Changed
+- Added `workbenchBrowserTabStateModel`.
+- Browser tab rail now reads from a local tab-state contract.
+- `Tab 1` is the only active local page frame.
+- `New Tab` remains planned and blocked until tab storage and runner contracts
+  exist.
+- A typed Browser draft now appears as a staged draft tab without opening a
+  page.
+- First-run page now repeats the no-tab/no-history/no-bookmark/no-source
+  boundary.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, typed `https://example.com/tabs-proof`, and confirmed `Tab 1`,
+  `New Tab`, `Page Draft`, staged URL, tab summary, and no-tab/no-history
+  boundary copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-tab-state.png`.
+
+### Drift Check
+- On path. This advances Daily OS browser contracts inside Workbench without
+  creating a Browser primary surface or pretending real tabs exist.
+- No browser runner, browser automation, real browser tab, page fetch, search
+  request, history entry, bookmark, persisted tab state, source save, Workbench
+  capture, credential action, download, external write, paid service, provider
+  call, model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Tab state is local display only.
+- Real tab persistence, history, bookmarks, page opening, and runner approval
+  all remain future contracts.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the stable Daily OS browser path. Workbench Browser now has local address/search drafts, Watch Shelf drawer readback, and local tab-state readback. Next best slice is a blocked page-action proposal preview inside the three-dot menu or a small browser safety/readiness readback, without running browser automation. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1654 EDT - Workbench Watch Shelf Draft Readback
 

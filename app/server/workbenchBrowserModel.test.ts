@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
+  workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
 } from "../client/src/lib/workbenchBrowserModel";
@@ -97,5 +98,24 @@ describe("workbenchBrowserModel", () => {
     expect(emptyShelf.candidateLabel).toBe("No open page");
     expect(emptyShelf.candidateTarget).toBe("Open a page before saving to Watch Shelf.");
     expect(emptyShelf.canSave).toBe(false);
+  });
+
+  it("reads tab state without creating or opening browser tabs", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const urlTabs = workbenchBrowserTabStateModel(urlDraft);
+    const emptyTabs = workbenchBrowserTabStateModel(emptyDraft);
+
+    expect(urlTabs.activeLabel).toBe("Tab 1");
+    expect(urlTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab", "Page Draft"]);
+    expect(urlTabs.visibleTabs.at(-1)?.state).toBe("draft");
+    expect(urlTabs.canCreateTab).toBe(false);
+    expect(urlTabs.tabSummary).toContain("Draft tab is staged");
+    expect(urlTabs.noActionText).toContain("No browser tab");
+
+    expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
+    expect(emptyTabs.tabSummary).toBe("Tab 1 is the only active local page frame.");
+    expect(emptyTabs.canCreateTab).toBe(false);
   });
 });

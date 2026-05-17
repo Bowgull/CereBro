@@ -7,6 +7,7 @@ export type WorkbenchBrowserAction = {
 export type WorkbenchBrowserTab = {
   label: string;
   active: boolean;
+  state?: "open" | "planned" | "draft";
 };
 
 export type WorkbenchBrowserDraft = {
@@ -24,6 +25,14 @@ export type WorkbenchWatchShelfDraft = {
   candidateTarget: string;
   canSave: boolean;
   saveLabel: string;
+  noActionText: string;
+};
+
+export type WorkbenchBrowserTabState = {
+  activeLabel: string;
+  visibleTabs: WorkbenchBrowserTab[];
+  canCreateTab: boolean;
+  tabSummary: string;
   noActionText: string;
 };
 
@@ -77,6 +86,28 @@ export function workbenchBrowserShellModel() {
     emptyTitle: "Open a page.",
     emptyBody: "Use the address field when the manual browser runner is wired. This first pass locks the shell and disabled actions.",
     noActionText: "No browser automation, page fetch, credential action, file transfer, source save, Workbench capture, or external write runs from this shell.",
+  };
+}
+
+export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): WorkbenchBrowserTabState {
+  const visibleTabs: WorkbenchBrowserTab[] = [
+    { label: "Tab 1", active: true, state: "open" },
+    { label: "New Tab", active: false, state: "planned" },
+  ];
+
+  if (draft.kind !== "empty") {
+    visibleTabs.push({ label: draft.tabLabel, active: false, state: "draft" });
+  }
+
+  return {
+    activeLabel: "Tab 1",
+    visibleTabs,
+    canCreateTab: false,
+    tabSummary:
+      draft.kind === "empty"
+        ? "Tab 1 is the only active local page frame."
+        : "Draft tab is staged beside Tab 1. No page is open.",
+    noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
   };
 }
 
