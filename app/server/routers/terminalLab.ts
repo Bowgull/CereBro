@@ -44,6 +44,8 @@ const writeFirstTokens = new Set([
 ]);
 
 const writeLikePhrases = [
+  "git add",
+  "git checkout",
   "git commit",
   "git push",
   "npm install",
@@ -71,6 +73,11 @@ function firstToken(command: string) {
 function includesToken(command: string, tokens: readonly string[]) {
   const normalized = command.toLowerCase();
   return tokens.some((token) => normalized.includes(token));
+}
+
+function isGitWriteCommand(command: string) {
+  const normalized = command.trim().toLowerCase();
+  return /^git\s+(add|commit|push|checkout|reset|clean|merge|rebase|tag|branch\s+-d|branch\s+-D)\b/.test(normalized);
 }
 
 type CommandObservation = {
@@ -121,8 +128,14 @@ function rowToObservation(row: Record<string, unknown>) {
     outputSummary: row.output_summary == null ? null : String(row.output_summary),
     createdAt: Number(row.created_at),
   };
+  const gitWrite = isGitWriteCommand(observation.command);
   return {
     ...observation,
+    gitWrite,
+    projectLabRouteRecommended: gitWrite,
+    projectLabRouteReason: gitWrite
+      ? "Git write commands belong in Project Lab push context before any execution proposal."
+      : null,
     followUps: buildFollowUps(observation),
     diagnosticDrafts: buildDiagnosticDrafts(observation),
   };
@@ -440,6 +453,7 @@ function classifyCommand(command: string) {
   const normalized = command.trim().toLowerCase();
   const token = firstToken(normalized);
   const isDestructive = includesToken(normalized, destructiveTokens);
+  const gitWrite = isGitWriteCommand(normalized);
   const writes = writeFirstTokens.has(token) || includesToken(normalized, writeLikePhrases);
   const reads = readOnlyCommands.has(token) && !writes && !isDestructive;
   const needsNetworkApproval =
@@ -452,6 +466,7 @@ function classifyCommand(command: string) {
 
   const gates = ["Terminal Lab preview does not execute commands."];
   if (isDestructive) gates.push("Destructive commands require explicit approval and a narrow explanation.");
+  if (gitWrite) gates.push("Git write commands route to Project Lab push context before any execution proposal.");
   if (writes && !isDestructive) gates.push("Commands that write files, install packages, or mutate git state require approval.");
   if (needsNetworkApproval) gates.push("Network, package install, and GitHub operations require approval when run.");
   if (reads) gates.push("Read-only inspection can be suggested, but execution still happens through the approved Codex command path.");
@@ -478,6 +493,11 @@ function classifyCommand(command: string) {
     command: command.trim(),
     firstToken: token || "unknown",
     risk: isDestructive ? "destructive" : writes || needsNetworkApproval ? "mutating_or_external" : reads ? "read_only" : "unknown",
+    gitWrite,
+    projectLabRouteRecommended: gitWrite,
+    projectLabRouteReason: gitWrite
+      ? "Git write commands belong in Project Lab push context. Review branch, dirty state, Workbench body, and approval receipt before any push path."
+      : null,
     suggestedAgent,
     wouldExecute: false,
     approvalRequiredToRun: true,

@@ -158,6 +158,21 @@ describe("execution action contract", () => {
     await expect(caller.approvals.decide({ id: approvalId, decision: "approved" })).rejects.toThrow("Only pending approvals can be decided.");
   });
 
+  it("routes git-write terminal previews toward Project Lab push context", async () => {
+    const caller = createCaller();
+    const preview = await caller.terminalLab.previewCommand({
+      command: "git push",
+      cwd: "/Users/lindsaybell/Desktop/CereBro",
+    });
+    expect(preview.wouldExecute).toBe(false);
+    expect(preview.risk).toBe("mutating_or_external");
+    expect(preview.gitWrite).toBe(true);
+    expect(preview.projectLabRouteRecommended).toBe(true);
+    expect(preview.projectLabRouteReason).toContain("Project Lab push context");
+    expect(preview.gates.join(" ")).toContain("Git write commands route to Project Lab push context");
+    expect(preview.projectId).toBeGreaterThan(0);
+  });
+
   it("creates a Project Lab push contract but keeps git remote writes blocked", async () => {
     const caller = createCaller();
     const first = await caller.projectIntelligence.createPushActionContract({

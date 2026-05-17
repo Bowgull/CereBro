@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0756 EDT
+Last updated: 2026-05-17 0803 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0803 EDT - Terminal Git Write Project Route Pass
+
+### What Changed
+- Hardened Terminal Lab routing for git-write commands.
+- Terminal command classification now detects git-write forms such as
+  `git add`, `git commit`, `git push`, `git checkout`, `git reset`,
+  `git clean`, `git merge`, `git rebase`, `git tag`, and branch delete forms.
+- Git-write previews now return `gitWrite`,
+  `projectLabRouteRecommended`, and `projectLabRouteReason`.
+- Git-write previews add a gate: `Git write commands route to Project Lab push
+  context before any execution proposal.`
+- Terminal Lab preview UI now shows a `Project Lab route` chip, route reason,
+  and Project Context button for git-write previews.
+- Saved git-write observations now also show the `Project Lab route` chip and
+  plain route note. This keeps historical observations legible.
+- Tests now prove `git push` previews are mutating/external, route to Project
+  Lab, do not execute, persist locally, and infer the CereBro project.
+
+### Files Touched
+- `app/server/routers/terminalLab.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Terminal Lab
+  and confirmed saved `git push` observations show `Project Lab route` and
+  `Terminal Lab did not run git.`
+- Screenshot proof saved locally at
+  `output/playwright/terminal-lab-git-write-project-route.png`.
+
+### Drift Check
+- On path. This connects Terminal Lab command teaching to Project Lab push
+  context without adding execution.
+- No git write runner was added.
+- No git stage, commit, push, pull, fetch, checkout, reset, file edit, browser
+  action, provider call, model call, external write, install, or paid service
+  was added to CereBro's product runner.
+- Raven remains untouched.
+
+### Known Risks
+- Browser proof seeded one local `git push` preview through the app's local
+  tRPC endpoint so the readback appeared in the running dev DB. It was a local
+  observation row only. No git command ran.
+- The Terminal Lab text input was difficult to drive through the current
+  in-app browser automation because fill depends on a virtual clipboard. The
+  server route and observation UI were still browser-proofed.
+
+### Storage Impact
+- No schema change.
+- Tests and browser proof wrote local command observation rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, and app/client/src/components/LedgerPanel.tsx first. Continue the approval-gated autonomy lane. Terminal Lab now routes git-write previews and saved observations to Project Lab push context without running git. Project Lab push contracts dedupe and Approvals shows git-write risk. Next best slice is Ledger audit readback for project push contracts and git-write terminal route observations, so the audit trail shows command preview -> Project Lab context -> approval -> blocked execution state. Do not add a git-write runner, stage/commit/push from CereBro product code, install tools, call providers, browse/fetch, or touch Raven without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0756 EDT - Approvals Project Push Risk Readback Pass
 

@@ -180,6 +180,9 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
     projectRows.find((project) => project.slug === "cerebro") ??
     projectRows[0] ??
     null;
+  const previewProject = preview.data?.projectId == null
+    ? contextProject
+    : projectRows.find((project) => project.tasks.projectId === preview.data?.projectId) ?? contextProject;
   const contextReceiptStats = (() => {
     if (!receiptDetailsOpen) return { total: 0, terminal: 0, needsReview: 0, validated: 0 };
     const projectId = contextProject?.tasks.projectId;
@@ -265,6 +268,25 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       },
       { onSuccess: () => utils.terminalLab.observations.invalidate() },
     );
+  }
+
+  function openPreviewProjectContext() {
+    const project = previewProject;
+    if (!project || !onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:project-lab-focus",
+        JSON.stringify({
+          source: "terminal_lab_git_write_preview",
+          projectId: project.tasks.projectId,
+          projectName: project.name,
+          notice: `Terminal Lab routed a git-write preview to ${project.name} push context. No git command ran.`,
+        }),
+      );
+    } catch {
+      // Project Lab still opens.
+    }
+    onNavigate("projects");
   }
 
   function submitOutput(event: React.FormEvent) {
@@ -613,6 +635,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                     <Chip label={preview.data.approvalRequiredToRun ? "approval required" : "no approval"} tone={C.warning} />
                     <Chip label={preview.data.wouldExecute ? "would execute" : "no execution"} tone={C.success} />
                     <Chip label={`saved #${preview.data.observationId}`} tone={C.textSecondary} />
+                    {preview.data.projectLabRouteRecommended && <Chip label="Project Lab route" tone={C.gold} />}
                   </div>
                   <div
                     className="text-[11px] rounded px-2 py-1 overflow-x-auto"
@@ -623,18 +646,39 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
                     {preview.data.explanation}
                   </div>
-                  <Button
-                    type="button"
-                    onClick={() => openSecurityGateForCommand(preview.data.command)}
-                    disabled={!onNavigate}
-                    variant="risk"
-                    size="sm"
-                    className="w-fit"
-                    title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target. Terminal Lab does not run it."}
-                    aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for command preview ${preview.data.observationId}`}
-                  >
-                    Security Gate
-                  </Button>
+                  {preview.data.projectLabRouteReason && (
+                    <div className="rounded px-2 py-1 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+                      {preview.data.projectLabRouteReason}
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {preview.data.projectLabRouteRecommended && (
+                      <Button
+                        type="button"
+                        onClick={openPreviewProjectContext}
+                        disabled={!onNavigate || !previewProject}
+                        variant="outline"
+                        size="sm"
+                        className="w-fit"
+                        title="Open Project Lab push context. Terminal Lab does not run git."
+                        aria-label={`Open Project Lab push context for command preview ${preview.data.observationId}`}
+                      >
+                        Project Context
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      onClick={() => openSecurityGateForCommand(preview.data.command)}
+                      disabled={!onNavigate}
+                      variant="risk"
+                      size="sm"
+                      className="w-fit"
+                      title={!onNavigate ? "Security Gate route is not available from this panel state." : "Open Security Gate with this command as the target. Terminal Lab does not run it."}
+                      aria-label={!onNavigate ? "Security Gate route unavailable" : `Open Security Gate for command preview ${preview.data.observationId}`}
+                    >
+                      Security Gate
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="rounded p-2" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
@@ -749,6 +793,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                         {item.diagnosticParentId != null && <Chip label={`from #${item.diagnosticParentId}`} tone={C.gold} />}
                         {item.diagnosticRootId != null && <Chip label={`root #${item.diagnosticRootId}`} tone={C.textSecondary} />}
                         {item.diagnosticDepth != null && <Chip label={`depth ${item.diagnosticDepth}`} tone={C.textMuted} />}
+                        {item.projectLabRouteRecommended && <Chip label="Project Lab route" tone={C.gold} />}
                         {item.taskId != null && <Chip label={`task #${item.taskId}`} tone={C.accent} />}
                         {item.sessionId != null && (
                           <Chip label={sessionLabelById.get(item.sessionId) ?? `Run #${item.sessionId}`} tone={C.accent} />
@@ -765,6 +810,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       {item.cwd && (
                         <div className="text-[10px] truncate" style={{ color: C.textMuted }} title={item.cwd}>
                           {compactPathLabel(item.cwd)}
+                        </div>
+                      )}
+                      {item.projectLabRouteReason && (
+                        <div className="text-[10px] leading-snug" style={{ color: C.gold }}>
+                          {item.projectLabRouteReason} Terminal Lab did not run git.
                         </div>
                       )}
                       {item.diagnosticParentId != null && (
