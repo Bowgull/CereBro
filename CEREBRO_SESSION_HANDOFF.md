@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 1951 EDT
+Last updated: 2026-05-16 2000 EDT
 
 ## Current North Star
 
@@ -20,6 +20,90 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2000 EDT - Model Tool Status Readback
+
+### What Changed
+- Added a compact local status-decision readback to the Model Tools policy.
+- Route preview now reads local status evidence from the registry before it
+  shows the Source -> Eval -> Approval path.
+- The readback reports source-ready, eval-ready, mixed, failed, and stale
+  counts.
+- The Basement Models surface now shows `Status Readback` as registry-only
+  evidence, with route defaults explicitly unchanged.
+- Route preview now shows `Status Evidence` and keeps the rule visible:
+  status decisions are registry evidence, not automatic route defaults.
+- No provider, model, tool, gateway, browser, search, fetch, install, token,
+  account action, model pull, external write, schema migration, dependency,
+  route default change, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-status-readback.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because route status readback was missing.
+- Targeted checks:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-modeltools-status-readback-3.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `git diff --check` passed.
+- Browser proof used the Playwright CLI wrapper headlessly against
+  `http://localhost:3002/`.
+- Browser proof opened Basement -> Models and verified `Status Readback`,
+  `Status Rule`, and unchanged route defaults in the snapshot.
+- Screenshot proof: `output/playwright/model-tools-status-readback-verified.png`.
+
+### Cleanliness Read
+- Current slice: Model Tools status readback.
+- Product surface register: Basement capability registry.
+- No worker was used because the slice had one owner surface and one backend
+  contract.
+- Stale CereBro dev servers were found on ports 3000, 3001, and 24678 after
+  browser proof. Their commands pointed at this repo's dev server, and they
+  were closed. No local server remains on ports 3000, 3001, 3002, or 24678.
+
+### Front-End Steward Review
+- Surface: Basement Model Registry.
+- Register: product surface.
+- Primary object: local capability evidence.
+- User question: what has been locally trusted, what is cautionary, and did
+  route defaults change.
+- Route visible: route preview now carries status evidence beside the decision
+  path.
+- Receipt/proof visible: no-action proof remains on the policy screen.
+- Machinery hidden until needed: readback stays in Basement Models only.
+- Generic UI rejected: no model marketplace, score table, auto-recommender, or
+  provider launcher was added.
+- Screenshot proof: `output/playwright/model-tools-status-readback-verified.png`.
+- Remaining taste risk: Models is dense but now more legible. Targeted polish
+  only.
+
+### Completion Read
+- Overall: 72%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 67%.
+- Knowledge/storage/source: 44%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Model Tools item 9 now has proposal,
+source readiness, eval evidence, explicit status decision, and status readback.
+Next best path is a bounded review of whether item 9 is complete enough to move
+back to route receipts or Knowledge contracts. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, or model calls without
+explicit approval.
 
 ## 2026-05-16 1951 EDT - Model Tool Status Decision
 

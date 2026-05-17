@@ -504,7 +504,7 @@ function routePlanForTask(input: {
   modality?: string;
   privacyClass?: string;
   requiresFrontier?: boolean;
-}) {
+}, statusDecisionReadback?: ReturnType<typeof statusDecisionReadbackFromSummary>) {
   const privacyClass = input.privacyClass ?? "unknown";
   const kind = input.taskKind.toLowerCase();
   const modality = input.modality?.toLowerCase() ?? "text";
@@ -585,13 +585,34 @@ function routePlanForTask(input: {
       "Use a small CereBro eval task before marking a model/tool as recommended.",
       "Have Spock/Oak inspect unsupported claims, privacy fit, and failure notes before reuse.",
       "Record call/eval results before changing routing defaults.",
+      "Read status decisions as registry evidence, not route defaults.",
     ],
+    statusDecisionReadback: statusDecisionReadback ?? statusDecisionReadbackFromSummary(),
     noActionTaken: [
       "No external model or tool was called.",
       "No Ollama install, local model pull, or local model call was made.",
       "No gateway dependency was installed.",
       "No browser/search/fetch was used.",
       "No account, token, payment, or provider setup was touched.",
+    ],
+  };
+}
+
+function statusDecisionReadbackFromSummary(summary?: Awaited<ReturnType<typeof readCapabilityMapSummary>>) {
+  return {
+    mode: "local_registry_readback" as const,
+    routeDefaultsChanged: false,
+    sourceReady: summary?.sourceReadiness.sourceReady ?? 0,
+    evalReady: summary?.sourceReadiness.evalReady ?? 0,
+    mixed: summary?.sourceReadiness.testedMixed ?? 0,
+    failed: summary?.sourceReadiness.testedFail ?? 0,
+    stale: summary?.sourceReadiness.stale ?? 0,
+    trustedEvidenceStates: ["source_verified", "tested_pass"],
+    cautionStates: ["tested_mixed", "tested_fail", "stale"],
+    routeDefaultRule: "Status decisions are registry evidence, not automatic route defaults.",
+    noActionTaken: [
+      "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, or external write ran.",
+      "Route preview reads local registry status only.",
     ],
   };
 }
@@ -665,7 +686,10 @@ async function readCapabilityMapSummary() {
           SUM(CASE WHEN source_uris IS NULL OR TRIM(source_uris) = '' THEN 1 ELSE 0 END) AS missing_sources,
           SUM(CASE WHEN source_uris IS NOT NULL AND TRIM(source_uris) != '' AND eval_status NOT IN ('source_verified', 'tested_pass') THEN 1 ELSE 0 END) AS needs_source_review,
           SUM(CASE WHEN eval_status = 'source_verified' THEN 1 ELSE 0 END) AS source_ready,
-          SUM(CASE WHEN eval_status = 'tested_pass' THEN 1 ELSE 0 END) AS eval_ready
+          SUM(CASE WHEN eval_status = 'tested_pass' THEN 1 ELSE 0 END) AS eval_ready,
+          SUM(CASE WHEN eval_status = 'tested_mixed' THEN 1 ELSE 0 END) AS tested_mixed,
+          SUM(CASE WHEN eval_status = 'tested_fail' THEN 1 ELSE 0 END) AS tested_fail,
+          SUM(CASE WHEN eval_status = 'stale' THEN 1 ELSE 0 END) AS stale
         FROM model_tool_capabilities
       `,
       args: [],
@@ -702,6 +726,9 @@ async function readCapabilityMapSummary() {
       needsSourceReview: countValue(totalRow, "needs_source_review"),
       sourceReady: countValue(totalRow, "source_ready"),
       evalReady: countValue(totalRow, "eval_ready"),
+      testedMixed: countValue(totalRow, "tested_mixed"),
+      testedFail: countValue(totalRow, "tested_fail"),
+      stale: countValue(totalRow, "stale"),
     },
     evalNotes: countValue(evalRow, "total"),
     mapCounts: {
@@ -766,6 +793,7 @@ export const modelToolsRouter = router({
           "The source gate reads local registry rows only.",
         ],
       },
+      statusDecisionReadback: statusDecisionReadbackFromSummary(capabilityMapSummary),
       capabilityMap: capabilityMap.map((lane) => ({
         ...lane,
         registryRecordCount: capabilityMapSummary.mapCounts[lane.id],
@@ -1115,7 +1143,7 @@ export const modelToolsRouter = router({
         requiresFrontier: z.boolean().optional(),
       }),
     )
-    .query(({ input }) => routePlanForTask(input)),
+    .query(async ({ input }) => routePlanForTask(input, statusDecisionReadbackFromSummary(await readCapabilityMapSummary()))),
 
   createOllamaStatusApprovalPreview: publicProcedure
     .input(

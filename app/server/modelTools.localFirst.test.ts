@@ -298,4 +298,44 @@ describe("Model Tools local-first routing policy", () => {
     expect(item?.evalStatus).toBe("source_verified");
     expect(item?.sourceReadiness.status).toBe("source_ready");
   });
+
+  it("shows status decisions in route readiness without making them defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Route Evidence ${stamp}`,
+      toolName: "Route evidence candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      riskReview: "Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+    await caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "tested_pass",
+      validationNotes: "Spock accepted the local eval result as registry evidence only.",
+    });
+
+    const route = await caller.modelTools.routePreview({
+      taskKind: "research current model options",
+      modality: "text",
+      privacyClass: "public_safe",
+    });
+
+    expect(route.routeStatus).toBe("proposal_only");
+    expect(route.statusDecisionReadback.evalReady).toBeGreaterThanOrEqual(1);
+    expect(route.statusDecisionReadback.trustedEvidenceStates).toEqual(["source_verified", "tested_pass"]);
+    expect(route.statusDecisionReadback.routeDefaultRule).toContain("not automatic route defaults");
+    expect(route.statusDecisionReadback.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(route.validationPlan).toContain("Read status decisions as registry evidence, not route defaults.");
+
+    const policy = await caller.modelTools.policy();
+    expect(policy.statusDecisionReadback.mode).toBe("local_registry_readback");
+    expect(policy.statusDecisionReadback.routeDefaultsChanged).toBe(false);
+    expect(policy.statusDecisionReadback.evalReady).toBeGreaterThanOrEqual(1);
+  });
 });

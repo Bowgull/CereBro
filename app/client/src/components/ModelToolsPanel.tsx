@@ -420,6 +420,30 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
           </div>
         </section>
 
+        <section className="rounded p-2" aria-label="Model tool status decision readback" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Status Readback" detail={policyData?.statusDecisionReadback?.routeDefaultsChanged ? "route changed" : "registry only"} />
+          <div className="mt-2 grid gap-1.5 sm:grid-cols-3 xl:grid-cols-6">
+            <StatusBlock label="Source" value={String(policyData?.statusDecisionReadback?.sourceReady ?? 0)} tone={(policyData?.statusDecisionReadback?.sourceReady ?? 0) > 0 ? C.success : C.textMuted} />
+            <StatusBlock label="Eval" value={String(policyData?.statusDecisionReadback?.evalReady ?? 0)} tone={(policyData?.statusDecisionReadback?.evalReady ?? 0) > 0 ? C.success : C.textMuted} />
+            <StatusBlock label="Mixed" value={String(policyData?.statusDecisionReadback?.mixed ?? 0)} tone={(policyData?.statusDecisionReadback?.mixed ?? 0) > 0 ? C.warning : C.textMuted} />
+            <StatusBlock label="Failed" value={String(policyData?.statusDecisionReadback?.failed ?? 0)} tone={(policyData?.statusDecisionReadback?.failed ?? 0) > 0 ? C.danger : C.textMuted} />
+            <StatusBlock label="Stale" value={String(policyData?.statusDecisionReadback?.stale ?? 0)} tone={(policyData?.statusDecisionReadback?.stale ?? 0) > 0 ? C.warning : C.textMuted} />
+            <StatusBlock label="Defaults" value={policyData?.statusDecisionReadback?.routeDefaultsChanged ? "changed" : "unchanged"} tone={policyData?.statusDecisionReadback?.routeDefaultsChanged ? C.danger : C.success} />
+          </div>
+          <div className="mt-2 grid gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <MachineRule
+              title="Status Rule"
+              body={policyData?.statusDecisionReadback?.routeDefaultRule ?? "Status decisions are registry evidence, not automatic route defaults."}
+              tone={C.warning}
+            />
+            <MachineRule
+              title="No Action"
+              body={policyData?.statusDecisionReadback?.noActionTaken?.join(" ") ?? "No provider, model, gateway, browser, fetch, install, pull, account, token, or external tool ran."}
+              tone={C.success}
+            />
+          </div>
+        </section>
+
         <section className="rounded p-2" aria-label="Model tool decision path" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
           <SectionTitle title="Decision Path" detail={selectedCapability ? `proposal ${selectedCapability.id}` : "select proposal"} />
           {selectedCapability ? (
@@ -847,6 +871,20 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <div className="space-y-2">
                 <Field label="Recommended lane" value={labelize(route.recommendedLane)} />
                 <Field label="Approval gate" value={route.approvalGate} />
+                <div className="rounded p-2 text-[11px] leading-snug" style={{ color: C.textSecondary, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Status Evidence</span>
+                    <Badge label="not default" tone={C.warning} />
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge label={`source ${route.statusDecisionReadback.sourceReady}`} tone={C.success} />
+                    <Badge label={`eval ${route.statusDecisionReadback.evalReady}`} tone={C.success} />
+                    <Badge label={`mixed ${route.statusDecisionReadback.mixed}`} tone={C.warning} />
+                    <Badge label={`failed ${route.statusDecisionReadback.failed}`} tone={C.danger} />
+                    <Badge label={`stale ${route.statusDecisionReadback.stale}`} tone={C.textMuted} />
+                  </div>
+                  <div className="mt-1" style={{ color: C.textMuted }}>{route.statusDecisionReadback.routeDefaultRule}</div>
+                </div>
                 <DecisionPath
                   items={route.decisionPath.map((step) => ({
                     step: step.step,

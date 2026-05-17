@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 1951 EDT
+Last updated: 2026-05-16 2000 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-16 2000 EDT: continued item 9 in Basement Model Tools. Added a
+  compact local status-decision readback to policy and route preview. The
+  Models tab now shows source-ready, eval-ready, mixed, failed, stale, and
+  unchanged route-default status as registry-only evidence. No provider/model/
+  tool call, route default change, install, browser/search/fetch, token/account
+  action, Ollama status command, schema migration, new surface, external write,
+  command runner, dependency, or Raven path was added.
 - 2026-05-16 1951 EDT: continued item 9 in Basement Model Tools. Added an
   explicit local Status Decision action for capability proposals. The action
   can set source-verified, tested-pass, tested-mixed, tested-fail, or stale
