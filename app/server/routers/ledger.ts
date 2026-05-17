@@ -96,6 +96,77 @@ async function countOne(sql: string, args: (string | number)[] = []) {
   return Number(result.rows[0]?.value ?? 0);
 }
 
+async function readRouteReceiptContract() {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT
+        r.*,
+        a.id AS approval_id,
+        a.task_id AS approval_task_id,
+        a.status AS approval_status,
+        a.action_type AS approval_action_type,
+        a.requested_by_agent AS approval_requested_by_agent,
+        a.permission_preflight_id AS approval_permission_preflight_id,
+        a.decided_at AS approval_decided_at,
+        wer.id AS workbench_evidence_id,
+        wer.kind AS workbench_evidence_kind,
+        wer.title AS workbench_evidence_title,
+        wer.target_uri AS workbench_evidence_target_uri,
+        wer.task_id AS workbench_evidence_task_id,
+        wer.permission_preflight_id AS workbench_evidence_permission_preflight_id
+      FROM runtime_route_records r
+      LEFT JOIN approvals a ON a.id = (
+        SELECT latest.id
+        FROM approvals latest
+        WHERE latest.target_type = 'runtime_route_record'
+          AND latest.target_id = r.id
+        ORDER BY latest.created_at DESC, latest.id DESC
+        LIMIT 1
+      )
+      LEFT JOIN workbench_evidence_records wer ON wer.id = (
+        SELECT latest_evidence.id
+        FROM workbench_evidence_records latest_evidence
+        WHERE latest_evidence.target_uri = 'runtime_route:' || r.id
+        ORDER BY latest_evidence.created_at DESC, latest_evidence.id DESC
+        LIMIT 1
+      )
+      ORDER BY r.created_at DESC, r.id DESC
+    `,
+    args: [],
+  });
+  const routes = result.rows.map((row) => routeRow(row as Record<string, unknown>));
+
+  return {
+    mode: "read_only" as const,
+    ownerAgent: "cortana" as const,
+    bodySurface: "workbench" as const,
+    auditSurface: "ledger" as const,
+    executorStatus: "not_built" as const,
+    canExecute: false,
+    totalRoutes: routes.length,
+    taskLinkedRoutes: routes.filter((route) => route.taskId != null).length,
+    workbenchBodyLinkedRoutes: routes.filter((route) => route.workbenchEvidence != null).length,
+    approvalPreviewRoutes: routes.filter((route) => route.approvalPreview != null).length,
+    approvedGateRoutes: routes.filter((route) => route.approvalPreview?.status === "approved").length,
+    futureReviewOnlyRoutes: routes.filter((route) => route.executionReadiness.readyForFutureExecutorReview).length,
+    gates: [
+      "Route receipts are local records before execution.",
+      "Workbench holds the body. Ledger holds the audit trail.",
+      "Execution remains blocked. A future executor must be designed separately.",
+    ],
+    noActionTaken: [
+      "No command ran.",
+      "No browser opened.",
+      "No model call ran.",
+      "No git action ran.",
+      "No route was saved from this read.",
+      "No task, approval, Workbench receipt, memory row, file, or external write was created.",
+    ],
+    nextAction: "Keep hardening route receipts before adding any executor.",
+  };
+}
+
 export const ledgerRouter = router({
   overview: publicProcedure
     .input(
@@ -123,6 +194,7 @@ export const ledgerRouter = router({
         latestEvidence,
         latestRoutes,
         memoryContract,
+        routeReceiptContract,
       ] = await Promise.all([
         db.execute({
           sql: `
@@ -224,6 +296,7 @@ export const ledgerRouter = router({
           args: [routeLimit],
         }),
         readMemoryContract(),
+        readRouteReceiptContract(),
       ]);
 
       const taskRow = taskCounts.rows[0] ?? {};
@@ -262,6 +335,7 @@ export const ledgerRouter = router({
         latestEvidence: latestEvidence.rows.map((row) => evidenceRow(row as Record<string, unknown>)),
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
         memoryContract,
+        routeReceiptContract,
         gates: [
           "Ledger overview is read-only.",
           "This read model does not open browsers, run commands, call models, approve gates, or write externally.",

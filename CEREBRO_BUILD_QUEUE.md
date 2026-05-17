@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0019 EDT
+Last updated: 2026-05-17 0023 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0023 EDT: continued item 8 backend route receipts before agent
+  execution. Added a read-only Ledger route receipt contract and surfaced it
+  in Ledger Overview with route count, task links, Workbench body links, gate
+  count, future-review-only count, and Execute blocked. Contract reports
+  Workbench as body surface, Ledger as audit surface, executor `not_built`, and
+  `canExecute: false`. No route executor, command runner, browser action,
+  model/provider call, git action, route save, task creation, external write,
+  new surface, dependency, or Raven path was added.
 - 2026-05-17 0019 EDT: continued item 8 backend route receipts before agent
   execution. Added `routeExecutionReadinessProofModel` and showed Ledger route
   readiness, task, body, gate, and execution state through shared

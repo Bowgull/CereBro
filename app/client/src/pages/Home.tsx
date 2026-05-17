@@ -1000,6 +1000,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
 
   const overviewCards = ledgerOverview.data?.cards;
   const memoryContract = ledgerOverview.data?.memoryContract;
+  const routeReceiptContract = ledgerOverview.data?.routeReceiptContract;
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const focusedEvidenceRows = ledgerFocusProject
@@ -1379,6 +1380,30 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
             <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               {memoryContract.gates[2]}
+            </div>
+          </section>
+        )}
+
+        {routeReceiptContract && (
+          <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Route receipt contract">
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+              <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                Route Receipt Contract
+              </div>
+              <Badge variant="secondary" className="uppercase">
+                executor {routeReceiptContract.executorStatus.replace(/_/g, " ")}
+              </Badge>
+            </div>
+            <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
+              <CompactReadDatum label="Routes" value={String(routeReceiptContract.totalRoutes)} tone={C.accent} />
+              <CompactReadDatum label="Tasks" value={String(routeReceiptContract.taskLinkedRoutes)} tone={routeReceiptContract.taskLinkedRoutes > 0 ? C.success : C.textMuted} />
+              <CompactReadDatum label="Bodies" value={String(routeReceiptContract.workbenchBodyLinkedRoutes)} tone={routeReceiptContract.workbenchBodyLinkedRoutes > 0 ? C.success : C.textMuted} />
+              <CompactReadDatum label="Gates" value={`${routeReceiptContract.approvedGateRoutes}/${routeReceiptContract.approvalPreviewRoutes}`} tone={routeReceiptContract.approvalPreviewRoutes > routeReceiptContract.approvedGateRoutes ? C.warning : C.textMuted} />
+              <CompactReadDatum label="Future" value={String(routeReceiptContract.futureReviewOnlyRoutes)} tone={routeReceiptContract.futureReviewOnlyRoutes > 0 ? C.gold : C.textMuted} />
+              <CompactReadDatum label="Execute" value={routeReceiptContract.canExecute ? "enabled" : "blocked"} tone={routeReceiptContract.canExecute ? C.danger : C.gold} />
+            </div>
+            <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              {routeReceiptContract.gates[2]}
             </div>
           </section>
         )}

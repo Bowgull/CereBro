@@ -275,6 +275,51 @@ describe("runtime route receipt preview", () => {
     expect(records.items[0]?.createdAt).toBeGreaterThan(0);
   });
 
+  it("exposes a read-only Ledger route receipt contract without mutating rows", async () => {
+    const caller = createCaller();
+    const rowCountsBefore = await countPreviewMutationRows();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "keep building CereBro front end",
+      mode: "build",
+    });
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const evidence = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    const rowCountsAfterSetup = await countPreviewMutationRows();
+    const overview = await caller.ledger.overview({
+      evidenceLimit: 5,
+      routeLimit: 5,
+    });
+
+    expect(overview.routeReceiptContract).toMatchObject({
+      mode: "read_only",
+      ownerAgent: "cortana",
+      bodySurface: "workbench",
+      auditSurface: "ledger",
+      executorStatus: "not_built",
+      canExecute: false,
+    });
+    expect(overview.routeReceiptContract.totalRoutes).toBeGreaterThanOrEqual(1);
+    expect(overview.routeReceiptContract.taskLinkedRoutes).toBeGreaterThanOrEqual(1);
+    expect(overview.routeReceiptContract.workbenchBodyLinkedRoutes).toBeGreaterThanOrEqual(1);
+    expect(overview.routeReceiptContract.futureReviewOnlyRoutes).toBeGreaterThanOrEqual(1);
+    expect(overview.routeReceiptContract.gates.join(" ")).toContain("Execution remains blocked");
+    expect(overview.routeReceiptContract.noActionTaken).toContain("No route was saved from this read.");
+    expect(overview.routeReceiptContract.noActionTaken.join(" ")).toContain("No task");
+    expect(overview.latestRoutes.find((item) => item.id === committed.record.id)?.taskId).toBe(task.task.id);
+    expect(overview.latestRoutes.find((item) => item.id === committed.record.id)?.workbenchEvidence?.id).toBe(evidence.evidence?.id);
+
+    for (const table of previewMutationTables) {
+      expect(await countRows(table)).toBe(rowCountsAfterSetup.get(table));
+    }
+    expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
+  });
+
   it("creates one local task from a committed route record and links it durably", async () => {
     const caller = createCaller();
     const taskCountBefore = await countRows("tasks");

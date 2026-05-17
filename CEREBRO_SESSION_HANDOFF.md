@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0019 EDT
+Last updated: 2026-05-17 0023 EDT
 
 ## Current North Star
 
@@ -20,6 +20,87 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0023 EDT - Ledger Route Receipt Contract
+
+### What Changed
+- Continued item 8 backend route receipts before agent execution.
+- Added a read-only Ledger route receipt contract.
+- Ledger Overview now shows Route Receipt Contract with route count, task
+  links, Workbench body links, gate count, future-review-only count, and
+  Execute blocked.
+- The contract reports Workbench as body surface, Ledger as audit surface, and
+  executor status as `not_built`.
+- The contract explicitly reports `canExecute: false` and lists no-action
+  proof.
+- No route executor, command runner, browser action, model call, provider call,
+  git action, Obsidian write, Notion write, Drive write, memory write, route
+  save, task creation, approval creation, Workbench receipt creation, install,
+  dependency, schema migration, new primary surface, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-route-contract.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run for this slice.
+
+### Cleanliness Read
+- Dirty files at start: `CEREBRO_BUILD_QUEUE.md` and
+  `CEREBRO_SESSION_HANDOFF.md` contained proof corrections from the previous
+  route-readiness pass. They were preserved and carried into this checkpoint.
+- Dirty files before closeout: current-slice Ledger route contract files and
+  docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one backend read contract plus one
+  existing Ledger call site.
+
+### Front-End Steward Review
+- Surface: Ledger Overview.
+- Register: product surface.
+- Primary object: route receipt contract before any execution system exists.
+- User question: how much of the route receipt chain exists, and can it run.
+- Route visible: routes, tasks, bodies, gates, future-review-only count, and
+  blocked execution are visible.
+- Gate visible: Execute reads `blocked`; backend contract returns
+  `canExecute: false`.
+- Machinery hidden until needed: no executor, dispatch button, provider runner,
+  model runner, browser runner, command runner, or git runner was exposed.
+- Generic UI rejected: no new dashboard, fake progress, agent activity theater,
+  or decorative analytics was added.
+- Remaining taste risk: Ledger has several contract strips. This is acceptable
+  while route safety is being hardened; later hierarchy cleanup should merge
+  contract reads only if it improves scanning.
+
+### Completion Read
+- Overall: 74%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 71%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Ledger now has a read-only route
+receipt contract showing body/audit/executor status and blocked execution.
+Next best path is item 8 route receipt hardening or a read-only backend receipt
+audit. Do not build an executor yet. Do not run Ollama status checks, installs,
+pulls, external searches, provider calls, model calls, note scans, vector
+indexing, source fetches, cleanup actions, command execution runners, route
+saves, task creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0019 EDT - Route Execution Readiness Proof
 
