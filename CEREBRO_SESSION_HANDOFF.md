@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1013 EDT
+Last updated: 2026-05-17 1142 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1142 EDT - Daily OS Browser Contract
+
+### What Changed
+- Added `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- Locked CereBro as a Daily OS with a core manual browser lane, not only a
+  builder dashboard.
+- Manual browser V1 now explicitly includes tabs, history, bookmarks, project
+  pins, trusted site profiles, Watch/resume flows, source capture, Workbench
+  attach, Send to Aang, and Aang correction/preference memory.
+- Clarified that manual browsing is user-controlled, while agent browsing
+  remains Surfer/Spock approval-gated.
+- Added the hidden agent capability matrix as an internal contract, not product
+  UI.
+- Added Zero as Tony's explicit-effects reference in
+  `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`. Zero is not a dependency,
+  install, language pivot, or V1 toolchain.
+- Updated the master build path and build queue so Daily OS/browser contracts
+  come before powerful browser automation.
+
+### Files Touched
+- `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git status --short`
+- No app tests were run. This was a docs/contracts slice only.
+
+### Drift Check
+- On path. This preserves the user's updated vision: CereBro is an everyday AI
+  OS with browser-centered daily utility, not a developer dashboard.
+- No app code, browser automation, install, model download, external write,
+  paid service, new primary surface, or Raven path was added.
+- Raven remains sealed and separate. Normal browser privacy covers logins,
+  credentials, trusted services, and risky public sites.
+
+### Known Risks
+- The contract is now written, but app code does not yet implement the manual
+  browser lane.
+- Browser GitHub/security references still need a focused refresh before
+  implementation if we build beyond the current source/readback contracts.
+
+### Storage Impact
+- No schema change.
+- No database rows created.
+- No local generated artifacts beyond the Obsidian handoff snapshot.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/SurferSourcesPanel.tsx first. Continue CereBro on the stable build path. Daily OS and Browser OS are now locked: manual browser, tabs, history, bookmarks, project pins, trusted site profiles, Watch/resume, source capture, Workbench attach, Send to Aang, and Aang correction/preference memory are V1 requirements, while agent browsing stays approval-gated. Zero is a Tony explicit-effects reference only. Next best code slice is still Research/Sources local validation unless a browser planning refresh is explicitly requested. Do not install Zero, OpenClaw, Hermes, browser security tools, model downloads, or add a new primary browser surface without approval. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1013 EDT - Source Research Loop Audit
 

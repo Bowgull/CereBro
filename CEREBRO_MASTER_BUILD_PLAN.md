@@ -25,6 +25,12 @@ Current build instruction:
 
 - CereBro is being built to replace the Codex chat as the user's everyday AI
   operating layer.
+- `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md` is active. CereBro is a Daily OS with
+  a core browser layer, not only a builder dashboard. Manual browsing, tabs,
+  history, bookmarks, project pins, Watch mode, source capture, Workbench
+  screenshot attach, trusted site profiles, and Aang correction/preference
+  memory are V1 product requirements. Agent browser automation remains
+  approval-gated.
 - `CEREBRO_UI_REDESIGN_CONTRACT.md` is active. The current V1 path starts with
   the redesign contract and controlled shell sweep because approval-gated
   autonomy needs a clear control surface. Verdigris Ivory is the Keep shell
@@ -79,16 +85,21 @@ Current front-end build path:
    Code Lab surface yet. Fold Codebase-to-Course and Coding Lab lessons into
    Terminal Lab: explain commands, failures, check output, next safe commands,
    Tony handoffs, and Spock gates.
-4. **Workbench as visual proof.** Localhost preview, browser views,
+4. **Manual Browser as Daily OS surface.** The user can browse normally:
+   multiple tabs, history, bookmarks, project pins, trusted service profiles,
+   Watch/resume flows, source capture, Workbench attach, and Send to Aang.
+   This is user-controlled browsing. Agent browsing still routes through
+   Surfer and Spock.
+5. **Workbench as visual proof.** Localhost preview, browser views,
    screenshots, images, annotations, before/after, and validation evidence live
    in Workbench.
-5. **Ledger as receipts.** Ledger records route, evidence, command/output,
+6. **Ledger as receipts.** Ledger records route, evidence, command/output,
    approvals, validation, artifacts, memory writes, and next actions.
-6. **Model/Tool Registry as basement capability map.** Connected tools and
+7. **Model/Tool Registry as basement capability map.** Connected tools and
    external services are readable capability proposals, not primary product
    surfaces. Use this for Nano Banana-style vision, PixelLab, Hugging Face,
    GitHub, Notion, Browser Use, and future tools.
-7. **Backend agent runtime after proof.** Build the backend agent only after the
+8. **Backend agent runtime after proof.** Build the backend agent only after the
    visible Project Lab -> Terminal Lab -> Workbench -> Ledger loop is coherent.
    The backend agent should consume the visible receipts, not replace them.
 
@@ -109,10 +120,14 @@ Current critical path gate:
    before/after comparisons, and validation bodies live here.
 6. **Ledger as audit trail.** Ledger records route, receipt body links,
    approvals, commands, artifacts, validation, memory writes, and next actions.
-7. **Knowledge contracts before knowledge automation.** Centralize artifact
+7. **Daily OS and browser contracts before browser automation.** Manual browser
+   UX, tabs, bookmarks, history, project pins, trusted service profiles, Watch
+   mode, source capture, Workbench attach, and Aang preference/correction
+   memory must be explicit before Surfer gets powerful browser automation.
+8. **Knowledge contracts before knowledge automation.** Centralize artifact
    kinds, lifecycle states, retention rules, Obsidian lanes, RAG metadata, and
    GitHub/project bridge paths before Source Library or RAG automation expands.
-8. **Backend route receipts before agent execution.** Build local-only Aang to
+9. **Backend route receipts before agent execution.** Build local-only Aang to
    Cortana route receipt support before model calls, browser actions, command
    execution, or external writes.
 

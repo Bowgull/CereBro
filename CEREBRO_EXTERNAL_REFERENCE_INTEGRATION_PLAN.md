@@ -1,6 +1,6 @@
 # CereBro External Reference Integration Plan
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 ## Purpose
 
@@ -60,6 +60,7 @@ decision.
 | CloakBrowser | https://github.com/CloakHQ/CloakBrowser | MIT | Restricted browser-evasion reference. Study isolation ideas only. Do not use stealth or bot-bypass behavior. |
 | Awesome Codex Skills | https://github.com/ComposioHQ/awesome-codex-skills | GitHub API: no license detected 2026-05-08 | Discovery index only. Verify each linked skill separately. |
 | Agent Reach | https://github.com/Panniantong/Agent-Reach | MIT verified 2026-05-09, HEAD `17624268a059ccfb23eba8a2ba50f9f92c8dc0ca` | Required source-access scaffold reference for Surfer, Raven, and future agents. Study and adapt the channel registry, doctor checks, and upstream-tool handoff pattern. Do not install, configure cookies, proxies, browser automation, downloads, or upstream tools without Spock receipt and explicit approval. |
+| Zero | https://github.com/vercel-labs/zero | Apache-2.0 | Tony explicit-effects reference. Study small native tools, structured diagnostics, explicit effects, and agent-readable repair loops. Do not install or add the toolchain until approval-gated execution is stable and a separate install receipt is approved. |
 
 ## CereBro-Native Lessons
 
@@ -124,6 +125,42 @@ Ledger records the receipt.
 Oak validates important claims.
 Piccolo watches stale channels, storage, and rate limits.
 ```
+
+### Zero Rule
+
+Zero is a Tony reference, not a CereBro V1 dependency.
+
+Use it as the pattern for:
+
+- small tools with narrow purpose
+- explicit file, network, external-write, install, destructive, and credential
+  effects
+- structured diagnostics
+- repair hints an agent can read
+- size/readiness reports
+- local native utilities when Node or Python is too heavy
+
+CereBro-native shape:
+
+```text
+Aang reads the build request.
+Cortana routes to Tony.
+Tony proposes a command or small tool with explicit effects.
+Spock checks the effect scope.
+User approves if required.
+Tony runs only the approved action.
+Ledger stores the effect receipt and result.
+Workbench stores visual proof when relevant.
+```
+
+Boundaries:
+
+- No Zero install yet.
+- No rewrite.
+- No new language in the main stack.
+- No toolchain download without storage and security receipt.
+- No generated tool can execute until Terminal Lab, Approvals, Workbench, and
+  Ledger can read its effect scope.
 
 Raven-native shape:
 

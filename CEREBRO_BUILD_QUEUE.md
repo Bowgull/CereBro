@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1013 EDT
+Last updated: 2026-05-17 1142 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -35,12 +35,13 @@ Build in this order:
 3. Keep-first visible loop.
 4. Project Lab as map.
 5. Terminal Lab as Aang's build-teaching lane.
-6. Workbench as receipt body and visual proof.
-7. Ledger as receipts and audit trail.
-8. Knowledge contracts before knowledge automation.
-9. Backend route receipts before agent execution.
-10. Model and Tool Registry as basement capability map.
-11. Animation, companion overlay, and walkthrough last.
+6. Daily OS and manual browser contracts.
+7. Workbench as receipt body and visual proof.
+8. Ledger as receipts and audit trail.
+9. Knowledge contracts before knowledge automation.
+10. Backend route receipts before agent execution.
+11. Model and Tool Registry as basement capability map.
+12. Animation, companion overlay, and walkthrough last.
 
 Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
 
@@ -118,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1142 EDT: added `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md` and
+  wired it into the master build path. CereBro now explicitly treats manual
+  browser, tabs, history, bookmarks, project pins, trusted site profiles,
+  Watch/resume, source capture, Workbench attach, Send to Aang, and Aang
+  correction/preference memory as V1 Daily OS requirements. Zero is now tracked
+  as a Tony explicit-effects reference, not a dependency. No browser
+  automation, installs, model downloads, new primary surface, or Raven path was
+  added.
 - 2026-05-17 1003 EDT: Ledger overview now includes a read-only
   `executionReceiptLoopAudit` and a compact `Execution Receipt Loop` section.
   It counts execution proposals, Terminal sources, approval/body/task links,
