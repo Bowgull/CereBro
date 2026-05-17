@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0947 EDT
+Last updated: 2026-05-17 0953 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0953 EDT: Workbench execution-linked receipt bodies now show
+  quick Spock validation controls inside `Append Validation Receipt`.
+  `Mark Looks Consistent` and `Mark Blocked` prepare local append-only
+  validation notes without rerunning, approving, or changing the original
+  execution result. Regression coverage proves validation notes append to the
+  execution-linked body and read back in validation history.
 - 2026-05-17 0947 EDT: Terminal Lab observations now support a focused
   observation id and pin it above the current page when needed. Ledger-to-
   Terminal result focus now shows the linked command observation row, teaching

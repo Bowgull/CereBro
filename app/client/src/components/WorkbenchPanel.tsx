@@ -2177,6 +2177,48 @@ function EvidenceDetailPanel({
           Append Validation Receipt
         </summary>
         <div className="mt-2 grid gap-2">
+          {linkedExecution && (
+            <div className="rounded p-1.5" aria-label="Execution-linked validation controls" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              <div className="mb-1 flex flex-wrap items-center gap-1">
+                <Chip label={`result #${linkedExecution.id}`} tone={C.gold} />
+                <Chip label={linkedExecution.status.replace(/_/g, " ")} tone={linkedExecution.status === "completed" ? C.success : C.warning} />
+                <Chip label={`exit ${linkedExecution.exitCode ?? "none"}`} tone={linkedExecution.exitCode === 0 ? C.success : C.warning} />
+              </div>
+              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setValidatorAgent("spock");
+                    setValidationStatus("looks_consistent");
+                    setValidationNote(`Execution result #${linkedExecution.id} completed as an approved read-only local command. Exit ${linkedExecution.exitCode ?? "none"}. Recovery note: ${linkedExecution.recoveryNote ?? "not recorded"}. Treat as local evidence only.`);
+                  }}
+                  title="Prepare a local validation note for a completed read-only execution result."
+                  aria-label={`Prepare looks consistent validation for execution result ${linkedExecution.id}`}
+                >
+                  Mark Looks Consistent
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setValidatorAgent("spock");
+                    setValidationStatus("blocked");
+                    setValidationNote(`Execution result #${linkedExecution.id} needs review before use. Status: ${linkedExecution.status}. Exit ${linkedExecution.exitCode ?? "none"}. Recovery note: ${linkedExecution.recoveryNote ?? "not recorded"}.`);
+                  }}
+                  title="Prepare a blocking validation note for a result that should not be used yet."
+                  aria-label={`Prepare blocked validation for execution result ${linkedExecution.id}`}
+                >
+                  Mark Blocked
+                </Button>
+              </div>
+              <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                These controls only prepare a local validation receipt. They do not rerun, approve, or change the original result.
+              </div>
+            </div>
+          )}
           <AppSelect
             label="Validator agent"
             value={validatorAgent}

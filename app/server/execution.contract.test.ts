@@ -125,6 +125,22 @@ describe("execution action contract", () => {
     });
     expect(executionLinkedWorkbenchList.items.map((item) => item.id)).toContain(evidence.evidence.id);
     expect(executionLinkedWorkbenchList.items.every((item) => item.executionResultId != null)).toBe(true);
+    const validationNote = await caller.workbench.createValidationNote({
+      evidenceId: evidence.evidence.id,
+      validatorAgent: "spock",
+      status: "looks_consistent",
+      note: `Execution result #${runnerGuard.resultId} completed as an approved read-only local command.`,
+    });
+    expect(validationNote.ok).toBe(true);
+    expect(validationNote.writesExternal).toBe(false);
+    const validatedDetail = await caller.workbench.evidenceDetail({
+      id: evidence.evidence.id,
+    });
+    expect(validatedDetail.found).toBe(true);
+    if (validatedDetail.found) {
+      expect(validatedDetail.validationHistory.map((item) => item.id)).toContain(validationNote.evidence.id);
+      expect(validatedDetail.validationHistory.at(-1)?.validationStatus).toBe("looks_consistent");
+    }
 
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);

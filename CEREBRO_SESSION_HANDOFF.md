@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0947 EDT
+Last updated: 2026-05-17 0953 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0953 EDT - Workbench Execution Validation Controls
+
+### What Changed
+- Workbench execution-linked receipt bodies now show quick validation controls
+  inside `Append Validation Receipt`.
+- `Mark Looks Consistent` prepares a Spock `looks_consistent` validation note
+  for the linked local execution result.
+- `Mark Blocked` prepares a Spock `blocked` validation note for a result that
+  needs review before use.
+- The controls only prepare an append-only local validation receipt. They do
+  not rerun, approve, or change the original execution result.
+- Regression coverage now proves a validation note can append to an
+  execution-linked Workbench body and read back in validation history.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workbench,
+  toggled `Execution Linked`, inspected an execution-linked receipt, expanded
+  `Append Validation Receipt`, and confirmed `Mark Looks Consistent`,
+  `Mark Blocked`, and the no-rerun/no-approval guard text.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-execution-validation-controls.png`.
+
+### Drift Check
+- On path. This improves Workbench validation status controls for
+  execution-linked bodies.
+- No new surface, runner broadening, git-write runner, install, destructive
+  action, browser automation, provider call, external write, paid service, or
+  Raven path was added.
+
+### Known Risks
+- Quick controls prepare validation notes only. The user still saves the local
+  validation receipt manually.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/terminalLab.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Workbench execution-linked bodies now have quick Spock validation note presets for looks-consistent and blocked states, and the controls only prepare local append-only validation receipts. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is a compact final audit read across Terminal Lab, Workbench, Ledger, and Approvals, or deeper approval receipt focus/readback if the audit finds a gap. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0947 EDT - Terminal Focused Observation Pin
 
