@@ -16,7 +16,7 @@ import { sessionDisplayName } from "./sessions";
 const KINDS = ["fact", "note", "reference", "feedback"] as const;
 const kindSchema = z.enum(KINDS);
 
-async function readMemoryContract() {
+export async function readMemoryContract() {
   const db = await getCerebroDb();
   const [entries, proposals] = await Promise.all([
     db.execute(`

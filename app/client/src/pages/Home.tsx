@@ -998,6 +998,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const ledgerCopy = ledgerOverviewCopy();
 
   const overviewCards = ledgerOverview.data?.cards;
+  const memoryContract = ledgerOverview.data?.memoryContract;
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const routeRows = ledgerOverview.data?.latestRoutes ?? [];
   const focusedEvidenceRows = ledgerFocusProject
@@ -1343,6 +1344,44 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           ))}
         </section>
 
+        {memoryContract && (
+          <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label={ledgerCopy.memoryContractAria}>
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+              <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                {ledgerCopy.memoryContractTitle}
+              </div>
+              <Badge variant="warning" className="uppercase">
+                {ledgerCopy.memoryContractBadge}
+              </Badge>
+            </div>
+            <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
+              <LedgerMemoryDatum
+                label={ledgerCopy.memoryContractRouteLabel}
+                value={ledgerCopy.memoryContractRouteValue(memoryContract.normalRoute, memoryContract.archiveRoute)}
+                tone={C.accent}
+              />
+              <LedgerMemoryDatum
+                label={ledgerCopy.memoryContractReviewLabel}
+                value={ledgerCopy.memoryContractReviewValue(memoryContract.pendingProposals, memoryContract.oakValidatedProposals)}
+                tone={memoryContract.pendingProposals > 0 ? C.warning : C.success}
+              />
+              <LedgerMemoryDatum
+                label={ledgerCopy.memoryContractGateLabel}
+                value={memoryContract.canAutomateRetrieval ? "retrieval allowed" : "validation required"}
+                tone={memoryContract.canAutomateRetrieval ? C.danger : C.gold}
+              />
+              <LedgerMemoryDatum
+                label={ledgerCopy.memoryContractNextLabel}
+                value={memoryContract.nextAction}
+                tone={C.textSecondary}
+              />
+            </div>
+            <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              {memoryContract.gates[2]}
+            </div>
+          </section>
+        )}
+
         <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="Recent route records">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -1651,6 +1690,19 @@ function LedgerRule({ title, body, tone }: { title: string; body: string; tone: 
       </div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
         {body}
+      </div>
+    </div>
+  );
+}
+
+function LedgerMemoryDatum({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>
+        {label}
+      </div>
+      <div className="mt-0.5 truncate text-[10px] leading-snug" style={{ color: tone }} title={value}>
+        {value}
       </div>
     </div>
   );

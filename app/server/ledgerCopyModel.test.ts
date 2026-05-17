@@ -25,6 +25,8 @@ describe("ledgerCopyModel", () => {
       overview.receiptLoadingText,
       overview.receiptEmptyText,
       overview.receiptPath,
+      overview.memoryContractTitle,
+      overview.memoryContractBadge,
       overview.rulesBody,
       overview.rules.external.body,
       overview.rules.memory.body,
@@ -38,6 +40,7 @@ describe("ledgerCopyModel", () => {
     expect(overview.routeSectionTitle).toBe("Recent Route Reads");
     expect(overview.routeActionsTitle).toBe("Next Actions");
     expect(overview.auditReadBadge).toBe("audit read only");
+    expect(overview.memoryContractTitle).toBe("Memory Reuse Read");
     expect(combined).not.toContain("proof");
     expect(combined).not.toContain("artifact receipts");
     expect(combined).not.toContain("route receipts");

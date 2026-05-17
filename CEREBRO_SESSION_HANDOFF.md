@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2353 EDT
+Last updated: 2026-05-16 2358 EDT
 
 ## Current North Star
 
@@ -20,6 +20,95 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2358 EDT - Ledger Memory Reuse Read
+
+### What Changed
+- Continued item 7 Knowledge/source contracts through Ledger as the audit
+  surface.
+- Ledger overview now includes the same read-only memory reuse contract used by
+  Knowledge Notes.
+- Added a compact `Memory Reuse Read` section to Ledger with normal route,
+  archive route, proposal review counts, validation gate, next action, and
+  no-automation proof.
+- Added a Ledger contract test that proves `ledger.overview` returns the
+  memory reuse context without durable writes.
+- Exported `readMemoryContract` from the Memory router so Ledger reads the same
+  contract instead of duplicating the rules.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/routers/memory.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/server/ledgerCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-memory-contract-red.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `ledger.overview.memoryContract` was missing.
+- Green check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-ledger-memory-contract-green.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/ledgerCopyModel.test.ts server/memory.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run for this slice because Playwright is not
+  installed in the app workspace and the in-app browser automation tool was not
+  exposed to this session. Local preview stayed live.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Existing staged Memory browser-proof/docs edits were preserved.
+- Dirty files before closeout: current-slice Ledger/Memory files, new Ledger
+  contract test, and handoff/queue docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one shared contract read and one existing
+  Ledger section.
+
+### Front-End Steward Review
+- Surface: Ledger.
+- Register: product surface.
+- Primary object: local audit trail.
+- User question: where does memory reuse stand in the audit trail.
+- Route visible: normal knowledge route and archive route are visible.
+- Gate visible: retrieval is off, validation is required, and next action is
+  visible.
+- Machinery hidden until needed: no RAG dashboard, vector controls, note
+  scanner, Obsidian writer, or source automation was added.
+- Generic UI rejected: no fake analytics dashboard, generic AI memory monitor,
+  or plugin control panel was added.
+- Remaining taste risk: Ledger is dense. Future polish should consolidate
+  repeated read cards into shared primitives instead of adding more bespoke
+  blocks.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 51%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Ledger now reads the shared Memory
+reuse contract. Next best path is either a small shared read-card primitive
+cleanup for Source/Memory/Ledger contract blocks or the next source contract
+slice if dirty files are clean. Do not run Ollama status checks, installs,
+pulls, external searches, provider calls, model calls, note scans, vector
+indexing, source fetches, or vault writes without explicit approval.
 
 ## 2026-05-16 2353 EDT - Memory Reuse Contract Read
 
@@ -54,9 +143,19 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   `CEREBRO_DB_URL='file:/tmp/cerebro-memory-contract-red.db' pnpm -C app exec vitest run server/memory.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `memory.contract` did not exist.
 - Green check:
   `CEREBRO_DB_URL='file:/tmp/cerebro-memory-contract-final.db' pnpm -C app exec vitest run server/memory.contract.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- Final focused check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-memory-panel-final.db' pnpm -C app exec vitest run server/memory.contract.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app check` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Final `pnpm -C app check` passed.
+- Final `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Playwright CLI opened `http://localhost:3005/`, opened Ledger > Memory, and
+  confirmed the `Memory reuse contract` region rendered route, review, gate,
+  next action, and no-automation proof.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/memory-reuse-contract.png`.
+- Dev console showed existing Vite HMR websocket errors caused by a stale
+  server already using ports 24678 and 3000. The Memory contract read rendered.
 
 ### Cleanliness Read
 - Dirty files at start: none.
@@ -64,7 +163,8 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
   test, and handoff/queue docs.
 - Existing handoff edits for the previous Workbench browser proof were
   preserved.
-- Dev server remains available at `http://localhost:3000/`.
+- The temporary dev server used for browser proof was closed. A pre-existing
+  local server remains on ports 3000 and 24678.
 - No worker was used because this was one backend read contract plus one
   existing Memory panel readback.
 

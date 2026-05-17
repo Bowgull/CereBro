@@ -2,6 +2,7 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { getCerebroDb } from "../cerebroDb";
 import { routeExecutionReadiness } from "../runtimeExecutionReadiness";
+import { readMemoryContract } from "./memory";
 
 function parseJsonField<T>(value: unknown, fallback: T): T {
   if (typeof value !== "string") return fallback;
@@ -121,6 +122,7 @@ export const ledgerRouter = router({
         routeCount,
         latestEvidence,
         latestRoutes,
+        memoryContract,
       ] = await Promise.all([
         db.execute({
           sql: `
@@ -221,6 +223,7 @@ export const ledgerRouter = router({
           `,
           args: [routeLimit],
         }),
+        readMemoryContract(),
       ]);
 
       const taskRow = taskCounts.rows[0] ?? {};
@@ -258,6 +261,7 @@ export const ledgerRouter = router({
         },
         latestEvidence: latestEvidence.rows.map((row) => evidenceRow(row as Record<string, unknown>)),
         latestRoutes: latestRoutes.rows.map((row) => routeRow(row as Record<string, unknown>)),
+        memoryContract,
         gates: [
           "Ledger overview is read-only.",
           "This read model does not open browsers, run commands, call models, approve gates, or write externally.",
