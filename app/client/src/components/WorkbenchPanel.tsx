@@ -163,7 +163,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       if (selectedEvidenceId != null) utils.workbench.evidenceDetail.invalidate({ id: selectedEvidenceId });
     },
   });
-  const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation();
+  const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation({
+    onSuccess: () => {
+      utils.workbench.browserActionProposals.invalidate();
+    },
+  });
   const [browserProposalNotice, setBrowserProposalNotice] = useState<string | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
@@ -227,6 +231,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       target: browserDraft.raw,
       draftKind: browserDraft.kind,
     },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const browserActionProposals = trpc.workbench.browserActionProposals.useQuery(
+    { limit: 3 },
     {
       staleTime: 30_000,
       refetchOnWindowFocus: false,
@@ -853,6 +865,53 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     {browserReadiness.requiredGates.map((gate) => (
                       <Chip key={gate} label={gate} tone={C.textMuted} />
                     ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-1.5 rounded p-2" aria-label="Recent Browser proposals" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                      Recent Proposals
+                    </span>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <Chip label="local only" tone={C.accent} />
+                      <Chip label="blocked" tone={C.warning} />
+                    </div>
+                  </div>
+                  {browserActionProposals.isLoading ? (
+                    <div className="text-[10px]" style={{ color: C.textMuted }}>
+                      Reading local Browser proposals.
+                    </div>
+                  ) : browserActionProposals.data?.items.length ? (
+                    <div className="grid gap-1">
+                      {browserActionProposals.data.items.map((proposal) => (
+                        <div
+                          key={proposal.id}
+                          className="grid gap-1 rounded px-1.5 py-1 md:grid-cols-[minmax(0,1fr)_auto]"
+                          style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
+                              #{proposal.id} {proposal.actionLabel}
+                            </div>
+                            <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+                              {proposal.target}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1 md:justify-end">
+                            <Chip label={proposal.statusLabel} tone={proposal.canExecute ? C.danger : C.warning} />
+                            <Chip label={proposal.resultState} tone={C.textMuted} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[10px]" style={{ color: C.textMuted }}>
+                      No Browser proposals saved.
+                    </div>
+                  )}
+                  <div className="text-[10px]" style={{ color: C.textMuted }}>
+                    No saved Browser proposal runs from this list.
                   </div>
                 </div>
 

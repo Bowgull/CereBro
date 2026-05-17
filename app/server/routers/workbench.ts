@@ -29,6 +29,46 @@ const validationAgents = ["oak", "spock"] as const;
 const evidenceGroupBys = ["project", "task", "session", "kind", "source", "command", "artifact", "validation_status"] as const;
 const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
 const browserDraftKinds = ["empty", "url", "search"] as const;
+const browserProposalNoActionTaken = [
+  "No browser opened.",
+  "No page fetched.",
+  "No source saved.",
+  "No Workbench capture created.",
+  "No Watch Shelf item saved.",
+  "No credential action ran.",
+  "No external write ran.",
+];
+
+function splitStoredList(value: unknown) {
+  return String(value ?? "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function browserProposalStatusLabel(status: unknown) {
+  return String(status ?? "proposal_blocked").split("_").join(" ");
+}
+
+function rowToBrowserActionProposal(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    surface: "workbench_browser" as const,
+    actionLabel: String(row.action_label),
+    target: String(row.target),
+    draftKind: String(row.draft_kind),
+    riskClass: String(row.risk_class),
+    executorAgent: String(row.executor_agent),
+    statusLabel: browserProposalStatusLabel(row.status),
+    canExecute: Boolean(row.can_execute),
+    resultState: String(row.result_state),
+    blockers: splitStoredList(row.blockers),
+    requiredGates: splitStoredList(row.required_gates),
+    receiptBody: String(row.receipt_body),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
 
 function rowToEvidence(row: Record<string, unknown>) {
   return {
@@ -431,6 +471,32 @@ export const workbenchRouter = router({
           updatedAt: Number(saved.rows[0]!.updated_at),
         },
         noActionTaken: proposal.noActionTaken,
+      };
+    }),
+
+  browserActionProposals: publicProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().min(1).max(20).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          ORDER BY created_at DESC, id DESC
+          LIMIT ?
+        `,
+        args: [input?.limit ?? 5],
+      });
+
+      return {
+        items: result.rows.map(rowToBrowserActionProposal),
+        noActionTaken: browserProposalNoActionTaken,
       };
     }),
 

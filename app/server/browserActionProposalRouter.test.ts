@@ -74,4 +74,38 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads recent durable Browser action proposals without approvals or execution", async () => {
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserProposals: await countRows("browser_action_proposals"),
+    };
+
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Add to Watch",
+      target: "https://example.com/watch",
+      draftKind: "url",
+    });
+
+    const proposals = await caller.workbench.browserActionProposals({ limit: 5 });
+
+    expect(proposals.items[0]?.id).toBe(created.proposal.id);
+    expect(proposals.items[0]?.surface).toBe("workbench_browser");
+    expect(proposals.items[0]?.actionLabel).toBe("Add to Watch");
+    expect(proposals.items[0]?.target).toBe("https://example.com/watch");
+    expect(proposals.items[0]?.statusLabel).toBe("proposal blocked");
+    expect(proposals.items[0]?.canExecute).toBe(false);
+    expect(proposals.items[0]?.resultState).toBe("not_run");
+    expect(proposals.items[0]?.requiredGates).toContain("Approval receipt");
+    expect(proposals.noActionTaken).toContain("No browser opened.");
+    expect(proposals.noActionTaken).toContain("No Watch Shelf item saved.");
+
+    expect(await countRows("browser_action_proposals")).toBe(before.browserProposals + 1);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });
