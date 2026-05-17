@@ -170,6 +170,44 @@ describe("visions contract", () => {
     expect(detail.receiptTrail.join(" ")).toContain("Cortana route");
   });
 
+  it("links a route-created Vision when route task, body, and gate records are added later", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const route = await caller.runtime.commitRoute({
+      text: `Build linked Vision trail ${stamp} for CereBro`,
+      mode: "build",
+    });
+    const vision = await caller.visions.createFromRouteRecord({
+      routeRecordId: route.record.id,
+    });
+    expect(vision.vision.taskId).toBeNull();
+
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: route.record.id,
+    });
+    const body = await caller.runtime.createWorkbenchReceiptFromRouteRecord({
+      routeRecordId: route.record.id,
+    });
+    const gate = await caller.runtime.createApprovalPreviewFromRouteRecord({
+      routeRecordId: route.record.id,
+      reason: "Vision linked trail gate.",
+    });
+
+    expect(task.task?.id).toBeTypeOf("number");
+    expect(body.evidence?.id).toBeTypeOf("number");
+    expect(gate.approval?.id).toBeTypeOf("number");
+
+    const detail = await caller.visions.detail({ id: vision.vision.id });
+    expect(detail.vision.taskId).toBe(task.task?.id);
+    expect(detail.task?.id).toBe(task.task?.id);
+    expect(detail.route?.id).toBe(route.record.id);
+    expect(detail.workbenchEvidence?.id).toBe(body.evidence?.id);
+    expect(detail.approval?.id).toBe(gate.approval?.id);
+    expect(detail.receiptTrail.join(" ")).toContain("Task");
+    expect(detail.receiptTrail.join(" ")).toContain("Workbench body");
+    expect(detail.receiptTrail.join(" ")).toContain("Approval");
+  });
+
   it("adds Vision counts and latest Vision rows to Ledger without side effects", async () => {
     const caller = createCaller();
     const stamp = Date.now();

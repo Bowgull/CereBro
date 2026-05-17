@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0822 EDT
+Last updated: 2026-05-17 0825 EDT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0825 EDT - Vision Route Task Sync Pass
+
+### What Changed
+- Route-created Visions now backfill `task_id` when a task is later created from the same route.
+- Existing linked tasks also sync back into any route Vision when read through the route task action.
+- Vision detail now reads the updated task link plus existing route body and approval records.
+- Added regression coverage for the full local trail: route -> Vision -> task -> Workbench body -> approval gate.
+
+### Files Touched
+- `app/server/routers/runtime.ts`
+- `app/server/visions.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/visions.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed route-created Vision readback shows owner and linked task in the Keep right rail.
+- Screenshot proof saved locally at:
+  - `output/playwright/vision-route-task-link-readback.png`
+
+### Drift Check
+- On path. This strengthens the Vision contract trail without creating a new surface or continuation loop.
+- No command runner, browser automation lane, provider call, external write, install, paid service, destructive action, git-write runner, or Raven path was added.
+
+### Known Risks
+- The local dev DB contains additional test/proof Vision, route, task, Workbench, and approval rows.
+- Workbench body and approval links remain read dynamically by route id. The Vision table only stores the task link for now.
+
+### Storage Impact
+- Targeted tests and browser proof wrote local dev DB rows.
+- One browser screenshot was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/visions.ts, app/server/routers/runtime.ts, app/server/routers/ledger.ts, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Current checkpoint includes Visions as local outcome contracts, Aang route receipts can create one linked Vision after saving the route, route task creation backfills that Vision task link, Keep/Ledger Vision readback, and Ledger git-write trail readback. Next best slice is to show linked Vision status compactly in Ledger route rows or route receipt audit, still read-only. Keep Ledger read-only, Project Lab as push context, Terminal Lab as preview surface, and no autonomous continuation loop. Do not add git-write runners, provider calls, external writes, installs, paid services, destructive actions, or Raven paths without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0822 EDT - Aang Route Vision Link Pass
 

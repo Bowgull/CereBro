@@ -252,6 +252,21 @@ async function getRuntimeTaskById(id: number): Promise<TaskRow | null> {
   return row ? mapRuntimeTaskRow(row as Record<string, unknown>) : null;
 }
 
+async function syncVisionTaskForRoute(routeRecordId: number, taskId: number) {
+  const db = await getCerebroDb();
+  await db.execute({
+    sql: `
+      UPDATE visions
+      SET task_id = COALESCE(task_id, ?),
+          updated_at = unixepoch(),
+          status_note = COALESCE(status_note, 'Linked to local task from route receipt.')
+      WHERE route_record_id = ?
+        AND task_id IS NULL
+    `,
+    args: [taskId, routeRecordId],
+  });
+}
+
 async function readRuntimeRouteRecordById(routeRecordId: number) {
   const db = await getCerebroDb();
   const result = await db.execute({
@@ -813,6 +828,7 @@ export const runtimeRouter = router({
       if (linkedTaskId != null) {
         const linkedTask = await getRuntimeTaskById(linkedTaskId);
         if (linkedTask) {
+          await syncVisionTaskForRoute(input.routeRecordId, linkedTaskId);
           return {
             mode: "local_task_record" as const,
             created: false,
@@ -888,6 +904,7 @@ export const runtimeRouter = router({
         `,
         args: [taskId, `runtime_route:${input.routeRecordId}`],
       });
+      await syncVisionTaskForRoute(input.routeRecordId, taskId);
 
       const task = await getRuntimeTaskById(taskId);
       if (!task) {
