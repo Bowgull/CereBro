@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1634 EDT
+Last updated: 2026-05-17 1639 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1639 EDT: added the first Browser V1 shell inside Workbench,
+  not as a new primary surface. The shell follows
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`: generic page tabs, one URL/search
+  field, quiet shield, Watch Shelf drawer, three-dot page actions, first-run
+  empty state, no fake service tabs, no profile picker, no Search tab, no
+  Manual Browser button, and no browser automation. Added
+  `workbenchBrowserShellModel` / `workbenchWatchShelfModel` plus regression
+  coverage to hold that shape.
 - 2026-05-17 1634 EDT: added selected-capability approval readback to Basement
   Model Registry. `modelTools.capabilityApprovalPreviews` reads local
   approval preview rows for one model/tool capability without running

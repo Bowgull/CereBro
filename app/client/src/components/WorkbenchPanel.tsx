@@ -21,6 +21,7 @@ import {
   workbenchPermissionLabel,
   workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
+import { workbenchBrowserShellModel, workbenchWatchShelfModel } from "@/lib/workbenchBrowserModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -102,6 +103,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [filterQuery, setFilterQuery] = useState("");
   const [executionLinkedOnly, setExecutionLinkedOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<EvidenceGroupBy>("project");
+  const [watchShelfOpen, setWatchShelfOpen] = useState(false);
   const evidence = trpc.workbench.evidence.useQuery({
     limit: 30,
     kind: filterKind === "all" ? undefined : filterKind,
@@ -199,6 +201,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const temporaryPreviewCopy = workbenchTemporaryPreviewCopy();
   const receiptGroupCopy = workbenchReceiptGroupCopy();
   const receiptListCopy = workbenchReceiptListCopy();
+  const browserShell = workbenchBrowserShellModel();
+  const watchShelf = workbenchWatchShelfModel();
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -318,6 +322,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     total: projectProofSummary.data?.summary.total ?? 0,
   });
   const workbenchLanes = [
+    {
+      label: "Browser",
+      meta: "Manual page context",
+      kind: "manual_note" as EvidenceKind,
+      agent: "surfer",
+      permission: "manual_note" as PermissionClass,
+      tone: C.success,
+    },
     {
       label: "Preview",
       meta: "Screens, images, browser views",
@@ -655,6 +667,127 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>Focus</span> {stagedDraftNotice}
               </div>
             )}
+
+            <section className="rounded p-2" aria-label="Manual browser shell" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+              <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-[11px] font-bold uppercase tracking-widest">{browserShell.title}</h3>
+                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+                    User-controlled page context. First pass shell only.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-1">
+                  <Chip label={browserShell.status} tone={C.success} />
+                  <Chip label={browserShell.safetyLabel} tone={C.accent} />
+                </div>
+              </div>
+
+              <div className="grid gap-1.5">
+                <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser back planned">‹</Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser forward planned">›</Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser reload planned">↻</Button>
+                  <Input
+                    value=""
+                    readOnly
+                    placeholder={browserShell.addressPlaceholder}
+                    aria-label="Browser address and search field"
+                    className="h-7 flex-1"
+                    title="Address/search will route to the manual browser runner after the runner contract exists."
+                  />
+                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser quiet shield">◇</Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={watchShelfOpen ? "secondary" : "outline"}
+                    className="h-7 px-2"
+                    onClick={() => setWatchShelfOpen((open) => !open)}
+                    aria-expanded={watchShelfOpen}
+                    aria-controls="workbench-watch-shelf"
+                  >
+                    Watch Shelf
+                  </Button>
+                  <details className="relative">
+                    <summary
+                      className="flex h-7 w-7 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      aria-label="Browser page actions"
+                      style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}
+                    >
+                      ⋯
+                    </summary>
+                    <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                      <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+                      {browserShell.actions.map((action) => (
+                        <Button
+                          key={action.label}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          disabled={!action.enabled}
+                          className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                          title={action.plannedReason}
+                          role="menuitem"
+                        >
+                          <span className="block">
+                            <span className="block text-[11px] font-semibold">{action.label}</span>
+                            <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+
+                <div className="flex items-center gap-1 overflow-x-auto rounded p-1" aria-label="Browser page tabs" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  {browserShell.tabs.map((tab) => (
+                    <Button
+                      key={tab.label}
+                      type="button"
+                      size="sm"
+                      variant={tab.active ? "secondary" : "outline"}
+                      disabled={!tab.active}
+                      className="h-7 shrink-0 px-2"
+                      aria-pressed={tab.active}
+                    >
+                      {tab.label}
+                    </Button>
+                  ))}
+                  <Button type="button" size="sm" variant="ghost" disabled className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab planned">+</Button>
+                </div>
+
+                {watchShelfOpen && (
+                  <div id="workbench-watch-shelf" className="rounded p-2" aria-label="Watch Shelf drawer" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}` }}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
+                        <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Drawer. Not a browser tab.</div>
+                      </div>
+                      <Button type="button" size="sm" variant="outline" disabled title="Requires a real open page before it can save.">
+                        {watchShelf.emptyAction}
+                      </Button>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {watchShelf.categories.map((category) => (
+                        <Chip key={category} label={category} tone={category === "Anime" ? C.warning : C.textMuted} />
+                      ))}
+                    </div>
+                    <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                      <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>{watchShelf.emptyTitle}</div>
+                      <div className="mt-1" style={{ color: C.textMuted }}>{watchShelf.emptyBody}</div>
+                    </div>
+                    <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {watchShelf.noActionText}
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded p-3 text-center" aria-label="Browser first-run page" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>{browserShell.emptyTitle}</div>
+                  <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>{browserShell.emptyBody}</div>
+                  <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>{browserShell.noActionText}</div>
+                </div>
+              </div>
+            </section>
 
             <details
               className="rounded p-2"

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1634 EDT
+Last updated: 2026-05-17 1639 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1639 EDT - Workbench Browser V1 Shell
+
+### What Changed
+- Added `workbenchBrowserShellModel` and `workbenchWatchShelfModel`.
+- Added regression coverage to keep the Browser V1 shell honest:
+  generic tabs only, disabled planned page actions, no profile picker, no
+  Search tab, no Manual Browser button, no fake service tabs, and no fake
+  streaming progress.
+- Added the first visible Browser shell inside Workbench, not as a new primary
+  surface.
+- Browser shell includes back/forward/reload placeholders, one URL/search
+  field, quiet shield, Watch Shelf button, three-dot page actions, generic
+  tabs, first-run page, and Watch Shelf drawer.
+- All contextual page actions are disabled/planned until their contracts exist.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench and confirmed Browser shell, URL/search field, Watch Shelf drawer,
+  disabled/planned page-action shape, no fake YouTube tab, no Manual Browser
+  button, and no profile text.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-v1-shell.png`.
+
+### Drift Check
+- On path. The Daily OS browser first pass is inside Workbench per
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- No dedicated Browser nav surface, browser runner, browser automation,
+  persisted service state, fake media progress, source save, Workbench capture,
+  credential action, download, external write, paid service, provider call,
+  model call, install, pull, or Raven path was added.
+
+### Known Risks
+- This is a shell contract pass, not a working browser runner.
+- Disabled page actions are intentionally visible so the shape is clear before
+  wiring real browser/source/storage contracts.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the stable build path. Workbench now contains the first Browser V1 shell with generic tabs, URL/search field, quiet shield, Watch Shelf drawer, and disabled planned page actions. Next best slice is to wire the next honest Browser contract piece inside Workbench, likely local tab state/address draft or Watch Shelf local draft state, without real browser automation or fake service state. Do not add a dedicated Browser nav surface, run browser automation, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1634 EDT - Model Tool Capability Approval Readback
 
