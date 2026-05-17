@@ -368,7 +368,7 @@ export const executionRouter = router({
     .input(
       z
         .object({
-          sourceType: z.literal("command_observation").optional(),
+          sourceType: z.enum(["command_observation", "project_push"]).optional(),
           sourceId: z.number().int().optional(),
           status: z.enum(proposalStatusOptions).optional(),
           limit: z.number().int().min(1).max(100).optional(),

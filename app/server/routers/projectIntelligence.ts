@@ -2,7 +2,7 @@ import { execFile } from "child_process";
 import fs from "fs/promises";
 import { promisify } from "util";
 import { z } from "zod";
-import { getCerebroDb } from "../cerebroDb";
+import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import { sourceDisplayName } from "../displayLabels";
 import {
   GITHUB_PROJECT_MAP_PATH,
@@ -1400,6 +1400,134 @@ export const projectIntelligenceRouter = router({
           createdAt: Number(row.created_at),
         },
         gates,
+      };
+    }),
+
+  createPushActionContract: publicProcedure
+    .input(
+      z.object({
+        slug: z.string().min(1).max(80),
+        workbenchEvidenceId: z.number().int().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const profile = projectProfiles.find((candidate) => candidate.slug === input.slug);
+      if (!profile) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          wouldExecute: false,
+          reason: "Unknown Project Lab profile.",
+        };
+      }
+
+      const snapshot = await projectGitStatusSnapshot({ force: true });
+      const gitStatus = snapshot.projects.find((project) => project.slug === profile.slug);
+      const tasks = await taskRollupForPath(profile.localPath);
+      const activity = await activityRollupForProject(tasks.projectId, profile.slug);
+      const project = {
+        ...profile,
+        localExists: gitStatus?.localExists ?? false,
+        tasks,
+        activity,
+        git: gitStatus?.git ?? emptyGitStatus(),
+      };
+      const pushReadiness = pushReadinessForProject(project);
+      const db = await getCerebroDb();
+      const projectId = await getOrCreateProjectByPath(profile.name, profile.localPath);
+      const task = await db.execute({
+        sql: `
+          INSERT INTO tasks (project_id, title, status, agent)
+          VALUES (?, ?, 'open', 'tony')
+          RETURNING id
+        `,
+        args: [projectId, `Review manual push for ${profile.name}`],
+      });
+      const taskId = Number(task.rows[0]!.id);
+      const approval = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            reason, context_summary, sensitive_data_flag, cost_risk
+          )
+          VALUES (?, 'project_manual_push', 'project', ?, 'spock', ?, ?, 0, 'git_remote_write')
+          RETURNING id
+        `,
+        args: [
+          taskId,
+          projectId,
+          `Approve a manual git push contract for ${profile.name}.`,
+          [
+            `Project: ${profile.name}`,
+            `Path: ${profile.localPath}`,
+            `Branch: ${project.git.branch ?? "unavailable"}`,
+            `Upstream: ${project.git.upstream ?? "none"}`,
+            `Dirty changes: ${project.git.dirtyCount}`,
+            `Readiness: ${pushReadiness.label}`,
+          ].join("\n"),
+        ],
+      });
+      const approvalId = Number(approval.rows[0]!.id);
+      const command = project.git.upstream ? "git push" : `git push -u origin ${project.git.branch ?? "<branch>"}`;
+      const receiptBody = [
+        `Project push action proposal for ${profile.name}.`,
+        `Command target: ${command}`,
+        `Working directory: ${profile.localPath}`,
+        `Risk: git remote write.`,
+        "Executor: Tony after Spock approval.",
+        `Readiness: ${pushReadiness.label}.`,
+        ...pushReadiness.why.map((item) => `Why: ${item}`),
+        ...pushReadiness.checks.map((item) => `Check: ${item}`),
+        "Result state: not run.",
+      ].join("\n");
+      const proposal = await db.execute({
+        sql: `
+          INSERT INTO execution_action_proposals (
+            source_type, source_id, action_type, risk_class, required_approvals,
+            executor_agent, command, cwd, project_id, task_id, approval_id,
+            workbench_evidence_id, receipt_body, result_state, recovery_note, status
+          )
+          VALUES (
+            'project_push', ?, 'project_manual_push', 'git_remote_write', ?, 'tony',
+            ?, ?, ?, ?, ?, ?, ?, 'not_run', ?, 'proposed'
+          )
+          RETURNING id
+        `,
+        args: [
+          projectId,
+          [
+            "Spock git remote write approval",
+            "Tony staged diff review",
+            "Workbench receipt body",
+            "Explicit run request",
+          ].join("\n"),
+          command,
+          profile.localPath,
+          projectId,
+          taskId,
+          approvalId,
+          input.workbenchEvidenceId ?? null,
+          receiptBody,
+          "Remote git writes require a manual rollback note before any runner exists.",
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "approval_gated_push_contract" as const,
+        writesExternal: false,
+        wouldExecute: false,
+        projectId,
+        taskId,
+        approvalId,
+        proposalId: Number(proposal.rows[0]!.id),
+        pushReadiness,
+        gates: [
+          "Created one local Project Lab push action contract.",
+          "Created one pending Spock approval receipt.",
+          "This did not stage, commit, push, pull, fetch, checkout, reset, or edit files.",
+          "The current V1 runner blocks git remote writes even after approval.",
+        ],
       };
     }),
 

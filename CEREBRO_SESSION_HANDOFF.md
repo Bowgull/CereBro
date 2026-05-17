@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0740 EDT
+Last updated: 2026-05-17 0748 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0748 EDT - Project Push Action Contract Pass
+
+### What Changed
+- Continued the approval-gated execution path in Project Lab.
+- Added `projectIntelligence.createPushActionContract`.
+- Project Lab can now create a local push action contract for a project.
+- The contract creates a Tony task, pending Spock approval receipt, and
+  execution proposal linked to the project.
+- The proposal records command target, cwd, risk class, required approvals,
+  Workbench evidence link when provided, receipt body, result state, and
+  recovery note.
+- `execution.proposals` can now read `project_push` proposal rows.
+- `execution.runApprovedAction` remains unchanged for safety. It still refuses
+  anything except approved read-only local command contracts.
+- Project Lab now exposes a compact Action Contract control inside the push
+  decision read. Manual push remains visible. No git command runs from that
+  control.
+
+### Files Touched
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/routers/execution.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Project Lab,
+  opened a push decision read, and confirmed the Action Contract control is
+  visible with the runner-blocked git write copy.
+- Screenshot proof saved locally at
+  `output/playwright/project-lab-push-action-contract.png`.
+
+### Drift Check
+- On path. This advances the Project Lab push readiness/manual push lane.
+- No actual git stage, commit, push, pull, fetch, checkout, reset, file edit,
+  browser action, provider call, model call, external write, install, or paid
+  service was added to CereBro's product runner.
+- The user-facing path stays Aang/Cortana/Spock/Tony shaped. Project Lab shows
+  the push decision without exposing raw machinery as the primary object.
+- Raven remains untouched.
+
+### Known Risks
+- Clicking Create Contract creates append-only local task/approval/proposal
+  rows. There is no dedupe yet.
+- Push execution is intentionally blocked by runner policy even after approval.
+  A future git-write runner requires a separate explicit safety design.
+- The dev database already has many pending approval rows from prior local
+  testing. This pass did not clean them.
+
+### Storage Impact
+- No schema change.
+- Tests wrote local DB rows in the current dev/test database path.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, and app/client/src/components/ProjectLabPanel.tsx first. Continue the approval-gated autonomy lane. Project Lab now creates local push action contracts, but git remote writes are intentionally blocked by the runner. Next best slice is either Project Lab contract dedupe/readback, Approvals queue grouping for project push contracts, or Terminal Lab handoff into Project Lab push context. Do not add a git-write runner, stage/commit/push from CereBro product code, install tools, call providers, browse/fetch, or touch Raven without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0740 EDT - Read-Only Runner And Ledger Receipt Pass
 

@@ -157,4 +157,64 @@ describe("execution action contract", () => {
     await caller.approvals.decide({ id: approvalId, decision: "rejected" });
     await expect(caller.approvals.decide({ id: approvalId, decision: "approved" })).rejects.toThrow("Only pending approvals can be decided.");
   });
+
+  it("creates a Project Lab push contract but keeps git remote writes blocked", async () => {
+    const caller = createCaller();
+    const first = await caller.projectIntelligence.createPushActionContract({
+      slug: "cerebro",
+    });
+    expect(first.ok).toBe(true);
+    expect(first.wouldExecute).toBe(false);
+    expect(first.gates.join(" ")).toContain("did not stage, commit, push");
+
+    const firstRun = await caller.execution.runApprovedAction({
+      proposalId: first.proposalId,
+      approved: true,
+    });
+    expect(firstRun.ok).toBe(false);
+    expect(firstRun.wouldExecute).toBe(false);
+    expect(firstRun.resultState).toBe("blocked_before_runner");
+    expect(firstRun.reason).toContain("Workbench receipt body");
+
+    const evidence = await caller.workbench.createEvidence({
+      kind: "validation_note",
+      title: "Project push contract body",
+      summary: "Project Lab push readiness was reviewed before any git write action.",
+      targetUri: "project_lab:push:cerebro",
+      projectId: first.projectId,
+      taskId: first.taskId,
+      ownerAgent: "spock",
+      routeAgent: "tony",
+      permissionClass: "manual_note",
+    });
+    const ready = await caller.projectIntelligence.createPushActionContract({
+      slug: "cerebro",
+      workbenchEvidenceId: evidence.evidence.id,
+    });
+    await caller.approvals.decide({
+      id: ready.approvalId,
+      decision: "approved",
+      reason: "Test approval for push contract shape only.",
+    });
+
+    const proposals = await caller.execution.proposals({
+      sourceType: "project_push",
+      sourceId: ready.projectId,
+      limit: 5,
+    });
+    const proposal = proposals.items.find((item) => item.id === ready.proposalId);
+    expect(proposal?.actionType).toBe("project_manual_push");
+    expect(proposal?.riskClass).toBe("git_remote_write");
+    expect(proposal?.readiness.canExecute).toBe(true);
+
+    const blocked = await caller.execution.runApprovedAction({
+      proposalId: ready.proposalId,
+      approved: true,
+    });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.wouldExecute).toBe(false);
+    expect(blocked.resultState).toBe("blocked_by_runner_policy");
+    expect(blocked.reason).toContain("Only approved read-only command contracts");
+    expect(blocked.gates.join(" ")).toContain("git write");
+  });
 });

@@ -327,6 +327,16 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
       utils.projectIntelligence.overview.invalidate();
     },
   });
+  const createPushActionContract = trpc.projectIntelligence.createPushActionContract.useMutation({
+    onSuccess: (result) => {
+      if (result.ok) {
+        setLedgerFocusNotice(`Push contract #${result.proposalId} created. Approval #${result.approvalId} is pending. No git command ran.`);
+      } else {
+        setLedgerFocusNotice(result.reason ?? "Push contract was not created.");
+      }
+      utils.projectIntelligence.overview.invalidate();
+    },
+  });
   const detail = trpc.projectIntelligence.detail.useQuery(
     { slug: selectedSlug ?? "" },
     {
@@ -841,13 +851,37 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                       <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
                         <PushModeStrip autoSelected={autoPushArmed} />
                         <ManualPushLine commands={pushReadiness.manualCommands} />
-                        <PushEvidenceStrip
+                          <PushEvidenceStrip
                           branch={pushReadiness.evidence.branch}
                           upstream={pushReadiness.evidence.upstream}
                           dirtyCount={pushReadiness.evidence.dirtyCount}
                           approvalRequired={pushReadiness.automationRequiresApproval}
                           executesGit={pushReadiness.executesGit}
-                        />
+                          />
+                          <div className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                            <div className="flex flex-wrap items-center justify-between gap-1.5">
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textMuted }}>
+                                  Action Contract
+                                </div>
+                                <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
+                                  Create approval receipt and execution proposal. The runner still blocks git remote writes.
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="risk"
+                                size="sm"
+                                disabled={createPushActionContract.isPending}
+                                onClick={() => {
+                                  setPushReceiptSlug(project.slug);
+                                  createPushActionContract.mutate({ slug: project.slug });
+                                }}
+                              >
+                                {createPushActionContract.isPending ? "Creating" : "Create contract"}
+                              </Button>
+                            </div>
+                          </div>
                         <div className="mt-1.5 grid gap-1.5 text-[11px] leading-snug">
                           <PushReceiptBlock title="Why" items={pushReadiness.why} tone={pushTone} />
                           <PushReceiptBlock title="Stays Out" items={pushReadiness.staysOut} tone={C.warning} />
