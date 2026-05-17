@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1639 EDT
+Last updated: 2026-05-17 1649 EDT
 
 ## Current North Star
 
@@ -20,6 +20,61 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1649 EDT - Workbench Browser Address Draft
+
+### What Changed
+- Added `workbenchBrowserDraftModel`.
+- Workbench Browser address input now stores a local draft instead of staying
+  static.
+- URL-like drafts show `Page Draft`; search-like drafts show `Search Draft`.
+- Draft readback shows the staged target, draft kind, and `open blocked`.
+- The `Stage` control remains disabled until the browser runner and approval
+  contracts exist.
+- No typed draft opens, fetches, searches, saves, captures, downloads, writes,
+  or uses credentials.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, typed `https://example.com/path?q=1` into the Browser address
+  field, and confirmed `Page Draft`, the staged URL, `url`, `open blocked`,
+  and the no-action receipt text.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-address-draft.png`.
+
+### Drift Check
+- On path. This advances the Daily OS browser shell inside Workbench without
+  adding a new primary Browser surface.
+- No browser runner, browser automation, page fetch, search request, persisted
+  service state, fake media progress, source save, Workbench capture,
+  credential action, download, external write, paid service, provider call,
+  model call, install, pull, or Raven path was added.
+
+### Known Risks
+- The draft is local UI state only. It does not survive reloads and it does not
+  open pages.
+- Browser runner wiring still needs its own proposal, approval, Spock gate, and
+  receipt contract before any real page action exists.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the stable Daily OS browser path. Workbench Browser now has a local address/search draft that shows Page Draft or Search Draft and keeps opening blocked. Next best slice is a small Watch Shelf local draft/readback or browser tab-state model inside Workbench. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1639 EDT - Workbench Browser V1 Shell
 

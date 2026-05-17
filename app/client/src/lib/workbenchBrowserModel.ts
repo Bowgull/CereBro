@@ -9,6 +9,43 @@ export type WorkbenchBrowserTab = {
   active: boolean;
 };
 
+export type WorkbenchBrowserDraft = {
+  kind: "empty" | "url" | "search";
+  raw: string;
+  displayTarget: string;
+  tabLabel: string;
+  canOpen: boolean;
+  noActionText: string;
+};
+
+function looksLikeUrl(value: string) {
+  return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
+}
+
+export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft {
+  const raw = value.trim();
+  if (!raw) {
+    return {
+      kind: "empty",
+      raw: "",
+      displayTarget: "No page draft.",
+      tabLabel: "Tab 1",
+      canOpen: false,
+      noActionText: "No browser automation, page fetch, search, source save, Workbench capture, or external write runs from an empty draft.",
+    };
+  }
+
+  const kind = looksLikeUrl(raw) ? "url" : "search";
+  return {
+    kind,
+    raw,
+    displayTarget: raw,
+    tabLabel: kind === "url" ? "Page Draft" : "Search Draft",
+    canOpen: false,
+    noActionText: "No browser automation, page fetch, search request, credential action, file transfer, source save, Workbench capture, or external write runs from this draft.",
+  };
+}
+
 export function workbenchBrowserShellModel() {
   return {
     title: "Browser",

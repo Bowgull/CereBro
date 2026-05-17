@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1639 EDT
+Last updated: 2026-05-17 1649 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1649 EDT: added local Browser address/search draft state inside
+  Workbench. Typed URL-like drafts show `Page Draft`; search-like drafts show
+  `Search Draft`; both show staged target, kind, `open blocked`, and no-action
+  receipt text. The `Stage` control remains disabled until browser runner and
+  approval contracts exist. No browser automation, page fetch, search request,
+  service state, source save, Workbench capture, credential action, download,
+  external write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 1639 EDT: added the first Browser V1 shell inside Workbench,
   not as a new primary surface. The shell follows
   `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`: generic page tabs, one URL/search

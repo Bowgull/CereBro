@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  workbenchBrowserDraftModel,
   workbenchBrowserShellModel,
   workbenchWatchShelfModel,
 } from "../client/src/lib/workbenchBrowserModel";
@@ -48,5 +49,26 @@ describe("workbenchBrowserModel", () => {
     expect(combined).not.toContain("resume");
     expect(combined).not.toContain("profile");
     expect(combined).not.toContain("download");
+  });
+
+  it("reads an address draft without opening or fetching the page", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path?q=1");
+    const searchDraft = workbenchBrowserDraftModel("best dub anime sources");
+    const emptyDraft = workbenchBrowserDraftModel("   ");
+
+    expect(urlDraft.kind).toBe("url");
+    expect(urlDraft.displayTarget).toBe("https://example.com/path?q=1");
+    expect(urlDraft.tabLabel).toBe("Page Draft");
+    expect(urlDraft.canOpen).toBe(false);
+    expect(urlDraft.noActionText).toContain("No browser automation");
+
+    expect(searchDraft.kind).toBe("search");
+    expect(searchDraft.displayTarget).toBe("best dub anime sources");
+    expect(searchDraft.tabLabel).toBe("Search Draft");
+    expect(searchDraft.canOpen).toBe(false);
+
+    expect(emptyDraft.kind).toBe("empty");
+    expect(emptyDraft.displayTarget).toBe("No page draft.");
+    expect(emptyDraft.tabLabel).toBe("Tab 1");
   });
 });

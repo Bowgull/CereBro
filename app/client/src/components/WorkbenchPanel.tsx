@@ -21,7 +21,7 @@ import {
   workbenchPermissionLabel,
   workbenchTemporaryPreviewCopy,
 } from "@/lib/workbenchCopyModel";
-import { workbenchBrowserShellModel, workbenchWatchShelfModel } from "@/lib/workbenchBrowserModel";
+import { workbenchBrowserDraftModel, workbenchBrowserShellModel, workbenchWatchShelfModel } from "@/lib/workbenchBrowserModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -104,6 +104,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [executionLinkedOnly, setExecutionLinkedOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<EvidenceGroupBy>("project");
   const [watchShelfOpen, setWatchShelfOpen] = useState(false);
+  const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const evidence = trpc.workbench.evidence.useQuery({
     limit: 30,
     kind: filterKind === "all" ? undefined : filterKind,
@@ -202,6 +203,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const receiptGroupCopy = workbenchReceiptGroupCopy();
   const receiptListCopy = workbenchReceiptListCopy();
   const browserShell = workbenchBrowserShellModel();
+  const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
   const watchShelf = workbenchWatchShelfModel();
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
@@ -688,13 +690,24 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser forward planned">›</Button>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser reload planned">↻</Button>
                   <Input
-                    value=""
-                    readOnly
+                    value={browserAddressDraft}
+                    onChange={(event) => setBrowserAddressDraft(event.target.value)}
                     placeholder={browserShell.addressPlaceholder}
                     aria-label="Browser address and search field"
                     className="h-7 flex-1"
-                    title="Address/search will route to the manual browser runner after the runner contract exists."
+                    title="Stages a local page draft only. It does not open, fetch, search, save, or capture."
                   />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2"
+                    disabled={browserDraft.kind === "empty"}
+                    title="Open is blocked until the manual browser runner contract exists."
+                    aria-label="Stage browser page draft"
+                  >
+                    Stage
+                  </Button>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser quiet shield">◇</Button>
                   <Button
                     type="button"
@@ -752,6 +765,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       {tab.label}
                     </Button>
                   ))}
+                  {browserDraft.kind !== "empty" && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled
+                      className="h-7 shrink-0 px-2"
+                      title="Draft only. No page opened."
+                    >
+                      {browserDraft.tabLabel}
+                    </Button>
+                  )}
                   <Button type="button" size="sm" variant="ghost" disabled className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab planned">+</Button>
                 </div>
 
@@ -782,9 +807,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 )}
 
                 <div className="rounded p-3 text-center" aria-label="Browser first-run page" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
-                  <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>{browserShell.emptyTitle}</div>
-                  <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>{browserShell.emptyBody}</div>
-                  <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>{browserShell.noActionText}</div>
+                  <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                    {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                  </div>
+                  <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                  </div>
+                  <div className="mt-2 flex justify-center gap-1">
+                    <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                    <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                  </div>
+                  <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
+                  </div>
                 </div>
               </div>
             </section>
