@@ -9,6 +9,7 @@ const groupOptions = ["origin", "project", "action_type", "status", "risk"] as c
 const preflightDecisions = ["allowed_local", "proposal_only", "approval_required", "blocked_by_hard_gate"] as const;
 const perceptionClasses = ["explicit_context", "local_files", "terminal_logs", "workbench_media", "public_browser"] as const;
 const actionClasses = ["local_note", "code_edit", "command_execution", "browser_or_media_capture", "external_write", "cleanup"] as const;
+const projectIdSql = "COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id, CASE WHEN a.target_type = 'project' THEN a.target_id END)";
 
 function rowToApproval(row: Record<string, unknown>) {
   const targetType = row.target_type == null ? null : String(row.target_type);
@@ -365,7 +366,7 @@ export const approvalsRouter = router({
       args.push(status);
 
       if (input?.projectId !== undefined) {
-        where.push("COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) = ?");
+        where.push(`${projectIdSql} = ?`);
         args.push(input.projectId);
       }
 
@@ -380,7 +381,7 @@ export const approvalsRouter = router({
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
       } else if (origin === "project_lab") {
-        where.push("(a.target_type IN ('task', 'project') OR COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) IS NOT NULL)");
+        where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
         where.push(`
           a.requested_by_agent != 'hedwig'
@@ -428,9 +429,9 @@ export const approvalsRouter = router({
             a.permission_preflight_id,
             ppr.decision AS preflight_decision,
             ppr.approval_required AS preflight_approval_required,
-            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -441,7 +442,7 @@ export const approvalsRouter = router({
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
-          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC
           LIMIT ?
@@ -465,6 +466,8 @@ export const approvalsRouter = router({
           source: items.filter((item) => item.origin === "source").length,
           raven: items.filter((item) => item.origin === "raven").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
+          projectLab: items.filter((item) => item.origin === "project_lab").length,
+          gitRemoteWrite: items.filter((item) => item.costRisk === "git_remote_write" || item.actionType === "project_manual_push").length,
           preflightLinked: items.filter((item) => item.permissionPreflightId != null).length,
         },
         gates: [
@@ -495,10 +498,10 @@ export const approvalsRouter = router({
             ppr.perception_class AS preflight_perception_class,
             ppr.action_class AS preflight_action_class,
             ppr.target_summary AS preflight_target_summary,
-            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -509,7 +512,7 @@ export const approvalsRouter = router({
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
-          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE a.id = ?
           LIMIT 1
         `,
@@ -552,7 +555,7 @@ export const approvalsRouter = router({
       args.push(status);
 
       if (input?.projectId !== undefined) {
-        where.push("COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) = ?");
+        where.push(`${projectIdSql} = ?`);
         args.push(input.projectId);
       }
 
@@ -567,7 +570,7 @@ export const approvalsRouter = router({
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
       } else if (origin === "project_lab") {
-        where.push("(a.target_type IN ('task', 'project') OR COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) IS NOT NULL)");
+        where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
         where.push(`
           a.requested_by_agent != 'hedwig'
@@ -622,10 +625,10 @@ export const approvalsRouter = router({
             ppr.perception_class AS preflight_perception_class,
             ppr.action_class AS preflight_action_class,
             ppr.target_summary AS preflight_target_summary,
-            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -636,7 +639,7 @@ export const approvalsRouter = router({
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
-          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC
           LIMIT ?
@@ -660,6 +663,8 @@ export const approvalsRouter = router({
           source: items.filter((item) => item.origin === "source").length,
           raven: items.filter((item) => item.origin === "raven").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
+          projectLab: items.filter((item) => item.origin === "project_lab").length,
+          gitRemoteWrite: items.filter((item) => item.costRisk === "git_remote_write" || item.actionType === "project_manual_push").length,
         },
         gates: [
           "This dashboard reads local approval previews only.",
@@ -692,7 +697,7 @@ export const approvalsRouter = router({
       args.push(status);
 
       if (input?.projectId !== undefined) {
-        where.push("COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) = ?");
+        where.push(`${projectIdSql} = ?`);
         args.push(input.projectId);
       }
 
@@ -707,7 +712,7 @@ export const approvalsRouter = router({
       } else if (origin === "source") {
         where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
       } else if (origin === "project_lab") {
-        where.push("(a.target_type IN ('task', 'project') OR COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) IS NOT NULL)");
+        where.push(`(a.target_type IN ('task', 'project') OR ${projectIdSql} IS NOT NULL)`);
       } else if (origin === "other") {
         where.push(`
           a.requested_by_agent != 'hedwig'
@@ -752,10 +757,10 @@ export const approvalsRouter = router({
             a.requested_by_agent, a.status, a.reason, a.context_summary,
             a.sensitive_data_flag, a.cost_risk, a.decided_at, a.created_at,
             a.permission_preflight_id,
-            COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id) AS project_id,
+            ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -765,7 +770,7 @@ export const approvalsRouter = router({
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
           LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
-          LEFT JOIN projects p ON p.id = COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id)
+          LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC
           LIMIT 100

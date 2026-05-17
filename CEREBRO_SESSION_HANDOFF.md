@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0752 EDT
+Last updated: 2026-05-17 0756 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0756 EDT - Approvals Project Push Risk Readback Pass
+
+### What Changed
+- Hardened Approvals queue readback for Project Lab push contracts.
+- Approval project resolution now includes approvals whose `target_type` is
+  `project`, not only approvals linked through tasks or observations.
+- Project push approvals now show the project name as the compact target label.
+- Compact approval queue summaries now include `projectLab` and
+  `gitRemoteWrite` counts.
+- Approval Queue UI now shows a `Git Writes` summary count.
+- Project push approval rows now show a visible `git write blocked` chip.
+- Approval receipt chain now routes `project_manual_push` and
+  `git_remote_write` approvals back to Project Lab with copy that states git
+  writes remain blocked in V1.
+- Tests now prove project push approvals appear in the project approval queue,
+  carry the `git_remote_write` risk, group by risk, and remain read-only.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/execution.contract.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Approvals,
+  filtered Projects for `project_manual_push`, and confirmed `Git Writes 1`
+  plus the `git write blocked` chip.
+- Screenshot proof saved locally at
+  `output/playwright/approvals-project-push-git-write-readback.png`.
+
+### Drift Check
+- On path. This makes the existing approval-gated push lane readable without
+  adding any execution path.
+- No git write runner was added.
+- No git stage, commit, push, pull, fetch, checkout, reset, file edit, browser
+  action, provider call, model call, external write, install, or paid service
+  was added to CereBro's product runner.
+- Raven remains untouched.
+
+### Known Risks
+- The local dev DB still has historical approval rows. This pass makes git
+  write risk legible but does not clean local data.
+- The queue still approves only through the existing approval decision path.
+  Product execution remains blocked separately by `execution.runApprovedAction`.
+
+### Storage Impact
+- No schema change.
+- Tests wrote local DB rows in the current dev/test database path.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, and app/client/src/components/TerminalLabPanel.tsx first. Continue the approval-gated autonomy lane. Project Lab push contracts now dedupe, read back latest contract status, and Approvals shows git-write risk clearly. Next best slice is Terminal Lab to Project Lab handoff for git-related observations, so git commands are taught and routed to Project Lab push context instead of being treated as ordinary terminal actions. Do not add a git-write runner, stage/commit/push from CereBro product code, install tools, call providers, browse/fetch, or touch Raven without explicit approval. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0752 EDT - Project Push Contract Readback Dedupe Pass
 

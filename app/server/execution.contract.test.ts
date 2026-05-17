@@ -211,6 +211,33 @@ describe("execution action contract", () => {
     expect(proposal?.riskClass).toBe("git_remote_write");
     expect(proposal?.readiness.canExecute).toBe(true);
 
+    const approvalStatus = ready.contract?.approvalStatus === "approved" ? "approved" : "pending";
+    const projectApprovals = await caller.approvals.queue({
+      origin: "project_lab",
+      status: approvalStatus,
+      query: "project_manual_push",
+      limit: 20,
+    });
+    expect(projectApprovals.mode).toBe("compact_read_only");
+    expect(projectApprovals.writesExternal).toBe(false);
+    expect(projectApprovals.wouldApprove).toBe(false);
+    expect(projectApprovals.summary.projectLab).toBeGreaterThan(0);
+    expect(projectApprovals.summary.gitRemoteWrite).toBeGreaterThan(0);
+    const queuedPushApproval = projectApprovals.items.find((item) => item.id === ready.approvalId);
+    expect(queuedPushApproval?.origin).toBe("project_lab");
+    expect(queuedPushApproval?.projectName).toBe("CereBro");
+    expect(queuedPushApproval?.targetLabel).toBe("CereBro");
+    expect(queuedPushApproval?.costRisk).toBe("git_remote_write");
+
+    const projectApprovalGroups = await caller.approvals.groups({
+      groupBy: "risk",
+      origin: "project_lab",
+      status: approvalStatus,
+      query: "project_manual_push",
+    });
+    expect(projectApprovalGroups.groups.map((group) => group.key)).toContain("git_remote_write");
+    expect(projectApprovalGroups.gates.join(" ")).toContain("does not approve");
+
     const blocked = await caller.execution.runApprovedAction({
       proposalId: ready.proposalId,
       approved: true,

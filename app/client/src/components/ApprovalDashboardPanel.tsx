@@ -117,6 +117,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   );
   const selected = selectedDetail.data?.approval ?? null;
   const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
+  const gitWriteCount = approvals.data?.summary.gitRemoteWrite ?? 0;
   const preflightItems = preflightsOpen ? preflights.data?.items ?? [] : [];
   const preflightTotal = preflightsOpen ? preflights.data?.summary.total ?? 0 : null;
   const blockedPreflights = preflightsOpen ? preflights.data?.summary.blocked ?? 0 : null;
@@ -155,9 +156,10 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           </Button>
         </div>
 
-        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4" aria-label={copy.summaryAria}>
+        <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-5" aria-label={copy.summaryAria}>
           <ReceiptStat label={copy.stats.pending} value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
           <ReceiptStat label={copy.stats.sensitive} value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
+          <ReceiptStat label="Git Writes" value={String(gitWriteCount)} tone={gitWriteCount > 0 ? C.danger : C.textMuted} />
           <ReceiptStat label={copy.stats.checks} value={preflightTotal == null ? copy.stats.closed : String(preflightTotal)} tone={preflightTotal == null ? C.textMuted : C.accent} />
           <ReceiptStat label={copy.stats.blocked} value={blockedPreflights == null ? copy.stats.closed : String(blockedPreflights)} tone={(blockedPreflights ?? 0) > 0 ? C.danger : C.textMuted} />
         </div>
@@ -404,6 +406,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                       <Chip label={labelize(item.status)} tone={item.status === "pending" ? C.warning : C.textMuted} />
                       {item.sensitive && <Chip label="sensitive" tone={C.danger} />}
                       {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
+                      {(item.costRisk === "git_remote_write" || item.actionType === "project_manual_push") && <Chip label="git write blocked" tone={C.danger} />}
                       {item.permissionPreflightId != null && <Chip label={copy.checkedChip} tone={item.permissionPreflight?.approvalRequired ? C.warning : C.accent} />}
                     </span>
                     <span className="mt-1.5 block text-[11px] font-semibold" style={{ color: C.textPrimary }}>
@@ -609,6 +612,13 @@ function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route
       label: "Model Tools",
       route: "model_tools",
       reason: "Review capability setup. The queue does not run the check.",
+    };
+  }
+  if (item.actionType === "project_manual_push" || item.costRisk === "git_remote_write") {
+    return {
+      label: "Project Lab",
+      route: "projects",
+      reason: "Review branch, dirty state, Workbench body, and push contract. Git writes remain blocked in V1.",
     };
   }
   if (item.targetType === "command_observation" || item.actionType.startsWith("terminal_")) {
