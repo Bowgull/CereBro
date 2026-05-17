@@ -45,6 +45,15 @@ export type WorkbenchBrowserActionPreview = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserReadiness = {
+  statusLabel: "runner blocked";
+  pageStateLabel: "no page" | "draft staged";
+  canOpen: boolean;
+  canRunAutomation: boolean;
+  requiredGates: string[];
+  noActionText: string;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -131,6 +140,17 @@ export function workbenchBrowserActionPreviewModel(
     statusLabel: draft.kind === "empty" ? "no page" : "blocked",
     routeLabel: draft.kind === "empty" ? "Open or stage a page first." : "Needs runner and approval contract.",
     noActionText: "No page action, browser automation, page fetch, source save, Workbench capture, shelf save, project pin, explanation route, clipboard write, or external write runs from this preview.",
+  };
+}
+
+export function workbenchBrowserReadinessModel(draft: WorkbenchBrowserDraft): WorkbenchBrowserReadiness {
+  return {
+    statusLabel: "runner blocked",
+    pageStateLabel: draft.kind === "empty" ? "no page" : "draft staged",
+    canOpen: false,
+    canRunAutomation: false,
+    requiredGates: ["Runner contract", "Approval receipt", "Spock gate", "Workbench body"],
+    noActionText: "No browser runner, browser automation, page open, page fetch, credential action, source save, Workbench capture, download, or external write is available from this readiness read.",
   };
 }
 

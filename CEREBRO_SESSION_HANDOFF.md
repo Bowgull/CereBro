@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1702 EDT
+Last updated: 2026-05-17 1706 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1706 EDT - Workbench Browser Readiness Readback
+
+### What Changed
+- Added `workbenchBrowserReadinessModel`.
+- Browser shell now shows `Runner Readiness` with `runner blocked` and page
+  state readback.
+- A staged Browser draft shows `draft staged`; empty state shows `no page`.
+- Required gates are visible as `Runner contract`, `Approval receipt`,
+  `Spock gate`, and `Workbench body`.
+- Readiness explicitly keeps `canOpen` and `canRunAutomation` false.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, typed `https://example.com/readiness`, and confirmed `RUNNER
+  READINESS`, `RUNNER BLOCKED`, `DRAFT STAGED`, all four required gates, the
+  staged URL, and no-browser-runner copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-readiness.png`.
+
+### Drift Check
+- On path. This advances Daily OS browser readiness inside Workbench without
+  enabling runner access.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, persisted tab state, source
+  save, Workbench capture, shelf save, project pin, explanation route,
+  clipboard write, credential action, download, external write, paid service,
+  provider call, model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Readiness is local display only.
+- Actual runner readiness still needs backend contracts for runner, approval,
+  Spock gate, Workbench body, result receipt, and recovery note.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/WorkbenchPanel.tsx first. Continue CereBro on the stable Daily OS browser path. Workbench Browser now has local address/search drafts, Watch Shelf drawer readback, tab-state readback, blocked page-action previews, and runner-readiness readback. Next best slice is to either tighten the browser shell UX copy/layout or begin the backend proposal contract for browser page actions while keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1702 EDT - Workbench Browser Action Preview
 

@@ -24,6 +24,7 @@ import {
 import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
+  workbenchBrowserReadinessModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -217,6 +218,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserAction =
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
+  const browserReadiness = workbenchBrowserReadinessModel(browserDraft);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -774,6 +776,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       </div>
                     </div>
                   </details>
+                </div>
+
+                <div className="grid gap-1.5 rounded p-2 md:grid-cols-[minmax(0,1fr)_auto]" aria-label="Browser runner readiness" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                        Runner Readiness
+                      </span>
+                      <Chip label={browserReadiness.statusLabel} tone={C.warning} />
+                      <Chip label={browserReadiness.pageStateLabel} tone={browserReadiness.pageStateLabel === "no page" ? C.textMuted : C.accent} />
+                    </div>
+                    <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserReadiness.noActionText}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-start gap-1 md:justify-end" aria-label="Browser runner gates">
+                    {browserReadiness.requiredGates.map((gate) => (
+                      <Chip key={gate} label={gate} tone={C.textMuted} />
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1 overflow-x-auto rounded p-1" aria-label="Browser page tabs" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>

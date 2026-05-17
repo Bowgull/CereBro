@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
+  workbenchBrowserReadinessModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -139,5 +140,29 @@ describe("workbenchBrowserModel", () => {
     expect(emptyPreview.targetLabel).toBe("No page draft.");
     expect(emptyPreview.statusLabel).toBe("no page");
     expect(emptyPreview.canPropose).toBe(false);
+  });
+
+  it("reads browser readiness without granting runner access", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const urlReadiness = workbenchBrowserReadinessModel(urlDraft);
+    const emptyReadiness = workbenchBrowserReadinessModel(emptyDraft);
+
+    expect(urlReadiness.statusLabel).toBe("runner blocked");
+    expect(urlReadiness.pageStateLabel).toBe("draft staged");
+    expect(urlReadiness.canOpen).toBe(false);
+    expect(urlReadiness.canRunAutomation).toBe(false);
+    expect(urlReadiness.requiredGates).toEqual([
+      "Runner contract",
+      "Approval receipt",
+      "Spock gate",
+      "Workbench body",
+    ]);
+    expect(urlReadiness.noActionText).toContain("No browser runner");
+
+    expect(emptyReadiness.pageStateLabel).toBe("no page");
+    expect(emptyReadiness.canOpen).toBe(false);
+    expect(emptyReadiness.canRunAutomation).toBe(false);
   });
 });
