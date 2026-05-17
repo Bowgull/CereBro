@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0429 EDT
+Last updated: 2026-05-17 0445 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0445 EDT: continued item 9 Model and Tool Registry hardening.
+  Added `modelTools.registryAudit`, a read-only backend contract that reports
+  capability count, eval note count, trust distribution, source readiness, lane
+  counts, gates, and no-action proof. The audit reports no external/local model
+  calls, no installs, no pulls, no browser/fetch, no external writes, and no
+  route default changes. Test coverage proves the read does not mutate
+  capability records, eval notes, approvals, or preflights. No provider, model,
+  gateway, browser, install, pull, local inference, UI surface, dependency, or
+  Raven path was added.
 - 2026-05-17 0441 EDT: finished item 8 by surfacing
   `runtime.routeReceiptAudit` inside the existing Ledger route card. Saved
   routes now have a `Read Audit` control that renders Task, Body, Gate,

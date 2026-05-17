@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0441 EDT
+Last updated: 2026-05-17 0445 EDT
 
 ## Current North Star
 
@@ -20,6 +20,82 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0445 EDT - Model Registry Audit Contract
+
+### What Changed
+- Continued item 9 Model and Tool Registry hardening.
+- Added `modelTools.registryAudit`, a read-only backend query for the Basement
+  model/tool registry contract.
+- The audit read returns total capability records, eval note count, trust
+  distribution, source readiness, lane counts, gate text, and no-action proof.
+- The audit explicitly reports no external model calls, no local model calls,
+  no installs, no pulls, no browser/fetch, no external writes, and no route
+  default changes.
+- Added test coverage proving the registry audit read does not mutate
+  capability records, eval notes, approvals, or permission preflights.
+- No provider, model, gateway, browser, install, pull, local inference,
+  account, token, file write, memory write, external write, UI surface, or
+  Raven path was added.
+
+### Files Touched
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-model-registry-audit.db' pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- Browser screenshot proof was not run because this was a backend read-only
+  contract with no UI change.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice model tools router, model tools
+  local-first test, and docs.
+- No dev server was started or left running for this slice.
+- No worker was used because this was one backend registry read plus one
+  focused test.
+
+### Front-End Steward Review
+- Surface: no UI surface changed.
+- Register: backend contract for Basement Model Registry.
+- Primary object: local model/tool capability registry trust state.
+- User question: what can the registry claim without running anything.
+- Route visible to backend callers: trust counts, source readiness, eval notes,
+  lane counts, approval gates, and no-action proof.
+- Gate visible: route defaults stay unchanged; provider/model/install/pull
+  actions read false.
+- Machinery hidden until needed: no model switch, provider runner, install
+  runner, browser runner, or local inference runner was exposed.
+- Generic UI rejected: no new dashboard or fake model readiness score was
+  added.
+
+### Completion Read
+- Overall: 78%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 76%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Model Tools now has
+`registryAudit`, a read-only backend contract for registry trust and no-action
+proof. Next best path is surfacing this audit in the existing Basement Model
+Registry surface without adding a new dashboard, or continuing item 9 with
+source/eval status hardening. Do not run Ollama status checks, installs,
+pulls, external searches, provider calls, model calls, note scans, vector
+indexing, source fetches, cleanup actions, command execution runners, route
+saves, task creation, or vault writes without explicit approval.
 
 ## 2026-05-17 0441 EDT - Ledger Route Audit Strip
 

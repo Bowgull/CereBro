@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
+import { getCerebroDb } from "./cerebroDb";
 
 function createCaller() {
   return appRouter.createCaller({
@@ -7,6 +8,12 @@ function createCaller() {
     req: {} as never,
     res: {} as never,
   });
+}
+
+async function countRows(table: string) {
+  const db = await getCerebroDb();
+  const result = await db.execute(`SELECT COUNT(*) AS count FROM ${table}`);
+  return Number(result.rows[0]?.count ?? 0);
 }
 
 describe("Model Tools local-first routing policy", () => {
@@ -337,5 +344,72 @@ describe("Model Tools local-first routing policy", () => {
     expect(policy.statusDecisionReadback.mode).toBe("local_registry_readback");
     expect(policy.statusDecisionReadback.routeDefaultsChanged).toBe(false);
     expect(policy.statusDecisionReadback.evalReady).toBeGreaterThanOrEqual(1);
+  });
+
+  it("reads a registry audit without running models, providers, installs, or writes", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    await caller.modelTools.proposeCapability({
+      provider: `Audit Source ${stamp}`,
+      toolName: "Audit source candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      riskReview: "Public docs only.",
+      validationNotes: "Local registry audit test.",
+    });
+    const trusted = await caller.modelTools.proposeCapability({
+      provider: `Audit Trusted ${stamp}`,
+      toolName: "Audit trusted candidate",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:audit",
+      riskReview: "Local only.",
+      validationNotes: "Local registry audit test.",
+    });
+    await caller.modelTools.updateCapabilityStatus({
+      capabilityId: trusted.capability.id,
+      evalStatus: "tested_pass",
+      validationNotes: "Spock accepted local registry evidence for audit test.",
+    });
+
+    const before = {
+      capabilities: await countRows("model_tool_capabilities"),
+      evals: await countRows("model_tool_evals"),
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+    };
+    const audit = await caller.modelTools.registryAudit();
+
+    expect(audit).toMatchObject({
+      mode: "read_only",
+      register: "basement_model_registry",
+      ownerAgent: "spock",
+      routeDefaultsChanged: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      writesExternal: false,
+    });
+    expect(audit.totalRecords).toBeGreaterThanOrEqual(2);
+    expect(audit.trust.evalReady).toBeGreaterThanOrEqual(1);
+    expect(audit.source.needsSourceReview).toBeGreaterThanOrEqual(1);
+    expect(audit.lanes.local_first).toBeGreaterThanOrEqual(1);
+    expect(audit.lanes.external_gateway).toBeGreaterThanOrEqual(1);
+    expect(audit.gates.join(" ")).toContain("not route defaults");
+    expect(audit.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(audit.noActionTaken.join(" ")).toContain("local model_tool_capabilities");
+
+    expect(await countRows("model_tool_capabilities")).toBe(before.capabilities);
+    expect(await countRows("model_tool_evals")).toBe(before.evals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights);
   });
 });

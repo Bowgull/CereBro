@@ -617,6 +617,46 @@ function statusDecisionReadbackFromSummary(summary?: Awaited<ReturnType<typeof r
   };
 }
 
+function registryAuditFromSummary(summary: Awaited<ReturnType<typeof readCapabilityMapSummary>>) {
+  return {
+    mode: "read_only" as const,
+    register: "basement_model_registry" as const,
+    ownerAgent: "spock" as const,
+    routeDefaultsChanged: false,
+    callsExternalModels: false,
+    callsLocalModels: false,
+    installsDependencies: false,
+    pullsModels: false,
+    browsesOrFetches: false,
+    writesExternal: false,
+    totalRecords: summary.totalRecords,
+    evalNotes: summary.evalNotes,
+    trust: {
+      sourceReady: summary.sourceReadiness.sourceReady,
+      evalReady: summary.sourceReadiness.evalReady,
+      mixed: summary.sourceReadiness.testedMixed,
+      failed: summary.sourceReadiness.testedFail,
+      stale: summary.sourceReadiness.stale,
+      blocked: summary.blockedRecords,
+    },
+    source: {
+      missingSources: summary.sourceReadiness.missingSources,
+      needsSourceReview: summary.sourceReadiness.needsSourceReview,
+    },
+    lanes: summary.mapCounts,
+    gates: [
+      "Model and tool records are local capability proposals.",
+      "Source-ready and eval-ready states are registry evidence, not route defaults.",
+      "External model/tool use still requires a visible approval receipt.",
+      "Install, pull, provider call, browser use, and background inference stay blocked from this read.",
+    ],
+    noActionTaken: [
+      "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, account, payment, route default, file write, memory write, or external write ran.",
+      "Registry audit reads local model_tool_capabilities and model_tool_evals rows only.",
+    ],
+  };
+}
+
 const capabilityMap = [
   {
     id: "local_first",
@@ -745,6 +785,8 @@ async function readCapabilityMapSummary() {
 }
 
 export const modelToolsRouter = router({
+  registryAudit: publicProcedure.query(async () => registryAuditFromSummary(await readCapabilityMapSummary())),
+
   policy: publicProcedure.query(async () => {
     const capabilityMapSummary = await readCapabilityMapSummary();
 
