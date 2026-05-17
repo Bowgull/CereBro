@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2338 EDT
+Last updated: 2026-05-16 2341 EDT
 
 ## Current North Star
 
@@ -20,6 +20,89 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-16 2341 EDT - Source Save Receipt Readback
+
+### What Changed
+- Continued item 7 Knowledge/source contracts.
+- Added `sourceSaveReceipt` to Surfer's approved public URL ingest response.
+- The receipt reports source id, artifact id, source-event id, HTTP status,
+  content type, fetch status, browser/search status, local-write status,
+  external-write status, memory-write status, route-default status, and
+  retrieval-automation status.
+- Research now shows the save receipt after an approved ingest instead of a
+  thin saved-source line.
+- This makes source saving auditable without adding source automation, note
+  scanning, vector indexing, Obsidian writes, Notion writes, Drive writes,
+  memory writes, model calls, or route-default changes.
+- No provider, model, tool, gateway, browser, search, install, token, account
+  action, model pull, external write, schema migration, dependency, route
+  default change, new primary surface, command runner, or Raven path was added.
+
+### Files Touched
+- `app/server/routers/surfer.ts`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-source-save-receipt-red.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `sourceSaveReceipt` was missing.
+- Green check:
+  `CEREBRO_DB_URL='file:/tmp/cerebro-source-save-receipt-green.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`
+  after restarting the dev server.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- While working, `CEREBRO_SESSION_HANDOFF.md` already had an uncommitted
+  previous-slice browser-proof update. It was preserved and folded into this
+  closeout.
+- Dev server restarted and remains running at `http://localhost:3000/` for
+  preview.
+- No worker was used because this was one source-save response contract plus
+  one existing Research readback.
+
+### Front-End Steward Review
+- Surface: Research.
+- Register: product surface.
+- Primary object: saved source receipt.
+- User question: what happened when a source was saved.
+- Route visible: source id, source-event id, artifact id, no browser, and
+  retrieval off are visible after save.
+- Receipt/proof visible: the source save receipt now names local records and
+  what did not run.
+- Machinery hidden until needed: no RAG dashboard, note scanner, vector store,
+  source automation panel, or provider control was added.
+- Generic UI rejected: no generic research dashboard or AI source marketplace
+  was added.
+- Remaining taste risk: Research remains dense. Future polish should group
+  receipt proof, not add more always-open machinery.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 48%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Source saves now return a visible
+receipt in Research. Next best path is a small Workbench knowledge-route polish
+pass or the next source/memory contract slice, depending on dirty files. Do not
+run Ollama status checks, installs, pulls, external searches, provider calls,
+model calls, note scans, vector indexing, source fetches, or vault writes
+without explicit approval.
 
 ## 2026-05-16 2338 EDT - Project Knowledge Route Read
 
