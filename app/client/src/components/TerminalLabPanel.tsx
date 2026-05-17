@@ -1221,6 +1221,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                             {result.stdoutSummary || result.stderrSummary || "No output."}
                           </div>
+                          {result.recoveryNote && (
+                            <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug" style={{ color: result.status === "completed" ? C.success : C.warning }}>
+                              Recovery: {result.recoveryNote}
+                            </div>
+                          )}
                         </div>
                       ))
                     )}

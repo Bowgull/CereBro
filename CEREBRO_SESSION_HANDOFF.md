@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0904 EDT
+Last updated: 2026-05-17 0908 EDT
 
 ## Current North Star
 
@@ -20,6 +20,52 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0908 EDT - Execution Recovery Note Readback
+
+### What Changed
+- Terminal Lab recent execution receipts now show recovery notes.
+- Ledger execution result cards now show recovery notes.
+- Added regression coverage proving execution result reads and Ledger audit
+  rows preserve the recovery note.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Terminal
+  Lab and Ledger both show recovery notes, including `No recovery needed`.
+- Screenshot proof saved locally at
+  `output/playwright/execution-recovery-note-readback.png`.
+
+### Drift Check
+- On path. This makes the existing execution receipt more complete without
+  adding a surface or broadening execution.
+- First live execution lane remains limited to approved, allowlisted,
+  shell-disabled local read-only commands.
+- No git-write runner, install, destructive action, browser automation,
+  provider call, external write, paid service, new primary surface, or Raven
+  path was added.
+
+### Known Risks
+- Local browser proof depends on current dev DB execution receipts. The backend
+  regression creates and verifies recovery-note readback directly.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Terminal Lab and Ledger now show execution recovery notes, Ledger opens linked Workbench bodies, and Workbench shows exact staged focus notices. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to deepen Workbench validation status around execution result bodies or add existing-surface approval receipt links to execution result cards. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0904 EDT - Workbench Focus Notice Readback
 

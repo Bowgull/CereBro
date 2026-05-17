@@ -1889,6 +1889,11 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                   <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>
                     {item.stdoutSummary || item.stderrSummary || item.receiptBody}
                   </div>
+                  {item.recoveryNote && (
+                    <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: item.status === "completed" ? C.success : C.warning }}>
+                      Recovery: {item.recoveryNote}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

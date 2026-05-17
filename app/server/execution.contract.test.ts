@@ -93,6 +93,7 @@ describe("execution action contract", () => {
     expect(results.writesExternal).toBe(false);
     expect(results.items[0]?.status).toBe("completed");
     expect(results.items[0]?.receiptBody).toContain(`action proposal #${ready.proposal?.id}`);
+    expect(results.items[0]?.recoveryNote).toBe("No recovery needed for a read-only command.");
 
     const ledger = await caller.ledger.overview({ evidenceLimit: 10 });
     expect(ledger.cards.execution.total).toBeGreaterThan(0);
@@ -103,6 +104,7 @@ describe("execution action contract", () => {
     expect(ledgerResult?.actionType).toBe("local_read_only_command");
     expect(ledgerResult?.taskId).toBe(task.id);
     expect(ledgerResult?.workbenchEvidenceId).toBe(evidence.evidence.id);
+    expect(ledgerResult?.recoveryNote).toBe("No recovery needed for a read-only command.");
   });
 
   it("blocks approved contracts that are not read-only allowlisted commands", async () => {

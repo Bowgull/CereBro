@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0904 EDT
+Last updated: 2026-05-17 0908 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0908 EDT: surfaced execution recovery notes in Terminal Lab
+  recent execution receipts and Ledger execution result cards. Regression
+  coverage now proves execution result reads and Ledger audit rows preserve the
+  recovery note. No runner broadening.
 - 2026-05-17 0904 EDT: fixed Workbench staged focus readback. Ledger-to-
   Workbench jumps now show the exact `Focus Ledger opened Workbench body...`
   notice near the receipt chain, and the receipt creation panel repeats the
