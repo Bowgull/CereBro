@@ -141,6 +141,14 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       refetchOnReconnect: false,
     },
   );
+  const executionResults = trpc.execution.results.useQuery(
+    { limit: 5 },
+    {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
   const createExecutionProposal = trpc.execution.proposeFromCommandObservation.useMutation();
   const runApprovedAction = trpc.execution.runApprovedAction.useMutation();
   const createTaskFromObservation = trpc.terminalLab.createTaskFromObservation.useMutation();
@@ -1190,6 +1198,34 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                       : runApprovedAction.data.reason}
                   </div>
                 )}
+                <div className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }} aria-label="Recent execution receipts">
+                  <SectionTitle title="Recent Results" detail="Ledger receipts" />
+                  <div className="mt-1.5 space-y-1">
+                    {executionResults.isLoading ? (
+                      <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>Reading local result receipts.</div>
+                    ) : executionResults.data?.items.length === 0 ? (
+                      <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                        No result receipts yet. Approved read-only runs appear here after Ledger records them.
+                      </div>
+                    ) : (
+                      executionResults.data?.items.slice(0, 3).map((result) => (
+                        <div key={result.id} className="rounded px-2 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                          <div className="flex flex-wrap items-center gap-1">
+                            <Chip label={`result #${result.id}`} tone={result.status === "completed" ? C.success : C.warning} />
+                            <Chip label={`exit ${result.exitCode ?? "none"}`} tone={result.exitCode === 0 ? C.success : C.warning} />
+                            <Chip label={result.timedOut ? "timed out" : result.status.replace(/_/g, " ")} tone={result.timedOut ? C.danger : C.textMuted} />
+                          </div>
+                          <div className="mt-1 truncate text-[10px]" style={{ color: C.textSecondary }} title={result.command}>
+                            {result.command}
+                          </div>
+                          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                            {result.stdoutSummary || result.stderrSummary || "No output."}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
 

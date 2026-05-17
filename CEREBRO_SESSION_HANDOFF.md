@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0849 EDT
+Last updated: 2026-05-17 0851 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0851 EDT - Terminal Result Receipt Readback
+
+### What Changed
+- Added compact `Recent Results` readback inside Terminal Lab's existing
+  Execution Contract section.
+- Terminal Lab now shows recent local execution result receipts with result id,
+  exit code, timeout/status, command, and redacted stdout/stderr summary.
+- The readback uses `execution.results`; it does not create a new surface or
+  bypass Ledger.
+- Empty state explains that approved read-only runs appear after Ledger records
+  them.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Terminal Lab
+  renders `Execution Contract`, `Recent Results`, `Ledger receipts`, visible
+  result rows, and no stale runner-blocked copy.
+- Screenshot proof saved locally at
+  `output/playwright/terminal-execution-result-receipts.png`.
+
+### Drift Check
+- On path. This strengthens the existing Terminal Lab -> Ledger receipt loop.
+- Terminal Lab remains a compact command teaching and execution-readback lane.
+- Ledger remains the audit trail. This is only a local readback of Ledger-style
+  execution receipts.
+- No new surface, command broadening, git-write runner, install, destructive
+  action, browser automation, provider call, external write, paid service, or
+  Raven path was added.
+
+### Known Risks
+- Result rows depend on the local dev DB containing execution receipts. Tests
+  cover the result contract; browser proof confirmed current rows render.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, and app/client/src/components/TerminalLabPanel.tsx first. Continue the approval-gated autonomy build path. Terminal Lab now distinguishes blocked gates from ready approved read-only contracts and shows compact recent execution result receipts. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to improve Workbench receipt body linking for execution contracts or add a compact Ledger execution receipt detail read without expanding machinery. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0849 EDT - Terminal Execution Contract Copy Correction
 

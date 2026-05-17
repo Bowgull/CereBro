@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0849 EDT
+Last updated: 2026-05-17 0851 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0851 EDT: added compact `Recent Results` readback to Terminal
+  Lab's existing Execution Contract section. It reads local execution result
+  receipts with result id, exit code, timeout/status, command, and redacted
+  output summary. This keeps the Terminal Lab -> Ledger loop visible without
+  creating a new surface or broadening the runner.
 - 2026-05-17 0849 EDT: corrected Terminal Lab execution contract copy after
   the read-only runner landed. Ready read-only contracts now show
   `Run Approved Read`; blocked, mutating, external, destructive, and git-write
