@@ -10,6 +10,12 @@ Use it before touching UI, motion, copy, screenshots, assets, or prototypes.
 The existing castle spec still rules the pixel scene. This file tells agents how
 to build the whole product around it without falling back to generic AI UI.
 
+Active redesign contract:
+
+- `CEREBRO_UI_REDESIGN_CONTRACT.md` locks the V1 shell direction. Verdigris
+  Ivory is the Keep shell theme. Graphite Candle is the dense work-surface
+  theme. Soft Parchment is rejected as the global shell.
+
 Primary reference:
 
 - `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md`
@@ -82,6 +88,8 @@ Use:
 - compact information density
 - purposeful motion
 - practical castle cues
+- Verdigris Ivory shell material for the Keep and command frame
+- Graphite Candle material for dense work surfaces
 
 Do not use:
 
@@ -95,6 +103,8 @@ Do not use:
 - hero sections inside internal tools
 - fantasy labels that make the product feel like cosplay
 - placeholder art presented as final
+- Soft Parchment as the global shell
+- RPG labels for core OS actions
 
 ## Color Tokens
 

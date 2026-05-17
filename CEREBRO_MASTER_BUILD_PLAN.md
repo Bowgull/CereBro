@@ -25,6 +25,11 @@ Current build instruction:
 
 - CereBro is being built to replace the Codex chat as the user's everyday AI
   operating layer.
+- `CEREBRO_UI_REDESIGN_CONTRACT.md` is active. The current V1 path starts with
+  the redesign contract and controlled shell sweep because approval-gated
+  autonomy needs a clear control surface. Verdigris Ivory is the Keep shell
+  theme. Graphite Candle is the dense work-surface theme. Soft Parchment is
+  rejected as the global shell.
 - While CereBro is still under construction, Tony/Codex sessions remain the
   external build worker. The work they do is evidence for CereBro's future
   workflow: inspect, plan, build, verify, archive, resume.
@@ -57,6 +62,9 @@ Current build-session plugin rule:
 
 Current front-end build path:
 
+0. **Redesign contract and shell foundation.** Lock the theme, anatomy, hidden
+   machinery rules, and screenshot-proof rollout before touching execution
+   controls. Do not replace the Phaser Keep or add rooms.
 1. **Keep-first UX spine.** The Keep remains the product spine. The first read
    should answer what CereBro thinks the user is doing, who owns it, what proof
    exists, and what needs approval.

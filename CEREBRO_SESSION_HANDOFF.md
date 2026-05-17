@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0506 EDT
+Last updated: 2026-05-17 0700 EDT
 
 ## Current North Star
 
@@ -20,6 +20,104 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0700 EDT - UI Redesign Contract And Shell Foundation
+
+### What Changed
+- Implemented the first approval-gated autonomy build block by locking the V1
+  UI redesign contract before widening execution work.
+- Added `CEREBRO_UI_REDESIGN_CONTRACT.md`.
+- Locked Verdigris Ivory as the Keep shell theme.
+- Locked Graphite Candle as the dense work-surface theme.
+- Rejected Soft Parchment as the global shell.
+- Linked the contract from `DESIGN.md`, `CEREBRO_MASTER_BUILD_PLAN.md`, and
+  `CEREBRO_BUILD_QUEUE.md`.
+- Updated the build queue so redesign contract and shell foundation now precede
+  execution wiring.
+- Added `cerebroTheme` token aliases without changing chamber data, agent
+  count, floor count, route state labels, or castle anatomy.
+- Started the first narrow shell foundation in `Home.tsx`: product UI now uses
+  system sans by default, with Verdigris Ivory shell frame, plaque left rail,
+  softer Aang route rail, Graphite Candle workspace header baseline, and a more
+  instrument-like command bar.
+- Preserved the Phaser Keep. No room, sprite, route executor, command runner,
+  model call, browser action, external write, paid service, dependency, or
+  Raven path was added.
+- Added `.superpowers/` to `.gitignore` so local brainstorming artifacts stay
+  out of the repo.
+
+### Files Touched
+- `.gitignore`
+- `CEREBRO_UI_REDESIGN_CONTRACT.md`
+- `DESIGN.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `app/client/src/lib/keepConfig.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian session snapshot and index.
+
+### Checks Run
+- `pnpm -C app check` passed.
+- Local dev server is running at `http://localhost:3000/`.
+- Browser proof used headless Chrome against `http://127.0.0.1:3000/` after
+  marking the establishing shot seen in localStorage.
+- Screenshot proof saved to:
+  `output/playwright/ui-redesign-shell-foundation.png`.
+- Targeted Vitest was not run because no router, schema, execution, model,
+  ledger, or storage behavior changed.
+
+### Front-End Steward Review
+- Surface: main CereBro shell.
+- Register: product surface.
+- Primary object: Keep-first AI OS control frame.
+- Hidden machinery: model/tool internals, audits, execution runners, provider
+  calls, installs, and raw debug proof stay out of the main shell.
+- Visible control: Aang route read, Cortana route, owner, receipt target,
+  approval gate, next action, and preview-only command state remain visible.
+- Screenshot proof: `output/playwright/ui-redesign-shell-foundation.png`.
+- Remaining taste risk: this is only the shell foundation. Individual surfaces
+  still need the Graphite Candle pass and hard-gate modal polish.
+
+### Cleanliness Read
+- Dirty files at start: `.gitignore` only.
+- Dirty files before closeout: current-slice docs and shell files only.
+- Worker used: one read-only explorer for frontend ownership mapping. No worker
+  edited files.
+- The dev server remains running because the user wanted the local preview up.
+
+### Drift Check
+- On path because the user explicitly approved starting the finished V1 plan
+  with redesign before execution wiring.
+- No Phaser Keep replacement, new primary surface, room count change, agent
+  count change, execution runner, external integration, paid service, or Raven
+  movement occurred.
+- Deferred: Project Lab, Terminal Lab, Workbench, Ledger, Approvals, Sources,
+  and Basement surface sweeps; execution contracts; approval-gated local
+  command lane.
+
+### Completion Read
+- Overall: 80%.
+- Foundation/docs/planning: 98%.
+- Frontend visible loop: 99%.
+- UI redesign foundation: 18%.
+- Backend/runtime: 77%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_REDESIGN_CONTRACT.md`, and
+`CEREBRO_UI_TASTE_AUDIT.md`. Continue the controlled redesign shell sweep.
+Start with a dirty-file read. The first contract and shell foundation are in
+place. Next best slice is Graphite Candle normalization for Project Lab and
+Terminal Lab, then hard-gate modal/Approval surface shape. Do not touch
+`KeepScene.tsx`, chamber data, agent count, floor count, execution runners,
+provider calls, browser automation, installs, paid services, or Raven paths.
+Run `pnpm -C app check` and browser-proof material UI changes.
 
 ## 2026-05-17 0506 EDT - Overall Build Audit
 

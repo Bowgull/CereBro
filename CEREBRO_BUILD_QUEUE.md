@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0453 EDT
+Last updated: 2026-05-17 0618 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -30,16 +30,17 @@ cross-lane conflict, or dirty-worktree ambiguity.
 
 Build in this order:
 
-1. Handoff integrity.
-2. Keep-first visible loop.
-3. Project Lab as map.
-4. Terminal Lab as Aang's build-teaching lane.
-5. Workbench as receipt body and visual proof.
-6. Ledger as receipts and audit trail.
-7. Knowledge contracts before knowledge automation.
-8. Backend route receipts before agent execution.
-9. Model and Tool Registry as basement capability map.
-10. Animation, companion overlay, and walkthrough last.
+1. Redesign contract and shell foundation.
+2. Handoff integrity.
+3. Keep-first visible loop.
+4. Project Lab as map.
+5. Terminal Lab as Aang's build-teaching lane.
+6. Workbench as receipt body and visual proof.
+7. Ledger as receipts and audit trail.
+8. Knowledge contracts before knowledge automation.
+9. Backend route receipts before agent execution.
+10. Model and Tool Registry as basement capability map.
+11. Animation, companion overlay, and walkthrough last.
 
 Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
 
@@ -60,6 +61,22 @@ Stop and ask when:
 - context bloat makes a summary and clear better than continuing
 
 ## Now
+
+### 2026-05-17 Active Redesign Foundation
+
+- `CEREBRO_UI_REDESIGN_CONTRACT.md` is active.
+- Current slice: controlled shell foundation before execution wiring.
+- Theme lock: Verdigris Ivory for Keep shell, Graphite Candle for dense work
+  surfaces, Soft Parchment rejected as global shell.
+- Keep anatomy lock: 11 agents, 3 floors, no extra rooms, no user sprite, no
+  Phaser Keep replacement, no castle art replacement in the first redesign
+  pass.
+- Rollout order: contract and shell tokens, main shell frame, Keep home route
+  read, Project Lab, Terminal Lab, Workbench, Ledger, Approvals, Sources,
+  Basement.
+- Execution remains blocked until route receipt, work object, approval receipt,
+  risk class, executor, result receipt, and recovery note contracts exist and
+  pass tests.
 
 ### 2026-05-14 Active Worker Topology
 

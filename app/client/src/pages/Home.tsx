@@ -44,7 +44,7 @@ import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel";
-import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
+import { FLOORS, cerebroColors as C, cerebroTheme as T, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
 import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel, type RouteAction } from "@/lib/routeActionModel";
@@ -165,6 +165,9 @@ const MODE_ROUTES: Record<Mode, string[]> = {
   build: ["Aang", "Cortana", "Tony", "Spock"],
 };
 
+const shellFrame = T.verdigrisIvory;
+const workFrame = T.graphiteCandle;
+
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
@@ -254,7 +257,11 @@ export default function Home() {
   return (
     <div
       className="h-screen flex flex-col overflow-hidden"
-      style={{ background: C.background, color: C.textPrimary, fontFamily: "'IBM Plex Mono', 'Courier New', monospace" }}
+      style={{
+        background: `radial-gradient(circle at 50% -20%, ${shellFrame.shellRaised} 0%, ${shellFrame.shellSoft} 34%, ${shellFrame.shell} 100%)`,
+        color: C.textPrimary,
+        fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      }}
     >
       <EstablishingShot />
 
@@ -262,12 +269,12 @@ export default function Home() {
       <header
         className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 shrink-0"
         aria-label="Keep header"
-        style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+        style={{ background: shellFrame.shellSoft, borderBottom: `1px solid ${shellFrame.shellLine}` }}
       >
         <div className="flex items-center gap-1.5 shrink-0">
           <div
             className="w-6 h-6 flex items-center justify-center rounded"
-            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.gold }}
+            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass }}
           >
             <span className="text-sm leading-none">◆</span>
           </div>
@@ -284,12 +291,12 @@ export default function Home() {
         <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
           <div
             className="flex min-w-0 items-center gap-1.5 rounded px-2 py-1"
-            style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}` }}
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>
               {ZONE_NAV_ITEMS.find((item) => item.zone === NAV_TO_ZONE[nav])?.label ?? "Keep"}
             </span>
-            <span className="h-3 w-px shrink-0" style={{ background: C.borderSoft }} />
+            <span className="h-3 w-px shrink-0" style={{ background: shellFrame.shellLineSoft }} />
             <span className="truncate text-[11px] leading-none" style={{ color: C.textMuted }}>
               <span style={{ color: C.gold }}>Aang</span> reads. <span style={{ color: C.accentViolet }}>Cortana</span> routes. Ledger records.
             </span>
@@ -303,7 +310,7 @@ export default function Home() {
             className="flex h-7 items-center gap-1.5 rounded px-1.5 text-[11px] shrink-0"
             role="status"
             aria-label={`Connection status: ${connected ? "Online" : "Offline"}`}
-            style={{ border: `1px solid ${C.borderSoft}`, background: C.surface }}
+            style={{ border: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}
           >
             <span className="w-2 h-2 rounded-full" style={{ background: connected ? C.success : C.danger }} />
             <span className="hidden sm:inline text-[11px] font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
@@ -382,7 +389,7 @@ export default function Home() {
         <nav
           className="w-12 lg:w-44 flex flex-col shrink-0 overflow-hidden"
           aria-label="CereBro zones"
-          style={{ background: C.backgroundSoft, borderRight: `1px solid ${C.borderSoft}` }}
+          style={{ background: shellFrame.shellSoft, borderRight: `1px solid ${shellFrame.shellLine}` }}
         >
           <div className="flex-1 overflow-y-auto py-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
@@ -397,17 +404,17 @@ export default function Home() {
                   className="h-auto w-full justify-start rounded-none px-2 py-1.5 text-left"
                   variant="ghost"
                   style={{
-                    background: isActive ? C.surfaceRaised : "transparent",
-                    borderLeft: isActive ? `2px solid ${C.accent}` : "2px solid transparent",
+                    background: isActive ? shellFrame.shellPlaqueActive : "transparent",
+                    borderLeft: isActive ? `2px solid ${shellFrame.brass}` : "2px solid transparent",
                     color: isActive ? C.textPrimary : C.textSecondary,
                   }}
                 >
                   <span
                     className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-sm"
                     style={{
-                      background: isActive ? C.surfaceMuted : "transparent",
-                      color: isActive ? C.accent : C.textMuted,
-                      border: `1px solid ${isActive ? C.borderSoft : "transparent"}`,
+                      background: isActive ? shellFrame.shellPlaque : "transparent",
+                      color: isActive ? shellFrame.brass : C.textMuted,
+                      border: `1px solid ${isActive ? shellFrame.shellLine : "transparent"}`,
                     }}
                   >
                     {item.glyph}
@@ -424,14 +431,14 @@ export default function Home() {
           </div>
           <div
             className="px-2 py-1.5 text-[10px] leading-snug hidden lg:block"
-            style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface, color: C.textMuted }}
+            style={{ borderTop: `1px solid ${shellFrame.shellLine}`, background: shellFrame.shellPlaque, color: C.textMuted }}
           >
             {connMode === "live" ? "Live. Watching ~/.claude/." : "Demo. Simulated sessions."}
           </div>
         </nav>
 
         {/* Center workspace */}
-        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: C.background }}>
+        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: workFrame.slabMuted }}>
           <ZoneHeader nav={nav} onNavigate={setNav} />
 
           <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
@@ -507,7 +514,7 @@ export default function Home() {
           <aside
             className="w-[270px] shrink-0 flex flex-col overflow-hidden"
             aria-label="Context panel"
-            style={{ background: C.backgroundSoft, borderLeft: `1px solid ${C.borderSoft}` }}
+            style={{ background: shellFrame.shellSoft, borderLeft: `1px solid ${shellFrame.shellLine}` }}
           >
             <ContextPanel
               agent={activeAgent}
@@ -653,7 +660,7 @@ function HomeView({
     <div className="h-full flex flex-col">
       <div
         className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
-        style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+        style={{ background: shellFrame.shellSoft, borderBottom: `1px solid ${shellFrame.shellLineSoft}` }}
       >
         <div className="flex items-center gap-1">
           {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
@@ -682,7 +689,7 @@ function HomeView({
           })}
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${shellFrame.shellLineSoft}` }}>
             {(["blueprint", "scene"] as const).map((id) => {
               const isActive = keepView === id;
               return (
@@ -800,7 +807,7 @@ function KeepHomeDock({
     <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
       <div
         className="pointer-events-auto grid grid-cols-2 lg:grid-cols-[0.95fr_repeat(4,1fr)] gap-1.5 rounded p-1.5"
-        style={{ background: `${C.background}e8`, border: `1px solid ${C.borderSoft}` }}
+        style={{ background: `${shellFrame.shell}ed`, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: `0 14px 40px ${shellFrame.shell}cc` }}
         aria-label="Keep first actions"
       >
         <div className="hidden lg:block px-2 py-1">
@@ -823,7 +830,7 @@ function KeepHomeDock({
             aria-label={`${action.label}: ${action.meta}`}
             variant="outline"
             className="h-auto justify-start whitespace-normal px-2 py-1.5 text-left"
-            style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}
+            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textSecondary }}
           >
             <span className="block w-full min-w-0">
               <span className="flex items-center justify-between gap-2">
@@ -887,10 +894,10 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
   return (
     <div
       className="flex shrink-0 items-center gap-1.5 overflow-hidden px-2.5 py-1.5"
-      style={{ background: C.backgroundSoft, borderBottom: `1px solid ${C.borderSoft}` }}
+      style={{ background: workFrame.slab, borderBottom: `1px solid ${workFrame.lineSoft}` }}
     >
       <div className="hidden xl:flex min-w-[150px] items-center gap-2">
-        <div className="h-7 w-1 rounded-full" style={{ background: C.accent }} />
+        <div className="h-7 w-1 rounded-full" style={{ background: shellFrame.brass }} />
         <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
             {zoneItem.label}
@@ -905,7 +912,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
         className="flex flex-1 items-stretch gap-1 overflow-x-auto"
         role="group"
         aria-label={`${zoneItem.label} surfaces`}
-        style={{ scrollbarColor: `${C.border} ${C.backgroundSoft}` }}
+        style={{ scrollbarColor: `${workFrame.line} ${workFrame.slab}` }}
       >
         {surfaces.map((surface) => {
           const isActive = nav === surface.id;
@@ -919,9 +926,9 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
               className="h-7 shrink-0 justify-start whitespace-normal px-2 text-left"
               variant={isActive ? "secondary" : "outline"}
               style={{
-                background: isActive ? C.surfaceRaised : C.surface,
+                background: isActive ? workFrame.slabRaised : workFrame.slabMuted,
                 color: isActive ? C.textPrimary : C.textSecondary,
-                border: `1px solid ${isActive ? C.accentSoft : C.borderSoft}`,
+                border: `1px solid ${isActive ? shellFrame.brassSoft : workFrame.lineSoft}`,
               }}
               title={surface.meta}
             >
@@ -944,7 +951,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
             key={receipt}
             variant={zone === "ledger" ? "warning" : "secondary"}
             className="px-1.5 py-0.5"
-            style={{ color: zone === "ledger" ? C.gold : C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+            style={{ color: zone === "ledger" ? C.gold : C.textMuted, background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}
           >
             {receipt}
           </Badge>
@@ -2381,10 +2388,10 @@ function ContextPanel({
       {/* Active Agent */}
       <div
         className="px-2.5 py-2 shrink-0"
-        style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+        style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}
       >
-        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Active Agent
+        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: shellFrame.ivoryMuted }}>
+          Aang Route Read
         </div>
         {agent ? (
           <>
@@ -2413,24 +2420,24 @@ function ContextPanel({
       <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Aang Read</div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Mode</div>
             <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{MODE_LABELS[mode]}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Model</div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Owner</div>
             <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={agent?.defaultModelClass}>
-              {agent?.defaultModelClass ?? "—"}
+              {owner}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellSoft }}>
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
             Visible Chain
           </div>
-          <Badge variant="violet" className="px-1.5 py-0.5" style={{ background: C.surfaceMuted, color: C.accentViolet, border: `1px solid ${C.borderSoft}` }}>
+          <Badge variant="violet" className="px-1.5 py-0.5" style={{ background: shellFrame.shellPlaque, color: C.accentViolet, border: `1px solid ${shellFrame.shellLineSoft}` }}>
             {activeSurface}
           </Badge>
         </div>
@@ -2444,7 +2451,7 @@ function ContextPanel({
       {/* Tool Permissions */}
       <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Tool Scope
+          Proof
         </div>
         {agent?.toolScope?.length ? (
           <div className="flex flex-wrap gap-1">
@@ -2453,7 +2460,7 @@ function ContextPanel({
                 key={t}
                 variant="secondary"
                 className="px-1.5 py-0.5"
-                style={{ background: C.surfaceMuted, color: C.textSecondary, border: `1px solid ${C.borderSoft}` }}
+                style={{ background: shellFrame.shellPlaque, color: C.textSecondary, border: `1px solid ${shellFrame.shellLineSoft}` }}
               >
                 {t}
               </Badge>
@@ -2573,7 +2580,7 @@ function ContextPanel({
 
 function RailRow({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded px-2 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+    <div className="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded px-2 py-1" style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}` }}>
       <div className="text-[10px] uppercase tracking-wider" style={{ color: tone }}>
         {label}
       </div>
@@ -2633,9 +2640,9 @@ function CommandBar({
       }}
       className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 px-2.5 py-1.5 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
       aria-label="Ask Aang command bar"
-      style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}
+      style={{ background: shellFrame.shellSoft, borderTop: `1px solid ${shellFrame.shellLine}`, boxShadow: `0 -14px 34px ${shellFrame.shell}99` }}
     >
-      <div className="flex h-7 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${C.borderSoft}` }}>
+      <div className="flex h-7 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${shellFrame.brassSoft}` }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
           <Button
             key={m}
@@ -2647,7 +2654,7 @@ function CommandBar({
             size="sm"
             className="h-full rounded-none px-1.5 sm:px-2"
             style={{
-              background: mode === m ? C.accentSoft : "transparent",
+              background: mode === m ? shellFrame.shellPlaqueActive : "transparent",
               color: mode === m ? C.textPrimary : C.textMuted,
             }}
           >
@@ -2666,8 +2673,8 @@ function CommandBar({
             placeholder="Ask Aang. Cortana routes it."
             className="h-7 flex-1 min-w-0"
             style={{
-              background: C.surface,
-              border: `1px solid ${C.borderSoft}`,
+              background: shellFrame.shellPlaque,
+              border: `1px solid ${shellFrame.shellLine}`,
               color: C.textPrimary,
             }}
           />
@@ -2712,7 +2719,7 @@ function CommandBar({
         variant="outline"
         size="sm"
         className="hidden h-7 shrink-0 px-2 lg:block"
-        style={{ border: `1px solid ${C.borderSoft}`, color: latestRiskTone, background: C.surface }}
+        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: latestRiskTone, background: shellFrame.shellPlaque }}
         title={latestReceipt ? latestReceipt.targetUri : "No security receipts recorded"}
       >
         {latestReceipt ? `Spock ${latestReceipt.riskLevel}` : "Spock clear"}
@@ -2725,7 +2732,7 @@ function CommandBar({
         variant="secondary"
         size="sm"
         className="h-7 shrink-0 px-2"
-        style={{ border: `1px solid ${C.borderSoft}`, color: C.textMuted, opacity: 0.6 }}
+        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textMuted, background: shellFrame.shellPlaque, opacity: 0.6 }}
         title="Phase 6"
       >
         Attach
@@ -2738,9 +2745,9 @@ function CommandBar({
         size="sm"
         className="h-7 shrink-0 px-2"
         style={{
-          border: `1px solid ${C.borderSoft}`,
+          border: `1px solid ${value.trim() && !isClassifying ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
           color: value.trim() && !isClassifying ? C.textPrimary : C.textMuted,
-          background: value.trim() && !isClassifying ? C.accentSoft : "transparent",
+          background: value.trim() && !isClassifying ? shellFrame.shellPlaqueActive : "transparent",
           opacity: value.trim() && !isClassifying ? 1 : 0.6,
         }}
         title="Preview routing"

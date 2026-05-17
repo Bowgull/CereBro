@@ -35,6 +35,36 @@ export const cerebroColors = {
   parapet:      "#1F2632",
 } as const;
 
+export const cerebroTheme = {
+  verdigrisIvory: {
+    shell: "#071513",
+    shellSoft: "#0B1B18",
+    shellRaised: "#112620",
+    shellPlaque: "#132A24",
+    shellPlaqueActive: "#19382F",
+    shellLine: "#24483F",
+    shellLineSoft: "#18362F",
+    ivory: "#F4EFE3",
+    ivoryMuted: "#BDB4A3",
+    verdigris: "#4DAA9A",
+    verdigrisSoft: "#1F6F64",
+    brass: "#C69B55",
+    brassSoft: "#6C5430",
+  },
+  graphiteCandle: {
+    slab: "#11161D",
+    slabRaised: "#171D26",
+    slabMuted: "#0D1218",
+    line: "#27313F",
+    lineSoft: "#1B2430",
+    candle: "#D7B16C",
+    candleSoft: "#7B5E33",
+    risk: "#E46D61",
+    caution: "#D9A75F",
+    healthy: "#8FBEA5",
+  },
+} as const;
+
 export type FloorId = "upper" | "ground" | "crypts";
 
 export interface FloorMeta {
