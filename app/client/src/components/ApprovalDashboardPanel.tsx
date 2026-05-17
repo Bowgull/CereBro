@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
@@ -19,6 +19,13 @@ type StatusFilter = "pending" | "approved" | "rejected" | "cancelled";
 type GroupFilter = "origin" | "project" | "action_type" | "status" | "risk";
 type ApprovalRoute = "security" | "terminal" | "workbench" | "projects" | "sources" | "inbox" | "model_tools";
 type SelectOption = { value: string; label: string };
+type ApprovalFocusDraft = {
+  approvalId?: number;
+  status?: StatusFilter;
+  origin?: OriginFilter;
+  query?: string;
+  notice?: string;
+};
 
 const origins: Array<{ id: OriginFilter; label: string }> = [
   { id: "all", label: "All" },
@@ -66,6 +73,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const [groupBy, setGroupBy] = useState<GroupFilter>("origin");
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [preflightsOpen, setPreflightsOpen] = useState(false);
+  const [focusNotice, setFocusNotice] = useState<string | null>(null);
 
   const projects = trpc.projectIntelligence.overview.useQuery();
   const projectOptions = useMemo(
@@ -110,10 +118,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   );
 
   const items = approvals.data?.items ?? [];
-  const selectedPreview = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
+  const selectedPreviewId = selectedId ?? items[0]?.id ?? null;
+  const selectedPreview = selectedPreviewId == null ? null : items.find((item) => item.id === selectedPreviewId) ?? null;
   const selectedDetail = trpc.approvals.detail.useQuery(
-    { id: selectedPreview?.id ?? 0 },
-    { enabled: selectedPreview != null },
+    { id: selectedPreviewId ?? 0 },
+    { enabled: selectedPreviewId != null },
   );
   const selected = selectedDetail.data?.approval ?? null;
   const sensitiveCount = approvals.data?.summary.sensitive ?? 0;
@@ -122,6 +131,27 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const preflightTotal = preflightsOpen ? preflights.data?.summary.total ?? 0 : null;
   const blockedPreflights = preflightsOpen ? preflights.data?.summary.blocked ?? 0 : null;
   const copy = approvalPanelCopy();
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:approvals-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:approvals-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as ApprovalFocusDraft;
+      if (draft.status && statuses.some((item) => item.id === draft.status)) setStatus(draft.status);
+      if (draft.origin && origins.some((item) => item.id === draft.origin)) setOrigin(draft.origin);
+      if (typeof draft.query === "string") setQuery(draft.query);
+      if (typeof draft.approvalId === "number") setSelectedId(draft.approvalId);
+      setFocusNotice(draft.notice ?? "Approval receipt focused.");
+    } catch {
+      setFocusNotice("Approval focus could not be read. Use queue search.");
+    }
+  }, []);
 
   function openSecurityGate(target: string | null | undefined) {
     if (!target?.trim() || !onNavigate) return;
@@ -299,6 +329,15 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
             ? copy.gateLoading
             : copy.gateStatus(items.length, status, approvals.data?.summary.sensitive ?? 0)}
         </div>
+        {focusNotice && (
+          <div
+            role="status"
+            className="mt-2 rounded px-2 py-1.5 text-[11px] leading-snug"
+            style={{ background: G.slabRaised, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}
+          >
+            <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>Focus</span> {focusNotice}
+          </div>
+        )}
 
         <details
           className="mt-2 rounded p-2"
@@ -395,8 +434,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                   className="h-auto w-full justify-start rounded p-2 text-left"
                   variant="secondary"
                   style={{
-                    background: selectedPreview?.id === item.id ? G.slabRaised : G.slab,
-                    border: `1px solid ${selectedPreview?.id === item.id ? G.candleSoft : G.lineSoft}`,
+                    background: selectedPreviewId === item.id ? G.slabRaised : G.slab,
+                    border: `1px solid ${selectedPreviewId === item.id ? G.candleSoft : G.lineSoft}`,
                     color: C.textPrimary,
                   }}
                 >

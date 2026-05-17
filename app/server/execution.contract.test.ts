@@ -100,6 +100,7 @@ describe("execution action contract", () => {
     expect(ledger.latestExecutionResults.map((item) => item.id)).toContain(runnerGuard.resultId);
     const ledgerResult = ledger.latestExecutionResults.find((item) => item.id === runnerGuard.resultId);
     expect(ledgerResult?.command).toBe("pwd");
+    expect(ledgerResult?.approvalId).toBe(approvalId);
     expect(ledgerResult?.riskClass).toBe("read_only");
     expect(ledgerResult?.actionType).toBe("local_read_only_command");
     expect(ledgerResult?.taskId).toBe(task.id);

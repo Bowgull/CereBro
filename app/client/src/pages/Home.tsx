@@ -1188,6 +1188,26 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     onNavigate("workbench");
   }
 
+  function openExecutionApprovalReceipt(item: { id: number; approvalId: number | null; command: string }) {
+    if (item.approvalId == null) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:approvals-focus",
+        JSON.stringify({
+          source: "ledger_execution_result",
+          approvalId: item.approvalId,
+          status: "approved",
+          origin: "all",
+          query: "",
+          notice: `Ledger opened approval #${item.approvalId} from execution result #${item.id}.`,
+        }),
+      );
+    } catch {
+      // Approvals still opens; the user can inspect the approved queue manually.
+    }
+    onNavigate("approvals");
+  }
+
   function openProjectPushContext(item: { id: number; projectId: number | null; projectName: string | null }) {
     try {
       window.sessionStorage.setItem(
@@ -1850,6 +1870,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       {item.status.replace(/_/g, " ")}
                     </Badge>
                     <Badge variant="warning" className="uppercase">proposal #{item.proposalId ?? "none"}</Badge>
+                    <Badge variant={item.approvalId ? "success" : "secondary"} className="uppercase">approval #{item.approvalId ?? "none"}</Badge>
                     <Badge variant="secondary" className="uppercase">{item.durationMs}ms</Badge>
                   </div>
                   <div className="mt-1 truncate rounded px-2 py-1 text-[11px]" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textPrimary }} title={item.command}>
@@ -1884,6 +1905,26 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       }
                     >
                       Open Body
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="h-7 px-2"
+                      onClick={() => openExecutionApprovalReceipt(item)}
+                      disabled={item.approvalId == null}
+                      title={
+                        item.approvalId
+                          ? `Open approval receipt #${item.approvalId}. Ledger keeps the execution audit read-only.`
+                          : "No approval receipt is linked to this execution result."
+                      }
+                      aria-label={
+                        item.approvalId
+                          ? `Open approval receipt ${item.approvalId} for execution result ${item.id}`
+                          : `Execution result ${item.id} has no approval receipt`
+                      }
+                    >
+                      Open Approval
                     </Button>
                   </div>
                   <div className="mt-1 line-clamp-2 text-[10px] leading-snug" style={{ color: C.textMuted }} title={item.stdoutSummary || item.stderrSummary || item.receiptBody}>

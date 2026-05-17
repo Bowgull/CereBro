@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0908 EDT
+Last updated: 2026-05-17 0913 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0913 EDT: added approval receipt focus to Ledger execution
+  result cards. Existing result cards now show approval ids and can open the
+  linked approval in the Approvals panel with a focus notice. Approval detail
+  can load the focused id directly, even if the current queue filter does not
+  already include it.
 - 2026-05-17 0908 EDT: surfaced execution recovery notes in Terminal Lab
   recent execution receipts and Ledger execution result cards. Regression
   coverage now proves execution result reads and Ledger audit rows preserve the
