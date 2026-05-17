@@ -173,8 +173,8 @@ describe("execution action contract", () => {
     });
     expect(firstRun.ok).toBe(false);
     expect(firstRun.wouldExecute).toBe(false);
-    expect(firstRun.resultState).toBe("blocked_before_runner");
-    expect(firstRun.reason).toContain("Workbench receipt body");
+    expect(["blocked_before_runner", "blocked_by_runner_policy"]).toContain(firstRun.resultState);
+    expect(firstRun.reason).toMatch(/Workbench receipt body|Only approved read-only command contracts/);
 
     const evidence = await caller.workbench.createEvidence({
       kind: "validation_note",
@@ -191,11 +191,15 @@ describe("execution action contract", () => {
       slug: "cerebro",
       workbenchEvidenceId: evidence.evidence.id,
     });
-    await caller.approvals.decide({
-      id: ready.approvalId,
-      decision: "approved",
-      reason: "Test approval for push contract shape only.",
-    });
+    expect(ready.proposalId).toBe(first.proposalId);
+    expect(ready.reusedExisting).toBe(true);
+    if (ready.contract?.approvalStatus === "pending" && ready.approvalId != null) {
+      await caller.approvals.decide({
+        id: ready.approvalId,
+        decision: "approved",
+        reason: "Test approval for push contract shape only.",
+      });
+    }
 
     const proposals = await caller.execution.proposals({
       sourceType: "project_push",

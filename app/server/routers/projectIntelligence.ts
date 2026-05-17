@@ -846,6 +846,47 @@ type ProjectOverviewItem = (typeof projectProfiles)[number] & {
 
 type PushReadinessState = "hold_dirty" | "commit_locally" | "push_branch" | "open_pr" | "needs_cleanup";
 
+function rowToPushContractSummary(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    approvalId: row.approval_id == null ? null : Number(row.approval_id),
+    approvalStatus: row.approval_status == null ? null : String(row.approval_status),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    actionType: String(row.action_type),
+    riskClass: String(row.risk_class),
+    command: row.command == null ? null : String(row.command),
+    resultState: String(row.result_state),
+    status: String(row.status),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+    canRunInV1: false,
+    gate: "Git remote writes are blocked by the V1 runner.",
+  };
+}
+
+async function latestPushContractForProject(projectId: number | null) {
+  if (projectId == null) return null;
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT eap.*,
+             a.status AS approval_status
+      FROM execution_action_proposals eap
+      LEFT JOIN approvals a ON a.id = eap.approval_id
+      WHERE eap.source_type = 'project_push'
+        AND eap.source_id = ?
+        AND eap.action_type = 'project_manual_push'
+      ORDER BY eap.created_at DESC, eap.id DESC
+      LIMIT 1
+    `,
+    args: [projectId],
+  });
+  const row = result.rows[0];
+  return row ? rowToPushContractSummary(row) : null;
+}
+
 function pushReadinessForProject(project: ProjectOverviewItem) {
   const blockers: string[] = [];
   const why: string[] = [];
@@ -916,6 +957,7 @@ function pushReadinessForProject(project: ProjectOverviewItem) {
       project.git.upstream ? "git push" : `git push -u origin ${branch}`,
     ],
     suggestedCommit: project.git.dirty ? "<short coherent slice>" : "No commit suggested while clean.",
+    contract: null as Awaited<ReturnType<typeof latestPushContractForProject>>,
     evidence: {
       branch: project.git.branch,
       upstream: project.git.upstream,
@@ -1254,11 +1296,15 @@ export const projectIntelligenceRouter = router({
           activity,
           git: gitStatus?.git ?? emptyGitStatus(),
         };
+        const pushReadiness = pushReadinessForProject(project);
 
         return {
           ...project,
           nextSafeAction: nextSafeActionForProject(project),
-          pushReadiness: pushReadinessForProject(project),
+          pushReadiness: {
+            ...pushReadiness,
+            contract: await latestPushContractForProject(tasks.projectId),
+          },
           knowledgeRoute: knowledgeRouteForProject(profile),
         };
       }),
@@ -1435,6 +1481,40 @@ export const projectIntelligenceRouter = router({
       const pushReadiness = pushReadinessForProject(project);
       const db = await getCerebroDb();
       const projectId = await getOrCreateProjectByPath(profile.name, profile.localPath);
+      const existing = await latestPushContractForProject(projectId);
+      if (existing && existing.resultState === "not_run" && !["rejected", "cancelled"].includes(existing.approvalStatus ?? "")) {
+        if (input.workbenchEvidenceId != null && existing.workbenchEvidenceId == null) {
+          await db.execute({
+            sql: `
+              UPDATE execution_action_proposals
+              SET workbench_evidence_id = ?,
+                  updated_at = unixepoch()
+              WHERE id = ?
+            `,
+            args: [input.workbenchEvidenceId, existing.id],
+          });
+        }
+        const updated = await latestPushContractForProject(projectId);
+        return {
+          ok: true as const,
+          mode: "approval_gated_push_contract" as const,
+          reusedExisting: true,
+          writesExternal: false,
+          wouldExecute: false,
+          projectId,
+          taskId: updated?.taskId ?? existing.taskId,
+          approvalId: updated?.approvalId ?? existing.approvalId,
+          proposalId: updated?.id ?? existing.id,
+          pushReadiness,
+          contract: updated ?? existing,
+          gates: [
+            "Reused the latest not-run Project Lab push action contract.",
+            "This did not create another task or approval receipt.",
+            "This did not stage, commit, push, pull, fetch, checkout, reset, or edit files.",
+            "The current V1 runner blocks git remote writes even after approval.",
+          ],
+        };
+      }
       const task = await db.execute({
         sql: `
           INSERT INTO tasks (project_id, title, status, agent)
@@ -1522,6 +1602,8 @@ export const projectIntelligenceRouter = router({
         approvalId,
         proposalId: Number(proposal.rows[0]!.id),
         pushReadiness,
+        contract: await latestPushContractForProject(projectId),
+        reusedExisting: false,
         gates: [
           "Created one local Project Lab push action contract.",
           "Created one pending Spock approval receipt.",
