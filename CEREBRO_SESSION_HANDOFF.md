@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0016 EDT
+Last updated: 2026-05-17 0019 EDT
 
 ## Current North Star
 
@@ -21,6 +21,89 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-05-17 0019 EDT - Route Execution Readiness Proof
+
+### What Changed
+- Continued item 8 backend route receipts before agent execution.
+- Added `routeExecutionReadinessProofModel` so Ledger route rows show
+  readiness, task, Workbench body, gate, and execution state as explicit proof
+  fields.
+- Ledger route rows now display execution readiness with shared
+  `CompactReadDatum` cells.
+- The execution field can only read `blocked` or `future review only`; it does
+  not say run, execute, start, or dispatch.
+- Runtime route logic remains unchanged. `routeExecutionReadiness` still
+  returns `canExecute: false`.
+- No route executor, command runner, browser action, model call, provider call,
+  git action, Obsidian write, Notion write, Drive write, memory write, install,
+  dependency, schema migration, new primary surface, or Raven path was added.
+
+### Files Touched
+- `app/client/src/lib/routeActionModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/routeActionModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-readiness-proof.db' pnpm -C app exec vitest run server/routeActionModel.test.ts server/runtime.routeReceipt.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run for this slice because the browser
+  automation tool is not currently exposed in this turn and Playwright is not
+  installed through `pnpm -C app exec playwright`.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice route action model, Home, tests,
+  and docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one small shared view-model plus one
+  existing Ledger call site.
+
+### Front-End Steward Review
+- Surface: Ledger route rows.
+- Register: product surface.
+- Primary object: execution readiness proof for saved route records.
+- User question: what is still missing before this route could ever be
+  reviewed for execution.
+- Route visible: readiness, task, Workbench receipt body, approval gate, and
+  execution state are visible.
+- Gate visible: execution state says `blocked` until prerequisites exist, then
+  `future review only`; it never implies automatic execution.
+- Machinery hidden until needed: no executor, dispatch button, provider runner,
+  model runner, browser runner, command runner, or git runner was exposed.
+- Generic UI rejected: no new dashboard, fake progress bar, agent activity
+  theater, or decorative analytics was added.
+- Remaining taste risk: Ledger route cards are dense. That is acceptable while
+  the route contract is still being hardened; later work should group route
+  rows more cleanly only after executor boundaries are designed.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 70%.
+- Knowledge/storage/source: 53%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. Ledger route rows now show explicit
+execution readiness proof and still do not execute. Next best path is more item
+8 receipt/readiness hardening, still without building an executor, or a
+read-only backend receipt audit if the visible route contract is stable. Do
+not run Ollama status checks, installs, pulls, external searches, provider
+calls, model calls, note scans, vector indexing, source fetches, cleanup
+actions, command execution runners, browser actions, or vault writes without
+explicit approval.
+
 ## 2026-05-17 0016 EDT - Runtime Receipt Compact Read
 
 ### What Changed
@@ -31,9 +114,10 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - Removed the local `PreviewField` helper from `Home.tsx`.
 - Kept runtime route logic unchanged: previews still do not mutate history,
   committed routes are local rows, and route readiness still never executes.
-- No route executor, command runner, browser action, model call, provider call,
-  git action, Obsidian write, Notion write, Drive write, memory write, install,
-  dependency, schema migration, new primary surface, or Raven path was added.
+- No route executor, command runner, external browser/search automation, model
+  call, provider call, git action, Obsidian write, Notion write, Drive write,
+  memory write, install, dependency, schema migration, new primary surface,
+  route save, task creation, or Raven path was added.
 
 ### Files Touched
 - `app/client/src/pages/Home.tsx`
@@ -41,16 +125,25 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 - `CEREBRO_SESSION_HANDOFF.md`
 
 ### Checks Run
+- `CEREBRO_DB_URL='file:/tmp/cerebro-home-compact-route.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/routeActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app check` passed.
-- `CEREBRO_DB_URL='file:/tmp/cerebro-runtime-receipt-compact.db' pnpm -C app exec vitest run server/runtime.routeReceipt.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
 - `pnpm -C app build` passed. Existing Vite large chunk warning remains.
-- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
-- Browser screenshot proof was not run because the browser automation tool is
-  not currently exposed in this turn and Playwright is not installed through
-  `pnpm -C app exec playwright`.
+- Playwright CLI opened `http://localhost:3000/`, opened Ledger Overview, and
+  confirmed selected Workbench body audit rendered compact Body, Project,
+  Validation, Route, and Next cells.
+- Playwright CLI filled the command bar with `keep building CereBro front end`,
+  clicked Preview, and confirmed the runtime route receipt preview rendered
+  compact Aang, Owner, Receipt, and Next proof cells. No route was saved and no
+  task was created.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/ledger-selected-body-audit-compact-read.png`.
+- Screenshot proof was saved to ignored local output:
+  `output/playwright/runtime-route-proof-compact-read.png`.
 
 ### Cleanliness Read
-- Dirty files at start: none.
+- Dirty files at start: `app/client/src/pages/Home.tsx` appeared after the
+  Piccolo proof correction. It matched the same compact-read consolidation
+  path and was treated as a bounded read-consistency slice.
 - Dirty files before closeout: current-slice `Home.tsx` and docs.
 - Dev server remains available at `http://localhost:3000/`.
 - No worker was used because this was one existing Ledger/runtime receipt call
@@ -94,8 +187,8 @@ the shared compact read primitive. Next best path is item 8 route receipt
 readiness and visible execution blockers, still without building an executor.
 Do not run Ollama status checks, installs, pulls, external searches, provider
 calls, model calls, note scans, vector indexing, source fetches, cleanup
-actions, command execution runners, browser actions, or vault writes without
-explicit approval.
+actions, command execution runners, route saves, task creation, or vault writes
+without explicit approval.
 
 ## 2026-05-17 0013 EDT - Piccolo Storage Contract Compact Read
 

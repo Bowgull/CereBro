@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { routeActionModel, routeExecutionReadinessLabel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
+import { routeActionModel, routeExecutionReadinessLabel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel } from "../client/src/lib/routeActionModel";
 
 describe("routeActionModel", () => {
   it("keeps saved route actions grouped by safe destination and state", () => {
@@ -91,5 +91,37 @@ describe("routeActionModel", () => {
     expect(routeExecutionReadinessLabel("approval_pending")).toBe("waiting gate");
     expect(routeExecutionReadinessLabel("approval_rejected")).toBe("gate closed");
     expect(routeExecutionReadinessLabel("ready_for_explicit_execution_call")).toBe("ready for future executor review");
+  });
+
+  it("shows execution readiness as blocked or future review, never as run now", () => {
+    const blocked = routeExecutionReadinessProofModel({
+      status: "missing_workbench_receipt",
+      taskId: 77,
+      workbenchEvidenceId: null,
+      approvalId: 99,
+      approvalStatus: "pending",
+      readyForFutureExecutorReview: false,
+    });
+
+    expect(blocked.map((field) => field.label)).toEqual(["Readiness", "Task", "Body", "Gate", "Execution"]);
+    expect(blocked.find((field) => field.label === "Execution")).toMatchObject({
+      value: "blocked",
+      tone: "danger",
+    });
+
+    const ready = routeExecutionReadinessProofModel({
+      status: "ready_for_explicit_execution_call",
+      taskId: 77,
+      workbenchEvidenceId: 88,
+      approvalId: 99,
+      approvalStatus: "approved",
+      readyForFutureExecutorReview: true,
+    });
+
+    expect(ready.find((field) => field.label === "Readiness")?.value).toBe("ready for future executor review");
+    expect(ready.find((field) => field.label === "Execution")).toMatchObject({
+      value: "future review only",
+      tone: "gold",
+    });
   });
 });

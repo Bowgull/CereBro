@@ -47,7 +47,7 @@ import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel
 import { FLOORS, cerebroColors as C, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
-import { routeActionModel, routeExecutionReadinessLabel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
+import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
@@ -1408,6 +1408,16 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                 const routeEvidence = item.workbenchEvidence;
                 const routeEvidenceId = routeEvidence?.id ?? null;
                 const readiness = item.executionReadiness;
+                const readinessProof = readiness
+                  ? routeExecutionReadinessProofModel({
+                      status: readiness.status,
+                      taskId: readiness.taskId,
+                      workbenchEvidenceId: readiness.workbenchEvidenceId,
+                      approvalId: readiness.approvalId,
+                      approvalStatus: readiness.approvalStatus,
+                      readyForFutureExecutorReview: readiness.readyForFutureExecutorReview,
+                    })
+                  : [];
                 const routeActions = routeActionModel({
                   routeId: item.id,
                   taskId: routeTaskId,
@@ -1446,13 +1456,20 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       <span>{new Date(item.createdAt * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                     </div>
                     {readiness && (
-                      <div className="mt-2 flex flex-wrap items-center justify-between gap-1 rounded px-1.5 py-1 text-[10px]" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                        <span className="min-w-0 truncate" style={{ color: readiness.status === "ready_for_explicit_execution_call" ? C.success : C.textSecondary }}>
-                          Readiness: {routeExecutionReadinessLabel(readiness.status)}
-                        </span>
-                        <span className="uppercase tracking-wider" style={{ color: C.warning }}>
-                          No execution
-                        </span>
+                      <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} execution readiness`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                            Execution Readiness
+                          </span>
+                          <span className="text-[9px] uppercase tracking-wider" style={{ color: C.warning }}>
+                            No execution
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 lg:grid-cols-5">
+                          {readinessProof.map((field) => (
+                            <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={proofTone(field.tone)} />
+                          ))}
+                        </div>
                       </div>
                     )}
                     <div className="mt-2 rounded p-1.5" aria-label={`Route ${item.id} safe actions`} style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>

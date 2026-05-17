@@ -31,6 +31,21 @@ export type RouteExecutionReadinessStatus =
   | "approval_rejected"
   | "ready_for_explicit_execution_call";
 
+export type RouteExecutionReadinessProofInput = {
+  status: RouteExecutionReadinessStatus | string | null | undefined;
+  taskId: number | null;
+  workbenchEvidenceId: number | null;
+  approvalId: number | null;
+  approvalStatus: string | null;
+  readyForFutureExecutorReview: boolean;
+};
+
+export type RouteExecutionReadinessProofField = {
+  label: string;
+  value: string;
+  tone: "gold" | "accent" | "warning" | "success" | "danger" | "muted";
+};
+
 export type RoutePreviewActionInput = {
   taskCreated: boolean;
   creatingTask: boolean;
@@ -145,6 +160,42 @@ export function routeExecutionReadinessLabel(status: RouteExecutionReadinessStat
   if (status === "approval_rejected") return "gate closed";
   if (status === "ready_for_explicit_execution_call") return "ready for future executor review";
   return "read route first";
+}
+
+export function routeExecutionReadinessProofModel(input: RouteExecutionReadinessProofInput) {
+  const gateValue = input.approvalId == null
+    ? "not queued"
+    : input.approvalStatus === "approved"
+      ? `approved #${input.approvalId}`
+      : `${input.approvalStatus ?? "pending"} #${input.approvalId}`;
+
+  return [
+    {
+      label: "Readiness",
+      value: routeExecutionReadinessLabel(input.status),
+      tone: input.status === "ready_for_explicit_execution_call" ? "success" : "warning",
+    },
+    {
+      label: "Task",
+      value: input.taskId == null ? "missing" : `task #${input.taskId}`,
+      tone: input.taskId == null ? "warning" : "success",
+    },
+    {
+      label: "Body",
+      value: input.workbenchEvidenceId == null ? "missing" : `receipt #${input.workbenchEvidenceId}`,
+      tone: input.workbenchEvidenceId == null ? "warning" : "success",
+    },
+    {
+      label: "Gate",
+      value: gateValue,
+      tone: input.approvalStatus === "approved" ? "success" : input.approvalId == null ? "muted" : "warning",
+    },
+    {
+      label: "Execution",
+      value: input.readyForFutureExecutorReview ? "future review only" : "blocked",
+      tone: input.readyForFutureExecutorReview ? "gold" : "danger",
+    },
+  ] satisfies RouteExecutionReadinessProofField[];
 }
 
 export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAction[] {

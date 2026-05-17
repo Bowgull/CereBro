@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0016 EDT
+Last updated: 2026-05-17 0019 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,12 +101,23 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0019 EDT: continued item 8 backend route receipts before agent
+  execution. Added `routeExecutionReadinessProofModel` and showed Ledger route
+  readiness, task, body, gate, and execution state through shared
+  `CompactReadDatum`. Execution reads only as `blocked` or `future review
+  only`; route logic still returns `canExecute: false`. No route executor,
+  command runner, browser action, model/provider call, git action, external
+  write, new surface, dependency, or Raven path was added.
 - 2026-05-17 0016 EDT: moved to item 8 backend route receipts, read-only
   visible proof first. Ledger selected body audit read and Runtime route
   preview primary proof now use shared `CompactReadDatum`; the local
   `PreviewField` helper was removed. Runtime route logic is unchanged. No
   route executor, command runner, browser action, model/provider call, git
   action, external write, new surface, dependency, or Raven path was added.
+  Browser proof opened Ledger Overview, captured
+  `output/playwright/ledger-selected-body-audit-compact-read.png`, previewed
+  `keep building CereBro front end` without saving a route or creating a task,
+  and captured `output/playwright/runtime-route-proof-compact-read.png`.
 - 2026-05-17 0013 EDT: continued item 7 Knowledge/source contract cleanup.
   Piccolo `Automation Hygiene` now uses shared `CompactReadDatum` for storage
   status, contract counts, Obsidian lanes, and Project Bridge/Source examples.
