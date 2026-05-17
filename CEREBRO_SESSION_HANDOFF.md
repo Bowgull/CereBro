@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0002 EDT
+Last updated: 2026-05-17 0004 EDT
 
 ## Current North Star
 
@@ -20,6 +20,78 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0004 EDT - Source Receipt Compact Read
+
+### What Changed
+- Continued item 7 Knowledge/source contract cleanup.
+- Folded Research `Source Receipt` stat cards into the shared
+  `CompactReadDatum` primitive.
+- Removed the local `ReceiptStat` helper from `SurferSourcesPanel`.
+- Kept the same source totals, trust/review/scrub/stale/event counts, route
+  state, retrieval state, and next action.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-source-compact-read.db' pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts server/ledger.memoryContract.test.ts server/memory.contract.test.ts server/workbench.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run because this was a no-behavior primitive
+  consolidation using an already checked component pattern.
+
+### Cleanliness Read
+- Dirty files at start: `CEREBRO_SESSION_HANDOFF.md` appeared dirty in
+  status, but `git diff` showed no content diff. It was treated as a harmless
+  file-state blip and preserved.
+- Dirty files before closeout: current-slice Research component and docs only.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was one existing Research readback call site.
+
+### Front-End Steward Review
+- Surface: Research.
+- Register: product surface.
+- Primary object: Source Receipt.
+- User question: what is in the source library and what needs review.
+- Route visible: unchanged.
+- Gate visible: retrieval off and route unchanged remain visible.
+- Machinery hidden until needed: unchanged.
+- Generic UI rejected: no new dashboard, visual restyle, fake metrics, or
+  decorative card layer was added.
+- Remaining taste risk: Source Route still uses its own rail-line pattern. It
+  may stay that way unless consolidation improves scanning without flattening
+  route meaning.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 51%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. `CompactReadDatum` now backs Memory,
+Ledger, Workbench, and Source Receipt compact reads. Next best path is the next
+source contract slice or a small audit of whether Source Route should keep its
+rail-line pattern. Do not run Ollama status checks, installs, pulls, external
+searches, provider calls, model calls, note scans, vector indexing, source
+fetches, or vault writes without explicit approval.
 
 ## 2026-05-17 0002 EDT - Compact Read Datum Primitive
 

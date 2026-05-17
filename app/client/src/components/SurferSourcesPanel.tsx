@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -316,12 +317,12 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               <section className="rounded p-1.5" aria-label="Source Library receipt" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
                 <SectionTitle title="Source Receipt" detail={data.sourceLibraryReceipt.mode.replace(/_/g, " ")} />
                 <div className="mt-2 grid grid-cols-2 gap-1">
-                  <ReceiptStat label="Total" value={data.sourceLibraryReceipt.totalSources} tone={C.accent} />
-                  <ReceiptStat label="Trusted" value={data.sourceLibraryReceipt.trustedSources} tone={C.success} />
-                  <ReceiptStat label="Review" value={data.sourceLibraryReceipt.needsReview} tone={data.sourceLibraryReceipt.needsReview > 0 ? C.warning : C.textMuted} />
-                  <ReceiptStat label="Scrub" value={data.sourceLibraryReceipt.needsScrub} tone={data.sourceLibraryReceipt.needsScrub > 0 ? C.warning : C.textMuted} />
-                  <ReceiptStat label="Stale" value={data.sourceLibraryReceipt.staleSources} tone={data.sourceLibraryReceipt.staleSources > 0 ? C.warning : C.textMuted} />
-                  <ReceiptStat label="Events" value={data.sourceLibraryReceipt.sourceEvents} tone={C.textSecondary} />
+                  <CompactReadDatum label="Total" value={data.sourceLibraryReceipt.totalSources} tone={C.accent} />
+                  <CompactReadDatum label="Trusted" value={data.sourceLibraryReceipt.trustedSources} tone={C.success} />
+                  <CompactReadDatum label="Review" value={data.sourceLibraryReceipt.needsReview} tone={data.sourceLibraryReceipt.needsReview > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Scrub" value={data.sourceLibraryReceipt.needsScrub} tone={data.sourceLibraryReceipt.needsScrub > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Stale" value={data.sourceLibraryReceipt.staleSources} tone={data.sourceLibraryReceipt.staleSources > 0 ? C.warning : C.textMuted} />
+                  <CompactReadDatum label="Events" value={data.sourceLibraryReceipt.sourceEvents} tone={C.textSecondary} />
                 </div>
                 <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                   {data.sourceLibraryReceipt.nextAction}
@@ -397,19 +398,6 @@ function SectionTitle({ title, detail }: { title: string; detail: string }) {
       </div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>
         {detail}
-      </div>
-    </div>
-  );
-}
-
-function ReceiptStat({ label, value, tone }: { label: string; value: number; tone: string }) {
-  return (
-    <div className="rounded px-1.5 py-1" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-        {label}
-      </div>
-      <div className="mt-0.5 text-[13px] font-semibold leading-none" style={{ color: tone }}>
-        {value}
       </div>
     </div>
   );
