@@ -604,6 +604,42 @@ describe("runtime route receipt preview", () => {
     expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
   });
 
+  it("includes linked Vision proof in route receipt audit without mutating records", async () => {
+    const caller = createCaller();
+    const rowCountsBefore = await countPreviewMutationRows();
+
+    const committed = await caller.runtime.commitRoute({
+      text: "build route audit Vision proof for CereBro",
+      mode: "build",
+    });
+    const vision = await caller.visions.createFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+    const task = await caller.runtime.createTaskFromRouteRecord({
+      routeRecordId: committed.record.id,
+    });
+
+    const rowCountsAfterSetup = await countPreviewMutationRows();
+    const audit = await caller.runtime.routeReceiptAudit({
+      routeRecordId: committed.record.id,
+    });
+
+    expect(audit.linkedVision).toMatchObject({
+      id: vision.vision.id,
+      status: "active",
+      ownerAgent: "tony",
+      taskId: task.task.id,
+    });
+    expect(audit.proof.hasLinkedVision).toBe(true);
+    expect(audit.proof.visionStatus).toBe("active");
+    expect(audit.proof.visionTaskId).toBe(task.task.id);
+
+    for (const table of previewMutationTables) {
+      expect(await countRows(table)).toBe(rowCountsAfterSetup.get(table));
+    }
+    expect(await countRows("runtime_route_records")).toBe((rowCountsBefore.get("runtime_route_records") ?? 0) + 1);
+  });
+
   it("shows linked Vision context on Ledger route rows without mutating records", async () => {
     const caller = createCaller();
     const rowCountsBefore = await countPreviewMutationRows();

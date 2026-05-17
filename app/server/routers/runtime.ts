@@ -226,6 +226,32 @@ async function runtimeRouteApprovalByRouteId(routeRecordId: number) {
   return row ? mapRuntimeApprovalPreview(row as Record<string, unknown>) : null;
 }
 
+async function runtimeRouteVisionByRouteId(routeRecordId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, title, status, owner_agent, task_id, stop_rule, updated_at
+      FROM visions
+      WHERE route_record_id = ?
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = result.rows[0];
+  return row
+    ? {
+        id: Number(row.id),
+        title: String(row.title),
+        status: String(row.status),
+        ownerAgent: String(row.owner_agent),
+        taskId: row.task_id == null ? null : Number(row.task_id),
+        stopRule: String(row.stop_rule),
+        updatedAt: Number(row.updated_at),
+      }
+    : null;
+}
+
 async function getRuntimeTaskById(id: number): Promise<TaskRow | null> {
   const db = await getCerebroDb();
   const result = await db.execute({
@@ -694,6 +720,7 @@ export const runtimeRouter = router({
           message: "Route record not found",
         });
       }
+      const linkedVision = await runtimeRouteVisionByRouteId(route.id);
 
       return {
         mode: "read_only" as const,
@@ -704,10 +731,14 @@ export const runtimeRouter = router({
         executorStatus: "not_built" as const,
         canExecute: false,
         route,
+        linkedVision,
         proof: {
           hasTask: route.taskId != null,
           hasWorkbenchBody: route.workbenchEvidence != null,
           hasApprovalPreview: route.approvalPreview != null,
+          hasLinkedVision: linkedVision != null,
+          visionStatus: linkedVision?.status ?? null,
+          visionTaskId: linkedVision?.taskId ?? null,
           approvalStatus: route.approvalPreview?.status ?? route.executionReadiness.approvalStatus,
           readyForFutureExecutorReview: route.executionReadiness.readyForFutureExecutorReview,
           executionStatus: route.executionReadiness.status,

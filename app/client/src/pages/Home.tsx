@@ -1676,6 +1676,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                       { label: "Task", value: routeAudit.proof.hasTask ? "linked" : "missing", tone: routeAudit.proof.hasTask ? C.success : C.warning },
                       { label: "Body", value: routeAudit.proof.hasWorkbenchBody ? "linked" : "missing", tone: routeAudit.proof.hasWorkbenchBody ? C.success : C.warning },
                       { label: "Gate", value: routeAudit.proof.approvalStatus ?? "not queued", tone: routeAudit.proof.hasApprovalPreview ? C.gold : C.textMuted },
+                      { label: "Vision", value: routeAudit.linkedVision ? `#${routeAudit.linkedVision.id}` : "unlinked", tone: routeAudit.linkedVision ? C.gold : C.warning },
                       { label: "Executor", value: routeAudit.executorStatus.replace(/_/g, " "), tone: C.gold },
                       { label: "Execute", value: routeAudit.canExecute ? "enabled" : "blocked", tone: routeAudit.canExecute ? C.danger : C.gold },
                     ]
@@ -1759,11 +1760,19 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                           </div>
                         ) : routeAudit ? (
                           <>
-                            <div className="grid grid-cols-2 gap-1 lg:grid-cols-5">
+                            <div className="grid grid-cols-2 gap-1 lg:grid-cols-6">
                               {routeAuditProof.map((field) => (
                                 <CompactReadDatum key={field.label} label={field.label} value={field.value} tone={field.tone} />
                               ))}
                             </div>
+                            {routeAudit.linkedVision && (
+                              <div className="mt-1 grid grid-cols-2 gap-1 lg:grid-cols-4">
+                                <CompactReadDatum label="Vision Status" value={routeAudit.linkedVision.status.replace(/_/g, " ")} tone={routeAudit.linkedVision.status === "active" ? C.gold : C.textSecondary} />
+                                <CompactReadDatum label="Vision Owner" value={routeAudit.linkedVision.ownerAgent} tone={C.accent} />
+                                <CompactReadDatum label="Vision Task" value={routeAudit.linkedVision.taskId ? `#${routeAudit.linkedVision.taskId}` : "unlinked"} tone={routeAudit.linkedVision.taskId ? C.success : C.warning} />
+                                <CompactReadDatum label="Vision Stop" value={routeAudit.linkedVision.stopRule} tone={C.textSecondary} />
+                              </div>
+                            )}
                             <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                               {routeAudit.gates[2]}
                             </div>
