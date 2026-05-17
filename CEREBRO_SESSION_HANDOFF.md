@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1346 EDT
+Last updated: 2026-05-17 1356 EDT
 
 ## Current North Star
 
@@ -20,6 +20,57 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 1356 EDT - Source Validation Audit Readback
+
+### What Changed
+- `sourceResearchLoopAudit` now counts `source_validation` events.
+- Research now shows a compact `Validated` datum in the `Source Loop Audit`.
+- Test coverage now proves a local source validation event is reflected in the
+  audit readback.
+
+### Files Touched
+- `app/server/routers/surfer.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/surfer.sourceLibraryRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3003/` after the dev server
+  auto-bumped from busy port `3000`: opened Workshop -> Research and confirmed
+  the DOM contains `Validated` in the Research audit.
+- Screenshot proof saved locally at
+  `output/playwright/source-validation-audit-count.png`; current visual scroll
+  position favors source cards, while DOM proof confirmed the audit datum.
+
+### Drift Check
+- On path. This is a narrow readback cleanup for the Research/Sources validation
+  slice.
+- No browser automation, source fetch, model call, memory write, retrieval,
+  external write, install, paid service, new primary surface, or Raven path was
+  added.
+
+### Known Risks
+- The Research panel still contains repeated dev fixture source rows because
+  existing source tests use the local dev DB by default. No data cleanup was
+  performed.
+
+### Storage Impact
+- No schema change.
+- No database rows created by the feature itself.
+- Test runs can create source fixture rows/events in the local dev DB when no
+  `CEREBRO_DB_URL` override is set.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/SurferSourcesPanel.tsx first. Continue CereBro on the stable build path. Research/Sources now has local source validation plus audit readback: sourceResearchLoopAudit counts source_validation events and Research shows Validated. Next best slice is to move to Model/Tool Registry readiness, unless a concrete Research validation bug appears. Do not build browser automation, retrieval automation, external writes, provider calls, installs, model downloads, new primary surfaces, or Raven paths. Run targeted tests for app changes, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1346 EDT - Source Validation Controls
 

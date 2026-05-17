@@ -270,6 +270,7 @@ async function readSourceResearchLoopAudit() {
           SUM(CASE WHEN owner_agent = 'surfer' THEN 1 ELSE 0 END) AS surfer,
           SUM(CASE WHEN owner_agent = 'hedwig' THEN 1 ELSE 0 END) AS hedwig,
           SUM(CASE WHEN event_type = 'surfer_public_url_ingest' OR source_label = 'approved_public_url' THEN 1 ELSE 0 END) AS approved_public_ingests,
+          SUM(CASE WHEN event_type = 'source_validation' THEN 1 ELSE 0 END) AS validation_events,
           SUM(CASE WHEN sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive
         FROM source_events
       `,
@@ -298,6 +299,7 @@ async function readSourceResearchLoopAudit() {
     surferEvents: countValue(eventRow, "surfer"),
     hedwigEvents: countValue(eventRow, "hedwig"),
     approvedPublicIngests: countValue(eventRow, "approved_public_ingests"),
+    validationEvents: countValue(eventRow, "validation_events"),
     sensitiveEvents: countValue(eventRow, "sensitive"),
     needsReviewBeforeRetrieval,
     canBrowseFromAudit: false,

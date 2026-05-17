@@ -165,6 +165,9 @@ describe("Surfer Source Library route", () => {
     expect(result.sourceValidationReceipt.retrievalAutomationEnabled).toBe(false);
     expect(result.sourceValidationReceipt.noActionTaken.join(" ")).toContain("No browser");
 
+    const panel = await caller.surfer.panel();
+    expect(panel.sourceResearchLoopAudit.validationEvents).toBeGreaterThanOrEqual(1);
+
     const events = await db.execute({
       sql: `
         SELECT event_type, owner_agent, source_label, trust_level, trust_notes

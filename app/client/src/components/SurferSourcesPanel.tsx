@@ -366,6 +366,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                   <CompactReadDatum label="Community" value={data.sourceResearchLoopAudit.communitySources} tone={C.textSecondary} />
                   <CompactReadDatum label="Surfer" value={data.sourceResearchLoopAudit.surferEvents} tone={C.textSecondary} />
                   <CompactReadDatum label="Hedwig" value={data.sourceResearchLoopAudit.hedwigEvents} tone={C.textSecondary} />
+                  <CompactReadDatum label="Validated" value={data.sourceResearchLoopAudit.validationEvents} tone={data.sourceResearchLoopAudit.validationEvents > 0 ? C.success : C.textMuted} />
                 </div>
                 <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   {data.sourceResearchLoopAudit.nextAction}

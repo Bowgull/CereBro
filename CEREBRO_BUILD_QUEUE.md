@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1346 EDT
+Last updated: 2026-05-17 1356 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 1356 EDT: added source validation readback to the Research audit.
+  `sourceResearchLoopAudit` now counts `source_validation` events and the
+  Research panel shows a compact `Validated` datum. This keeps Oak/Spock local
+  source checks visible without browsing, retrieval, memory writes, or external
+  tools.
 - 2026-05-17 1346 EDT: added local Source validation in Research. Saved
   sources can now be marked `Trusted`, `Review`, or `Reject` from the existing
   `Source Rules` drawer. The backend writes only local source trust notes and
