@@ -587,6 +587,7 @@ export const terminalLabRouter = router({
           projectId: z.number().int().optional(),
           taskId: z.number().int().optional(),
           sessionId: z.number().int().optional(),
+          focusedObservationId: z.number().int().min(1).optional(),
           limit: z.number().int().min(1).max(100).optional(),
         })
         .optional(),
@@ -607,7 +608,6 @@ export const terminalLabRouter = router({
         where.push("session_id = ?");
         args.push(input.sessionId);
       }
-      args.push(input?.limit ?? 20);
       const result = await db.execute({
         sql: `
           SELECT id, project_id, task_id, session_id, command, cwd, risk,
@@ -618,9 +618,25 @@ export const terminalLabRouter = router({
           ORDER BY created_at DESC, id DESC
           LIMIT ?
         `,
-        args,
+        args: [...args, input?.limit ?? 20],
       });
-      return result.rows.map(rowToObservation);
+      let rows = result.rows;
+      if (input?.focusedObservationId != null && !rows.some((row) => Number(row.id) === input.focusedObservationId)) {
+        const focusedWhere = [...where, "id = ?"];
+        const focused = await db.execute({
+          sql: `
+            SELECT id, project_id, task_id, session_id, command, cwd, risk,
+                   suggested_agent, explanation, gates, source, status,
+                   exit_code, output_summary, created_at
+            FROM command_observations
+            WHERE ${focusedWhere.join(" AND ")}
+            LIMIT 1
+          `,
+          args: [...args, input.focusedObservationId],
+        });
+        if (focused.rows[0]) rows = [focused.rows[0], ...rows];
+      }
+      return rows.map(rowToObservation);
     }),
 
   observationDetail: publicProcedure

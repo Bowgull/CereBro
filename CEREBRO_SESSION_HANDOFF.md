@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0944 EDT
+Last updated: 2026-05-17 0947 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0947 EDT - Terminal Focused Observation Pin
+
+### What Changed
+- `terminalLab.observations` now accepts a focused observation id.
+- Terminal Lab passes the selected observation id into the observations read.
+- If the focused observation is outside the current page, the server pins it
+  at the top of the returned list.
+- Ledger-to-Terminal focus now shows the linked observation row and teaching
+  frame instead of only the focus notice.
+- Regression coverage now proves a focused observation is pinned when the page
+  limit would otherwise exclude it.
+
+### Files Touched
+- `app/server/routers/terminalLab.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Ledger,
+  clicked `Open Terminal`, and confirmed Terminal Lab shows the focus notice,
+  focused observation row, teaching frame, linked Workbench body, and recent
+  result receipts.
+- Screenshot proof saved locally at
+  `output/playwright/terminal-focused-observation-pinned.png`.
+
+### Drift Check
+- On path. This completes the Ledger -> Terminal Lab focus loop without adding
+  a surface or changing execution.
+- No endpoint that runs actions, fake seed data, new primary surface, runner
+  broadening, git-write runner, install, destructive action, browser
+  automation, provider call, external write, paid service, or Raven path was
+  added.
+
+### Known Risks
+- Focus pinning respects active task/session filters. Ledger focus uses the
+  unfiltered Terminal Lab route, so the current path is covered.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/terminalLab.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Terminal Lab now pins focused command observations opened from Ledger execution results, so the focus notice, observation row, teaching frame, Workbench body, and recent result receipt all align. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is Workbench validation status controls for execution-linked bodies or a compact final audit read across Terminal Lab, Workbench, Ledger, and Approvals. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0944 EDT - Ledger To Terminal Result Focus
 

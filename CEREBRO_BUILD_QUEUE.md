@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0944 EDT
+Last updated: 2026-05-17 0947 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0947 EDT: Terminal Lab observations now support a focused
+  observation id and pin it above the current page when needed. Ledger-to-
+  Terminal result focus now shows the linked command observation row, teaching
+  frame, Workbench body, and recent result receipts together. Regression
+  coverage proves focused observation pinning.
 - 2026-05-17 0944 EDT: Ledger execution result cards now include
   `Open Terminal`. Ledger result reads preserve proposal source type/id, and
   Terminal Lab reads a one-time focus notice with command text and linked

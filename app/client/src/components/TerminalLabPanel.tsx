@@ -74,10 +74,10 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
   const plan = trpc.terminalLab.plan.useQuery();
   const observationFilter =
     observationScope === "selectedTask" && selectedTaskId
-      ? { limit: 12, taskId: Number(selectedTaskId) }
+      ? { limit: 12, taskId: Number(selectedTaskId), focusedObservationId: selectedObservationId ?? undefined }
       : observationScope === "selectedSession" && selectedSessionId
-        ? { limit: 12, sessionId: Number(selectedSessionId) }
-        : { limit: 12 };
+        ? { limit: 12, sessionId: Number(selectedSessionId), focusedObservationId: selectedObservationId ?? undefined }
+        : { limit: 12, focusedObservationId: selectedObservationId ?? undefined };
   const observations = trpc.terminalLab.observations.useQuery(observationFilter);
   const selectedTaskNumber = selectedTaskId ? Number(selectedTaskId) : undefined;
   const tasks = trpc.tasks.workQueue.useQuery(

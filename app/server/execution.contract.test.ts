@@ -139,6 +139,13 @@ describe("execution action contract", () => {
     expect(ledgerResult?.taskId).toBe(task.id);
     expect(ledgerResult?.workbenchEvidenceId).toBe(evidence.evidence.id);
     expect(ledgerResult?.recoveryNote).toBe("No recovery needed for a read-only command.");
+
+    const pinnedObservations = await caller.terminalLab.observations({
+      focusedObservationId: preview.observationId,
+      limit: 1,
+    });
+    expect(pinnedObservations[0]?.id).toBe(preview.observationId);
+    expect(pinnedObservations[0]?.command).toBe("pwd");
   });
 
   it("blocks approved contracts that are not read-only allowlisted commands", async () => {
