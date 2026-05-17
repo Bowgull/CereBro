@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 0913 EDT
+Last updated: 2026-05-17 0917 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -118,6 +118,10 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0917 EDT: Terminal Lab execution contract cards now show direct
+  missing-piece actions. Blocked contracts can stage missing approval previews
+  or Workbench bodies; linked contracts can open existing approval/body
+  receipts. The run gate remains separate.
 - 2026-05-17 0913 EDT: added approval receipt focus to Ledger execution
   result cards. Existing result cards now show approval ids and can open the
   linked approval in the Approvals panel with a focus notice. Approval detail

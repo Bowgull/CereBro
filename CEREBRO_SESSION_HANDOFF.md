@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 0913 EDT
+Last updated: 2026-05-17 0917 EDT
 
 ## Current North Star
 
@@ -20,6 +20,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0917 EDT - Terminal Execution Missing Pieces
+
+### What Changed
+- Terminal Lab execution contract cards now show direct next actions for
+  missing pieces.
+- Blocked contracts can stage a missing approval preview.
+- Blocked contracts can stage a missing Workbench body.
+- Contracts with linked receipts can open the approval or Workbench body from
+  the same card.
+- The run gate remains separate and still blocks ineligible actions.
+
+### Files Touched
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: confirmed Terminal
+  Lab renders `Execution Contract`, `Stage Approval`, `Stage Body`,
+  `Open Approval`, `Open Body`, and `Read Run Gate`.
+- Screenshot proof saved locally at
+  `output/playwright/terminal-execution-missing-next-actions.png`.
+
+### Drift Check
+- On path. This improves the first live execution lane by making missing
+  contract pieces explicit before any run attempt.
+- No new primary surface, approval execution, runner broadening, git-write
+  runner, install, destructive action, browser automation, provider call,
+  external write, paid service, or Raven path was added.
+
+### Known Risks
+- Current local browser data did not show a `Run Approved Read` button during
+  proof. The backend regression covers the ready approved read-only state.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-Session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_REDESIGN_CONTRACT.md, app/server/routers/execution.ts, app/server/routers/ledger.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the approval-gated autonomy build path. Terminal Lab execution contract cards now show missing-piece actions for approval and Workbench body, plus links to existing approval/body receipts. Keep first live execution lane limited to approved, allowlisted, shell-disabled local read-only commands with Ledger receipts. Do not add git-write runners, installs, destructive actions, browser automation, provider calls, external writes, paid services, new primary surfaces, or Raven paths. Next best slice is to deepen Workbench validation status around execution result bodies or tighten the ready approved read-only UI state. Run targeted tests, pnpm check, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 0913 EDT - Ledger Execution Approval Focus
 

@@ -55,7 +55,7 @@ type TerminalProjectContext = {
 
 const G = T.graphiteCandle;
 
-export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "projects" | "security" | "workbench" | "ledger") => void }) {
+export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "projects" | "security" | "workbench" | "ledger" | "approvals") => void }) {
   const terminalCopy = terminalLabProjectReadCopy();
   const [command, setCommand] = useState("rg -n \"Terminal Lab\" CEREBRO_MASTER_BUILD_PLAN.md");
   const [selectedObservationId, setSelectedObservationId] = useState<number | null>(null);
@@ -513,6 +513,26 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
       // Ledger still opens; the user can select the receipt manually.
     }
     onNavigate("ledger");
+  }
+
+  function openApprovalReceipt(input: { approvalId: number; observationId: number; status: string | null }) {
+    if (!onNavigate) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:approvals-focus",
+        JSON.stringify({
+          source: "terminal_lab_execution_contract",
+          approvalId: input.approvalId,
+          status: input.status === "approved" || input.status === "rejected" || input.status === "cancelled" ? input.status : "pending",
+          origin: "terminal",
+          query: "",
+          notice: `Terminal Lab opened approval #${input.approvalId} for observation #${input.observationId}.`,
+        }),
+      );
+    } catch {
+      // Approvals still opens; the user can inspect the queue manually.
+    }
+    onNavigate("approvals");
   }
 
   async function copyTonyDraft(key: string, value: string) {
@@ -1146,6 +1166,11 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                   executionProposals.data?.items.map((proposal) => {
                     const canRunReadOnly = proposal.readiness.canExecute && proposal.actionType === "local_read_only_command" && proposal.riskClass === "read_only";
                     const runButtonLabel = canRunReadOnly ? "Run Approved Read" : "Read Run Gate";
+                    const proposalObservation = observationRows.find((item) => item.id === proposal.sourceId) ?? null;
+                    const proposalEvidence = evidenceByObservationId.get(proposal.sourceId) ?? null;
+                    const missingText = proposal.readiness.missing.join("; ");
+                    const needsApproval = missingText.includes("approval receipt");
+                    const needsWorkbenchBody = missingText.includes("Workbench receipt body");
                     return (
                       <div key={proposal.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
                         <div className="flex flex-wrap gap-1">
@@ -1160,9 +1185,59 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                             ? canRunReadOnly
                               ? "Approved read-only contract is ready. This button runs one allowlisted local command and records a Ledger receipt."
                               : "Contract is complete, but this action is not eligible for the V1 read-only runner."
-                            : proposal.readiness.missing.join("; ")}
+                            : missingText}
                         </div>
                         <div className="mt-1 flex flex-wrap gap-1">
+                          {needsApproval ? (
+                            <Button
+                              type="button"
+                              onClick={() => stageCommandApprovalPreview(proposal.sourceId)}
+                              disabled={createApprovalPreview.isPending}
+                              title="Stage the missing local approval preview. This does not approve or run anything."
+                              aria-label={`Stage approval preview for execution action proposal ${proposal.id}`}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Stage Approval
+                            </Button>
+                          ) : proposal.approvalId != null ? (
+                            <Button
+                              type="button"
+                              onClick={() => openApprovalReceipt({ approvalId: proposal.approvalId!, observationId: proposal.sourceId, status: proposal.approvalStatus })}
+                              disabled={!onNavigate}
+                              title={!onNavigate ? "Approvals route is not available from this panel state." : "Open the linked approval receipt. This does not approve or run anything."}
+                              aria-label={`Open approval receipt ${proposal.approvalId} for execution action proposal ${proposal.id}`}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Open Approval
+                            </Button>
+                          ) : null}
+                          {needsWorkbenchBody && proposalObservation ? (
+                            <Button
+                              type="button"
+                              onClick={() => stageWorkbenchProof(proposalObservation)}
+                              disabled={!onNavigate}
+                              title={!onNavigate ? "Workbench route is not available from this panel state." : "Stage the missing Workbench receipt body. This does not run anything."}
+                              aria-label={`Stage Workbench body for execution action proposal ${proposal.id}`}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Stage Body
+                            </Button>
+                          ) : proposalEvidence ? (
+                            <Button
+                              type="button"
+                              onClick={() => openWorkbenchProof(proposal.sourceId, proposalEvidence.id)}
+                              disabled={!onNavigate}
+                              title={!onNavigate ? "Workbench route is not available from this panel state." : "Open the linked Workbench body."}
+                              aria-label={`Open Workbench body ${proposalEvidence.id} for execution action proposal ${proposal.id}`}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Open Body
+                            </Button>
+                          ) : null}
                           <Button
                             type="button"
                             onClick={() => readRunGuard(proposal.id)}
