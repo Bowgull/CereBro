@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-16 2358 EDT
+Last updated: 2026-05-17 0002 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -101,6 +101,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 0002 EDT: continued item 7 Knowledge/source contract cleanup.
+  Added shared `CompactReadDatum` frontend primitive and replaced duplicate
+  compact datum components in Knowledge Notes, Ledger, and Workbench. Same
+  data, routes, gates, and proof remain visible. No note scan, vector index,
+  source fetch, Obsidian/Notion/Drive/memory write, model/provider/tool call,
+  route default change, new surface, command runner, dependency, or Raven path
+  was added.
 - 2026-05-16 2358 EDT: continued item 7 Knowledge/source contracts through
   Ledger. `ledger.overview` now returns the shared read-only Memory reuse
   contract, and Ledger shows a compact Memory Reuse Read with route, archive,

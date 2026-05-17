@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { disambiguateSessionOptions } from "@/lib/sessionLabels";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import {
   workbenchCurrentBodyCopy,
   workbenchHeaderCopy,
@@ -1798,19 +1799,21 @@ function EvidenceDetailPanel({
             <Chip label={detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")} tone={C.accent} />
           </div>
           <div className="mt-2 grid grid-cols-2 gap-1">
-            <KnowledgeRouteCard label="Bridge" value={detail.knowledgeRoute.projectBridgePath} tone={C.success} />
-            <KnowledgeRouteCard label="Source" value={detail.knowledgeRoute.repositorySourcePath} tone={C.accent} />
-            <KnowledgeRouteCard label="Map" value={detail.knowledgeRoute.projectMapPath} tone={C.textSecondary} />
-            <KnowledgeRouteCard label="Index" value={detail.knowledgeRoute.sourcesIndexPath} tone={C.textSecondary} />
-            <KnowledgeRouteCard
+            <CompactReadDatum label="Bridge" value={detail.knowledgeRoute.projectBridgePath} tone={C.success} wrap />
+            <CompactReadDatum label="Source" value={detail.knowledgeRoute.repositorySourcePath} tone={C.accent} wrap />
+            <CompactReadDatum label="Map" value={detail.knowledgeRoute.projectMapPath} tone={C.textSecondary} wrap />
+            <CompactReadDatum label="Index" value={detail.knowledgeRoute.sourcesIndexPath} tone={C.textSecondary} wrap />
+            <CompactReadDatum
               label="Archive"
               value={`${detail.knowledgeRoute.archiveLane} / ${detail.knowledgeRoute.archiveRetrieval.replace(/_/g, " ")}`}
               tone={C.warning}
+              wrap
             />
-            <KnowledgeRouteCard
+            <CompactReadDatum
               label="Writes"
               value={detail.knowledgeRoute.writesExternalSystems ? "enabled" : "approval gated"}
               tone={detail.knowledgeRoute.writesExternalSystems ? C.danger : C.gold}
+              wrap
             />
           </div>
           <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
@@ -2191,15 +2194,6 @@ function Meta({ label, value, title, tone = C.textSecondary }: { label: string; 
     <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-2 text-[11px] leading-snug">
       <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
       <div className="break-words" style={{ color: tone }} title={title}>{value}</div>
-    </div>
-  );
-}
-
-function KnowledgeRouteCard({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>{label}</div>
-      <div className="mt-1 break-words text-[10px] leading-snug" style={{ color: tone }} title={value}>{value}</div>
     </div>
   );
 }

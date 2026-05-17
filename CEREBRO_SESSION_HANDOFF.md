@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-16 2358 EDT
+Last updated: 2026-05-17 0002 EDT
 
 ## Current North Star
 
@@ -20,6 +20,82 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 0002 EDT - Compact Read Datum Primitive
+
+### What Changed
+- Continued item 7 Knowledge/source contract cleanup.
+- Added shared frontend primitive `CompactReadDatum` for compact read cards.
+- Replaced duplicate local datum components in Knowledge Notes, Ledger, and
+  Workbench knowledge route reads.
+- Kept the same data, routes, gates, and visible proof. This was a shared
+  primitive cleanup, not a redesign.
+- No note scan, vector index, source fetch, Obsidian write, Notion write,
+  Drive write, memory write, model call, provider/tool/gateway call,
+  browser/search automation, install, token/account action, model pull, schema
+  migration, dependency, route default change, new primary surface, command
+  runner, or Raven path was added.
+
+### Files Touched
+- `app/client/src/components/CompactReadDatum.tsx`
+- `app/client/src/components/MemoryPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check` passed.
+- `CEREBRO_DB_URL='file:/tmp/cerebro-compact-read-datum.db' pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/memory.contract.test.ts server/workbench.knowledgeRoute.test.ts server/ledgerCopyModel.test.ts server/memoryPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app build` passed. Existing Vite large chunk warning remains.
+- `curl -I --max-time 5 http://localhost:3000/` returned `HTTP/1.1 200 OK`.
+- Browser screenshot proof was not run because this was a no-behavior primitive
+  refactor and the local browser automation tool was not exposed to this
+  session.
+
+### Cleanliness Read
+- Dirty files at start: none.
+- Dirty files before closeout: current-slice frontend primitive files and
+  handoff/queue docs.
+- Dev server remains available at `http://localhost:3000/`.
+- No worker was used because this was a narrow shared primitive refactor across
+  three known call sites.
+
+### Front-End Steward Review
+- Surfaces: Knowledge Notes, Ledger, Workbench.
+- Register: product surface.
+- Primary object: compact contract and route read cards.
+- User question: can the same kind of proof read look and behave consistently.
+- Route visible: unchanged.
+- Gate visible: unchanged.
+- Machinery hidden until needed: unchanged.
+- Generic UI rejected: no visual restyle, fake dashboard, new panel, or
+  decorative card layer was added.
+- Remaining taste risk: Source Receipt still uses its own numeric stat cards.
+  Future cleanup can fold compatible source stats into the same primitive if it
+  improves scanning.
+
+### Completion Read
+- Overall: 73%.
+- Foundation/docs/planning: 96%.
+- Frontend visible loop: 99%.
+- Backend/runtime: 68%.
+- Knowledge/storage/source: 51%.
+- Creative/freelance/watch: 10%.
+- Confidence: medium.
+
+### Next Session Starter
+Read `AGENTS.md`, `CEREBRO_MASTER_BUILD_PLAN.md`,
+`CEREBRO_SESSION_HANDOFF.md`, `CEREBRO_BUILD_QUEUE.md`, `DESIGN.md`,
+`CEREBRO_FRONTEND_SYSTEM.md`, `CEREBRO_UX_SYSTEM.md`,
+`CEREBRO_ANTI_DRIFT_LAW.md`, `CEREBRO_UI_TASTE_AUDIT.md`, and Obsidian note
+`20_Knowledge/Playbooks/CereBro Prime Build Compass.md`. Continue in CereBro
+Prime mode. Start with a dirty-file read. `CompactReadDatum` now backs Memory,
+Ledger, and Workbench compact read cards. Next best path is either folding
+compatible Source Receipt stats into the shared primitive or the next source
+contract slice if dirty files are clean. Do not run Ollama status checks,
+installs, pulls, external searches, provider calls, model calls, note scans,
+vector indexing, source fetches, or vault writes without explicit approval.
 
 ## 2026-05-16 2358 EDT - Ledger Memory Reuse Read
 

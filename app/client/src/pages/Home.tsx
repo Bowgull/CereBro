@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
@@ -1355,22 +1356,22 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </Badge>
             </div>
             <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
-              <LedgerMemoryDatum
+              <CompactReadDatum
                 label={ledgerCopy.memoryContractRouteLabel}
                 value={ledgerCopy.memoryContractRouteValue(memoryContract.normalRoute, memoryContract.archiveRoute)}
                 tone={C.accent}
               />
-              <LedgerMemoryDatum
+              <CompactReadDatum
                 label={ledgerCopy.memoryContractReviewLabel}
                 value={ledgerCopy.memoryContractReviewValue(memoryContract.pendingProposals, memoryContract.oakValidatedProposals)}
                 tone={memoryContract.pendingProposals > 0 ? C.warning : C.success}
               />
-              <LedgerMemoryDatum
+              <CompactReadDatum
                 label={ledgerCopy.memoryContractGateLabel}
                 value={memoryContract.canAutomateRetrieval ? "retrieval allowed" : "validation required"}
                 tone={memoryContract.canAutomateRetrieval ? C.danger : C.gold}
               />
-              <LedgerMemoryDatum
+              <CompactReadDatum
                 label={ledgerCopy.memoryContractNextLabel}
                 value={memoryContract.nextAction}
                 tone={C.textSecondary}
@@ -1690,19 +1691,6 @@ function LedgerRule({ title, body, tone }: { title: string; body: string; tone: 
       </div>
       <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
         {body}
-      </div>
-    </div>
-  );
-}
-
-function LedgerMemoryDatum({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>
-        {label}
-      </div>
-      <div className="mt-0.5 truncate text-[10px] leading-snug" style={{ color: tone }} title={value}>
-        {value}
       </div>
     </div>
   );

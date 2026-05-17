@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { memoryPanelCopy } from "@/lib/memoryPanelCopyModel";
+import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -143,22 +144,22 @@ export default function MemoryPanel({ onClose }: { onClose: () => void }) {
           ) : contract.data ? (
             <>
               <div className="grid grid-cols-2 gap-1">
-                <MemoryContractDatum
+                <CompactReadDatum
                   label={copy.contractRouteLabel}
                   value={copy.contractRouteValue(contract.data.normalRoute, contract.data.archiveRoute)}
                   tone={C.accent}
                 />
-                <MemoryContractDatum
+                <CompactReadDatum
                   label={copy.contractReviewLabel}
                   value={copy.contractReviewValue(contract.data.pendingProposals, contract.data.oakValidatedProposals)}
                   tone={contract.data.pendingProposals > 0 ? C.warning : C.success}
                 />
-                <MemoryContractDatum
+                <CompactReadDatum
                   label={copy.contractGateLabel}
                   value={contract.data.canAutomateRetrieval ? "retrieval allowed" : "validation required"}
                   tone={contract.data.canAutomateRetrieval ? C.danger : C.gold}
                 />
-                <MemoryContractDatum
+                <CompactReadDatum
                   label={copy.contractNextLabel}
                   value={contract.data.nextAction}
                   tone={C.textSecondary}
@@ -436,19 +437,6 @@ function MemoryStat({ label, value, tone }: { label: string; value: string; tone
         {label}
       </div>
       <div className="mt-0.5 text-[11px] font-semibold" style={{ color: tone }}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function MemoryContractDatum({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="min-w-0 rounded px-2 py-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
-      <div className="truncate text-[9px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }} title={label}>
-        {label}
-      </div>
-      <div className="mt-0.5 truncate text-[10px] leading-snug" style={{ color: tone }} title={value}>
         {value}
       </div>
     </div>
