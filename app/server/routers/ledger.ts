@@ -238,6 +238,21 @@ function browserRunnerAuditRow(row: Record<string, unknown>) {
   };
 }
 
+function browserLiveRunnerApprovalRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.target_id == null ? null : Number(row.target_id),
+    status: String(row.status),
+    actionType: String(row.action_type),
+    requestedByAgent: row.requested_by_agent == null ? null : String(row.requested_by_agent),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+    createdAt: Number(row.created_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -399,7 +414,7 @@ async function readExecutionReceiptLoopAudit() {
 
 async function readBrowserReceiptAudit() {
   const db = await getCerebroDb();
-  const [summary, draftTabs, watchShelfItems, runnerAudits, latestProposals, latestTabs, latestWatchShelfItems, latestRunnerAudits] = await Promise.all([
+  const [summary, draftTabs, watchShelfItems, runnerAudits, liveRunnerApprovalSummary, latestProposals, latestTabs, latestWatchShelfItems, latestRunnerAudits, latestLiveRunnerApprovals] = await Promise.all([
     db.execute(`
       SELECT
         COUNT(*) AS proposals,
@@ -411,6 +426,15 @@ async function readBrowserReceiptAudit() {
     countOne("SELECT COUNT(*) AS value FROM browser_tab_sessions WHERE state = ?", ["draft"]),
     countOne("SELECT COUNT(*) AS value FROM browser_watch_shelf_items"),
     countOne("SELECT COUNT(*) AS value FROM browser_runner_audit_records"),
+    db.execute(`
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND action_type = 'browser_live_runner'
+    `),
     db.execute(`
       SELECT id, action_label, target, draft_kind, risk_class, executor_agent,
              status, can_execute, result_state, recovery_note, created_at, updated_at
@@ -441,8 +465,19 @@ async function readBrowserReceiptAudit() {
       ORDER BY created_at DESC, id DESC
       LIMIT 5
     `),
+    db.execute(`
+      SELECT id, action_type, target_type, target_id, requested_by_agent,
+             status, reason, context_summary, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND action_type = 'browser_live_runner'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 5
+    `),
   ]);
   const row = summary.rows[0] ?? {};
+  const liveRunnerRow = liveRunnerApprovalSummary.rows[0] ?? {};
 
   return {
     mode: "read_only" as const,
@@ -451,6 +486,9 @@ async function readBrowserReceiptAudit() {
     draftTabs,
     watchShelfItems,
     runnerAudits,
+    liveRunnerApprovals: Number(liveRunnerRow.total ?? 0),
+    pendingLiveRunnerApprovals: Number(liveRunnerRow.pending ?? 0),
+    approvedLiveRunnerApprovals: Number(liveRunnerRow.approved ?? 0),
     resultScaffolds: Number(row.result_scaffolds ?? 0),
     recoveryScaffolds: Number(row.recovery_scaffolds ?? 0),
     executable: Number(row.executable ?? 0),
@@ -462,9 +500,11 @@ async function readBrowserReceiptAudit() {
     latestTabs: latestTabs.rows.map((tabRow) => browserTabRow(tabRow as Record<string, unknown>)),
     latestWatchShelfItems: latestWatchShelfItems.rows.map((shelfRow) => browserWatchShelfRow(shelfRow as Record<string, unknown>)),
     latestRunnerAudits: latestRunnerAudits.rows.map((auditRow) => browserRunnerAuditRow(auditRow as Record<string, unknown>)),
+    latestLiveRunnerApprovals: latestLiveRunnerApprovals.rows.map((approvalRow) => browserLiveRunnerApprovalRow(approvalRow as Record<string, unknown>)),
     gates: [
       "Browser receipt audit reads local Browser proposals and draft tabs only.",
       "Ledger reads runner audit rows but does not run the Browser runner.",
+      "Ledger reads live-runner approval rows as receipts, not permission to open pages.",
       "This read does not open pages, fetch URLs, persist history, save sources, or run browser automation.",
       "This read does not save Watch Shelf items or persist watch progress.",
       "Workbench remains the Browser body surface. Ledger remains the audit surface.",

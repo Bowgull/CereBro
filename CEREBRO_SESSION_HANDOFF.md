@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0500 EDT
+Last updated: 2026-05-18 0505 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0505 EDT - Ledger Browser Live Runner Gates
+
+### What Changed
+- Ledger Browser Receipt Audit now reads `browser_live_runner` approval rows.
+- Ledger reports total, pending, and approved live-runner gates.
+- Ledger shows a compact `Live Gates` stat.
+- Ledger now has a `Live Runner Gates` readback column with proposal links and
+  `no page open` state.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Ledger and confirmed
+  `Browser Receipt Audit`, `Live Gates`, `Live Runner Gates`, and
+  `no page open`.
+- Screenshot proof saved locally at
+  `output/playwright/ledger-browser-live-runner-gates.png`.
+
+### Drift Check
+- On path. This gives Ledger parity with Approval Queue for live-runner gates.
+- It does not approve or run the live runner.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+
+### Known Risks
+- The local dev DB still has many Browser approval/proposal rows from tests and
+  prior local passes.
+- Ledger now shows more Browser audit detail, but the Browser runner remains
+  intentionally blocked.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests wrote local dev DB approval/proposal rows as part of contract coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Ledger Browser Receipt Audit now reads live-runner approval gates and shows `Live Gates` / `Live Runner Gates` without opening pages. Approval Queue reports hidden local approval rows. Workbench Browser has `Stage Live` and `Preflight`, but the runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is the next blocked runner implementation contract without opening pages. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0500 EDT - Approval Queue Hidden Row Counts
 

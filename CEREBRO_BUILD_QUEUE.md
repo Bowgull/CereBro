@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0500 EDT
+Last updated: 2026-05-18 0505 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0505 EDT: added Ledger Browser live-runner gate readback.
+  Ledger Browser Receipt Audit now reads `browser_live_runner` approval rows,
+  reports total, pending, and approved live-runner gates, and shows a compact
+  `Live Runner Gates` lane with `no page open` state. No live browser runner,
+  browser automation, real browser tab, page open, fetch, history, source save,
+  Watch Shelf item save, progress persistence, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-18 0500 EDT: added Approval Queue hidden row counts.
   `approvals.queue` now returns total, visible, and hidden approval row counts.
   Approval Queue uses the visible count for the Waiting stat and states when

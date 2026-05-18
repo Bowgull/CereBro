@@ -1578,6 +1578,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               <CompactReadDatum label="Draft Tabs" value={String(browserReceiptAudit.draftTabs)} tone={browserReceiptAudit.draftTabs > 0 ? C.gold : C.textMuted} />
               <CompactReadDatum label="Watch Shelf" value={String(browserReceiptAudit.watchShelfItems)} tone={browserReceiptAudit.watchShelfItems > 0 ? C.gold : C.textMuted} />
               <CompactReadDatum label="Runner Audits" value={String(browserReceiptAudit.runnerAudits)} tone={browserReceiptAudit.runnerAudits > 0 ? C.gold : C.textMuted} />
+              <CompactReadDatum label="Live Gates" value={String(browserReceiptAudit.liveRunnerApprovals)} tone={browserReceiptAudit.liveRunnerApprovals > 0 ? C.gold : C.textMuted} />
               <CompactReadDatum label="Result Scaffolds" value={String(browserReceiptAudit.resultScaffolds)} tone={browserReceiptAudit.resultScaffolds > 0 ? C.success : C.textMuted} />
               <CompactReadDatum label="Recovery Notes" value={String(browserReceiptAudit.recoveryScaffolds)} tone={browserReceiptAudit.recoveryScaffolds > 0 ? C.success : C.textMuted} />
               <CompactReadDatum label="Can Open" value={browserReceiptAudit.canOpenPage ? "yes" : "no"} tone={browserReceiptAudit.canOpenPage ? C.danger : C.success} />
@@ -1585,7 +1586,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               <CompactReadDatum label="Shelf Save" value={browserReceiptAudit.canSaveWatchShelf ? "yes" : "no"} tone={browserReceiptAudit.canSaveWatchShelf ? C.danger : C.success} />
               <CompactReadDatum label="Progress" value={browserReceiptAudit.canPersistWatchProgress ? "yes" : "no"} tone={browserReceiptAudit.canPersistWatchProgress ? C.danger : C.success} />
             </div>
-            <div className="mt-1.5 grid gap-1.5 xl:grid-cols-4">
+            <div className="mt-1.5 grid gap-1.5 xl:grid-cols-5">
               <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                   Latest Browser Proposals
@@ -1684,6 +1685,32 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                         </div>
                         <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
                           proposal {item.proposalId ? `#${item.proposalId}` : "unlinked"} · {item.canOpenPage ? "can open" : "no page open"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                  Live Runner Gates
+                </div>
+                {browserReceiptAudit.latestLiveRunnerApprovals.length === 0 ? (
+                  <div className="text-[11px]" style={{ color: C.textMuted }}>
+                    No live-runner gates recorded.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {browserReceiptAudit.latestLiveRunnerApprovals.map((item) => (
+                      <div key={item.id} className="rounded px-2 py-1" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="flex items-center justify-between gap-2 text-[11px]" style={{ color: C.textPrimary }}>
+                          <span className="truncate">Gate #{item.id}</span>
+                          <span className="shrink-0" style={{ color: item.status === "approved" ? C.gold : C.textMuted }}>
+                            {item.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
+                          proposal {item.proposalId ? `#${item.proposalId}` : "unlinked"} · no page open
                         </div>
                       </div>
                     ))}

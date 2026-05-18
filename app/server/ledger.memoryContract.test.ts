@@ -81,6 +81,10 @@ describe("Ledger memory contract read", () => {
     await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
     await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
     const runner = await caller.workbench.runBrowserActionBlocked({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+      reason: "Ledger live-runner readback test only.",
+    });
     const before = {
       approvals: await countRows("approvals"),
       workbenchEvidence: await countRows("workbench_evidence_records"),
@@ -100,6 +104,9 @@ describe("Ledger memory contract read", () => {
     expect(overview.browserReceiptAudit.recoveryScaffolds).toBeGreaterThan(0);
     expect(overview.browserReceiptAudit.watchShelfItems).toBeGreaterThanOrEqual(0);
     expect(overview.browserReceiptAudit.runnerAudits).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.liveRunnerApprovals).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.pendingLiveRunnerApprovals).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.approvedLiveRunnerApprovals).toBeGreaterThanOrEqual(0);
     expect(overview.browserReceiptAudit.canSaveWatchShelf).toBe(false);
     expect(overview.browserReceiptAudit.canPersistWatchProgress).toBe(false);
     expect(overview.browserReceiptAudit.latestWatchShelfItems).toEqual([]);
@@ -109,10 +116,14 @@ describe("Ledger memory contract read", () => {
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.canOpenPage).toBe(false);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.canExecute).toBe(false);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.receiptBody).toContain("No browser opened.");
+    expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.id).toBe(liveApproval.approval?.id);
+    expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.proposalId).toBe(created.proposal.id);
+    expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.status).toBe("pending");
     expect(overview.browserReceiptAudit.latestProposals[0]?.id).toBe(created.proposal.id);
     expect(overview.browserReceiptAudit.latestTabs.some((tab) => tab.proposalId === created.proposal.id)).toBe(true);
     expect(overview.browserReceiptAudit.gates.join(" ")).toContain("does not open pages");
     expect(overview.browserReceiptAudit.gates.join(" ")).toContain("runner audit rows");
+    expect(overview.browserReceiptAudit.gates.join(" ")).toContain("live-runner approval rows");
     expect(overview.browserReceiptAudit.gates.join(" ")).toContain("does not save Watch Shelf items");
     expect(overview.browserReceiptAudit.noActionTaken).toContain("No browser opened.");
     expect(overview.browserReceiptAudit.noActionTaken).toContain("No page fetched.");
