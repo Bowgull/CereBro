@@ -142,6 +142,46 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("reports hidden Browser proposal rows behind the compact recent list without deleting them", async () => {
+    const caller = createCaller();
+    const first = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/hidden-one",
+      draftKind: "url",
+    });
+    const second = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/hidden-two",
+      draftKind: "url",
+    });
+    const third = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/hidden-three",
+      draftKind: "url",
+    });
+    const before = {
+      browserProposals: await countRows("browser_action_proposals"),
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const proposals = await caller.workbench.browserActionProposals({ limit: 2 });
+
+    expect(proposals.items.map((item) => item.id)).toEqual([third.proposal.id, second.proposal.id]);
+    expect(proposals.totalProposalRows).toBeGreaterThanOrEqual(3);
+    expect(proposals.visibleProposalRows).toBe(2);
+    expect(proposals.hiddenProposalRows).toBe(proposals.totalProposalRows - 2);
+    expect(proposals.hiddenProposalRows).toBeGreaterThanOrEqual(1);
+    expect(proposals.items.some((item) => item.id === first.proposal.id)).toBe(false);
+    expect(proposals.noActionTaken).toContain("No browser opened.");
+
+    expect(await countRows("browser_action_proposals")).toBe(before.browserProposals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("pins a focused Browser proposal outside the compact recent limit without running it", async () => {
     const caller = createCaller();
     const older = await caller.workbench.createBrowserActionProposal({

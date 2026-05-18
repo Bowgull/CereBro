@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0427 EDT
+Last updated: 2026-05-18 0434 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0434 EDT: added Workbench Browser hidden proposal counts.
+  `workbench.browserActionProposals` now returns total, visible, and hidden
+  Browser proposal row counts. Workbench Browser Recent Proposals shows compact
+  `shown` and `hidden` chips and states that older local rows stay hidden until
+  Ledger or a focused approval opens them. No rows were deleted. No live
+  browser runner, browser automation, real browser tab, page open, fetch,
+  history, source save, Watch Shelf item save, progress persistence, external
+  write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-18 0427 EDT: added Workbench Browser audit summary readback.
   `workbench.browserActionProposals` now summarizes
   `browser_runner_audit_records` per proposal, including runner audit count,

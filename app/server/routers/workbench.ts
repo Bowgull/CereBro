@@ -675,6 +675,7 @@ export const workbenchRouter = router({
     )
     .query(async ({ input }) => {
       const db = await getCerebroDb();
+      const limit = input?.limit ?? 5;
       const focusedProposal = input?.focusedProposalId
         ? await db.execute({
             sql: `
@@ -725,15 +726,21 @@ export const workbenchRouter = router({
           ORDER BY bap.created_at DESC, bap.id DESC
           LIMIT ?
         `,
-        args: [input?.limit ?? 5],
+        args: [limit],
       });
+      const totalRows = await db.execute("SELECT COUNT(*) AS count FROM browser_action_proposals");
       const rows = [
         ...(focusedProposal?.rows ?? []),
         ...result.rows.filter((row) => Number(row.id) !== input?.focusedProposalId),
       ];
+      const totalProposalRows = Number(totalRows.rows[0]?.count ?? 0);
+      const visibleProposalRows = rows.length;
 
       return {
         items: rows.map(rowToBrowserActionProposal),
+        totalProposalRows,
+        visibleProposalRows,
+        hiddenProposalRows: Math.max(0, totalProposalRows - visibleProposalRows),
         focusedProposalPinned: Boolean(focusedProposal?.rows.length),
         noActionTaken: browserProposalNoActionTaken,
       };

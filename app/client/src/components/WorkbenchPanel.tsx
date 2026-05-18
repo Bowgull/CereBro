@@ -1021,6 +1021,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       Recent Proposals
                     </span>
                     <div className="flex flex-wrap items-center gap-1">
+                      {browserActionProposals.data && (
+                        <Chip label={`${browserActionProposals.data.visibleProposalRows} shown`} tone={C.textMuted} />
+                      )}
+                      {browserActionProposals.data && browserActionProposals.data.hiddenProposalRows > 0 && (
+                        <Chip label={`${browserActionProposals.data.hiddenProposalRows} hidden`} tone={C.textMuted} />
+                      )}
                       <Chip label="local only" tone={C.accent} />
                       <Chip label="blocked" tone={C.warning} />
                     </div>
@@ -1224,7 +1230,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     </div>
                   )}
                   <div className="text-[10px]" style={{ color: C.textMuted }}>
-                    No saved Browser proposal runs from this list.
+                    No saved Browser proposal runs from this list. Older local proposal rows stay hidden until Ledger or a focused approval opens them.
                   </div>
                   {browserProposalNotice && (
                     <div className="text-[10px]" style={{ color: C.textMuted }}>
