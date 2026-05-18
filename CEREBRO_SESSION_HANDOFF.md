@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2153 EDT
+Last updated: 2026-05-17 2158 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2158 EDT - Workbench Browser Blocked Runner Route
+
+### What Changed
+- Added `workbench.runBrowserActionBlocked`.
+- The route accepts a Browser proposal id and returns a blocked runner result.
+- It reuses the manual Browser runner contract.
+- Workbench Browser proposal details now expose `Check Runner`.
+- The UI confirms `Runner blocked for proposal #... No page opened.`
+
+### Files Touched
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.runBrowserActionBlocked`.
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, opened a proposal detail panel, clicked `Check Runner`, and
+  confirmed blocked runner notice and no page open copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-runner-blocked-route.png`.
+
+### Drift Check
+- On path. This creates a runner route boundary while keeping it blocked before
+  browser open.
+- The route does not write rows.
+- No approval decision was made, no Workbench evidence row was written, no
+  security review row was written, no source row was written, and no browser
+  action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, download, external write, paid service, provider call, model call,
+  install, pull, or Raven path was added.
+
+### Known Risks
+- This is route scaffolding only. It proves the boundary and does not open
+  pages.
+- A later slice must decide whether Browser tab/session storage should land
+  before any real manual open.
+
+### Storage Impact
+- No schema change.
+- Browser proof read existing local dev DB rows only.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has a blocked manual runner contract readback, a blocked runner route, durable local browser_action_proposals, compact proposal rows behind Details, approval previews, Approval Queue Browser filtering, Workbench body receipts, Spock security receipts, gate readiness, and result/recovery contract readbacks. Next best slice is Browser tab/session storage contract or the first manual open-page contract, keeping actual page open disabled until the storage/receipt path is explicit. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2153 EDT - Workbench Browser Runner Contract
 

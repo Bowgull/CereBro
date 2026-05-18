@@ -196,6 +196,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       );
     },
   });
+  const runBrowserActionBlocked = trpc.workbench.runBrowserActionBlocked.useMutation({
+    onSuccess: (result) => {
+      setBrowserProposalNotice(`Runner blocked for proposal #${result.proposal.id}. No page opened.`);
+    },
+  });
   const [selectedBrowserReadinessId, setSelectedBrowserReadinessId] = useState<number | null>(null);
   const browserProposalReadiness = trpc.workbench.browserActionProposalReadiness.useQuery(
     { proposalId: selectedBrowserReadinessId ?? 0 },
@@ -1047,6 +1052,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     onClick={() => setSelectedBrowserResultId(proposal.id)}
                                   >
                                     Read Result
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={runBrowserActionBlocked.isPending}
+                                    title="Check the blocked manual Browser runner route. This does not open a page."
+                                    onClick={() => {
+                                      runBrowserActionBlocked.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Check Runner
                                   </Button>
                                 </div>
                               </div>

@@ -355,4 +355,40 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("scaffolds a manual Browser runner route that refuses to open pages or write rows", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-runner",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const runner = await caller.workbench.runBrowserActionBlocked({
+      proposalId: created.proposal.id,
+    });
+
+    expect(runner.ok).toBe(true);
+    expect(runner.wouldOpenBrowser).toBe(false);
+    expect(runner.writesExternal).toBe(false);
+    expect(runner.resultState).toBe("blocked_before_runner");
+    expect(runner.proposal.id).toBe(created.proposal.id);
+    expect(runner.contract.statusLabel).toBe("contract blocked");
+    expect(runner.gates).toContain("Manual Browser runner route exists but is blocked before page open.");
+    expect(runner.noActionTaken).toContain("No browser opened.");
+    expect(runner.noActionTaken).toContain("No external write ran.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

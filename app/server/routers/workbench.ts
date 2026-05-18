@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { browserActionProposalModel } from "../browserActionProposalModel";
+import { workbenchBrowserDraftModel, workbenchBrowserRunnerContractModel } from "../../client/src/lib/workbenchBrowserModel";
 import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import {
   GITHUB_PROJECT_MAP_PATH,
@@ -696,6 +697,35 @@ export const workbenchRouter = router({
           "This result/recovery contract does not run the Browser proposal.",
           "No Browser result receipt is written until an approved runner exists.",
           "Recovery notes stay required before canExecute can become true.",
+        ],
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  runBrowserActionBlocked: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const contract = workbenchBrowserRunnerContractModel(workbenchBrowserDraftModel(proposal.target));
+
+      return {
+        ok: true as const,
+        mode: "blocked_manual_browser_runner" as const,
+        proposal,
+        contract,
+        wouldOpenBrowser: false,
+        wouldFetchPage: false,
+        writesExternal: false,
+        canExecute: false,
+        resultState: "blocked_before_runner" as const,
+        gates: [
+          "Manual Browser runner route exists but is blocked before page open.",
+          "Runner contract, approved approval receipt, Spock gate, Workbench body, result receipt, and recovery note are required before any future runner can execute.",
+          "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
         ],
         noActionTaken: browserProposalNoActionTaken,
       };
