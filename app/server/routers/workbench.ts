@@ -222,6 +222,17 @@ async function browserProposalGateRows(proposalId: number) {
     `,
     args: [proposalId],
   });
+  const latestRunnerAudit = await db.execute({
+    sql: `
+      SELECT id, proposal_id, runner_state, can_open_page, can_execute,
+             receipt_body, no_action_taken, created_at
+      FROM browser_runner_audit_records
+      WHERE proposal_id = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
 
   return {
     approvalPreview: approvalPreview.rows[0],
@@ -230,6 +241,7 @@ async function browserProposalGateRows(proposalId: number) {
     spock: spock.rows[0],
     tabDraft: tabDraft.rows[0],
     liveRunnerApproval: liveRunnerApproval.rows[0],
+    latestRunnerAudit: latestRunnerAudit.rows[0],
   };
 }
 
@@ -1382,6 +1394,11 @@ export const workbenchRouter = router({
           present: Boolean(gateRows.liveRunnerApproval),
           detail: gateRows.liveRunnerApproval ? `Live runner approval #${Number(gateRows.liveRunnerApproval.id)} recorded.` : "Missing. V1 requires a separate explicit live-runner approval before page open.",
         },
+        latestRunnerAudit: {
+          label: "Latest runner audit",
+          present: Boolean(gateRows.latestRunnerAudit),
+          detail: gateRows.latestRunnerAudit ? `Runner audit #${Number(gateRows.latestRunnerAudit.id)} recorded. ${String(gateRows.latestRunnerAudit.runner_state).replace(/_/g, " ")}.` : "No blocked runner audit recorded yet.",
+        },
       };
       const preflightGateList = [
         gates.approvalPreview,
@@ -1399,6 +1416,7 @@ export const workbenchRouter = router({
       return {
         mode: "preflight_only" as const,
         proposal,
+        latestRunnerAudit: gateRows.latestRunnerAudit ? rowToBrowserRunnerAudit(gateRows.latestRunnerAudit as Record<string, unknown>) : null,
         liveRunnerApproved: Boolean(gateRows.liveRunnerApproval),
         requiresExplicitLiveRunnerApproval: true,
         canOpenPage: false,

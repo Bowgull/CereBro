@@ -1484,6 +1484,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                 </div>
                               ))}
                           </div>
+                          {browserLiveRunnerPreflight.data.latestRunnerAudit && (
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold" style={{ color: C.textPrimary }}>Latest audit #{browserLiveRunnerPreflight.data.latestRunnerAudit.id}</span>
+                                <Chip label={browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")} tone={C.warning} />
+                              </div>
+                              <div className="mt-0.5">
+                                {browserLiveRunnerPreflight.data.latestRunnerAudit.noActionTaken.slice(0, 2).join(" ")}
+                              </div>
+                            </div>
+                          )}
                           <div>Next missing gate: {browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "none"}.</div>
                           <div>{browserLiveRunnerPreflight.data.nextAction}</div>
                           <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
