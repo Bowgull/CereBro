@@ -4,6 +4,7 @@ import {
   workbenchBrowserDraftModel,
   workbenchBrowserReadinessModel,
   workbenchBrowserRunnerContractModel,
+  workbenchBrowserSessionStorageContractModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -188,5 +189,27 @@ describe("workbenchBrowserModel", () => {
     expect(emptyContract.targetLabel).toBe("No page draft.");
     expect(emptyContract.pageStateLabel).toBe("no page");
     expect(emptyContract.requiredReceipts).toContain("Page draft");
+  });
+
+  it("defines Browser tab and session storage without persisting real browsing state", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const urlStorage = workbenchBrowserSessionStorageContractModel(urlDraft);
+    const emptyStorage = workbenchBrowserSessionStorageContractModel(emptyDraft);
+
+    expect(urlStorage.mode).toBe("manual_browser_session_storage_contract");
+    expect(urlStorage.statusLabel).toBe("storage blocked");
+    expect(urlStorage.canPersistTabs).toBe(false);
+    expect(urlStorage.canPersistHistory).toBe(false);
+    expect(urlStorage.canPersistCookies).toBe(false);
+    expect(urlStorage.activeDraftLabel).toBe("https://example.com/path");
+    expect(urlStorage.storageShape.requiredFields).toContain("tab_id");
+    expect(urlStorage.storageShape.requiredFields).toContain("target_url");
+    expect(urlStorage.blockedState).toContain("No cookies.");
+    expect(urlStorage.noActionText).toContain("No tab session");
+
+    expect(emptyStorage.activeDraftLabel).toBe("No page draft.");
+    expect(emptyStorage.requiredBeforePersist).toContain("Page draft");
   });
 });

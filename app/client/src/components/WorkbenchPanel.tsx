@@ -26,6 +26,7 @@ import {
   workbenchBrowserDraftModel,
   workbenchBrowserReadinessModel,
   workbenchBrowserRunnerContractModel,
+  workbenchBrowserSessionStorageContractModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -277,6 +278,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
   const browserReadiness = workbenchBrowserReadinessModel(browserDraft);
   const browserRunnerContract = workbenchBrowserRunnerContractModel(browserDraft);
+  const browserStorageContract = workbenchBrowserSessionStorageContractModel(browserDraft);
   const browserActionProposal = trpc.workbench.browserActionProposalPreview.useQuery(
     {
       actionLabel: browserActionPreview.label,
@@ -1191,6 +1193,25 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </Button>
                   <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
                     {browserTabState.tabSummary}
+                  </div>
+                </div>
+
+                <div className="grid gap-1.5 rounded p-2 md:grid-cols-[minmax(0,1fr)_auto]" aria-label="Browser tab storage contract" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="min-w-0 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                        Tab Storage
+                      </span>
+                      <Chip label={browserStorageContract.statusLabel} tone={C.warning} />
+                      <Chip label={browserStorageContract.canPersistTabs ? "tabs persist" : "tabs blocked"} tone={browserStorageContract.canPersistTabs ? C.accent : C.warning} />
+                    </div>
+                    <div className="mt-1 break-all">{browserStorageContract.activeDraftLabel}</div>
+                    <div className="mt-1">{browserStorageContract.noActionText}</div>
+                  </div>
+                  <div className="flex flex-wrap items-start gap-1 md:justify-end">
+                    {browserStorageContract.requiredBeforePersist.map((gate) => (
+                      <Chip key={gate} label={gate} tone={C.textMuted} />
+                    ))}
                   </div>
                 </div>
 

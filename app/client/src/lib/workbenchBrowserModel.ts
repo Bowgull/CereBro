@@ -68,6 +68,22 @@ export type WorkbenchBrowserRunnerContract = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserSessionStorageContract = {
+  mode: "manual_browser_session_storage_contract";
+  statusLabel: "storage blocked";
+  activeDraftLabel: string;
+  canPersistTabs: boolean;
+  canPersistHistory: boolean;
+  canPersistCookies: boolean;
+  storageShape: {
+    requiredFields: string[];
+    optionalFields: string[];
+  };
+  requiredBeforePersist: string[];
+  blockedState: string[];
+  noActionText: string;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -201,6 +217,50 @@ export function workbenchBrowserRunnerContractModel(draft: WorkbenchBrowserDraft
       "Recovery note",
     ],
     noActionText: "No browser page opens, fetches, persists history, saves sources, captures Workbench proof, downloads files, enters credentials, or writes externally from this contract.",
+  };
+}
+
+export function workbenchBrowserSessionStorageContractModel(draft: WorkbenchBrowserDraft): WorkbenchBrowserSessionStorageContract {
+  return {
+    mode: "manual_browser_session_storage_contract",
+    statusLabel: "storage blocked",
+    activeDraftLabel: draft.kind === "empty" ? "No page draft." : draft.displayTarget,
+    canPersistTabs: false,
+    canPersistHistory: false,
+    canPersistCookies: false,
+    storageShape: {
+      requiredFields: [
+        "tab_id",
+        "target_url",
+        "title",
+        "state",
+        "created_at",
+        "updated_at",
+      ],
+      optionalFields: [
+        "project_id",
+        "source_id",
+        "workbench_evidence_id",
+        "watch_shelf_id",
+        "last_error",
+      ],
+    },
+    requiredBeforePersist: [
+      ...(draft.kind === "empty" ? ["Page draft"] : []),
+      "Runner contract receipt",
+      "Local tab storage table",
+      "Result receipt",
+      "Recovery note",
+    ],
+    blockedState: [
+      "No cookies.",
+      "No credentials.",
+      "No private session.",
+      "No service login state.",
+      "No page content cache.",
+      "No source save.",
+    ],
+    noActionText: "No tab session, browser history, cookie jar, credential state, page content, source row, Watch Shelf item, or Workbench capture is persisted from this contract.",
   };
 }
 
