@@ -238,6 +238,24 @@ function browserRunnerAuditRow(row: Record<string, unknown>) {
   };
 }
 
+function browserRunnerAuditDetailRow(row: Record<string, unknown>) {
+  return {
+    ...browserRunnerAuditRow(row),
+    proposal: row.browser_proposal_id == null ? null : {
+      id: Number(row.browser_proposal_id),
+      actionLabel: String(row.browser_action_label),
+      target: String(row.browser_target),
+      draftKind: String(row.browser_draft_kind),
+      riskClass: String(row.browser_risk_class),
+      executorAgent: String(row.browser_executor_agent),
+      statusLabel: String(row.browser_status ?? "proposal_blocked").split("_").join(" "),
+      resultState: String(row.browser_result_state),
+      canExecute: Boolean(row.browser_can_execute),
+      recoveryNote: row.browser_recovery_note == null ? null : String(row.browser_recovery_note),
+    },
+  };
+}
+
 function browserLiveRunnerApprovalRow(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -523,6 +541,58 @@ async function readBrowserReceiptAudit() {
 }
 
 export const ledgerRouter = router({
+  browserRunnerAuditDetail: publicProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT
+            bra.id, bra.proposal_id, bra.runner_state, bra.can_open_page,
+            bra.can_execute, bra.receipt_body, bra.no_action_taken,
+            bra.created_at,
+            bap.id AS browser_proposal_id,
+            bap.action_label AS browser_action_label,
+            bap.target AS browser_target,
+            bap.draft_kind AS browser_draft_kind,
+            bap.risk_class AS browser_risk_class,
+            bap.executor_agent AS browser_executor_agent,
+            bap.status AS browser_status,
+            bap.result_state AS browser_result_state,
+            bap.can_execute AS browser_can_execute,
+            bap.recovery_note AS browser_recovery_note
+          FROM browser_runner_audit_records bra
+          LEFT JOIN browser_action_proposals bap ON bap.id = bra.proposal_id
+          WHERE bra.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      const row = result.rows[0] as Record<string, unknown> | undefined;
+      return {
+        mode: "read_only" as const,
+        ownerAgent: "spock" as const,
+        found: Boolean(row),
+        audit: row ? browserRunnerAuditDetailRow(row) : null,
+        canOpenPage: false,
+        canExecute: false,
+        gates: [
+          "Browser runner audit detail is read-only.",
+          "A runner audit receipt is evidence, not permission to open pages.",
+          "This read does not open pages, fetch URLs, persist history, save sources, run browser automation, or write externally.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No source saved.",
+          "No Watch Shelf item saved.",
+          "No progress persisted.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   overview: publicProcedure
     .input(
       z

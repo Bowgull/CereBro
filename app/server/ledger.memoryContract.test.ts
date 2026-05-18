@@ -135,4 +135,50 @@ describe("Ledger memory contract read", () => {
     expect(await countRows("sources")).toBe(before.sources);
     expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
   });
+
+  it("reads one Browser runner audit receipt without opening pages or writing rows", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/ledger-runner-audit-detail",
+      draftKind: "url",
+    });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Ledger runner audit detail test only.",
+    });
+    const runner = await caller.workbench.runBrowserLiveRunnerBlocked({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      runnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const detail = await caller.ledger.browserRunnerAuditDetail({ id: runner.audit.id });
+
+    expect(detail.mode).toBe("read_only");
+    expect(detail.found).toBe(true);
+    expect(detail.audit?.id).toBe(runner.audit.id);
+    expect(detail.audit?.proposalId).toBe(created.proposal.id);
+    expect(detail.audit?.runnerState).toBe("blocked_before_live_runner_implementation");
+    expect(detail.audit?.canOpenPage).toBe(false);
+    expect(detail.audit?.canExecute).toBe(false);
+    expect(detail.audit?.receiptBody).toContain("Live runner implementation is not present.");
+    expect(detail.audit?.proposal?.target).toBe("https://example.com/ledger-runner-audit-detail");
+    expect(detail.noActionTaken).toContain("No browser opened.");
+    expect(detail.noActionTaken).toContain("No page fetched.");
+    expect(detail.gates.join(" ")).toContain("read-only");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("browser_runner_audit_records")).toBe(before.runnerAudits);
+  });
 });

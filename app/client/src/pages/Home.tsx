@@ -969,6 +969,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const [creatingRouteApprovalId, setCreatingRouteApprovalId] = useState<number | null>(null);
   const [creatingRouteReceiptId, setCreatingRouteReceiptId] = useState<number | null>(null);
   const [selectedRouteAuditId, setSelectedRouteAuditId] = useState<number | null>(null);
+  const [selectedBrowserRunnerAuditId, setSelectedBrowserRunnerAuditId] = useState<number | null>(null);
   const utils = trpc.useUtils();
   const ledgerOverview = trpc.ledger.overview.useQuery(
     { evidenceLimit: 50, routeLimit: 6 },
@@ -1008,6 +1009,15 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     { routeRecordId: selectedRouteAuditId ?? 0 },
     {
       enabled: selectedRouteAuditId != null,
+      staleTime: 15_000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const browserRunnerAuditDetail = trpc.ledger.browserRunnerAuditDetail.useQuery(
+    { id: selectedBrowserRunnerAuditId ?? 0 },
+    {
+      enabled: selectedBrowserRunnerAuditId != null,
       staleTime: 15_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
@@ -1683,8 +1693,18 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                             {item.runnerState.replace(/_/g, " ")}
                           </span>
                         </div>
-                        <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
-                          proposal {item.proposalId ? `#${item.proposalId}` : "unlinked"} · {item.canOpenPage ? "can open" : "no page open"}
+                        <div className="mt-0.5 flex items-center gap-1 text-[10px]" style={{ color: C.textMuted }}>
+                          <span className="min-w-0 flex-1 truncate">
+                            proposal {item.proposalId ? `#${item.proposalId}` : "unlinked"} · {item.canOpenPage ? "can open" : "no page open"}
+                          </span>
+                          <button
+                            type="button"
+                            className="shrink-0 rounded px-1.5 py-0.5 uppercase tracking-wider"
+                            onClick={() => setSelectedBrowserRunnerAuditId(item.id)}
+                            style={{ color: C.accent, border: `1px solid ${workFrame.lineSoft}`, background: workFrame.slabMuted }}
+                          >
+                            Inspect
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1721,6 +1741,44 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               No browser opened. No page fetched. No Watch Shelf item saved. No progress persisted. Next: {browserReceiptAudit.nextAction}
             </div>
+            {selectedBrowserRunnerAuditId != null && (
+              <div className="mt-1.5 rounded p-2" aria-label="Browser runner audit receipt detail" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Runner Receipt Detail
+                  </span>
+                  <Badge variant="secondary" className="uppercase">
+                    read only
+                  </Badge>
+                </div>
+                {browserRunnerAuditDetail.isLoading ? (
+                  <div className="text-[11px]" style={{ color: C.textMuted }}>
+                    Reading runner receipt.
+                  </div>
+                ) : browserRunnerAuditDetail.data?.audit ? (
+                  <div className="grid gap-1.5">
+                    <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
+                      <CompactReadDatum label="Audit" value={`#${browserRunnerAuditDetail.data.audit.id}`} tone={C.accent} />
+                      <CompactReadDatum label="Runner" value={browserRunnerAuditDetail.data.audit.runnerState.replace(/_/g, " ")} tone={C.gold} />
+                      <CompactReadDatum label="Can Open" value={browserRunnerAuditDetail.data.audit.canOpenPage ? "yes" : "no"} tone={browserRunnerAuditDetail.data.audit.canOpenPage ? C.danger : C.success} />
+                      <CompactReadDatum label="Can Execute" value={browserRunnerAuditDetail.data.audit.canExecute ? "yes" : "no"} tone={browserRunnerAuditDetail.data.audit.canExecute ? C.danger : C.success} />
+                    </div>
+                    <div className="rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textSecondary }}>
+                      {browserRunnerAuditDetail.data.audit.proposal
+                        ? `Proposal #${browserRunnerAuditDetail.data.audit.proposal.id}: ${browserRunnerAuditDetail.data.audit.proposal.target}`
+                        : "Proposal unlinked."}
+                    </div>
+                    <div className="rounded px-2 py-1.5 text-[10px] leading-snug" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}`, color: C.textMuted }}>
+                      {browserRunnerAuditDetail.data.audit.noActionTaken.slice(0, 4).join(" ")}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[11px]" style={{ color: C.warning }}>
+                    Runner receipt could not be read.
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
