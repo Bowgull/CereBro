@@ -209,6 +209,19 @@ async function browserProposalGateRows(proposalId: number) {
     `,
     args: [proposalId],
   });
+  const liveRunnerApproval = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_live_runner'
+        AND status = 'approved'
+      ORDER BY decided_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
 
   return {
     approvalPreview: approvalPreview.rows[0],
@@ -216,6 +229,7 @@ async function browserProposalGateRows(proposalId: number) {
     body: body.rows[0],
     spock: spock.rows[0],
     tabDraft: tabDraft.rows[0],
+    liveRunnerApproval: liveRunnerApproval.rows[0],
   };
 }
 
@@ -1210,6 +1224,109 @@ export const workbenchRouter = router({
           "No history persisted.",
           "No cookies or credentials persisted.",
           "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  browserLiveRunnerPreflight: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const gates = {
+        runnerContract: {
+          label: "Runner contract",
+          present: true,
+          detail: "Blocked runner contract is present. It still cannot open a page.",
+        },
+        approvalPreview: {
+          label: "Approval preview",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not live runner permission.` : "Missing approval preview.",
+        },
+        executionApproval: {
+          label: "Approved execution approval",
+          present: Boolean(gateRows.executionApproval),
+          detail: gateRows.executionApproval ? `Approved approval #${Number(gateRows.executionApproval.id)} recorded. Still not live runner permission.` : "Missing approved execution approval.",
+        },
+        spock: {
+          label: "Spock target safety receipt",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing Spock target safety receipt.",
+        },
+        workbenchBody: {
+          label: "Workbench body receipt",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing Workbench body receipt.",
+        },
+        tabDraft: {
+          label: "Draft tab row",
+          present: Boolean(gateRows.tabDraft),
+          detail: gateRows.tabDraft ? `Draft tab ${String(gateRows.tabDraft.tab_id)}.` : "Missing browser_tab_sessions draft row.",
+        },
+        resultReceipt: {
+          label: "Result receipt",
+          present: String(proposal.resultState) === "blocked_before_runner",
+          detail: String(proposal.resultState) === "blocked_before_runner" ? "Blocked result scaffold recorded. No page opened." : "Missing blocked result scaffold.",
+        },
+        recoveryNote: {
+          label: "Recovery note",
+          present: Boolean(proposal.recoveryNote),
+          detail: proposal.recoveryNote ? proposal.recoveryNote : "Missing recovery note scaffold.",
+        },
+        liveRunnerApproval: {
+          label: "Explicit live runner approval",
+          present: Boolean(gateRows.liveRunnerApproval),
+          detail: gateRows.liveRunnerApproval ? `Live runner approval #${Number(gateRows.liveRunnerApproval.id)} recorded.` : "Missing. V1 requires a separate explicit live-runner approval before page open.",
+        },
+      };
+      const preflightGateList = [
+        gates.approvalPreview,
+        gates.executionApproval,
+        gates.spock,
+        gates.workbenchBody,
+        gates.tabDraft,
+        gates.resultReceipt,
+        gates.recoveryNote,
+        gates.liveRunnerApproval,
+      ];
+      const readyCount = preflightGateList.filter((gate) => gate.present).length;
+      const nextMissingGate = preflightGateList.find((gate) => !gate.present)?.label.toLowerCase() ?? null;
+
+      return {
+        mode: "preflight_only" as const,
+        proposal,
+        liveRunnerApproved: Boolean(gateRows.liveRunnerApproval),
+        requiresExplicitLiveRunnerApproval: true,
+        canOpenPage: false,
+        canExecute: false,
+        runnerState: "blocked_before_live_runner" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: preflightGateList.length - readyCount,
+          nextMissingGate,
+        },
+        nextAction: "Live runner remains blocked until a separate explicit live-runner approval contract exists.",
+        gatesText: [
+          "This preflight is read-only.",
+          "A pending or approved Browser review approval is not enough to open a page.",
+          "No browser tab opens until the separate live-runner approval path exists and is approved.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No runner audit written.",
           "No external write ran.",
         ],
       };

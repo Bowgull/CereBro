@@ -878,4 +878,103 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads Browser live-runner preflight without treating pending approval as live runner permission", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-pending",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const preflight = await caller.workbench.browserLiveRunnerPreflight({
+      proposalId: created.proposal.id,
+    });
+
+    expect(preflight.mode).toBe("preflight_only");
+    expect(preflight.proposal.id).toBe(created.proposal.id);
+    expect(preflight.liveRunnerApproved).toBe(false);
+    expect(preflight.requiresExplicitLiveRunnerApproval).toBe(true);
+    expect(preflight.canOpenPage).toBe(false);
+    expect(preflight.canExecute).toBe(false);
+    expect(preflight.gates.approvalPreview.present).toBe(true);
+    expect(preflight.gates.executionApproval.present).toBe(false);
+    expect(preflight.gates.liveRunnerApproval.present).toBe(false);
+    expect(preflight.summary.nextMissingGate).toBe("approved execution approval");
+    expect(preflight.noActionTaken).toContain("No browser opened.");
+    expect(preflight.noActionTaken).toContain("No page fetched.");
+    expect(preflight.noActionTaken).toContain("No runner audit written.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("keeps Browser live-runner preflight blocked even after all local scaffolds exist", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-all-scaffolds",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test approval decision. This still must not open a page.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const preflight = await caller.workbench.browserLiveRunnerPreflight({
+      proposalId: created.proposal.id,
+    });
+
+    expect(preflight.mode).toBe("preflight_only");
+    expect(preflight.liveRunnerApproved).toBe(false);
+    expect(preflight.requiresExplicitLiveRunnerApproval).toBe(true);
+    expect(preflight.canOpenPage).toBe(false);
+    expect(preflight.canExecute).toBe(false);
+    expect(preflight.gates.executionApproval.present).toBe(true);
+    expect(preflight.gates.spock.present).toBe(true);
+    expect(preflight.gates.workbenchBody.present).toBe(true);
+    expect(preflight.gates.tabDraft.present).toBe(true);
+    expect(preflight.gates.resultReceipt.present).toBe(true);
+    expect(preflight.gates.recoveryNote.present).toBe(true);
+    expect(preflight.gates.liveRunnerApproval.present).toBe(false);
+    expect(preflight.summary.readyCount).toBe(7);
+    expect(preflight.summary.missingCount).toBe(1);
+    expect(preflight.summary.nextMissingGate).toBe("explicit live runner approval");
+    expect(preflight.nextAction).toContain("explicit live-runner approval");
+    expect(preflight.noActionTaken).toContain("No browser opened.");
+    expect(preflight.noActionTaken).toContain("No runner audit written.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });
