@@ -973,8 +973,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </details>
                 </div>
 
-                <div className="grid gap-1.5 rounded p-2 md:grid-cols-[minmax(0,1fr)_auto]" aria-label="Browser runner readiness" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
-                  <div>
+                <div className="grid gap-1.5 rounded p-2" aria-label="Browser runner readiness" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                         Runner Readiness
@@ -983,23 +983,27 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       <Chip label={browserReadiness.pageStateLabel} tone={browserReadiness.pageStateLabel === "no page" ? C.textMuted : C.accent} />
                       <Chip label={browserRunnerContract.statusLabel} tone={C.warning} />
                     </div>
-                    <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                      {browserReadiness.noActionText}
+                    <span className="text-[10px]" style={{ color: C.textMuted }}>
+                      No page opens here.
+                    </span>
+                  </div>
+                  <div className="grid gap-1 text-[10px] leading-snug sm:grid-cols-3" style={{ color: C.textMuted }}>
+                    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                      <span className="font-semibold" style={{ color: C.textPrimary }}>Target</span>
+                      <div className="mt-0.5 truncate" title={browserRunnerContract.targetLabel}>{browserRunnerContract.targetLabel}</div>
                     </div>
-                    <div className="mt-1 grid gap-1 text-[10px] leading-snug md:grid-cols-2" style={{ color: C.textMuted }}>
-                      <div className="rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-                        <span className="font-semibold" style={{ color: C.textPrimary }}>Runner Contract</span>
-                        <div className="mt-0.5 break-all">{browserRunnerContract.targetLabel}</div>
-                        <div className="mt-0.5">{browserRunnerContract.noActionText}</div>
-                      </div>
-                      <div className="rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-                        <span className="font-semibold" style={{ color: C.textPrimary }}>Manual Allowance</span>
-                        <div className="mt-0.5">{browserRunnerContract.allowedManualActions[0]}</div>
-                        <div className="mt-0.5">{browserRunnerContract.blockedActions.slice(0, 3).join(" ")}</div>
+                    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                      <span className="font-semibold" style={{ color: C.textPrimary }}>Manual Allowance</span>
+                      <div className="mt-0.5 truncate" title={browserRunnerContract.allowedManualActions[0]}>{browserRunnerContract.allowedManualActions[0]}</div>
+                    </div>
+                    <div className="min-w-0 rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                      <span className="font-semibold" style={{ color: C.textPrimary }}>Blocked</span>
+                      <div className="mt-0.5 truncate" title={browserRunnerContract.blockedActions.join(" ")}>
+                        {browserRunnerContract.blockedActions.slice(0, 3).join(" ")}
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-start gap-1 md:justify-end" aria-label="Browser runner gates">
+                  <div className="flex flex-wrap items-center gap-1" aria-label="Browser runner gates">
                     {browserRunnerContract.requiredReceipts.map((gate) => (
                       <Chip key={gate} label={gate} tone={C.textMuted} />
                     ))}

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2303 EDT
+Last updated: 2026-05-17 2307 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2307 EDT: compacted Workbench Browser runner readiness UI.
+  Removed the side-column receipt layout that compressed text into a narrow
+  vertical strip. Runner readiness now uses compact `Target`, `Manual
+  Allowance`, and `Blocked` blocks, with required receipt chips below and
+  explicit `No page opens here.` copy. No backend behavior changed. No browser
+  runner, browser automation, real browser tab, page open, fetch, history,
+  source save, Watch Shelf item save, external write, provider/model call,
+  install, pull, or Raven path was added.
 - 2026-05-17 2303 EDT: added Workbench Browser focused proposal pinning.
   `workbench.browserActionProposals` can now include a focused proposal id
   before the compact recent list, so Approval Queue handoffs keep the exact

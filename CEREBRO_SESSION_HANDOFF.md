@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2303 EDT
+Last updated: 2026-05-17 2307 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2307 EDT - Workbench Browser Runner Density
+
+### What Changed
+- Reduced visible machinery in the Workbench Browser runner readiness panel.
+- Removed the side-column receipt layout that compressed text into a narrow
+  vertical strip.
+- Replaced long runner explanations with compact `Target`, `Manual Allowance`,
+  and `Blocked` readback blocks.
+- Kept required receipt chips visible without making them dominate the panel.
+- Kept explicit no-page state with `No page opens here.`
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench and confirmed `Target`, `Manual Allowance`, `Blocked`, and
+  `No page opens here.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-runner-density.png`.
+
+### Drift Check
+- On path. This is UI density/readback polish for the existing Browser surface.
+- It hides machinery better without removing the explicit approval boundary.
+- Workbench remains the Browser body and policy surface.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, download,
+  external write, paid service, provider call, model call, install, pull, or
+  Raven path was added.
+
+### Known Risks
+- This did not change backend behavior or add new test coverage because it is a
+  visual density patch.
+- The Browser section still needs a broader product-taste polish pass later.
+
+### Storage Impact
+- No schema change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser runner readiness was compacted to hide machinery better while keeping no-page and required-receipt states explicit. Workbench Browser also pins focused proposals from Approval Queue handoff. Approval Queue reads linked Browser proposal receipt metadata. Ledger has read-only Browser receipt audit visibility. Next best slice is either another small Workbench Browser polish pass, or the next blocked Browser runner contract test if the surface is clean. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2303 EDT - Workbench Browser Focus Pin
 
