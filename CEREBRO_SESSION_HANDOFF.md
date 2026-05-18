@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2257 EDT
+Last updated: 2026-05-17 2303 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2303 EDT - Workbench Browser Focus Pin
+
+### What Changed
+- Added focused Browser proposal pinning to `workbench.browserActionProposals`.
+- The compact Workbench Browser proposal list can now include a selected
+  proposal even when it is outside the recent limit.
+- Workbench now passes the focused proposal id from Approval Queue handoff into
+  the proposal list query.
+- Focused Browser proposal rows show a `focused` chip.
+- Approval-to-Workbench Browser handoff now keeps the exact proposal visible
+  in the compact list and policy readback at the same time.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because the focused proposal was dropped outside the compact limit.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Approvals,
+  filtered Browser, opened Browser proposal to Workbench, confirmed `focused`
+  chip, and confirmed `No browser opened. No page fetched.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-focused-proposal-pin.png`.
+
+### Drift Check
+- On path. This is focused Workbench readback polish only.
+- It fixes a real approval handoff visibility defect without adding a new
+  surface.
+- Workbench remains the Browser body and policy surface.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, download,
+  external write, paid service, provider call, model call, install, pull, or
+  Raven path was added.
+
+### Known Risks
+- The Browser shell is still visually dense in the runner readiness area. This
+  pass did not redesign it.
+- Focus pinning only affects the Workbench Browser proposal list readback.
+
+### Storage Impact
+- No schema change.
+- Tests and browser proof read local dev Browser proposal rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now pins a focused proposal from Approval Queue handoff even when it is outside the compact recent limit. Approval Queue reads linked Browser proposal receipt metadata and can hand off a Browser approval to Workbench policy readback without opening pages. Ledger has read-only Browser receipt audit visibility for proposals, draft tabs, result scaffolds, and recovery notes. Next best slice is either Workbench Browser density/readback polish that hides machinery better, or the next blocked Browser runner contract test if the surface is clean. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2257 EDT - Approval Browser Proposal Receipt
 

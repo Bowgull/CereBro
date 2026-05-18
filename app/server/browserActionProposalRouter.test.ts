@@ -109,6 +109,41 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("pins a focused Browser proposal outside the compact recent limit without running it", async () => {
+    const caller = createCaller();
+    const older = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/focused-browser-proposal",
+      draftKind: "url",
+    });
+    const newer = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/newer-browser-proposal",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserProposals: await countRows("browser_action_proposals"),
+    };
+
+    const proposals = await caller.workbench.browserActionProposals({
+      limit: 1,
+      focusedProposalId: older.proposal.id,
+    });
+
+    expect(proposals.items.map((item) => item.id)).toEqual([older.proposal.id, newer.proposal.id]);
+    expect(proposals.focusedProposalPinned).toBe(true);
+    expect(proposals.noActionTaken).toContain("No browser opened.");
+    expect(proposals.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("browser_action_proposals")).toBe(before.browserProposals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("creates one pending approval preview for a Browser proposal without running it", async () => {
     const caller = createCaller();
     const before = {

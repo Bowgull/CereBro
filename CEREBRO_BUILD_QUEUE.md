@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2257 EDT
+Last updated: 2026-05-17 2303 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2303 EDT: added Workbench Browser focused proposal pinning.
+  `workbench.browserActionProposals` can now include a focused proposal id
+  before the compact recent list, so Approval Queue handoffs keep the exact
+  Browser proposal visible even when it is outside the recent limit. Workbench
+  passes `selectedBrowserProposalId` into the query and marks the row with a
+  `focused` chip. No approval execution, browser runner, browser automation,
+  real browser tab, page open, fetch, history, source save, Watch Shelf item
+  save, external write, provider/model call, install, pull, or Raven path was
+  added.
 - 2026-05-17 2257 EDT: added Approval Queue Browser proposal receipt readback.
   `approvals.detail` now reads linked Browser proposal metadata: action,
   target, risk, result state, recovery note, blocked open state, and no-action

@@ -631,11 +631,23 @@ export const workbenchRouter = router({
       z
         .object({
           limit: z.number().int().min(1).max(20).optional(),
+          focusedProposalId: z.number().int().positive().optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
       const db = await getCerebroDb();
+      const focusedProposal = input?.focusedProposalId
+        ? await db.execute({
+            sql: `
+              SELECT *
+              FROM browser_action_proposals
+              WHERE id = ?
+              LIMIT 1
+            `,
+            args: [input.focusedProposalId],
+          })
+        : null;
       const result = await db.execute({
         sql: `
           SELECT *
@@ -645,9 +657,14 @@ export const workbenchRouter = router({
         `,
         args: [input?.limit ?? 5],
       });
+      const rows = [
+        ...(focusedProposal?.rows ?? []),
+        ...result.rows.filter((row) => Number(row.id) !== input?.focusedProposalId),
+      ];
 
       return {
-        items: result.rows.map(rowToBrowserActionProposal),
+        items: rows.map(rowToBrowserActionProposal),
+        focusedProposalPinned: Boolean(focusedProposal?.rows.length),
         noActionTaken: browserProposalNoActionTaken,
       };
     }),

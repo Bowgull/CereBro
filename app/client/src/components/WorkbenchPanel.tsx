@@ -334,7 +334,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     },
   );
   const browserActionProposals = trpc.workbench.browserActionProposals.useQuery(
-    { limit: 3 },
+    { limit: 3, focusedProposalId: selectedBrowserProposalId ?? undefined },
     {
       staleTime: 30_000,
       refetchOnWindowFocus: false,
@@ -1039,6 +1039,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <div className="flex flex-wrap items-center gap-1 md:justify-end">
                             <Chip label={proposal.statusLabel} tone={proposal.canExecute ? C.danger : C.warning} />
                             <Chip label={proposal.resultState} tone={C.textMuted} />
+                            {selectedBrowserProposalId === proposal.id && browserActionProposals.data?.focusedProposalPinned && (
+                              <Chip label="focused" tone={C.accent} />
+                            )}
                             <Button
                               type="button"
                               size="sm"
