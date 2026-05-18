@@ -66,6 +66,12 @@ function rowToBrowserActionProposal(row: Record<string, unknown>) {
     canExecute: Boolean(row.can_execute),
     resultState: String(row.result_state),
     recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    runnerAuditCount: Number(row.runner_audit_count ?? 0),
+    latestRunnerAuditId: row.latest_runner_audit_id == null ? null : Number(row.latest_runner_audit_id),
+    latestRunnerState: row.latest_runner_state == null ? null : String(row.latest_runner_state),
+    latestRunnerCanOpenPage: row.latest_runner_can_open_page == null ? false : Boolean(row.latest_runner_can_open_page),
+    latestRunnerCanExecute: row.latest_runner_can_execute == null ? false : Boolean(row.latest_runner_can_execute),
+    latestRunnerAuditAt: row.latest_runner_audit_at == null ? null : Number(row.latest_runner_audit_at),
     blockers: splitStoredList(row.blockers),
     requiredGates: splitStoredList(row.required_gates),
     receiptBody: String(row.receipt_body),
@@ -672,9 +678,25 @@ export const workbenchRouter = router({
       const focusedProposal = input?.focusedProposalId
         ? await db.execute({
             sql: `
-              SELECT *
-              FROM browser_action_proposals
-              WHERE id = ?
+              SELECT
+                bap.*,
+                COUNT(bra.id) AS runner_audit_count,
+                latest.id AS latest_runner_audit_id,
+                latest.runner_state AS latest_runner_state,
+                latest.can_open_page AS latest_runner_can_open_page,
+                latest.can_execute AS latest_runner_can_execute,
+                latest.created_at AS latest_runner_audit_at
+              FROM browser_action_proposals bap
+              LEFT JOIN browser_runner_audit_records bra ON bra.proposal_id = bap.id
+              LEFT JOIN browser_runner_audit_records latest ON latest.id = (
+                SELECT latest_inner.id
+                FROM browser_runner_audit_records latest_inner
+                WHERE latest_inner.proposal_id = bap.id
+                ORDER BY latest_inner.created_at DESC, latest_inner.id DESC
+                LIMIT 1
+              )
+              WHERE bap.id = ?
+              GROUP BY bap.id
               LIMIT 1
             `,
             args: [input.focusedProposalId],
@@ -682,9 +704,25 @@ export const workbenchRouter = router({
         : null;
       const result = await db.execute({
         sql: `
-          SELECT *
-          FROM browser_action_proposals
-          ORDER BY created_at DESC, id DESC
+          SELECT
+            bap.*,
+            COUNT(bra.id) AS runner_audit_count,
+            latest.id AS latest_runner_audit_id,
+            latest.runner_state AS latest_runner_state,
+            latest.can_open_page AS latest_runner_can_open_page,
+            latest.can_execute AS latest_runner_can_execute,
+            latest.created_at AS latest_runner_audit_at
+          FROM browser_action_proposals bap
+          LEFT JOIN browser_runner_audit_records bra ON bra.proposal_id = bap.id
+          LEFT JOIN browser_runner_audit_records latest ON latest.id = (
+            SELECT latest_inner.id
+            FROM browser_runner_audit_records latest_inner
+            WHERE latest_inner.proposal_id = bap.id
+            ORDER BY latest_inner.created_at DESC, latest_inner.id DESC
+            LIMIT 1
+          )
+          GROUP BY bap.id
+          ORDER BY bap.created_at DESC, bap.id DESC
           LIMIT ?
         `,
         args: [input?.limit ?? 5],

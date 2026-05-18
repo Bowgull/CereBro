@@ -109,6 +109,39 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("summarizes runner audit state on recent Browser action proposals", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/runner-audit-summary",
+      draftKind: "url",
+    });
+    const runner = await caller.workbench.runBrowserActionBlocked({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const proposals = await caller.workbench.browserActionProposals({ limit: 5 });
+    const proposal = proposals.items.find((item) => item.id === created.proposal.id);
+
+    expect(proposal?.runnerAuditCount).toBeGreaterThanOrEqual(1);
+    expect(proposal?.latestRunnerAuditId).toBe(runner.audit.id);
+    expect(proposal?.latestRunnerState).toBe("blocked_before_runner");
+    expect(proposal?.latestRunnerCanOpenPage).toBe(false);
+    expect(proposal?.latestRunnerCanExecute).toBe(false);
+    expect(proposal?.latestRunnerAuditAt).toBeGreaterThan(0);
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("pins a focused Browser proposal outside the compact recent limit without running it", async () => {
     const caller = createCaller();
     const older = await caller.workbench.createBrowserActionProposal({

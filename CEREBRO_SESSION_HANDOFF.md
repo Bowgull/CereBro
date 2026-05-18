@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2347 EDT
+Last updated: 2026-05-18 0427 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0427 EDT - Workbench Browser Audit Summary
+
+### What Changed
+- `workbench.browserActionProposals` now summarizes local blocked runner audit
+  state per Browser proposal.
+- Recent proposal rows expose runner audit count, latest audit id, latest
+  blocked runner state, and no-page/no-execute state.
+- Workbench Browser proposal rows now show a compact `audits N` chip.
+- Expanded proposal details show the latest runner audit id and blocked state.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `runnerAuditCount`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser control was unavailable in this turn after retry. Local
+  Playwright proof against `http://localhost:3000/` opened Workshop ->
+  Workbench, clicked `Check Runner`, reloaded, and confirmed `audits 1`,
+  `Recent Proposals`, and `No page opens here.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-audit-summary.png`.
+
+### Drift Check
+- On path. This reduces Workbench Browser proposal/audit noise by summarizing
+  audit state where the proposal already appears.
+- It does not add a live browser runner.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+- Workbench remains the Browser body surface.
+- Ledger remains the audit surface.
+
+### Known Risks
+- The local dev DB still has many Browser proposal and receipt rows.
+- This pass summarizes audit state, but it does not add cleanup or pruning.
+- Browser proof used local Playwright because in-app browser control was not
+  available in this turn.
+
+### Storage Impact
+- No schema change.
+- Browser proof inserted one local blocked runner audit row through the
+  existing blocked route.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now summarizes blocked runner audit state on recent proposal rows with `audits N` and latest runner audit details. The runner remains blocked before page open. Next best slice is either a compact dev-row visibility cleanup in Workbench/Ledger or the next explicit approval-gated live-runner preflight contract without enabling page open. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2347 EDT - Ledger Browser Runner Audit
 

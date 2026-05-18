@@ -1048,6 +1048,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <div className="flex flex-wrap items-center gap-1 md:justify-end">
                             <Chip label={proposal.statusLabel} tone={proposal.canExecute ? C.danger : C.warning} />
                             <Chip label={proposal.resultState} tone={C.textMuted} />
+                            {proposal.runnerAuditCount > 0 && (
+                              <Chip label={`audits ${proposal.runnerAuditCount}`} tone={C.gold} />
+                            )}
                             {selectedBrowserProposalId === proposal.id && browserActionProposals.data?.focusedProposalPinned && (
                               <Chip label="focused" tone={C.accent} />
                             )}
@@ -1070,6 +1073,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                 <div className="min-w-0 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                                   <span className="font-semibold" style={{ color: C.textPrimary }}>Proposal #{proposal.id}</span>
                                   {" "}is local only. Stage receipts or read contracts here. Nothing runs from this detail panel.
+                                  {proposal.latestRunnerAuditId != null && (
+                                    <span className="mt-0.5 block">
+                                      Runner audit #{proposal.latestRunnerAuditId}: {proposal.latestRunnerState?.replace(/_/g, " ") ?? "not run"}. No page opened.
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1 md:justify-end">
                                   <Button
