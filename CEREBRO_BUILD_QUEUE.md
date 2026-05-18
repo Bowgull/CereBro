@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2143 EDT
+Last updated: 2026-05-17 2147 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2147 EDT: compressed Workbench Browser proposal rows.
+  Proposal rows now show id/action, target, status, result state, and one
+  `Details` control. Stage Approval, Stage Body, Stage Spock, Read Gates, and
+  Read Result live inside the selected detail panel. This hides machinery until
+  requested and does not change backend contracts, approval state, evidence,
+  security rows, source rows, runner behavior, or execution state.
+  `can_execute` remains false.
 - 2026-05-17 2143 EDT: added Workbench Browser result/recovery contract
   readback. `workbench.browserActionResultRecoveryContract` reads one Browser
   proposal and returns the required result receipt shape plus recovery note

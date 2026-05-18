@@ -213,6 +213,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnWindowFocus: false,
     },
   );
+  const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -948,70 +949,94 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             <Button
                               type="button"
                               size="sm"
-                              variant="outline"
+                              variant={selectedBrowserProposalId === proposal.id ? "secondary" : "outline"}
                               className="h-6 px-2 text-[10px]"
-                              disabled={createBrowserActionApprovalPreview.isPending}
-                              title="Stage a local approval preview for this Browser proposal. This does not approve or run it."
+                              title="Open Browser proposal receipt actions and reads."
                               onClick={() => {
-                                createBrowserActionApprovalPreview.mutate({
-                                  proposalId: proposal.id,
-                                  reason: "Local Browser action approval preview only. This does not approve or run browser work.",
-                                });
+                                setSelectedBrowserProposalId((current) => current === proposal.id ? null : proposal.id);
                               }}
                             >
-                              Stage Approval
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-6 px-2 text-[10px]"
-                              disabled={createBrowserActionWorkbenchBody.isPending}
-                              title="Save a local Workbench body for this Browser proposal. This does not approve or run it."
-                              onClick={() => {
-                                createBrowserActionWorkbenchBody.mutate({
-                                  proposalId: proposal.id,
-                                });
-                              }}
-                            >
-                              Stage Body
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-6 px-2 text-[10px]"
-                              disabled={createBrowserActionSpockGate.isPending}
-                              title="Save a local Spock security receipt for this Browser proposal. This does not approve or run it."
-                              onClick={() => {
-                                createBrowserActionSpockGate.mutate({
-                                  proposalId: proposal.id,
-                                });
-                              }}
-                            >
-                              Stage Spock
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant={selectedBrowserReadinessId === proposal.id ? "secondary" : "outline"}
-                              className="h-6 px-2 text-[10px]"
-                              title="Read Browser proposal gate readiness. This does not approve or run it."
-                              onClick={() => setSelectedBrowserReadinessId(proposal.id)}
-                            >
-                              Read Gates
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant={selectedBrowserResultId === proposal.id ? "secondary" : "outline"}
-                              className="h-6 px-2 text-[10px]"
-                              title="Read the Browser result and recovery contract. This does not approve or run it."
-                              onClick={() => setSelectedBrowserResultId(proposal.id)}
-                            >
-                              Read Result
+                              Details
                             </Button>
                           </div>
+                          {selectedBrowserProposalId === proposal.id && (
+                            <div className="md:col-span-2">
+                              <div className="grid gap-1 rounded p-1.5 md:grid-cols-[minmax(0,1fr)_auto]" aria-label="Browser proposal details" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                                <div className="min-w-0 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                                  <span className="font-semibold" style={{ color: C.textPrimary }}>Proposal #{proposal.id}</span>
+                                  {" "}is local only. Stage receipts or read contracts here. Nothing runs from this detail panel.
+                                </div>
+                                <div className="flex flex-wrap items-center gap-1 md:justify-end">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserActionApprovalPreview.isPending}
+                                    title="Stage a local approval preview for this Browser proposal. This does not approve or run it."
+                                    onClick={() => {
+                                      createBrowserActionApprovalPreview.mutate({
+                                        proposalId: proposal.id,
+                                        reason: "Local Browser action approval preview only. This does not approve or run browser work.",
+                                      });
+                                    }}
+                                  >
+                                    Stage Approval
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserActionWorkbenchBody.isPending}
+                                    title="Save a local Workbench body for this Browser proposal. This does not approve or run it."
+                                    onClick={() => {
+                                      createBrowserActionWorkbenchBody.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Stage Body
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserActionSpockGate.isPending}
+                                    title="Save a local Spock security receipt for this Browser proposal. This does not approve or run it."
+                                    onClick={() => {
+                                      createBrowserActionSpockGate.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Stage Spock
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant={selectedBrowserReadinessId === proposal.id ? "secondary" : "outline"}
+                                    className="h-6 px-2 text-[10px]"
+                                    title="Read Browser proposal gate readiness. This does not approve or run it."
+                                    onClick={() => setSelectedBrowserReadinessId(proposal.id)}
+                                  >
+                                    Read Gates
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant={selectedBrowserResultId === proposal.id ? "secondary" : "outline"}
+                                    className="h-6 px-2 text-[10px]"
+                                    title="Read the Browser result and recovery contract. This does not approve or run it."
+                                    onClick={() => setSelectedBrowserResultId(proposal.id)}
+                                  >
+                                    Read Result
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

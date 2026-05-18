@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2143 EDT
+Last updated: 2026-05-17 2147 EDT
 
 ## Current North Star
 
@@ -20,6 +20,59 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2147 EDT - Workbench Browser Proposal Compression
+
+### What Changed
+- Compressed Browser proposal rows in Workbench.
+- Rows now show proposal id/action, target, status, result state, and one
+  `Details` control.
+- Stage Approval, Stage Body, Stage Spock, Read Gates, and Read Result now
+  live inside the selected proposal detail panel.
+- The detail panel states that nothing runs from the panel.
+- No backend contract changed.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, confirmed `Details`, opened one proposal detail panel, and
+  confirmed Stage Approval, Stage Body, Stage Spock, Read Gates, Read Result,
+  and no-run copy.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-proposal-compressed.png`.
+
+### Drift Check
+- On path. This hides Browser proposal machinery until requested while keeping
+  the same Workbench surface.
+- No backend action, schema, runner, approval state, evidence row, security row,
+  source row, or Browser execution behavior changed.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, download, external write, paid service, provider call, model call,
+  install, pull, or Raven path was added.
+
+### Known Risks
+- This is a compact UI pass only. The manual browser runner contract is still
+  missing and `can_execute` remains false.
+
+### Storage Impact
+- No schema change.
+- Browser proof read existing local dev DB rows only.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now stages durable local browser_action_proposals, lists recent blocked proposals in compact rows, hides proposal machinery behind Details, can stage pending local Browser approval previews, Approval Queue can filter Browser approvals, Browser proposals can stage local Workbench body receipts, Browser proposals can stage local Spock security receipts, Browser proposals have a read-only gate readiness view, and Browser proposals have a read-only result/recovery contract. Next best slice is the manual browser runner contract design/readiness model, keeping canExecute false until the runner contract is real. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2143 EDT - Workbench Browser Result Contract
 
