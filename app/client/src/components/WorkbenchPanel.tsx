@@ -85,6 +85,12 @@ type WorkbenchFilterDraft = {
   groupBy?: EvidenceGroupBy;
   notice?: string;
 };
+type WorkbenchBrowserFocusDraft = {
+  source?: string;
+  proposalId?: number;
+  query?: string;
+  notice?: string;
+};
 
 const G = T.graphiteCandle;
 
@@ -583,6 +589,30 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setStagedDraftNotice(draft.notice ?? "Workbench receipt filter staged.");
     } catch {
       setStagedDraftNotice("Workbench filter could not be read. Use receipt search.");
+    }
+  }, []);
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:workbench-browser-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:workbench-browser-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const draft = JSON.parse(raw) as WorkbenchBrowserFocusDraft;
+      if (typeof draft.proposalId === "number") {
+        setSelectedBrowserProposalId(draft.proposalId);
+        setSelectedBrowserPolicyId(draft.proposalId);
+      }
+      if (typeof draft.query === "string") {
+        setBrowserAddressDraft(draft.query);
+      }
+      setBrowserProposalNotice(draft.notice ?? "Browser proposal focused from Approvals. No page opens.");
+    } catch {
+      setBrowserProposalNotice("Browser proposal focus could not be read. Use recent Browser proposals.");
     }
   }, []);
 

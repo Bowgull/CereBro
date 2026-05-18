@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2250 EDT
+Last updated: 2026-05-17 2257 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2257 EDT: added Approval Queue Browser proposal receipt readback.
+  `approvals.detail` now reads linked Browser proposal metadata: action,
+  target, risk, result state, recovery note, blocked open state, and no-action
+  copy. Approval Queue shows a compact Browser proposal receipt card with
+  `no page open` and can hand off to Workbench Browser proposal policy readback
+  without opening a page. No approval execution, browser runner, browser
+  automation, real browser tab, page open, fetch, history, source save, Watch
+  Shelf item save, external write, provider/model call, install, pull, or Raven
+  path was added.
 - 2026-05-17 2250 EDT: added Ledger Browser receipt audit visibility.
   `ledger.overview` now reads Browser proposal counts, draft tab counts,
   blocked result scaffolds, recovery note scaffolds, latest Browser proposals,

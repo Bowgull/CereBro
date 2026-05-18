@@ -52,6 +52,26 @@ function rowToApproval(row: Record<string, unknown>) {
     projectPath: row.project_path == null ? null : String(row.project_path),
     targetLabel: row.target_label == null ? null : String(row.target_label),
     origin: originForApproval({ actionType, targetType, requestedByAgent }),
+    browserProposalReceipt: row.browser_proposal_id == null ? null : {
+      proposalId: Number(row.browser_proposal_id),
+      actionLabel: String(row.browser_action_label),
+      target: String(row.browser_target),
+      draftKind: String(row.browser_draft_kind),
+      riskClass: String(row.browser_risk_class),
+      executorAgent: String(row.browser_executor_agent),
+      statusLabel: String(row.browser_status ?? "proposal_blocked").split("_").join(" "),
+      resultState: String(row.browser_result_state),
+      recoveryNote: row.browser_recovery_note == null ? null : String(row.browser_recovery_note),
+      canOpenPage: false,
+      canExecute: Boolean(row.browser_can_execute),
+      noActionTaken: [
+        "No browser opened.",
+        "No page fetched.",
+        "No history persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    },
     validationPreview: validationPreviewForApproval({
       actionType,
       targetType,
@@ -548,7 +568,17 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label,
+            bap.id AS browser_proposal_id,
+            bap.action_label AS browser_action_label,
+            bap.target AS browser_target,
+            bap.draft_kind AS browser_draft_kind,
+            bap.risk_class AS browser_risk_class,
+            bap.executor_agent AS browser_executor_agent,
+            bap.status AS browser_status,
+            bap.can_execute AS browser_can_execute,
+            bap.result_state AS browser_result_state,
+            bap.recovery_note AS browser_recovery_note
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id

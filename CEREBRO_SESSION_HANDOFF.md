@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2250 EDT
+Last updated: 2026-05-17 2257 EDT
 
 ## Current North Star
 
@@ -20,6 +20,74 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2257 EDT - Approval Browser Proposal Receipt
+
+### What Changed
+- Added Browser proposal receipt metadata to `approvals.detail`.
+- Approval detail now reads the linked Browser proposal action, target, risk,
+  result state, recovery note, blocked open state, and no-action copy.
+- Approval Queue now shows a Browser proposal receipt card for Browser
+  approvals.
+- The receipt card includes `no page open` and `No browser opened. No page
+  fetched.` copy.
+- Added an `Open Browser Proposal` handoff from Approval Queue to Workbench.
+- Workbench reads `cerebro:workbench-browser-focus`, selects the Browser
+  proposal policy, and shows the handoff notice without opening a page.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `browserProposalReceipt`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Approvals,
+  filtered Browser, confirmed Browser proposal receipt and `no page open`, then
+  opened Workbench handoff and confirmed Browser proposal policy readback with
+  `No browser opened. No page fetched.`
+- Screenshot proof saved locally at
+  `output/playwright/approval-browser-proposal-receipt.png`.
+
+### Drift Check
+- On path. This improves Approval Queue readback for Browser approvals only.
+- Approval Queue still does not approve or execute from the receipt card.
+- Workbench remains the Browser body and policy surface.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, download,
+  external write, paid service, provider call, model call, install, pull, or
+  Raven path was added.
+
+### Known Risks
+- Workbench Browser proposal rows still list only the latest local rows, so a
+  focused proposal can show its policy readback even when its row is outside
+  the compact recent list.
+- The queue still has high pending counts from local dev/test records.
+
+### Storage Impact
+- No schema change.
+- Tests and browser proof read local dev Browser proposal, approval, draft tab,
+  and result scaffold rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Approval Queue now reads linked Browser proposal receipt metadata and can hand off a Browser approval to Workbench policy readback without opening pages. Ledger has read-only Browser receipt audit visibility for proposals, draft tabs, result scaffolds, and recovery notes. Workbench Browser still separates pending approval preview from approved execution approval and can show all manual open runner policy gates present while still blocking execution. Next best slice is compact Workbench focus/readback polish for focused Browser proposals, or begin the next blocked Browser runner contract test if the surface is clean. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2250 EDT - Ledger Browser Receipt Audit
 

@@ -26,6 +26,20 @@ type ApprovalFocusDraft = {
   query?: string;
   notice?: string;
 };
+type BrowserProposalReceipt = {
+  proposalId: number;
+  actionLabel: string;
+  target: string;
+  draftKind: string;
+  riskClass: string;
+  executorAgent: string;
+  statusLabel: string;
+  resultState: string;
+  recoveryNote: string | null;
+  canOpenPage: boolean;
+  canExecute: boolean;
+  noActionTaken: string[];
+};
 
 const origins: Array<{ id: OriginFilter; label: string }> = [
   { id: "all", label: "All" },
@@ -645,6 +659,7 @@ type ApprovalChainItem = {
     targetSummary: string | null;
   } | null;
   costRisk: string | null;
+  browserProposalReceipt?: BrowserProposalReceipt | null;
   executionLinks?: Array<{
     proposalId: number;
     sourceType: string;
@@ -666,6 +681,13 @@ type ApprovalChainItem = {
 };
 
 function nextSurfaceForApproval(item: ApprovalChainItem): { label: string; route: ApprovalRoute | null; reason: string } {
+  if (item.targetType === "browser_action_proposal" || item.browserProposalReceipt) {
+    return {
+      label: "Workbench",
+      route: "workbench",
+      reason: "Review the Browser proposal body, policy, and gates. Approval Queue does not open pages.",
+    };
+  }
   if (item.targetType === "model_tool_ollama_status_check" || item.actionType.includes("ollama") || item.actionType.includes("model")) {
     return {
       label: "Model Tools",
@@ -727,6 +749,7 @@ function ApprovalReceiptChain({
   const copy = approvalPanelCopy();
   const nextSurface = nextSurfaceForApproval(selected);
   const executionLinks = selected.executionLinks ?? [];
+  const browserProposalReceipt = selected.browserProposalReceipt ?? null;
   const preflightTone = selected.permissionPreflight == null
     ? C.warning
     : selected.permissionPreflight.decision === "blocked_by_hard_gate"
@@ -800,6 +823,24 @@ function ApprovalReceiptChain({
     onNavigate("workbench");
   }
 
+  function openBrowserProposalInWorkbench() {
+    if (!onNavigate || !browserProposalReceipt) return;
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:workbench-browser-focus",
+        JSON.stringify({
+          source: "approval_browser_proposal",
+          proposalId: browserProposalReceipt.proposalId,
+          query: browserProposalReceipt.target,
+          notice: `Approvals opened Browser proposal #${browserProposalReceipt.proposalId}. No page opens from this handoff.`,
+        }),
+      );
+    } catch {
+      // Workbench still opens; Browser proposal rows remain visible there.
+    }
+    onNavigate("workbench");
+  }
+
   return (
     <Section title={copy.chainTitle} detail={copy.chainDetail}>
       <div className="grid gap-1 sm:grid-cols-2">
@@ -841,6 +882,35 @@ function ApprovalReceiptChain({
           Security Gate
         </Button>
       </div>
+      {browserProposalReceipt && (
+        <div className="grid gap-1 rounded p-1.5" aria-label="Browser approval proposal receipt" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+          <div className="flex flex-wrap items-center gap-1">
+            <Chip label={`browser proposal #${browserProposalReceipt.proposalId}`} tone={C.accent} />
+            <Chip label={browserProposalReceipt.statusLabel} tone={browserProposalReceipt.canExecute ? C.danger : C.success} />
+            <Chip label={labelize(browserProposalReceipt.resultState)} tone={browserProposalReceipt.resultState === "not_run" ? C.warning : C.textMuted} />
+            <Chip label={browserProposalReceipt.canOpenPage ? "can open" : "no page open"} tone={browserProposalReceipt.canOpenPage ? C.danger : C.success} />
+          </div>
+          <div className="truncate text-[10px]" title={browserProposalReceipt.target} style={{ color: C.textMuted }}>
+            {browserProposalReceipt.actionLabel}: {browserProposalReceipt.target}
+          </div>
+          <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+            {browserProposalReceipt.noActionTaken.slice(0, 2).join(" ")}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={openBrowserProposalInWorkbench}
+              disabled={!onNavigate}
+              title="Open this Browser proposal in Workbench. No page opens."
+              aria-label={`Open Workbench Browser proposal ${browserProposalReceipt.proposalId}`}
+            >
+              Open Browser Proposal
+            </Button>
+          </div>
+        </div>
+      )}
       {executionLinks.length > 0 && (
         <div className="grid gap-1" aria-label="Approval linked execution receipts">
           {executionLinks.map((link) => (

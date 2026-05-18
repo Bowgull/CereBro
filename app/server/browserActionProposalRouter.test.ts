@@ -203,6 +203,46 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(groups.groups.some((group) => group.key === "browser")).toBe(true);
   });
 
+  it("reads Browser approval detail with the linked proposal contract without running it", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/browser-approval-detail",
+      draftKind: "url",
+    });
+    const approvalPreview = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+    };
+
+    const detail = await caller.approvals.detail({
+      id: approvalPreview.approval?.id ?? 0,
+    });
+
+    expect(detail.approval?.origin).toBe("browser");
+    expect(detail.approval?.browserProposalReceipt?.proposalId).toBe(created.proposal.id);
+    expect(detail.approval?.browserProposalReceipt?.actionLabel).toBe("Open Page");
+    expect(detail.approval?.browserProposalReceipt?.target).toBe("https://example.com/browser-approval-detail");
+    expect(detail.approval?.browserProposalReceipt?.canOpenPage).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.canExecute).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.resultState).toBe("blocked_before_runner");
+    expect(detail.approval?.browserProposalReceipt?.recoveryNote).toContain("Recovery scaffold recorded before runner");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No browser opened.");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+  });
+
   it("creates one local Workbench body receipt for a Browser proposal without running it", async () => {
     const caller = createCaller();
     const before = {
