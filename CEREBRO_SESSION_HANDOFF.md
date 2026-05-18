@@ -30926,3 +30926,84 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue the Browser/Daily OS build path only if there is a missing contract gap; otherwise move to the next highest build-plan slice. The Browser live runner is still not implemented and must remain hard-blocked. Do not open pages, fetch URLs, persist browser history, save Watch Shelf progress, install tools, call providers, route Raven content, or add a new primary surface without explicit approval. Update handoff and Obsidian archive before commit.
 ```
+
+## 2026-05-18 0538 EDT - Model Tool Risk Review Gate
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: Basement Model Tools trust controls tightened
+- Backend/runtime: Model/tool registry trust promotion hardened
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: unchanged
+- Creative/freelance/watch: unchanged
+
+What changed:
+
+- Tightened Model/Tool Registry trust promotion.
+- `updateCapabilityStatus` now blocks `source_verified` and `tested_pass` if
+  the capability has source URLs but no risk review.
+- Added a regression test proving trusted status cannot skip risk review.
+- Model Tools UI now disables trusted status updates when source URLs or risk
+  review are missing.
+- This keeps registry trust evidence separate from route defaults and actual
+  model/tool use.
+
+Files touched in this slice:
+
+- `app/server/routers/modelTools.ts`
+- `app/server/modelTools.localFirst.test.ts`
+- `app/client/src/components/ModelToolsPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 0538 CereBro Session Handoff - model-tool-risk-review-gate.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- Red test:
+  `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because trust promotion resolved without risk review.
+- Green targeted tests:
+  `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 14 tests.
+- Paired Model Tools tests:
+  `pnpm -C app exec vitest run server/modelTools.localFirst.test.ts server/modelTools.creativeLanes.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 15 tests.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof fallback:
+  `output/playwright/model-tools-risk-review-gate.png`
+  captured Basement Model Tools with a selected capability showing missing risk
+  review.
+
+Drift check:
+
+- On path. This advances item 9 without installing, pulling, running, browsing,
+  fetching, calling providers, or changing route defaults.
+- This does not add a new primary surface.
+- This does not route Raven content into CereBro.
+- Basement remains the machinery destination for models/tools.
+
+Known risks:
+
+- Browser plugin control was not exposed in this tool set, so browser proof used
+  the local Playwright fallback.
+- Test-created local dev rows remain in the dev DB. No cleanup was performed.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Test-created local dev rows only.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 only if the next slice hardens Model/Tool Registry trust, approval, or source verification without installing tools, pulling models, running providers, browsing, fetching, changing route defaults, or exposing machinery outside Basement. Otherwise move to the next highest build-plan surface. Preserve Raven seal. Update handoff and Obsidian archive before commit.
+```

@@ -1171,7 +1171,7 @@ export const modelToolsRouter = router({
       const db = await getCerebroDb();
       const now = Math.floor(Date.now() / 1000);
       const existing = await db.execute({
-        sql: "SELECT id, source_uris, eval_status FROM model_tool_capabilities WHERE id = ? LIMIT 1",
+        sql: "SELECT id, source_uris, risk_review, eval_status FROM model_tool_capabilities WHERE id = ? LIMIT 1",
         args: [input.capabilityId],
       });
       const row = existing.rows[0] as Record<string, unknown> | undefined;
@@ -1186,6 +1186,13 @@ export const modelToolsRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Source URLs are required before this capability can be marked source verified or tested pass.",
+        });
+      }
+      const riskReview = row.risk_review == null ? "" : String(row.risk_review).trim();
+      if ((input.evalStatus === "source_verified" || input.evalStatus === "tested_pass") && !riskReview) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Risk review is required before this capability can be marked source verified or tested pass.",
         });
       }
 

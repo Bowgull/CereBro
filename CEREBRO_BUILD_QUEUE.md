@@ -1684,3 +1684,9 @@ Expected shape:
   approved. Next Browser work should either close a real missing contract gap
   or move forward to the next Daily OS Browser surface. Do not keep expanding
   Ledger machinery if it does not improve user-visible safety or clarity.
+- 2026-05-18 0538 EDT: Model/Tool Registry trust promotion now requires risk
+  review before `source_verified` or `tested_pass`. Source URLs alone are not
+  enough. The UI disables trusted status updates when source URLs or risk review
+  are missing. This keeps Basement as the machinery destination and does not
+  run models, tools, providers, installs, pulls, browsing, fetching, route
+  default changes, or Raven routes.

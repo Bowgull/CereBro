@@ -255,6 +255,16 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
     return Array.from(groups.values());
   }, [rows]);
   const selectedCapability = rows.find((item) => item.id === selectedCapabilityId) ?? groupedRows[0]?.representative ?? null;
+  const trustStatusDecision = statusDecision === "source_verified" || statusDecision === "tested_pass";
+  const statusDecisionBlockedReason = !selectedCapability
+    ? "Select a proposal before changing local status."
+    : !statusDecisionNotes.trim()
+      ? "Add validation notes before changing local status."
+      : trustStatusDecision && !selectedCapability.sourceUris?.trim()
+        ? "Add source URLs before marking this capability trusted."
+        : trustStatusDecision && !selectedCapability.riskReview?.trim()
+          ? "Add risk review before marking this capability trusted."
+          : null;
   const capabilityApprovalPreviews = trpc.modelTools.capabilityApprovalPreviews.useQuery(
     {
       capabilityId: selectedCapability?.id ?? 0,
@@ -364,7 +374,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
   function submitStatusDecision(event: React.FormEvent) {
     event.preventDefault();
     const trimmedNotes = statusDecisionNotes.trim();
-    if (!selectedCapability || !trimmedNotes || updateCapabilityStatus.isPending) return;
+    if (!selectedCapability || !trimmedNotes || statusDecisionBlockedReason || updateCapabilityStatus.isPending) return;
     updateCapabilityStatus.mutate({
       capabilityId: selectedCapability.id,
       evalStatus: statusDecision,
@@ -1080,8 +1090,8 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
               <Textarea value={statusFailureNotes} onChange={(event) => setStatusFailureNotes(event.target.value)} aria-label="Model tool status failure notes" placeholder="Failure notes for mixed, failed, stale, or blocked cases." rows={3} />
               <Button
                 type="submit"
-                disabled={!selectedCapability || !statusDecisionNotes.trim() || updateCapabilityStatus.isPending}
-                title={!selectedCapability ? "Select a proposal before changing local status." : !statusDecisionNotes.trim() ? "Add validation notes before changing local status." : "Update the local registry status. No route default or provider call changes."}
+                disabled={Boolean(statusDecisionBlockedReason) || updateCapabilityStatus.isPending}
+                title={statusDecisionBlockedReason ?? "Update the local registry status. No route default or provider call changes."}
                 aria-label="Update local model tool trust status"
                 className="w-full"
               >

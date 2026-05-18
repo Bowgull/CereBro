@@ -306,6 +306,28 @@ describe("Model Tools local-first routing policy", () => {
     expect(item?.sourceReadiness.status).toBe("source_ready");
   });
 
+  it("blocks trusted model tool status without a risk review", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Missing Risk ${stamp}`,
+      toolName: "No risk review candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      validationNotes: "Source URL exists, but risk review is missing.",
+    });
+
+    await expect(caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "source_verified",
+      validationNotes: "Attempted trust promotion without risk review.",
+    })).rejects.toThrow("Risk review is required before this capability can be marked source verified or tested pass.");
+  });
+
   it("shows status decisions in route readiness without making them defaults", async () => {
     const caller = createCaller();
     const stamp = Date.now();
