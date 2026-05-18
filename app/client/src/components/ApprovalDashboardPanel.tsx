@@ -154,6 +154,8 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const preflightTotal = preflightsOpen ? preflights.data?.summary.total ?? 0 : null;
   const blockedPreflights = preflightsOpen ? preflights.data?.summary.blocked ?? 0 : null;
   const copy = approvalPanelCopy();
+  const visibleApprovalRows = approvals.data?.summary.visible ?? items.length;
+  const hiddenApprovalRows = approvals.data?.summary.hidden ?? 0;
 
   useEffect(() => {
     let raw: string | null = null;
@@ -210,7 +212,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         </div>
 
         <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-5" aria-label={copy.summaryAria}>
-          <ReceiptStat label={copy.stats.pending} value={String(items.length)} tone={items.length > 0 ? C.warning : C.textMuted} />
+          <ReceiptStat label={copy.stats.pending} value={String(visibleApprovalRows)} tone={visibleApprovalRows > 0 ? C.warning : C.textMuted} />
           <ReceiptStat label={copy.stats.sensitive} value={String(sensitiveCount)} tone={sensitiveCount > 0 ? C.danger : C.textMuted} />
           <ReceiptStat label="Git Writes" value={String(gitWriteCount)} tone={gitWriteCount > 0 ? C.danger : C.textMuted} />
           <ReceiptStat label={copy.stats.checks} value={preflightTotal == null ? copy.stats.closed : String(preflightTotal)} tone={preflightTotal == null ? C.textMuted : C.accent} />
@@ -350,7 +352,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         >
           {approvals.isLoading
             ? copy.gateLoading
-            : copy.gateStatus(items.length, status, approvals.data?.summary.sensitive ?? 0)}
+            : `${copy.gateStatus(visibleApprovalRows, status, approvals.data?.summary.sensitive ?? 0)}${hiddenApprovalRows > 0 ? ` ${hiddenApprovalRows} hidden by current limit.` : ""}`}
         </div>
         {focusNotice && (
           <div

@@ -311,6 +311,35 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(groups.groups.some((group) => group.key === "browser")).toBe(true);
   });
 
+  it("reports hidden Browser approval rows without changing approval state", async () => {
+    const caller = createCaller();
+    const beforeApprovals = await countRows("approvals");
+
+    for (const index of [1, 2, 3]) {
+      const created = await caller.workbench.createBrowserActionProposal({
+        actionLabel: "Open Page",
+        target: `https://example.com/browser-queue-hidden-${index}`,
+        draftKind: "url",
+      });
+      await caller.workbench.createBrowserActionApprovalPreview({
+        proposalId: created.proposal.id,
+      });
+    }
+
+    const browserQueue = await caller.approvals.queue({
+      origin: "browser" as never,
+      status: "pending",
+      limit: 2,
+    });
+
+    expect(browserQueue.items).toHaveLength(2);
+    expect(browserQueue.summary.visible).toBe(2);
+    expect(browserQueue.summary.total).toBeGreaterThanOrEqual(3);
+    expect(browserQueue.summary.hidden).toBe(browserQueue.summary.total - browserQueue.summary.visible);
+    expect(browserQueue.items.every((item) => item.origin === "browser")).toBe(true);
+    expect(await countRows("approvals")).toBe(beforeApprovals + 3);
+  });
+
   it("reads Browser approval detail with the linked proposal contract without running it", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

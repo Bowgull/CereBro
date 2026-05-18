@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0455 EDT
+Last updated: 2026-05-18 0500 EDT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0500 EDT - Approval Queue Hidden Row Counts
+
+### What Changed
+- `approvals.queue` now returns total, visible, and hidden approval row counts.
+- Approval Queue uses visible count for the Waiting stat.
+- Approval Queue status copy now states when local rows are hidden by the
+  current queue limit.
+- Browser approval rows still read as local approval previews only.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Approvals and confirmed
+  `Showing 60 pending decisions` plus `1265 hidden by current limit.`
+- Screenshot proof saved locally at
+  `output/playwright/approval-queue-hidden-counts.png`.
+
+### Drift Check
+- On path. This reduces Approval Queue dev-row noise without deleting records.
+- It does not approve, reject, or run anything.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+
+### Known Risks
+- The local dev DB still has many Browser approval/proposal rows from tests and
+  prior local passes.
+- Hidden rows remain accessible through focused queue filters and detail reads.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests wrote local dev DB approval/proposal rows as part of contract coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Approval Queue now reports total, visible, and hidden local approval rows so crowded dev data does not read as the whole queue. Workbench Browser has `Stage Live` and `Preflight`, but the runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is the next blocked runner implementation contract without opening pages, or Ledger readback for live-runner approvals if the audit trail needs parity. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0455 EDT - Approval Browser Live Runner Readback
 
@@ -30363,4 +30415,81 @@ Next-session starter prompt:
 
 ```text
 Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9. Use the UI taste audit for any material UI change: name the register, reject generic AI UI, keep machinery in Basement, and screenshot-proof visual changes. Next best build slice is a source-verified Model/Tool Registry proposal path or an approved read-only Ollama status/capability read. Do not install Ollama, pull models, run ComfyUI, call providers, browse/search/fetch, add dependencies, clean DB rows, copy external skill files, or route Raven content into CereBro without explicit approval. Update handoff and Obsidian archive before commit.
+```
+
+## 2026-05-17 2315 EDT - CLI MCP Research Rule
+
+Completion:
+
+- Overall: research only
+- Frontend visible loop: unchanged
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: unchanged
+- Creative/freelance/watch: unchanged
+
+What changed:
+
+- Added `CEREBRO_CLI_MCP_RESEARCH.md` as the durable CLI/MCP research note.
+- Updated `CEREBRO_BUILD_QUEUE.md` with the active-builder summary.
+- Locked the working architecture rule: CLI is CereBro's first local execution
+  lane; MCP is an external connector/action lane.
+- Split CLI/MCP ownership across agents so Spock gates risk but does not own
+  the whole system.
+- Defined the next correct CLI slice as a read-only `CommandRunner` contract
+  with allowlist, redaction, timeout, cancellation, receipt capture, and Spock
+  gate hooks.
+- Recorded the first CLI shortlist:
+  - Tier 0: existing local/repo-native commands and checks.
+  - Tier 1: Docling, Gitingest, OSV-Scanner, Gitleaks, Semgrep.
+  - Tier 2: zizmor, Scorecard, GuardDog, Ollama.
+- Recorded the first MCP shortlist: official/provider-hosted paths only:
+  OpenAI connectors, GitHub official MCP, Notion official hosted MCP, and Slack
+  official MCP after Slack capture requirements are approved.
+
+Files touched in this slice:
+
+- `CEREBRO_CLI_MCP_RESEARCH.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-17 2315 CereBro Session Handoff - cli-mcp-research-rule.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Current-source web research against official MCP, OpenAI, Codex, Docling,
+  OSV-Scanner, Semgrep, Gitleaks, zizmor, Scorecard, GuardDog, Notion, Slack,
+  and GitHub docs.
+- No app tests were run. This was a docs/research slice only.
+
+Drift check:
+
+- On path. This does not add an executor, install a tool, run MCP servers, add
+  dependencies, call providers, browse private pages, write external systems,
+  or create a generic marketplace.
+- The note is an operating rule and build input, not a new product surface.
+
+Known risks:
+
+- Tool and connector docs are current-source notes as of this pass and can
+  drift.
+- CLI/MCP policy contracts are now locked in `CEREBRO_CLI_MCP_RESEARCH.md`.
+- Each CLI/MCP candidate still needs a registry row, install/use approval,
+  version capture, and source verification before actual use.
+- The locked policy does not approve any install, MCP server, connector,
+  provider call, private browse, mutating command, networked CLI command, or
+  external write.
+
+Storage impact:
+
+- One repo Markdown research file added.
+- One Obsidian handoff snapshot and one index link appended.
+- No schema change.
+- No database rows created intentionally.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_CLI_MCP_RESEARCH.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 without installing or running tools. Use the locked CLI/MCP policy: CLI is the first local execution lane; MCP is an approval-gated external connector/action lane; direct/native APIs are for stable CereBro-owned product workflows; raw secrets never enter DB, Obsidian, receipts, logs, screenshots, stdout/stderr, browser evidence, or handoffs; first CommandRunner is read-only, allowlisted, no shell interpolation, cwd-bound, timed, output-capped, cancellable, no background processes, no daemons, no installs, no network, no writes by default; stdout/stderr redacts before receipts; Oak grades evidence. Next best slice is a small read-only CommandRunner contract or Model/Tool Registry proposal path that records tool candidates, owner agents, approval class, allowed commands/tools, forbidden commands/tools, network behavior, storage behavior, version governance, evidence grade, and source URL. Do not install Docling, Gitingest, OSV-Scanner, Gitleaks, Semgrep, zizmor, Scorecard, GuardDog, Ollama, or MCP servers. Do not call providers, browse private pages, write external systems, or add a generic marketplace without explicit approval. Update handoff and Obsidian archive before commit.
 ```

@@ -500,7 +500,26 @@ export const approvalsRouter = router({
         args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
-      args.push(input?.limit ?? 40);
+      const queueLimit = input?.limit ?? 40;
+      const countResult = await db.execute({
+        sql: `
+          SELECT COUNT(*) AS total
+          FROM approvals a
+          LEFT JOIN tasks t ON t.id = a.task_id
+          LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
+          LEFT JOIN capture_observations cap ON a.target_type = 'capture_observation' AND cap.id = a.target_id
+          LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
+          LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
+          LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
+          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
+          LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
+          LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
+          LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
+          LEFT JOIN projects p ON p.id = ${projectIdSql}
+          WHERE ${where.join(" AND ")}
+        `,
+        args,
+      });
       const result = await db.execute({
         sql: `
           SELECT
@@ -530,10 +549,11 @@ export const approvalsRouter = router({
           ORDER BY a.created_at DESC, a.id DESC
           LIMIT ?
         `,
-        args,
+        args: [...args, queueLimit],
       });
 
       const items = result.rows.map(rowToApprovalPreview);
+      const total = Number(countResult.rows[0]?.total ?? items.length);
       return {
         mode: "compact_read_only" as const,
         writesExternal: false,
@@ -542,7 +562,9 @@ export const approvalsRouter = router({
         origin,
         items,
         summary: {
-          total: items.length,
+          total,
+          visible: items.length,
+          hidden: Math.max(0, total - items.length),
           sensitive: items.filter((item) => item.sensitive).length,
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,

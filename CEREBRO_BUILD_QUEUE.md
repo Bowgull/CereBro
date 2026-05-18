@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0455 EDT
+Last updated: 2026-05-18 0500 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0500 EDT: added Approval Queue hidden row counts.
+  `approvals.queue` now returns total, visible, and hidden approval row counts.
+  Approval Queue uses the visible count for the Waiting stat and states when
+  older local rows are hidden by the current limit. No rows were deleted. No
+  live browser runner, browser automation, real browser tab, page open, fetch,
+  history, source save, Watch Shelf item save, progress persistence, external
+  write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-18 0455 EDT: added Approval Queue Browser live-runner readback.
   Approval detail now marks `browser_live_runner` receipts as live-runner
   gates with `approvalKind`, `liveRunnerAction`, and `liveRunnerGate`.
@@ -1566,3 +1573,61 @@ Expected shape:
   review loop. Use it before material UI changes and record the scorecard in
   handoff when a UI slice matters. It is not a redesign queue and does not
   outrank `DESIGN.md`, the castle spec, or the anti-drift law.
+- 2026-05-17 2247 EDT: CLI/MCP responsibility note for the active builder.
+  Do not put all CLI/MCP work on Spock. Spock owns risk classification,
+  preflight receipts, scanner posture, and blocked/allowed execution gates.
+  Tony owns command proposal, code/test/build execution after approval, and
+  runner integration. Aang owns user-facing command explanation and next-action
+  teaching. Cortana owns routing and approval state. Piccolo owns storage,
+  cleanup, timeout, process hygiene, and background-job pressure. Surfer owns
+  source/tool discovery and current docs, but does not execute. Oak owns
+  validation, provenance, and whether a CLI/MCP output is evidence or noise.
+  C-3PO owns handoff, summaries, and durable receipt wording. Gojo owns visual
+  proof and media/design tool routes. Hedwig owns capture-lane candidates only.
+  Next correct CLI slice is a small read-only CommandRunner contract with
+  allowlist, redaction, timeout, cancellation, receipt capture, and Spock gate
+  hooks. Do not install tools, run MCP servers, browse, call providers, execute
+  mutating commands, or add a generic CLI/MCP marketplace without explicit
+  approval.
+- 2026-05-17 2258 EDT: CLI/MCP current-source research update. MCP is a
+  protocol for JSON-RPC tool/resource/prompt connections with capability
+  negotiation, tool listing, tool-call outputs, and optional approvals. OpenAI
+  docs explicitly treat connectors and remote MCP servers as external-service
+  access with sensitive-data, third-party-server, prompt-injection, URL, and
+  data-retention risk. CereBro should therefore treat remote MCP as an external
+  action lane, not a default local runner. Use official provider-hosted MCP
+  servers first when MCP is needed. Avoid third-party aggregator MCP servers
+  until Surfer records source research and Spock/Oak approve the risk. Keep MCP
+  approvals on by default.
+- 2026-05-17 2258 EDT: CLI research update. Codex CLI is officially a local
+  terminal coding agent that can inspect repos, edit files, and run commands.
+  Docling, OSV-Scanner, Semgrep, Ollama, Scorecard, Gitleaks, GuardDog, zizmor,
+  Gitingest, and Playwright all fit CereBro better first as CLI/native-adapter
+  candidates than as generic MCP marketplace entries. Each candidate still
+  needs a registry row before use: install method, executable path, version,
+  allowed commands, forbidden commands, network behavior, output format,
+  storage impact, approval class, owner agent, and last verified source URL.
+- 2026-05-17 2315 EDT: added `CEREBRO_CLI_MCP_RESEARCH.md` as the durable
+  research note for the active build chat. Current shortlist: Tier 0 local
+  commands and repo-native checks first; Tier 1 adapters are Docling, Gitingest,
+  OSV-Scanner, Gitleaks, and Semgrep after registry rows and approval; Tier 2
+  adapters are zizmor, Scorecard, GuardDog, and Ollama. MCP shortlist is
+  official/provider-hosted paths only at first: OpenAI connectors, GitHub
+  official MCP, Notion official hosted MCP, and Slack official MCP after Slack
+  capture requirements are approved. The note defines CommandRunner fields,
+  controls, ownership, registry fields, and source links.
+- 2026-05-17 2325 EDT: locked CLI/MCP policy contracts in
+  `CEREBRO_CLI_MCP_RESEARCH.md`. Direct/native APIs are for stable
+  CereBro-owned product workflows. MCP is for provider-maintained,
+  approval-gated external agent access. Raw secrets cannot be stored in DB,
+  Obsidian, receipts, logs, screenshots, stdout/stderr, browser evidence, or
+  handoffs. First `CommandRunner` is read-only, allowlisted, no shell
+  interpolation, cwd-bound, timed, output-capped, cancellable, no background
+  processes, no daemons, no installs, no network, no writes by default.
+  stdout/stderr must be redacted before receipts. CLI network is off by
+  default. Tools need version governance and no auto-upgrade. Oak grades
+  evidence as proof/strong_signal/weak_signal/warning/noise. CLI/MCP machinery
+  belongs in Terminal Lab, Basement/Model Tools, Workbench, Ledger, and
+  Approvals, not the Keep primary surface. First build slice is either
+  read-only `CommandRunner` contract or registry/proposal rows. No tool install
+  or MCP server is approved by this policy.
