@@ -54,6 +54,20 @@ export type WorkbenchBrowserReadiness = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserRunnerContract = {
+  mode: "manual_browser_runner_contract";
+  statusLabel: "contract blocked";
+  pageStateLabel: "no page" | "draft staged";
+  targetLabel: string;
+  canOpenPage: boolean;
+  canFetchPage: boolean;
+  canPersistHistory: boolean;
+  allowedManualActions: string[];
+  blockedActions: string[];
+  requiredReceipts: string[];
+  noActionText: string;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -151,6 +165,42 @@ export function workbenchBrowserReadinessModel(draft: WorkbenchBrowserDraft): Wo
     canRunAutomation: false,
     requiredGates: ["Runner contract", "Approval receipt", "Spock gate", "Workbench body"],
     noActionText: "No browser runner, browser automation, page open, page fetch, credential action, source save, Workbench capture, download, or external write is available from this readiness read.",
+  };
+}
+
+export function workbenchBrowserRunnerContractModel(draft: WorkbenchBrowserDraft): WorkbenchBrowserRunnerContract {
+  return {
+    mode: "manual_browser_runner_contract",
+    statusLabel: "contract blocked",
+    pageStateLabel: draft.kind === "empty" ? "no page" : "draft staged",
+    targetLabel: draft.kind === "empty" ? "No page draft." : draft.displayTarget,
+    canOpenPage: false,
+    canFetchPage: false,
+    canPersistHistory: false,
+    allowedManualActions: [
+      "Open one user-entered URL after runner contract approval.",
+      "Keep page state local to the manual browser surface.",
+      "Record a local result receipt after the page opens.",
+    ],
+    blockedActions: [
+      "No credential entry.",
+      "No form submission.",
+      "No download.",
+      "No source save.",
+      "No Workbench capture.",
+      "No Watch Shelf save.",
+      "No external write.",
+    ],
+    requiredReceipts: [
+      ...(draft.kind === "empty" ? ["Page draft"] : []),
+      "Runner contract receipt",
+      "Approval receipt",
+      "Spock gate",
+      "Workbench body",
+      "Result receipt",
+      "Recovery note",
+    ],
+    noActionText: "No browser page opens, fetches, persists history, saves sources, captures Workbench proof, downloads files, enters credentials, or writes externally from this contract.",
   };
 }
 

@@ -3,6 +3,7 @@ import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserReadinessModel,
+  workbenchBrowserRunnerContractModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -164,5 +165,28 @@ describe("workbenchBrowserModel", () => {
     expect(emptyReadiness.pageStateLabel).toBe("no page");
     expect(emptyReadiness.canOpen).toBe(false);
     expect(emptyReadiness.canRunAutomation).toBe(false);
+  });
+
+  it("defines the manual browser runner contract without granting runner access", () => {
+    const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
+    const emptyDraft = workbenchBrowserDraftModel("");
+
+    const urlContract = workbenchBrowserRunnerContractModel(urlDraft);
+    const emptyContract = workbenchBrowserRunnerContractModel(emptyDraft);
+
+    expect(urlContract.mode).toBe("manual_browser_runner_contract");
+    expect(urlContract.statusLabel).toBe("contract blocked");
+    expect(urlContract.canOpenPage).toBe(false);
+    expect(urlContract.canFetchPage).toBe(false);
+    expect(urlContract.canPersistHistory).toBe(false);
+    expect(urlContract.targetLabel).toBe("https://example.com/path");
+    expect(urlContract.allowedManualActions).toContain("Open one user-entered URL after runner contract approval.");
+    expect(urlContract.blockedActions).toContain("No credential entry.");
+    expect(urlContract.requiredReceipts).toContain("Runner contract receipt");
+    expect(urlContract.noActionText).toContain("No browser page opens");
+
+    expect(emptyContract.targetLabel).toBe("No page draft.");
+    expect(emptyContract.pageStateLabel).toBe("no page");
+    expect(emptyContract.requiredReceipts).toContain("Page draft");
   });
 });

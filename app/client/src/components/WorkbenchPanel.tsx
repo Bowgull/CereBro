@@ -25,6 +25,7 @@ import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserReadinessModel,
+  workbenchBrowserRunnerContractModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
@@ -270,6 +271,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
   const browserReadiness = workbenchBrowserReadinessModel(browserDraft);
+  const browserRunnerContract = workbenchBrowserRunnerContractModel(browserDraft);
   const browserActionProposal = trpc.workbench.browserActionProposalPreview.useQuery(
     {
       actionLabel: browserActionPreview.label,
@@ -901,13 +903,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       </span>
                       <Chip label={browserReadiness.statusLabel} tone={C.warning} />
                       <Chip label={browserReadiness.pageStateLabel} tone={browserReadiness.pageStateLabel === "no page" ? C.textMuted : C.accent} />
+                      <Chip label={browserRunnerContract.statusLabel} tone={C.warning} />
                     </div>
                     <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
                       {browserReadiness.noActionText}
                     </div>
+                    <div className="mt-1 grid gap-1 text-[10px] leading-snug md:grid-cols-2" style={{ color: C.textMuted }}>
+                      <div className="rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                        <span className="font-semibold" style={{ color: C.textPrimary }}>Runner Contract</span>
+                        <div className="mt-0.5 break-all">{browserRunnerContract.targetLabel}</div>
+                        <div className="mt-0.5">{browserRunnerContract.noActionText}</div>
+                      </div>
+                      <div className="rounded px-1.5 py-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                        <span className="font-semibold" style={{ color: C.textPrimary }}>Manual Allowance</span>
+                        <div className="mt-0.5">{browserRunnerContract.allowedManualActions[0]}</div>
+                        <div className="mt-0.5">{browserRunnerContract.blockedActions.slice(0, 3).join(" ")}</div>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-start gap-1 md:justify-end" aria-label="Browser runner gates">
-                    {browserReadiness.requiredGates.map((gate) => (
+                    {browserRunnerContract.requiredReceipts.map((gate) => (
                       <Chip key={gate} label={gate} tone={C.textMuted} />
                     ))}
                   </div>

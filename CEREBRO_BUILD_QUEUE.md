@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2147 EDT
+Last updated: 2026-05-17 2153 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2153 EDT: added the blocked Workbench Browser runner contract
+  readback. `workbenchBrowserRunnerContractModel` defines manual allowance,
+  blocked actions, target state, and required receipts without granting runner
+  access. Workbench Browser readiness now shows contract blocked state,
+  runner contract, manual allowance, and receipt gates. No runner, browser
+  automation, page open, fetch, history, source save, Workbench capture,
+  external write, provider/model call, install, pull, or Raven path was added.
+  `can_execute` remains false.
 - 2026-05-17 2147 EDT: compressed Workbench Browser proposal rows.
   Proposal rows now show id/action, target, status, result state, and one
   `Details` control. Stage Approval, Stage Body, Stage Spock, Read Gates, and
