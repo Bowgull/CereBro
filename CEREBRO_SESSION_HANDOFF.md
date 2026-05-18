@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2317 EDT
+Last updated: 2026-05-17 2325 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2325 EDT - Ledger Watch Shelf Audit
+
+### What Changed
+- Extended Ledger Browser Receipt Audit with Watch Shelf storage state.
+- Ledger now reads Watch Shelf item count from `browser_watch_shelf_items`.
+- Ledger now exposes `canSaveWatchShelf: false` and
+  `canPersistWatchProgress: false`.
+- Ledger now reads latest Watch Shelf rows when they exist.
+- Ledger UI shows `Watch Shelf`, `Shelf Save`, and `Progress` inside the
+  existing Browser Receipt Audit section.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing Watch Shelf audit fields.
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Ledger and
+  confirmed `Browser Receipt Audit`, `Watch Shelf`, `Shelf Save`, `Progress`,
+  `No Watch Shelf item saved.`, and `No progress persisted.`
+- Screenshot proof saved locally at
+  `output/playwright/ledger-watch-shelf-audit.png`.
+
+### Drift Check
+- On path. This advances Ledger audit visibility for the existing Daily OS
+  Browser/Watch Shelf contract.
+- Ledger remains an audit surface. It does not become a Watch Shelf surface.
+- Watch Shelf remains in Workbench Browser.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, progress
+  persistence, download, external write, paid service, provider call, model
+  call, install, pull, or Raven path was added.
+
+### Known Risks
+- Ledger now reads Watch Shelf storage state, but it still cannot create or
+  save Watch Shelf items.
+- The audit surface is intentionally factual and compact. Real Watch Shelf item
+  UX still belongs in Workbench Browser after the live runner is approved.
+
+### Storage Impact
+- No schema change.
+- No Watch Shelf rows were inserted by product code.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser has a read-only Watch Shelf storage contract and local browser_watch_shelf_items table. Ledger Browser Receipt Audit now reads Watch Shelf count, save-blocked state, progress-blocked state, and latest shelf rows without saving items or opening pages. Next best slice is Approval Queue readback for Add to Watch proposals, or the next blocked Browser runner contract test if Workbench and Ledger are clean. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2317 EDT - Workbench Watch Shelf Storage Contract
 

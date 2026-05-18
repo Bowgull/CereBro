@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2317 EDT
+Last updated: 2026-05-17 2325 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2325 EDT: added Ledger Watch Shelf audit readback. Ledger Browser
+  Receipt Audit now reads `browser_watch_shelf_items`, exposes shelf count,
+  `canSaveWatchShelf: false`, `canPersistWatchProgress: false`, and latest
+  shelf rows. Ledger UI shows `Watch Shelf`, `Shelf Save`, and `Progress`
+  inside the existing Browser Receipt Audit section. No Watch Shelf item save,
+  watch progress persistence, browser runner, browser automation, real browser
+  tab, page open, fetch, history, source save, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 2317 EDT: added Workbench Watch Shelf storage contract.
   Added local `browser_watch_shelf_items` schema and
   `workbench.watchShelfStorageContract`. Workbench Watch Shelf now reads the

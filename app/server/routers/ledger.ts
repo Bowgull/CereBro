@@ -206,6 +206,25 @@ function browserTabRow(row: Record<string, unknown>) {
   };
 }
 
+function browserWatchShelfRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    category: String(row.category),
+    sourceLabel: row.source_label == null ? null : String(row.source_label),
+    progressLabel: row.progress_label == null ? null : String(row.progress_label),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -367,7 +386,7 @@ async function readExecutionReceiptLoopAudit() {
 
 async function readBrowserReceiptAudit() {
   const db = await getCerebroDb();
-  const [summary, draftTabs, latestProposals, latestTabs] = await Promise.all([
+  const [summary, draftTabs, watchShelfItems, latestProposals, latestTabs, latestWatchShelfItems] = await Promise.all([
     db.execute(`
       SELECT
         COUNT(*) AS proposals,
@@ -377,6 +396,7 @@ async function readBrowserReceiptAudit() {
       FROM browser_action_proposals
     `),
     countOne("SELECT COUNT(*) AS value FROM browser_tab_sessions WHERE state = ?", ["draft"]),
+    countOne("SELECT COUNT(*) AS value FROM browser_watch_shelf_items"),
     db.execute(`
       SELECT id, action_label, target, draft_kind, risk_class, executor_agent,
              status, can_execute, result_state, recovery_note, created_at, updated_at
@@ -392,6 +412,14 @@ async function readBrowserReceiptAudit() {
       ORDER BY updated_at DESC, id DESC
       LIMIT 5
     `),
+    db.execute(`
+      SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+             category, source_label, progress_label, state, project_id,
+             source_id, workbench_evidence_id, created_at, updated_at
+      FROM browser_watch_shelf_items
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 5
+    `),
   ]);
   const row = summary.rows[0] ?? {};
 
@@ -400,16 +428,21 @@ async function readBrowserReceiptAudit() {
     ownerAgent: "spock" as const,
     proposals: Number(row.proposals ?? 0),
     draftTabs,
+    watchShelfItems,
     resultScaffolds: Number(row.result_scaffolds ?? 0),
     recoveryScaffolds: Number(row.recovery_scaffolds ?? 0),
     executable: Number(row.executable ?? 0),
     canOpenPage: false,
     canExecute: false,
+    canSaveWatchShelf: false,
+    canPersistWatchProgress: false,
     latestProposals: latestProposals.rows.map((proposalRow) => browserProposalRow(proposalRow as Record<string, unknown>)),
     latestTabs: latestTabs.rows.map((tabRow) => browserTabRow(tabRow as Record<string, unknown>)),
+    latestWatchShelfItems: latestWatchShelfItems.rows.map((shelfRow) => browserWatchShelfRow(shelfRow as Record<string, unknown>)),
     gates: [
       "Browser receipt audit reads local Browser proposals and draft tabs only.",
       "This read does not open pages, fetch URLs, persist history, save sources, or run browser automation.",
+      "This read does not save Watch Shelf items or persist watch progress.",
       "Workbench remains the Browser body surface. Ledger remains the audit surface.",
     ],
     noActionTaken: [
@@ -417,6 +450,8 @@ async function readBrowserReceiptAudit() {
       "No page fetched.",
       "No history persisted.",
       "No source saved.",
+      "No Watch Shelf item saved.",
+      "No progress persisted.",
       "No external write ran.",
     ],
     nextAction: "Keep Browser runner blocked until a separate live runner contract is approved.",

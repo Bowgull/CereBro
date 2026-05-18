@@ -97,11 +97,18 @@ describe("Ledger memory contract read", () => {
     expect(overview.browserReceiptAudit.draftTabs).toBeGreaterThan(0);
     expect(overview.browserReceiptAudit.resultScaffolds).toBeGreaterThan(0);
     expect(overview.browserReceiptAudit.recoveryScaffolds).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.watchShelfItems).toBeGreaterThanOrEqual(0);
+    expect(overview.browserReceiptAudit.canSaveWatchShelf).toBe(false);
+    expect(overview.browserReceiptAudit.canPersistWatchProgress).toBe(false);
+    expect(overview.browserReceiptAudit.latestWatchShelfItems).toEqual([]);
     expect(overview.browserReceiptAudit.latestProposals[0]?.id).toBe(created.proposal.id);
     expect(overview.browserReceiptAudit.latestTabs.some((tab) => tab.proposalId === created.proposal.id)).toBe(true);
     expect(overview.browserReceiptAudit.gates.join(" ")).toContain("does not open pages");
+    expect(overview.browserReceiptAudit.gates.join(" ")).toContain("does not save Watch Shelf items");
     expect(overview.browserReceiptAudit.noActionTaken).toContain("No browser opened.");
     expect(overview.browserReceiptAudit.noActionTaken).toContain("No page fetched.");
+    expect(overview.browserReceiptAudit.noActionTaken).toContain("No Watch Shelf item saved.");
+    expect(overview.browserReceiptAudit.noActionTaken).toContain("No progress persisted.");
 
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
