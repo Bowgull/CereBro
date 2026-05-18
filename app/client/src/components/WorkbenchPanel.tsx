@@ -202,6 +202,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setBrowserProposalNotice(`Runner blocked for proposal #${result.proposal.id}. No page opened.`);
     },
   });
+  const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      setBrowserProposalNotice(`Draft tab ${result.tab.tabId} staged. No page opened.`);
+    },
+  });
   const [selectedBrowserReadinessId, setSelectedBrowserReadinessId] = useState<number | null>(null);
   const browserProposalReadiness = trpc.workbench.browserActionProposalReadiness.useQuery(
     { proposalId: selectedBrowserReadinessId ?? 0 },
@@ -1078,6 +1084,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     onClick={() => setSelectedBrowserOpenId(proposal.id)}
                                   >
                                     Read Open
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserTabSessionDraft.isPending}
+                                    title="Create a local draft tab row for this Browser proposal. This does not open a page."
+                                    onClick={() => {
+                                      createBrowserTabSessionDraft.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Stage Tab
                                   </Button>
                                   <Button
                                     type="button"

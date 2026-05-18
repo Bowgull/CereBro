@@ -92,6 +92,24 @@ function rowToBrowserApprovalPreview(row: Record<string, unknown>) {
   };
 }
 
+function rowToBrowserTabSession(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    tabId: String(row.tab_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
+    lastError: row.last_error == null ? null : String(row.last_error),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
 async function pendingBrowserApprovalByProposalId(proposalId: number) {
   const db = await getCerebroDb();
   const result = await db.execute({
@@ -735,7 +753,7 @@ export const workbenchRouter = router({
     const db = await getCerebroDb();
     const rows = await db.execute({
       sql: `
-        SELECT id, tab_id, target_url, title, state, project_id, source_id,
+        SELECT id, proposal_id, tab_id, target_url, title, state, project_id, source_id,
                workbench_evidence_id, watch_shelf_id, last_error, created_at,
                updated_at
         FROM browser_tab_sessions
@@ -753,22 +771,9 @@ export const workbenchRouter = router({
       canPersistCookies: false,
       storageShape: {
         requiredFields: ["tab_id", "target_url", "title", "state", "created_at", "updated_at"],
-        optionalFields: ["project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
+        optionalFields: ["proposal_id", "project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
       },
-      items: rows.rows.map((row) => ({
-        id: Number(row.id),
-        tabId: String(row.tab_id),
-        targetUrl: String(row.target_url),
-        title: row.title == null ? null : String(row.title),
-        state: String(row.state),
-        projectId: row.project_id == null ? null : Number(row.project_id),
-        sourceId: row.source_id == null ? null : Number(row.source_id),
-        workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
-        watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
-        lastError: row.last_error == null ? null : String(row.last_error),
-        createdAt: Number(row.created_at),
-        updatedAt: Number(row.updated_at),
-      })),
+      items: rows.rows.map(rowToBrowserTabSession),
       gates: [
         "Browser tab/session storage table exists, but persistence remains blocked.",
         "Manual page open, history, cookies, credentials, page content cache, source saves, Watch Shelf saves, and Workbench captures require later receipts.",
@@ -823,6 +828,84 @@ export const workbenchRouter = router({
           "No cookies or credentials persisted.",
           "No source saved.",
           "No Workbench capture created.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserTabSessionDraft: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const tabId = `draft-proposal-${proposal.id}`;
+      const existing = await db.execute({
+        sql: `
+          SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+                 source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                 created_at, updated_at
+          FROM browser_tab_sessions
+          WHERE proposal_id = ? AND state = 'draft'
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [proposal.id],
+      });
+
+      let row = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        await db.execute({
+          sql: `
+            INSERT INTO browser_tab_sessions (proposal_id, tab_id, target_url, title, state)
+            VALUES (?, ?, ?, ?, 'draft')
+          `,
+          args: [proposal.id, tabId, proposal.target, `${proposal.actionLabel} draft`,],
+        });
+        const created = await db.execute({
+          sql: `
+            SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+                   source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                   created_at, updated_at
+            FROM browser_tab_sessions
+            WHERE proposal_id = ? AND state = 'draft'
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+          `,
+          args: [proposal.id],
+        });
+        row = created.rows[0] as Record<string, unknown> | undefined;
+      }
+
+      if (!row) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser tab draft could not be created.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "local_browser_tab_draft" as const,
+        proposal,
+        tab: rowToBrowserTabSession(row),
+        canOpenPage: false,
+        canFetchPage: false,
+        canPersistHistory: false,
+        canPersistCookies: false,
+        gates: [
+          "Local draft tab row exists, but manual page open remains blocked.",
+          "Draft tab rows do not persist history, cookies, credentials, page content, source rows, or Watch Shelf items.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
           "No external write ran.",
         ],
       };

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2218 EDT
+Last updated: 2026-05-17 2224 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2224 EDT: added local Workbench Browser draft tab rows.
+  `browser_tab_sessions` now links to `browser_action_proposals` through
+  `proposal_id`, with migration support for existing DBs.
+  `workbench.createBrowserTabSessionDraft` creates or reuses one local draft
+  tab row and returns no-action copy. Workbench Browser proposal details now
+  expose `Stage Tab` and show `Draft tab draft-proposal-... staged. No page
+  opened.` No browser runner, browser automation, real browser tab, page open,
+  fetch, history, source save, Workbench capture, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 2218 EDT: added the blocked Workbench Browser manual open-page
   contract. `workbench.browserManualOpenPageContract` reads a durable Browser
   proposal and returns the target URL, required pre-open receipts, open

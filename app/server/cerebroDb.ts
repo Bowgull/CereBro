@@ -467,6 +467,7 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_browser_action_proposals_created ON browser_action_proposals(created_at DESC)`,
       `CREATE TABLE IF NOT EXISTS browser_tab_sessions (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
+         proposal_id INTEGER REFERENCES browser_action_proposals(id) ON DELETE SET NULL,
          tab_id TEXT NOT NULL,
          target_url TEXT NOT NULL,
          title TEXT,
@@ -900,6 +901,7 @@ async function ensureSchema(client: Client): Promise<void> {
   await ensureWorkbenchEvidenceColumns(client);
   await ensureApprovalColumns(client);
   await ensureRuntimeRouteRecordColumns(client);
+  await ensureBrowserTabSessionColumns(client);
 }
 
 async function ensureSessionLedgerColumns(client: Client): Promise<void> {
@@ -1021,6 +1023,15 @@ async function ensureRuntimeRouteRecordColumns(client: Client): Promise<void> {
     await client.execute(`ALTER TABLE runtime_route_records ADD COLUMN task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL`);
   }
   await client.execute(`CREATE INDEX IF NOT EXISTS idx_runtime_route_records_task ON runtime_route_records(task_id)`);
+}
+
+async function ensureBrowserTabSessionColumns(client: Client): Promise<void> {
+  const table = await client.execute(`PRAGMA table_info(browser_tab_sessions)`);
+  const existing = new Set(table.rows.map((row) => String(row.name)));
+  if (!existing.has("proposal_id")) {
+    await client.execute(`ALTER TABLE browser_tab_sessions ADD COLUMN proposal_id INTEGER REFERENCES browser_action_proposals(id) ON DELETE SET NULL`);
+  }
+  await client.execute(`CREATE INDEX IF NOT EXISTS idx_browser_tab_sessions_proposal ON browser_tab_sessions(proposal_id)`);
 }
 
 export type MemoryKind = "fact" | "note" | "reference" | "feedback";
