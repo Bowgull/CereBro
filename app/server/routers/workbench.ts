@@ -10,6 +10,7 @@ import {
   githubRepositorySourcePath,
 } from "../knowledge/contracts";
 import { type PerceptionClass, recordPermissionPreflight } from "../permissionPolicy";
+import { receiptFor, rowToSecurityReview } from "./securityGate";
 import { sessionDisplayName } from "./sessions";
 
 const evidenceKinds = [
@@ -724,6 +725,86 @@ export const workbenchRouter = router({
           "Created one local Workbench body receipt for a Browser proposal.",
           "Recorded one local permission preflight audit row for this evidence record.",
           "This did not open a browser, fetch a page, save a source, capture media, approve work, or write externally.",
+        ],
+      };
+    }),
+
+  createBrowserActionSpockGate: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const receipt = receiptFor(proposal.target);
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "explicit_context",
+        actionClass: "local_note",
+        sensitiveData: false,
+        externalTarget: false,
+        requestedByAgent: "spock",
+        targetSummary: `browser_action_proposal:${proposal.id} ${receipt.targetUri}`,
+        additionalReasons: [
+          "Spock Browser proposal receipt records local review state only.",
+          "Browser, source save, download, credential, install, and execution paths need separate approval.",
+        ],
+      });
+      const result = await db.execute({
+        sql: `
+          INSERT INTO security_review_records (
+            target_uri, target_kind, risk_level, status, owner_agent, route_chain,
+            checks_json, findings_json, allowed_actions_json, blocked_actions_json,
+            scanner_plan_json, browser_policy_json, permission_preflight_id
+          )
+          VALUES (?, ?, ?, 'receipt', 'spock', ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING *
+        `,
+        args: [
+          receipt.targetUri,
+          receipt.targetKind,
+          receipt.riskLevel,
+          JSON.stringify(receipt.routeChain),
+          JSON.stringify(receipt.checks),
+          JSON.stringify(receipt.findings),
+          JSON.stringify(receipt.allowedActions),
+          JSON.stringify(receipt.blockedActions),
+          JSON.stringify(receipt.scannerPlan),
+          JSON.stringify(receipt.browserPolicy),
+          Number(preflight.row.id),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        executesCommand: false,
+        review: rowToSecurityReview(result.rows[0]!),
+        permissionPreflightId: Number(preflight.row.id),
+        gates: [
+          "Recorded one local Spock security receipt for a Browser proposal.",
+          "Recorded one local permission preflight audit row for this Spock gate.",
+          "This did not open a browser, fetch a page, save a source, approve work, or write externally.",
         ],
       };
     }),

@@ -218,7 +218,7 @@ function browserPolicyFor(kind: TargetKind, riskLevel: RiskLevel) {
   };
 }
 
-function receiptFor(target: string) {
+export function receiptFor(target: string) {
   const url = parseMaybeUrl(target);
   const kind = inferTargetKind(target, url);
   const risk = riskForTarget(target, kind, url);
@@ -236,7 +236,7 @@ function receiptFor(target: string) {
   };
 }
 
-function rowToSecurityReview(row: Record<string, unknown>) {
+export function rowToSecurityReview(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
     targetUri: String(row.target_uri),

@@ -237,4 +237,42 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("creates one local Spock security receipt for a Browser proposal without running it", async () => {
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-spock",
+      draftKind: "url",
+    });
+
+    const spockGate = await caller.workbench.createBrowserActionSpockGate({
+      proposalId: created.proposal.id,
+    });
+
+    expect(spockGate.ok).toBe(true);
+    expect(spockGate.writesExternal).toBe(false);
+    expect(spockGate.opensBrowser).toBe(false);
+    expect(spockGate.executesCommand).toBe(false);
+    expect(spockGate.review?.ownerAgent).toBe("spock");
+    expect(spockGate.review?.targetUri).toBe("https://example.com/browser-spock");
+    expect(spockGate.review?.targetKind).toBe("public_url");
+    expect(spockGate.review?.status).toBe("receipt");
+    expect(spockGate.review?.blockedActions).toContain("No downloads.");
+    expect(spockGate.gates).toContain("Recorded one local Spock security receipt for a Browser proposal.");
+    expect(spockGate.gates).toContain("This did not open a browser, fetch a page, save a source, approve work, or write externally.");
+
+    expect(await countRows("security_review_records")).toBe(before.securityReviews + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights + 1);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

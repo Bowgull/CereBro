@@ -186,6 +186,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setBrowserProposalNotice(`Workbench body #${result.evidence.id} saved. Not run.`);
     },
   });
+  const createBrowserActionSpockGate = trpc.workbench.createBrowserActionSpockGate.useMutation({
+    onSuccess: (result) => {
+      setBrowserProposalNotice(
+        result.review
+          ? `Spock receipt #${result.review.id} saved. Not run.`
+          : "Spock receipt was not saved.",
+      );
+    },
+  });
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -948,6 +957,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                               }}
                             >
                               Stage Body
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              disabled={createBrowserActionSpockGate.isPending}
+                              title="Save a local Spock security receipt for this Browser proposal. This does not approve or run it."
+                              onClick={() => {
+                                createBrowserActionSpockGate.mutate({
+                                  proposalId: proposal.id,
+                                });
+                              }}
+                            >
+                              Stage Spock
                             </Button>
                           </div>
                         </div>

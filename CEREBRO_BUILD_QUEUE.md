@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2127 EDT
+Last updated: 2026-05-17 2133 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2133 EDT: added Workbench Browser Spock gate linkage.
+  `workbench.createBrowserActionSpockGate` stages one local Spock security
+  receipt for a durable Browser proposal and records one local permission
+  preflight row. Workbench Browser recent proposals now expose `Stage Spock`
+  and show `Spock receipt #... saved. Not run.` No approval decision,
+  Workbench evidence row, source row, browser runner, page fetch, Watch Shelf
+  save, external write, provider/model call, install, pull, or Raven path was
+  added. `can_execute` remains false.
 - 2026-05-17 2127 EDT: added Workbench Browser body linkage.
   `workbench.createBrowserActionWorkbenchBody` stages one local Workbench
   evidence body for a durable Browser proposal and records one local
