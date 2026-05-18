@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2242 EDT
+Last updated: 2026-05-17 2250 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2250 EDT - Ledger Browser Receipt Audit
+
+### What Changed
+- Added a read-only Browser receipt audit to `ledger.overview`.
+- Ledger now counts Browser proposals, draft tabs, blocked result scaffolds,
+  and recovery note scaffolds.
+- Ledger now reads latest Browser proposals and latest draft tabs without
+  opening pages or writing audit rows.
+- Added a compact Ledger UI section called `Browser Receipt Audit`.
+- The section shows no-page-open state, Browser proposal rows, draft tab rows,
+  and `No browser opened. No page fetched.` copy.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `overview.browserReceiptAudit`.
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Ledger and
+  confirmed `Browser Receipt Audit`, `no page open`, `Draft Tabs`, and
+  `No browser opened. No page fetched.`
+- Screenshot proof saved locally at
+  `output/playwright/ledger-browser-receipt-audit.png`.
+
+### Drift Check
+- On path. This adds Ledger visibility for Browser receipts only.
+- Workbench remains the Browser body surface. Ledger remains the audit surface.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, download,
+  external write, paid service, provider call, model call, install, pull, or
+  Raven path was added.
+
+### Known Risks
+- The Ledger section is intentionally compact. A future pass can improve
+  grouping after the Browser runner contract is approved.
+- Browser audit rows are from the local dev database and include test/proof
+  records.
+
+### Storage Impact
+- No schema change.
+- Tests and browser proof read local dev Browser proposal and draft tab rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Ledger now has read-only Browser receipt audit visibility for proposals, draft tabs, result scaffolds, and recovery notes. Workbench Browser now separates pending approval preview from approved execution approval, has result/recovery scaffolding, and can show all manual open runner policy gates present while still blocking execution. Next best slice is Approval Queue or Workbench readback polish for Browser approvals and runner policy, still without opening pages. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2242 EDT - Workbench Browser Result Recovery Scaffold
 

@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2242 EDT
+Last updated: 2026-05-17 2250 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2250 EDT: added Ledger Browser receipt audit visibility.
+  `ledger.overview` now reads Browser proposal counts, draft tab counts,
+  blocked result scaffolds, recovery note scaffolds, latest Browser proposals,
+  and latest draft tabs. Ledger now shows a compact `Browser Receipt Audit`
+  section with `no page open`, `Draft Tabs`, and `No browser opened. No page
+  fetched.` copy. Workbench remains the Browser body surface. Ledger remains
+  the audit surface. No dedicated Browser nav surface, browser runner, browser
+  automation, real browser tab, page open, fetch, history, source save, Watch
+  Shelf item save, external write, provider/model call, install, pull, or Raven
+  path was added.
 - 2026-05-17 2242 EDT: added Workbench Browser result/recovery scaffolding.
   `browser_action_proposals` now has `recovery_note`, and
   `workbench.createBrowserResultRecoveryScaffold` records

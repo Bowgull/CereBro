@@ -70,4 +70,42 @@ describe("Ledger memory contract read", () => {
     expect(await countRows("permission_preflight_records")).toBe(before.preflights);
     expect(await countRows("memory_entries")).toBe(before.memoryEntries);
   });
+
+  it("includes Browser receipt audit context without opening pages or writing audit rows", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/ledger-browser-audit",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+    };
+
+    const overview = await caller.ledger.overview({ evidenceLimit: 5, routeLimit: 3 });
+
+    expect(overview.browserReceiptAudit.mode).toBe("read_only");
+    expect(overview.browserReceiptAudit.ownerAgent).toBe("spock");
+    expect(overview.browserReceiptAudit.canOpenPage).toBe(false);
+    expect(overview.browserReceiptAudit.canExecute).toBe(false);
+    expect(overview.browserReceiptAudit.proposals).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.draftTabs).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.resultScaffolds).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.recoveryScaffolds).toBeGreaterThan(0);
+    expect(overview.browserReceiptAudit.latestProposals[0]?.id).toBe(created.proposal.id);
+    expect(overview.browserReceiptAudit.latestTabs.some((tab) => tab.proposalId === created.proposal.id)).toBe(true);
+    expect(overview.browserReceiptAudit.gates.join(" ")).toContain("does not open pages");
+    expect(overview.browserReceiptAudit.noActionTaken).toContain("No browser opened.");
+    expect(overview.browserReceiptAudit.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+  });
 });

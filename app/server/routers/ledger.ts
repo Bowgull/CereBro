@@ -171,6 +171,41 @@ function projectPushContractRow(row: Record<string, unknown>) {
   };
 }
 
+function browserProposalRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    actionLabel: String(row.action_label),
+    target: String(row.target),
+    draftKind: String(row.draft_kind),
+    riskClass: String(row.risk_class),
+    executorAgent: String(row.executor_agent),
+    statusLabel: String(row.status ?? "proposal_blocked").split("_").join(" "),
+    canExecute: Boolean(row.can_execute),
+    resultState: String(row.result_state),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function browserTabRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    tabId: String(row.tab_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
+    lastError: row.last_error == null ? null : String(row.last_error),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -330,6 +365,64 @@ async function readExecutionReceiptLoopAudit() {
   };
 }
 
+async function readBrowserReceiptAudit() {
+  const db = await getCerebroDb();
+  const [summary, draftTabs, latestProposals, latestTabs] = await Promise.all([
+    db.execute(`
+      SELECT
+        COUNT(*) AS proposals,
+        SUM(CASE WHEN result_state = 'blocked_before_runner' THEN 1 ELSE 0 END) AS result_scaffolds,
+        SUM(CASE WHEN recovery_note IS NOT NULL AND TRIM(recovery_note) != '' THEN 1 ELSE 0 END) AS recovery_scaffolds,
+        SUM(CASE WHEN can_execute = 1 THEN 1 ELSE 0 END) AS executable
+      FROM browser_action_proposals
+    `),
+    countOne("SELECT COUNT(*) AS value FROM browser_tab_sessions WHERE state = ?", ["draft"]),
+    db.execute(`
+      SELECT id, action_label, target, draft_kind, risk_class, executor_agent,
+             status, can_execute, result_state, recovery_note, created_at, updated_at
+      FROM browser_action_proposals
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 5
+    `),
+    db.execute(`
+      SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+             source_id, workbench_evidence_id, watch_shelf_id, last_error,
+             created_at, updated_at
+      FROM browser_tab_sessions
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 5
+    `),
+  ]);
+  const row = summary.rows[0] ?? {};
+
+  return {
+    mode: "read_only" as const,
+    ownerAgent: "spock" as const,
+    proposals: Number(row.proposals ?? 0),
+    draftTabs,
+    resultScaffolds: Number(row.result_scaffolds ?? 0),
+    recoveryScaffolds: Number(row.recovery_scaffolds ?? 0),
+    executable: Number(row.executable ?? 0),
+    canOpenPage: false,
+    canExecute: false,
+    latestProposals: latestProposals.rows.map((proposalRow) => browserProposalRow(proposalRow as Record<string, unknown>)),
+    latestTabs: latestTabs.rows.map((tabRow) => browserTabRow(tabRow as Record<string, unknown>)),
+    gates: [
+      "Browser receipt audit reads local Browser proposals and draft tabs only.",
+      "This read does not open pages, fetch URLs, persist history, save sources, or run browser automation.",
+      "Workbench remains the Browser body surface. Ledger remains the audit surface.",
+    ],
+    noActionTaken: [
+      "No browser opened.",
+      "No page fetched.",
+      "No history persisted.",
+      "No source saved.",
+      "No external write ran.",
+    ],
+    nextAction: "Keep Browser runner blocked until a separate live runner contract is approved.",
+  };
+}
+
 export const ledgerRouter = router({
   overview: publicProcedure
     .input(
@@ -365,6 +458,7 @@ export const ledgerRouter = router({
         memoryContract,
         routeReceiptContract,
         executionReceiptLoopAudit,
+        browserReceiptAudit,
       ] = await Promise.all([
         db.execute({
           sql: `
@@ -564,6 +658,7 @@ export const ledgerRouter = router({
         readMemoryContract(),
         readRouteReceiptContract(),
         readExecutionReceiptLoopAudit(),
+        readBrowserReceiptAudit(),
       ]);
 
       const taskRow = taskCounts.rows[0] ?? {};
@@ -614,6 +709,7 @@ export const ledgerRouter = router({
         memoryContract,
         routeReceiptContract,
         executionReceiptLoopAudit,
+        browserReceiptAudit,
         gates: [
           "Ledger overview is read-only.",
           "This read model does not open browsers, run commands, call models, approve gates, or write externally.",

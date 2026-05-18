@@ -1019,6 +1019,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const memoryContract = ledgerOverview.data?.memoryContract;
   const routeReceiptContract = ledgerOverview.data?.routeReceiptContract;
   const executionReceiptLoopAudit = ledgerOverview.data?.executionReceiptLoopAudit;
+  const browserReceiptAudit = ledgerOverview.data?.browserReceiptAudit;
   const routeReceiptContractProof = routeReceiptContract ? routeReceiptContractProofModel(routeReceiptContract) : [];
   const evidenceRows = ledgerOverview.data?.latestEvidence ?? [];
   const executionRows = ledgerOverview.data?.latestExecutionResults ?? [];
@@ -1553,6 +1554,89 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
             </div>
             <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
               {executionReceiptLoopAudit.gates[2]} Next: {executionReceiptLoopAudit.nextAction}
+            </div>
+          </section>
+        )}
+
+        {browserReceiptAudit && (
+          <section className="rounded p-2" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }} aria-label="Browser receipt audit">
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-1.5">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                  Browser Receipt Audit
+                </div>
+                <div className="mt-0.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                  Workbench holds the Browser body. Ledger holds the audit trail.
+                </div>
+              </div>
+              <Badge variant="secondary" className="uppercase">
+                no page open
+              </Badge>
+            </div>
+            <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
+              <CompactReadDatum label="Proposals" value={String(browserReceiptAudit.proposals)} tone={C.accent} />
+              <CompactReadDatum label="Draft Tabs" value={String(browserReceiptAudit.draftTabs)} tone={browserReceiptAudit.draftTabs > 0 ? C.gold : C.textMuted} />
+              <CompactReadDatum label="Result Scaffolds" value={String(browserReceiptAudit.resultScaffolds)} tone={browserReceiptAudit.resultScaffolds > 0 ? C.success : C.textMuted} />
+              <CompactReadDatum label="Recovery Notes" value={String(browserReceiptAudit.recoveryScaffolds)} tone={browserReceiptAudit.recoveryScaffolds > 0 ? C.success : C.textMuted} />
+              <CompactReadDatum label="Can Open" value={browserReceiptAudit.canOpenPage ? "yes" : "no"} tone={browserReceiptAudit.canOpenPage ? C.danger : C.success} />
+              <CompactReadDatum label="Can Execute" value={browserReceiptAudit.canExecute ? "yes" : "no"} tone={browserReceiptAudit.canExecute ? C.danger : C.success} />
+            </div>
+            <div className="mt-1.5 grid gap-1.5 xl:grid-cols-2">
+              <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                  Latest Browser Proposals
+                </div>
+                {browserReceiptAudit.latestProposals.length === 0 ? (
+                  <div className="text-[11px]" style={{ color: C.textMuted }}>
+                    No Browser proposals recorded.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {browserReceiptAudit.latestProposals.map((item) => (
+                      <div key={item.id} className="rounded px-2 py-1" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="flex items-center justify-between gap-2 text-[11px]" style={{ color: C.textPrimary }}>
+                          <span className="truncate">#{item.id} {item.actionLabel}</span>
+                          <span className="shrink-0" style={{ color: item.canExecute ? C.danger : C.success }}>
+                            {item.statusLabel}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
+                          {item.resultState.replace(/_/g, " ")} · {item.target}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                  Latest Draft Tabs
+                </div>
+                {browserReceiptAudit.latestTabs.length === 0 ? (
+                  <div className="text-[11px]" style={{ color: C.textMuted }}>
+                    No draft tabs recorded.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {browserReceiptAudit.latestTabs.map((item) => (
+                      <div key={item.id} className="rounded px-2 py-1" style={{ background: workFrame.slab, border: `1px solid ${workFrame.lineSoft}` }}>
+                        <div className="flex items-center justify-between gap-2 text-[11px]" style={{ color: C.textPrimary }}>
+                          <span className="truncate">{item.tabId}</span>
+                          <span className="shrink-0" style={{ color: item.state === "draft" ? C.gold : C.textMuted }}>
+                            {item.state}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
+                          proposal {item.proposalId ? `#${item.proposalId}` : "unlinked"} · {item.targetUrl}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mt-1.5 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              No browser opened. No page fetched. Next: {browserReceiptAudit.nextAction}
             </div>
           </section>
         )}
