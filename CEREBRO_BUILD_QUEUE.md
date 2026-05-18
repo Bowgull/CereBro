@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2203 EDT
+Last updated: 2026-05-17 2211 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2211 EDT: added the local Workbench Browser tab/session storage
+  table contract. `browser_tab_sessions` now exists in the local schema, and
+  `workbench.browserTabSessionStorageContract` reads it without writing rows.
+  Workbench Browser shows `browser_tab_sessions`, `storage blocked`, row
+  count, the first gate, and `No tab session persisted.` No tab session row,
+  browser runner, browser automation, real browser tab, page open, fetch,
+  history, source save, Workbench capture, external write, provider/model
+  call, install, pull, or Raven path was added.
 - 2026-05-17 2203 EDT: added blocked Workbench Browser tab/session storage
   contract. `workbenchBrowserSessionStorageContractModel` defines future tab
   storage fields, required gates, and blocked state without persistence.

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2203 EDT
+Last updated: 2026-05-17 2211 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2211 EDT - Workbench Browser Tab Storage Table Contract
+
+### What Changed
+- Added a local `browser_tab_sessions` schema contract.
+- Added `workbench.browserTabSessionStorageContract`.
+- Workbench Browser now reads the server table contract below Tab Storage.
+- The readback shows `browser_tab_sessions`, `storage blocked`, row count, the
+  first gate, and `No tab session persisted.`
+- No tab session persistence was enabled.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.browserTabSessionStorageContract`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench and confirmed Tab Storage, `browser_tab_sessions`,
+  `storage blocked`, and `No tab session persisted.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-tab-storage-table-contract.png`.
+
+### Drift Check
+- On path. This creates the durable local table boundary before any real manual
+  page open.
+- The route is read-only.
+- No browser tab session row was written.
+- No approval decision was made, no Workbench evidence row was written, no
+  security review row was written, no source row was written, and no browser
+  action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, cookie/session persistence, download, external write, paid service,
+  provider call, model call, install, pull, or Raven path was added.
+
+### Known Risks
+- This is a table and read route only. The first manual open-page contract and
+  any draft tab creation remain future slices.
+- The table has placeholder linkage for Watch Shelf, but no Watch Shelf
+  persistence exists yet.
+
+### Storage Impact
+- Adds the local SQLite table `browser_tab_sessions` and indexes if missing.
+- Browser proof read existing local dev DB rows only.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has a blocked manual runner contract readback, a blocked runner route, a blocked tab/session storage contract, a local browser_tab_sessions table contract, durable local browser_action_proposals, compact proposal rows behind Details, approval previews, Approval Queue Browser filtering, Workbench body receipts, Spock security receipts, gate readiness, and result/recovery contract readbacks. Next best slice is the first manual open-page contract that still keeps execution disabled, or a controlled draft-tab row contract if the table should hold drafts before page open. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2203 EDT - Workbench Browser Tab Storage Contract
 

@@ -731,6 +731,60 @@ export const workbenchRouter = router({
       };
     }),
 
+  browserTabSessionStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, tab_id, target_url, title, state, project_id, source_id,
+               workbench_evidence_id, watch_shelf_id, last_error, created_at,
+               updated_at
+        FROM browser_tab_sessions
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_tab_sessions" as const,
+      canPersistTabs: false,
+      canPersistHistory: false,
+      canPersistCookies: false,
+      storageShape: {
+        requiredFields: ["tab_id", "target_url", "title", "state", "created_at", "updated_at"],
+        optionalFields: ["project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
+      },
+      items: rows.rows.map((row) => ({
+        id: Number(row.id),
+        tabId: String(row.tab_id),
+        targetUrl: String(row.target_url),
+        title: row.title == null ? null : String(row.title),
+        state: String(row.state),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        sourceId: row.source_id == null ? null : Number(row.source_id),
+        workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+        watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
+        lastError: row.last_error == null ? null : String(row.last_error),
+        createdAt: Number(row.created_at),
+        updatedAt: Number(row.updated_at),
+      })),
+      gates: [
+        "Browser tab/session storage table exists, but persistence remains blocked.",
+        "Manual page open, history, cookies, credentials, page content cache, source saves, Watch Shelf saves, and Workbench captures require later receipts.",
+      ],
+      noActionTaken: [
+        "No browser opened.",
+        "No page fetched.",
+        "No tab session persisted.",
+        "No history persisted.",
+        "No cookies or credentials persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
   createBrowserActionApprovalPreview: publicProcedure
     .input(
       z.object({

@@ -465,6 +465,22 @@ async function ensureSchema(client: Client): Promise<void> {
          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
        )`,
       `CREATE INDEX IF NOT EXISTS idx_browser_action_proposals_created ON browser_action_proposals(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS browser_tab_sessions (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         tab_id TEXT NOT NULL,
+         target_url TEXT NOT NULL,
+         title TEXT,
+         state TEXT NOT NULL DEFAULT 'draft',
+         project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+         source_id INTEGER REFERENCES sources(id) ON DELETE SET NULL,
+         workbench_evidence_id INTEGER REFERENCES workbench_evidence_records(id) ON DELETE SET NULL,
+         watch_shelf_id INTEGER,
+         last_error TEXT,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_browser_tab_sessions_tab ON browser_tab_sessions(tab_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_browser_tab_sessions_created ON browser_tab_sessions(created_at DESC)`,
       `CREATE TABLE IF NOT EXISTS execution_action_results (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          proposal_id INTEGER REFERENCES execution_action_proposals(id) ON DELETE SET NULL,

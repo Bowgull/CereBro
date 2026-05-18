@@ -299,6 +299,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnReconnect: false,
     },
   );
+  const browserTabSessionStorageContract = trpc.workbench.browserTabSessionStorageContract.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -1207,6 +1212,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     </div>
                     <div className="mt-1 break-all">{browserStorageContract.activeDraftLabel}</div>
                     <div className="mt-1">{browserStorageContract.noActionText}</div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      <Chip
+                        label={browserTabSessionStorageContract.data?.tableName ?? "reading table"}
+                        tone={C.textMuted}
+                      />
+                      <Chip
+                        label={browserTabSessionStorageContract.data?.canPersistTabs ? "storage live" : "storage blocked"}
+                        tone={browserTabSessionStorageContract.data?.canPersistTabs ? C.accent : C.warning}
+                      />
+                      <Chip
+                        label={`${browserTabSessionStorageContract.data?.items.length ?? 0} rows`}
+                        tone={C.textMuted}
+                      />
+                    </div>
+                    <div className="mt-1">
+                      {browserTabSessionStorageContract.data?.gates[0] ?? "Reading Browser tab/session storage table contract."}
+                    </div>
+                    <div className="mt-1">
+                      {browserTabSessionStorageContract.data?.noActionTaken.find((item) => item === "No tab session persisted.") ?? "No tab session persisted."}
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-start gap-1 md:justify-end">
                     {browserStorageContract.requiredBeforePersist.map((gate) => (

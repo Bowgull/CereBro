@@ -391,4 +391,37 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads the Browser tab session storage table contract without persisting tabs", async () => {
+    const caller = createCaller();
+    const browserTabsBefore = await countRows("browser_tab_sessions");
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const storage = await caller.workbench.browserTabSessionStorageContract();
+
+    expect(storage.mode).toBe("read_only");
+    expect(storage.tableName).toBe("browser_tab_sessions");
+    expect(storage.canPersistTabs).toBe(false);
+    expect(storage.canPersistHistory).toBe(false);
+    expect(storage.canPersistCookies).toBe(false);
+    expect(storage.storageShape.requiredFields).toContain("tab_id");
+    expect(storage.storageShape.requiredFields).toContain("target_url");
+    expect(storage.items.length).toBeLessThanOrEqual(10);
+    expect(storage.gates).toContain("Browser tab/session storage table exists, but persistence remains blocked.");
+    expect(storage.noActionTaken).toContain("No browser opened.");
+    expect(storage.noActionTaken).toContain("No tab session persisted.");
+
+    expect(await countRows("browser_tab_sessions")).toBe(browserTabsBefore);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });
