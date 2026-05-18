@@ -291,6 +291,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnWindowFocus: false,
     },
   );
+  const browserLiveRunnerLaunchGate = trpc.workbench.browserLiveRunnerLaunchGate.useQuery(
+    { proposalId: selectedBrowserPreflightId ?? 0 },
+    {
+      enabled: selectedBrowserPreflightId != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  );
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
@@ -1525,6 +1533,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           <div>Next missing gate: {browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "none"}.</div>
                           <div>{browserLiveRunnerPreflight.data.nextAction}</div>
                           <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
+                          {browserLiveRunnerLaunchGate.data && (
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold" style={{ color: C.textPrimary }}>Launch Gate</span>
+                                <Chip label={browserLiveRunnerLaunchGate.data.hardGate} tone={C.warning} />
+                              </div>
+                              <div className="mt-0.5">
+                                {browserLiveRunnerLaunchGate.data.nextAction}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div>No live runner preflight available.</div>

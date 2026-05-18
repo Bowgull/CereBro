@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0525 EDT
+Last updated: 2026-05-18 0530 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0530 EDT: added Workbench live-runner launch gate.
+  `workbench.browserLiveRunnerLaunchGate` reads proposal, live-runner approval,
+  and latest runner audit state, then returns `implementationPresent: false`,
+  `canOpenPage: false`, and `canExecute: false`. Workbench Live Preflight now
+  shows `Launch Gate / live runner implementation missing`. No live browser
+  runner, browser automation, real browser tab, page open, fetch, history,
+  source save, Watch Shelf item save, progress persistence, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-18 0525 EDT: added Workbench preflight to Ledger runner focus.
   Workbench Live Preflight latest audit now exposes a `Ledger` action that
   stores `browserRunnerAuditId` in the existing local Ledger focus draft.

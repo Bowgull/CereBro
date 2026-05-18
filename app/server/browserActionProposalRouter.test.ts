@@ -1198,6 +1198,51 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("reads the live-runner launch gate as blocked after approval and audit receipts", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-launch-gate",
+      draftKind: "url",
+    });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Launch gate readback only.",
+    });
+    const blocked = await caller.workbench.runBrowserLiveRunnerBlocked({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const gate = await caller.workbench.browserLiveRunnerLaunchGate({
+      proposalId: created.proposal.id,
+    });
+
+    expect(gate.mode).toBe("read_only_launch_gate");
+    expect(gate.proposal.id).toBe(created.proposal.id);
+    expect(gate.liveRunnerApproved).toBe(true);
+    expect(gate.latestRunnerAudit?.id).toBe(blocked.audit.id);
+    expect(gate.implementationPresent).toBe(false);
+    expect(gate.canOpenPage).toBe(false);
+    expect(gate.canExecute).toBe(false);
+    expect(gate.hardGate).toBe("live runner implementation missing");
+    expect(gate.nextAction).toContain("implementation contract");
+    expect(gate.noActionTaken).toContain("No browser opened.");
+    expect(gate.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads live-runner approval detail as a blocked Browser runner gate", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

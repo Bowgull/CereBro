@@ -1452,6 +1452,53 @@ export const workbenchRouter = router({
       };
     }),
 
+  browserLiveRunnerLaunchGate: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const latestRunnerAudit = gateRows.latestRunnerAudit
+        ? rowToBrowserRunnerAudit(gateRows.latestRunnerAudit as Record<string, unknown>)
+        : null;
+
+      return {
+        mode: "read_only_launch_gate" as const,
+        proposal,
+        liveRunnerApproved: Boolean(gateRows.liveRunnerApproval),
+        latestRunnerAudit,
+        implementationPresent: false,
+        canOpenPage: false,
+        canExecute: false,
+        hardGate: "live runner implementation missing" as const,
+        gates: [
+          gateRows.liveRunnerApproval
+            ? `Approved live-runner gate #${Number(gateRows.liveRunnerApproval.id)} is present.`
+            : "Approved live-runner gate is missing.",
+          latestRunnerAudit
+            ? `Latest runner audit #${latestRunnerAudit.id} confirms ${latestRunnerAudit.runnerState.replace(/_/g, " ")}.`
+            : "No blocked runner audit receipt exists yet.",
+          "Live runner implementation is not present.",
+          "This launch gate is read-only and cannot open pages.",
+        ],
+        nextAction: "Keep page open blocked until a separate live runner implementation contract exists and passes no-page regression gates.",
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No runner audit written.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   createBrowserLiveRunnerApprovalPreview: publicProcedure
     .input(
       z.object({
