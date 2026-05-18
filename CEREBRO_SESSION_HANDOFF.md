@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0520 EDT
+Last updated: 2026-05-18 0525 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0525 EDT - Workbench Preflight To Ledger Runner Focus
+
+### What Changed
+- Workbench Live Preflight latest audit now has a `Ledger` action.
+- The action writes a local `cerebro:ledger-focus` session draft with the
+  `browserRunnerAuditId`.
+- Ledger now reads `browserRunnerAuditId` from the same focus path and opens
+  Runner Receipt Detail automatically.
+- This links Workbench proof to Ledger audit without adding a new Browser
+  surface.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Workshop, expanded a Browser
+  proposal, clicked `Preflight`, clicked the latest audit `Ledger` action, and
+  confirmed Ledger showed `Runner Receipt Detail`, `read only`, `Can Open`,
+  `Can Execute`, `No browser opened`, `No page fetched`, and
+  `Ledger opened Browser runner audit #118.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-preflight-ledger-focus.png`.
+
+### Drift Check
+- On path. This only links existing Workbench preflight proof to existing
+  Ledger audit detail.
+- It does not approve or run the live runner.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+
+### Known Risks
+- The local dev DB still has many Browser approval/proposal/audit rows from
+  tests and prior local passes.
+- This is a UI focus handoff. It does not reduce local DB row count.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests wrote local dev DB Browser proposal, approval, and runner audit rows as
+  part of contract coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Live Preflight now shows the latest blocked runner audit and can focus that audit in Ledger. Ledger can inspect one Browser runner audit receipt. `Check Live` writes blocked live-runner audit rows. The actual runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is final runner contract hardening or compact cleanup around no-page gates before any true runner implementation. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0520 EDT - Workbench Live Preflight Latest Audit
 

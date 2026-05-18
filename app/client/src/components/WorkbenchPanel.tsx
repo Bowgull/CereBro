@@ -1488,7 +1488,34 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                               <div className="flex items-center justify-between gap-2">
                                 <span className="font-semibold" style={{ color: C.textPrimary }}>Latest audit #{browserLiveRunnerPreflight.data.latestRunnerAudit.id}</span>
-                                <Chip label={browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")} tone={C.warning} />
+                                <div className="flex items-center gap-1">
+                                  <Chip label={browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")} tone={C.warning} />
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-5 px-1.5 text-[9px]"
+                                    title="Open this blocked runner audit in Ledger. This does not open a page."
+                                    onClick={() => {
+                                      if (!onNavigate) return;
+                                      try {
+                                        window.sessionStorage.setItem(
+                                          "cerebro:ledger-focus",
+                                          JSON.stringify({
+                                            source: "workbench-browser-live-preflight",
+                                            browserRunnerAuditId: browserLiveRunnerPreflight.data.latestRunnerAudit?.id,
+                                            notice: `Ledger opened Browser runner audit #${browserLiveRunnerPreflight.data.latestRunnerAudit?.id}.`,
+                                          }),
+                                        );
+                                      } catch {
+                                        // Ledger still opens; the user can inspect runner audits manually.
+                                      }
+                                      onNavigate("ledger");
+                                    }}
+                                  >
+                                    Ledger
+                                  </Button>
+                                </div>
                               </div>
                               <div className="mt-0.5">
                                 {browserLiveRunnerPreflight.data.latestRunnerAudit.noActionTaken.slice(0, 2).join(" ")}

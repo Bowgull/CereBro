@@ -1083,12 +1083,13 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     }
     if (!raw) return;
     try {
-      const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; projectId?: number | null; projectName?: string | null; notice?: string };
+      const draft = JSON.parse(raw) as { evidenceId?: number; observationId?: number; browserRunnerAuditId?: number; projectId?: number | null; projectName?: string | null; notice?: string };
       if (typeof draft.projectId === "number" || draft.projectName) {
         setLedgerFocusProject({ id: typeof draft.projectId === "number" ? draft.projectId : null, name: draft.projectName ?? null });
         if (typeof draft.evidenceId !== "number") setSelectedEvidenceId(null);
       }
       if (typeof draft.evidenceId === "number") setSelectedEvidenceId(draft.evidenceId);
+      if (typeof draft.browserRunnerAuditId === "number") setSelectedBrowserRunnerAuditId(draft.browserRunnerAuditId);
       setLedgerFocusNotice(draft.notice ?? "Ledger opened a focused receipt.");
     } catch {
       setLedgerFocusNotice("Ledger focus could not be read. Select a receipt manually.");

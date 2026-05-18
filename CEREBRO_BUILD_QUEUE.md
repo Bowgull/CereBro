@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0520 EDT
+Last updated: 2026-05-18 0525 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0525 EDT: added Workbench preflight to Ledger runner focus.
+  Workbench Live Preflight latest audit now exposes a `Ledger` action that
+  stores `browserRunnerAuditId` in the existing local Ledger focus draft.
+  Ledger reads it and opens Runner Receipt Detail automatically. No live
+  browser runner, browser automation, real browser tab, page open, fetch,
+  history, source save, Watch Shelf item save, progress persistence, external
+  write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-18 0520 EDT: added Workbench Live Preflight latest audit readback.
   `workbench.browserLiveRunnerPreflight` now reads the latest
   `browser_runner_audit_records` row for the proposal and exposes a compact
