@@ -955,6 +955,83 @@ export const workbenchRouter = router({
       };
     }),
 
+  runBrowserLiveRunnerBlocked: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const liveRunnerApproved = Boolean(gateRows.liveRunnerApproval);
+      const runnerState = liveRunnerApproved
+        ? "blocked_before_live_runner_implementation"
+        : "blocked_before_live_runner_approval";
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, ?, 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          runnerState,
+          [
+            `Blocked live Browser runner check for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            liveRunnerApproved
+              ? `Live runner approval #${Number(gateRows.liveRunnerApproval?.id)} is approved.`
+              : "Approved live runner approval is missing.",
+            "Live runner implementation is not present.",
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            ...browserProposalNoActionTaken,
+            "No runner implementation invoked.",
+          ].join("\n"),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "blocked_live_browser_runner" as const,
+        proposal,
+        liveRunnerApproved,
+        implementationPresent: false,
+        requiresImplementation: true,
+        wouldOpenBrowser: false,
+        wouldFetchPage: false,
+        writesExternal: false,
+        canOpenPage: false,
+        canExecute: false,
+        resultState: runnerState,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          liveRunnerApproved
+            ? "Approved live-runner gate is present."
+            : "Approved live-runner gate is missing.",
+          "Live runner implementation is not present.",
+          "This route writes a local blocked audit receipt only.",
+          "No browser opened, page fetched, source saved, Workbench capture created, Watch Shelf item saved, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner implementation invoked.",
+        ],
+      };
+    }),
+
   browserTabSessionStorageContract: publicProcedure.query(async () => {
     const db = await getCerebroDb();
     const rows = await db.execute({

@@ -220,6 +220,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setBrowserProposalNotice(`Runner audit #${result.audit.id} blocked proposal #${result.proposal.id}. No page opened.`);
     },
   });
+  const runBrowserLiveRunnerBlocked = trpc.workbench.runBrowserLiveRunnerBlocked.useMutation({
+    onSuccess: (result) => {
+      setBrowserProposalNotice(`Live runner audit #${result.audit.id} blocked proposal #${result.proposal.id}. No page opened.`);
+      if (selectedBrowserPreflightId === result.proposal.id) {
+        utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      }
+    },
+  });
   const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
     onSuccess: (result) => {
       utils.workbench.browserTabSessionStorageContract.invalidate();
@@ -1263,6 +1271,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     }}
                                   >
                                     Check Runner
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={runBrowserLiveRunnerBlocked.isPending}
+                                    title="Check the blocked live Browser runner implementation. This does not open a page."
+                                    onClick={() => {
+                                      runBrowserLiveRunnerBlocked.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Check Live
                                   </Button>
                                 </div>
                               </div>

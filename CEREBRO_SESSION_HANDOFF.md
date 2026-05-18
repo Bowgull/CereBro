@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0505 EDT
+Last updated: 2026-05-18 0510 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0510 EDT - Workbench Blocked Live Runner Check
+
+### What Changed
+- Added `workbench.runBrowserLiveRunnerBlocked`.
+- The route writes a local blocked runner audit receipt only.
+- The receipt distinguishes missing live-runner approval from missing live
+  runner implementation.
+- Workbench Browser proposal details now include `Check Live`.
+- `Check Live` records the blocked live-runner implementation state without
+  opening or fetching a page.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Workshop, expanded a Browser
+  proposal, clicked `Check Live`, and confirmed
+  `Live runner audit #85 blocked proposal #1560. No page opened.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-check-live-runner.png`.
+
+### Drift Check
+- On path. This adds the blocked live-runner implementation receipt before any
+  real runner can exist.
+- It does not approve or run the live runner.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+
+### Known Risks
+- The local dev DB still has many Browser approval/proposal/audit rows from
+  tests and prior local passes.
+- `Check Live` writes a local audit row each time it is clicked.
+- The Browser runner remains intentionally blocked.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests and browser proof wrote local dev DB browser runner audit rows as part
+  of contract coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench now has `Check Live`, which writes a local blocked live-runner audit receipt and still opens no page. Ledger reads live-runner approval gates. Approval Queue reports hidden local approval rows. The actual runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is the next runner contract hardening step, likely tying `Check Live` audit rows into Ledger latest runner readback or adding a focused no-page runner receipt detail. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0505 EDT - Ledger Browser Live Runner Gates
 

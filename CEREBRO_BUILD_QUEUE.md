@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0505 EDT
+Last updated: 2026-05-18 0510 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0510 EDT: added Workbench blocked live-runner check.
+  `workbench.runBrowserLiveRunnerBlocked` writes a local blocked runner audit
+  receipt and distinguishes missing live-runner approval from missing live
+  runner implementation. Workbench Browser proposal details now include
+  `Check Live`. No live browser runner, browser automation, real browser tab,
+  page open, fetch, history, source save, Watch Shelf item save, progress
+  persistence, external write, provider/model call, install, pull, or Raven
+  path was added.
 - 2026-05-18 0505 EDT: added Ledger Browser live-runner gate readback.
   Ledger Browser Receipt Audit now reads `browser_live_runner` approval rows,
   reports total, pending, and approved live-runner gates, and shows a compact
