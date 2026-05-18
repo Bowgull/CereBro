@@ -225,6 +225,19 @@ function browserWatchShelfRow(row: Record<string, unknown>) {
   };
 }
 
+function browserRunnerAuditRow(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    runnerState: String(row.runner_state),
+    canOpenPage: Boolean(row.can_open_page),
+    canExecute: Boolean(row.can_execute),
+    receiptBody: String(row.receipt_body),
+    noActionTaken: String(row.no_action_taken ?? "").split("\n").filter(Boolean),
+    createdAt: Number(row.created_at),
+  };
+}
+
 async function countOne(sql: string, args: (string | number)[] = []) {
   const db = await getCerebroDb();
   const result = await db.execute({ sql, args });
@@ -386,7 +399,7 @@ async function readExecutionReceiptLoopAudit() {
 
 async function readBrowserReceiptAudit() {
   const db = await getCerebroDb();
-  const [summary, draftTabs, watchShelfItems, latestProposals, latestTabs, latestWatchShelfItems] = await Promise.all([
+  const [summary, draftTabs, watchShelfItems, runnerAudits, latestProposals, latestTabs, latestWatchShelfItems, latestRunnerAudits] = await Promise.all([
     db.execute(`
       SELECT
         COUNT(*) AS proposals,
@@ -397,6 +410,7 @@ async function readBrowserReceiptAudit() {
     `),
     countOne("SELECT COUNT(*) AS value FROM browser_tab_sessions WHERE state = ?", ["draft"]),
     countOne("SELECT COUNT(*) AS value FROM browser_watch_shelf_items"),
+    countOne("SELECT COUNT(*) AS value FROM browser_runner_audit_records"),
     db.execute(`
       SELECT id, action_label, target, draft_kind, risk_class, executor_agent,
              status, can_execute, result_state, recovery_note, created_at, updated_at
@@ -420,6 +434,13 @@ async function readBrowserReceiptAudit() {
       ORDER BY updated_at DESC, id DESC
       LIMIT 5
     `),
+    db.execute(`
+      SELECT id, proposal_id, runner_state, can_open_page, can_execute,
+             receipt_body, no_action_taken, created_at
+      FROM browser_runner_audit_records
+      ORDER BY created_at DESC, id DESC
+      LIMIT 5
+    `),
   ]);
   const row = summary.rows[0] ?? {};
 
@@ -429,6 +450,7 @@ async function readBrowserReceiptAudit() {
     proposals: Number(row.proposals ?? 0),
     draftTabs,
     watchShelfItems,
+    runnerAudits,
     resultScaffolds: Number(row.result_scaffolds ?? 0),
     recoveryScaffolds: Number(row.recovery_scaffolds ?? 0),
     executable: Number(row.executable ?? 0),
@@ -439,8 +461,10 @@ async function readBrowserReceiptAudit() {
     latestProposals: latestProposals.rows.map((proposalRow) => browserProposalRow(proposalRow as Record<string, unknown>)),
     latestTabs: latestTabs.rows.map((tabRow) => browserTabRow(tabRow as Record<string, unknown>)),
     latestWatchShelfItems: latestWatchShelfItems.rows.map((shelfRow) => browserWatchShelfRow(shelfRow as Record<string, unknown>)),
+    latestRunnerAudits: latestRunnerAudits.rows.map((auditRow) => browserRunnerAuditRow(auditRow as Record<string, unknown>)),
     gates: [
       "Browser receipt audit reads local Browser proposals and draft tabs only.",
+      "Ledger reads runner audit rows but does not run the Browser runner.",
       "This read does not open pages, fetch URLs, persist history, save sources, or run browser automation.",
       "This read does not save Watch Shelf items or persist watch progress.",
       "Workbench remains the Browser body surface. Ledger remains the audit surface.",

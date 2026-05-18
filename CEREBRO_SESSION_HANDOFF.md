@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2341 EDT
+Last updated: 2026-05-17 2347 EDT
 
 ## Current North Star
 
@@ -20,6 +20,60 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2347 EDT - Ledger Browser Runner Audit
+
+### What Changed
+- Ledger Browser Receipt Audit now reads `browser_runner_audit_records`.
+- Ledger now exposes runner audit count and latest runner audit rows.
+- Ledger UI shows `Runner Audits` in the Browser Receipt Audit section.
+- The readback shows audit id, proposal id, blocked runner state, and no-page
+  state without running the Browser runner.
+
+### Files Touched
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `runnerAudits`.
+- `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Ledger and
+  confirmed `Browser Receipt Audit`, `Runner Audits`, `blocked before runner`,
+  and `no page open`.
+- Screenshot proof saved locally at
+  `output/playwright/ledger-browser-runner-audit.png`.
+
+### Drift Check
+- On path. This only makes Ledger read the blocked runner audits already
+  recorded by Workbench.
+- Ledger remains the audit surface.
+- Workbench remains the Browser body surface.
+- It does not add a live browser runner, open pages, fetch pages, save sources,
+  capture pages, save Watch Shelf items, persist watch progress, write
+  externally, call providers/models, install, pull, or touch Raven paths.
+
+### Known Risks
+- Local runner audit rows now appear in Ledger and can become noisy during dev.
+- The live Browser runner remains blocked and requires a later explicit
+  approval-gated contract.
+
+### Storage Impact
+- No schema change in this slice.
+- Browser proof read existing local runner audit rows.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser writes local blocked runner audit rows, and Ledger now reads runner audit count/latest rows inside Browser Receipt Audit. The runner remains blocked before page open. Next best slice is compacting noisy Browser proposal/audit dev rows in Workbench or adding the next explicit approval-gated live-runner preflight contract without enabling page open. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2341 EDT - Workbench Blocked Runner Audit
 
