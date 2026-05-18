@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2325 EDT
+Last updated: 2026-05-17 2331 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2331 EDT - Approval Watch Shelf Receipt
+
+### What Changed
+- Added Watch Shelf state to Browser approval detail receipts.
+- `Add to Watch` approvals now expose `watchShelfAction: true`.
+- Approval detail now shows `canSaveWatchShelf: false`,
+  `canPersistWatchProgress: false`, and a Watch Shelf gate explanation.
+- Approval Queue UI now shows `shelf blocked` and `no progress` chips for
+  Add to Watch Browser proposals.
+- The receipt copy states that no Watch Shelf item or progress was saved.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing Watch Shelf approval receipt fields.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Ledger ->
+  Approvals, inspected an Add to Watch Browser approval, and confirmed
+  `shelf blocked`, `no progress`, `No Watch Shelf item saved.`, and
+  `No progress persisted.`
+- Screenshot proof saved locally at
+  `output/playwright/approval-watch-shelf-receipt.png`.
+
+### Drift Check
+- On path. This improves Approval Queue readback for existing Browser
+  Add to Watch proposals.
+- Approval Queue remains a review surface. It does not save Watch Shelf items.
+- Watch Shelf remains in Workbench Browser.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, progress
+  persistence, download, external write, paid service, provider call, model
+  call, install, pull, or Raven path was added.
+
+### Known Risks
+- The approval receipt now explains Watch Shelf gates, but there is still no
+  live save path.
+- Pending local dev approvals are numerous because tests create durable local
+  approval previews.
+
+### Storage Impact
+- No schema change.
+- No Watch Shelf rows were inserted by product code.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser has a read-only Watch Shelf storage contract. Ledger audits Watch Shelf count/save/progress state. Approval Queue now shows Add to Watch proposals as shelf-blocked and progress-blocked without opening pages or saving items. Next best slice is the next blocked Browser runner contract test, or a small Workbench/Approval cleanup if the pending dev rows make the UI too noisy. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2325 EDT - Ledger Watch Shelf Audit
 

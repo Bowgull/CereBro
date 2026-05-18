@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2325 EDT
+Last updated: 2026-05-17 2331 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2331 EDT: added Approval Watch Shelf receipt readback.
+  Browser approval detail now marks `Add to Watch` proposals as Watch Shelf
+  actions, exposes `canSaveWatchShelf: false` and
+  `canPersistWatchProgress: false`, and shows a shelf gate explanation.
+  Approval Queue shows `shelf blocked` and `no progress` for Add to Watch
+  Browser proposals. No Watch Shelf item save, watch progress persistence,
+  browser runner, browser automation, real browser tab, page open, fetch,
+  history, source save, external write, provider/model call, install, pull, or
+  Raven path was added.
 - 2026-05-17 2325 EDT: added Ledger Watch Shelf audit readback. Ledger Browser
   Receipt Audit now reads `browser_watch_shelf_items`, exposes shelf count,
   `canSaveWatchShelf: false`, `canPersistWatchProgress: false`, and latest

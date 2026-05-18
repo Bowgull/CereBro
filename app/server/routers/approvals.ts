@@ -19,6 +19,8 @@ function rowToApproval(row: Record<string, unknown>) {
   const contextSummary = row.context_summary == null ? null : String(row.context_summary);
   const sensitive = Boolean(row.sensitive_data_flag);
   const costRisk = row.cost_risk == null ? null : String(row.cost_risk);
+  const browserActionLabel = row.browser_action_label == null ? "" : String(row.browser_action_label);
+  const browserIsWatchShelfAction = browserActionLabel.toLowerCase().includes("watch");
 
   return {
     id: Number(row.id),
@@ -54,7 +56,7 @@ function rowToApproval(row: Record<string, unknown>) {
     origin: originForApproval({ actionType, targetType, requestedByAgent }),
     browserProposalReceipt: row.browser_proposal_id == null ? null : {
       proposalId: Number(row.browser_proposal_id),
-      actionLabel: String(row.browser_action_label),
+      actionLabel: browserActionLabel,
       target: String(row.browser_target),
       draftKind: String(row.browser_draft_kind),
       riskClass: String(row.browser_risk_class),
@@ -64,11 +66,19 @@ function rowToApproval(row: Record<string, unknown>) {
       recoveryNote: row.browser_recovery_note == null ? null : String(row.browser_recovery_note),
       canOpenPage: false,
       canExecute: Boolean(row.browser_can_execute),
+      watchShelfAction: browserIsWatchShelfAction,
+      canSaveWatchShelf: false,
+      canPersistWatchProgress: false,
+      watchShelfGate: browserIsWatchShelfAction
+        ? "Saving to Watch Shelf requires a real open page, approved Browser runner, tab session row, and receipt body."
+        : null,
       noActionTaken: [
         "No browser opened.",
         "No page fetched.",
         "No history persisted.",
         "No source saved.",
+        "No Watch Shelf item saved.",
+        "No progress persisted.",
         "No external write ran.",
       ],
     },

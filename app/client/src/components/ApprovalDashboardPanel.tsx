@@ -38,6 +38,10 @@ type BrowserProposalReceipt = {
   recoveryNote: string | null;
   canOpenPage: boolean;
   canExecute: boolean;
+  watchShelfAction: boolean;
+  canSaveWatchShelf: boolean;
+  canPersistWatchProgress: boolean;
+  watchShelfGate: string | null;
   noActionTaken: string[];
 };
 
@@ -889,6 +893,12 @@ function ApprovalReceiptChain({
             <Chip label={browserProposalReceipt.statusLabel} tone={browserProposalReceipt.canExecute ? C.danger : C.success} />
             <Chip label={labelize(browserProposalReceipt.resultState)} tone={browserProposalReceipt.resultState === "not_run" ? C.warning : C.textMuted} />
             <Chip label={browserProposalReceipt.canOpenPage ? "can open" : "no page open"} tone={browserProposalReceipt.canOpenPage ? C.danger : C.success} />
+            {browserProposalReceipt.watchShelfAction && (
+              <>
+                <Chip label={browserProposalReceipt.canSaveWatchShelf ? "shelf save" : "shelf blocked"} tone={browserProposalReceipt.canSaveWatchShelf ? C.danger : C.success} />
+                <Chip label={browserProposalReceipt.canPersistWatchProgress ? "progress" : "no progress"} tone={browserProposalReceipt.canPersistWatchProgress ? C.danger : C.textMuted} />
+              </>
+            )}
           </div>
           <div className="truncate text-[10px]" title={browserProposalReceipt.target} style={{ color: C.textMuted }}>
             {browserProposalReceipt.actionLabel}: {browserProposalReceipt.target}
@@ -896,6 +906,11 @@ function ApprovalReceiptChain({
           <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
             {browserProposalReceipt.noActionTaken.slice(0, 2).join(" ")}
           </div>
+          {browserProposalReceipt.watchShelfAction && (
+            <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              {browserProposalReceipt.watchShelfGate} No Watch Shelf item saved. No progress persisted.
+            </div>
+          )}
           <div className="flex flex-wrap gap-1">
             <Button
               type="button"

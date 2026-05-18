@@ -278,6 +278,42 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
   });
 
+  it("reads Add to Watch approval detail with blocked Watch Shelf save state", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Add to Watch",
+      target: "https://example.com/watch-approval-detail",
+      draftKind: "url",
+    });
+    const approvalPreview = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const detail = await caller.approvals.detail({
+      id: approvalPreview.approval?.id ?? 0,
+    });
+
+    expect(detail.approval?.origin).toBe("browser");
+    expect(detail.approval?.browserProposalReceipt?.actionLabel).toBe("Add to Watch");
+    expect(detail.approval?.browserProposalReceipt?.watchShelfAction).toBe(true);
+    expect(detail.approval?.browserProposalReceipt?.canSaveWatchShelf).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.canPersistWatchProgress).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.watchShelfGate).toContain("real open page");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No Watch Shelf item saved.");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No progress persisted.");
+
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("creates one local Workbench body receipt for a Browser proposal without running it", async () => {
     const caller = createCaller();
     const before = {
