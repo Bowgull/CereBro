@@ -178,6 +178,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       );
     },
   });
+  const createBrowserActionWorkbenchBody = trpc.workbench.createBrowserActionWorkbenchBody.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.evidence.invalidate();
+      utils.workbench.evidenceGroups.invalidate();
+      utils.workbench.evidenceSummary.invalidate();
+      setBrowserProposalNotice(`Workbench body #${result.evidence.id} saved. Not run.`);
+    },
+  });
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -925,6 +933,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                               }}
                             >
                               Stage Approval
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              disabled={createBrowserActionWorkbenchBody.isPending}
+                              title="Save a local Workbench body for this Browser proposal. This does not approve or run it."
+                              onClick={() => {
+                                createBrowserActionWorkbenchBody.mutate({
+                                  proposalId: proposal.id,
+                                });
+                              }}
+                            >
+                              Stage Body
                             </Button>
                           </div>
                         </div>

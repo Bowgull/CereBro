@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2119 EDT
+Last updated: 2026-05-17 2127 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2127 EDT - Workbench Browser Body Link
+
+### What Changed
+- Added `workbench.createBrowserActionWorkbenchBody`.
+- A saved Browser proposal can now stage one local Workbench body receipt.
+- The body receipt writes local `workbench_evidence_records` evidence and one
+  local permission preflight row.
+- Workbench Browser recent proposals now expose `Stage Body`.
+- UI notice confirms `Workbench body #... saved. Not run.`
+
+### Files Touched
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.createBrowserActionWorkbenchBody`.
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, confirmed `Stage Body`, clicked it, and confirmed
+  `Workbench body #... saved. Not run.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-body-link.png`.
+
+### Drift Check
+- On path. This links Browser proposals to Workbench body receipts without
+  making them executable.
+- Body staging writes one local Workbench evidence row and one local
+  permission preflight row only.
+- No approval decision was made, no source row was written, and no browser
+  action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, download, external write, paid service, provider call, model call,
+  install, pull, or Raven path was added.
+
+### Known Risks
+- Browser proposals now have proposal, approval-preview, Approval Queue, and
+  Workbench body linkage, but Spock gate, result receipt, recovery note, and
+  runner contract are still missing.
+- `can_execute` remains false.
+
+### Storage Impact
+- No schema change.
+- Local app proof created one local Workbench evidence row and one local
+  permission preflight row in the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now stages durable local browser_action_proposals, lists recent blocked proposals, can stage pending local Browser approval previews, Approval Queue can filter Browser approvals, and Browser proposals can stage local Workbench body receipts. Next best slice is Spock gate preview/readback for Browser proposals or Browser proposal detail polish, keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2119 EDT - Approval Queue Browser Filter
 

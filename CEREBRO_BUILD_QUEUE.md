@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2119 EDT
+Last updated: 2026-05-17 2127 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2127 EDT: added Workbench Browser body linkage.
+  `workbench.createBrowserActionWorkbenchBody` stages one local Workbench
+  evidence body for a durable Browser proposal and records one local
+  permission preflight row. Workbench Browser recent proposals now expose
+  `Stage Body` and show `Workbench body #... saved. Not run.` No approval
+  decision, source row, browser runner, page fetch, Watch Shelf save,
+  Workbench capture from a live page, external write, provider/model call,
+  install, pull, or Raven path was added. `can_execute` remains false.
 - 2026-05-17 2119 EDT: added Approval Queue Browser filter/readback.
   `browser` is now a first-class approval origin. Browser approval previews
   classify as `browser`, no longer fall into `other`, and can be filtered and

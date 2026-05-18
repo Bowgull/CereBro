@@ -651,6 +651,83 @@ export const workbenchRouter = router({
       };
     }),
 
+  createBrowserActionWorkbenchBody: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const permissionPreflightId = await recordEvidencePreflight({
+        permissionClass: "public_browser",
+        sensitive: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `browser_action_proposal:${proposal.id}`,
+      });
+      const summary = [
+        `Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Status: ${proposal.statusLabel}`,
+        `Result state: ${proposal.resultState}`,
+        `Required gates: ${proposal.requiredGates.join(", ")}`,
+        `No action: ${browserProposalNoActionTaken.join(" ")}`,
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, owner_agent, route_agent,
+            validation_status, permission_class, permission_preflight_id,
+            sensitive_data_flag
+          )
+          VALUES ('public_browser', ?, ?, ?, 'cortana', ?, 'unvalidated', 'public_browser', ?, 0)
+          RETURNING *
+        `,
+        args: [
+          `Browser proposal #${proposal.id} body`,
+          summary,
+          `browser_action_proposal:${proposal.id}`,
+          proposal.executorAgent,
+          permissionPreflightId,
+        ],
+      });
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created one local Workbench body receipt for a Browser proposal.",
+          "Recorded one local permission preflight audit row for this evidence record.",
+          "This did not open a browser, fetch a page, save a source, capture media, approve work, or write externally.",
+        ],
+      };
+    }),
+
   evidence: publicProcedure
     .input(
       z

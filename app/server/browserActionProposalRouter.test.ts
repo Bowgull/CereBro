@@ -202,4 +202,39 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(otherQueue.items.some((item) => item.id === approvalPreview.approval?.id)).toBe(false);
     expect(groups.groups.some((group) => group.key === "browser")).toBe(true);
   });
+
+  it("creates one local Workbench body receipt for a Browser proposal without running it", async () => {
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-body",
+      draftKind: "url",
+    });
+
+    const body = await caller.workbench.createBrowserActionWorkbenchBody({
+      proposalId: created.proposal.id,
+    });
+
+    expect(body.ok).toBe(true);
+    expect(body.writesExternal).toBe(false);
+    expect(body.opensBrowser).toBe(false);
+    expect(body.capturesMedia).toBe(false);
+    expect(body.evidence.kind).toBe("public_browser");
+    expect(body.evidence.targetUri).toBe(`browser_action_proposal:${created.proposal.id}`);
+    expect(body.evidence.title).toContain("Browser proposal");
+    expect(body.evidence.summary).toContain("https://example.com/browser-body");
+    expect(body.evidence.validationStatus).toBe("unvalidated");
+    expect(body.gates).toContain("Created one local Workbench body receipt for a Browser proposal.");
+
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights + 1);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });
