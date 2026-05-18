@@ -503,6 +503,43 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("records a local blocked Browser runner audit without opening a page", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/blocked-runner-audit",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const runner = await caller.workbench.runBrowserActionBlocked({
+      proposalId: created.proposal.id,
+    });
+
+    expect(runner.audit.id).toBeGreaterThan(0);
+    expect(runner.audit.proposalId).toBe(created.proposal.id);
+    expect(runner.audit.runnerState).toBe("blocked_before_runner");
+    expect(runner.audit.canOpenPage).toBe(false);
+    expect(runner.audit.canExecute).toBe(false);
+    expect(runner.audit.receiptBody).toContain("No browser opened.");
+    expect(runner.audit.noActionTaken).toContain("No browser opened.");
+    expect(runner.audit.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits + 1);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads the Browser tab session storage table contract without persisting tabs", async () => {
     const caller = createCaller();
     const browserTabsBefore = await countRows("browser_tab_sessions");

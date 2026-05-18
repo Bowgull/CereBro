@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2331 EDT
+Last updated: 2026-05-17 2341 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2341 EDT: added Workbench blocked runner audit receipts.
+  `browser_runner_audit_records` now stores local blocked runner checks.
+  `workbench.runBrowserActionBlocked` writes a receipt when `Check Runner` is
+  used and Workbench shows the audit id. The receipt records that no browser
+  opened, no page fetched, no source saved, no Workbench capture was created,
+  no Watch Shelf item was saved, and no external write ran. No live browser
+  runner, browser automation, real browser tab, page open, fetch, history,
+  source save, Watch Shelf item save, progress persistence, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 2331 EDT: added Approval Watch Shelf receipt readback.
   Browser approval detail now marks `Add to Watch` proposals as Watch Shelf
   actions, exposes `canSaveWatchShelf: false` and

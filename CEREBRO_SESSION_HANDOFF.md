@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2331 EDT
+Last updated: 2026-05-17 2341 EDT
 
 ## Current North Star
 
@@ -20,6 +20,63 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2341 EDT - Workbench Blocked Runner Audit
+
+### What Changed
+- Added local `browser_runner_audit_records` schema.
+- `workbench.runBrowserActionBlocked` now writes a blocked runner audit receipt.
+- Workbench shows the runner audit id after `Check Runner`.
+- The receipt records that no browser opened, no page fetched, no source saved,
+  no Workbench capture created, no Watch Shelf item saved, and no external
+  write ran.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `browser_runner_audit_records`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, expanded a Browser proposal, clicked `Check Runner`, and
+  confirmed `Runner audit #... blocked proposal #... No page opened.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-blocked-runner-audit.png`.
+
+### Drift Check
+- On path. This records blocked runner checks for the existing Workbench
+  Browser contract.
+- It does not add a live browser runner.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+- Workbench remains the Browser body surface.
+
+### Known Risks
+- Local runner audit rows now accumulate during dev/test proof.
+- The runner is still blocked before real browser execution. A future live
+  runner needs explicit approval gates and a Spock-reviewed contract.
+
+### Storage Impact
+- Local libSQL schema now includes `browser_runner_audit_records`.
+- Browser proof inserted one local runner audit row.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now writes local blocked runner audit rows when `Check Runner` is used. The audit records that no browser opened, no page fetched, no source saved, no Workbench capture was created, no Watch Shelf item was saved, and no external write ran. Next best slice is Ledger readback for `browser_runner_audit_records`, or a compact Workbench cleanup if the proposal/audit rows make the UI too noisy. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2331 EDT - Approval Watch Shelf Receipt
 

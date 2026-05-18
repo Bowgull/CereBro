@@ -130,6 +130,19 @@ function rowToWatchShelfItem(row: Record<string, unknown>) {
   };
 }
 
+function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    runnerState: String(row.runner_state),
+    canOpenPage: Boolean(row.can_open_page),
+    canExecute: Boolean(row.can_execute),
+    receiptBody: String(row.receipt_body),
+    noActionTaken: splitStoredList(row.no_action_taken),
+    createdAt: Number(row.created_at),
+  };
+}
+
 async function browserProposalGateRows(proposalId: number) {
   const db = await getCerebroDb();
   const approvalPreview = await db.execute({
@@ -812,8 +825,35 @@ export const workbenchRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
       const proposal = await browserProposalById(input.proposalId);
       const contract = workbenchBrowserRunnerContractModel(workbenchBrowserDraftModel(proposal.target));
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, ?, 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          "blocked_before_runner",
+          [
+            `Blocked manual Browser runner check for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          browserProposalNoActionTaken.join("\n"),
+        ],
+      });
 
       return {
         ok: true as const,
@@ -825,6 +865,7 @@ export const workbenchRouter = router({
         writesExternal: false,
         canExecute: false,
         resultState: "blocked_before_runner" as const,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
         gates: [
           "Manual Browser runner route exists but is blocked before page open.",
           "Runner contract, approved approval receipt, Spock gate, Workbench body, result receipt, and recovery note are required before any future runner can execute.",

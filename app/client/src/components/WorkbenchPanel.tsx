@@ -205,7 +205,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   });
   const runBrowserActionBlocked = trpc.workbench.runBrowserActionBlocked.useMutation({
     onSuccess: (result) => {
-      setBrowserProposalNotice(`Runner blocked for proposal #${result.proposal.id}. No page opened.`);
+      setBrowserProposalNotice(`Runner audit #${result.audit.id} blocked proposal #${result.proposal.id}. No page opened.`);
     },
   });
   const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
