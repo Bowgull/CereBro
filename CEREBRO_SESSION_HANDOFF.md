@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2307 EDT
+Last updated: 2026-05-17 2317 EDT
 
 ## Current North Star
 
@@ -20,6 +20,74 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2317 EDT - Workbench Watch Shelf Storage Contract
+
+### What Changed
+- Added the local `browser_watch_shelf_items` table.
+- Added a read-only Workbench Watch Shelf storage contract.
+- The contract reads shelf rows, categories, required fields, optional links,
+  and blocked save/progress/page-open state.
+- Workbench Watch Shelf drawer now shows `browser_watch_shelf_items`,
+  `storage blocked`, row count, and `no progress`.
+- Kept Watch Shelf as a drawer inside Workbench Browser, not a new primary
+  surface or separate browser tab.
+
+### Files Touched
+- `app/server/cerebroDb.ts`
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because `browser_watch_shelf_items` did not exist.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench -> Watch Shelf and confirmed `browser_watch_shelf_items`,
+  `storage blocked`, `No Watch Shelf item saved.`, and
+  `No progress persisted.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-watch-shelf-storage-contract.png`.
+
+### Drift Check
+- On path. This advances the Daily OS Browser/Watch Shelf contract inside the
+  existing Workbench surface.
+- It creates storage shape only. It does not save items or fake watch progress.
+- Workbench remains the Browser body and policy surface.
+- Watch Shelf remains a drawer, not a primary nav surface.
+- No dedicated Browser nav surface was added.
+- No browser tab was opened by CereBro product code.
+- No page was fetched by CereBro product code.
+- No Browser runner, browser automation, real browser tab persistence, history,
+  bookmark, source save, Watch Shelf item save, project pin, explanation route,
+  clipboard write, credential action, cookie/session persistence, progress
+  persistence, download, external write, paid service, provider call, model
+  call, install, pull, or Raven path was added.
+
+### Known Risks
+- The table is empty and read-only. A real save path still needs an approved
+  Browser runner, real open page state, draft tab/session row, receipt body,
+  and Spock gate.
+- Watch Shelf UI is still intentionally compact and contract-heavy. It needs a
+  later taste pass when real item cards exist.
+
+### Storage Impact
+- Local libSQL schema now includes `browser_watch_shelf_items`.
+- No Watch Shelf rows were inserted by product code.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has a read-only Watch Shelf storage contract and local browser_watch_shelf_items table. The drawer shows blocked storage, 0 rows, and no progress persistence. It does not save Watch Shelf items, persist progress, open pages, fetch pages, save sources, or run browser automation. Next best slice is either Ledger/Approval readback for the Watch Shelf storage contract, or the next blocked Browser runner contract test if the Workbench surface is clean. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2307 EDT - Workbench Browser Runner Density
 

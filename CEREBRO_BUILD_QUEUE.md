@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2307 EDT
+Last updated: 2026-05-17 2317 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2317 EDT: added Workbench Watch Shelf storage contract.
+  Added local `browser_watch_shelf_items` schema and
+  `workbench.watchShelfStorageContract`. Workbench Watch Shelf now reads the
+  real shelf table shape and shows `storage blocked`, row count, and
+  `no progress` in the drawer. No Watch Shelf item save, watch progress
+  persistence, browser runner, browser automation, real browser tab, page open,
+  fetch, history, source save, external write, provider/model call, install,
+  pull, or Raven path was added.
 - 2026-05-17 2307 EDT: compacted Workbench Browser runner readiness UI.
   Removed the side-column receipt layout that compressed text into a narrow
   vertical strip. Runner readiness now uses compact `Target`, `Manual

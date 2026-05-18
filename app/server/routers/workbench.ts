@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { browserActionProposalModel } from "../browserActionProposalModel";
-import { workbenchBrowserDraftModel, workbenchBrowserRunnerContractModel } from "../../client/src/lib/workbenchBrowserModel";
+import { workbenchBrowserDraftModel, workbenchBrowserRunnerContractModel, workbenchWatchShelfModel } from "../../client/src/lib/workbenchBrowserModel";
 import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import {
   GITHUB_PROJECT_MAP_PATH,
@@ -106,6 +106,25 @@ function rowToBrowserTabSession(row: Record<string, unknown>) {
     workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
     watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
     lastError: row.last_error == null ? null : String(row.last_error),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function rowToWatchShelfItem(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    category: String(row.category),
+    sourceLabel: row.source_label == null ? null : String(row.source_label),
+    progressLabel: row.progress_label == null ? null : String(row.progress_label),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
   };
@@ -850,6 +869,59 @@ export const workbenchRouter = router({
         "No tab session persisted.",
         "No history persisted.",
         "No cookies or credentials persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
+  watchShelfStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const shelf = workbenchWatchShelfModel();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               category, source_label, progress_label, state, project_id,
+               source_id, workbench_evidence_id, created_at, updated_at
+        FROM browser_watch_shelf_items
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_watch_shelf_items" as const,
+      categories: shelf.categories,
+      canSaveItems: false,
+      canPersistProgress: false,
+      canOpenPage: false,
+      storageShape: {
+        requiredFields: ["target_url", "category", "state", "created_at", "updated_at"],
+        optionalFields: [
+          "browser_tab_session_id",
+          "proposal_id",
+          "title",
+          "source_label",
+          "progress_label",
+          "project_id",
+          "source_id",
+          "workbench_evidence_id",
+        ],
+      },
+      items: rows.rows.map(rowToWatchShelfItem),
+      gates: [
+        "Watch Shelf storage table exists, but saves remain blocked.",
+        "Saving a Watch Shelf item requires a real open page, approved Browser runner, tab session row, and receipt body.",
+        "Progress, thumbnails, service sessions, source searches, and media files are not inferred or faked.",
+      ],
+      noActionTaken: [
+        "No Watch Shelf item saved.",
+        "No browser opened.",
+        "No page fetched.",
+        "No progress persisted.",
+        "No service session persisted.",
         "No source saved.",
         "No external write ran.",
       ],

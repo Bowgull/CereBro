@@ -500,6 +500,38 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("reads the Watch Shelf storage contract without saving fake media state", async () => {
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const shelf = await caller.workbench.watchShelfStorageContract();
+
+    expect(shelf.mode).toBe("read_only");
+    expect(shelf.tableName).toBe("browser_watch_shelf_items");
+    expect(shelf.canSaveItems).toBe(false);
+    expect(shelf.canPersistProgress).toBe(false);
+    expect(shelf.canOpenPage).toBe(false);
+    expect(shelf.storageShape.requiredFields).toContain("target_url");
+    expect(shelf.storageShape.requiredFields).toContain("category");
+    expect(shelf.storageShape.optionalFields).toContain("browser_tab_session_id");
+    expect(shelf.categories).toContain("Anime");
+    expect(shelf.noActionTaken).toContain("No Watch Shelf item saved.");
+    expect(shelf.noActionTaken).toContain("No browser opened.");
+    expect(shelf.noActionTaken).toContain("No progress persisted.");
+
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads a manual Browser open-page contract without opening or persisting a tab", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

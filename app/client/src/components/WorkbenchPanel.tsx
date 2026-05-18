@@ -346,6 +346,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const watchShelfStorageContract = trpc.workbench.watchShelfStorageContract.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const data = plan.data;
@@ -1479,6 +1484,35 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       <div className="mt-1 break-all" style={{ color: C.textMuted }}>{watchShelfDraft.candidateTarget}</div>
                       <div className="mt-1" style={{ color: C.textMuted }}>
                         {browserDraft.kind === "empty" ? watchShelf.emptyBody : "This is only a local shelf readback. It cannot save until a real page is open."}
+                      </div>
+                    </div>
+                    <div className="mt-2 rounded p-2 text-[11px] leading-snug" aria-label="Watch Shelf storage contract" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Chip
+                          label={watchShelfStorageContract.data?.tableName ?? "reading shelf"}
+                          tone={C.textMuted}
+                        />
+                        <Chip
+                          label={watchShelfStorageContract.data?.canSaveItems ? "save ready" : "storage blocked"}
+                          tone={watchShelfStorageContract.data?.canSaveItems ? C.accent : C.warning}
+                        />
+                        <Chip
+                          label={`${watchShelfStorageContract.data?.items.length ?? 0} rows`}
+                          tone={C.textMuted}
+                        />
+                        <Chip
+                          label={watchShelfStorageContract.data?.canPersistProgress ? "progress ready" : "no progress"}
+                          tone={watchShelfStorageContract.data?.canPersistProgress ? C.accent : C.textMuted}
+                        />
+                      </div>
+                      <div className="mt-1">
+                        {watchShelfStorageContract.data?.gates[0] ?? "Reading Watch Shelf storage contract."}
+                      </div>
+                      <div className="mt-1">
+                        {watchShelfStorageContract.data?.noActionTaken.find((item) => item === "No Watch Shelf item saved.") ?? "No Watch Shelf item saved."}
+                      </div>
+                      <div className="mt-1">
+                        {watchShelfStorageContract.data?.noActionTaken.find((item) => item === "No progress persisted.") ?? "No progress persisted."}
                       </div>
                     </div>
                     <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
