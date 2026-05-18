@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2224 EDT
+Last updated: 2026-05-17 2230 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2230 EDT: added Workbench Browser manual open runner policy
+  readback. `workbench.browserManualOpenRunnerPolicy` reads approval preview,
+  Spock, Workbench body, draft tab, result receipt, and recovery note gates.
+  Workbench Browser proposal details now expose `Read Policy` and show
+  `blocked_before_runner`, ready/missing counts, next missing gate, manual
+  runner blocked copy, and no-action copy. No browser runner, browser
+  automation, real browser tab, page open, fetch, history, source save,
+  Workbench capture, external write, provider/model call, install, pull, or
+  Raven path was added.
 - 2026-05-17 2224 EDT: added local Workbench Browser draft tab rows.
   `browser_tab_sessions` now links to `browser_action_proposals` through
   `proposal_id`, with migration support for existing DBs.

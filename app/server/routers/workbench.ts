@@ -110,6 +110,51 @@ function rowToBrowserTabSession(row: Record<string, unknown>) {
   };
 }
 
+async function browserProposalGateRows(proposalId: number) {
+  const db = await getCerebroDb();
+  const approval = await pendingBrowserApprovalByProposalId(proposalId);
+  const body = await db.execute({
+    sql: `
+      SELECT id
+      FROM workbench_evidence_records
+      WHERE target_uri = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [`browser_action_proposal:${proposalId}`],
+  });
+  const spock = await db.execute({
+    sql: `
+      SELECT srr.id
+      FROM security_review_records srr
+      INNER JOIN permission_preflight_records ppr ON ppr.id = srr.permission_preflight_id
+      WHERE ppr.target_summary LIKE ?
+      ORDER BY srr.created_at DESC, srr.id DESC
+      LIMIT 1
+    `,
+    args: [`browser_action_proposal:${proposalId}%`],
+  });
+  const tabDraft = await db.execute({
+    sql: `
+      SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+             source_id, workbench_evidence_id, watch_shelf_id, last_error,
+             created_at, updated_at
+      FROM browser_tab_sessions
+      WHERE proposal_id = ? AND state = 'draft'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+
+  return {
+    approval,
+    body: body.rows[0],
+    spock: spock.rows[0],
+    tabDraft: tabDraft.rows[0],
+  };
+}
+
 async function pendingBrowserApprovalByProposalId(proposalId: number) {
   const db = await getCerebroDb();
   const result = await db.execute({
@@ -588,30 +633,8 @@ export const workbenchRouter = router({
       }),
     )
     .query(async ({ input }) => {
-      const db = await getCerebroDb();
       const proposal = await browserProposalById(input.proposalId);
-      const approval = await pendingBrowserApprovalByProposalId(proposal.id);
-      const body = await db.execute({
-        sql: `
-          SELECT id
-          FROM workbench_evidence_records
-          WHERE target_uri = ?
-          ORDER BY created_at DESC, id DESC
-          LIMIT 1
-        `,
-        args: [`browser_action_proposal:${proposal.id}`],
-      });
-      const spock = await db.execute({
-        sql: `
-          SELECT srr.id
-          FROM security_review_records srr
-          INNER JOIN permission_preflight_records ppr ON ppr.id = srr.permission_preflight_id
-          WHERE ppr.target_summary LIKE ?
-          ORDER BY srr.created_at DESC, srr.id DESC
-          LIMIT 1
-        `,
-        args: [`browser_action_proposal:${proposal.id}%`],
-      });
+      const gateRows = await browserProposalGateRows(proposal.id);
       const gates = [
         {
           key: "runner_contract",
@@ -622,20 +645,20 @@ export const workbenchRouter = router({
         {
           key: "approval_receipt",
           label: "Approval receipt",
-          present: Boolean(approval),
-          detail: approval ? `Pending approval #${approval.id}. Not execution permission.` : "Missing pending approval preview.",
+          present: Boolean(gateRows.approval),
+          detail: gateRows.approval ? `Pending approval #${gateRows.approval.id}. Not execution permission.` : "Missing pending approval preview.",
         },
         {
           key: "spock_gate",
           label: "Spock gate",
-          present: Boolean(spock.rows[0]),
-          detail: spock.rows[0] ? `Spock receipt #${Number(spock.rows[0].id)}.` : "Missing local Spock receipt.",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing local Spock receipt.",
         },
         {
           key: "workbench_body",
           label: "Workbench body",
-          present: Boolean(body.rows[0]),
-          detail: body.rows[0] ? `Workbench body #${Number(body.rows[0].id)}.` : "Missing local Workbench body.",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing local Workbench body.",
         },
         {
           key: "result_receipt",
@@ -899,6 +922,79 @@ export const workbenchRouter = router({
         gates: [
           "Local draft tab row exists, but manual page open remains blocked.",
           "Draft tab rows do not persist history, cookies, credentials, page content, source rows, or Watch Shelf items.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  browserManualOpenRunnerPolicy: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const gates = {
+        approval: {
+          label: "Approval receipt",
+          present: Boolean(gateRows.approval),
+          detail: gateRows.approval ? `Pending approval #${gateRows.approval.id}. Not execution permission.` : "Missing approved Browser action approval receipt.",
+        },
+        spock: {
+          label: "Spock target safety receipt",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing Spock target safety receipt.",
+        },
+        workbenchBody: {
+          label: "Workbench body receipt",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing Workbench body receipt.",
+        },
+        tabDraft: {
+          label: "Draft tab row",
+          present: Boolean(gateRows.tabDraft),
+          detail: gateRows.tabDraft ? `Draft tab ${String(gateRows.tabDraft.tab_id)}.` : "Missing browser_tab_sessions draft row.",
+        },
+        resultReceipt: {
+          label: "Result receipt",
+          present: false,
+          detail: "Missing. No Browser result has run.",
+        },
+        recoveryNote: {
+          label: "Recovery note",
+          present: false,
+          detail: "Missing. Recovery note waits for an attempted result.",
+        },
+      };
+      const gateList = Object.values(gates);
+      const readyCount = gateList.filter((gate) => gate.present).length;
+      const nextMissingGate = gateList.find((gate) => !gate.present)?.label.toLowerCase() ?? null;
+
+      return {
+        mode: "blocked_manual_open_runner_policy" as const,
+        proposal,
+        canOpenPage: false,
+        canExecute: false,
+        runnerState: "blocked_before_runner" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: gateList.length - readyCount,
+          nextMissingGate,
+        },
+        gatesText: [
+          "Manual open runner remains blocked.",
+          "Result receipt and recovery note are required before any future runner can execute.",
+          "This policy read does not open a browser tab, fetch a page, persist history, save a source, or write external state.",
         ],
         noActionTaken: [
           "No browser opened.",

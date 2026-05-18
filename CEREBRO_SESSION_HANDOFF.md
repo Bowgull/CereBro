@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2224 EDT
+Last updated: 2026-05-17 2230 EDT
 
 ## Current North Star
 
@@ -20,6 +20,71 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2230 EDT - Workbench Browser Manual Open Runner Policy
+
+### What Changed
+- Added `workbench.browserManualOpenRunnerPolicy`.
+- Added shared Browser proposal gate row lookup for approval, Spock,
+  Workbench body, and draft tab rows.
+- The policy readback reports approval, Spock, Workbench body, draft tab,
+  result receipt, and recovery note gates.
+- Workbench Browser proposal details now expose `Read Policy`.
+- The UI shows runner state, ready/missing counts, gate details, next missing
+  gate, manual runner blocked copy, and no-action copy.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.browserManualOpenRunnerPolicy`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench -> proposal Details -> Read Policy and confirmed Runner Policy,
+  `blocked_before_runner`, ready/missing counts, next missing gate, manual open
+  runner blocked copy, `No browser opened.`, and `No page fetched.`
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-manual-open-runner-policy.png`.
+
+### Drift Check
+- On path. This is a policy readback only.
+- The policy sees local gate rows but does not execute.
+- No browser tab was opened.
+- No page was fetched.
+- No approval decision was made, no Workbench evidence row was written, no
+  security review row was written, no source row was written, and no tab row
+  was created by the policy route.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, cookie/session persistence, download, external write, paid service,
+  provider call, model call, install, pull, or Raven path was added.
+
+### Known Risks
+- Existing approval previews are still pending previews, not real execution
+  approvals. The policy labels that clearly.
+- Result receipt and recovery note are still missing by design, so the runner
+  remains blocked.
+
+### Storage Impact
+- No schema change.
+- Browser proof read local dev DB rows only.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has blocked manual runner contract readback, blocked runner route, blocked tab/session storage contract, local browser_tab_sessions table contract, blocked manual open-page contract, local draft tab row creation, manual open runner policy readback, durable local browser_action_proposals, compact proposal rows behind Details, approval previews, Approval Queue Browser filtering, Workbench body receipts, Spock security receipts, gate readiness, and result/recovery contract readbacks. Next best slice is Ledger/readback visibility for Browser tab draft and policy receipts, or hardening approval preview versus true execution approval before any runner can open pages. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2224 EDT - Workbench Browser Draft Tab Row
 

@@ -506,4 +506,54 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads approved manual-open runner policy without enabling page open", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/open-policy",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+    };
+
+    const policy = await caller.workbench.browserManualOpenRunnerPolicy({
+      proposalId: created.proposal.id,
+    });
+
+    expect(policy.mode).toBe("blocked_manual_open_runner_policy");
+    expect(policy.proposal.id).toBe(created.proposal.id);
+    expect(policy.canOpenPage).toBe(false);
+    expect(policy.canExecute).toBe(false);
+    expect(policy.runnerState).toBe("blocked_before_runner");
+    expect(policy.gates.approval.present).toBe(true);
+    expect(policy.gates.spock.present).toBe(true);
+    expect(policy.gates.workbenchBody.present).toBe(true);
+    expect(policy.gates.tabDraft.present).toBe(true);
+    expect(policy.gates.resultReceipt.present).toBe(false);
+    expect(policy.gates.recoveryNote.present).toBe(false);
+    expect(policy.summary.readyCount).toBe(4);
+    expect(policy.summary.missingCount).toBe(2);
+    expect(policy.summary.nextMissingGate).toBe("result receipt");
+    expect(policy.gatesText).toContain("Manual open runner remains blocked.");
+    expect(policy.noActionTaken).toContain("No browser opened.");
+    expect(policy.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

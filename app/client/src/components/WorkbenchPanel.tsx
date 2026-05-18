@@ -235,6 +235,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnWindowFocus: false,
     },
   );
+  const [selectedBrowserPolicyId, setSelectedBrowserPolicyId] = useState<number | null>(null);
+  const browserOpenPolicy = trpc.workbench.browserManualOpenRunnerPolicy.useQuery(
+    { proposalId: selectedBrowserPolicyId ?? 0 },
+    {
+      enabled: selectedBrowserPolicyId != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  );
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
@@ -1088,6 +1097,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                   <Button
                                     type="button"
                                     size="sm"
+                                    variant={selectedBrowserPolicyId === proposal.id ? "secondary" : "outline"}
+                                    className="h-6 px-2 text-[10px]"
+                                    title="Read the manual open runner policy. This does not open a page."
+                                    onClick={() => setSelectedBrowserPolicyId(proposal.id)}
+                                  >
+                                    Read Policy
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
                                     variant="outline"
                                     className="h-6 px-2 text-[10px]"
                                     disabled={createBrowserTabSessionDraft.isPending}
@@ -1243,6 +1262,42 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         </div>
                       ) : (
                         <div>No open-page contract available.</div>
+                      )}
+                    </div>
+                  )}
+                  {selectedBrowserPolicyId != null && (
+                    <div className="rounded p-2 text-[10px] leading-snug" aria-label="Browser manual open runner policy" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                      {browserOpenPolicy.isLoading ? (
+                        <div>Reading Browser runner policy.</div>
+                      ) : browserOpenPolicy.data ? (
+                        <div className="grid gap-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                              Runner Policy #{browserOpenPolicy.data.proposal.id}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Chip label={browserOpenPolicy.data.runnerState} tone={C.warning} />
+                              <Chip label={`${browserOpenPolicy.data.summary.readyCount} ready`} tone={C.accent} />
+                              <Chip label={`${browserOpenPolicy.data.summary.missingCount} missing`} tone={C.warning} />
+                            </div>
+                          </div>
+                          <div className="grid gap-1 md:grid-cols-2">
+                            {Object.entries(browserOpenPolicy.data.gates).map(([key, gate]) => (
+                              <div key={key} className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold" style={{ color: C.textPrimary }}>{gate.label}</span>
+                                  <Chip label={gate.present ? "ready" : "missing"} tone={gate.present ? C.accent : C.warning} />
+                                </div>
+                                <div className="mt-0.5">{gate.detail}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>Next missing gate: {browserOpenPolicy.data.summary.nextMissingGate ?? "none"}.</div>
+                          <div>{browserOpenPolicy.data.gatesText[0]}</div>
+                          <div>{browserOpenPolicy.data.noActionTaken.slice(0, 2).join(" ")}</div>
+                        </div>
+                      ) : (
+                        <div>No runner policy available.</div>
                       )}
                     </div>
                   )}
