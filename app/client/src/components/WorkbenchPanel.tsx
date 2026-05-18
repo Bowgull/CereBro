@@ -220,6 +220,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnWindowFocus: false,
     },
   );
+  const [selectedBrowserOpenId, setSelectedBrowserOpenId] = useState<number | null>(null);
+  const browserOpenContract = trpc.workbench.browserManualOpenPageContract.useQuery(
+    { proposalId: selectedBrowserOpenId ?? 0 },
+    {
+      enabled: selectedBrowserOpenId != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  );
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
@@ -1063,6 +1072,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                   <Button
                                     type="button"
                                     size="sm"
+                                    variant={selectedBrowserOpenId === proposal.id ? "secondary" : "outline"}
+                                    className="h-6 px-2 text-[10px]"
+                                    title="Read the manual open-page contract. This does not open a page."
+                                    onClick={() => setSelectedBrowserOpenId(proposal.id)}
+                                  >
+                                    Read Open
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
                                     variant="outline"
                                     className="h-6 px-2 text-[10px]"
                                     disabled={runBrowserActionBlocked.isPending}
@@ -1165,6 +1184,44 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         </div>
                       ) : (
                         <div>No result contract available.</div>
+                      )}
+                    </div>
+                  )}
+                  {selectedBrowserOpenId != null && (
+                    <div className="rounded p-2 text-[10px] leading-snug" aria-label="Browser manual open-page contract" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                      {browserOpenContract.isLoading ? (
+                        <div>Reading Browser open-page contract.</div>
+                      ) : browserOpenContract.data ? (
+                        <div className="grid gap-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                              Open Contract #{browserOpenContract.data.proposal.id}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Chip label={browserOpenContract.data.canOpenPage ? "can open" : "open blocked"} tone={browserOpenContract.data.canOpenPage ? C.danger : C.warning} />
+                              <Chip label={browserOpenContract.data.canPersistTab ? "tab persists" : "tab blocked"} tone={browserOpenContract.data.canPersistTab ? C.accent : C.warning} />
+                              <Chip label={browserOpenContract.data.canFetchPage ? "fetch enabled" : "fetch blocked"} tone={browserOpenContract.data.canFetchPage ? C.accent : C.textMuted} />
+                            </div>
+                          </div>
+                          <div className="break-all">{browserOpenContract.data.targetUrl}</div>
+                          <div className="grid gap-1 md:grid-cols-2">
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="font-semibold" style={{ color: C.textPrimary }}>Required Before Open</div>
+                              <div className="mt-0.5">
+                                {browserOpenContract.data.requiredBeforeOpen.slice(0, 4).join(", ")}.
+                              </div>
+                            </div>
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="font-semibold" style={{ color: C.textPrimary }}>No Action</div>
+                              <div className="mt-0.5">
+                                {browserOpenContract.data.noActionTaken.slice(0, 3).join(" ")}
+                              </div>
+                            </div>
+                          </div>
+                          <div>{browserOpenContract.data.gates[0]}</div>
+                        </div>
+                      ) : (
+                        <div>No open-page contract available.</div>
                       )}
                     </div>
                   )}

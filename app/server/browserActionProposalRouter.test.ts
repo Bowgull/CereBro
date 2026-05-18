@@ -424,4 +424,46 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads a manual Browser open-page contract without opening or persisting a tab", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/manual-open",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+    };
+
+    const contract = await caller.workbench.browserManualOpenPageContract({
+      proposalId: created.proposal.id,
+    });
+
+    expect(contract.mode).toBe("blocked_manual_open_page_contract");
+    expect(contract.proposal.id).toBe(created.proposal.id);
+    expect(contract.targetUrl).toBe("https://example.com/manual-open");
+    expect(contract.canOpenPage).toBe(false);
+    expect(contract.canPersistTab).toBe(false);
+    expect(contract.canFetchPage).toBe(false);
+    expect(contract.requiredBeforeOpen).toContain("approved Browser action approval receipt");
+    expect(contract.requiredBeforeOpen).toContain("Spock target safety receipt");
+    expect(contract.requiredBeforeOpen).toContain("Workbench body receipt");
+    expect(contract.requiredBeforeOpen).toContain("browser_tab_sessions draft row policy");
+    expect(contract.gates).toContain("Manual page open is still blocked.");
+    expect(contract.noActionTaken).toContain("No browser opened.");
+    expect(contract.noActionTaken).toContain("No tab session persisted.");
+
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

@@ -785,6 +785,49 @@ export const workbenchRouter = router({
     };
   }),
 
+  browserManualOpenPageContract: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+
+      return {
+        mode: "blocked_manual_open_page_contract" as const,
+        proposal,
+        targetUrl: proposal.target,
+        canOpenPage: false,
+        canPersistTab: false,
+        canFetchPage: false,
+        canExecute: false,
+        requiredBeforeOpen: [
+          "approved Browser action approval receipt",
+          "Spock target safety receipt",
+          "Workbench body receipt",
+          "browser_tab_sessions draft row policy",
+          "result receipt contract",
+          "recovery note contract",
+        ],
+        gates: [
+          "Manual page open is still blocked.",
+          "A future page open must attach to an approved Browser proposal, a Spock target receipt, a Workbench body, and a tab storage policy.",
+          "This contract does not open a browser tab, fetch a page, persist a session, save a source, or write external state.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   createBrowserActionApprovalPreview: publicProcedure
     .input(
       z.object({
