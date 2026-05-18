@@ -1594,8 +1594,24 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               <CompactReadDatum label="Recovery Notes" value={String(browserReceiptAudit.recoveryScaffolds)} tone={browserReceiptAudit.recoveryScaffolds > 0 ? C.success : C.textMuted} />
               <CompactReadDatum label="Can Open" value={browserReceiptAudit.canOpenPage ? "yes" : "no"} tone={browserReceiptAudit.canOpenPage ? C.danger : C.success} />
               <CompactReadDatum label="Can Execute" value={browserReceiptAudit.canExecute ? "yes" : "no"} tone={browserReceiptAudit.canExecute ? C.danger : C.success} />
+              <CompactReadDatum label="Launch Gate" value={browserReceiptAudit.launchGate.canExecute ? "open" : "blocked"} tone={browserReceiptAudit.launchGate.canExecute ? C.danger : C.success} />
               <CompactReadDatum label="Shelf Save" value={browserReceiptAudit.canSaveWatchShelf ? "yes" : "no"} tone={browserReceiptAudit.canSaveWatchShelf ? C.danger : C.success} />
               <CompactReadDatum label="Progress" value={browserReceiptAudit.canPersistWatchProgress ? "yes" : "no"} tone={browserReceiptAudit.canPersistWatchProgress ? C.danger : C.success} />
+            </div>
+            <div className="mt-1.5 rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                    Launch Gate
+                  </div>
+                  <div className="mt-0.5 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+                    {browserReceiptAudit.launchGate.hardGate}. No page open. No execute.
+                  </div>
+                </div>
+                <Badge variant="secondary" className="uppercase">
+                  blocked
+                </Badge>
+              </div>
             </div>
             <div className="mt-1.5 grid gap-1.5 xl:grid-cols-5">
               <div className="rounded p-2" style={{ background: workFrame.slabMuted, border: `1px solid ${workFrame.lineSoft}` }}>

@@ -496,6 +496,7 @@ async function readBrowserReceiptAudit() {
   ]);
   const row = summary.rows[0] ?? {};
   const liveRunnerRow = liveRunnerApprovalSummary.rows[0] ?? {};
+  const latestRunnerAuditRow = latestRunnerAudits.rows[0] as Record<string, unknown> | undefined;
 
   return {
     mode: "read_only" as const,
@@ -514,6 +515,16 @@ async function readBrowserReceiptAudit() {
     canExecute: false,
     canSaveWatchShelf: false,
     canPersistWatchProgress: false,
+    launchGate: {
+      mode: "read_only" as const,
+      ownerAgent: "spock" as const,
+      implementationPresent: false,
+      canOpenPage: false,
+      canExecute: false,
+      hardGate: "live runner implementation missing",
+      latestRunnerAuditId: latestRunnerAuditRow?.id == null ? null : Number(latestRunnerAuditRow.id),
+      receiptBody: "Ledger reads Browser launch gate state. It cannot open pages or execute the live runner.",
+    },
     latestProposals: latestProposals.rows.map((proposalRow) => browserProposalRow(proposalRow as Record<string, unknown>)),
     latestTabs: latestTabs.rows.map((tabRow) => browserTabRow(tabRow as Record<string, unknown>)),
     latestWatchShelfItems: latestWatchShelfItems.rows.map((shelfRow) => browserWatchShelfRow(shelfRow as Record<string, unknown>)),
@@ -523,6 +534,7 @@ async function readBrowserReceiptAudit() {
       "Browser receipt audit reads local Browser proposals and draft tabs only.",
       "Ledger reads runner audit rows but does not run the Browser runner.",
       "Ledger reads live-runner approval rows as receipts, not permission to open pages.",
+      "Ledger reads launch gate state but cannot open pages.",
       "This read does not open pages, fetch URLs, persist history, save sources, or run browser automation.",
       "This read does not save Watch Shelf items or persist watch progress.",
       "Workbench remains the Browser body surface. Ledger remains the audit surface.",

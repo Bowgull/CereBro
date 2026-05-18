@@ -116,6 +116,12 @@ describe("Ledger memory contract read", () => {
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.canOpenPage).toBe(false);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.canExecute).toBe(false);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.receiptBody).toContain("No browser opened.");
+    expect(overview.browserReceiptAudit.launchGate.mode).toBe("read_only");
+    expect(overview.browserReceiptAudit.launchGate.implementationPresent).toBe(false);
+    expect(overview.browserReceiptAudit.launchGate.canOpenPage).toBe(false);
+    expect(overview.browserReceiptAudit.launchGate.canExecute).toBe(false);
+    expect(overview.browserReceiptAudit.launchGate.hardGate).toBe("live runner implementation missing");
+    expect(overview.browserReceiptAudit.launchGate.latestRunnerAuditId).toBe(runner.audit.id);
     expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.id).toBe(liveApproval.approval?.id);
     expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.proposalId).toBe(created.proposal.id);
     expect(overview.browserReceiptAudit.latestLiveRunnerApprovals[0]?.status).toBe("pending");

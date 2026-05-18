@@ -30841,3 +30841,88 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_CLI_MCP_RESEARCH.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 without installing or running tools. Use the locked CLI/MCP policy: CLI is the first local execution lane; MCP is an approval-gated external connector/action lane; direct/native APIs are for stable CereBro-owned product workflows; raw secrets never enter DB, Obsidian, receipts, logs, screenshots, stdout/stderr, browser evidence, or handoffs; first CommandRunner is read-only, allowlisted, no shell interpolation, cwd-bound, timed, output-capped, cancellable, no background processes, no daemons, no installs, no network, no writes by default; stdout/stderr redacts before receipts; Oak grades evidence. Next best slice is a small read-only CommandRunner contract or Model/Tool Registry proposal path that records tool candidates, owner agents, approval class, allowed commands/tools, forbidden commands/tools, network behavior, storage behavior, version governance, evidence grade, and source URL. Do not install Docling, Gitingest, OSV-Scanner, Gitleaks, Semgrep, zizmor, Scorecard, GuardDog, Ollama, or MCP servers. Do not call providers, browse private pages, write external systems, or add a generic marketplace without explicit approval. Update handoff and Obsidian archive before commit.
 ```
+
+## 2026-05-18 0535 EDT - Ledger Browser Launch Gate
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: unchanged shape, Ledger readback tightened
+- Backend/runtime: Browser runner remains hard-blocked
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: unchanged
+- Creative/freelance/watch: unchanged
+
+What changed:
+
+- Added a read-only Browser launch gate summary to Ledger's Browser receipt
+  audit.
+- Ledger now reads `implementationPresent: false`, `canOpenPage: false`,
+  `canExecute: false`, and the hard gate `live runner implementation missing`.
+- Ledger links the launch gate to the latest Browser runner audit id when one
+  exists.
+- Added compact Ledger UI readback for `Launch Gate` with blocked state and
+  `No page open. No execute.`
+- This does not enable the Browser live runner, open pages, fetch URLs, save
+  history, save sources, or persist Watch Shelf progress.
+
+Files touched in this slice:
+
+- `app/server/routers/ledger.ts`
+- `app/server/ledger.memoryContract.test.ts`
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 0535 CereBro Session Handoff - ledger-browser-launch-gate.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- Red test:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `browserReceiptAudit.launchGate`.
+- Green targeted tests:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 4 tests.
+- Paired Browser/Ledger tests:
+  `pnpm -C app exec vitest run server/ledger.memoryContract.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  passed, 37 tests.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof fallback:
+  `output/playwright/ledger-browser-launch-gate.png`
+  captured Ledger showing `Launch Gate`, `live runner implementation missing`,
+  `No browser opened`, and `No page fetched`.
+
+Drift check:
+
+- On path. This is audit parity for the Browser runner gate.
+- No new primary surface.
+- No Raven path.
+- No external install, provider call, private browse, page open, URL fetch,
+  source save, model call, or paid service.
+- Browser V1 source truth remains locked: Workbench is the Browser body,
+  Ledger is audit, Aang is the conversational handle, and machinery stays
+  hidden unless requested.
+
+Known risks:
+
+- Browser plugin control was not exposed in this tool set, so browser proof used
+  the local Playwright fallback and this is recorded.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No database migration.
+- Test-created local dev rows only.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue the Browser/Daily OS build path only if there is a missing contract gap; otherwise move to the next highest build-plan slice. The Browser live runner is still not implemented and must remain hard-blocked. Do not open pages, fetch URLs, persist browser history, save Watch Shelf progress, install tools, call providers, route Raven content, or add a new primary surface without explicit approval. Update handoff and Obsidian archive before commit.
+```

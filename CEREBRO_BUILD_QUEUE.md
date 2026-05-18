@@ -1676,3 +1676,11 @@ Expected shape:
   Approvals, not the Keep primary surface. First build slice is either
   read-only `CommandRunner` contract or registry/proposal rows. No tool install
   or MCP server is approved by this policy.
+- 2026-05-18 0535 EDT: Ledger now reads Browser launch gate state from the
+  Browser receipt audit. It shows `live runner implementation missing`,
+  `implementationPresent: false`, `canOpenPage: false`, and `canExecute: false`
+  without opening pages or running the Browser live runner. Browser V1 remains
+  hard-blocked until a separate live runner implementation is built and
+  approved. Next Browser work should either close a real missing contract gap
+  or move forward to the next Daily OS Browser surface. Do not keep expanding
+  Ledger machinery if it does not improve user-visible safety or clarity.
