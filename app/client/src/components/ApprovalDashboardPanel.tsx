@@ -28,6 +28,7 @@ type ApprovalFocusDraft = {
 };
 type BrowserProposalReceipt = {
   proposalId: number;
+  approvalKind: "review" | "live_runner";
   actionLabel: string;
   target: string;
   draftKind: string;
@@ -38,6 +39,8 @@ type BrowserProposalReceipt = {
   recoveryNote: string | null;
   canOpenPage: boolean;
   canExecute: boolean;
+  liveRunnerAction: boolean;
+  liveRunnerGate: string | null;
   watchShelfAction: boolean;
   canSaveWatchShelf: boolean;
   canPersistWatchProgress: boolean;
@@ -890,6 +893,7 @@ function ApprovalReceiptChain({
         <div className="grid gap-1 rounded p-1.5" aria-label="Browser approval proposal receipt" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
           <div className="flex flex-wrap items-center gap-1">
             <Chip label={`browser proposal #${browserProposalReceipt.proposalId}`} tone={C.accent} />
+            {browserProposalReceipt.liveRunnerAction && <Chip label="live runner gate" tone={C.warning} />}
             <Chip label={browserProposalReceipt.statusLabel} tone={browserProposalReceipt.canExecute ? C.danger : C.success} />
             <Chip label={labelize(browserProposalReceipt.resultState)} tone={browserProposalReceipt.resultState === "not_run" ? C.warning : C.textMuted} />
             <Chip label={browserProposalReceipt.canOpenPage ? "can open" : "no page open"} tone={browserProposalReceipt.canOpenPage ? C.danger : C.success} />
@@ -906,6 +910,11 @@ function ApprovalReceiptChain({
           <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
             {browserProposalReceipt.noActionTaken.slice(0, 2).join(" ")}
           </div>
+          {browserProposalReceipt.liveRunnerAction && (
+            <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              {browserProposalReceipt.liveRunnerGate} No runner audit written.
+            </div>
+          )}
           {browserProposalReceipt.watchShelfAction && (
             <div className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
               {browserProposalReceipt.watchShelfGate} No Watch Shelf item saved. No progress persisted.

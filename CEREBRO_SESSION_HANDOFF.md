@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0450 EDT
+Last updated: 2026-05-18 0455 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0455 EDT - Approval Browser Live Runner Readback
+
+### What Changed
+- Approval detail now labels `browser_live_runner` receipts as live-runner
+  gates.
+- Browser approval proposal receipts now expose `approvalKind`,
+  `liveRunnerAction`, and `liveRunnerGate`.
+- Approval Queue shows a compact `live runner gate` chip for Browser
+  live-runner approvals.
+- The selected receipt states that the live-runner approval does not open a
+  page and writes no runner audit.
+
+### Files Touched
+- `app/server/routers/approvals.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing live-runner receipt fields.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Approvals and confirmed
+  `browser live runner`, `live runner gate`, `no page open`, and
+  `No runner audit written.`
+- Screenshot proof saved locally at
+  `output/playwright/approval-browser-live-runner-readback.png`.
+
+### Drift Check
+- On path. This only makes Approval Queue understand the Browser live-runner
+  approval gate.
+- It does not approve or run the live runner.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+
+### Known Risks
+- The local dev DB still has many Browser approval/proposal rows from tests and
+  prior local passes.
+- This pass improves readback only. It does not clean local dev rows.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests wrote local dev DB approval/preflight rows as part of contract
+  coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Approval Queue now understands `browser_live_runner` as a live-runner gate and shows no-page/no-runner-audit readback. Workbench Browser has `Stage Live` and `Preflight`, but the runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is compact Ledger/Approval count cleanup if local dev rows still crowd the UI, or the next blocked runner implementation contract without opening pages. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0450 EDT - Workbench Browser Live Approval Preview
 

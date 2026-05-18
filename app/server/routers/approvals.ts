@@ -21,6 +21,7 @@ function rowToApproval(row: Record<string, unknown>) {
   const costRisk = row.cost_risk == null ? null : String(row.cost_risk);
   const browserActionLabel = row.browser_action_label == null ? "" : String(row.browser_action_label);
   const browserIsWatchShelfAction = browserActionLabel.toLowerCase().includes("watch");
+  const browserIsLiveRunnerAction = actionType === "browser_live_runner";
 
   return {
     id: Number(row.id),
@@ -56,6 +57,7 @@ function rowToApproval(row: Record<string, unknown>) {
     origin: originForApproval({ actionType, targetType, requestedByAgent }),
     browserProposalReceipt: row.browser_proposal_id == null ? null : {
       proposalId: Number(row.browser_proposal_id),
+      approvalKind: browserIsLiveRunnerAction ? "live_runner" as const : "review" as const,
       actionLabel: browserActionLabel,
       target: String(row.browser_target),
       draftKind: String(row.browser_draft_kind),
@@ -66,6 +68,10 @@ function rowToApproval(row: Record<string, unknown>) {
       recoveryNote: row.browser_recovery_note == null ? null : String(row.browser_recovery_note),
       canOpenPage: false,
       canExecute: Boolean(row.browser_can_execute),
+      liveRunnerAction: browserIsLiveRunnerAction,
+      liveRunnerGate: browserIsLiveRunnerAction
+        ? "This is explicit live-runner approval. It does not open a page until a separate runner implementation exists."
+        : null,
       watchShelfAction: browserIsWatchShelfAction,
       canSaveWatchShelf: false,
       canPersistWatchProgress: false,
@@ -79,6 +85,7 @@ function rowToApproval(row: Record<string, unknown>) {
         "No source saved.",
         "No Watch Shelf item saved.",
         "No progress persisted.",
+        "No runner audit written.",
         "No external write ran.",
       ],
     },

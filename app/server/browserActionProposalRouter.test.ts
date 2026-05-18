@@ -1081,4 +1081,40 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads live-runner approval detail as a blocked Browser runner gate", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-approval-detail",
+      draftKind: "url",
+    });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const detail = await caller.approvals.detail({
+      id: liveApproval.approval?.id ?? 0,
+    });
+
+    expect(detail.approval?.origin).toBe("browser");
+    expect(detail.approval?.actionType).toBe("browser_live_runner");
+    expect(detail.approval?.browserProposalReceipt?.proposalId).toBe(created.proposal.id);
+    expect(detail.approval?.browserProposalReceipt?.approvalKind).toBe("live_runner");
+    expect(detail.approval?.browserProposalReceipt?.liveRunnerAction).toBe(true);
+    expect(detail.approval?.browserProposalReceipt?.canOpenPage).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.canExecute).toBe(false);
+    expect(detail.approval?.browserProposalReceipt?.liveRunnerGate).toContain("explicit live-runner approval");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No browser opened.");
+    expect(detail.approval?.browserProposalReceipt?.noActionTaken).toContain("No runner audit written.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });
