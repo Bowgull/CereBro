@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2230 EDT
+Last updated: 2026-05-17 2235 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2235 EDT: hardened the Workbench Browser manual open runner
+  policy. Pending approval preview and approved execution approval are now
+  separate gates. A pending Browser approval preview no longer satisfies the
+  execution approval gate. The policy panel shows `Approval preview`,
+  `Approved execution approval`, `Not execution permission`, and runner blocked
+  copy. No browser runner, browser automation, real browser tab, page open,
+  fetch, history, source save, Workbench capture, external write,
+  provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 2230 EDT: added Workbench Browser manual open runner policy
   readback. `workbench.browserManualOpenRunnerPolicy` reads approval preview,
   Spock, Workbench body, draft tab, result receipt, and recovery note gates.

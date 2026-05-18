@@ -112,7 +112,31 @@ function rowToBrowserTabSession(row: Record<string, unknown>) {
 
 async function browserProposalGateRows(proposalId: number) {
   const db = await getCerebroDb();
-  const approval = await pendingBrowserApprovalByProposalId(proposalId);
+  const approvalPreview = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_action_review'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const executionApproval = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_action_review'
+        AND status = 'approved'
+      ORDER BY decided_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
   const body = await db.execute({
     sql: `
       SELECT id
@@ -148,7 +172,8 @@ async function browserProposalGateRows(proposalId: number) {
   });
 
   return {
-    approval,
+    approvalPreview: approvalPreview.rows[0],
+    executionApproval: executionApproval.rows[0],
     body: body.rows[0],
     spock: spock.rows[0],
     tabDraft: tabDraft.rows[0],
@@ -645,8 +670,8 @@ export const workbenchRouter = router({
         {
           key: "approval_receipt",
           label: "Approval receipt",
-          present: Boolean(gateRows.approval),
-          detail: gateRows.approval ? `Pending approval #${gateRows.approval.id}. Not execution permission.` : "Missing pending approval preview.",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not execution permission.` : "Missing pending approval preview.",
         },
         {
           key: "spock_gate",
@@ -944,10 +969,15 @@ export const workbenchRouter = router({
       const proposal = await browserProposalById(input.proposalId);
       const gateRows = await browserProposalGateRows(proposal.id);
       const gates = {
-        approval: {
-          label: "Approval receipt",
-          present: Boolean(gateRows.approval),
-          detail: gateRows.approval ? `Pending approval #${gateRows.approval.id}. Not execution permission.` : "Missing approved Browser action approval receipt.",
+        approvalPreview: {
+          label: "Approval preview",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not execution permission.` : "Missing approval preview.",
+        },
+        executionApproval: {
+          label: "Approved execution approval",
+          present: Boolean(gateRows.executionApproval),
+          detail: gateRows.executionApproval ? `Approved approval #${Number(gateRows.executionApproval.id)} recorded. Runner still blocked.` : "Missing approved execution approval.",
         },
         spock: {
           label: "Spock target safety receipt",
