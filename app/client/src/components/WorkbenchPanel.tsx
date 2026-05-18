@@ -186,6 +186,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       );
     },
   });
+  const createBrowserLiveRunnerApprovalPreview = trpc.workbench.createBrowserLiveRunnerApprovalPreview.useMutation({
+    onSuccess: (result) => {
+      setBrowserProposalNotice(
+        result.approval
+          ? `Live runner approval #${result.approval.id} staged. No page opened.`
+          : "Live runner approval preview was not staged.",
+      );
+      if (typeof result.approval?.targetId === "number" && result.approval.targetId === selectedBrowserPreflightId) {
+        utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.approval.targetId });
+      }
+    },
+  });
   const createBrowserActionWorkbenchBody = trpc.workbench.createBrowserActionWorkbenchBody.useMutation({
     onSuccess: (result) => {
       utils.workbench.evidence.invalidate();
@@ -1190,6 +1202,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     onClick={() => setSelectedBrowserPreflightId(proposal.id)}
                                   >
                                     Preflight
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserLiveRunnerApprovalPreview.isPending}
+                                    title="Stage explicit live-runner approval preview. This does not open a page."
+                                    onClick={() => {
+                                      createBrowserLiveRunnerApprovalPreview.mutate({
+                                        proposalId: proposal.id,
+                                        reason: "Local Browser live-runner approval preview only. This does not open or run browser work.",
+                                      });
+                                    }}
+                                  >
+                                    Stage Live
                                   </Button>
                                   <Button
                                     type="button"

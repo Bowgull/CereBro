@@ -253,6 +253,27 @@ async function pendingBrowserApprovalByProposalId(proposalId: number) {
   return result.rows[0] ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>) : null;
 }
 
+async function pendingBrowserLiveRunnerApprovalByProposalId(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, task_id, action_type, target_type, target_id,
+             requested_by_agent, status, reason, context_summary,
+             sensitive_data_flag, cost_risk, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_live_runner'
+        AND status = 'pending'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  return result.rows[0] ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>) : null;
+}
+
 function rowToEvidence(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -1312,11 +1333,15 @@ export const workbenchRouter = router({
           missingCount: preflightGateList.length - readyCount,
           nextMissingGate,
         },
-        nextAction: "Live runner remains blocked until a separate explicit live-runner approval contract exists.",
+        nextAction: gateRows.liveRunnerApproval
+          ? "Live runner remains blocked until the live runner implementation exists."
+          : "Live runner remains blocked until a separate explicit live-runner approval contract exists.",
         gatesText: [
           "This preflight is read-only.",
           "A pending or approved Browser review approval is not enough to open a page.",
-          "No browser tab opens until the separate live-runner approval path exists and is approved.",
+          gateRows.liveRunnerApproval
+            ? "No browser tab opens until the live runner implementation exists."
+            : "No browser tab opens until the separate live-runner approval path exists and is approved.",
         ],
         noActionTaken: [
           "No browser opened.",
@@ -1328,6 +1353,108 @@ export const workbenchRouter = router({
           "No Workbench capture created.",
           "No runner audit written.",
           "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserLiveRunnerApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const existingApproval = await pendingBrowserLiveRunnerApprovalByProposalId(proposal.id);
+      if (existingApproval) {
+        return {
+          ok: true as const,
+          mode: "local_browser_live_runner_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          opensBrowser: false,
+          wouldExecute: false,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local Browser live-runner approval preview returned.",
+            "No browser opened, page fetched, source saved, Workbench capture created, runner audit written, or external write ran.",
+          ],
+          noActionTaken: [
+            ...browserProposalNoActionTaken,
+            "No runner audit written.",
+          ],
+        };
+      }
+
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "public_browser",
+        actionClass: "browser_or_media_capture",
+        externalTarget: true,
+        sensitiveData: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `Browser live runner approval preview: proposal #${proposal.id} ${proposal.target}`,
+        additionalReasons: [
+          "Live-runner approval is separate from Browser proposal review approval.",
+          "This approval preview does not open, fetch, search, save, capture, or write externally.",
+          "Even if approved, the Browser runner remains blocked until the live runner implementation exists.",
+        ],
+      });
+      const contextSummary = [
+        `Live runner approval preview for Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Result state: ${proposal.resultState}`,
+        "This is explicit live-runner approval only.",
+        "It does not open a browser page.",
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'browser_live_runner', 'browser_action_proposal', ?, ?,
+                  'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          proposal.id,
+          proposal.executorAgent,
+          input.reason ?? "Local Browser live-runner approval preview only. This does not open or run browser work.",
+          contextSummary,
+          proposal.riskClass,
+          Number(preflight.row.id),
+        ],
+      });
+      const approval = result.rows[0]
+        ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>)
+        : await pendingBrowserLiveRunnerApprovalByProposalId(proposal.id);
+
+      return {
+        ok: Boolean(approval),
+        mode: "local_browser_live_runner_approval_preview" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        opensBrowser: false,
+        wouldExecute: false,
+        approval,
+        gates: [
+          "Created one pending local Browser live-runner approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "This is separate from Browser proposal review approval.",
+          "No browser opened, page fetched, source saved, Workbench capture created, runner audit written, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner audit written.",
         ],
       };
     }),

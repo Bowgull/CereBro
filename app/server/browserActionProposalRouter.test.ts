@@ -977,4 +977,108 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("creates one pending live-runner approval preview without opening a page", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-approval-preview",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+      sources: await countRows("sources"),
+    };
+
+    const approvalPreview = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+      reason: "Test live runner approval preview only.",
+    });
+
+    expect(approvalPreview.ok).toBe(true);
+    expect(approvalPreview.created).toBe(true);
+    expect(approvalPreview.opensBrowser).toBe(false);
+    expect(approvalPreview.wouldExecute).toBe(false);
+    expect(approvalPreview.writesExternal).toBe(false);
+    expect(approvalPreview.approval?.status).toBe("pending");
+    expect(approvalPreview.approval?.actionType).toBe("browser_live_runner");
+    expect(approvalPreview.approval?.targetType).toBe("browser_action_proposal");
+    expect(approvalPreview.approval?.targetId).toBe(created.proposal.id);
+    expect(approvalPreview.approval?.contextSummary).toContain("Live runner approval preview");
+    expect(approvalPreview.gates).toContain("Created one pending local Browser live-runner approval preview.");
+    expect(approvalPreview.noActionTaken).toContain("No browser opened.");
+    expect(approvalPreview.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights + 1);
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("keeps live-runner approval preview idempotent and blocked before approval", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-approval-idempotent",
+      draftKind: "url",
+    });
+
+    const first = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    const beforeApprovals = await countRows("approvals");
+    const second = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    const preflight = await caller.workbench.browserLiveRunnerPreflight({
+      proposalId: created.proposal.id,
+    });
+
+    expect(first.approval?.id).toBe(second.approval?.id);
+    expect(second.created).toBe(false);
+    expect(second.gates).toContain("Existing pending local Browser live-runner approval preview returned.");
+    expect(preflight.gates.liveRunnerApproval.present).toBe(false);
+    expect(preflight.liveRunnerApproved).toBe(false);
+    expect(preflight.canOpenPage).toBe(false);
+    expect(await countRows("approvals")).toBe(beforeApprovals);
+  });
+
+  it("recognizes approved live-runner approval but still blocks page open", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/live-runner-approval-approved",
+      draftKind: "url",
+    });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live runner approval only. This still must not open a page.",
+    });
+    const before = {
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+      sources: await countRows("sources"),
+    };
+
+    const preflight = await caller.workbench.browserLiveRunnerPreflight({
+      proposalId: created.proposal.id,
+    });
+
+    expect(preflight.gates.liveRunnerApproval.present).toBe(true);
+    expect(preflight.liveRunnerApproved).toBe(true);
+    expect(preflight.canOpenPage).toBe(false);
+    expect(preflight.canExecute).toBe(false);
+    expect(preflight.gatesText).toContain("No browser tab opens until the live runner implementation exists.");
+    expect(preflight.nextAction).toBe("Live runner remains blocked until the live runner implementation exists.");
+    expect(preflight.noActionTaken).toContain("No browser opened.");
+    expect(preflight.noActionTaken).toContain("No runner audit written.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

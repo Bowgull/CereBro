@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0442 EDT
+Last updated: 2026-05-18 0450 EDT
 
 ## Current North Star
 
@@ -20,6 +20,71 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 0450 EDT - Workbench Browser Live Approval Preview
+
+### What Changed
+- Added `workbench.createBrowserLiveRunnerApprovalPreview`.
+- The live-runner approval preview writes one local pending approval with
+  `action_type = browser_live_runner`.
+- Duplicate pending live-runner approval previews return the existing row.
+- `browserLiveRunnerPreflight` now recognizes approved live-runner approvals
+  while still returning `canOpenPage: false` and `canExecute: false`.
+- Workbench Browser proposal details now include `Stage Live`.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.createBrowserLiveRunnerApprovalPreview`.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/ledger.memoryContract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- In-app browser control was unavailable in this turn. Local Playwright proof
+  against `http://localhost:3000/` opened Workshop -> Workbench, expanded a
+  Browser proposal, clicked `Stage Live`, clicked `Preflight`, and confirmed
+  `Live runner approval`, `open blocked`, and
+  `No browser opened. No page fetched.`
+- Screenshot proof saved locally at
+  `output/playwright/browser-live-runner-approval-preview.png`.
+
+### Drift Check
+- On path. This adds the explicit live-runner approval gate without enabling a
+  live runner.
+- It does not add a dedicated Browser nav surface.
+- It does not open pages, fetch pages, save sources, capture pages, save Watch
+  Shelf items, persist watch progress, write externally, call providers/models,
+  install, pull, or touch Raven paths.
+- Workbench remains the Browser body surface.
+- Ledger remains the audit surface.
+
+### Known Risks
+- The local dev DB still has many Browser proposal rows from tests and prior
+  local passes.
+- Browser proof created one local pending live-runner approval row.
+- A Vite reconnect happened during browser proof after typecheck restarted the
+  dev process; the final proof completed after reconnect.
+
+### Storage Impact
+- No schema change.
+- No rows were deleted.
+- Tests and browser proof wrote local dev DB approval/preflight rows as part of
+  contract coverage.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/ledger.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, and app/client/src/pages/Home.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now has a live-runner approval preview route and `Stage Live` UI, but the runner still returns `canOpenPage: false` and `canExecute: false`. Next best slice is either Approval Queue detail/readback for `browser_live_runner` receipts or compact Ledger/Approval count cleanup if local dev rows still crowd the UI. Do not add a dedicated Browser nav surface, run live browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0442 EDT - Workbench Browser Live Preflight
 

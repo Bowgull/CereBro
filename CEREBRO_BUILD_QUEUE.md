@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0442 EDT
+Last updated: 2026-05-18 0450 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 0450 EDT: added Workbench Browser live-runner approval preview.
+  `workbench.createBrowserLiveRunnerApprovalPreview` now creates one pending
+  local `browser_live_runner` approval preview, dedupes existing pending rows,
+  and records a local permission preflight. Workbench Browser proposal details
+  show `Stage Live`. `browserLiveRunnerPreflight` recognizes approved
+  live-runner approval but still returns `canOpenPage: false` and
+  `canExecute: false`. No live browser runner, browser automation, real browser
+  tab, page open, fetch, history, source save, Watch Shelf item save, progress
+  persistence, external write, provider/model call, install, pull, or Raven
+  path was added.
 - 2026-05-18 0442 EDT: added Workbench Browser live preflight readback.
   `workbench.browserLiveRunnerPreflight` now reads Browser proposal gate state
   and separates approval preview, approved execution approval, and explicit
