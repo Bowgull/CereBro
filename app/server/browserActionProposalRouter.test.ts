@@ -317,4 +317,42 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads a Browser result and recovery contract without writing rows or enabling execution", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-result-contract",
+      draftKind: "url",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const contract = await caller.workbench.browserActionResultRecoveryContract({
+      proposalId: created.proposal.id,
+    });
+
+    expect(contract.mode).toBe("read_only");
+    expect(contract.proposal.id).toBe(created.proposal.id);
+    expect(contract.canExecute).toBe(false);
+    expect(contract.resultContract.resultState).toBe("not_run");
+    expect(contract.resultContract.receiptTitle).toContain("Browser result receipt");
+    expect(contract.resultContract.requiredFields).toContain("result_state");
+    expect(contract.recoveryContract.status).toBe("not_ready");
+    expect(contract.recoveryContract.note).toContain("No browser action has run.");
+    expect(contract.gates).toContain("This result/recovery contract does not run the Browser proposal.");
+    expect(contract.noActionTaken).toContain("No browser opened.");
+    expect(contract.noActionTaken).toContain("No external write ran.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

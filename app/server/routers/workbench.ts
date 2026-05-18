@@ -647,6 +647,60 @@ export const workbenchRouter = router({
       };
     }),
 
+  browserActionResultRecoveryContract: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      return {
+        mode: "read_only" as const,
+        proposal,
+        canExecute: false,
+        resultContract: {
+          receiptTitle: `Browser result receipt for proposal #${proposal.id}`,
+          resultState: "not_run" as const,
+          requiredFields: [
+            "proposal_id",
+            "approval_id",
+            "executor_agent",
+            "browser_target",
+            "action_label",
+            "result_state",
+            "stdout_summary",
+            "stderr_summary",
+            "artifact_or_source_id",
+            "created_at",
+          ],
+          blockedUntil: [
+            "Runner contract exists.",
+            "Approval receipt is approved.",
+            "Spock gate is present.",
+            "Workbench body is present.",
+          ],
+        },
+        recoveryContract: {
+          status: "not_ready" as const,
+          note: "No browser action has run. Recovery is a required note after a real result, not before.",
+          requiredWhen: [
+            "Browser runner fails.",
+            "Source save fails.",
+            "Workbench capture fails.",
+            "User revokes approval.",
+            "Spock blocks the target.",
+          ],
+        },
+        gates: [
+          "This result/recovery contract does not run the Browser proposal.",
+          "No Browser result receipt is written until an approved runner exists.",
+          "Recovery notes stay required before canExecute can become true.",
+        ],
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
   createBrowserActionApprovalPreview: publicProcedure
     .input(
       z.object({

@@ -204,6 +204,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       refetchOnWindowFocus: false,
     },
   );
+  const [selectedBrowserResultId, setSelectedBrowserResultId] = useState<number | null>(null);
+  const browserResultContract = trpc.workbench.browserActionResultRecoveryContract.useQuery(
+    { proposalId: selectedBrowserResultId ?? 0 },
+    {
+      enabled: selectedBrowserResultId != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  );
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -992,6 +1001,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             >
                               Read Gates
                             </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant={selectedBrowserResultId === proposal.id ? "secondary" : "outline"}
+                              className="h-6 px-2 text-[10px]"
+                              title="Read the Browser result and recovery contract. This does not approve or run it."
+                              onClick={() => setSelectedBrowserResultId(proposal.id)}
+                            >
+                              Read Result
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -1042,6 +1061,43 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         </div>
                       ) : (
                         <div>No gate read available.</div>
+                      )}
+                    </div>
+                  )}
+                  {selectedBrowserResultId != null && (
+                    <div className="rounded p-2 text-[10px] leading-snug" aria-label="Browser result recovery contract" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                      {browserResultContract.isLoading ? (
+                        <div>Reading Browser result contract.</div>
+                      ) : browserResultContract.data ? (
+                        <div className="grid gap-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                              Result Contract #{browserResultContract.data.proposal.id}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Chip label={browserResultContract.data.resultContract.resultState} tone={C.textMuted} />
+                              <Chip label={browserResultContract.data.canExecute ? "can execute" : "blocked"} tone={browserResultContract.data.canExecute ? C.danger : C.warning} />
+                              <Chip label={browserResultContract.data.recoveryContract.status} tone={C.warning} />
+                            </div>
+                          </div>
+                          <div className="grid gap-1 md:grid-cols-2">
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="font-semibold" style={{ color: C.textPrimary }}>{browserResultContract.data.resultContract.receiptTitle}</div>
+                              <div className="mt-0.5">
+                                Required fields: {browserResultContract.data.resultContract.requiredFields.slice(0, 4).join(", ")}.
+                              </div>
+                            </div>
+                            <div className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                              <div className="font-semibold" style={{ color: C.textPrimary }}>Recovery Note</div>
+                              <div className="mt-0.5">{browserResultContract.data.recoveryContract.note}</div>
+                            </div>
+                          </div>
+                          <div>
+                            {browserResultContract.data.gates[0]}
+                          </div>
+                        </div>
+                      ) : (
+                        <div>No result contract available.</div>
                       )}
                     </div>
                   )}

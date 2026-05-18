@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 2138 EDT
+Last updated: 2026-05-17 2143 EDT
 
 ## Current North Star
 
@@ -20,6 +20,66 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2143 EDT - Workbench Browser Result Contract
+
+### What Changed
+- Added `workbench.browserActionResultRecoveryContract`.
+- Browser proposals now have a read-only result and recovery contract.
+- Workbench Browser proposal rows now expose `Read Result`.
+- The result contract shows required result receipt fields and `not_run`.
+- The recovery contract shows why recovery is `not_ready`.
+- `canExecute` remains false.
+
+### Files Touched
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed on missing `workbench.browserActionResultRecoveryContract`.
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Workshop ->
+  Workbench, clicked `Read Result`, and confirmed result contract, browser
+  result receipt, `not_run`, blocked state, recovery note, and no-run wording.
+- Screenshot proof saved locally at
+  `output/playwright/workbench-browser-result-contract.png`.
+
+### Drift Check
+- On path. This adds the result/recovery shape without creating a runner,
+  adding a new surface, or pretending Browser execution exists.
+- Result/recovery contract is read-only and does not write rows.
+- No approval decision was made, no Workbench evidence row was written, no
+  security review row was written, no source row was written, and no browser
+  action ran.
+- No browser runner, browser automation, real browser tab, page open, page
+  fetch, search request, history entry, bookmark, source save, Watch Shelf
+  item save, project pin, explanation route, clipboard write, credential
+  action, download, external write, paid service, provider call, model call,
+  install, pull, or Raven path was added.
+
+### Known Risks
+- Browser proposal rows are now action-dense. A later polish pass should
+  compress proposal actions into a quieter detail/readback shape.
+- `can_execute` remains false until a real manual browser runner contract
+  exists.
+
+### Storage Impact
+- No schema change.
+- Browser proof read existing local dev DB rows only.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/securityGate.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now stages durable local browser_action_proposals, lists recent blocked proposals, can stage pending local Browser approval previews, Approval Queue can filter Browser approvals, Browser proposals can stage local Workbench body receipts, Browser proposals can stage local Spock security receipts, Browser proposals have a read-only gate readiness view, and Browser proposals have a read-only result/recovery contract. Next best slice is proposal-row UI compression or the manual browser runner contract design, keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 2138 EDT - Workbench Browser Gate Readiness
 

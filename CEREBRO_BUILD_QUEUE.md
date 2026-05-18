@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2138 EDT
+Last updated: 2026-05-17 2143 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2143 EDT: added Workbench Browser result/recovery contract
+  readback. `workbench.browserActionResultRecoveryContract` reads one Browser
+  proposal and returns the required result receipt shape plus recovery note
+  requirements without writing rows. Workbench Browser proposal rows now expose
+  `Read Result` and show result state, blocked state, and recovery status. No
+  approval decision, Workbench evidence row, security review row, source row,
+  browser runner, page fetch, Watch Shelf save, external write,
+  provider/model call, install, pull, or Raven path was added. `can_execute`
+  remains false.
 - 2026-05-17 2138 EDT: added Workbench Browser gate readiness.
   `workbench.browserActionProposalReadiness` reads one Browser proposal and
   reports runner contract, approval receipt, Spock gate, Workbench body,
