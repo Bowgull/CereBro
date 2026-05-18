@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-17 1733 EDT
+Last updated: 2026-05-17 2119 EDT
 
 ## Current North Star
 
@@ -20,6 +20,64 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-17 2119 EDT - Approval Queue Browser Filter
+
+### What Changed
+- Added `browser` as a first-class Approval Queue origin.
+- Browser approval previews now classify as `browser`, not `other`.
+- Approval Queue, Approval List, and Approval Groups can filter and group
+  `browser_action_proposal` approvals.
+- Approval target labels now read Browser proposal action and target.
+- Approval Queue UI now exposes a `Browser` filter button.
+
+### Files Touched
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/approvals.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- Red test first:
+  `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  failed because `browser` was not an accepted approval origin.
+- `pnpm -C app exec vitest run server/browserActionProposalModel.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- In-app browser proof against `http://localhost:3000/`: opened Approval
+  Gates, confirmed the `Browser` filter, selected it, and confirmed
+  `browser action review` plus `pending`.
+- Screenshot proof saved locally at
+  `output/playwright/approval-browser-filter.png`.
+
+### Drift Check
+- On path. This makes Browser approval previews visible in the existing
+  Approval Queue instead of creating a new Browser surface.
+- No approval decision was made, no Workbench evidence was written, no source
+  row was written, and no browser action ran.
+- No browser runner, browser automation, real browser tab state, page fetch,
+  search request, history entry, bookmark, source save, Workbench capture,
+  shelf save, project pin, explanation route, clipboard write, credential
+  action, download, external write, paid service, provider call, model call,
+  install, pull, or Raven path was added.
+
+### Known Risks
+- Browser approvals are visible and filterable, but they are not yet linked to
+  a Workbench body receipt.
+- `can_execute` remains false because Workbench body, Spock gate, result
+  receipt, recovery note, and runner contract are still missing.
+
+### Storage Impact
+- No schema change.
+- Local app proof read existing pending Browser approvals from the dev DB.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/server/browserActionProposalModel.ts, app/server/routers/workbench.ts, app/server/routers/approvals.ts, app/client/src/components/WorkbenchPanel.tsx, and app/client/src/components/ApprovalDashboardPanel.tsx first. Continue CereBro on the Daily OS browser path. Workbench Browser now stages durable local browser_action_proposals, lists recent blocked proposals, can stage pending local Browser approval previews, and Approval Queue can filter Browser approvals. Next best slice is Workbench body linkage for a Browser proposal or Browser approval detail polish, keeping canExecute false. Do not add a dedicated Browser nav surface, run browser automation, open/fetch/search pages, save sources, capture pages, download media, use credentials, call providers/models, install/pull, write externally, or touch Raven paths. Run targeted tests, pnpm check, browser-proof visual changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-17 1733 EDT - Workbench Browser Approval Preview
 

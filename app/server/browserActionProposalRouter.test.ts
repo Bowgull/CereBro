@@ -169,4 +169,37 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(second.gates).toContain("Existing pending local Browser approval preview returned.");
     expect(await countRows("approvals")).toBe(beforeApprovals);
   });
+
+  it("surfaces Browser approval previews in the approval queue without treating them as other", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-queue",
+      draftKind: "url",
+    });
+    const approvalPreview = await caller.workbench.createBrowserActionApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+
+    const browserQueue = await caller.approvals.queue({
+      origin: "browser" as never,
+      status: "pending",
+      limit: 20,
+    });
+    const otherQueue = await caller.approvals.queue({
+      origin: "other",
+      status: "pending",
+      limit: 100,
+    });
+    const groups = await caller.approvals.groups({
+      groupBy: "origin",
+      status: "pending",
+    });
+
+    expect(browserQueue.items.some((item) => item.id === approvalPreview.approval?.id)).toBe(true);
+    expect(browserQueue.items.find((item) => item.id === approvalPreview.approval?.id)?.origin).toBe("browser");
+    expect(browserQueue.summary.browser).toBeGreaterThan(0);
+    expect(otherQueue.items.some((item) => item.id === approvalPreview.approval?.id)).toBe(false);
+    expect(groups.groups.some((group) => group.key === "browser")).toBe(true);
+  });
 });

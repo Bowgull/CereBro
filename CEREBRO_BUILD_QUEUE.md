@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 1733 EDT
+Last updated: 2026-05-17 2119 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2119 EDT: added Approval Queue Browser filter/readback.
+  `browser` is now a first-class approval origin. Browser approval previews
+  classify as `browser`, no longer fall into `other`, and can be filtered and
+  grouped in Approval Queue/List/Groups. Browser proposal approvals now show
+  target labels from `browser_action_proposals`, and the Approval Queue UI has
+  a `Browser` filter. No approval decision, browser runner, page fetch,
+  source save, Workbench capture, external write, provider/model call, install,
+  pull, or Raven path was added.
 - 2026-05-17 1733 EDT: added Workbench Browser approval previews.
   `workbench.createBrowserActionApprovalPreview` stages one pending local
   approval preview for a durable Browser proposal and records one local
