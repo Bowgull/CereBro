@@ -208,6 +208,18 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       setBrowserProposalNotice(`Draft tab ${result.tab.tabId} staged. No page opened.`);
     },
   });
+  const createBrowserResultRecoveryScaffold = trpc.workbench.createBrowserResultRecoveryScaffold.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserActionProposals.invalidate();
+      if (selectedBrowserResultId === result.proposal.id) {
+        utils.workbench.browserActionResultRecoveryContract.invalidate({ proposalId: result.proposal.id });
+      }
+      if (selectedBrowserPolicyId === result.proposal.id) {
+        utils.workbench.browserManualOpenRunnerPolicy.invalidate({ proposalId: result.proposal.id });
+      }
+      setBrowserProposalNotice(`Result scaffold staged for proposal #${result.proposal.id}. No page opened.`);
+    },
+  });
   const [selectedBrowserReadinessId, setSelectedBrowserReadinessId] = useState<number | null>(null);
   const browserProposalReadiness = trpc.workbench.browserActionProposalReadiness.useQuery(
     { proposalId: selectedBrowserReadinessId ?? 0 },
@@ -1118,6 +1130,21 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     }}
                                   >
                                     Stage Tab
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserResultRecoveryScaffold.isPending}
+                                    title="Stage blocked result and recovery scaffolds. This does not open a page."
+                                    onClick={() => {
+                                      createBrowserResultRecoveryScaffold.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Stage Result
                                   </Button>
                                   <Button
                                     type="button"

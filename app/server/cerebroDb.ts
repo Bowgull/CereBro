@@ -460,6 +460,7 @@ async function ensureSchema(client: Client): Promise<void> {
          receipt_body TEXT NOT NULL,
          status TEXT NOT NULL DEFAULT 'proposal_blocked',
          result_state TEXT NOT NULL DEFAULT 'not_run',
+         recovery_note TEXT,
          can_execute INTEGER NOT NULL DEFAULT 0,
          created_at INTEGER NOT NULL DEFAULT (unixepoch()),
          updated_at INTEGER NOT NULL DEFAULT (unixepoch())
@@ -902,6 +903,7 @@ async function ensureSchema(client: Client): Promise<void> {
   await ensureApprovalColumns(client);
   await ensureRuntimeRouteRecordColumns(client);
   await ensureBrowserTabSessionColumns(client);
+  await ensureBrowserActionProposalColumns(client);
 }
 
 async function ensureSessionLedgerColumns(client: Client): Promise<void> {
@@ -1032,6 +1034,14 @@ async function ensureBrowserTabSessionColumns(client: Client): Promise<void> {
     await client.execute(`ALTER TABLE browser_tab_sessions ADD COLUMN proposal_id INTEGER REFERENCES browser_action_proposals(id) ON DELETE SET NULL`);
   }
   await client.execute(`CREATE INDEX IF NOT EXISTS idx_browser_tab_sessions_proposal ON browser_tab_sessions(proposal_id)`);
+}
+
+async function ensureBrowserActionProposalColumns(client: Client): Promise<void> {
+  const table = await client.execute(`PRAGMA table_info(browser_action_proposals)`);
+  const existing = new Set(table.rows.map((row) => String(row.name)));
+  if (!existing.has("recovery_note")) {
+    await client.execute(`ALTER TABLE browser_action_proposals ADD COLUMN recovery_note TEXT`);
+  }
 }
 
 export type MemoryKind = "fact" | "note" | "reference" | "feedback";

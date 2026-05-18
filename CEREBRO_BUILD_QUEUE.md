@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2235 EDT
+Last updated: 2026-05-17 2242 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2242 EDT: added Workbench Browser result/recovery scaffolding.
+  `browser_action_proposals` now has `recovery_note`, and
+  `workbench.createBrowserResultRecoveryScaffold` records
+  `blocked_before_runner` plus a draft recovery note on a Browser proposal.
+  Manual open runner policy now reads result receipt and recovery note gates
+  from the Browser proposal. Workbench Browser proposal details expose
+  `Stage Result`. Even when all scaffolds are present, `canExecute` and
+  `canOpenPage` remain false. No browser runner, browser automation, real
+  browser tab, page open, fetch, history, source save, Workbench capture,
+  external write, provider/model call, install, pull, or Raven path was added.
 - 2026-05-17 2235 EDT: hardened the Workbench Browser manual open runner
   policy. Pending approval preview and approved execution approval are now
   separate gates. A pending Browser approval preview no longer satisfies the

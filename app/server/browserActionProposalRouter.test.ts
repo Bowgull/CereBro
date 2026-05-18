@@ -573,4 +573,56 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("stages Browser result and recovery scaffolds without opening a page", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/result-scaffold",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test approval decision. This still must not open a page.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+    };
+
+    const scaffold = await caller.workbench.createBrowserResultRecoveryScaffold({
+      proposalId: created.proposal.id,
+    });
+
+    expect(scaffold.ok).toBe(true);
+    expect(scaffold.mode).toBe("blocked_browser_result_recovery_scaffold");
+    expect(scaffold.resultReceipt.present).toBe(true);
+    expect(scaffold.recoveryNote.present).toBe(true);
+    expect(scaffold.resultReceipt.resultState).toBe("blocked_before_runner");
+    expect(scaffold.recoveryNote.status).toBe("draft");
+    expect(scaffold.canOpenPage).toBe(false);
+    expect(scaffold.canExecute).toBe(false);
+    expect(scaffold.noActionTaken).toContain("No browser opened.");
+    expect(scaffold.noActionTaken).toContain("No page fetched.");
+
+    const policy = await caller.workbench.browserManualOpenRunnerPolicy({
+      proposalId: created.proposal.id,
+    });
+
+    expect(policy.gates.resultReceipt.present).toBe(true);
+    expect(policy.gates.recoveryNote.present).toBe(true);
+    expect(policy.summary.readyCount).toBe(7);
+    expect(policy.summary.missingCount).toBe(0);
+    expect(policy.canExecute).toBe(false);
+    expect(policy.canOpenPage).toBe(false);
+    expect(policy.gatesText).toContain("All policy scaffolds are present, but manual open runner remains disabled.");
+
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

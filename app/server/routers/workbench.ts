@@ -65,6 +65,7 @@ function rowToBrowserActionProposal(row: Record<string, unknown>) {
     statusLabel: browserProposalStatusLabel(row.status),
     canExecute: Boolean(row.can_execute),
     resultState: String(row.result_state),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
     blockers: splitStoredList(row.blockers),
     requiredGates: splitStoredList(row.required_gates),
     receiptBody: String(row.receipt_body),
@@ -996,13 +997,13 @@ export const workbenchRouter = router({
         },
         resultReceipt: {
           label: "Result receipt",
-          present: false,
-          detail: "Missing. No Browser result has run.",
+          present: String(proposal.resultState) === "blocked_before_runner",
+          detail: String(proposal.resultState) === "blocked_before_runner" ? "Blocked result scaffold recorded. No page opened." : "Missing. No Browser result has run.",
         },
         recoveryNote: {
           label: "Recovery note",
-          present: false,
-          detail: "Missing. Recovery note waits for an attempted result.",
+          present: Boolean(proposal.recoveryNote),
+          detail: proposal.recoveryNote ? proposal.recoveryNote : "Missing. Recovery note waits for an attempted result.",
         },
       };
       const gateList = Object.values(gates);
@@ -1022,9 +1023,77 @@ export const workbenchRouter = router({
           nextMissingGate,
         },
         gatesText: [
-          "Manual open runner remains blocked.",
+          gateList.every((gate) => gate.present)
+            ? "All policy scaffolds are present, but manual open runner remains disabled."
+            : "Manual open runner remains blocked.",
           "Result receipt and recovery note are required before any future runner can execute.",
           "This policy read does not open a browser tab, fetch a page, persist history, save a source, or write external state.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserResultRecoveryScaffold: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const recoveryNote = [
+        "Recovery scaffold recorded before runner.",
+        "No browser opened.",
+        "No page fetched.",
+        "If a future runner fails, explain visible state and next safe action here.",
+      ].join(" ");
+      const result = await db.execute({
+        sql: `
+          UPDATE browser_action_proposals
+          SET result_state = 'blocked_before_runner',
+              recovery_note = ?,
+              updated_at = unixepoch()
+          WHERE id = ?
+          RETURNING *
+        `,
+        args: [recoveryNote, proposal.id],
+      });
+      const row = result.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser result scaffold could not be created.",
+        });
+      }
+      const updatedProposal = rowToBrowserActionProposal(row);
+
+      return {
+        ok: true as const,
+        mode: "blocked_browser_result_recovery_scaffold" as const,
+        proposal: updatedProposal,
+        resultReceipt: {
+          present: true,
+          resultState: updatedProposal.resultState,
+          detail: "Blocked result scaffold recorded. No page opened.",
+        },
+        recoveryNote: {
+          present: true,
+          status: "draft" as const,
+          detail: updatedProposal.recoveryNote,
+        },
+        canOpenPage: false,
+        canExecute: false,
+        gates: [
+          "Result and recovery scaffolds exist, but manual page open remains blocked.",
+          "This does not run the Browser proposal.",
         ],
         noActionTaken: [
           "No browser opened.",
