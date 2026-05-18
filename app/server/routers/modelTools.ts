@@ -1282,6 +1282,7 @@ export const modelToolsRouter = router({
       const capability = rowToCapability(row);
       const externalTarget = capability.accessMethod !== "local" || capability.privacyClass !== "local_private";
       const sensitiveData = capability.privacyClass === "sensitive_review" || capability.privacyClass === "blocked_sensitive";
+      const sourceReadinessRequired = capability.sourceReadiness.requiredBeforeTrust.join(", ") || "none";
       const preflight = await recordPermissionPreflight(db, {
         perceptionClass: externalTarget ? "public_browser" : "explicit_context",
         actionClass: externalTarget ? "external_write" : "local_note",
@@ -1303,6 +1304,9 @@ export const modelToolsRouter = router({
         `Privacy class: ${capability.privacyClass}`,
         `Approval level: ${capability.approvalLevel}`,
         `Eval status: ${capability.evalStatus}`,
+        `Source readiness: ${capability.sourceReadiness.label}`,
+        `Required before trust: ${sourceReadinessRequired}`,
+        `Source next step: ${capability.sourceReadiness.nextStep}`,
         capability.sourceUris ? `Sources: ${capability.sourceUris}` : "Sources: not recorded",
         input.dataSummary ? `Data summary: ${input.dataSummary}` : "Data summary: not provided",
         capability.riskReview ? `Risk: ${capability.riskReview}` : null,
@@ -1354,10 +1358,12 @@ export const modelToolsRouter = router({
         pullsModels: false,
         browsesOrFetches: false,
         routeDefaultsChanged: false,
+        sourceReadiness: capability.sourceReadiness,
         approval,
         gates: [
           "Created one pending local model/tool route approval preview.",
           "Recorded one local permission preflight audit row.",
+          "Source readiness is recorded in the approval context.",
           "No model/tool, provider, gateway, browser, search, fetch, install, token, pull, local inference, route default, file write, memory write, or external write ran.",
           "A later model/tool use still requires a separate explicit action receipt.",
         ],

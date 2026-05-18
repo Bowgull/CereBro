@@ -637,4 +637,36 @@ describe("Model Tools local-first routing policy", () => {
     expect(await countRows("permission_preflight_records")).toBe(before.preflights);
     expect(await countRows("model_tool_call_logs")).toBe(before.calls);
   });
+
+  it("includes source readiness warnings in model tool approval previews", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Untrusted Route ${stamp}`,
+      toolName: "Missing source approval candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      validationNotes: "Approval preview should expose missing source readiness.",
+    });
+
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "browser source review",
+      dataSummary: "Public-safe route summary only.",
+      reason: "Review this capability before use.",
+    });
+
+    expect(staged.sourceReadiness.status).toBe("missing_sources");
+    expect(staged.sourceReadiness.requiredBeforeTrust).toContain("Source URLs.");
+    expect(staged.approval?.contextSummary).toContain("Source readiness: missing sources");
+    expect(staged.approval?.contextSummary).toContain("Required before trust: Source URLs.");
+    expect(staged.gates.join(" ")).toContain("Source readiness is recorded in the approval context.");
+
+    const detail = await caller.approvals.detail({ id: staged.approval?.id ?? -1 });
+    expect(detail.approval?.contextSummary).toContain("Source readiness: missing sources");
+    expect(detail.approval?.contextSummary).toContain("Required before trust: Source URLs.");
+  });
 });

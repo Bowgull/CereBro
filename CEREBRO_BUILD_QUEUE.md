@@ -1690,3 +1690,9 @@ Expected shape:
   are missing. This keeps Basement as the machinery destination and does not
   run models, tools, providers, installs, pulls, browsing, fetching, route
   default changes, or Raven routes.
+- 2026-05-18 0542 EDT: Model/tool route approval previews now include
+  source-readiness status, required-before-trust fields, and next source step in
+  the approval context. Approval previews can still be staged for untrusted
+  capabilities, but the receipt now exposes why they are not trusted. No
+  provider call, model call, install, pull, browse, fetch, route default change,
+  external write, or Raven route was added.
