@@ -275,4 +275,46 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
     expect(await countRows("sources")).toBe(before.sources);
   });
+
+  it("reads Browser proposal gate readiness without writing rows or enabling execution", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Save to Sources",
+      target: "https://example.com/browser-readiness",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    const before = {
+      approvals: await countRows("approvals"),
+      permissionPreflights: await countRows("permission_preflight_records"),
+      securityReviews: await countRows("security_review_records"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      sources: await countRows("sources"),
+    };
+
+    const readiness = await caller.workbench.browserActionProposalReadiness({
+      proposalId: created.proposal.id,
+    });
+
+    expect(readiness.proposal.id).toBe(created.proposal.id);
+    expect(readiness.canExecute).toBe(false);
+    expect(readiness.summary.readyCount).toBe(3);
+    expect(readiness.summary.missingCount).toBe(3);
+    expect(readiness.gates.find((gate) => gate.key === "approval_receipt")?.present).toBe(true);
+    expect(readiness.gates.find((gate) => gate.key === "spock_gate")?.present).toBe(true);
+    expect(readiness.gates.find((gate) => gate.key === "workbench_body")?.present).toBe(true);
+    expect(readiness.gates.find((gate) => gate.key === "runner_contract")?.present).toBe(false);
+    expect(readiness.gates.find((gate) => gate.key === "result_receipt")?.present).toBe(false);
+    expect(readiness.gates.find((gate) => gate.key === "recovery_note")?.present).toBe(false);
+    expect(readiness.noActionTaken).toContain("No browser opened.");
+    expect(readiness.noActionTaken).toContain("No external write ran.");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.permissionPreflights);
+    expect(await countRows("security_review_records")).toBe(before.securityReviews);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
 });

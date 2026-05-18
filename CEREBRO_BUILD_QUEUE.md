@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-17 2133 EDT
+Last updated: 2026-05-17 2138 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-17 2138 EDT: added Workbench Browser gate readiness.
+  `workbench.browserActionProposalReadiness` reads one Browser proposal and
+  reports runner contract, approval receipt, Spock gate, Workbench body,
+  result receipt, and recovery note state without writing rows. Workbench
+  Browser proposal rows now expose `Read Gates` and show ready/missing counts
+  plus the next missing gate. No approval decision, Workbench evidence row,
+  security review row, source row, browser runner, page fetch, Watch Shelf
+  save, external write, provider/model call, install, pull, or Raven path was
+  added. `can_execute` remains false.
 - 2026-05-17 2133 EDT: added Workbench Browser Spock gate linkage.
   `workbench.createBrowserActionSpockGate` stages one local Spock security
   receipt for a durable Browser proposal and records one local permission

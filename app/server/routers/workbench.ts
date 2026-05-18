@@ -168,6 +168,27 @@ function rowToEvidence(row: Record<string, unknown>) {
   };
 }
 
+async function browserProposalById(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT *
+      FROM browser_action_proposals
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+  if (!row) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Browser action proposal not found.",
+    });
+  }
+  return rowToBrowserActionProposal(row);
+}
+
 function projectKnowledgeRoute(projectName: string | null) {
   if (!projectName) return null;
   return {
@@ -537,6 +558,91 @@ export const workbenchRouter = router({
 
       return {
         items: result.rows.map(rowToBrowserActionProposal),
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  browserActionProposalReadiness: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const approval = await pendingBrowserApprovalByProposalId(proposal.id);
+      const body = await db.execute({
+        sql: `
+          SELECT id
+          FROM workbench_evidence_records
+          WHERE target_uri = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [`browser_action_proposal:${proposal.id}`],
+      });
+      const spock = await db.execute({
+        sql: `
+          SELECT srr.id
+          FROM security_review_records srr
+          INNER JOIN permission_preflight_records ppr ON ppr.id = srr.permission_preflight_id
+          WHERE ppr.target_summary LIKE ?
+          ORDER BY srr.created_at DESC, srr.id DESC
+          LIMIT 1
+        `,
+        args: [`browser_action_proposal:${proposal.id}%`],
+      });
+      const gates = [
+        {
+          key: "runner_contract",
+          label: "Runner contract",
+          present: false,
+          detail: "Missing. Browser runner is not wired.",
+        },
+        {
+          key: "approval_receipt",
+          label: "Approval receipt",
+          present: Boolean(approval),
+          detail: approval ? `Pending approval #${approval.id}. Not execution permission.` : "Missing pending approval preview.",
+        },
+        {
+          key: "spock_gate",
+          label: "Spock gate",
+          present: Boolean(spock.rows[0]),
+          detail: spock.rows[0] ? `Spock receipt #${Number(spock.rows[0].id)}.` : "Missing local Spock receipt.",
+        },
+        {
+          key: "workbench_body",
+          label: "Workbench body",
+          present: Boolean(body.rows[0]),
+          detail: body.rows[0] ? `Workbench body #${Number(body.rows[0].id)}.` : "Missing local Workbench body.",
+        },
+        {
+          key: "result_receipt",
+          label: "Result receipt",
+          present: false,
+          detail: "Missing. No Browser result runner exists.",
+        },
+        {
+          key: "recovery_note",
+          label: "Recovery note",
+          present: false,
+          detail: "Missing. Recovery note waits for result contract.",
+        },
+      ];
+      const readyCount = gates.filter((gate) => gate.present).length;
+      return {
+        mode: "read_only" as const,
+        proposal,
+        canExecute: false,
+        statusLabel: "blocked" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: gates.length - readyCount,
+          nextMissingGate: gates.find((gate) => !gate.present)?.label ?? null,
+        },
         noActionTaken: browserProposalNoActionTaken,
       };
     }),

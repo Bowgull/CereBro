@@ -195,6 +195,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       );
     },
   });
+  const [selectedBrowserReadinessId, setSelectedBrowserReadinessId] = useState<number | null>(null);
+  const browserProposalReadiness = trpc.workbench.browserActionProposalReadiness.useQuery(
+    { proposalId: selectedBrowserReadinessId ?? 0 },
+    {
+      enabled: selectedBrowserReadinessId != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  );
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<number | null>(null);
   const [comparisonPickerOpen, setComparisonPickerOpen] = useState(false);
   const evidenceDetail = trpc.workbench.evidenceDetail.useQuery(
@@ -973,6 +982,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                             >
                               Stage Spock
                             </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant={selectedBrowserReadinessId === proposal.id ? "secondary" : "outline"}
+                              className="h-6 px-2 text-[10px]"
+                              title="Read Browser proposal gate readiness. This does not approve or run it."
+                              onClick={() => setSelectedBrowserReadinessId(proposal.id)}
+                            >
+                              Read Gates
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -988,6 +1007,42 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   {browserProposalNotice && (
                     <div className="text-[10px]" style={{ color: C.textMuted }}>
                       {browserProposalNotice}
+                    </div>
+                  )}
+                  {selectedBrowserReadinessId != null && (
+                    <div className="rounded p-2 text-[10px] leading-snug" aria-label="Browser proposal gate readiness" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                      {browserProposalReadiness.isLoading ? (
+                        <div>Reading Browser proposal gates.</div>
+                      ) : browserProposalReadiness.data ? (
+                        <div className="grid gap-1.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                              Gate Read #{browserProposalReadiness.data.proposal.id}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Chip label={`${browserProposalReadiness.data.summary.readyCount} ready`} tone={C.accent} />
+                              <Chip label={`${browserProposalReadiness.data.summary.missingCount} missing`} tone={C.warning} />
+                              <Chip label={browserProposalReadiness.data.canExecute ? "can execute" : "blocked"} tone={browserProposalReadiness.data.canExecute ? C.danger : C.warning} />
+                            </div>
+                          </div>
+                          <div className="grid gap-1 md:grid-cols-2">
+                            {browserProposalReadiness.data.gates.map((gate) => (
+                              <div key={gate.key} className="rounded px-1.5 py-1" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold" style={{ color: C.textPrimary }}>{gate.label}</span>
+                                  <Chip label={gate.present ? "ready" : "missing"} tone={gate.present ? C.accent : C.warning} />
+                                </div>
+                                <div className="mt-0.5">{gate.detail}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div>
+                            Next missing gate: {browserProposalReadiness.data.summary.nextMissingGate ?? "none"}.
+                          </div>
+                        </div>
+                      ) : (
+                        <div>No gate read available.</div>
+                      )}
                     </div>
                   )}
                 </div>
