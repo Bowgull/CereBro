@@ -119,7 +119,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const [filterQuery, setFilterQuery] = useState("");
   const [executionLinkedOnly, setExecutionLinkedOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<EvidenceGroupBy>("project");
-  const [watchShelfOpen, setWatchShelfOpen] = useState(false);
+  const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [watchShelfCategory, setWatchShelfCategory] = useState("Watching");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const [browserActionLabel, setBrowserActionLabel] = useState("Add to Watch");
@@ -879,12 +879,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             )}
 
-            <section className="rounded p-2" aria-label="Manual browser shell" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+            <section className="order-first rounded p-2" aria-label="Manual browser shell" style={{ background: "linear-gradient(180deg, rgba(10, 16, 15, 0.98), rgba(5, 9, 8, 0.98))", border: `1px solid ${G.candleSoft}` }}>
               <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">{browserShell.title}</h3>
                   <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    User-controlled page context. First pass shell only.
+                    Page surface. Aang handles search intent.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-1">
@@ -894,6 +894,52 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
 
               <div className="grid gap-1.5">
+                <div className="flex items-center gap-1 overflow-x-auto rounded p-1" aria-label="Browser page tabs" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={browserSurface === "page" ? "secondary" : "outline"}
+                    className="h-7 shrink-0 px-2"
+                    aria-pressed={browserSurface === "page"}
+                    onClick={() => setBrowserSurface("page")}
+                  >
+                    Current Page
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={browserSurface === "watch" ? "secondary" : "outline"}
+                    className="h-7 shrink-0 px-2"
+                    aria-pressed={browserSurface === "watch"}
+                    aria-controls="workbench-watch-shelf"
+                    onClick={() => setBrowserSurface("watch")}
+                  >
+                    Watch Shelf
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={!browserTabState.canCreateTab}
+                    className="h-7 w-7 shrink-0 px-0"
+                    aria-label="New browser tab planned"
+                    title="New tab is blocked until tab storage and runner contracts exist."
+                  >
+                    +
+                  </Button>
+                  <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
+                    {browserTabState.tabSummary}
+                  </div>
+                </div>
+
+                <div className="hidden items-center gap-2 overflow-x-auto rounded px-2 py-1 md:flex" aria-label="Browser bookmark rail" style={{ background: "rgba(198, 155, 85, 0.06)", border: `1px solid ${G.lineSoft}` }}>
+                  {["CereBro Hub", "Dev Docs", "Research Log", "Design Vault"].map((bookmark) => (
+                    <span key={bookmark} className="shrink-0 text-[10px]" style={{ color: C.textMuted }}>
+                      ▰ {bookmark}
+                    </span>
+                  ))}
+                </div>
+
                 <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser back planned">‹</Button>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser forward planned">›</Button>
@@ -918,17 +964,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     Stage
                   </Button>
                   <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" disabled aria-label="Browser quiet shield">◇</Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={watchShelfOpen ? "secondary" : "outline"}
-                    className="h-7 px-2"
-                    onClick={() => setWatchShelfOpen((open) => !open)}
-                    aria-expanded={watchShelfOpen}
-                    aria-controls="workbench-watch-shelf"
-                  >
-                    Watch Shelf
-                  </Button>
                   <details className="relative">
                     <summary
                       className="flex h-7 w-7 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -1015,6 +1050,86 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </details>
                 </div>
 
+                {browserSurface === "page" ? (
+                  <div className="rounded p-3 text-center" aria-label="Browser current page" style={{ background: C.background, border: `1px solid ${G.lineSoft}`, minHeight: 170 }}>
+                    <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                      {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                    </div>
+                    <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                    </div>
+                    <div className="mt-2 flex justify-center gap-1">
+                      <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                      <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                    </div>
+                    <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
+                    </div>
+                  </div>
+                ) : (
+                  <div id="workbench-watch-shelf" className="rounded p-2" aria-label="Watch Shelf tab" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}`, minHeight: 170 }}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
+                        <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved watch pages live here after the runner exists.</div>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={!watchShelfDraft.canSave}
+                        title="Requires a real open page before it can save."
+                      >
+                        {watchShelfDraft.saveLabel}
+                      </Button>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {watchShelf.categories.map((category) => (
+                        <Button
+                          key={category}
+                          type="button"
+                          size="sm"
+                          variant={watchShelfDraft.selectedCategory === category ? "secondary" : "outline"}
+                          className="h-7 px-2"
+                          onClick={() => setWatchShelfCategory(category)}
+                          aria-pressed={watchShelfDraft.selectedCategory === category}
+                        >
+                          {category}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="mt-2 rounded p-2 text-[11px] leading-snug" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                          {watchShelfDraft.candidateLabel}
+                        </div>
+                        <Chip label={watchShelfDraft.selectedCategory} tone={watchShelfDraft.selectedCategory === "Anime" ? C.warning : C.accent} />
+                      </div>
+                      <div className="mt-1 break-all" style={{ color: C.textMuted }}>{watchShelfDraft.candidateTarget}</div>
+                      <div className="mt-1" style={{ color: C.textMuted }}>
+                        {browserDraft.kind === "empty" ? watchShelf.emptyBody : "This is only a local shelf readback. It cannot save until a real page is open."}
+                      </div>
+                    </div>
+                    <div className="mt-2 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {watchShelfDraft.noActionText}
+                    </div>
+                  </div>
+                )}
+
+                <details className="rounded p-2" aria-label="Browser proof and gates" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                        Browser proof and gates
+                      </span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Chip label={browserReadiness.statusLabel} tone={C.warning} />
+                        <Chip label={browserStorageContract.statusLabel} tone={C.warning} />
+                        <Chip label="collapsed" tone={C.textMuted} />
+                      </div>
+                    </div>
+                  </summary>
+                  <div className="mt-2 grid gap-1.5">
                 <div className="grid gap-1.5 rounded p-2" aria-label="Browser runner readiness" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1">
@@ -1622,7 +1737,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 </div>
 
-                {watchShelfOpen && (
+                {browserSurface === "watch" && (
                   <div id="workbench-watch-shelf" className="rounded p-2" aria-label="Watch Shelf drawer" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}` }}>
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
@@ -1719,6 +1834,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     {browserTabState.noActionText}
                   </div>
                 </div>
+                  </div>
+                </details>
               </div>
             </section>
 

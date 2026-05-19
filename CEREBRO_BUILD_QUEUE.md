@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2216 EDT
+Last updated: 2026-05-18 2227 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2227 EDT: moved Workbench Browser toward the locked
+  Browser/Watch Shelf mockup. Browser is now the first Workbench object, with
+  `Current Page` and `Watch Shelf` tabs, blocked `+`, one address/search field,
+  bookmark rail, Watch Shelf categories, page actions behind the dot menu, and
+  Browser proof/gate machinery collapsed. Screenshots saved at
+  `output/playwright/workbench-browser-mockup-fidelity-current-page.png` and
+  `output/playwright/workbench-browser-mockup-fidelity-watch-shelf.png`. No
+  page open, fetch, search request, Watch Shelf save, source save, provider
+  call, install, external write, or Raven path was added.
 - 2026-05-18 2216 EDT: reduced main-shell right-rail machinery. Changed the
   route rail into compact route/surface/chain/contract/session/next context,
   removed exposed proof/tool-scope/Oak validation blocks from the primary
