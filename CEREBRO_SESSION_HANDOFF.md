@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 2227 EDT
+Last updated: 2026-05-18 2233 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 2233 EDT - Workbench Browser Proportion Polish
+
+### What Changed
+- Tightened the Workbench Browser shell toward the locked Browser/Watch Shelf
+  mockup.
+- Added stronger browser-frame material, inner edge, and shadow treatment.
+- Made the page tabs feel more like browser tabs with attached active states.
+- Replaced the bookmark rail marker with a small folder-style plaque shape.
+- Increased address bar and browser-control height for a more usable control
+  strip.
+- Increased the Current Page and Watch Shelf body height so the browser surface
+  owns the Workbench view.
+- Gave Watch Shelf categories richer active/inactive states without adding
+  saved items or fake media behavior.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `git diff --check`
+- Local Playwright proof against `http://localhost:3000/` opened Workshop and
+  captured the polished `Current Page` Browser state.
+- Local Playwright proof clicked `Watch Shelf` and captured the polished Watch
+  Shelf tab state.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-browser-proportion-polish-current-page.png`
+  - `output/playwright/workbench-browser-proportion-polish-watch-shelf.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup.
+- Matched elements: heavier browser frame, richer tabs, one larger
+  address/search field, quiet bookmark rail, larger page viewport, Watch Shelf
+  as a named tab, Watch Shelf categories, and collapsed proof/gate machinery.
+- Deviations: no real page render, no persistent tabs, no saved Watch Shelf
+  rows, no playback, no login/session state, and no external page open.
+- Next fidelity gap: final icon treatment, browser viewport content once the
+  approved runner exists, and shell-wide spacing comparison against the mockup.
+
+### Drift Check
+- On path. This is visual polish only and stays inside the approved
+  Browser/Watch Shelf mockup lane.
+- It does not add a new primary surface, fake Browser/Watch behavior,
+  open/fetch/search pages, save sources, persist watch progress, call
+  providers/models, install, pull, write externally, or touch Raven paths.
+
+### Known Risks
+- The Browser shell is still a blocked local surface until the manual runner
+  contract is implemented.
+- Accessibility snapshots include collapsed details children. Visual shell
+  remains low machinery.
+
+### Storage Impact
+- No schema change.
+- No database rows were written by the code change.
+- Two local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/components/WorkbenchPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/routers/workbench.ts first. Continue CereBro on the locked Browser/Watch Shelf path. Browser and Watch Shelf now have stronger browser-frame material, richer active tabs, a larger address strip, quiet bookmark rail, larger page/shelf body, and collapsed proof/gate machinery. Next best slice is either final icon treatment and shell-wide visual comparison, or backend manual page-open runner contract only if gates are complete. Do not add a new primary surface, fake Browser/Watch behavior, open/fetch/search pages, save sources, persist watch progress, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 2227 EDT - Workbench Browser Watch Shelf Mockup Pass
 

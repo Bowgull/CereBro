@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2227 EDT
+Last updated: 2026-05-18 2233 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2233 EDT: polished Workbench Browser proportions. Added stronger
+  browser-frame material, attached tab styling, folder-style bookmark markers,
+  larger address controls, larger Current Page/Watch Shelf bodies, and richer
+  Watch Shelf category states. Screenshots saved at
+  `output/playwright/workbench-browser-proportion-polish-current-page.png` and
+  `output/playwright/workbench-browser-proportion-polish-watch-shelf.png`. No
+  page open, fetch, search request, Watch Shelf save, source save, provider
+  call, install, external write, or Raven path was added.
 - 2026-05-18 2227 EDT: moved Workbench Browser toward the locked
   Browser/Watch Shelf mockup. Browser is now the first Workbench object, with
   `Current Page` and `Watch Shelf` tabs, blocked `+`, one address/search field,
