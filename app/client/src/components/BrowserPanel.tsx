@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
@@ -82,6 +82,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [sandboxFrameTarget, setSandboxFrameTarget] = useState<string | null>(null);
   const [sandboxFrameProposalId, setSandboxFrameProposalId] = useState<number | null>(null);
   const [sandboxFrameReloadKey, setSandboxFrameReloadKey] = useState(0);
+  const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
+  const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
@@ -229,6 +231,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const renameBrowserBookmark = trpc.workbench.renameBrowserBookmark.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Renamed bookmark: ${result.bookmark?.title ?? result.bookmark?.targetUrl ?? "bookmark"}.`
+          : "Bookmark was already gone.",
+      );
+      setEditingBookmarkId(null);
+      setBookmarkTitleDraft("");
+      utils.workbench.browserBookmarkStorageContract.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
   const recordBrowserSandboxFrameReload = trpc.workbench.recordBrowserSandboxFrameReload.useMutation({
     onSuccess: (result) => {
       if (result.ok) {
@@ -318,6 +333,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     createWatchShelfItemFromOpenTab.isPending ||
     createBrowserBookmarkFromOpenTab.isPending ||
     removeBrowserBookmark.isPending ||
+    renameBrowserBookmark.isPending ||
     recordBrowserSandboxFrameReload.isPending;
 
   useEffect(() => {
@@ -683,42 +699,84 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Local Bookmarks</div>
                   <div className="mt-1 grid gap-1">
-                    {browserBookmarkItems.slice(0, 6).map((bookmark) => (
-                      <div key={bookmark.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1 rounded" style={{ background: "rgba(5, 10, 10, 0.52)", border: `1px solid ${browserFrame.lineSoft}` }}>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left"
-                          title={`${bookmark.targetUrl}. Stages address only. No page opens.`}
-                          onClick={() => {
-                            setBrowserSurface("page");
-                            setBrowserAddressDraft(bookmark.targetUrl);
-                            setSelectedBrowserProposalId(null);
-                            setSandboxFrameTarget(null);
-                            setSandboxFrameProposalId(null);
-                            setBrowserNotice("Bookmark loaded into the address bar. Stage it before opening.");
-                          }}
-                        >
-                          <span className="min-w-0">
-                            <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
-                            <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
-                          </span>
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 w-7 px-0"
-                          disabled={removeBrowserBookmark.isPending}
-                          aria-label={`Remove bookmark ${bookmark.title ?? bookmark.targetUrl}`}
-                          title="Remove this local bookmark. No external write."
-                          onClick={() => removeBrowserBookmark.mutate({ bookmarkId: bookmark.id })}
-                        >
-                          <Trash2 size={12} strokeWidth={1.8} aria-hidden="true" />
-                        </Button>
-                      </div>
-                    ))}
+                    {browserBookmarkItems.slice(0, 6).map((bookmark) => {
+                      const editing = editingBookmarkId === bookmark.id;
+                      return (
+                        <div key={bookmark.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 rounded" style={{ background: "rgba(5, 10, 10, 0.52)", border: `1px solid ${browserFrame.lineSoft}` }}>
+                          {editing ? (
+                            <Input
+                              value={bookmarkTitleDraft}
+                              onChange={(event) => setBookmarkTitleDraft(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                  setEditingBookmarkId(null);
+                                  setBookmarkTitleDraft("");
+                                }
+                                if (event.key === "Enter" && bookmarkTitleDraft.trim()) {
+                                  renameBrowserBookmark.mutate({ bookmarkId: bookmark.id, title: bookmarkTitleDraft.trim() });
+                                }
+                              }}
+                              aria-label={`Rename bookmark ${bookmark.title ?? bookmark.targetUrl}`}
+                              className="h-7 min-w-0 text-[11px]"
+                              style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}` }}
+                            />
+                          ) : (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left"
+                              title={`${bookmark.targetUrl}. Stages address only. No page opens.`}
+                              onClick={() => {
+                                setBrowserSurface("page");
+                                setBrowserAddressDraft(bookmark.targetUrl);
+                                setSelectedBrowserProposalId(null);
+                                setSandboxFrameTarget(null);
+                                setSandboxFrameProposalId(null);
+                                setBrowserNotice("Bookmark loaded into the address bar. Stage it before opening.");
+                              }}
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
+                                <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                              </span>
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 px-0"
+                            disabled={renameBrowserBookmark.isPending}
+                            aria-label={editing ? `Save bookmark ${bookmark.title ?? bookmark.targetUrl}` : `Rename bookmark ${bookmark.title ?? bookmark.targetUrl}`}
+                            title={editing ? "Save local bookmark title. No external write." : "Rename this local bookmark."}
+                            onClick={() => {
+                              if (editing) {
+                                if (!bookmarkTitleDraft.trim()) return;
+                                renameBrowserBookmark.mutate({ bookmarkId: bookmark.id, title: bookmarkTitleDraft.trim() });
+                                return;
+                              }
+                              setEditingBookmarkId(bookmark.id);
+                              setBookmarkTitleDraft(bookmark.title ?? bookmark.targetUrl);
+                            }}
+                          >
+                            <Pencil size={12} strokeWidth={1.8} aria-hidden="true" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 px-0"
+                            disabled={removeBrowserBookmark.isPending}
+                            aria-label={`Remove bookmark ${bookmark.title ?? bookmark.targetUrl}`}
+                            title="Remove this local bookmark. No external write."
+                            onClick={() => removeBrowserBookmark.mutate({ bookmarkId: bookmark.id })}
+                          >
+                            <Trash2 size={12} strokeWidth={1.8} aria-hidden="true" />
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
                   <div className="mt-1">Local rows only. No cookies, page cache, source save, or external write.</div>
                 </div>

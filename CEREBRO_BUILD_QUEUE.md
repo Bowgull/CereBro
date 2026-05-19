@@ -2216,3 +2216,11 @@ Expected shape:
   No backend page fetch, cookies, credentials, source save, Watch Shelf change,
   external write, fake progress, or Raven path changed. Next Browser slice can
   add bookmark rename or continue visual polish around the frame chrome.
+- 2026-05-19 1936 EDT: Browser bookmark rename landed. Added local-only
+  `workbench.renameBrowserBookmark`, test coverage proving source and Watch
+  Shelf rows are untouched, and a compact inline title edit control inside the
+  collapsed bookmark plaque. Renaming updates only the local
+  `browser_bookmarks.title` field. No backend page fetch, cookies, credentials,
+  source save, Watch Shelf change, external write, fake progress, or Raven path
+  changed. Next Browser slice should return to frame chrome polish or the next
+  build-plan surface.
