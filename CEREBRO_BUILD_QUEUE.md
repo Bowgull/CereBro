@@ -1767,3 +1767,8 @@ Expected shape:
   ScrollText, and Settings. This keeps the four-zone model unchanged. Next UI
   fidelity slice should refine Browser proportions, reduce generic Workbench
   panel chrome, or design final custom shell icons.
+- 2026-05-18 2339 EDT: Workbench Browser viewport proportions landed. Browser
+  current-page and Watch Shelf bodies now use a taller responsive viewport and
+  stronger inner material depth. Browser behavior remains blocked and honest.
+  Next UI fidelity slice should reduce generic Workbench panel chrome around
+  Browser or continue final shell/icon treatment.

@@ -1084,13 +1084,13 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     className="rounded p-4"
                     aria-label="Browser current page"
                     style={{
-                      background: "linear-gradient(180deg, rgba(7, 10, 12, 0.98), rgba(3, 6, 7, 0.98))",
+                      background: "radial-gradient(circle at 50% 8%, rgba(77, 170, 154, 0.06), transparent 32%), linear-gradient(180deg, rgba(7, 10, 12, 0.98), rgba(3, 6, 7, 0.98))",
                       border: `1px solid ${G.lineSoft}`,
-                      minHeight: 260,
-                      boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.42)",
+                      minHeight: "clamp(300px, 42dvh, 380px)",
+                      boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(244, 239, 227, 0.02)",
                     }}
                   >
-                    <div className="mx-auto flex min-h-[220px] max-w-2xl flex-col items-center justify-center text-center">
+                    <div className="mx-auto flex max-w-2xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(260px, 36dvh, 340px)" }}>
                       <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                         {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
                       </div>
@@ -1112,9 +1112,10 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     className="rounded p-3"
                     aria-label="Watch Shelf tab"
                     style={{
-                      background: "linear-gradient(180deg, rgba(10, 16, 15, 0.98), rgba(5, 9, 8, 0.98))",
+                      background: "radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.08), transparent 34%), linear-gradient(180deg, rgba(10, 16, 15, 0.98), rgba(5, 9, 8, 0.98))",
                       border: `1px solid ${G.candleSoft}`,
-                      minHeight: 260,
+                      minHeight: "clamp(300px, 42dvh, 380px)",
+                      boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.36), inset 0 0 0 1px rgba(244, 239, 227, 0.02)",
                     }}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">

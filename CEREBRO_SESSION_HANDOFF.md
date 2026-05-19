@@ -31860,3 +31860,86 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is refining Browser proportions, reducing generic Workbench panel chrome, or designing final custom shell icons. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-18 2339 EDT - Workbench Browser Viewport Proportions
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: Workbench Browser/Watch Shelf moved closer to the approved mockup
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian snapshot appended
+- Creative/freelance/watch: Watch Shelf UI only, no media or site automation
+
+What changed:
+
+- Browser current-page body now uses a taller responsive viewport height.
+- Watch Shelf body now uses the same taller responsive viewport height.
+- Added restrained inner material depth and subtle surface tone to both bodies.
+- No Browser, Watch Shelf, route, context rail, or castle behavior changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 2339 CereBro Session Handoff - workbench-browser-viewport-proportions.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof on localhost:
+  `output/playwright/workbench-browser-proportions-viewport-current-page.png`
+  `output/playwright/workbench-browser-proportions-viewport-watch-shelf.png`
+- Snapshot checks confirmed `Browser current page`, `Watch Shelf tab`,
+  `Open a page`, `Watching`, `Safety read`, and `Search or enter address`.
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/workbench-browser-proportions-viewport-current-page.png`
+  and `output/playwright/workbench-browser-proportions-viewport-watch-shelf.png`.
+- Matched elements: Browser body reads more like a viewport, Watch Shelf has
+  more room, material depth is stronger, URL/search controls remain fixed above
+  the body, safety read remains visible.
+- Deviations: Browser remains embedded in Workbench, current-page body still
+  shows a blocked empty state instead of page rendering, Watch Shelf saving is
+  still blocked, and the surrounding Workbench chrome remains visible.
+- Next fidelity gap: reduce generic Workbench panel chrome around Browser or
+  continue toward final custom shell/icon treatment.
+
+Drift check:
+
+- On path. This pass changes proportions and material only.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- The taller viewport pushes lower Workbench receipt tools farther below the
+  fold, which is intentional for Browser focus but should be watched for other
+  Workbench workflows.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- No database rows created intentionally.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is reducing generic Workbench panel chrome around Browser or designing final custom shell icons. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```
