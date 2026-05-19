@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
-import { ArrowLeft, ArrowRight, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
@@ -29,6 +29,7 @@ import {
   workbenchBrowserRunnerContractModel,
   workbenchBrowserSessionStorageContractModel,
   workbenchBrowserShellModel,
+  workbenchBrowserProjectPinsModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
@@ -417,6 +418,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserDraftTabs = (browserTabSessionStorageContract.data?.items ?? [])
     .filter((item) => item.state === "draft")
     .slice(0, 3);
+  const browserProjectPins = workbenchBrowserProjectPinsModel(projects.data?.projects ?? []);
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -1160,6 +1162,45 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 {browserProposalNotice && (
                   <div className="rounded px-2 py-1 text-[10px] leading-snug" role="status" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
                     {browserProposalNotice}
+                  </div>
+                )}
+
+                {browserProjectPins.items.length > 0 && (
+                  <div
+                    className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1"
+                    aria-label="Browser project pins"
+                    style={{ background: "rgba(7, 12, 12, 0.88)", border: `1px solid ${G.lineSoft}` }}
+                  >
+                    <div className="flex shrink-0 items-center gap-1 pr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
+                      <Folder size={12} strokeWidth={1.8} aria-hidden="true" />
+                      {browserProjectPins.title}
+                    </div>
+                    {browserProjectPins.items.map((pin) => (
+                      <Button
+                        key={`${pin.label}-${pin.target}`}
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 max-w-[150px] shrink-0 gap-1 px-2"
+                        title={`${pin.target}. Local project pin only. No browser page opens.`}
+                        onClick={() => {
+                          setBrowserProposalNotice(`${pin.label} project pin selected. No page opened.`);
+                        }}
+                        style={{
+                          background: "rgba(11, 18, 16, 0.72)",
+                          border: `1px solid ${G.lineSoft}`,
+                          color: C.textMuted,
+                        }}
+                      >
+                        <span className="truncate">{pin.label}</span>
+                        <span className="shrink-0 text-[9px] uppercase" style={{ color: pin.statusLabel === "clean" ? C.success : C.gold }}>
+                          {pin.statusLabel}
+                        </span>
+                      </Button>
+                    ))}
+                    <div className="ml-auto hidden min-w-[190px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
+                      {browserProjectPins.noActionText}
+                    </div>
                   </div>
                 )}
 

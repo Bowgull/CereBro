@@ -84,6 +84,28 @@ export type WorkbenchBrowserSessionStorageContract = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserProjectPin = {
+  label: string;
+  target: string;
+  statusLabel: string;
+};
+
+export type WorkbenchBrowserProjectPins = {
+  title: "Project pins";
+  canOpen: false;
+  items: WorkbenchBrowserProjectPin[];
+  noActionText: string;
+};
+
+type BrowserProjectPinInput = {
+  name: string;
+  localPath: string;
+  localExists: boolean;
+  git?: {
+    statusText?: string | null;
+  } | null;
+};
+
 function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
@@ -156,6 +178,22 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
         ? "Tab 1 is the only active local page frame."
         : "Draft tab is staged beside Tab 1. No page is open.",
     noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
+  };
+}
+
+export function workbenchBrowserProjectPinsModel(projects: BrowserProjectPinInput[]): WorkbenchBrowserProjectPins {
+  return {
+    title: "Project pins",
+    canOpen: false,
+    items: projects
+      .filter((project) => project.localExists && project.localPath.trim())
+      .slice(0, 5)
+      .map((project) => ({
+        label: project.name,
+        target: project.localPath,
+        statusLabel: project.git?.statusText ?? "unread",
+      })),
+    noActionText: "No bookmark defaults, browser opens, source saves, project writes, or external actions run from project pins.",
   };
 }
 

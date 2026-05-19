@@ -6,6 +6,7 @@ import {
   workbenchBrowserRunnerContractModel,
   workbenchBrowserSessionStorageContractModel,
   workbenchBrowserShellModel,
+  workbenchBrowserProjectPinsModel,
   workbenchBrowserTabStateModel,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
@@ -121,6 +122,36 @@ describe("workbenchBrowserModel", () => {
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(emptyTabs.tabSummary).toBe("Tab 1 is the only active local page frame.");
     expect(emptyTabs.canCreateTab).toBe(false);
+  });
+
+  it("turns real project records into Browser pins without fake bookmarks", () => {
+    const pins = workbenchBrowserProjectPinsModel([
+      {
+        name: "CereBro",
+        localPath: "/Users/lindsaybell/Desktop/CereBro",
+        localExists: true,
+        git: { statusText: "dirty" },
+      },
+      {
+        name: "Missing App",
+        localPath: "/Users/lindsaybell/Developer/Missing",
+        localExists: false,
+        git: { statusText: "unavailable" },
+      },
+    ]);
+
+    expect(pins.title).toBe("Project pins");
+    expect(pins.canOpen).toBe(false);
+    expect(pins.items).toEqual([
+      {
+        label: "CereBro",
+        target: "/Users/lindsaybell/Desktop/CereBro",
+        statusLabel: "dirty",
+      },
+    ]);
+    expect(pins.noActionText).toContain("No bookmark defaults");
+    expect(JSON.stringify(pins).toLowerCase()).not.toContain("youtube");
+    expect(JSON.stringify(pins).toLowerCase()).not.toContain("reddit");
   });
 
   it("reads blocked page action previews without running page actions", () => {

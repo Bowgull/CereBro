@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0034 EDT
+Last updated: 2026-05-19 0623 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0623 EDT - Workbench Browser Project Pins
+
+### What Changed
+- Added a Browser project pin model that turns real Project Intelligence rows
+  into local Browser shortcuts.
+- Added a compact Project pins row under the Browser controls.
+- Project pins show only real local projects and their current git read.
+- Clicking a project pin shows a local notice only. It does not open a page,
+  route to a site, save a source, save a bookmark, or write project state.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchBrowserModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- Browser proof against `http://localhost:3000/` opened Workshop and confirmed
+  the Browser project pin row shows real projects: Declyne, Waymark, Sygnalist,
+  Bridgefour, and CereBro.
+- Browser proof clicked the CereBro pin and confirmed the local notice:
+  `CereBro project pin selected. No page opened.`
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-browser-project-pins.png`
+  - `output/playwright/workbench-browser-project-pin-selected.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup plus
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- Matched elements: quiet browser utility row, project-aware shortcuts, compact
+  plaque treatment, and hidden machinery.
+- Deviations: Project pins are local project shortcuts, not browser bookmarks.
+  They do not open pages or mutate project state.
+- Next fidelity gap: real manual browser runner contract, or approved
+  user-created bookmarks after the storage contract exists.
+
+### Drift Check
+- On path.
+- No new primary surface.
+- No fake browser function.
+- No fake bookmarks or default site links.
+- No castle, renderer, route, model, provider, install, pull, external write,
+  or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No database rows created.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/lib/workbenchBrowserModel.ts, and app/client/src/components/WorkbenchPanel.tsx first. Continue the Browser fidelity track only if the slice moves live Workbench Browser toward the approved 1:1 Browser/Watch Shelf mockup without faking capability. Current browser project pins are local project shortcuts only. Next safest slices are the real manual browser runner contract, approved user-created bookmarks, or final tab/pin material polish. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0034 EDT - Workbench Browser Draft Tabs Visible
 

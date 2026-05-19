@@ -1850,3 +1850,10 @@ Expected shape:
   either build the real manual browser runner contract or add real user-created
   bookmark/project pins. Do not fake page rendering, Watch Shelf saves, or
   source discovery.
+- 2026-05-19 0623 EDT: Workbench Browser project pins landed. The Browser now
+  shows a compact Project pins row sourced from real Project Intelligence local
+  projects and git read state. Clicking a pin only shows a local notice. It
+  does not open a page, save a source, create a bookmark, mutate a project, or
+  write externally. Next Browser slice should build the real manual browser
+  runner contract, approved user-created bookmarks, or final tab/pin material
+  polish.
