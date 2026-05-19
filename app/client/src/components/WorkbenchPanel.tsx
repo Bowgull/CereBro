@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
-import { ArrowLeft, ArrowRight, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
@@ -961,15 +961,6 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
                     {browserTabState.tabSummary}
                   </div>
-                </div>
-
-                <div className="hidden items-center gap-3 overflow-x-auto px-2 py-1 md:flex" aria-label="Browser bookmark rail" style={{ background: "rgba(198, 155, 85, 0.06)", border: `1px solid ${G.lineSoft}` }}>
-                  {["CereBro Hub", "Dev Docs", "Research Log", "Design Vault"].map((bookmark) => (
-                    <span key={bookmark} className="inline-flex shrink-0 items-center gap-1 text-[10px]" style={{ color: C.textMuted }}>
-                      <Folder size={11} strokeWidth={1.8} aria-hidden="true" style={{ color: C.gold }} />
-                      {bookmark}
-                    </span>
-                  ))}
                 </div>
 
                 <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>

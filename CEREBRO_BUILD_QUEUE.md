@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0005 EDT
+Last updated: 2026-05-19 0011 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0011 EDT: removed the fake default Browser bookmark rail and
+  placeholder folders `CereBro Hub`, `Dev Docs`, `Research Log`, and
+  `Design Vault`. The Browser now follows the contract rule that
+  bookmark/project rows must be user-created, not placeholder content.
+  Screenshots saved at
+  `output/playwright/workbench-browser-fake-bookmarks-removed-current-page.png`
+  and
+  `output/playwright/workbench-browser-fake-bookmarks-removed-watch-shelf.png`.
+  No page open, fetch, search request, Watch Shelf save, source save, provider
+  call, install, external write, or Raven path was added.
 - 2026-05-19 0005 EDT: hid the Browser `Safety read` disclosure on the empty
   Browser default state. Safety/proof readback returns when a browser address
   draft exists or a Browser proposal is focused. Screenshots saved at
