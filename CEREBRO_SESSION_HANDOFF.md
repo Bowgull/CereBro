@@ -31084,3 +31084,74 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/components/ModelToolsPanel.tsx first. Continue item 9 only if there is another real trust, source, approval, or registry gap. Do not keep expanding Basement machinery for its own sake. Do not install tools, pull models, run providers, browse, fetch, change route defaults, write externally, or route Raven content. If item 9 is contract-complete enough, move to the next build-plan surface. Update handoff and Obsidian archive before commit.
 ```
+
+## 2026-05-18 0548 EDT - UI Mockup Contract
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: contract locked, no UI code changed
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian mirror added
+- Creative/freelance/watch: unchanged
+
+What changed:
+
+- Added `CEREBRO_UI_MOCKUP_CONTRACT.md`.
+- Locked the approved high-fidelity main CereBro shell mockup as a 1:1 visual
+  target.
+- Locked the approved high-fidelity Browser and Watch Shelf mockup as a 1:1
+  visual target.
+- Updated `DESIGN.md` so the mockup contract is part of the active design law.
+- Added Obsidian mirror:
+  `20_Knowledge/Playbooks/CereBro UI Mockup Contract.md`.
+- Updated `CEREBRO_BUILD_QUEUE.md` so future UI passes must target mockup
+  fidelity directly.
+
+Files touched in this slice:
+
+- `CEREBRO_UI_MOCKUP_CONTRACT.md`
+- `DESIGN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/CereBro UI Mockup Contract.md`
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 0548 CereBro Session Handoff - ui-mockup-contract.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `git diff --check`
+- No app tests were run. This was a docs/contract slice only.
+
+Drift check:
+
+- On path. The user explicitly made 1:1 mockup fidelity non-negotiable.
+- This does not redesign the app yet.
+- This does not add a new primary surface.
+- This does not touch the castle, Browser implementation, models, tools,
+  providers, installs, pulls, Raven paths, or external services.
+
+Known risks:
+
+- The contract references the approved mockups by session context, not by a
+  durable repo image path. A later pass should place approved mockup images in a
+  stable reference folder if the user wants exact visual diffing.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- One repo Markdown contract added.
+- One Obsidian playbook mirror added.
+- One Obsidian handoff snapshot and one index link appended.
+- No schema change.
+- No database rows created intentionally.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue with UI work only if it moves the live app toward the approved high-fidelity main shell mockup or Browser/Watch Shelf mockup as a 1:1 target. Before edits, name the mockup target, matched elements, and required deviations. Preserve the castle. Do not fake function. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```

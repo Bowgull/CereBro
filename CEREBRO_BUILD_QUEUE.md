@@ -1696,3 +1696,10 @@ Expected shape:
   capabilities, but the receipt now exposes why they are not trusted. No
   provider call, model call, install, pull, browse, fetch, route default change,
   external write, or Raven route was added.
+- 2026-05-18 0548 EDT: `CEREBRO_UI_MOCKUP_CONTRACT.md` is active. The approved
+  high-fidelity main shell mockup and approved Browser/Watch Shelf mockup are
+  1:1 visual targets, not inspiration. Future UI work must name the mockup
+  target, call out required deviations before building, preserve the castle,
+  avoid fake function, and screenshot-proof fidelity after changes. The next UI
+  build slice should move the live shell or Browser toward the approved mockup
+  directly.

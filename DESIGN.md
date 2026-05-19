@@ -15,6 +15,9 @@ Active redesign contract:
 - `CEREBRO_UI_REDESIGN_CONTRACT.md` locks the V1 shell direction. Verdigris
   Ivory is the Keep shell theme. Graphite Candle is the dense work-surface
   theme. Soft Parchment is rejected as the global shell.
+- `CEREBRO_UI_MOCKUP_CONTRACT.md` locks the approved high-fidelity main shell
+  mockup and Browser/Watch Shelf mockup as 1:1 visual targets. They are not
+  mood boards or loose inspiration.
 
 Primary reference:
 
