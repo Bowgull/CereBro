@@ -36287,3 +36287,89 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, bookmark removal, bookmark rename, and frame chrome polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next slice should move to the next build-plan surface unless Browser proof tooling becomes available for visual QA. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1949 EDT - Project Lab Saved Push Policy
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Project Lab push policy state now persists from local
+  durable data instead of temporary component state.
+- Backend/runtime: added local policy storage and router mutation. It does not
+  execute git.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `project_push_policies` local DB table with one saved policy per
+  project.
+- Added `projectIntelligence.savePushPolicy`.
+- Project Lab now reads assisted/manual state from `pushReadiness.policy`.
+- The policy toggle saves assisted/manual preference and keeps manual push
+  visible.
+- Saving a policy does not create a task, approval, execution proposal, git
+  command, provider call, external write, source write, or Raven path.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/projectIntelligence.ts`
+- `app/server/projectPushPolicy.test.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1949 CereBro Session Handoff - project-lab-saved-push-policy.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red check: `pnpm -C app exec vitest run server/projectPushPolicy.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first on missing `project_push_policies`.
+- Targeted checks: `pnpm -C app exec vitest run server/projectPushPolicy.test.ts server/projectIntelligence.knowledgeRoute.test.ts server/projectLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Computer Use is blocked from
+  inspecting `com.openai.codex`.
+
+Mockup fidelity:
+
+- Target used: Project Lab remains a dense work surface under the larger
+  1:1 shell direction.
+- Screenshot path: unavailable in this session because in-app Browser proof is
+  not callable.
+- Matched elements: push policy is visible but contained inside the existing
+  card. Manual push remains present.
+- Deviations: Project Lab still needs the later full 1:1 visual polish pass.
+- Next fidelity gap: project cards need the richer plaque/material treatment
+  after critical behavior gaps are closed.
+
+Drift check:
+
+- On path. This pass turns a temporary Project Lab control into durable local
+  policy state.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Policy storage is local SQLite only.
+- Assisted policy is advisory only. It does not execute a push.
+- Visual proof remains unavailable in this session.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- Added local `project_push_policies`.
+- Test writes and updates a CereBro project policy row in the local dev DB.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/server/routers/projectIntelligence.ts, app/server/projectPushPolicy.test.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, bookmark removal, bookmark rename, and frame chrome polish. Project Lab now has approval-gated push contracts plus saved local assisted/manual push policy. Next slice should continue Project Lab critical-path behavior or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

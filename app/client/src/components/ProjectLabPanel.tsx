@@ -293,7 +293,6 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
   const [projectFilter, setProjectFilter] = useState<ProjectViewFilter>("all");
   const [inspectorQueue, setInspectorQueue] = useState<InspectorQueue>("approvals");
   const [pushReceiptSlug, setPushReceiptSlug] = useState<string | null>(null);
-  const [autoPushSlugs, setAutoPushSlugs] = useState<Set<string>>(() => new Set());
   const [ledgerFocusNotice, setLedgerFocusNotice] = useState<string | null>(null);
   const [projectReceiptsOpen, setProjectReceiptsOpen] = useState(false);
   const overview = trpc.projectIntelligence.overview.useQuery(undefined, {
@@ -334,6 +333,16 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
         setLedgerFocusNotice(`Push contract #${result.proposalId} ${action}. Approval #${result.approvalId ?? "none"} is ${result.contract?.approvalStatus ?? "pending"}. No git command ran.`);
       } else {
         setLedgerFocusNotice(result.reason ?? "Push contract was not created.");
+      }
+      utils.projectIntelligence.overview.invalidate();
+    },
+  });
+  const savePushPolicy = trpc.projectIntelligence.savePushPolicy.useMutation({
+    onSuccess: (result) => {
+      if (result.ok) {
+        setLedgerFocusNotice(`${result.policy.mode === "assisted" ? "Assisted" : "Manual"} push policy saved. No git command ran.`);
+      } else {
+        setLedgerFocusNotice(result.reason ?? "Push policy was not saved.");
       }
       utils.projectIntelligence.overview.invalidate();
     },
@@ -673,7 +682,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               });
               const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
-              const autoPushArmed = autoPushSlugs.has(project.slug);
+              const autoPushArmed = project.pushReadiness.policy.mode === "assisted";
               const proofStats = project.tasks.projectId == null
                 ? { total: 0, terminal: 0, needsReview: 0, validated: 0 }
                 : projectReceiptsOpen ? evidenceByProjectId.get(project.tasks.projectId) ?? { total: 0, terminal: 0, needsReview: 0, validated: 0 } : { total: 0, terminal: 0, needsReview: 0, validated: 0 };
@@ -819,12 +828,11 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                           aria-pressed={autoPushArmed}
                           aria-label={`${autoPushArmed ? "Disable" : "Enable"} assisted push recommendation for ${project.name}`}
                           title={autoPushArmed ? "Assisted recommendation is selected. Manual push remains visible and approval-gated." : "Manual push remains visible. Assisted recommendation is off."}
+                          disabled={savePushPolicy.isPending}
                           onClick={() => {
-                            setAutoPushSlugs((current) => {
-                              const next = new Set(current);
-                              if (next.has(project.slug)) next.delete(project.slug);
-                              else next.add(project.slug);
-                              return next;
+                            savePushPolicy.mutate({
+                              slug: project.slug,
+                              mode: autoPushArmed ? "manual" : "assisted",
                             });
                             setPushReceiptSlug(project.slug);
                           }}

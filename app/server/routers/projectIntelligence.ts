@@ -904,6 +904,59 @@ async function latestPushContractForProject(projectId: number | null) {
   return row ? rowToPushContractSummary(row) : null;
 }
 
+const projectPushPolicyModes = ["manual", "assisted"] as const;
+
+function defaultPushPolicy(projectId: number | null) {
+  return {
+    id: null,
+    projectId,
+    mode: "manual" as const,
+    manualPushVisible: true,
+    automationRequiresApproval: true,
+    executesGit: false,
+    writesExternal: false,
+    saved: false,
+    updatedByAgent: "spock",
+    receiptBody: "Manual push remains visible. Assisted policy does not run git or write externally.",
+    createdAt: null,
+    updatedAt: null,
+  };
+}
+
+function rowToPushPolicy(row: Record<string, unknown>) {
+  const mode = String(row.mode) === "assisted" ? "assisted" : "manual";
+  return {
+    id: Number(row.id),
+    projectId: Number(row.project_id),
+    mode,
+    manualPushVisible: Boolean(row.manual_push_visible),
+    automationRequiresApproval: Boolean(row.automation_requires_approval),
+    executesGit: Boolean(row.executes_git),
+    writesExternal: Boolean(row.writes_external),
+    saved: true,
+    updatedByAgent: String(row.updated_by_agent),
+    receiptBody: String(row.receipt_body),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+async function latestPushPolicyForProject(projectId: number | null) {
+  if (projectId == null) return defaultPushPolicy(null);
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT *
+      FROM project_push_policies
+      WHERE project_id = ?
+      LIMIT 1
+    `,
+    args: [projectId],
+  });
+  const row = result.rows[0];
+  return row ? rowToPushPolicy(row) : defaultPushPolicy(projectId);
+}
+
 function pushReadinessForProject(project: ProjectOverviewItem) {
   const blockers: string[] = [];
   const why: string[] = [];
@@ -1321,6 +1374,7 @@ export const projectIntelligenceRouter = router({
           pushReadiness: {
             ...pushReadiness,
             contract: await latestPushContractForProject(tasks.projectId),
+            policy: await latestPushPolicyForProject(tasks.projectId),
           },
           knowledgeRoute: knowledgeRouteForProject(profile),
         };
@@ -1463,6 +1517,94 @@ export const projectIntelligenceRouter = router({
           createdAt: Number(row.created_at),
         },
         gates,
+      };
+    }),
+
+  savePushPolicy: publicProcedure
+    .input(
+      z.object({
+        slug: z.string().min(1).max(80),
+        mode: z.enum(projectPushPolicyModes),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const profile = projectProfiles.find((candidate) => candidate.slug === input.slug);
+      if (!profile) {
+        return {
+          ok: false as const,
+          mode: "unknown_project" as const,
+          writesExternal: false,
+          wouldExecute: false,
+          reason: "Unknown Project Lab profile.",
+        };
+      }
+
+      const db = await getCerebroDb();
+      const projectId = await getOrCreateProjectByPath(profile.name, profile.localPath);
+      const receiptBody = [
+        `Saved Project Lab push policy for ${profile.name}.`,
+        `Policy: ${input.mode}.`,
+        "Manual push remains visible.",
+        "No git command ran.",
+        "No external write ran.",
+        "Assisted policy may recommend a push contract, but execution still requires approval.",
+      ].join("\n");
+
+      const existing = await db.execute({
+        sql: `
+          SELECT id
+          FROM project_push_policies
+          WHERE project_id = ?
+          LIMIT 1
+        `,
+        args: [projectId],
+      });
+      if (existing.rows[0]?.id == null) {
+        await db.execute({
+          sql: `
+            INSERT INTO project_push_policies (
+              project_id, mode, manual_push_visible, automation_requires_approval,
+              executes_git, writes_external, updated_by_agent, receipt_body
+            )
+            VALUES (?, ?, 1, 1, 0, 0, 'spock', ?)
+          `,
+          args: [projectId, input.mode, receiptBody],
+        });
+      } else {
+        await db.execute({
+          sql: `
+            UPDATE project_push_policies
+            SET mode = ?,
+                manual_push_visible = 1,
+                automation_requires_approval = 1,
+                executes_git = 0,
+                writes_external = 0,
+                updated_by_agent = 'spock',
+                receipt_body = ?,
+                updated_at = unixepoch()
+            WHERE project_id = ?
+          `,
+          args: [input.mode, receiptBody, projectId],
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "saved_project_push_policy" as const,
+        writesExternal: false,
+        wouldExecute: false,
+        projectId,
+        policy: await latestPushPolicyForProject(projectId),
+        gates: [
+          "Saved a local Project Lab policy row.",
+          "Manual push stays visible.",
+          "Approval remains required before any push contract can run.",
+        ],
+        noActionTaken: [
+          "No git command ran.",
+          "No external write ran.",
+          "No task, approval, or execution proposal was created.",
+        ],
       };
     }),
 

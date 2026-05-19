@@ -424,6 +424,20 @@ async function ensureSchema(client: Client): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_project_action_draft_notes_draft ON project_action_draft_notes(draft_id)`,
       `CREATE INDEX IF NOT EXISTS idx_project_action_draft_notes_project ON project_action_draft_notes(project_id)`,
       `CREATE INDEX IF NOT EXISTS idx_project_action_draft_notes_created ON project_action_draft_notes(created_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS project_push_policies (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+         mode TEXT NOT NULL DEFAULT 'manual',
+         manual_push_visible INTEGER NOT NULL DEFAULT 1,
+         automation_requires_approval INTEGER NOT NULL DEFAULT 1,
+         executes_git INTEGER NOT NULL DEFAULT 0,
+         writes_external INTEGER NOT NULL DEFAULT 0,
+         updated_by_agent TEXT NOT NULL DEFAULT 'spock',
+         receipt_body TEXT NOT NULL,
+         created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+         updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+       )`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_project_push_policies_project ON project_push_policies(project_id)`,
       `CREATE TABLE IF NOT EXISTS execution_action_proposals (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          source_type TEXT NOT NULL,

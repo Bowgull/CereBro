@@ -2232,3 +2232,11 @@ Expected shape:
   Shelf change, external write, fake progress, or Raven path changed. Next
   slice should move to the next build-plan surface unless Browser proof tooling
   becomes available for visual QA.
+- 2026-05-19 1949 EDT: Project Lab saved push policy landed. Added durable
+  local `project_push_policies` storage, a `savePushPolicy` router mutation,
+  and Project Lab UI wiring so assisted/manual push recommendation state
+  survives refresh without running git. Manual push remains visible, approval
+  remains required, and saving the policy creates no task, approval, execution
+  proposal, provider call, external write, git command, or Raven path. Next
+  slice should continue Project Lab critical-path work or move to the next
+  build-plan surface after checking current queue priority.
