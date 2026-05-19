@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { approvalPanelCopy, approvalRunnerStateCopy } from "../client/src/lib/approvalPanelCopyModel";
+import { approvalBrowserReturnCopy, approvalPanelCopy, approvalRunnerStateCopy } from "../client/src/lib/approvalPanelCopyModel";
 
 describe("approvalPanelCopyModel", () => {
   it("frames approvals as waiting gates without primary-surface machinery", () => {
@@ -72,5 +72,32 @@ describe("approvalPanelCopyModel", () => {
     expect(state.tone).toBe("accent");
     expect(state.body).toContain("does not execute");
     expect(state.body).not.toContain("Git remote writes");
+  });
+
+  it("names the next Browser step for review approvals", () => {
+    const copy = approvalBrowserReturnCopy({
+      approvalKind: "review",
+      status: "approved",
+      canOpenPage: false,
+    });
+
+    expect(copy.buttonLabel).toBe("Return to Browser");
+    expect(copy.notice).toContain("Review approval recorded");
+    expect(copy.notice).toContain("approve the live gate");
+    expect(copy.opensPage).toBe(false);
+  });
+
+  it("names the next Browser step for approved live-runner approvals", () => {
+    const copy = approvalBrowserReturnCopy({
+      approvalKind: "live_runner",
+      status: "approved",
+      canOpenPage: false,
+    });
+
+    expect(copy.buttonLabel).toBe("Return to Browser");
+    expect(copy.notice).toContain("Live gate approved");
+    expect(copy.notice).toContain("mark the tab ready");
+    expect(copy.notice).toContain("Open Frame");
+    expect(copy.opensPage).toBe(false);
   });
 });

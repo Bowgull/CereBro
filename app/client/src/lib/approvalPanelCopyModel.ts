@@ -89,3 +89,33 @@ export function approvalRunnerStateCopy(input: {
     body: "Approval records the decision. This queue does not execute work.",
   };
 }
+
+export function approvalBrowserReturnCopy(input: {
+  approvalKind: "review" | "live_runner";
+  status: string | null | undefined;
+  canOpenPage: boolean;
+}) {
+  if (input.approvalKind === "live_runner" && input.status === "approved") {
+    return {
+      buttonLabel: "Return to Browser",
+      notice: input.canOpenPage
+        ? "Live gate approved. Return to Browser and use Open Frame when ready. No page opens from Approval Queue."
+        : "Live gate approved. Return to Browser, mark the tab ready, then use Open Frame. No page opens from Approval Queue.",
+      opensPage: false,
+    };
+  }
+
+  if (input.approvalKind === "review" && input.status === "approved") {
+    return {
+      buttonLabel: "Return to Browser",
+      notice: "Review approval recorded. Return to Browser and approve the live gate before any page can open.",
+      opensPage: false,
+    };
+  }
+
+  return {
+    buttonLabel: "Return to Browser",
+    notice: "Browser proposal focused. Approval Queue does not open pages.",
+    opensPage: false,
+  };
+}

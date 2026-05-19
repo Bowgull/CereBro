@@ -35782,3 +35782,90 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, and open-package staging. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice should make the approval return path clearer or add honest local bookmarks. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1913 EDT - Browser Approval Return Path Copy
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Approval Queue now explains the Browser next step
+  after review approval versus live-runner approval.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added tested `approvalBrowserReturnCopy`.
+- Review approvals now tell the user to return to Browser and approve the live
+  gate before any page can open.
+- Approved live-runner approvals now tell the user to return to Browser, mark
+  the tab ready, then use Open Frame.
+- The Browser focus notice now carries the same guidance back to the Browser
+  surface.
+- No approval is decided automatically.
+- No readiness state is changed automatically.
+- No page opens.
+- No backend fetch, proxy, cookies, credentials, scraping, source save,
+  provider call, install, download, external write, fake capability, fake
+  progress, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/lib/approvalPanelCopyModel.ts`
+- `app/server/approvalPanelCopyModel.test.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1913 CereBro Session Handoff - browser-approval-return-path-copy.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/approvalPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected before the Browser return helper existed.
+- `pnpm -C app exec vitest run server/approvalPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Browser proof tooling is not callable
+  in this session.
+
+Mockup fidelity:
+
+- Target used: Browser high-fidelity source-of-truth direction, workflow only.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: Browser approval return path is clearer and lower
+  machinery.
+- Deviations: approval decision, readiness, and open frame remain explicit.
+- Next fidelity gap: honest bookmarks and fewer exposed details are still open.
+
+Drift check:
+
+- On path. This pass improves Browser usefulness without pretending it has a
+  full browser engine.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- The Browser still needs manual readiness after live-runner approval.
+- Browser still does not own cookies, durable login sessions, bookmarks,
+  service resume, source capture, page content cache, or Aang-driven browsing.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/lib/approvalPanelCopyModel.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, and approval return copy. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice can add honest local bookmarks or continue reducing exposed machinery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

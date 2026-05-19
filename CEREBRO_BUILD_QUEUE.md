@@ -2185,3 +2185,10 @@ Expected shape:
   backend fetch runs, no cookies or credentials persist, no source save occurs,
   and no external write runs. Next Browser slice should make the approval
   return path clearer or add honest local bookmarks.
+- 2026-05-19 1913 EDT: Browser approval return path copy landed. Approval
+  Queue now names the next Browser step after review approval versus
+  live-runner approval, and the Browser focus notice carries that guidance back
+  into the Browser surface. This is copy and focus-state clarity only. It does
+  not approve a gate automatically, mark a tab ready, open a frame, fetch a
+  page, persist cookies, save sources, or write externally. Next Browser slice
+  can add honest local bookmarks or continue reducing exposed machinery.

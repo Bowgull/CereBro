@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
-import { approvalPanelCopy, approvalRunnerStateCopy } from "@/lib/approvalPanelCopyModel";
+import { approvalBrowserReturnCopy, approvalPanelCopy, approvalRunnerStateCopy } from "@/lib/approvalPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -202,6 +202,11 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   }
 
   function focusBrowserProposal(input: BrowserProposalReceipt) {
+    const returnCopy = approvalBrowserReturnCopy({
+      approvalKind: input.approvalKind,
+      status: selected?.status,
+      canOpenPage: input.canOpenPage,
+    });
     try {
       window.sessionStorage.setItem(
         "cerebro:browser-focus",
@@ -209,7 +214,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
           source: "approval_decision_return",
           proposalId: input.proposalId,
           query: input.target,
-          notice: `Browser proposal #${input.proposalId} focused after approval decision. Page open remains blocked.`,
+          notice: `Browser proposal #${input.proposalId}. ${returnCopy.notice}`,
         }),
       );
     } catch {
@@ -602,15 +607,25 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                     </>
                   )}
                   {selected.browserProposalReceipt && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={!onNavigate}
-                      onClick={() => focusBrowserProposal(selected.browserProposalReceipt!)}
-                    >
-                      Return to Browser
-                    </Button>
+                    (() => {
+                      const returnCopy = approvalBrowserReturnCopy({
+                        approvalKind: selected.browserProposalReceipt.approvalKind,
+                        status: selected.status,
+                        canOpenPage: selected.browserProposalReceipt.canOpenPage,
+                      });
+                      return (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={!onNavigate}
+                          title={returnCopy.notice}
+                          onClick={() => focusBrowserProposal(selected.browserProposalReceipt!)}
+                        >
+                          {returnCopy.buttonLabel}
+                        </Button>
+                      );
+                    })()
                   )}
                 </div>
               </Section>
