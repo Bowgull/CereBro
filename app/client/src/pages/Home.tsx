@@ -582,10 +582,21 @@ export default function Home() {
         {/* Right context panel — quiet route context only */}
         {isContextPanelOpen && (
           <aside
-            className={`${isWorkbenchFocus ? "w-[184px]" : "w-[250px]"} shrink-0 flex flex-col overflow-hidden transition-[width] duration-200`}
+            className={`${isWorkbenchFocus ? "w-[184px]" : "w-[250px]"} relative shrink-0 flex flex-col overflow-hidden transition-[width] duration-200`}
             aria-label="Context panel"
-            style={{ background: "rgba(7, 15, 13, 0.96)", borderLeft: `1px solid ${mockupShell.marbleLine}`, boxShadow: "inset 1px 0 0 rgba(244, 239, 227, 0.05)" }}
+            style={{
+              background: `
+                radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.11), transparent 34%),
+                linear-gradient(180deg, rgba(15, 29, 25, 0.98), rgba(5, 12, 11, 0.99))
+              `,
+              borderLeft: `1px solid ${mockupShell.marbleLine}`,
+              boxShadow: "inset 1px 0 0 rgba(244, 239, 227, 0.05), -18px 0 36px rgba(0, 0, 0, 0.22)",
+            }}
           >
+            <div className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l border-t" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
+            <div className="pointer-events-none absolute right-2 top-2 h-4 w-4 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+            <div className="pointer-events-none absolute bottom-2 left-2 h-4 w-4 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+            <div className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 border-b border-r" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
             <ContextPanel
               agent={activeAgent}
               mode={mode}
@@ -3099,27 +3110,37 @@ function ContextPanel({
   const activeVision = activeVisions.data?.items[0] ?? null;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="relative z-[1] flex h-full flex-col overflow-hidden">
       {/* Active Agent */}
       <div
-        className="px-2.5 py-2 shrink-0"
+        className="mx-2 mt-2 shrink-0 rounded px-2.5 py-2"
         style={{
-          borderBottom: `1px solid ${mockupShell.marbleLineSoft}`,
-          background: "linear-gradient(180deg, rgba(24, 42, 35, 0.98), rgba(8, 17, 15, 0.98))",
-          boxShadow: mockupShell.bevel,
+          border: `1px solid ${mockupShell.marbleLine}`,
+          background: `
+            radial-gradient(circle at 12% 0%, rgba(198, 155, 85, 0.12), transparent 35%),
+            linear-gradient(180deg, rgba(28, 49, 41, 0.98), rgba(7, 16, 14, 0.98))
+          `,
+          boxShadow: `${mockupShell.bevel}, 0 12px 26px rgba(0, 0, 0, 0.22)`,
         }}
       >
-        <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: shellFrame.ivoryMuted }}>
-          Route read
+        <div className="mb-1.5 flex items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: shellFrame.ivoryMuted }}>
+            Aang route read
+          </div>
+          <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${shellFrame.brassSoft}, transparent)` }} />
         </div>
         {agent ? (
           <>
             <div className="flex items-center gap-2">
               <div
-                className="h-8 w-8 shrink-0 rounded flex items-center justify-center"
-                style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: mockupShell.bevel }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded"
+                style={{
+                  background: "linear-gradient(180deg, rgba(38, 63, 53, 0.96), rgba(7, 16, 14, 0.98))",
+                  border: `1px solid ${shellFrame.brassSoft}`,
+                  boxShadow: `${mockupShell.bevel}, 0 0 18px rgba(198, 155, 85, 0.08)`,
+                }}
               >
-                <img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-7 w-7" style={{ imageRendering: "pixelated" }} />
+                <img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-8 w-8" style={{ imageRendering: "pixelated" }} />
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[13px] font-semibold" style={{ color: C.textPrimary }}>
@@ -3139,14 +3160,14 @@ function ContextPanel({
         )}
       </div>
 
-      <div className={`${compact ? "px-2 py-1.5 space-y-1.5" : "px-2.5 py-2 space-y-2"} shrink-0`} style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}>
+      <div className={`${compact ? "px-2 py-1.5 space-y-1.5" : "px-2.5 py-2 space-y-2"} shrink-0`}>
         <div className="grid grid-cols-2 gap-1.5">
           <ShellMiniStat label="Mode" value={MODE_LABELS[mode]} />
           <ShellMiniStat label="Surface" value={activeSurface} />
         </div>
-        <div className={`${compact ? "rounded px-2 py-1.5" : "rounded p-2"}`} style={{ background: "rgba(5, 11, 10, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
+        <div className={`${compact ? "rounded px-2 py-1.5" : "rounded p-2"}`} style={{ background: "rgba(5, 11, 10, 0.64)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: "inset 0 1px 8px rgba(0, 0, 0, 0.34)" }}>
           <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: C.textMuted }}>
-            Chain
+            Route
           </div>
           <div className="flex flex-wrap items-center gap-1">
             {route.map((agentName, index) => (
@@ -3171,7 +3192,7 @@ function ContextPanel({
         </div>
       </div>
 
-      <div className={`${compact ? "hidden" : "px-2.5 py-2 shrink-0 space-y-1.5"}`} style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.55)" }}>
+      <div className={`${compact ? "hidden" : "mx-2 mb-2 shrink-0 space-y-1.5 rounded px-2 py-2"}`} style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.5)", boxShadow: mockupShell.bevel }}>
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
             Active contract
@@ -3197,10 +3218,10 @@ function ContextPanel({
       </div>
 
       {/* Sessions list (moved from left rail) */}
-      <div className={compact ? "hidden" : "flex-1 flex flex-col overflow-hidden"}>
+      <div className={compact ? "hidden" : "mx-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded"} style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.42)", boxShadow: "inset 0 1px 10px rgba(0, 0, 0, 0.28)" }}>
         <div
           className="px-2.5 py-1.5 flex items-center justify-between shrink-0"
-          style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(6, 13, 12, 0.7)" }}
+          style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(6, 13, 12, 0.72)" }}
         >
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             {selectedHero ? "Selected" : "Sessions"}
@@ -3281,9 +3302,12 @@ function ContextPanel({
       </div>
 
       {/* Next Actions */}
-      <div className={`${compact ? "px-2 py-1.5" : "px-2.5 py-2"} shrink-0`} style={{ borderTop: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque }}>
-        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Next
+      <div className={`${compact ? "mx-2 mb-2 px-2 py-1.5" : "mx-2 mb-2 px-2.5 py-2"} shrink-0 rounded`} style={{ border: `1px solid ${mockupShell.marbleLine}`, background: mockupShell.plaque, boxShadow: `${mockupShell.bevel}, 0 -10px 24px rgba(0, 0, 0, 0.18)` }}>
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            Next action
+          </div>
+          <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${mockupShell.marbleLineSoft}, transparent)` }} />
         </div>
         <div className={`${compact ? "line-clamp-3 text-[10px]" : "text-[11px]"} leading-snug`} style={{ color: C.textSecondary }}>
           {nextAction}
@@ -3309,7 +3333,7 @@ function ContextPanel({
 
 function ShellMiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded px-2 py-1.5" style={{ background: shellFrame.shellPlaque, border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
+    <div className="rounded px-2 py-1.5" style={{ background: "rgba(7, 16, 14, 0.68)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
       <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
         {label}
       </div>

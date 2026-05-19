@@ -2081,3 +2081,11 @@ Expected shape:
   schema, provider call, install, download, external write, fake capability, or
   Raven path was added. Next shell slice should continue the 1:1 pass on right
   rail shape or remaining command bar refinement.
+- 2026-05-19 1159 EDT: Main shell right rail shape polish landed. The Aang
+  context rail now has a richer carved side-panel frame, corner trim, softer
+  Aang route-read plaque, inset route grouping, and quieter contract/session/
+  next-action panels. This is visual shell polish only: no nav behavior, route
+  behavior, backend route, schema, provider call, install, download, external
+  write, fake capability, or Raven path was added. Next shell slice should
+  compare the whole shell against the 1:1 mockup and choose the remaining
+  highest-fidelity gap.

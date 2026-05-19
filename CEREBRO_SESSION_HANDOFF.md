@@ -34775,3 +34775,84 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the broader shell 1:1 pass. Browser chrome, Browser empty-state, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile polish, main shell frame corner/control-node polish, main shell header chrome polish, main shell left rail plaque polish, and main shell command bar material polish exist. Next safest slice is right rail shape or remaining command bar proportion. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 1159 EDT - Main Shell Right Rail Shape Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Main shell right rail moved closer to the approved
+  high-fidelity mockup.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Reworked the right context rail into a richer carved side panel.
+- Added side-rail corner trim.
+- Softened the top Aang route-read plaque.
+- Made the Aang avatar well match the command bar treatment.
+- Reduced the stacked admin-sidebar feel by giving route, contract, sessions,
+  and next action clearer material boundaries.
+- Kept all navigation, route read, active contract, session selection, and
+  quick-link behavior unchanged.
+- No backend route, schema, provider call, install, download, external write,
+  fake capability, fake source discovery, service resume, or Raven path was
+  added.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1159 CereBro Session Handoff - main-shell-right-rail-shape-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed. The browser plugin did not expose a
+  callable browser tool after discovery in this session, Playwright is not
+  installed in the available Node path, and Computer Use is blocked from
+  operating the Codex app.
+
+Mockup fidelity:
+
+- Target used: approved main shell high-fidelity mockup plus low-machinery rule.
+- Matched elements: the right rail now reads more like a softened Aang route
+  panel and less like a generic context sidebar.
+- Deviations: still not 1:1 visual polish. The full shell needs a visual
+  compare pass once screenshot tooling is available, and the castle scene itself
+  still trails the approved mockup.
+- Next fidelity gap: compare the full shell against the approved 1:1 mockup and
+  choose the remaining highest-impact mismatch.
+
+Drift check:
+
+- On path. This pass changes right rail material only.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, unsafe
+  site automation, provider use, install, pull, external write, or Raven path.
+
+Known risks:
+
+- This is UI polish only.
+- Browser visual proof could not run with the currently available tools in this
+  turn.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the broader shell 1:1 pass. Browser chrome, Browser empty-state, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile polish, main shell frame corner/control-node polish, main shell header chrome polish, main shell left rail plaque polish, main shell command bar material polish, and main shell right rail shape polish exist. Next safest slice is a full shell compare against the approved 1:1 mockup followed by the highest-impact remaining shell mismatch. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
+```
