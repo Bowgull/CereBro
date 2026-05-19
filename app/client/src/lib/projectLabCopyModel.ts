@@ -86,3 +86,19 @@ export function projectLabPushContractCopy(input: {
       : `Contract #${input.contractId}. Approval ${input.approvalStatus ?? "unknown"}. V1 records the decision only. Git remote writes stay manual.`,
   };
 }
+
+export function projectLabPushContractActionCopy(input: { contractId: number | null }) {
+  if (input.contractId == null) {
+    return {
+      label: "Create contract",
+      shouldCreateContract: true,
+      notice: "Create a local approval receipt and execution proposal. No git command runs.",
+    };
+  }
+
+  return {
+    label: "Read contract",
+    shouldCreateContract: false,
+    notice: `Contract #${input.contractId} is already open in Project Lab. No git command ran.`,
+  };
+}

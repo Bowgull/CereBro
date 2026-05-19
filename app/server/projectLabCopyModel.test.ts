@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { projectLabGuideCopy, projectLabPushContractCopy, projectLabPushCopy, projectLabReceiptCopy } from "../client/src/lib/projectLabCopyModel";
+import {
+  projectLabGuideCopy,
+  projectLabPushContractActionCopy,
+  projectLabPushContractCopy,
+  projectLabPushCopy,
+  projectLabReceiptCopy,
+} from "../client/src/lib/projectLabCopyModel";
 
 describe("projectLabCopyModel", () => {
   it("names the local rule drawer as a project map guide", () => {
@@ -76,5 +82,17 @@ describe("projectLabCopyModel", () => {
     expect(blocked.stateLabel).toBe("route blocked");
     expect(blocked.body).toContain("Save the Aang route");
     expect(blocked.body).toContain("git remote writes stay manual");
+  });
+
+  it("does not route existing push-contract reads through the create action", () => {
+    const missing = projectLabPushContractActionCopy({ contractId: null });
+    const existing = projectLabPushContractActionCopy({ contractId: 42 });
+
+    expect(missing.label).toBe("Create contract");
+    expect(missing.shouldCreateContract).toBe(true);
+    expect(existing.label).toBe("Read contract");
+    expect(existing.shouldCreateContract).toBe(false);
+    expect(existing.notice).toContain("Contract #42");
+    expect(existing.notice).toContain("No git command ran");
   });
 });

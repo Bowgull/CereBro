@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
-import { projectLabGuideCopy, projectLabPushContractCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
+import { projectLabGuideCopy, projectLabPushContractActionCopy, projectLabPushContractCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -680,6 +680,9 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                 canRunInV1: pushContract?.canRunInV1 ?? false,
                 missing: pushContract?.missing ?? [],
               });
+              const pushContractActionCopy = projectLabPushContractActionCopy({
+                contractId: pushContract?.id ?? null,
+              });
               const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
               const autoPushArmed = project.pushReadiness.policy.mode === "assisted";
@@ -891,13 +894,17 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                               type="button"
                               variant="risk"
                               size="sm"
-                              disabled={createPushActionContract.isPending}
+                              disabled={pushContractActionCopy.shouldCreateContract && createPushActionContract.isPending}
                               onClick={() => {
                                 setPushReceiptSlug(project.slug);
-                                createPushActionContract.mutate({ slug: project.slug });
+                                if (pushContractActionCopy.shouldCreateContract) {
+                                  createPushActionContract.mutate({ slug: project.slug });
+                                  return;
+                                }
+                                setLedgerFocusNotice(pushContractActionCopy.notice);
                               }}
                             >
-                              {createPushActionContract.isPending ? "Creating" : pushContract ? "Read contract" : "Create contract"}
+                              {pushContractActionCopy.shouldCreateContract && createPushActionContract.isPending ? "Creating" : pushContractActionCopy.label}
                             </Button>
                           </div>
                         </div>

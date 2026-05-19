@@ -36373,3 +36373,87 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/server/routers/projectIntelligence.ts, app/server/projectPushPolicy.test.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, bookmark removal, bookmark rename, and frame chrome polish. Project Lab now has approval-gated push contracts plus saved local assisted/manual push policy. Next slice should continue Project Lab critical-path behavior or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1954 EDT - Project Lab Contract Read Action
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Project Lab now distinguishes create-contract from
+  read-existing-contract.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added tested `projectLabPushContractActionCopy`.
+- Missing push contracts still show `Create contract` and use the create
+  mutation.
+- Existing push contracts now show `Read contract` and only open the local
+  Project Lab contract read with a notice.
+- Existing contract reads no longer call `createPushActionContract`.
+- No git command, task, approval, execution proposal, provider call, external
+  write, source write, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/server/projectLabCopyModel.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1954 CereBro Session Handoff - project-lab-contract-read-action.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red check: `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first on missing `projectLabPushContractActionCopy`.
+- Targeted checks: `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts server/projectPushPolicy.test.ts server/projectIntelligence.knowledgeRoute.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Computer Use is blocked from
+  inspecting `com.openai.codex`.
+
+Mockup fidelity:
+
+- Target used: Project Lab remains a dense work surface under the larger
+  1:1 shell direction.
+- Screenshot path: unavailable in this session because in-app Browser proof is
+  not callable.
+- Matched elements: less duplicate machinery. The existing contract path reads
+  locally instead of behaving like another create action.
+- Deviations: Project Lab still needs the later full 1:1 visual polish pass.
+- Next fidelity gap: project cards need richer plaque/material treatment after
+  critical behavior gaps are closed.
+
+Drift check:
+
+- On path. This pass removes a duplicate create path from the existing Project
+  Lab push contract card.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Existing contract read stays in Project Lab for now. It does not deep-link
+  into Ledger.
+- Visual proof remains unavailable in this session.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No DB writes from this code change.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/server/projectLabCopyModel.test.ts, app/server/projectPushPolicy.test.ts, app/server/routers/projectIntelligence.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, bookmark removal, bookmark rename, and frame chrome polish. Project Lab now has approval-gated push contracts, saved local assisted/manual push policy, and read-existing-contract behavior that does not create duplicate contracts. Next slice should continue Project Lab critical-path behavior or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

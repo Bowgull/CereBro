@@ -2240,3 +2240,10 @@ Expected shape:
   proposal, provider call, external write, git command, or Raven path. Next
   slice should continue Project Lab critical-path work or move to the next
   build-plan surface after checking current queue priority.
+- 2026-05-19 1954 EDT: Project Lab contract read action landed. Existing
+  push-contract buttons now read the already-open local contract instead of
+  routing through the create mutation again. Missing contracts still use the
+  create path. No schema change, task, approval, execution proposal, git
+  command, provider call, external write, or Raven path changed. Next slice
+  should continue Project Lab behavior gaps or move to the next build-plan
+  surface after queue review.
