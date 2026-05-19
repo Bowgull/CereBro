@@ -35869,3 +35869,93 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/lib/approvalPanelCopyModel.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, and approval return copy. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice can add honest local bookmarks or continue reducing exposed machinery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1923 EDT - Browser Local Bookmarks
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser can save and show local bookmarks from an open
+  Browser frame.
+- Backend/runtime: added local bookmark storage and guarded save route.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `browser_bookmarks` local table.
+- Added `workbench.browserBookmarkStorageContract`.
+- Added `workbench.createBrowserBookmarkFromOpenTab`.
+- Browser page actions menu now includes `Bookmark Page`.
+- Saved bookmarks show in a collapsed `Bookmarks` plaque.
+- Selecting a bookmark loads the address bar only.
+- Bookmark save is blocked until the tab state is `open`.
+- Duplicate target URLs reuse the existing bookmark.
+- No page opens from bookmark selection.
+- No backend page fetch, cookies, credentials, source save, media save, Watch
+  Shelf save, provider call, install, download, external write, fake progress,
+  service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1923 CereBro Session Handoff - browser-local-bookmarks.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected because `browser_bookmarks` did not exist.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. `tool_search` exposed Computer Use
+  only, and Computer Use is blocked from inspecting `com.openai.codex`.
+
+Mockup fidelity:
+
+- Target used: Browser high-fidelity source-of-truth direction.
+- Screenshot path: unavailable in this session because in-app Browser proof is
+  not callable.
+- Matched elements: bookmarks are real local rows, collapsed by default, and do
+  not add a new top-level tab.
+- Deviations: bookmarks do not yet support rename, delete, folder grouping, or
+  sync.
+- Next fidelity gap: open page state still exposes too much proof/gate
+  machinery.
+
+Drift check:
+
+- On path. This pass makes Browser more useful without pretending CereBro has a
+  full browser engine.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Local bookmark rows are durable and append to the dev DB.
+- Bookmark rename/delete is not built yet.
+- Browser proof remains unavailable in this session.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- Added local table `browser_bookmarks`.
+- Test runs may create local bookmark rows in `app/cerebro.db`.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, and local bookmarks. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice should reduce visible machinery in the open page state or harden bookmark rename/delete if needed. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

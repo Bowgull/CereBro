@@ -2192,3 +2192,12 @@ Expected shape:
   not approve a gate automatically, mark a tab ready, open a frame, fetch a
   page, persist cookies, save sources, or write externally. Next Browser slice
   can add honest local bookmarks or continue reducing exposed machinery.
+- 2026-05-19 1923 EDT: Browser local bookmarks landed. Added
+  `browser_bookmarks`, read-only bookmark storage contract, and
+  `createBrowserBookmarkFromOpenTab`. The Browser page actions menu can save
+  the current open local frame as a bookmark, and saved bookmarks appear as a
+  collapsed local plaque that loads the address bar without opening a page.
+  Bookmark save is blocked until the Browser tab is actually open. No backend
+  page fetch, cookies, credentials, source save, media save, external write, or
+  Watch Shelf save runs. Next Browser slice should continue reducing visible
+  machinery in the open page state or harden bookmark deletion/rename if needed.

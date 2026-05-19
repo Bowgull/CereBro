@@ -159,6 +159,22 @@ function rowToBrowserTabHistoryItem(row: Record<string, unknown>) {
   };
 }
 
+function rowToBrowserBookmark(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
 function browserHistoryNavigationItems(items: ReturnType<typeof rowToBrowserTabHistoryItem>[]) {
   const grouped = new Map<number, ReturnType<typeof rowToBrowserTabHistoryItem>[]>();
   for (const item of items) {
@@ -1212,6 +1228,53 @@ export const workbenchRouter = router({
     };
   }),
 
+  browserBookmarkStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               state, project_id, source_id, workbench_evidence_id,
+               created_at, updated_at
+        FROM browser_bookmarks
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_bookmarks" as const,
+      canSaveBookmarks: true,
+      canPersistCookies: false,
+      canFetchPage: false,
+      storageShape: {
+        requiredFields: ["target_url", "state", "created_at", "updated_at"],
+        optionalFields: [
+          "browser_tab_session_id",
+          "proposal_id",
+          "title",
+          "project_id",
+          "source_id",
+          "workbench_evidence_id",
+        ],
+      },
+      items: rows.rows.map((row) => rowToBrowserBookmark(row as Record<string, unknown>)),
+      gates: [
+        "Bookmark storage table exists.",
+        "Saving a bookmark requires a real open Browser tab.",
+        "Bookmarks are local rows only. They do not save cookies, credentials, page content, sources, or media.",
+      ],
+      noActionTaken: [
+        "No browser opened.",
+        "No backend page fetch ran.",
+        "No cookies or credentials persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
   browserManualOpenPageContract: publicProcedure
     .input(
       z.object({
@@ -1924,6 +1987,108 @@ export const workbenchRouter = router({
         noActionTaken: [
           "No progress persisted.",
           "No backend page fetch ran.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserBookmarkFromOpenTab: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_save_blocked" as const,
+          proposal,
+          tab,
+          bookmark: null,
+          canSaveBookmark: false,
+          writesExternal: false,
+          gates: [
+            "Bookmark save remains blocked.",
+            "A real open Browser tab is required before saving a bookmark.",
+            "No bookmark saved, source saved, backend page fetch run, cookie persisted, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark saved.",
+            "No backend page fetch ran.",
+            "No cookies or credentials persisted.",
+            "No source saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 state, project_id, source_id, workbench_evidence_id,
+                 created_at, updated_at
+          FROM browser_bookmarks
+          WHERE target_url = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [tab.targetUrl],
+      });
+      let bookmark = existing.rows[0] as Record<string, unknown> | undefined;
+
+      if (!bookmark) {
+        const created = await db.execute({
+          sql: `
+            INSERT INTO browser_bookmarks (
+              browser_tab_session_id, proposal_id, target_url, title, state,
+              project_id, source_id, workbench_evidence_id
+            )
+            VALUES (?, ?, ?, ?, 'saved', ?, ?, ?)
+            RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                      state, project_id, source_id, workbench_evidence_id,
+                      created_at, updated_at
+          `,
+          args: [
+            tab.id,
+            proposal.id,
+            tab.targetUrl,
+            tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+            tab.projectId,
+            tab.sourceId,
+            tab.workbenchEvidenceId,
+          ],
+        });
+        bookmark = created.rows[0] as Record<string, unknown> | undefined;
+      }
+
+      if (!bookmark) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser bookmark could not be saved.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_saved" as const,
+        proposal,
+        tab,
+        bookmark: rowToBrowserBookmark(bookmark),
+        canSaveBookmark: true,
+        writesExternal: false,
+        gates: [
+          "Saved one local Browser bookmark from an open Browser tab.",
+          "No cookies, credentials, page content, source discovery, backend page fetch, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
           "No source saved.",
           "No external write ran.",
         ],

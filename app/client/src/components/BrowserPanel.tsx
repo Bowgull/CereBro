@@ -98,6 +98,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const browserBookmarkStorageContract = trpc.workbench.browserBookmarkStorageContract.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation({
     onSuccess: () => {
       utils.workbench.browserActionProposals.invalidate();
@@ -202,6 +207,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const createBrowserBookmarkFromOpenTab = trpc.workbench.createBrowserBookmarkFromOpenTab.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Bookmarked: ${result.bookmark?.title ?? result.bookmark?.targetUrl ?? "current page"}.`
+          : "Bookmark blocked. Open the page first.",
+      );
+      utils.workbench.browserBookmarkStorageContract.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
   const recordBrowserSandboxFrameReload = trpc.workbench.recordBrowserSandboxFrameReload.useMutation({
     onSuccess: (result) => {
       if (result.ok) {
@@ -260,6 +276,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const watchShelfItems = (watchShelfStorageContract.data?.items ?? []).filter(
     (item, index, items) => items.findIndex((candidate) => candidate.targetUrl === item.targetUrl) === index,
   );
+  const browserBookmarkItems = (browserBookmarkStorageContract.data?.items ?? []).filter(
+    (item, index, items) => items.findIndex((candidate) => candidate.targetUrl === item.targetUrl) === index,
+  );
   const navigateBrowserLocalHistory = (target: typeof browserLocalNavigation.backTarget) => {
     if (!target || target.proposalId == null) {
       setBrowserNotice("No real local Browser history target is available.");
@@ -286,6 +305,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     prepareBrowserLiveRunnerOpenReadiness.isPending ||
     recordBrowserSandboxFrameOpen.isPending ||
     createWatchShelfItemFromOpenTab.isPending ||
+    createBrowserBookmarkFromOpenTab.isPending ||
     recordBrowserSandboxFrameReload.isPending;
 
   useEffect(() => {
@@ -532,6 +552,24 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </summary>
                 <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                    disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createBrowserBookmarkFromOpenTab.isPending}
+                    title={hasOpenSandboxFrame ? "Save this open page as a local bookmark. No page fetch or source save." : "Open a page before saving a bookmark."}
+                    role="menuitem"
+                    onClick={() => {
+                      if (selectedBrowserProposalId == null) return;
+                      createBrowserBookmarkFromOpenTab.mutate({ proposalId: selectedBrowserProposalId });
+                    }}
+                  >
+                    <span className="block">
+                      <span className="block text-[11px] font-semibold">{createBrowserBookmarkFromOpenTab.isPending ? "Saving Bookmark" : "Bookmark Page"}</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Local bookmark only.</span>
+                    </span>
+                  </Button>
                   {browserShell.actions.map((action) => (
                     <Button
                       key={action.label}
@@ -617,6 +655,47 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     ))}
                   </div>
                   <div className="mt-1">{browserProjectPins.noActionText}</div>
+                </div>
+              </details>
+            </div>
+          )}
+
+          {browserBookmarkItems.length > 0 && !hasOpenSandboxFrame && (
+            <div className="flex justify-end">
+              <details className="relative">
+                <summary className="flex h-7 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Show Browser bookmarks" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                  <Bookmark size={12} strokeWidth={1.8} aria-hidden="true" />
+                  Bookmarks
+                  <span style={{ color: C.gold }}>{browserBookmarkItems.length}</span>
+                </summary>
+                <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                  <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Local Bookmarks</div>
+                  <div className="mt-1 grid gap-1">
+                    {browserBookmarkItems.slice(0, 6).map((bookmark) => (
+                      <Button
+                        key={bookmark.id}
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                        title={`${bookmark.targetUrl}. Stages address only. No page opens.`}
+                        onClick={() => {
+                          setBrowserSurface("page");
+                          setBrowserAddressDraft(bookmark.targetUrl);
+                          setSelectedBrowserProposalId(null);
+                          setSandboxFrameTarget(null);
+                          setSandboxFrameProposalId(null);
+                          setBrowserNotice("Bookmark loaded into the address bar. Stage it before opening.");
+                        }}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
+                          <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="mt-1">Local rows only. No cookies, page cache, source save, or external write.</div>
                 </div>
               </details>
             </div>
