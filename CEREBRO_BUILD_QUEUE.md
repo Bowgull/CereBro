@@ -1918,3 +1918,12 @@ Expected shape:
   Gate shows `Prepare runner` disabled until preflight has zero missing gates.
   Next Browser slice should decide and build the actual in-app manual page
   render lane without faking rendering or adding unapproved dependencies.
+- 2026-05-19 0748 EDT: Browser sandbox-frame render lane landed. The Workbench
+  router now records `sandbox_frame_open_requested` only for `open_ready` or
+  already `open` Browser tabs, and the client assigns the URL to a sandboxed
+  iframe after that receipt. This is the first real in-app page render lane.
+  It does not add a backend fetch/proxy, source save, Watch Shelf save,
+  credential handling, downloads, provider calls, installs, or external writes.
+  Some sites will refuse iframe rendering. Next Browser slice should collapse
+  runner machinery after frame open, add reload/history controls for sandboxed
+  frames, or enable Watch Shelf draft save from a real open page.

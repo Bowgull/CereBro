@@ -33093,3 +33093,95 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Next safest slice is the actual in-app manual page render lane design/implementation gate: decide whether the stack can use a sandboxed iframe/webview-like frame or needs a separate local runner adapter. Do not fake rendering. Do not add dependencies, external services, provider calls, source discovery, Watch Shelf saves, installs, or Raven paths. Keep page opens approval-gated and screenshot-proof any UI change.
 ```
+
+## 2026-05-19 0748 EDT - Browser Sandbox Frame Render
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser can now render an approved open-ready URL in
+  a sandboxed in-app frame.
+- Backend/runtime: added a local sandbox-frame open receipt before assigning
+  the URL to the frame.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `recordBrowserSandboxFrameOpen` to the Workbench router.
+- The route blocks unless the Browser tab is `open_ready` or already `open`.
+- The route records a local audit with `sandbox_frame_open_requested` and then
+  the client may assign the URL to a sandboxed iframe.
+- Browser now shows open-ready/open tabs in the tab strip.
+- Browser can click `Open frame` only after the open-readiness gate allows it.
+- The frame uses `sandbox="allow-scripts allow-forms"` and
+  `referrerPolicy="no-referrer"`.
+- No backend page fetch, proxy, source save, Watch Shelf save, credential
+  handling, download, provider call, install, or external write was added.
+
+Files touched in this slice:
+
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0748 CereBro Session Handoff - browser-sandbox-frame-render.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 37 tests.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 47 tests.
+- `git diff --check` passed.
+- Browser proof on localhost:
+  `output/playwright/browser-sandbox-frame-open.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/browser-sandbox-frame-open.png`.
+- Matched elements: the Browser page body now behaves like a real browser
+  viewport, with a URL bar, tab strip, quiet safety row, and large page region.
+- Deviations: this is a sandboxed iframe, not a full browser engine. Sites with
+  frame blockers may refuse to render. Back/forward/reload/history/bookmarks
+  remain disabled.
+- Next fidelity gap: collapse the temporary runner controls after open, add
+  reload/history controls for sandboxed frames, and begin Watch Shelf save from
+  a real open page.
+
+Drift check:
+
+- On path. This pass builds the Browser V1 render lane.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Many real sites block iframe rendering with security headers. This lane is
+  still valuable for simple pages and for proving the approval-to-render path,
+  but a fuller browser adapter may be needed later.
+- Tests and browser proof created local dev database rows for Browser proposals,
+  approvals, gates, audits, and frame-open fixtures.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Local dev database received test/proof rows only.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. The sandbox-frame render lane exists. Next safest slice is either collapse runner machinery after frame open, add reload/history controls for sandboxed frames, or enable a Watch Shelf draft save from a real open page. Do not add dependencies, proxies, scraping, source discovery, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
+```

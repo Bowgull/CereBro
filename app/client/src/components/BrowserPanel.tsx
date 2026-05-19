@@ -65,6 +65,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
   const [preparedApprovalId, setPreparedApprovalId] = useState<number | null>(null);
   const [browserNotice, setBrowserNotice] = useState<string | null>(null);
+  const [sandboxFrameTarget, setSandboxFrameTarget] = useState<string | null>(null);
+  const [sandboxFrameProposalId, setSandboxFrameProposalId] = useState<number | null>(null);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
@@ -151,6 +153,23 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const recordBrowserSandboxFrameOpen = trpc.workbench.recordBrowserSandboxFrameOpen.useMutation({
+    onSuccess: (result) => {
+      if (result.ok) {
+        setSandboxFrameTarget(result.tab.targetUrl);
+        setSandboxFrameProposalId(result.proposal.id);
+        setBrowserNotice(`Sandbox frame opened for ${result.tab.tabId}. Some sites may refuse frame rendering.`);
+      } else {
+        setSandboxFrameTarget(null);
+        setSandboxFrameProposalId(null);
+        setBrowserNotice("Sandbox frame blocked. Prepare runner first.");
+      }
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -158,9 +177,15 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserAction =
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
-  const browserDraftTabs = (browserTabSessionStorageContract.data?.items ?? [])
-    .filter((item) => item.state === "draft")
+  const browserVisibleTabs = (browserTabSessionStorageContract.data?.items ?? [])
+    .filter((item) => item.state === "draft" || item.state === "open_ready" || item.state === "open")
     .slice(0, 3);
+  const selectedBrowserTab = browserVisibleTabs.find((tab) => tab.proposalId === selectedBrowserProposalId) ?? null;
+  const canOpenSandboxFrame = selectedBrowserTab?.state === "open_ready" || selectedBrowserTab?.state === "open";
+  const hasOpenSandboxFrame =
+    sandboxFrameTarget != null &&
+    sandboxFrameProposalId != null &&
+    sandboxFrameProposalId === selectedBrowserProposalId;
   const browserLiveRunnerPreflight = trpc.workbench.browserLiveRunnerPreflight.useQuery(
     { proposalId: selectedBrowserProposalId ?? 0 },
     {
@@ -191,7 +216,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     createBrowserResultRecoveryScaffold.isPending ||
     createBrowserLiveRunnerApprovalPreview.isPending ||
     runBrowserLiveRunnerBlocked.isPending ||
-    prepareBrowserLiveRunnerOpenReadiness.isPending;
+    prepareBrowserLiveRunnerOpenReadiness.isPending ||
+    recordBrowserSandboxFrameOpen.isPending;
 
   useEffect(() => {
     let raw: string | null = null;
@@ -209,6 +235,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setBrowserSurface("page");
       setBrowserNotice(focus.notice ?? "Browser proposal focused. No page opened.");
       setPreparedApprovalId(null);
+      setSandboxFrameTarget(null);
+      setSandboxFrameProposalId(null);
     } catch {
       setBrowserNotice("Browser focus could not be read. No page opened.");
     }
@@ -267,7 +295,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Current Page
             </Button>
-            {browserDraftTabs.map((tab) => {
+            {browserVisibleTabs.map((tab) => {
               const active = browserSurface === "page" && selectedBrowserProposalId === tab.proposalId;
               return (
                 <Button
@@ -282,7 +310,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     setBrowserSurface("page");
                     setBrowserAddressDraft(tab.targetUrl);
                     setSelectedBrowserProposalId(tab.proposalId);
-                    setBrowserNotice(`Draft tab ${tab.tabId} selected. No page opened.`);
+                    if (sandboxFrameProposalId !== tab.proposalId) setSandboxFrameTarget(null);
+                    setBrowserNotice(`${tab.state === "open" ? "Open" : "Draft"} tab ${tab.tabId} selected. No page opened.`);
                   }}
                   style={{
                     background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.76)",
@@ -481,6 +510,25 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
           {browserSurface === "page" ? (
             <section className="rounded p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
+              {hasOpenSandboxFrame ? (
+                <div className="grid gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.78)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, boxShadow: browserFrame.bevel }}>
+                    <span>Sandbox frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling.</span>
+                    <div className="flex flex-wrap gap-1">
+                      <Chip label="sandbox" tone={C.accent} />
+                      <Chip label="no same-origin" tone={C.warning} />
+                    </div>
+                  </div>
+                  <iframe
+                    title="CereBro sandbox browser frame"
+                    src={sandboxFrameTarget}
+                    sandbox="allow-scripts allow-forms"
+                    referrerPolicy="no-referrer"
+                    className="h-[clamp(360px,58dvh,640px)] w-full rounded"
+                    style={{ background: "#fff", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.42)" }}
+                  />
+                </div>
+              ) : (
               <div className="mx-auto flex max-w-2xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
                 <div className="mb-3 h-10 w-10 rounded" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }} />
                 <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
@@ -562,6 +610,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           >
                             {prepareBrowserLiveRunnerOpenReadiness.isPending ? "Preparing" : "Prepare runner"}
                           </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[10px]"
+                            disabled={recordBrowserSandboxFrameOpen.isPending || !canOpenSandboxFrame}
+                            title={canOpenSandboxFrame ? "Open the target in the sandbox frame." : "Requires open_ready tab state."}
+                            onClick={() => recordBrowserSandboxFrameOpen.mutate({ proposalId: selectedBrowserProposalId })}
+                          >
+                            {recordBrowserSandboxFrameOpen.isPending ? "Opening" : "Open frame"}
+                          </Button>
                         </div>
                         <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
                       </div>
@@ -571,6 +630,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 )}
               </div>
+              )}
             </section>
           ) : (
             <section id="browser-watch-shelf" className="rounded p-3" aria-label="Watch Shelf tab" style={{ background: "radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.1), transparent 34%), linear-gradient(180deg, rgba(8, 15, 14, 0.99), rgba(3, 7, 7, 0.99))", border: `1px solid ${browserFrame.line}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.46)" }}>
