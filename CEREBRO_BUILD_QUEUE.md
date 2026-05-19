@@ -2030,3 +2030,10 @@ Expected shape:
   media progress, service resume, or Raven path. Next Browser slice should
   continue toward 1:1 by tightening mobile behavior and remaining footer
   machinery.
+- 2026-05-19 0922 EDT: Browser footer machinery collapse landed. The four
+  exposed footer route buttons are now hidden behind one compact `Tools`
+  disclosure while preserving access to Workbench receipts, Approvals, Sources,
+  and Spock gate. This is UI compression only: no browser engine, backend
+  route, schema, provider call, install, download, external write, fake source
+  discovery, fake media progress, service resume, or Raven path. Next Browser
+  slice should continue mobile polish or return to the broader shell 1:1 pass.

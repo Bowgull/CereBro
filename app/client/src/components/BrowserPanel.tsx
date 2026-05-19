@@ -989,11 +989,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </section>
           )}
 
-          <div className="flex flex-wrap gap-1">
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("workbench")}>Workbench receipts</Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("approvals")}>Approvals</Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("sources")}>Sources</Button>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("security")}>Spock gate</Button>
+          <div className="flex justify-end">
+            <details className="relative">
+              <summary className="flex h-7 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser utilities" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                <MoreHorizontal size={13} strokeWidth={1.8} aria-hidden="true" />
+                Tools
+              </summary>
+              <div className="absolute bottom-full right-0 z-20 mb-1 grid w-56 gap-1 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                <Button type="button" size="sm" variant="ghost" className="h-7 justify-start px-2 text-[11px]" role="menuitem" onClick={() => onNavigate?.("workbench")}>Workbench receipts</Button>
+                <Button type="button" size="sm" variant="ghost" className="h-7 justify-start px-2 text-[11px]" role="menuitem" onClick={() => onNavigate?.("approvals")}>Approvals</Button>
+                <Button type="button" size="sm" variant="ghost" className="h-7 justify-start px-2 text-[11px]" role="menuitem" onClick={() => onNavigate?.("sources")}>Sources</Button>
+                <Button type="button" size="sm" variant="ghost" className="h-7 justify-start px-2 text-[11px]" role="menuitem" onClick={() => onNavigate?.("security")}>Spock gate</Button>
+              </div>
+            </details>
           </div>
         </div>
       </main>
