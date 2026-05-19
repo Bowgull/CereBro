@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 0530 EDT
+Last updated: 2026-05-18 2205 EDT
 
 ## Current North Star
 
@@ -20,6 +20,73 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 2205 EDT - Main Shell Mockup Frame Pass
+
+### What Changed
+- Moved the main CereBro shell closer to the locked high-fidelity mockup
+  contract.
+- Added a darker carved/marble outer frame around the active app shell.
+- Converted the left rail into compact plaque-style buttons with always-visible
+  labels.
+- Made the live Keep scene the default home view again so the castle owns the
+  screen.
+- Reworked the Keep header, surface tabs, dock, right context rail, and command
+  bar toward the approved verdigris/gold instrument-shell direction.
+- Added Aang's sprite beside the command input so the conversational handle sits
+  with the command surface instead of becoming another exposed machinery panel.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `git diff --check`
+- In-app Browser control was not exposed in this tool set after discovery.
+  Local Playwright proof against `http://localhost:3000/` confirmed `CereBro`,
+  `Keep`, `Workshop`, `Ledger`, `Basement`, `Aang Route Read`, and the `Ask
+  Aang` command bar rendered.
+- Screenshot proof saved locally at
+  `output/playwright/main-shell-mockup-fidelity-pass.png`.
+
+### Mockup Fidelity
+- Target used: locked main CereBro shell high-fidelity mockup.
+- Matched elements: dark carved outer frame, rich shell material, plaque left
+  rail, compact OS labels, castle-first center, quiet top strip, right context
+  rail, instrument command bar, Aang beside the command input.
+- Deviations: current live castle art remains unchanged, right rail still uses
+  existing route-read content, Browser/Watch Shelf mockup is not touched in this
+  slice, and the left rail icon craft is still simpler than the mockup.
+- Next fidelity gap: browser/watch mockup pass, richer rail icon treatment,
+  tighter command-bar composition, and shell-wide screenshot comparison.
+
+### Drift Check
+- On path. This follows `CEREBRO_UI_MOCKUP_CONTRACT.md` and moves the existing
+  shell toward the approved 1:1 target.
+- It does not replace the Phaser Keep, add rooms, add agents, create a new
+  primary surface, add fake browser/watch behavior, open/fetch/search pages,
+  save sources, call providers/models, install, pull, write externally, or touch
+  Raven paths.
+
+### Known Risks
+- This is a first shell-frame pass, not full 1:1 fidelity.
+- The live castle composition still differs from the high-fidelity mockup.
+- Some existing route-read machinery remains visible in the right panel until
+  the next low-machinery shell cleanup.
+
+### Storage Impact
+- No schema change.
+- No database rows were written by the code change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue CereBro on the locked mockup-fidelity UI path. The main shell now has the first carved/marble frame pass, plaque left rail, live Keep scene default, richer Keep dock, and Aang beside the command input. Next best slice is either Browser/Watch Shelf mockup fidelity inside Workbench or a tighter main-shell cleanup for right rail machinery, rail icon craft, and command-bar composition. Do not replace the Phaser Keep, add rooms, add agents, create a new primary surface, fake Browser/Watch behavior, open/fetch/search pages, save sources, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 0530 EDT - Workbench Live Runner Launch Gate
 

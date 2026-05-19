@@ -167,6 +167,24 @@ const MODE_ROUTES: Record<Mode, string[]> = {
 
 const shellFrame = T.verdigrisIvory;
 const workFrame = T.graphiteCandle;
+const mockupShell = {
+  frame: "#060A09",
+  frameSoft: "#0A1110",
+  marble: "#080D0C",
+  marbleLine: "rgba(198, 155, 85, 0.34)",
+  marbleLineSoft: "rgba(77, 170, 154, 0.22)",
+  plaque: "linear-gradient(180deg, rgba(26, 43, 37, 0.96), rgba(9, 19, 17, 0.98))",
+  plaqueActive: "linear-gradient(180deg, rgba(39, 65, 54, 0.98), rgba(14, 31, 27, 0.98))",
+  bevel: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.55)",
+  outerShadow: "0 28px 80px rgba(0, 0, 0, 0.7)",
+};
+const marbleBackground = `
+  radial-gradient(circle at 82% 8%, rgba(198, 155, 85, 0.16), transparent 24%),
+  radial-gradient(circle at 18% 12%, rgba(77, 170, 154, 0.14), transparent 28%),
+  linear-gradient(138deg, rgba(244, 239, 227, 0.04) 0 1px, transparent 1px 38px),
+  linear-gradient(42deg, rgba(77, 170, 154, 0.05) 0 1px, transparent 1px 54px),
+  #050806
+`;
 
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
@@ -256,9 +274,9 @@ export default function Home() {
 
   return (
     <div
-      className="h-screen flex flex-col overflow-hidden"
+      className="h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden gap-1.5 p-1.5 sm:p-2"
       style={{
-        background: `radial-gradient(circle at 50% -20%, ${shellFrame.shellRaised} 0%, ${shellFrame.shellSoft} 34%, ${shellFrame.shell} 100%)`,
+        background: marbleBackground,
         color: C.textPrimary,
         fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -267,14 +285,18 @@ export default function Home() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
-        className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 shrink-0"
+        className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 shrink-0 rounded"
         aria-label="Keep header"
-        style={{ background: shellFrame.shellSoft, borderBottom: `1px solid ${shellFrame.shellLine}` }}
+        style={{
+          background: mockupShell.plaque,
+          border: `1px solid ${mockupShell.marbleLine}`,
+          boxShadow: mockupShell.bevel,
+        }}
       >
         <div className="flex items-center gap-1.5 shrink-0">
           <div
             className="w-6 h-6 flex items-center justify-center rounded"
-            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass }}
+            style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass, boxShadow: mockupShell.bevel }}
           >
             <span className="text-sm leading-none">◆</span>
           </div>
@@ -291,7 +313,7 @@ export default function Home() {
         <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
           <div
             className="flex min-w-0 items-center gap-1.5 rounded px-2 py-1"
-            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}` }}
+            style={{ background: mockupShell.frameSoft, border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>
               {ZONE_NAV_ITEMS.find((item) => item.zone === NAV_TO_ZONE[nav])?.label ?? "Keep"}
@@ -384,14 +406,22 @@ export default function Home() {
       </header>
 
       {/* ── Main: left rail + center + right context panel ─────────────── */}
-      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+      <div
+        className="flex flex-1 overflow-hidden rounded"
+        style={{
+          minHeight: 0,
+          background: mockupShell.marble,
+          border: `1px solid ${mockupShell.marbleLine}`,
+          boxShadow: `${mockupShell.outerShadow}, ${mockupShell.bevel}`,
+        }}
+      >
         {/* Left rail — four-zone OS dock */}
         <nav
-          className="w-12 lg:w-44 flex flex-col shrink-0 overflow-hidden"
+          className="w-[68px] flex flex-col shrink-0 overflow-hidden"
           aria-label="CereBro zones"
-          style={{ background: shellFrame.shellSoft, borderRight: `1px solid ${shellFrame.shellLine}` }}
+          style={{ background: "rgba(5, 10, 9, 0.94)", borderRight: `1px solid ${mockupShell.marbleLine}` }}
         >
-          <div className="flex-1 overflow-y-auto py-1.5">
+          <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
               const isActive = NAV_TO_ZONE[nav] === item.zone;
               return (
@@ -401,44 +431,42 @@ export default function Home() {
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="h-auto w-full justify-start rounded-none px-2 py-1.5 text-left"
+                  className="h-[58px] w-full flex-col justify-center gap-1 rounded px-1 py-1 text-center"
                   variant="ghost"
                   style={{
-                    background: isActive ? shellFrame.shellPlaqueActive : "transparent",
-                    borderLeft: isActive ? `2px solid ${shellFrame.brass}` : "2px solid transparent",
+                    background: isActive ? mockupShell.plaqueActive : mockupShell.plaque,
+                    border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
                     color: isActive ? C.textPrimary : C.textSecondary,
+                    boxShadow: isActive ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, ${mockupShell.bevel}` : mockupShell.bevel,
                   }}
                 >
                   <span
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-sm"
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[12px]"
                     style={{
-                      background: isActive ? shellFrame.shellPlaque : "transparent",
+                      background: isActive ? "rgba(198, 155, 85, 0.12)" : "rgba(244, 239, 227, 0.04)",
                       color: isActive ? shellFrame.brass : C.textMuted,
-                      border: `1px solid ${isActive ? shellFrame.shellLine : "transparent"}`,
+                      border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
                     }}
                   >
                     {item.glyph}
                   </span>
-                  <span className="hidden lg:block min-w-0">
-                    <span className="block text-[11px] uppercase tracking-widest font-semibold">{item.label}</span>
-                    <span className="hidden xl:block text-[10px] leading-snug mt-0.5 normal-case tracking-normal" style={{ color: C.textMuted }}>
-                      {item.blurb}
-                    </span>
+                  <span className="block min-w-0">
+                    <span className="block text-[9px] uppercase tracking-wider font-semibold leading-none">{item.label}</span>
                   </span>
                 </Button>
               );
             })}
           </div>
           <div
-            className="px-2 py-1.5 text-[10px] leading-snug hidden lg:block"
-            style={{ borderTop: `1px solid ${shellFrame.shellLine}`, background: shellFrame.shellPlaque, color: C.textMuted }}
+            className="px-1.5 py-1.5 text-[9px] leading-snug text-center uppercase tracking-wider"
+            style={{ borderTop: `1px solid ${mockupShell.marbleLine}`, background: mockupShell.plaque, color: C.textMuted }}
           >
-            {connMode === "live" ? "Live. Watching ~/.claude/." : "Demo. Simulated sessions."}
+            {connMode === "live" ? "Live" : "Demo"}
           </div>
         </nav>
 
         {/* Center workspace */}
-        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: workFrame.slabMuted }}>
+        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: "rgba(6, 10, 10, 0.96)" }}>
           <ZoneHeader nav={nav} onNavigate={setNav} />
 
           <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
@@ -514,7 +542,7 @@ export default function Home() {
           <aside
             className="w-[270px] shrink-0 flex flex-col overflow-hidden"
             aria-label="Context panel"
-            style={{ background: shellFrame.shellSoft, borderLeft: `1px solid ${shellFrame.shellLine}` }}
+            style={{ background: "rgba(7, 15, 13, 0.96)", borderLeft: `1px solid ${mockupShell.marbleLine}`, boxShadow: "inset 1px 0 0 rgba(244, 239, 227, 0.05)" }}
           >
             <ContextPanel
               agent={activeAgent}
@@ -653,16 +681,16 @@ function HomeView({
   connMode: "demo" | "live";
   onNavigate: (id: NavId) => void;
 }) {
-  const [keepView, setKeepView] = useState<"scene" | "blueprint">("blueprint");
+  const [keepView, setKeepView] = useState<"scene" | "blueprint">("scene");
   const activeAgents = Object.values(agentStates).filter((state) => state && state !== "idle" && state !== "dormant").length;
 
   return (
     <div className="h-full flex flex-col">
       <div
         className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
-        style={{ background: shellFrame.shellSoft, borderBottom: `1px solid ${shellFrame.shellLineSoft}` }}
+        style={{ background: "rgba(6, 12, 11, 0.94)", borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}
       >
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" aria-label="Keep floor focus">
           {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
             const f = FLOORS[id];
             const isActive = id === floor;
@@ -679,7 +707,8 @@ function HomeView({
                 style={{
                   background: isActive ? C.surfaceRaised : "transparent",
                   color: isActive ? C.textPrimary : C.textMuted,
-                  border: `1px solid ${isActive ? C.accentSoft : C.borderSoft}`,
+                  border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
+                  boxShadow: isActive ? mockupShell.bevel : undefined,
                 }}
                 title={f.blurb}
               >
@@ -689,7 +718,7 @@ function HomeView({
           })}
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${shellFrame.shellLineSoft}` }}>
+          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.frameSoft }}>
             {(["blueprint", "scene"] as const).map((id) => {
               const isActive = keepView === id;
               return (
@@ -703,7 +732,7 @@ function HomeView({
                   size="sm"
                   className="h-7 rounded-none px-2"
                   style={{
-                    background: isActive ? C.surfaceRaised : "transparent",
+                    background: isActive ? shellFrame.shellPlaqueActive : "transparent",
                     color: isActive ? C.textPrimary : C.textMuted,
                   }}
                 >
@@ -718,7 +747,17 @@ function HomeView({
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0, background: C.background }}>
+      <div
+        className="flex-1 relative overflow-hidden"
+        style={{
+          minHeight: 0,
+          background: `
+            radial-gradient(circle at 50% 42%, rgba(198, 155, 85, 0.08), transparent 34%),
+            radial-gradient(circle at 50% 65%, rgba(77, 170, 154, 0.08), transparent 38%),
+            #050706
+          `,
+        }}
+      >
         {keepView === "blueprint" ? (
           <KeepFortressBlueprint />
         ) : (
@@ -807,7 +846,12 @@ function KeepHomeDock({
     <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
       <div
         className="pointer-events-auto grid grid-cols-2 lg:grid-cols-[0.95fr_repeat(4,1fr)] gap-1.5 rounded p-1.5"
-        style={{ background: `${shellFrame.shell}ed`, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: `0 14px 40px ${shellFrame.shell}cc` }}
+        style={{
+          background: "rgba(5, 9, 8, 0.92)",
+          border: `1px solid ${mockupShell.marbleLine}`,
+          boxShadow: `0 18px 46px rgba(0, 0, 0, 0.62), ${mockupShell.bevel}`,
+          backdropFilter: "blur(10px)",
+        }}
         aria-label="Keep first actions"
       >
         <div className="hidden lg:block px-2 py-1">
@@ -830,7 +874,7 @@ function KeepHomeDock({
             aria-label={`${action.label}: ${action.meta}`}
             variant="outline"
             className="h-auto justify-start whitespace-normal px-2 py-1.5 text-left"
-            style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textSecondary }}
+            style={{ background: mockupShell.plaque, border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textSecondary, boxShadow: mockupShell.bevel }}
           >
             <span className="block w-full min-w-0">
               <span className="flex items-center justify-between gap-2">
@@ -894,7 +938,7 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
   return (
     <div
       className="flex shrink-0 items-center gap-1.5 overflow-hidden px-2.5 py-1.5"
-      style={{ background: workFrame.slab, borderBottom: `1px solid ${workFrame.lineSoft}` }}
+      style={{ background: "rgba(8, 14, 13, 0.96)", borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}
     >
       <div className="hidden xl:flex min-w-[150px] items-center gap-2">
         <div className="h-7 w-1 rounded-full" style={{ background: shellFrame.brass }} />
@@ -926,9 +970,10 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
               className="h-7 shrink-0 justify-start whitespace-normal px-2 text-left"
               variant={isActive ? "secondary" : "outline"}
               style={{
-                background: isActive ? workFrame.slabRaised : workFrame.slabMuted,
+                background: isActive ? mockupShell.plaqueActive : "rgba(9, 15, 15, 0.82)",
                 color: isActive ? C.textPrimary : C.textSecondary,
                 border: `1px solid ${isActive ? shellFrame.brassSoft : workFrame.lineSoft}`,
+                boxShadow: isActive ? mockupShell.bevel : undefined,
               }}
               title={surface.meta}
             >
@@ -3302,9 +3347,13 @@ function CommandBar({
         event.preventDefault();
         onSubmit();
       }}
-      className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 px-2.5 py-1.5 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
+      className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 rounded px-2.5 py-1.5 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
       aria-label="Ask Aang command bar"
-      style={{ background: shellFrame.shellSoft, borderTop: `1px solid ${shellFrame.shellLine}`, boxShadow: `0 -14px 34px ${shellFrame.shell}99` }}
+      style={{
+        background: mockupShell.plaque,
+        border: `1px solid ${mockupShell.marbleLine}`,
+        boxShadow: `0 -18px 42px rgba(0, 0, 0, 0.55), ${mockupShell.bevel}`,
+      }}
     >
       <div className="flex h-7 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${shellFrame.brassSoft}` }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
@@ -3329,17 +3378,30 @@ function CommandBar({
 
       <div className="min-w-0">
         <div className="flex items-center gap-2">
+          <div
+            className="hidden h-8 w-8 shrink-0 items-center justify-center rounded sm:flex"
+            style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: mockupShell.bevel }}
+            aria-hidden="true"
+          >
+            <img
+              src="/sprites/keep/aang/rotations/south.png"
+              alt=""
+              className="h-7 w-7"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
           <Input
             type="text"
             aria-label="Ask Aang command input"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Ask Aang. Cortana routes it."
-            className="h-7 flex-1 min-w-0"
+            className="h-8 flex-1 min-w-0"
             style={{
-              background: shellFrame.shellPlaque,
-              border: `1px solid ${shellFrame.shellLine}`,
+              background: "rgba(5, 10, 9, 0.86)",
+              border: `1px solid ${mockupShell.marbleLineSoft}`,
               color: C.textPrimary,
+              boxShadow: "inset 0 1px 5px rgba(0, 0, 0, 0.45)",
             }}
           />
         </div>

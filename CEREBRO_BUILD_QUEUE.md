@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 0530 EDT
+Last updated: 2026-05-18 2205 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2205 EDT: moved the main shell toward the locked high-fidelity
+  mockup. Added carved/marble outer shell framing, compact plaque-style left
+  rail, live Keep scene as the default home view, richer Keep dock/surface tabs,
+  dark right context rail, and Aang beside the command input. Browser proof
+  saved at `output/playwright/main-shell-mockup-fidelity-pass.png`. Still not
+  full 1:1. Next fidelity gaps are Browser/Watch Shelf mockup fidelity, right
+  rail machinery reduction, rail icon craft, and tighter command-bar
+  composition.
 - 2026-05-18 0530 EDT: added Workbench live-runner launch gate.
   `workbench.browserLiveRunnerLaunchGate` reads proposal, live-runner approval,
   and latest runner audit state, then returns `implementationPresent: false`,
