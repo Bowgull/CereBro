@@ -1950,3 +1950,10 @@ Expected shape:
   download, external write, or Raven path was added. Next Browser slice should
   hide or compress project pins during open-page browsing, add simple local
   history records, or polish Watch Shelf cards.
+- 2026-05-19 0814 EDT: Browser open-page pin collapse landed. The full Project
+  Pins row now hides while a sandbox frame is open, with local-only pins
+  available from a compact header disclosure. This gives the page more vertical
+  priority without adding capability. No backend, schema, provider, install,
+  source save, fake media progress, credential, download, external write, or
+  Raven path was added. Next Browser slice should add simple local history
+  records or polish Watch Shelf cards.

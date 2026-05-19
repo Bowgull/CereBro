@@ -523,7 +523,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           )}
 
-          {browserProjectPins.items.length > 0 && (
+          {browserProjectPins.items.length > 0 && !hasOpenSandboxFrame && (
             <div className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1" aria-label="Browser project pins" style={{ background: "rgba(7, 12, 12, 0.88)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <div className="flex shrink-0 items-center gap-1 pr-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
                 <Folder size={12} strokeWidth={1.8} aria-hidden="true" />
@@ -600,6 +600,36 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           </div>
                         </div>
                       </details>
+                      {browserProjectPins.items.length > 0 && (
+                        <details className="relative">
+                          <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                            <Folder size={11} strokeWidth={1.8} aria-hidden="true" />
+                            Pins
+                          </summary>
+                          <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{browserProjectPins.title}</div>
+                            <div className="mt-1 grid gap-1">
+                              {browserProjectPins.items.map((pin) => (
+                                <Button
+                                  key={`${pin.label}-${pin.target}`}
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 w-full justify-between px-1.5 text-[10px]"
+                                  title={`${pin.target}. Local project pin only. No browser page opens.`}
+                                  onClick={() => setBrowserNotice(`${pin.label} project pin selected. No page opened.`)}
+                                >
+                                  <span className="truncate">{pin.label}</span>
+                                  <span className="shrink-0 uppercase" style={{ color: pin.statusLabel === "clean" ? C.success : C.gold }}>
+                                    {pin.statusLabel}
+                                  </span>
+                                </Button>
+                              ))}
+                            </div>
+                            <div className="mt-1">{browserProjectPins.noActionText}</div>
+                          </div>
+                        </details>
+                      )}
                     </div>
                   </div>
                   <iframe

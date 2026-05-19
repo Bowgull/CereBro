@@ -33431,3 +33431,80 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, and collapsed open-page proof exist. Next safest slice is hide or compress project pins during open-page browsing, add simple local history records for sandbox frames, or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
 ```
+
+## 2026-05-19 0814 EDT - Browser Open Page Pin Collapse
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: open Browser pages now keep the page viewport higher.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Hid the full Project Pins row while a sandbox frame is open.
+- Added a compact `Pins` disclosure in the open-page header.
+- Kept pin behavior local-only. Selecting a pin still only shows a notice and
+  does not open a page, save a source, mutate a project, or write externally.
+- Kept the same sandbox iframe, reload, proof, and Watch Shelf behavior.
+- No backend route, schema, provider, install, source save, fake media progress,
+  credential handling, download, external write, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0814 CereBro Session Handoff - browser-open-page-pin-collapse.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser proof on localhost:
+  `output/playwright/browser-open-page-pins-collapsed.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched elements: open page gets more vertical priority, project pins no
+  longer read as a major row during browsing, and the useful action group stays
+  compact.
+- Deviations: back/forward are still planned, the Browser still uses the
+  current live shell rather than final 1:1 mockup polish, and the pin popover
+  is functional rather than final-art.
+- Next fidelity gap: add simple local history records for sandbox frames, or
+  polish Watch Shelf cards toward the approved Browser mockup.
+
+Drift check:
+
+- On path. This pass reduces open-page machinery without adding capability.
+- No new primary surface.
+- No fake browser capability, fake watch progress, or fake source discovery.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Some framed sites still block rendering. This pass only changes visible
+  chrome.
+- Local dev database still contains proof/test Browser rows from earlier passes.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, and collapsed open-page pins exist. Next safest slice is add simple local history records for sandbox frames or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
+```
