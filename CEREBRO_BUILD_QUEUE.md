@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0023 EDT
+Last updated: 2026-05-19 0704 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0704 EDT: polished the direct Browser surface toward the locked
+  Browser/Watch Shelf mockup. Added richer dark frame material, plaque tabs,
+  tighter URL chrome, stronger project pins, larger page body, and a richer
+  Watch Shelf tab while preserving honest blocked behavior. Screenshots saved
+  at `output/playwright/browser-visual-polish-current-page.png` and
+  `output/playwright/browser-visual-polish-watch-shelf.png`. No page open,
+  fetch, search request, Watch Shelf save, source save, provider call, install,
+  external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 0023 EDT: extended the Browser `Stage` button to create both a
   local Browser action proposal and a local `browser_tab_sessions` draft row.
   The draft tab stays blocked from page open, fetch, browser automation, source

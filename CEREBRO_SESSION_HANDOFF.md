@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0640 EDT
+Last updated: 2026-05-19 0704 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0704 EDT - Browser Visual Polish
+
+### What Changed
+- Polished the direct Browser surface toward the approved high-fidelity Browser
+  mockup.
+- Added a darker carved frame, richer rail material, plaque tab treatment,
+  tighter URL chrome, stronger project-pin treatment, and larger page/Watch
+  Shelf bodies.
+- Preserved honest blocked behavior. Browser still does not open pages, fetch,
+  search, save Watch Shelf items, save sources, capture pages, or write outside
+  local receipt/staging paths.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/homeShellCopyModel.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Browser proof against `http://localhost:3000/` confirmed:
+  - Browser opens as its own OS zone
+  - Current Page shows the larger framed page body
+  - Watch Shelf opens as a tab inside Browser
+  - project pins remain local-only and do not open pages
+  - disabled browser controls stay disabled
+- Screenshot proof saved locally at:
+  - `output/playwright/browser-visual-polish-current-page.png`
+  - `output/playwright/browser-visual-polish-watch-shelf.png`
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup.
+- Matched elements: dark instrument-style browser frame, plaque tabs, compact
+  URL controls, quiet project pins, bigger page viewport, Watch Shelf as a tab,
+  and low-machinery default state.
+- Deviations: still not 1:1. The surface does not yet render a live web page,
+  real history, durable Watch Shelf saves, source capture, or browser runner.
+- Next fidelity gap: manual browser runner contract and the final 1:1 shell
+  polish pass once the runner can show real page content.
+
+### Drift Check
+- On path.
+- No fake browser function.
+- No fake bookmarks, fake media progress, fake service state, fake source
+  discovery, provider call, install, external write, model pull, castle change,
+  or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No database rows created.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/client/src/pages/Home.tsx first. Continue the Browser critical path. The next safest slice is the manual browser runner contract or a small visual fidelity pass that does not fake live browsing. Browser must remain its own OS zone. Watch Shelf stays inside Browser. Route Read stays collapsed by default. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0640 EDT - Browser Surface Promotion
 
