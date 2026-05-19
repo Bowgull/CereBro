@@ -1842,3 +1842,11 @@ Expected shape:
   screen-reader-only, and Close is smaller. Browser behavior remains blocked
   and honest. Next UI fidelity slice should reduce generic receipt machinery
   below Browser or move to final custom shell/icon treatment.
+- 2026-05-19 0034 EDT: Workbench Browser draft tabs are now visible in the
+  Browser tab strip from real `browser_tab_sessions` draft rows. Selecting a
+  staged tab fills the address field, links to its proposal, shows a local-only
+  notice, and does not open/fetch/render a page. Generic `Open Page draft`
+  labels were replaced with readable target labels. Next Browser slice should
+  either build the real manual browser runner contract or add real user-created
+  bookmark/project pins. Do not fake page rendering, Watch Shelf saves, or
+  source discovery.

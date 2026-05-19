@@ -92,8 +92,29 @@ type WorkbenchBrowserFocusDraft = {
   query?: string;
   notice?: string;
 };
+type BrowserDraftTab = {
+  id: number;
+  tabId: string;
+  targetUrl: string;
+  title: string | null;
+};
 
 const G = T.graphiteCandle;
+
+function browserDraftTabLabel(tab: BrowserDraftTab) {
+  const title = tab.title?.trim();
+  if (title && !/^open page draft$/i.test(title)) {
+    return title;
+  }
+
+  try {
+    const url = new URL(tab.targetUrl);
+    const path = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+    return `${url.hostname}${path}`.slice(0, 34);
+  } catch {
+    return tab.targetUrl.slice(0, 34) || tab.tabId;
+  }
+}
 
 type TemporaryMediaPreview = {
   name: string;
@@ -393,6 +414,9 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
   const showBrowserSafetyRead = browserDraft.kind !== "empty" || selectedBrowserProposalId != null;
+  const browserDraftTabs = (browserTabSessionStorageContract.data?.items ?? [])
+    .filter((item) => item.state === "draft")
+    .slice(0, 3);
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -920,18 +944,51 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <Button
                     type="button"
                     size="sm"
-                    variant={browserSurface === "page" ? "secondary" : "outline"}
+                    variant={browserSurface === "page" && selectedBrowserProposalId == null ? "secondary" : "outline"}
                     className="h-7 shrink-0 rounded-b-none px-2"
-                    aria-pressed={browserSurface === "page"}
-                    onClick={() => setBrowserSurface("page")}
+                    aria-pressed={browserSurface === "page" && selectedBrowserProposalId == null}
+                    onClick={() => {
+                      setBrowserSurface("page");
+                      setSelectedBrowserProposalId(null);
+                      setBrowserProposalNotice(null);
+                    }}
                     style={{
-                      background: browserSurface === "page" ? "rgba(20, 41, 35, 0.96)" : "rgba(10, 15, 15, 0.82)",
-                      border: `1px solid ${browserSurface === "page" ? G.candleSoft : G.lineSoft}`,
-                      color: browserSurface === "page" ? C.textPrimary : C.textMuted,
+                      background: browserSurface === "page" && selectedBrowserProposalId == null ? "rgba(20, 41, 35, 0.96)" : "rgba(10, 15, 15, 0.82)",
+                      border: `1px solid ${browserSurface === "page" && selectedBrowserProposalId == null ? G.candleSoft : G.lineSoft}`,
+                      color: browserSurface === "page" && selectedBrowserProposalId == null ? C.textPrimary : C.textMuted,
                     }}
                   >
                     Current Page
                   </Button>
+                  {browserDraftTabs.map((tab) => {
+                    const active = browserSurface === "page" && selectedBrowserProposalId === tab.proposalId;
+                    return (
+                      <Button
+                        key={tab.id}
+                        type="button"
+                        size="sm"
+                        variant={active ? "secondary" : "outline"}
+                        className="h-7 max-w-[160px] shrink-0 rounded-b-none px-2"
+                        aria-pressed={active}
+                        title={`${tab.targetUrl}. Draft tab only. No page opens.`}
+                        onClick={() => {
+                          setBrowserSurface("page");
+                          setBrowserAddressDraft(tab.targetUrl);
+                          setSelectedBrowserProposalId(tab.proposalId);
+                          setBrowserProposalNotice(`Draft tab ${tab.tabId} selected. No page opened.`);
+                        }}
+                        style={{
+                          background: active ? "rgba(20, 41, 35, 0.96)" : "rgba(10, 15, 15, 0.82)",
+                          border: `1px solid ${active ? G.candleSoft : G.lineSoft}`,
+                          color: active ? C.textPrimary : C.textMuted,
+                        }}
+                      >
+                        <span className="truncate">
+                          {browserDraftTabLabel(tab)}
+                        </span>
+                      </Button>
+                    );
+                  })}
                   <Button
                     type="button"
                     size="sm"

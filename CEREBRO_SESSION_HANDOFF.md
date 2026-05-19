@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0023 EDT
+Last updated: 2026-05-19 0034 EDT
 
 ## Current North Star
 
@@ -20,6 +20,65 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0034 EDT - Workbench Browser Draft Tabs Visible
+
+### What Changed
+- Surfaced real `browser_tab_sessions` draft rows in the Workbench Browser tab
+  strip.
+- Selecting a staged draft tab now fills the address field, links back to its
+  proposal receipt, shows a local-only notice, and keeps page opening blocked.
+- Fixed active tab state so `Current Page` is not pressed while a draft tab is
+  selected.
+- Replaced generic `Open Page draft` labels with readable target labels derived
+  from the staged URL.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Browser proof against `http://localhost:3000/` opened Workshop, selected a
+  staged draft tab, confirmed only the draft tab is pressed, confirmed readable
+  target labels, and confirmed no page opened.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-browser-draft-tabs-selected-fixed.png`
+  - `output/playwright/workbench-browser-draft-tabs-host-labels.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup plus
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- Matched elements: browser-like tab strip, readable staged page tabs, selected
+  tab state, one URL/search field, quiet blocked state, and no fake web page.
+- Deviations: tabs are still local staged drafts only. No page render, history,
+  cookies, credentials, source save, Watch Shelf save, or browser runner exists.
+- Next fidelity gap: build the real manual browser runner contract or add real
+  user-created bookmark/project pins. Do not fake either.
+
+### Drift Check
+- On path.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, route, model, provider, install, pull, external write,
+  or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No new database rows were created by code. Existing local draft rows were
+  read for UI proof.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the Browser fidelity track only if the slice moves live Workbench Browser toward the approved 1:1 Browser/Watch Shelf mockup without faking capability. Next safest slices are the real manual browser runner contract, real user-created bookmark/project pins, or final tab-strip material polish. Preserve the castle. Do not create a new Browser primary surface without approval. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0023 EDT - Workbench Browser Draft Tab Stage
 
