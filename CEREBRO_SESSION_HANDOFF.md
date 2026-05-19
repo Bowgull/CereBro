@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0011 EDT
+Last updated: 2026-05-19 0018 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0018 EDT - Workbench Browser Stage Button
+
+### What Changed
+- Wired the Browser `Stage` button to create an existing local Browser action
+  proposal.
+- Added a compact inline status after staging so the user can see the proposal
+  receipt without opening page actions.
+- Focused the staged Browser proposal for readback while keeping the page open
+  blocked.
+- Preserved the no-open, no-fetch, no-search, no-source-save, no-external-write
+  Browser boundary.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Local Playwright proof against `http://localhost:3000/` opened Workshop,
+  typed `https://example.com/stage-button-clean`, captured the pre-stage state,
+  clicked `Stage`, and captured the visible proposal receipt state.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-browser-stage-button-clean-before.png`
+  - `output/playwright/workbench-browser-stage-button-clean-after.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup plus
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- Matched elements: one address/search field, a user-driven browser action,
+  quiet visible receipt, and no fake page open.
+- Deviations: `Stage` creates a local proposal receipt only. It does not open a
+  browser page because the manual runner is still blocked by contract.
+- Next fidelity gap: implement the real manual browser runner contract when the
+  product gate is ready, or wire real user-created bookmarks/project pins.
+
+### Drift Check
+- On path. This uses the existing Browser proposal contract instead of adding
+  fake browser behavior.
+- It does not add a new primary surface, fake Browser/Watch behavior,
+  open/fetch/search pages, save sources, persist watch progress, call
+  providers/models, install, pull, write externally, or touch Raven paths.
+
+### Known Risks
+- Stage now writes a local proposal row when clicked. This is intended and uses
+  the existing local Browser proposal contract.
+- The Browser shell remains a blocked local surface until the approved manual
+  runner contract is implemented.
+
+### Storage Impact
+- No schema change.
+- Browser proof created one local Browser proposal row during manual QA.
+- Two local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/components/WorkbenchPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/routers/workbench.ts first. Continue CereBro on the locked Browser/Watch Shelf path. The Browser Stage button now creates a local Browser action proposal and shows a compact receipt status, while page opening remains blocked. Next best slice is either the real manual browser runner contract if gates are ready, or real user-created bookmark/project pin contracts. Do not add a new primary surface, fake Browser/Watch behavior, fake bookmarks, open/fetch/search pages without the runner contract, save sources, persist watch progress, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-19 0011 EDT - Workbench Browser Fake Bookmark Removal
 

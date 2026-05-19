@@ -987,11 +987,26 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     size="sm"
                     variant="outline"
                     className="h-8 px-2"
-                    disabled={browserDraft.kind === "empty"}
-                    title="Open is blocked until the manual browser runner contract exists."
+                    disabled={browserDraft.kind === "empty" || createBrowserActionProposal.isPending}
+                    title="Stage a local Browser proposal. This does not open, fetch, search, save, or capture."
                     aria-label="Stage browser page draft"
+                    onClick={() => {
+                      createBrowserActionProposal.mutate(
+                        {
+                          actionLabel: browserActionPreview.label,
+                          target: browserDraft.raw,
+                          draftKind: browserDraft.kind,
+                        },
+                        {
+                          onSuccess: (result) => {
+                            setSelectedBrowserProposalId(result.proposal.id);
+                            setBrowserProposalNotice(`Browser proposal #${result.proposal.id} saved. Not run.`);
+                          },
+                        },
+                      );
+                    }}
                   >
-                    Stage
+                    {createBrowserActionProposal.isPending ? "Staging" : "Stage"}
                   </Button>
                   <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
                     <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
@@ -1081,6 +1096,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     </div>
                   </details>
                 </div>
+                {browserProposalNotice && (
+                  <div className="rounded px-2 py-1 text-[10px] leading-snug" role="status" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                    {browserProposalNotice}
+                  </div>
+                )}
 
                 {browserSurface === "page" ? (
                   <div
