@@ -231,6 +231,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   });
   const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
     onSuccess: (result) => {
+      utils.workbench.browserActionProposals.invalidate();
       utils.workbench.browserTabSessionStorageContract.invalidate();
       setBrowserProposalNotice(`Draft tab ${result.tab.tabId} staged. No page opened.`);
     },
@@ -987,8 +988,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     size="sm"
                     variant="outline"
                     className="h-8 px-2"
-                    disabled={browserDraft.kind === "empty" || createBrowserActionProposal.isPending}
-                    title="Stage a local Browser proposal. This does not open, fetch, search, save, or capture."
+                    disabled={browserDraft.kind === "empty" || createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending}
+                    title="Stage a local Browser proposal and draft tab row. This does not open, fetch, search, save, or capture."
                     aria-label="Stage browser page draft"
                     onClick={() => {
                       createBrowserActionProposal.mutate(
@@ -1001,12 +1002,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                           onSuccess: (result) => {
                             setSelectedBrowserProposalId(result.proposal.id);
                             setBrowserProposalNotice(`Browser proposal #${result.proposal.id} saved. Not run.`);
+                            createBrowserTabSessionDraft.mutate({
+                              proposalId: result.proposal.id,
+                            });
                           },
                         },
                       );
                     }}
                   >
-                    {createBrowserActionProposal.isPending ? "Staging" : "Stage"}
+                    {createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending ? "Staging" : "Stage"}
                   </Button>
                   <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
                     <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />

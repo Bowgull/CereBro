@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0018 EDT
+Last updated: 2026-05-19 0023 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0023 EDT: extended the Browser `Stage` button to create both a
+  local Browser action proposal and a local `browser_tab_sessions` draft row.
+  The draft tab stays blocked from page open, fetch, browser automation, source
+  save, Workbench capture, Watch Shelf save, and external write. Screenshots
+  saved at `output/playwright/workbench-browser-stage-draft-tab-before.png` and
+  `output/playwright/workbench-browser-stage-draft-tab-after.png`. Browser proof
+  created one local Browser proposal row and one local draft tab row. No page
+  open, fetch, search request, Watch Shelf save, source save, provider call,
+  install, external write, or Raven path was added.
 - 2026-05-19 0018 EDT: wired the Browser `Stage` button to create the existing
   local Browser action proposal and show a compact inline receipt status. Page
   opening remains blocked. Screenshots saved at

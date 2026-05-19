@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0018 EDT
+Last updated: 2026-05-19 0023 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0023 EDT - Workbench Browser Draft Tab Stage
+
+### What Changed
+- Extended the Browser `Stage` button to create both a local Browser action
+  proposal and a local `browser_tab_sessions` draft row.
+- Kept the staged draft tab blocked from page opening, page fetching, browser
+  automation, source saving, Workbench capture, Watch Shelf save, and external
+  writes.
+- Updated inline status to show the staged draft tab receipt.
+- Invalidated Browser proposal and tab-session storage reads after the draft
+  row is created.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Local Playwright proof against `http://localhost:3000/` opened Workshop,
+  typed `https://example.com/draft-tab-stage`, captured the pre-stage state,
+  clicked `Stage`, and captured the visible draft-tab receipt state.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-browser-stage-draft-tab-before.png`
+  - `output/playwright/workbench-browser-stage-draft-tab-after.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup plus
+  `CEREBRO_DAILY_OS_BROWSER_CONTRACT.md`.
+- Matched elements: one address/search field, real local tab staging, compact
+  visible receipt, and no fake page open.
+- Deviations: the staged tab is a local draft row only. It does not open,
+  fetch, render, persist history, save a source, or create Watch Shelf state.
+- Next fidelity gap: real manual browser runner contract, then real user-created
+  bookmarks/project pins and tab switching.
+
+### Drift Check
+- On path. This uses existing Browser proposal and tab-session contracts instead
+  of adding fake browser behavior.
+- It does not add a new primary surface, fake Browser/Watch behavior,
+  open/fetch/search pages, save sources, persist watch progress, call
+  providers/models, install, pull, write externally, or touch Raven paths.
+
+### Known Risks
+- Stage now writes two local rows during use: a Browser action proposal and a
+  draft tab session. This is intended.
+- The Browser shell remains a blocked local surface until the approved manual
+  runner contract is implemented.
+
+### Storage Impact
+- No schema change.
+- Browser proof created one local Browser proposal row and one local draft tab
+  row during manual QA.
+- Two local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/components/WorkbenchPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/routers/workbench.ts first. Continue CereBro on the locked Browser/Watch Shelf path. The Browser Stage button now creates a local Browser action proposal plus a local browser_tab_sessions draft row, shows a compact receipt status, and still does not open/fetch/render a page. Next best slice is either the real manual browser runner contract if gates are ready, or real user-created bookmark/project pin contracts and tab switching. Do not add a new primary surface, fake Browser/Watch behavior, fake bookmarks, open/fetch/search pages without the runner contract, save sources, persist watch progress, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-19 0018 EDT - Workbench Browser Stage Button
 
