@@ -17,7 +17,7 @@ import {
 type OriginFilter = "all" | "hedwig" | "terminal" | "runtime" | "project_lab" | "source" | "browser" | "model_tools" | "other";
 type StatusFilter = "pending" | "approved" | "rejected" | "cancelled";
 type GroupFilter = "origin" | "project" | "action_type" | "status" | "risk";
-type ApprovalRoute = "security" | "terminal" | "workbench" | "projects" | "sources" | "inbox" | "model_tools";
+type ApprovalRoute = "browser" | "security" | "terminal" | "workbench" | "projects" | "sources" | "inbox" | "model_tools";
 type SelectOption = { value: string; label: string };
 type ApprovalFocusDraft = {
   approvalId?: number;
@@ -97,6 +97,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [preflightsOpen, setPreflightsOpen] = useState(false);
   const [focusNotice, setFocusNotice] = useState<string | null>(null);
+  const utils = trpc.useUtils();
 
   const projects = trpc.projectIntelligence.overview.useQuery();
   const projectOptions = useMemo(
@@ -156,6 +157,18 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
   const copy = approvalPanelCopy();
   const visibleApprovalRows = approvals.data?.summary.visible ?? items.length;
   const hiddenApprovalRows = approvals.data?.summary.hidden ?? 0;
+  const decideApproval = trpc.approvals.decide.useMutation({
+    onSuccess: (result) => {
+      const decidedStatus = result.approval.status as StatusFilter;
+      setStatus(decidedStatus);
+      setSelectedId(result.approval.id);
+      setFocusNotice(`Approval #${result.approval.id} ${labelize(result.approval.status)}. No action ran.`);
+      utils.approvals.queue.invalidate();
+      utils.approvals.detail.invalidate();
+      utils.approvals.list.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   useEffect(() => {
     let raw: string | null = null;
@@ -186,6 +199,23 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
       // Ignore storage failure. The Security Gate form still opens.
     }
     onNavigate("security");
+  }
+
+  function focusBrowserProposal(input: BrowserProposalReceipt) {
+    try {
+      window.sessionStorage.setItem(
+        "cerebro:browser-focus",
+        JSON.stringify({
+          source: "approval_decision_return",
+          proposalId: input.proposalId,
+          query: input.target,
+          notice: `Browser proposal #${input.proposalId} focused after approval decision. Page open remains blocked.`,
+        }),
+      );
+    } catch {
+      // Browser still opens; the user can select the staged tab manually.
+    }
+    onNavigate?.("browser");
   }
 
   return (
@@ -496,7 +526,7 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
         </section>
 
         <aside className="overflow-y-auto p-2" aria-label={copy.detailAria} style={{ borderLeft: `1px solid ${G.lineSoft}`, background: G.slabRaised }}>
-          {!selectedPreview ? (
+          {selectedPreviewId == null ? (
             <div className="rounded p-2 text-[11px]" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
               {copy.selectEmpty}
             </div>
@@ -536,6 +566,53 @@ export default function ApprovalDashboardPanel({ onClose, onNavigate }: { onClos
                 )}
                 <Meta label="Cost/Risk" value={labelize(selected.costRisk)} />
                 <Meta label={copy.policyCheckLabel} value={selected.permissionPreflightId == null ? "unlinked" : labelize(selected.permissionPreflight?.decision)} />
+                <div className="flex flex-wrap gap-1">
+                  {selected.status === "pending" && (
+                    <>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={decideApproval.isPending}
+                        onClick={() =>
+                          decideApproval.mutate({
+                            id: selected.id,
+                            decision: "approved",
+                            reason: "Approved from Approval Queue. This records metadata only and does not run the linked action.",
+                          })
+                        }
+                      >
+                        {decideApproval.isPending ? "Recording" : "Approve"}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="risk"
+                        disabled={decideApproval.isPending}
+                        onClick={() =>
+                          decideApproval.mutate({
+                            id: selected.id,
+                            decision: "rejected",
+                            reason: "Rejected from Approval Queue. Linked action remains blocked.",
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  {selected.browserProposalReceipt && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={!onNavigate}
+                      onClick={() => focusBrowserProposal(selected.browserProposalReceipt!)}
+                    >
+                      Return to Browser
+                    </Button>
+                  )}
+                </div>
               </Section>
 
               <DetailSection title={copy.permissionCheckTitle} detail={selected.permissionPreflight == null ? "unlinked" : labelize(selected.permissionPreflight.decision)}>

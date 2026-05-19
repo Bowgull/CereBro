@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0716 EDT
+Last updated: 2026-05-19 0723 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0723 EDT - Browser Approval Decision Return
+
+### What Changed
+- Added Approvals detail controls to approve or reject a pending approval as
+  local metadata only.
+- Added `Return to Browser` for Browser approval receipts.
+- Added Browser focus readback so returning from Approvals restores the staged
+  Browser proposal, URL, and blocked page state.
+- Fixed Approvals detail persistence so a selected receipt still shows after a
+  status change even if the filtered list changes.
+
+### Files Touched
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Browser proof against `http://localhost:3000/` staged:
+  - `https://example.com/browser-approval-detail`
+  - opened Approvals through `Review approval`
+  - clicked `Approve`
+  - confirmed approval metadata recorded and `Return to Browser` remains visible
+  - clicked `Return to Browser`
+  - confirmed Browser restores the staged URL and still shows `open blocked`
+- Screenshot proof saved locally at:
+  - `output/playwright/browser-approval-return-approved-detail.png`
+  - `output/playwright/browser-approval-return-focused-detail.png`
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and approval-gated
+  autonomy contract.
+- Matched elements: Browser now has a visible approval loop and return path
+  without exposing runner machinery in the primary page body.
+- Deviations: still not 1:1. The live browser page renderer and real manual
+  runner are not implemented yet.
+- Next fidelity gap: manual browser runner implementation contract, with page
+  open still gated behind approved receipts and Spock policy.
+
+### Drift Check
+- On path.
+- Approval records metadata only.
+- No fake browser function.
+- No page open, page fetch, search request, source save, Watch Shelf save,
+  provider call, install, external write, model pull, castle change, or Raven
+  path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- Browser proof created local Browser proposal, approval preview, permission
+  preflight, Workbench body, Spock receipt, tab draft, and result/recovery rows
+  for test URL `https://example.com/browser-approval-detail`, then marked that
+  approval approved as local metadata.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, app/server/routers/workbench.ts, app/server/routers/approvals.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. Browser now prepares an Open Page package, hands off to Approvals, records approval metadata only, and returns to Browser with open still blocked. Next safest slice is the manual browser runner implementation contract. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0716 EDT - Browser Approval Handoff
 

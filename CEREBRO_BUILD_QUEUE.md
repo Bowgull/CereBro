@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0716 EDT
+Last updated: 2026-05-19 0723 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0723 EDT: added the Browser approval decision return path. Approvals
+  can now approve or reject pending receipts as local metadata only, selected
+  receipt detail persists after status changes, and Browser receipts can return
+  to the Browser with the staged proposal focused and `open blocked` intact.
+  Screenshots saved at
+  `output/playwright/browser-approval-return-approved-detail.png` and
+  `output/playwright/browser-approval-return-focused-detail.png`. No execute,
+  page open, fetch, search request, Watch Shelf save, source save, provider
+  call, install, external write, model pull, castle change, or Raven path was
+  added.
 - 2026-05-19 0716 EDT: added a direct Browser `Review approval` handoff after
   Stage prepares an Open Page package. The handoff focuses the existing
   Approvals surface on the pending Browser decision through session storage and

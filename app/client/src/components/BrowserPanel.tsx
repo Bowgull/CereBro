@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,6 +134,27 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     createBrowserActionWorkbenchBody.isPending ||
     createBrowserActionSpockGate.isPending ||
     createBrowserResultRecoveryScaffold.isPending;
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.sessionStorage.getItem("cerebro:browser-focus");
+      if (raw) window.sessionStorage.removeItem("cerebro:browser-focus");
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    try {
+      const focus = JSON.parse(raw) as { proposalId?: number; query?: string; notice?: string };
+      if (typeof focus.query === "string") setBrowserAddressDraft(focus.query);
+      if (typeof focus.proposalId === "number") setSelectedBrowserProposalId(focus.proposalId);
+      setBrowserSurface("page");
+      setBrowserNotice(focus.notice ?? "Browser proposal focused. No page opened.");
+      setPreparedApprovalId(null);
+    } catch {
+      setBrowserNotice("Browser focus could not be read. No page opened.");
+    }
+  }, []);
 
   return (
     <div
