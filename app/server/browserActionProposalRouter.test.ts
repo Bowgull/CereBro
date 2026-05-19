@@ -1678,6 +1678,60 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
   });
 
+  it("removes one Browser bookmark without source or Watch Shelf writes", async () => {
+    const caller = createCaller();
+    const target = `https://example.com/bookmark-remove-${Date.now()}`;
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target,
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({ proposalId: created.proposal.id });
+    await caller.workbench.recordBrowserSandboxFrameOpen({ proposalId: created.proposal.id });
+    const saved = await caller.workbench.createBrowserBookmarkFromOpenTab({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      browserBookmarks: await countRows("browser_bookmarks"),
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const removed = await caller.workbench.removeBrowserBookmark({
+      bookmarkId: saved.bookmark?.id ?? 0,
+    });
+    const bookmarks = await caller.workbench.browserBookmarkStorageContract();
+
+    expect(removed.ok).toBe(true);
+    expect(removed.mode).toBe("browser_bookmark_removed");
+    expect(removed.removedBookmark?.targetUrl).toBe(target);
+    expect(removed.noActionTaken).toContain("No source saved.");
+    expect(removed.noActionTaken).toContain("No external write ran.");
+    expect(bookmarks.items.some((item) => item.id === saved.bookmark?.id)).toBe(false);
+
+    expect(await countRows("browser_bookmarks")).toBe(before.browserBookmarks - 1);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+  });
+
   it("blocks sandbox frame reload until the Browser tab is open", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

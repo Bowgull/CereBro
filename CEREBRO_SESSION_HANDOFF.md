@@ -36041,3 +36041,86 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, and open-page machinery reduction. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice can harden bookmark rename/delete or continue visual polish around the frame chrome. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1931 EDT - Browser Bookmark Removal
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: collapsed Browser bookmark plaque now supports local
+  removal.
+- Backend/runtime: added local-only bookmark removal route.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `workbench.removeBrowserBookmark`.
+- Added test coverage for removing one bookmark without touching source rows or
+  Watch Shelf rows.
+- Added a compact trash icon inside each collapsed bookmark row.
+- Removing a bookmark deletes only the local `browser_bookmarks` row.
+- Missing bookmark removal returns a no-action result.
+- No page opens.
+- No backend page fetch, source save, cookies, credentials, Watch Shelf change,
+  provider call, install, download, external write, fake progress, service
+  resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/routers/workbench.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1931 CereBro Session Handoff - browser-bookmark-removal.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected because `workbench.removeBrowserBookmark` did not exist.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Computer Use is blocked from
+  inspecting `com.openai.codex`.
+
+Mockup fidelity:
+
+- Target used: Browser high-fidelity source-of-truth direction.
+- Screenshot path: unavailable in this session because in-app Browser proof is
+  not callable.
+- Matched elements: bookmark management stays collapsed and does not add a new
+  primary tab.
+- Deviations: bookmark rename is not built.
+- Next fidelity gap: frame chrome polish remains open.
+
+Drift check:
+
+- On path. This pass adds real local Browser utility without pretending CereBro
+  has a full browser engine.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Bookmark removal is immediate local deletion with no undo.
+- Visual proof remains unavailable in this session.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- Bookmark removal deletes rows from local `browser_bookmarks` only.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, and bookmark removal. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice can add bookmark rename or continue visual polish around the frame chrome. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

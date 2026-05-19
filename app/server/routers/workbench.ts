@@ -2095,6 +2095,70 @@ export const workbenchRouter = router({
       };
     }),
 
+  removeBrowserBookmark: publicProcedure
+    .input(
+      z.object({
+        bookmarkId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 state, project_id, source_id, workbench_evidence_id,
+                 created_at, updated_at
+          FROM browser_bookmarks
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.bookmarkId],
+      });
+      const bookmark = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!bookmark) {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_remove_missing" as const,
+          removedBookmark: null,
+          writesExternal: false,
+          gates: [
+            "Bookmark row was not found.",
+            "No bookmark removed, source saved, Watch Shelf item changed, backend page fetch run, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark removed.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item changed.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      await db.execute({
+        sql: "DELETE FROM browser_bookmarks WHERE id = ?",
+        args: [input.bookmarkId],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_removed" as const,
+        removedBookmark: rowToBrowserBookmark(bookmark),
+        writesExternal: false,
+        gates: [
+          "Removed one local Browser bookmark row.",
+          "No page fetch, source save, Watch Shelf change, cookie persistence, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Watch Shelf item changed.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   recordBrowserSandboxFrameReload: publicProcedure
     .input(
       z.object({

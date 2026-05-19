@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
@@ -218,6 +218,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const removeBrowserBookmark = trpc.workbench.removeBrowserBookmark.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Removed bookmark: ${result.removedBookmark?.title ?? result.removedBookmark?.targetUrl ?? "bookmark"}.`
+          : "Bookmark was already gone.",
+      );
+      utils.workbench.browserBookmarkStorageContract.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
   const recordBrowserSandboxFrameReload = trpc.workbench.recordBrowserSandboxFrameReload.useMutation({
     onSuccess: (result) => {
       if (result.ok) {
@@ -306,6 +317,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     recordBrowserSandboxFrameOpen.isPending ||
     createWatchShelfItemFromOpenTab.isPending ||
     createBrowserBookmarkFromOpenTab.isPending ||
+    removeBrowserBookmark.isPending ||
     recordBrowserSandboxFrameReload.isPending;
 
   useEffect(() => {
@@ -672,27 +684,40 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Local Bookmarks</div>
                   <div className="mt-1 grid gap-1">
                     {browserBookmarkItems.slice(0, 6).map((bookmark) => (
-                      <Button
-                        key={bookmark.id}
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
-                        title={`${bookmark.targetUrl}. Stages address only. No page opens.`}
-                        onClick={() => {
-                          setBrowserSurface("page");
-                          setBrowserAddressDraft(bookmark.targetUrl);
-                          setSelectedBrowserProposalId(null);
-                          setSandboxFrameTarget(null);
-                          setSandboxFrameProposalId(null);
-                          setBrowserNotice("Bookmark loaded into the address bar. Stage it before opening.");
-                        }}
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
-                          <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
-                        </span>
-                      </Button>
+                      <div key={bookmark.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1 rounded" style={{ background: "rgba(5, 10, 10, 0.52)", border: `1px solid ${browserFrame.lineSoft}` }}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left"
+                          title={`${bookmark.targetUrl}. Stages address only. No page opens.`}
+                          onClick={() => {
+                            setBrowserSurface("page");
+                            setBrowserAddressDraft(bookmark.targetUrl);
+                            setSelectedBrowserProposalId(null);
+                            setSandboxFrameTarget(null);
+                            setSandboxFrameProposalId(null);
+                            setBrowserNotice("Bookmark loaded into the address bar. Stage it before opening.");
+                          }}
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
+                            <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                          </span>
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 px-0"
+                          disabled={removeBrowserBookmark.isPending}
+                          aria-label={`Remove bookmark ${bookmark.title ?? bookmark.targetUrl}`}
+                          title="Remove this local bookmark. No external write."
+                          onClick={() => removeBrowserBookmark.mutate({ bookmarkId: bookmark.id })}
+                        >
+                          <Trash2 size={12} strokeWidth={1.8} aria-hidden="true" />
+                        </Button>
+                      </div>
                     ))}
                   </div>
                   <div className="mt-1">Local rows only. No cookies, page cache, source save, or external write.</div>

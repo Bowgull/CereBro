@@ -2209,3 +2209,10 @@ Expected shape:
   save, cookie persistence, external write, fake progress, or Raven path
   changed. Next Browser slice can harden bookmark rename/delete or continue
   visual polish around the frame chrome.
+- 2026-05-19 1931 EDT: Browser bookmark removal landed. Added local-only
+  `workbench.removeBrowserBookmark`, test coverage proving source and Watch
+  Shelf rows are untouched, and a trash icon inside the collapsed bookmark
+  plaque. Removing a bookmark deletes only the local `browser_bookmarks` row.
+  No backend page fetch, cookies, credentials, source save, Watch Shelf change,
+  external write, fake progress, or Raven path changed. Next Browser slice can
+  add bookmark rename or continue visual polish around the frame chrome.
