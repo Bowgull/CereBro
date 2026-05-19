@@ -2430,17 +2430,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             </details>
 
-            <section className="rounded p-2" aria-label="Recent Workbench receipts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">Recent Receipts</h3>
-                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Filter and inspect local receipts.
-                  </p>
+            <details className="rounded p-2" aria-label="Recent Workbench receipts" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Receipt archive</h3>
+                    <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
+                      Search, filter, and inspect local receipts.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-1">
+                    <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
+                    <Chip label="open to inspect" tone={C.accent} />
+                  </div>
                 </div>
-                <Chip label={`${evidence.data?.summary.total ?? 0} shown`} tone={C.textMuted} />
-              </div>
-              <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto_auto]">
+              </summary>
+              <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_160px_180px_auto_auto]">
                 <Input
                   value={filterQuery}
                   onChange={(event) => setFilterQuery(event.target.value)}
@@ -2698,7 +2703,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   />
                 </div>
               )}
-            </section>
+            </details>
 
           </div>
         )}
