@@ -34390,3 +34390,81 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, collapsed Open Gate proposal UI, collapsed no-page Project Pins, Browser chrome polish, Browser empty-state polish, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, and Browser mobile address-row polish exist. Next safest slice is continue mobile polish or return to the broader shell 1:1 pass. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 0928 EDT - Browser Mobile Open Page Watch Shelf Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser open-page and Watch Shelf layouts are safer on
+  narrow screens.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Open-page title and action controls now stack cleanly on mobile.
+- Sandbox iframe uses a shorter mobile height and keeps the taller frame at
+  `sm` and up.
+- Browser page surface padding is slightly tighter on mobile.
+- Watch Shelf padding is tighter on mobile.
+- Watch Shelf save action spans the row on mobile and returns to compact width
+  at `sm`.
+- No browser engine, backend route, schema, provider call, install, download,
+  external write, fake source discovery, fake media progress, service resume,
+  or Raven path was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0928 CereBro Session Handoff - browser-mobile-open-page-watch-shelf-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed because Playwright is not installed in
+  the available Node path and Computer Use is blocked from operating the Codex
+  app.
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched elements: mobile layout is less cramped while preserving desktop
+  proportions.
+- Deviations: still not 1:1 visual polish. The broader shell needs the full
+  high-fidelity pass.
+- Next fidelity gap: return to the broader shell 1:1 pass unless a visible
+  Browser mobile issue appears.
+
+Drift check:
+
+- On path. This pass changes responsive layout only.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, unsafe
+  site automation, provider use, install, pull, external write, or Raven path.
+
+Known risks:
+
+- This is UI polish only.
+- Browser visual proof could not run with the currently available tools in this
+  turn.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, collapsed Open Gate proposal UI, collapsed no-page Project Pins, Browser chrome polish, Browser empty-state polish, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile address-row polish, and Browser mobile open-page/Watch Shelf polish exist. Next safest slice is return to the broader shell 1:1 pass unless a visible Browser mobile issue appears. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
+```

@@ -2045,3 +2045,11 @@ Expected shape:
   external write, fake source discovery, fake media progress, service resume,
   or Raven path was added. Next Browser slice can continue mobile polish or
   return to the broader shell 1:1 pass.
+- 2026-05-19 0928 EDT: Browser mobile open-page and Watch Shelf polish landed.
+  Open-page title/actions now stack cleanly on narrow screens, the sandbox frame
+  uses a shorter mobile height, and Watch Shelf padding/save action sizing is
+  less cramped on mobile. This is responsive polish only: no browser engine,
+  backend route, schema, provider call, install, download, external write, fake
+  source discovery, fake media progress, service resume, or Raven path was
+  added. Next Browser slice should return to the broader shell 1:1 pass unless
+  a visible mobile issue appears.

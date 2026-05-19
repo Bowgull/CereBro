@@ -617,11 +617,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           )}
 
           {browserSurface === "page" ? (
-            <section className="rounded p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
+            <section className="rounded p-3 sm:p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
               {hasOpenSandboxFrame ? (
                 <div className="grid gap-2">
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1 basis-full sm:basis-auto">
                       <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                         {selectedBrowserTab ? browserDraftTabLabel(selectedBrowserTab) : "Open page"}
                       </div>
@@ -629,7 +629,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                         {sandboxFrameTarget}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-1">
+                    <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto sm:shrink-0">
                       <Button
                         type="button"
                         size="sm"
@@ -728,7 +728,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       src={sandboxFrameTarget}
                       sandbox="allow-scripts allow-forms"
                       referrerPolicy="no-referrer"
-                      className="h-[clamp(350px,56dvh,620px)] w-full rounded"
+                      className="h-[clamp(300px,52dvh,620px)] w-full rounded sm:h-[clamp(350px,56dvh,620px)]"
                       style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.16)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
                     />
                   </div>
@@ -875,7 +875,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               )}
             </section>
           ) : (
-            <section id="browser-watch-shelf" className="rounded p-3" aria-label="Watch Shelf tab" style={{ background: "radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.1), transparent 34%), linear-gradient(180deg, rgba(8, 15, 14, 0.99), rgba(3, 7, 7, 0.99))", border: `1px solid ${browserFrame.line}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.46)" }}>
+            <section id="browser-watch-shelf" className="rounded p-2 sm:p-3" aria-label="Watch Shelf tab" style={{ background: "radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.1), transparent 34%), linear-gradient(180deg, rgba(8, 15, 14, 0.99), rgba(3, 7, 7, 0.99))", border: `1px solid ${browserFrame.line}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.46)" }}>
               <div className="flex flex-wrap items-start justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
@@ -885,6 +885,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   size="sm"
                   variant="outline"
+                  className="h-7 w-full sm:w-auto"
                   disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createWatchShelfItemFromOpenTab.isPending}
                   title={hasOpenSandboxFrame ? "Save the current open page to Watch Shelf." : "Requires a real open page before it can save."}
                   onClick={() => {
