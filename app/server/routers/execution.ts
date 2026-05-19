@@ -76,6 +76,9 @@ function runnerPolicyForCommand(command: string) {
   }
   const args = parsed.args.map((arg) => arg.toLowerCase());
   if (parsed.file === "git") {
+    if (args.some((arg) => arg === "-c" || arg === "-c." || arg.startsWith("--git-dir") || arg.startsWith("--work-tree"))) {
+      return { ok: false as const, reason: "git config, git-dir, and work-tree overrides are blocked in the read-only runner." };
+    }
     const subcommand = args.find((arg) => !arg.startsWith("-"));
     if (!subcommand || !allowedGitSubcommands.has(subcommand)) {
       return { ok: false as const, reason: "Only read-only git status, diff, log, show, branch, and rev-parse are allowed." };
@@ -90,18 +93,53 @@ function runnerPolicyForCommand(command: string) {
   return parsed;
 }
 
-function containedCwd(cwd: string | null, projectPath: string | null) {
-  if (!cwd) return { ok: false as const, reason: "Missing cwd." };
-  const resolved = path.resolve(cwd);
-  const allowedRoots = [
+function allowedPathRoots(projectPath: string | null) {
+  return [
     projectPath ? path.resolve(projectPath) : null,
     "/Users/lindsaybell/Desktop/CereBro",
   ].filter(Boolean) as string[];
-  const matched = allowedRoots.some((root) => resolved === root || resolved.startsWith(`${root}${path.sep}`));
+}
+
+function pathWithinAllowedRoots(candidate: string, roots: string[]) {
+  return roots.some((root) => candidate === root || candidate.startsWith(`${root}${path.sep}`));
+}
+
+function containedCwd(cwd: string | null, projectPath: string | null) {
+  if (!cwd) return { ok: false as const, reason: "Missing cwd." };
+  const resolved = path.resolve(cwd);
+  const allowedRoots = allowedPathRoots(projectPath);
+  const matched = pathWithinAllowedRoots(resolved, allowedRoots);
   if (!matched) {
     return { ok: false as const, reason: "cwd is outside the approved project boundary." };
   }
   return { ok: true as const, cwd: resolved };
+}
+
+function argLooksLikePath(arg: string) {
+  return arg === "."
+    || arg === ".."
+    || arg.startsWith("/")
+    || arg.startsWith("./")
+    || arg.startsWith("../")
+    || arg.startsWith("~/")
+    || arg.includes("/")
+    || arg.includes(`${path.sep}..${path.sep}`);
+}
+
+function containedCommandArgs(input: { file: string; args: string[]; cwd: string; projectPath: string | null }) {
+  if (input.file === "git") return { ok: true as const };
+  const roots = allowedPathRoots(input.projectPath);
+  for (const arg of input.args) {
+    if (arg.startsWith("-") || !argLooksLikePath(arg)) continue;
+    if (arg.startsWith("~/")) {
+      return { ok: false as const, reason: "Home-directory path arguments are blocked in the read-only runner." };
+    }
+    const candidate = path.resolve(input.cwd, arg);
+    if (!pathWithinAllowedRoots(candidate, roots)) {
+      return { ok: false as const, reason: "Path arguments must stay inside the approved project boundary." };
+    }
+  }
+  return { ok: true as const };
 }
 
 function runReadOnlyCommand(input: { file: string; args: string[]; cwd: string }) {
@@ -480,6 +518,24 @@ export const executionRouter = router({
           resultState: "blocked_by_cwd_policy",
           reason: cwdCheck.reason,
           gates: ["cwd containment blocked this command before execution."],
+        };
+      }
+      const argCheck = containedCommandArgs({
+        file: policy.file,
+        args: policy.args,
+        cwd: cwdCheck.cwd,
+        projectPath: (proposal as typeof proposal & { projectPath?: string | null }).projectPath ?? null,
+      });
+      if (!argCheck.ok) {
+        return {
+          ok: false as const,
+          blocked: true,
+          proposal,
+          writesExternal: false,
+          wouldExecute: false,
+          resultState: "blocked_by_path_policy",
+          reason: argCheck.reason,
+          gates: ["Path containment blocked this command before execution."],
         };
       }
 

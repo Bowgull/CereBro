@@ -35183,3 +35183,83 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/terminalExecutionActionModel.ts, app/server/terminalExecutionActionModel.test.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/BrowserPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening exists and now distinguishes read runnable, contract blocked, and runner blocked. Next critical slice should continue approval-gated execution clarity or move to the next V1 surface with real behavior gaps. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 1407 EDT - Read-Only Runner Path Containment Hardening
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: unchanged.
+- Backend/runtime: read-only local runner boundary hardened.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added path-argument containment checks to the approved read-only runner.
+- Allowlisted commands can no longer read arbitrary absolute paths outside the
+  approved project boundary.
+- Parent-traversal path arguments are blocked when they resolve outside the
+  approved roots.
+- Home-directory path arguments are blocked.
+- Git `--git-dir`, `--work-tree`, and config override forms are blocked in the
+  read-only runner.
+- Added regression coverage proving an approved `cat /etc/hosts` action
+  contract still does not execute.
+- No command allowlist expansion, git write runner, backend surface expansion,
+  provider call, install, download, external write, fake capability, fake source
+  discovery, service resume, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/server/routers/execution.ts`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1407 CereBro Session Handoff - readonly-runner-path-containment-hardening.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- Browser visual proof was not needed because this is backend runner policy.
+
+Mockup fidelity:
+
+- Target used: no visual target in this slice.
+- Screenshot path: not applicable.
+- Matched elements: unchanged.
+- Deviations: none.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass hardens the approval-gated execution core.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, or Raven path.
+
+Known risks:
+
+- This hardening is conservative. Some future safe commands with path-like
+  search patterns may need explicit handling.
+- The runner remains read-only allowlisted only.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/terminalExecutionActionModel.ts, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening exists. Read-only runner path containment hardening exists and blocks outside path args before spawn. Next critical slice should continue execution-core hardening or inspect Project Lab push-readiness gates. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

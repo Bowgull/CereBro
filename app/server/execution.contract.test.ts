@@ -228,6 +228,51 @@ describe("execution action contract", () => {
     expect(blocked.reason).toContain("Only approved read-only command contracts");
   });
 
+  it("blocks read-only commands that target paths outside the project boundary", async () => {
+    const caller = createCaller();
+    const task = await caller.tasks.create({
+      title: "Execution path containment test task",
+      agent: "tony",
+    });
+    const preview = await caller.terminalLab.previewCommand({
+      command: "cat /etc/hosts",
+      cwd: "/Users/lindsaybell/Desktop/CereBro",
+      taskId: task.id,
+    });
+    const approvalPreview = await caller.terminalLab.createApprovalPreviewFromObservation({
+      observationId: preview.observationId,
+    });
+    const approvalId = approvalPreview.approval?.id ?? -1;
+    await caller.approvals.decide({ id: approvalId, decision: "approved" });
+    const evidence = await caller.workbench.createEvidence({
+      kind: "terminal_output",
+      title: "Blocked outside path receipt",
+      summary: "Receipt body exists so path containment is the deciding gate.",
+      targetUri: `terminal_lab:observation:${preview.observationId}`,
+      taskId: task.id,
+      commandObservationId: preview.observationId,
+      ownerAgent: "tony",
+      routeAgent: "tony",
+      permissionClass: "manual_note",
+    });
+    const proposal = await caller.execution.proposeFromCommandObservation({
+      observationId: preview.observationId,
+      approvalId,
+      workbenchEvidenceId: evidence.evidence.id,
+    });
+    expect(proposal.proposal?.readiness.canExecute).toBe(true);
+
+    const blocked = await caller.execution.runApprovedAction({
+      proposalId: proposal.proposal?.id ?? -1,
+      approved: true,
+    });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.wouldExecute).toBe(false);
+    expect(blocked.resultState).toBe("blocked_by_path_policy");
+    expect(blocked.reason).toContain("approved project boundary");
+    expect(blocked.gates.join(" ")).toContain("Path containment blocked");
+  });
+
   it("does not allow approval receipts to be decided twice", async () => {
     const caller = createCaller();
     const preview = await caller.terminalLab.previewCommand({

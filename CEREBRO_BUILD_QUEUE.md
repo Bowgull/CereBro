@@ -2122,3 +2122,12 @@ Expected shape:
   fake capability, or Raven path changed. Next critical slice should continue
   approval-gated execution clarity or return to the next V1 surface with real
   behavior gaps.
+- 2026-05-19 1407 EDT: Read-only runner path containment hardening landed. The
+  approved local read-only runner now blocks path arguments that resolve outside
+  the approved project boundary, so allowlisted commands such as `cat`, `ls`,
+  `sed`, `tail`, `wc`, `stat`, `find`, or `rg` cannot read arbitrary absolute
+  or parent-traversal paths just because the cwd is safe. Git config/work-tree
+  overrides are also blocked. No command allowlist expansion, git write runner,
+  provider call, install, download, external write, fake capability, or Raven
+  path was added. Next critical slice should continue execution-core hardening
+  or inspect Project Lab push-readiness gates.
