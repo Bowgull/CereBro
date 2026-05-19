@@ -1750,3 +1750,9 @@ Expected shape:
   should reduce route/context rail dominance during Browser focus or refine
   plaque/sidebar material. Do not create a new Browser primary surface without
   approval.
+- 2026-05-18 2325 EDT: Workbench Browser context focus landed. While Workbench
+  is open, the right rail narrows to 184px and hides Active Contract, Sessions,
+  and route shortcut buttons. It keeps Route Read, Mode, Surface, Chain, and
+  Next visible. Browser behavior remains blocked and honest. Next UI fidelity
+  slice should refine left rail plaque material, top Workbench tab treatment,
+  or Browser proportions.

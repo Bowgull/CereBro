@@ -200,6 +200,7 @@ export default function Home() {
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
   const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
+  const isWorkbenchFocus = nav === "workbench";
 
   const selectedHero = useMemo(
     () => heroes.find((h) => h.id === selectedHeroId) || null,
@@ -540,7 +541,7 @@ export default function Home() {
         {/* Right context panel — quiet route context only */}
         {isContextPanelOpen && (
           <aside
-            className="w-[250px] shrink-0 flex flex-col overflow-hidden"
+            className={`${isWorkbenchFocus ? "w-[184px]" : "w-[250px]"} shrink-0 flex flex-col overflow-hidden transition-[width] duration-200`}
             aria-label="Context panel"
             style={{ background: "rgba(7, 15, 13, 0.96)", borderLeft: `1px solid ${mockupShell.marbleLine}`, boxShadow: "inset 1px 0 0 rgba(244, 239, 227, 0.05)" }}
           >
@@ -553,6 +554,7 @@ export default function Home() {
               onSelectHero={setSelectedHeroId}
               onNavigate={setNav}
               connMode={connMode}
+              compact={isWorkbenchFocus}
             />
           </aside>
         )}
@@ -3021,7 +3023,7 @@ function proofTone(tone: "gold" | "accent" | "warning" | "success" | "danger" | 
 
 // ── Right context panel ─────────────────────────────────────────────────────
 function ContextPanel({
-  agent, mode, nav, heroes, selectedHeroId, onSelectHero, onNavigate, connMode,
+  agent, mode, nav, heroes, selectedHeroId, onSelectHero, onNavigate, connMode, compact = false,
 }: {
   agent: { id: string; name: string; chamber: string; role: string; floor: string; defaultModelClass: string; escalationModelClass?: string; skills: string[]; toolScope: string[] } | undefined;
   mode: Mode;
@@ -3031,6 +3033,7 @@ function ContextPanel({
   onSelectHero: (id: number | null) => void;
   onNavigate: (id: NavId) => void;
   connMode: "demo" | "live";
+  compact?: boolean;
 }) {
   const route = MODE_ROUTES[mode];
   const owner = route[2] ?? "Cortana";
@@ -3088,12 +3091,12 @@ function ContextPanel({
         )}
       </div>
 
-      <div className="px-2.5 py-2 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}>
+      <div className={`${compact ? "px-2 py-1.5 space-y-1.5" : "px-2.5 py-2 space-y-2"} shrink-0`} style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}>
         <div className="grid grid-cols-2 gap-1.5">
           <ShellMiniStat label="Mode" value={MODE_LABELS[mode]} />
           <ShellMiniStat label="Surface" value={activeSurface} />
         </div>
-        <div className="rounded p-2" style={{ background: "rgba(5, 11, 10, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
+        <div className={`${compact ? "rounded px-2 py-1.5" : "rounded p-2"}`} style={{ background: "rgba(5, 11, 10, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
           <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: C.textMuted }}>
             Chain
           </div>
@@ -3120,7 +3123,7 @@ function ContextPanel({
         </div>
       </div>
 
-      <div className="px-2.5 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.55)" }}>
+      <div className={`${compact ? "hidden" : "px-2.5 py-2 shrink-0 space-y-1.5"}`} style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.55)" }}>
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
             Active contract
@@ -3146,7 +3149,7 @@ function ContextPanel({
       </div>
 
       {/* Sessions list (moved from left rail) */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={compact ? "hidden" : "flex-1 flex flex-col overflow-hidden"}>
         <div
           className="px-2.5 py-1.5 flex items-center justify-between shrink-0"
           style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(6, 13, 12, 0.7)" }}
@@ -3230,14 +3233,14 @@ function ContextPanel({
       </div>
 
       {/* Next Actions */}
-      <div className="px-2.5 py-2 shrink-0" style={{ borderTop: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque }}>
+      <div className={`${compact ? "px-2 py-1.5" : "px-2.5 py-2"} shrink-0`} style={{ borderTop: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
           Next
         </div>
-        <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+        <div className={`${compact ? "line-clamp-3 text-[10px]" : "text-[11px]"} leading-snug`} style={{ color: C.textSecondary }}>
           {nextAction}
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-1">
+        <div className={`${compact ? "hidden" : "mt-2 grid grid-cols-2 gap-1"}`}>
           <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
             Project
           </Button>
