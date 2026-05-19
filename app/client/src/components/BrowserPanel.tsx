@@ -20,6 +20,7 @@ const browserFrame = {
   rail: "linear-gradient(180deg, rgba(20, 35, 31, 0.98), rgba(6, 13, 12, 0.99))",
   plaque: "linear-gradient(180deg, rgba(28, 45, 38, 0.96), rgba(8, 18, 16, 0.98))",
   plaqueActive: "linear-gradient(180deg, rgba(42, 66, 55, 0.98), rgba(12, 30, 26, 0.98))",
+  address: "linear-gradient(180deg, rgba(2, 7, 7, 0.98), rgba(8, 15, 14, 0.98))",
   page: "radial-gradient(circle at 50% 0%, rgba(77, 170, 154, 0.08), transparent 32%), linear-gradient(180deg, rgba(6, 10, 11, 0.99), rgba(2, 5, 6, 0.99))",
   line: "rgba(198, 155, 85, 0.32)",
   lineSoft: "rgba(77, 170, 154, 0.2)",
@@ -340,7 +341,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       <main className="flex-1 overflow-y-auto p-2" aria-label="Browser workspace">
         <div className="grid gap-1.5">
           <div
-            className="flex items-center gap-1 overflow-x-auto rounded-t px-1 pt-1"
+            className="flex items-end gap-1 overflow-x-auto rounded-t px-1.5 pt-1.5"
             aria-label="Browser page tabs"
             style={{ background: "rgba(4, 8, 8, 0.96)", border: `1px solid ${browserFrame.lineSoft}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)" }}
           >
@@ -348,7 +349,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "page" && selectedBrowserProposalId == null ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2"
+              className="h-7 shrink-0 rounded-b-none px-2.5 text-[11px]"
               aria-pressed={browserSurface === "page" && selectedBrowserProposalId == null}
               onClick={() => {
                 setBrowserSurface("page");
@@ -356,8 +357,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 setBrowserNotice(null);
               }}
               style={{
-                background: browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.76)",
+                background: browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                 border: `1px solid ${browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.line : browserFrame.lineSoft}`,
+                borderBottomColor: browserSurface === "page" && selectedBrowserProposalId == null ? C.gold : "transparent",
                 color: browserSurface === "page" && selectedBrowserProposalId == null ? C.textPrimary : C.textMuted,
                 boxShadow: browserFrame.bevel,
               }}
@@ -372,7 +374,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   size="sm"
                   variant={active ? "secondary" : "outline"}
-                  className="h-7 max-w-[160px] shrink-0 rounded-b-none px-2"
+                  className="h-7 max-w-[170px] shrink-0 rounded-b-none px-2.5 text-[11px]"
                   aria-pressed={active}
                   title={`${tab.targetUrl}. Draft tab only. No page opens.`}
                   onClick={() => {
@@ -383,8 +385,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     setBrowserNotice(`${tab.state === "open" ? "Open" : "Draft"} tab ${tab.tabId} selected. No page opened.`);
                   }}
                   style={{
-                    background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.76)",
+                    background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                     border: `1px solid ${active ? browserFrame.line : browserFrame.lineSoft}`,
+                    borderBottomColor: active ? C.gold : "transparent",
                     color: active ? C.textPrimary : C.textMuted,
                     boxShadow: browserFrame.bevel,
                   }}
@@ -397,12 +400,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "watch" ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2"
+              className="h-7 shrink-0 rounded-b-none px-2.5 text-[11px]"
               aria-pressed={browserSurface === "watch"}
               onClick={() => setBrowserSurface("watch")}
               style={{
-                background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.76)",
+                background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                 border: `1px solid ${browserSurface === "watch" ? browserFrame.line : browserFrame.lineSoft}`,
+                borderBottomColor: browserSurface === "watch" ? C.gold : "transparent",
                 color: browserSurface === "watch" ? C.textPrimary : C.textMuted,
                 boxShadow: browserFrame.bevel,
               }}
@@ -412,51 +416,53 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab planned">
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
-            <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
-              {browserTabState.tabSummary}
+            <div className="ml-auto hidden shrink-0 rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-widest md:block" style={{ color: C.textMuted, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.7)", boxShadow: browserFrame.bevel }}>
+              Local
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 px-0"
-              disabled={!browserLocalNavigation.canGoBack}
-              aria-label={browserLocalNavigation.canGoBack ? "Go back through local Browser history" : "No previous local Browser history"}
-              title={browserLocalNavigation.backTarget ? `Open previous local history row: ${browserLocalNavigation.backTarget.targetUrl}` : "No previous local history for this page."}
-              onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.backTarget)}
-            >
-              <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 px-0"
-              disabled={!browserLocalNavigation.canGoForward}
-              aria-label={browserLocalNavigation.canGoForward ? "Go forward through local Browser history" : "No next local Browser history"}
-              title={browserLocalNavigation.forwardTarget ? `Open next local history row: ${browserLocalNavigation.forwardTarget.targetUrl}` : "No next local history for this page."}
-              onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.forwardTarget)}
-            >
-              <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 px-0"
-              disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
-              aria-label="Reload sandbox frame"
-              title={hasOpenSandboxFrame ? "Reload the sandbox frame. No backend fetch runs." : "Open a page before reload."}
-              onClick={() => {
-                if (selectedBrowserProposalId == null) return;
-                recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
-              }}
-            >
-              <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded p-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+            <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 px-0"
+                disabled={!browserLocalNavigation.canGoBack}
+                aria-label={browserLocalNavigation.canGoBack ? "Go back through local Browser history" : "No previous local Browser history"}
+                title={browserLocalNavigation.backTarget ? `Open previous local history row: ${browserLocalNavigation.backTarget.targetUrl}` : "No previous local history for this page."}
+                onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.backTarget)}
+              >
+                <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 px-0"
+                disabled={!browserLocalNavigation.canGoForward}
+                aria-label={browserLocalNavigation.canGoForward ? "Go forward through local Browser history" : "No next local Browser history"}
+                title={browserLocalNavigation.forwardTarget ? `Open next local history row: ${browserLocalNavigation.forwardTarget.targetUrl}` : "No next local history for this page."}
+                onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.forwardTarget)}
+              >
+                <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 px-0"
+                disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
+                aria-label="Reload sandbox frame"
+                title={hasOpenSandboxFrame ? "Reload the sandbox frame. No backend fetch runs." : "Open a page before reload."}
+                onClick={() => {
+                  if (selectedBrowserProposalId == null) return;
+                  recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
+                }}
+              >
+                <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
+              </Button>
+            </div>
             <Input
               value={browserAddressDraft}
               onChange={(event) => {
@@ -465,79 +471,81 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               }}
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
-              className="h-8 flex-1"
+              className="h-8 min-w-0 font-mono text-[12px]"
               title="Stages a local page draft only. It does not open, fetch, search, save, or capture."
               style={{
-                background: "rgba(3, 7, 7, 0.92)",
+                background: browserFrame.address,
                 border: `1px solid ${browserFrame.line}`,
-                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)",
+                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05), inset 0 -10px 20px rgba(0, 0, 0, 0.18)",
               }}
             />
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-8 px-2"
-              disabled={browserDraft.kind === "empty" || isPreparingBrowserDraft}
-              title="Prepare local Browser receipts. This does not open, fetch, search, save, or capture."
-              aria-label="Stage browser page draft"
-              onClick={async () => {
-                if (browserDraft.kind === "empty" || isPreparingBrowserDraft) return;
-                setBrowserNotice("Preparing local Browser receipts. No page will open.");
-                try {
-                  const result = await createBrowserActionProposal.mutateAsync({
-                    actionLabel: "Open Page",
-                    target: browserDraft.raw,
-                    draftKind: browserDraft.kind,
-                  });
-                  const proposalId = result.proposal.id;
-                  setSelectedBrowserProposalId(proposalId);
-                  await createBrowserTabSessionDraft.mutateAsync({ proposalId });
-                  const approvalPreview = await createBrowserActionApprovalPreview.mutateAsync({
-                    proposalId,
-                    reason: "Prepare Browser page open for user approval. This does not open the page.",
-                  });
-                  setPreparedApprovalId(approvalPreview.approval?.id ?? null);
-                  await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
-                  await createBrowserActionSpockGate.mutateAsync({ proposalId });
-                  await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
-                  setBrowserNotice(`Browser proposal #${proposalId} prepared. Approval is waiting. No page opened.`);
-                } catch {
-                  setBrowserNotice("Browser preparation failed before any page opened.");
-                  setPreparedApprovalId(null);
-                }
-              }}
-            >
-              {isPreparingBrowserDraft ? "Preparing" : "Stage"}
-            </Button>
-            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
-              <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
-            <details className="relative">
-              <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
-              </summary>
-              <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
-                <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
-                {browserShell.actions.map((action) => (
-                  <Button
-                    key={action.label}
-                    type="button"
-                    variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
-                    size="sm"
-                    className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
-                    title={action.plannedReason}
-                    role="menuitem"
-                    onClick={() => setBrowserActionLabel(action.label)}
-                  >
-                    <span className="block">
-                      <span className="block text-[11px] font-semibold">{action.label}</span>
-                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </details>
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-8 px-2"
+                disabled={browserDraft.kind === "empty" || isPreparingBrowserDraft}
+                title="Prepare local Browser receipts. This does not open, fetch, search, save, or capture."
+                aria-label="Stage browser page draft"
+                onClick={async () => {
+                  if (browserDraft.kind === "empty" || isPreparingBrowserDraft) return;
+                  setBrowserNotice("Preparing local Browser receipts. No page will open.");
+                  try {
+                    const result = await createBrowserActionProposal.mutateAsync({
+                      actionLabel: "Open Page",
+                      target: browserDraft.raw,
+                      draftKind: browserDraft.kind,
+                    });
+                    const proposalId = result.proposal.id;
+                    setSelectedBrowserProposalId(proposalId);
+                    await createBrowserTabSessionDraft.mutateAsync({ proposalId });
+                    const approvalPreview = await createBrowserActionApprovalPreview.mutateAsync({
+                      proposalId,
+                      reason: "Prepare Browser page open for user approval. This does not open the page.",
+                    });
+                    setPreparedApprovalId(approvalPreview.approval?.id ?? null);
+                    await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
+                    await createBrowserActionSpockGate.mutateAsync({ proposalId });
+                    await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
+                    setBrowserNotice(`Browser proposal #${proposalId} prepared. Approval is waiting. No page opened.`);
+                  } catch {
+                    setBrowserNotice("Browser preparation failed before any page opened.");
+                    setPreparedApprovalId(null);
+                  }
+                }}
+              >
+                {isPreparingBrowserDraft ? "Preparing" : "Stage"}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
+                <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
+              </Button>
+              <details className="relative">
+                <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                  <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
+                </summary>
+                <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                  <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+                  {browserShell.actions.map((action) => (
+                    <Button
+                      key={action.label}
+                      type="button"
+                      variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
+                      size="sm"
+                      className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                      title={action.plannedReason}
+                      role="menuitem"
+                      onClick={() => setBrowserActionLabel(action.label)}
+                    >
+                      <span className="block">
+                        <span className="block text-[11px] font-semibold">{action.label}</span>
+                        <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+              </details>
+            </div>
           </div>
 
           {browserNotice && (

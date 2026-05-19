@@ -2005,3 +2005,11 @@ Expected shape:
   provider call, install, download, external write, fake source discovery, fake
   media progress, or Raven path. Next Browser slice should continue frame and
   address/tab polish toward the approved 1:1 Browser mockup.
+- 2026-05-19 0909 EDT: Browser chrome polish landed. The tab rail now uses
+  tighter plaque tabs with active bottom trim, the old explanatory tab-summary
+  sentence is replaced by a compact `LOCAL` badge, and the address field now
+  reads as a stronger mono address well. This is UI polish only: no browser
+  engine, backend route, schema, provider call, install, download, external
+  write, fake source discovery, fake media progress, or Raven path. Next
+  Browser slice should refine the empty/page state toward the approved 1:1
+  Browser mockup.
