@@ -35520,3 +35520,94 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/lib/terminalExecutionActionModel.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/routeActionModel.ts, app/server/runtimeExecutionReadiness.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, and mobile polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, and execution route-record gate hardening exist. Next critical slice should inspect Terminal Lab and Project Lab UI for the new missing `route record` state, then move to the next real V1 behavior gap. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1442 EDT - Terminal Project Route Gate Copy
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Terminal Lab and Project Lab now name the route gate
+  without raw database language.
+- Backend/runtime: Project Lab push contracts now expose missing route state.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Terminal execution action model now returns `route blocked` when a route
+  record is missing.
+- Terminal runner boundary text now says the Aang route spine must be saved
+  before execution.
+- Project Lab push contract copy now returns `route blocked` when the push
+  contract lacks route context.
+- Project Lab backend push-contract summaries now include `routeRecordId` and
+  a missing-gates list derived from route, Workbench body, and approval state.
+- Project Lab panel now passes missing contract gates into the copy model.
+- No runner policy, command allowlist, git-write runner, backend schema change,
+  provider call, install, download, external write, fake capability, fake source
+  discovery, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/lib/terminalExecutionActionModel.ts`
+- `app/server/terminalExecutionActionModel.test.ts`
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/server/projectLabCopyModel.test.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/routers/projectIntelligence.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1442 CereBro Session Handoff - terminal-project-route-gate-copy.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/terminalExecutionActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected before route-gate copy existed.
+- `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected before route-gate copy existed.
+- `pnpm -C app exec vitest run server/terminalExecutionActionModel.test.ts server/projectLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Browser proof tooling is not callable
+  in this session.
+
+Mockup fidelity:
+
+- Target used: no shell visual target in this slice.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: unchanged.
+- Deviations: none.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass makes the saved-route execution gate visible on the
+  affected build surfaces.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Route linkage remains derived from latest `runtime_route_records.task_id`.
+- Project Lab push contracts can show route blocked until the push path is
+  explicitly tied into a saved route/task flow.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/lib/terminalExecutionActionModel.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/client/src/components/ProjectLabPanel.tsx, app/server/routers/projectIntelligence.ts, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, and mobile polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next critical slice should move to the next real V1 behavior gap. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

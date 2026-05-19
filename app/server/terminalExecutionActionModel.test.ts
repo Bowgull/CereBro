@@ -44,6 +44,23 @@ describe("terminalExecutionActionModel", () => {
     expect(model.showOpenBody).toBe(false);
   });
 
+  it("names a missing route record as the saved route gate", () => {
+    const model = terminalExecutionActionModel({
+      canExecute: false,
+      actionType: "local_read_only_command",
+      riskClass: "read_only",
+      missing: ["route record"],
+      approvalId: 44,
+      workbenchEvidenceId: 55,
+    });
+
+    expect(model.contractStateLabel).toBe("route blocked");
+    expect(model.readyText).toBe("Save the Aang route before execution. Terminal Lab cannot run work from a direct task alone.");
+    expect(model.runnerBoundary).toContain("route spine");
+    expect(model.showOpenApproval).toBe(true);
+    expect(model.showOpenBody).toBe(true);
+  });
+
   it("keeps complete mutating or git-write contracts off the V1 read-only runner", () => {
     const model = terminalExecutionActionModel({
       canExecute: true,

@@ -54,7 +54,10 @@ export function projectLabPushContractCopy(input: {
   contractId: number | null;
   approvalStatus: string | null;
   canRunInV1: boolean;
+  missing?: string[];
 }) {
+  const routeMissing = input.missing?.includes("route record") ?? false;
+
   if (input.canRunInV1) {
     return {
       stateLabel: "runner open",
@@ -62,6 +65,16 @@ export function projectLabPushContractCopy(input: {
       body: input.contractId == null
         ? "No contract exists."
         : `Contract #${input.contractId}. Approval ${input.approvalStatus ?? "unknown"}. Runner policy must be rechecked before any git action.`,
+    };
+  }
+
+  if (routeMissing) {
+    return {
+      stateLabel: "route blocked",
+      stateTone: "warning" as const,
+      body: input.contractId == null
+        ? "Save the Aang route before creating a push contract. The V1 runner still blocks git remote writes."
+        : `Contract #${input.contractId}. Approval ${input.approvalStatus ?? "unknown"}. Save the Aang route first; git remote writes stay manual.`,
     };
   }
 

@@ -64,4 +64,17 @@ describe("projectLabCopyModel", () => {
     expect(blocked.stateLabel).toBe("runner blocked");
     expect(blocked.body).toContain("Git remote writes stay manual");
   });
+
+  it("names missing route context before Project Lab push contracts can run", () => {
+    const blocked = projectLabPushContractCopy({
+      contractId: 42,
+      approvalStatus: "approved",
+      canRunInV1: false,
+      missing: ["route record"],
+    });
+
+    expect(blocked.stateLabel).toBe("route blocked");
+    expect(blocked.body).toContain("Save the Aang route");
+    expect(blocked.body).toContain("git remote writes stay manual");
+  });
 });

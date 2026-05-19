@@ -847,10 +847,18 @@ type ProjectOverviewItem = (typeof projectProfiles)[number] & {
 type PushReadinessState = "hold_dirty" | "commit_locally" | "push_branch" | "open_pr" | "needs_cleanup";
 
 function rowToPushContractSummary(row: Record<string, unknown>) {
+  const routeRecordId = row.route_record_id == null ? null : Number(row.route_record_id);
+  const missing = [
+    routeRecordId == null ? "route record" : null,
+    row.workbench_evidence_id == null ? "Workbench receipt body" : null,
+    row.approval_id == null ? "approval receipt" : null,
+  ].filter(Boolean) as string[];
+
   return {
     id: Number(row.id),
     projectId: row.project_id == null ? null : Number(row.project_id),
     taskId: row.task_id == null ? null : Number(row.task_id),
+    routeRecordId,
     approvalId: row.approval_id == null ? null : Number(row.approval_id),
     approvalStatus: row.approval_status == null ? null : String(row.approval_status),
     workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
@@ -862,6 +870,7 @@ function rowToPushContractSummary(row: Record<string, unknown>) {
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
     canRunInV1: false,
+    missing,
     gate: "Git remote writes are blocked by the V1 runner.",
   };
 }
@@ -872,9 +881,17 @@ async function latestPushContractForProject(projectId: number | null) {
   const result = await db.execute({
     sql: `
       SELECT eap.*,
-             a.status AS approval_status
+             a.status AS approval_status,
+             rr.id AS route_record_id
       FROM execution_action_proposals eap
       LEFT JOIN approvals a ON a.id = eap.approval_id
+      LEFT JOIN runtime_route_records rr ON rr.id = (
+        SELECT latest_route.id
+        FROM runtime_route_records latest_route
+        WHERE latest_route.task_id = eap.task_id
+        ORDER BY latest_route.created_at DESC, latest_route.id DESC
+        LIMIT 1
+      )
       WHERE eap.source_type = 'project_push'
         AND eap.source_id = ?
         AND eap.action_type = 'project_manual_push'

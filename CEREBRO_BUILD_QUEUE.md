@@ -2159,3 +2159,12 @@ Expected shape:
   capability, or Raven path changed. Next critical slice should inspect how
   Terminal Lab/Project Lab surface the new `route record` missing state and
   then move to the next real V1 behavior gap.
+- 2026-05-19 1442 EDT: Terminal and Project Lab route-gate copy landed.
+  Terminal Lab execution contracts now show `route blocked` with plain guidance
+  to save the Aang route before execution, instead of exposing raw database
+  language. Project Lab push contracts now carry missing route state from the
+  backend and show `route blocked` before repeating that git remote writes stay
+  manual in V1. No runner policy, command allowlist, git-write runner, schema
+  change, provider call, install, download, external write, fake capability, or
+  Raven path changed. Next critical slice should move to the next real V1
+  behavior gap now that the route gate is visible on the affected surfaces.

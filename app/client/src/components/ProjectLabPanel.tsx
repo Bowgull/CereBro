@@ -669,6 +669,7 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                 contractId: pushContract?.id ?? null,
                 approvalStatus: pushContract?.approvalStatus ?? null,
                 canRunInV1: pushContract?.canRunInV1 ?? false,
+                missing: pushContract?.missing ?? [],
               });
               const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
