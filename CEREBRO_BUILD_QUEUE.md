@@ -2053,3 +2053,10 @@ Expected shape:
   source discovery, fake media progress, service resume, or Raven path was
   added. Next Browser slice should return to the broader shell 1:1 pass unless
   a visible mobile issue appears.
+- 2026-05-19 1059 EDT: Main shell frame polish landed. The central OS frame now
+  has mockup-style corner trim, and the left rail footer now reads as a small
+  `CereBro OS` control-node plaque instead of a generic Demo/Live label. This
+  is visual shell polish only: no nav behavior, backend route, schema, provider
+  call, install, download, external write, fake capability, or Raven path was
+  added. Next shell slice should continue the broader 1:1 pass on header chrome,
+  left rail plaque treatment, or command bar material.

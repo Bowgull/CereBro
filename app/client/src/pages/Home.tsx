@@ -418,7 +418,7 @@ export default function Home() {
 
       {/* ── Main: left rail + center + right context panel ─────────────── */}
       <div
-        className="flex flex-1 overflow-hidden rounded"
+        className="relative flex flex-1 overflow-hidden rounded"
         style={{
           minHeight: 0,
           background: mockupShell.marble,
@@ -426,6 +426,11 @@ export default function Home() {
           boxShadow: `${mockupShell.outerShadow}, ${mockupShell.bevel}`,
         }}
       >
+        <div className="pointer-events-none absolute left-2 top-2 z-10 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute right-2 top-2 z-10 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute bottom-2 left-2 z-10 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute bottom-2 right-2 z-10 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+
         {/* Left rail — four-zone OS dock */}
         <nav
           className="w-[68px] flex flex-col shrink-0 overflow-hidden"
@@ -474,10 +479,11 @@ export default function Home() {
             })}
           </div>
           <div
-            className="px-1.5 py-1.5 text-[9px] leading-snug text-center uppercase tracking-wider"
-            style={{ borderTop: `1px solid ${mockupShell.marbleLine}`, background: mockupShell.plaque, color: C.textMuted }}
+            className="mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider"
+            style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
           >
-            {connMode === "live" ? "Live" : "Demo"}
+            <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
+            <div className="mt-1 text-[8px] leading-none">{connMode === "live" ? "Live node" : "Demo node"}</div>
           </div>
         </nav>
 
