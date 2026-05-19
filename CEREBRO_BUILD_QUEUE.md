@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0711 EDT
+Last updated: 2026-05-19 0716 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0716 EDT: added a direct Browser `Review approval` handoff after
+  Stage prepares an Open Page package. The handoff focuses the existing
+  Approvals surface on the pending Browser decision through session storage and
+  keeps all browser behavior hard-gated. Added an `Approvals` utility button to
+  the Browser footer. Screenshots saved at
+  `output/playwright/browser-approval-handoff-ready-settled.png` and
+  `output/playwright/browser-approval-handoff-focused-settled.png`. No approve,
+  reject, execute, page open, fetch, search request, Watch Shelf save, source
+  save, provider call, install, external write, model pull, castle change, or
+  Raven path was added.
 - 2026-05-19 0711 EDT: changed the direct Browser `Stage` action into a local
   prepare-open package. Stage now creates the Browser proposal, draft tab,
   pending approval preview, Workbench body receipt, Spock security receipt, and

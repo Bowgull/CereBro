@@ -26,7 +26,7 @@ const browserFrame = {
   shadow: "0 24px 70px rgba(0, 0, 0, 0.52)",
 };
 
-type BrowserRoute = "workbench" | "sources" | "security";
+type BrowserRoute = "approvals" | "workbench" | "sources" | "security";
 
 type BrowserDraftTab = {
   id: number;
@@ -63,6 +63,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [browserActionLabel, setBrowserActionLabel] = useState("Add to Watch");
   const [watchShelfCategory, setWatchShelfCategory] = useState("Watching");
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
+  const [preparedApprovalId, setPreparedApprovalId] = useState<number | null>(null);
   const [browserNotice, setBrowserNotice] = useState<string | null>(null);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
@@ -251,7 +252,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </Button>
             <Input
               value={browserAddressDraft}
-              onChange={(event) => setBrowserAddressDraft(event.target.value)}
+              onChange={(event) => {
+                setBrowserAddressDraft(event.target.value);
+                setPreparedApprovalId(null);
+              }}
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
               className="h-8 flex-1"
@@ -282,16 +286,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   const proposalId = result.proposal.id;
                   setSelectedBrowserProposalId(proposalId);
                   await createBrowserTabSessionDraft.mutateAsync({ proposalId });
-                  await createBrowserActionApprovalPreview.mutateAsync({
+                  const approvalPreview = await createBrowserActionApprovalPreview.mutateAsync({
                     proposalId,
                     reason: "Prepare Browser page open for user approval. This does not open the page.",
                   });
+                  setPreparedApprovalId(approvalPreview.approval?.id ?? null);
                   await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
                   await createBrowserActionSpockGate.mutateAsync({ proposalId });
                   await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
                   setBrowserNotice(`Browser proposal #${proposalId} prepared. Approval is waiting. No page opened.`);
                 } catch {
                   setBrowserNotice("Browser preparation failed before any page opened.");
+                  setPreparedApprovalId(null);
                 }
               }}
             >
@@ -328,8 +334,36 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           </div>
 
           {browserNotice && (
-            <div className="rounded px-2 py-1 text-[10px] leading-snug" role="status" style={{ background: "rgba(8, 14, 13, 0.84)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
-              {browserNotice}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1 text-[10px] leading-snug" role="status" style={{ background: "rgba(8, 14, 13, 0.84)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+              <span>{browserNotice}</span>
+              {preparedApprovalId != null && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-6 px-2 text-[10px]"
+                  onClick={() => {
+                    try {
+                      window.sessionStorage.setItem(
+                        "cerebro:approvals-focus",
+                        JSON.stringify({
+                          source: "browser_prepare_open_package",
+                          approvalId: preparedApprovalId,
+                          status: "pending",
+                          origin: "browser",
+                          query: browserDraft.raw,
+                          notice: `Browser proposal #${selectedBrowserProposalId ?? "current"} approval focused. No page opens from this handoff.`,
+                        }),
+                      );
+                    } catch {
+                      // Approval Queue still opens and can be searched manually.
+                    }
+                    onNavigate?.("approvals");
+                  }}
+                >
+                  Review approval
+                </Button>
+              )}
             </div>
           )}
 
@@ -431,6 +465,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
           <div className="flex flex-wrap gap-1">
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("workbench")}>Workbench receipts</Button>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("approvals")}>Approvals</Button>
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("sources")}>Sources</Button>
             <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate?.("security")}>Spock gate</Button>
           </div>

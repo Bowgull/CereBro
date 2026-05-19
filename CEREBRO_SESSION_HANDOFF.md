@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0711 EDT
+Last updated: 2026-05-19 0716 EDT
 
 ## Current North Star
 
@@ -20,6 +20,70 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0716 EDT - Browser Approval Handoff
+
+### What Changed
+- Added a direct `Review approval` handoff after Browser prepares an Open Page
+  package.
+- The handoff stores an approval-focus draft in browser session storage and
+  opens the existing Approvals surface filtered to the pending Browser decision.
+- Added an `Approvals` utility button to the Browser footer.
+- Kept Browser behavior hard-gated. This handoff does not approve, reject,
+  execute, open a page, fetch a page, save a source, save Watch Shelf state, or
+  write externally.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Browser proof against `http://localhost:3000/` staged:
+  - `https://example.com/browser-approval-settled`
+  - confirmed `Review approval` appears after the Browser package is prepared
+  - clicked `Review approval`
+  - confirmed Approvals opens filtered to Browser, pending status, and the
+    staged URL
+  - confirmed the Browser approval receipt says `no page open`
+- Screenshot proof saved locally at:
+  - `output/playwright/browser-approval-handoff-ready-settled.png`
+  - `output/playwright/browser-approval-handoff-focused-settled.png`
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and approval-gated
+  autonomy contract.
+- Matched elements: the Browser chrome now hands off page intent through visible
+  approval instead of exposing machinery or faking a live page.
+- Deviations: still not 1:1. Approval review remains in the existing Ledger /
+  Approvals surface, and no live browser runner exists yet.
+- Next fidelity gap: make the approval result return cleanly to Browser, then
+  implement the manual browser runner contract.
+
+### Drift Check
+- On path.
+- No fake browser function.
+- No page open, page fetch, search request, source save, Watch Shelf save,
+  provider call, install, external write, model pull, castle change, or Raven
+  path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- Browser proof created local Browser proposal, approval preview, permission
+  preflight, Workbench body, Spock receipt, tab draft, and result/recovery rows
+  for test URL `https://example.com/browser-approval-settled`.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/components/ApprovalDashboardPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. Browser Stage now prepares a local Open Page package and exposes a Review approval handoff. Next safest slice is the approval decision return path or the manual browser runner implementation contract. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0711 EDT - Browser Prepare Open Package
 
