@@ -1857,3 +1857,11 @@ Expected shape:
   write externally. Next Browser slice should build the real manual browser
   runner contract, approved user-created bookmarks, or final tab/pin material
   polish.
+- 2026-05-19 0640 EDT: Browser is now a first-class OS zone. Route Read is
+  collapsed by default and opens from the Context button. The new
+  `BrowserPanel` owns the direct Browser surface with tab row, URL/search
+  field, page menu, real project pins, and Watch Shelf access. Browser remains
+  honest and blocked: no page render, history, source save, Watch save, login,
+  fetch, or external write. `CEREBRO_UI_TRUTH_PASS.md` is active for live-vs-
+  mockup comparison. Next Browser slice should polish this direct surface
+  toward the approved 1:1 mockup or build the real manual runner contract.

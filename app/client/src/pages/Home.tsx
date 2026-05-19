@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Castle, Hammer, ScrollText, Settings } from "lucide-react";
+import { Castle, Compass, Hammer, ScrollText, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import KeepScene from "@/components/KeepScene";
 import KeepFortressBlueprint from "@/components/KeepFortressBlueprint";
@@ -17,6 +17,7 @@ import HedwigInboxPanel from "@/components/HedwigInboxPanel";
 import TerminalLabPanel from "@/components/TerminalLabPanel";
 import ApprovalDashboardPanel from "@/components/ApprovalDashboardPanel";
 import WorkbenchPanel from "@/components/WorkbenchPanel";
+import BrowserPanel from "@/components/BrowserPanel";
 import AangCompanionPanel from "@/components/AangCompanionPanel";
 import ModelToolsPanel from "@/components/ModelToolsPanel";
 import SecurityGatePanel from "@/components/SecurityGatePanel";
@@ -60,6 +61,7 @@ import { trpc } from "@/lib/trpc";
 
 type NavId =
   | "home"
+  | "browser"
   | "projects"
   | "inbox"
   | "ledger"
@@ -78,7 +80,7 @@ type NavId =
   | "automation"
   | "settings";
 
-type ZoneId = "keep" | "workshop" | "ledger" | "basement";
+type ZoneId = "keep" | "browser" | "workshop" | "ledger" | "basement";
 
 interface ZoneNavItem {
   zone: ZoneId;
@@ -98,6 +100,7 @@ const shellCopy = homeShellCopy();
 
 const ZONE_NAV_ITEMS: ZoneNavItem[] = [
   { zone: "keep", id: "home", label: "Keep", Icon: Castle, blurb: "Understand what is active." },
+  { zone: "browser", id: "browser", label: "Browser", Icon: Compass, blurb: shellCopy.zoneBlurbs.browser },
   { zone: "workshop", id: "workbench", label: "Workshop", Icon: Hammer, blurb: shellCopy.zoneBlurbs.workshop },
   { zone: "ledger", id: "ledger", label: "Ledger", Icon: ScrollText, blurb: ledgerNavCopy().blurb },
   { zone: "basement", id: "basement", label: "Basement", Icon: Settings, blurb: "Configure the machine." },
@@ -109,11 +112,15 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
     { id: "companion", label: "Aang", meta: "Human bridge" },
     { id: "inbox", label: "Capture", meta: "Hedwig intake" },
   ],
+  browser: [
+    { id: "browser", label: "Browser", meta: shellCopy.surfaceMeta.browser },
+    { id: "sources", label: "Sources", meta: "Source review" },
+    { id: "security", label: "Shield", meta: "Spock gates" },
+  ],
   workshop: [
     { id: "workbench", label: "Workbench", meta: shellCopy.surfaceMeta.workbench },
     { id: "projects", label: "Project Lab", meta: "Local project state" },
     { id: "terminal", label: "Terminal Lab", meta: shellCopy.surfaceMeta.terminal },
-    { id: "sources", label: "Research", meta: "Source review" },
   ],
   ledger: [
     { id: "ledger", label: "Overview", meta: "Audit trail" },
@@ -134,6 +141,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
 
 const ZONE_RECEIPTS: Record<ZoneId, string[]> = {
   keep: ["state", "route", "approval"],
+  browser: shellCopy.zoneMarkers.browser,
   workshop: shellCopy.zoneMarkers.workshop,
   ledger: ["tasks", "sessions", "approvals", "outputs", "memory"],
   basement: ["permissions", "models", "storage"],
@@ -198,7 +206,7 @@ export default function Home() {
   const [askInput, setAskInput] = useState("");
   const [showSkillsManager, setShowSkillsManager] = useState(false);
   const [showLog, setShowLog] = useState(false);
-  const [isContextPanelOpen, setIsContextPanelOpen] = useState(true);
+  const [isContextPanelOpen, setIsContextPanelOpen] = useState(false);
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
   const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
@@ -496,6 +504,7 @@ export default function Home() {
             {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
             {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
+            {nav === "browser" && <PanelHost><BrowserPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}

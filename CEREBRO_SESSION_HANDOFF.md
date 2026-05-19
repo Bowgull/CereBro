@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0623 EDT
+Last updated: 2026-05-19 0640 EDT
 
 ## Current North Star
 
@@ -20,6 +20,73 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0640 EDT - Browser Surface Promotion
+
+### What Changed
+- Added `CEREBRO_UI_TRUTH_PASS.md` to compare the live UI against the approved
+  high-fidelity shell and Browser mockups.
+- Promoted Browser to a first-class OS zone in the left rail.
+- Added `BrowserPanel` as the direct Browser surface.
+- Kept Browser behavior honest: draft tabs, project pins, URL/search staging,
+  page menu, and Watch Shelf shell exist, but no page opens or fetches.
+- Moved Sources and Spock Shield under the Browser zone.
+- Collapsed Route Read by default. It remains available through the Context
+  button.
+
+### Files Touched
+- `CEREBRO_UI_TRUTH_PASS.md`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/homeShellCopyModel.ts`
+- `app/server/homeShellCopyModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/homeShellCopyModel.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- Browser proof against `http://localhost:3000/` confirmed:
+  - left rail has Browser as its own item
+  - Route Read is collapsed by default
+  - Browser opens as a direct surface
+  - Browser still shows honest blocked page state and real project pins
+- Screenshot proof saved locally at:
+  - `output/playwright/ui-truth-pass-keep-route-collapsed.png`
+  - `output/playwright/ui-truth-pass-browser-surface.png`
+
+### Mockup Fidelity
+- Target used: locked main shell mockup and locked Browser/Watch Shelf mockup.
+- Matched elements: Browser is now a first-class OS surface, Route Read no
+  longer steals space by default, Browser tab row/URL bar/project pins/Watch
+  Shelf access are directly visible, and machinery remains hidden.
+- Deviations: Browser is still an honest shell. It does not render pages,
+  persist real history, save Watch items, save sources, or run the browser
+  runner yet.
+- Next fidelity gap: Browser visual polish toward the approved mockup, then
+  real manual browser runner contract.
+
+### Drift Check
+- On path.
+- No fake browser function.
+- No fake bookmarks, fake media progress, fake service state, or fake source
+  discovery.
+- No castle, renderer, agent count, route model, provider, install, pull,
+  external write, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No database rows created.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, and app/client/src/pages/Home.tsx first. Continue the Browser fidelity track only if it moves the direct Browser surface toward the approved 1:1 Browser/Watch Shelf mockup without faking capability. Route Read must stay collapsed by default. Workbench remains receipt/body infrastructure. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0623 EDT - Workbench Browser Project Pins
 
