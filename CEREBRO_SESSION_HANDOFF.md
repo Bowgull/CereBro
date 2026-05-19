@@ -31419,3 +31419,92 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue with UI work only if it moves the live app toward the approved high-fidelity main shell mockup or Browser/Watch Shelf mockup as a 1:1 target. Before edits, name the mockup target, matched elements, and required deviations. Preserve the castle. Do not fake function. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-18 2239 EDT - Workbench Browser Icon Polish
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: Workbench Browser/Watch Shelf moved closer to the approved mockup
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian snapshot appended
+- Creative/freelance/watch: Watch Shelf UI only, no media or site automation
+
+What changed:
+
+- Replaced raw browser control glyphs with `lucide-react` icons for back,
+  forward, reload, quiet shield, overflow menu, new tab, and bookmark folders.
+- Kept the browser action menu behind the three-dot control.
+- Changed the collapsed proof block label from exposed machinery language to
+  `Safety read` with compact `local only`, `blocked safely`, and `details`
+  chips.
+- Preserved the honest blocked state. No page opens, no browser automation runs,
+  no search runs, no page fetch runs, and no Watch Shelf item is saved.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 2239 CereBro Session Handoff - workbench-browser-icon-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- `curl -I http://localhost:3000/` returned 200.
+- Browser proof on localhost:
+  `output/playwright/workbench-browser-icon-polish-current-page.png`
+  `output/playwright/workbench-browser-icon-polish-watch-shelf.png`
+- Snapshot checks confirmed `Current Page`, `Watch Shelf`, `Search or enter
+  address`, `Safety read`, `local only`, `blocked safely`, `Watching`, `Want`,
+  `YouTube`, `Twitch`, `Anime`, and `Finished`.
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Matched elements: attached tab row, quiet bookmark rail, single address/search
+  bar, icon browser controls, three-dot action menu, Watch Shelf tab body,
+  category chips, compact safety disclosure.
+- Required deviations: still embedded in Workbench instead of a full browser
+  surface, live page rendering is blocked, tab creation is blocked, Add current
+  page is disabled, and safety details remain inspectable below the browser.
+- Next fidelity gap: full browser surface proportions, richer plaque material,
+  less visible Workbench chrome around the browser, and eventual approved
+  runner wiring.
+
+Drift check:
+
+- On path. This is a small visual fidelity pass against the locked Browser
+  mockup target.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- The current browser shell still shows too much surrounding Workbench structure
+  compared with the mockup.
+- The safety detail body still contains technical receipt language once opened.
+  That is acceptable for this slice because it stays collapsed by default.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- No database rows created intentionally.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Prefer reducing visible machinery and improving mockup material/proportions over adding function. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```

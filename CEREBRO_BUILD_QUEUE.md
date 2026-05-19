@@ -1735,3 +1735,11 @@ Expected shape:
   avoid fake function, and screenshot-proof fidelity after changes. The next UI
   build slice should move the live shell or Browser toward the approved mockup
   directly.
+- 2026-05-18 2239 EDT: Workbench Browser/Watch Shelf icon polish landed. Raw
+  browser glyphs were replaced with `lucide-react` icons, the bookmark rail now
+  uses folder icons, and the collapsed browser proof block now reads as
+  `Safety read` with compact `local only`, `blocked safely`, and `details`
+  chips. Browser behavior remains honestly blocked. Next UI fidelity slice
+  should reduce surrounding Workbench chrome and improve material/proportions
+  against the approved Browser mockup, without faking page rendering or Watch
+  Shelf saves.

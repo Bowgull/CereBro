@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
+import { ArrowLeft, ArrowRight, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
@@ -943,7 +944,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     aria-label="New browser tab planned"
                     title="New tab is blocked until tab storage and runner contracts exist."
                   >
-                    +
+                    <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
                   </Button>
                   <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
                     {browserTabState.tabSummary}
@@ -953,16 +954,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 <div className="hidden items-center gap-3 overflow-x-auto px-2 py-1 md:flex" aria-label="Browser bookmark rail" style={{ background: "rgba(198, 155, 85, 0.06)", border: `1px solid ${G.lineSoft}` }}>
                   {["CereBro Hub", "Dev Docs", "Research Log", "Design Vault"].map((bookmark) => (
                     <span key={bookmark} className="inline-flex shrink-0 items-center gap-1 text-[10px]" style={{ color: C.textMuted }}>
-                      <span className="h-2.5 w-3 rounded-[2px]" style={{ background: "rgba(198, 155, 85, 0.16)", border: `1px solid ${G.candleSoft}` }} />
+                      <Folder size={11} strokeWidth={1.8} aria-hidden="true" style={{ color: C.gold }} />
                       {bookmark}
                     </span>
                   ))}
                 </div>
 
                 <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser back planned">‹</Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">›</Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser reload planned">↻</Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser back planned">
+                    <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">
+                    <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser reload planned">
+                    <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
                   <Input
                     value={browserAddressDraft}
                     onChange={(event) => setBrowserAddressDraft(event.target.value)}
@@ -983,14 +990,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   >
                     Stage
                   </Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">◇</Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
+                    <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
                   <details className="relative">
                     <summary
                       className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                       aria-label="Browser page actions"
                       style={{ border: `1px solid ${G.lineSoft}`, color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}
                     >
-                      ⋯
+                      <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                     </summary>
                     <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                       <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
@@ -1161,16 +1170,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 )}
 
-                <details className="rounded p-2" aria-label="Browser proof and gates" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                <details className="rounded p-2" aria-label="Browser safety read" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                        Browser proof and gates
+                        Safety read
                       </span>
                       <div className="flex flex-wrap items-center gap-1">
-                        <Chip label={browserReadiness.statusLabel} tone={C.warning} />
-                        <Chip label={browserStorageContract.statusLabel} tone={C.warning} />
-                        <Chip label="collapsed" tone={C.textMuted} />
+                        <Chip label="local only" tone={C.accent} />
+                        <Chip label="blocked safely" tone={C.warning} />
+                        <Chip label="details" tone={C.textMuted} />
                       </div>
                     </div>
                   </summary>
