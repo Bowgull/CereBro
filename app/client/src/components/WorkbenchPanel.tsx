@@ -385,7 +385,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserActionProposal = trpc.workbench.browserActionProposalPreview.useQuery(
     {
       actionLabel: browserActionPreview.label,
-      target: browserDraft.raw,
+      target: browserDraft.targetUrl ?? browserDraft.raw,
       draftKind: browserDraft.kind,
     },
     {
@@ -1054,7 +1054,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       createBrowserActionProposal.mutate(
                         {
                           actionLabel: browserActionPreview.label,
-                          target: browserDraft.raw,
+                          target: browserDraft.targetUrl ?? browserDraft.raw,
                           draftKind: browserDraft.kind,
                         },
                         {
@@ -1135,7 +1135,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                 createBrowserActionProposal.mutate(
                                   {
                                     actionLabel: browserActionPreview.label,
-                                    target: browserDraft.raw,
+                                    target: browserDraft.targetUrl ?? browserDraft.raw,
                                     draftKind: browserDraft.kind,
                                   },
                                   {

@@ -2168,3 +2168,12 @@ Expected shape:
   change, provider call, install, download, external write, fake capability, or
   Raven path changed. Next critical slice should move to the next real V1
   behavior gap now that the route gate is visible on the affected surfaces.
+- 2026-05-19 1445 EDT: Browser address normalization landed. Browser and
+  Workbench address drafts now normalize bare domains into `https://` targets
+  and search text into a Google search URL before staging open-page proposals,
+  while keeping the UI display plain. This makes the approved sandbox frame
+  path receive an openable URL instead of raw search text or a bare domain. No
+  backend fetch, proxy, cookies, credentials, scraping, source save, provider
+  call, install, download, external write, fake progress, or Raven path changed.
+  Next Browser slice should reduce the open flow steps or add honest bookmark
+  storage, without pretending to own login sessions or service resume.

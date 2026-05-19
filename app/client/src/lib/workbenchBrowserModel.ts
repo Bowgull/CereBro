@@ -14,6 +14,7 @@ export type WorkbenchBrowserDraft = {
   kind: "empty" | "url" | "search";
   raw: string;
   displayTarget: string;
+  targetUrl: string | null;
   tabLabel: string;
   canOpen: boolean;
   noActionText: string;
@@ -126,6 +127,15 @@ function looksLikeUrl(value: string) {
   return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
 
+function normalizedBrowserTarget(kind: "url" | "search", raw: string) {
+  if (kind === "search") {
+    return `https://www.google.com/search?q=${encodeURIComponent(raw).replace(/%20/g, "+")}`;
+  }
+
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `https://${raw}`;
+}
+
 export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft {
   const raw = value.trim();
   if (!raw) {
@@ -133,6 +143,7 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
       kind: "empty",
       raw: "",
       displayTarget: "No page draft.",
+      targetUrl: null,
       tabLabel: "Tab 1",
       canOpen: false,
       noActionText: "No browser automation, page fetch, search, source save, Workbench capture, or external write runs from an empty draft.",
@@ -144,6 +155,7 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
     kind,
     raw,
     displayTarget: raw,
+    targetUrl: normalizedBrowserTarget(kind, raw),
     tabLabel: kind === "url" ? "Page Draft" : "Search Draft",
     canOpen: false,
     noActionText: "No browser automation, page fetch, search request, credential action, file transfer, source save, Workbench capture, or external write runs from this draft.",

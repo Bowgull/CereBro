@@ -494,7 +494,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   try {
                     const result = await createBrowserActionProposal.mutateAsync({
                       actionLabel: "Open Page",
-                      target: browserDraft.raw,
+                      target: browserDraft.targetUrl ?? browserDraft.raw,
                       draftKind: browserDraft.kind,
                     });
                     const proposalId = result.proposal.id;

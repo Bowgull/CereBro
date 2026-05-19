@@ -66,18 +66,29 @@ describe("workbenchBrowserModel", () => {
 
     expect(urlDraft.kind).toBe("url");
     expect(urlDraft.displayTarget).toBe("https://example.com/path?q=1");
+    expect(urlDraft.targetUrl).toBe("https://example.com/path?q=1");
     expect(urlDraft.tabLabel).toBe("Page Draft");
     expect(urlDraft.canOpen).toBe(false);
     expect(urlDraft.noActionText).toContain("No browser automation");
 
     expect(searchDraft.kind).toBe("search");
     expect(searchDraft.displayTarget).toBe("best dub anime sources");
+    expect(searchDraft.targetUrl).toBe("https://www.google.com/search?q=best+dub+anime+sources");
     expect(searchDraft.tabLabel).toBe("Search Draft");
     expect(searchDraft.canOpen).toBe(false);
 
     expect(emptyDraft.kind).toBe("empty");
     expect(emptyDraft.displayTarget).toBe("No page draft.");
+    expect(emptyDraft.targetUrl).toBeNull();
     expect(emptyDraft.tabLabel).toBe("Tab 1");
+  });
+
+  it("normalizes bare domains into openable https targets", () => {
+    const draft = workbenchBrowserDraftModel("example.com/watch/episode-1");
+
+    expect(draft.kind).toBe("url");
+    expect(draft.displayTarget).toBe("example.com/watch/episode-1");
+    expect(draft.targetUrl).toBe("https://example.com/watch/episode-1");
   });
 
   it("reads Watch Shelf draft state without saving fake media state", () => {
