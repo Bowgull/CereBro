@@ -729,88 +729,99 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
                 </div>
                 {selectedBrowserProposalId != null && (
-                  <div className="mt-4 w-full max-w-2xl rounded p-2 text-left text-[10px] leading-snug" aria-label="Browser runner gate" style={{ background: "rgba(5, 10, 10, 0.74)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel, color: C.textMuted }}>
+                  <div className="mt-4 w-full max-w-xl rounded p-2 text-left text-[10px] leading-snug" aria-label="Browser open gate" style={{ background: "rgba(5, 10, 10, 0.64)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel, color: C.textMuted }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                        Runner Gate
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Open Gate</div>
+                        <div className="mt-0.5 truncate">
+                          {browserLiveRunnerPreflight.isLoading
+                            ? "Reading approval state."
+                            : browserLiveRunnerPreflight.data?.nextAction ?? "Open gate is unavailable for this proposal."}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1">
-                        <Chip label={`proposal #${selectedBrowserProposalId}`} tone={C.accent} />
-                        <Chip label={browserLiveRunnerPreflight.data?.canOpenPage ? "can open" : "open blocked"} tone={browserLiveRunnerPreflight.data?.canOpenPage ? C.danger : C.warning} />
-                        {browserLiveRunnerPreflight.data && (
-                          <Chip label={`${browserLiveRunnerPreflight.data.summary.missingCount} missing`} tone={browserLiveRunnerPreflight.data.summary.missingCount > 0 ? C.warning : C.accent} />
-                        )}
+                      <div className="flex shrink-0 flex-wrap items-center gap-1">
+                        <Chip label={browserLiveRunnerPreflight.data?.canOpenPage ? "ready" : "blocked"} tone={browserLiveRunnerPreflight.data?.canOpenPage ? C.success : C.warning} />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px]"
+                          disabled={recordBrowserSandboxFrameOpen.isPending || !canOpenSandboxFrame}
+                          title={canOpenSandboxFrame ? "Open the target in the sandbox frame." : "Requires open-ready state."}
+                          onClick={() => recordBrowserSandboxFrameOpen.mutate({ proposalId: selectedBrowserProposalId })}
+                        >
+                          {recordBrowserSandboxFrameOpen.isPending ? "Opening" : "Open Frame"}
+                        </Button>
+                        <details className="relative">
+                          <summary className="flex h-6 cursor-pointer list-none items-center rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                            Details
+                          </summary>
+                          <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                            <div className="flex flex-wrap gap-1">
+                              <Chip label={`proposal #${selectedBrowserProposalId}`} tone={C.accent} />
+                              {browserLiveRunnerPreflight.data && (
+                                <Chip label={`${browserLiveRunnerPreflight.data.summary.missingCount} missing`} tone={browserLiveRunnerPreflight.data.summary.missingCount > 0 ? C.warning : C.accent} />
+                              )}
+                            </div>
+                            {browserLiveRunnerPreflight.data ? (
+                              <div className="mt-2 grid gap-1">
+                                {browserLiveRunnerPreflight.data.latestRunnerAudit && (
+                                  <div>Latest audit #{browserLiveRunnerPreflight.data.latestRunnerAudit.id}: {browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")}.</div>
+                                )}
+                                {browserLiveRunnerLaunchGate.data && (
+                                  <div>{browserLiveRunnerLaunchGate.data.nextAction}</div>
+                                )}
+                                <div className="flex flex-wrap gap-1 pt-1">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={createBrowserLiveRunnerApprovalPreview.isPending}
+                                    title="Create the separate live-runner approval preview. This does not open a page."
+                                    onClick={() => createBrowserLiveRunnerApprovalPreview.mutate({
+                                      proposalId: selectedBrowserProposalId,
+                                      reason: "Prepare explicit live-runner approval. This does not open the page.",
+                                    })}
+                                  >
+                                    {createBrowserLiveRunnerApprovalPreview.isPending ? "Staging" : "Stage Gate"}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={runBrowserLiveRunnerBlocked.isPending}
+                                    title="Write a blocked live-runner audit. This does not open a page."
+                                    onClick={() => runBrowserLiveRunnerBlocked.mutate({ proposalId: selectedBrowserProposalId })}
+                                  >
+                                    {runBrowserLiveRunnerBlocked.isPending ? "Checking" : "Check"}
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={prepareBrowserLiveRunnerOpenReadiness.isPending || browserLiveRunnerPreflight.data.summary.missingCount > 0}
+                                    title={
+                                      browserLiveRunnerPreflight.data.summary.missingCount > 0
+                                        ? `Blocked by ${browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "missing gate"}.`
+                                        : "Mark the local tab runner-ready. This does not open a page."
+                                    }
+                                    onClick={() => prepareBrowserLiveRunnerOpenReadiness.mutate({ proposalId: selectedBrowserProposalId })}
+                                  >
+                                    {prepareBrowserLiveRunnerOpenReadiness.isPending ? "Preparing" : "Ready"}
+                                  </Button>
+                                </div>
+                                <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
+                              </div>
+                            ) : (
+                              <div className="mt-2">Open gate is not available for this proposal.</div>
+                            )}
+                          </div>
+                        </details>
                       </div>
                     </div>
-                    {browserLiveRunnerPreflight.isLoading ? (
-                      <div className="mt-1">Reading runner gate.</div>
-                    ) : browserLiveRunnerPreflight.data ? (
-                      <div className="mt-1 grid gap-1">
-                        <div>{browserLiveRunnerPreflight.data.nextAction}</div>
-                        {browserLiveRunnerPreflight.data.latestRunnerAudit && (
-                          <div>Latest audit #{browserLiveRunnerPreflight.data.latestRunnerAudit.id}: {browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")}.</div>
-                        )}
-                        {browserLiveRunnerLaunchGate.data && (
-                          <div>Launch gate: {browserLiveRunnerLaunchGate.data.hardGate}. {browserLiveRunnerLaunchGate.data.nextAction}</div>
-                        )}
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[10px]"
-                            disabled={createBrowserLiveRunnerApprovalPreview.isPending}
-                            title="Create the separate live-runner approval preview. This does not open a page."
-                            onClick={() => createBrowserLiveRunnerApprovalPreview.mutate({
-                              proposalId: selectedBrowserProposalId,
-                              reason: "Prepare explicit live-runner approval. This does not open the page.",
-                            })}
-                          >
-                            {createBrowserLiveRunnerApprovalPreview.isPending ? "Staging" : "Stage live gate"}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[10px]"
-                            disabled={runBrowserLiveRunnerBlocked.isPending}
-                            title="Write a blocked live-runner audit. This does not open a page."
-                            onClick={() => runBrowserLiveRunnerBlocked.mutate({ proposalId: selectedBrowserProposalId })}
-                          >
-                            {runBrowserLiveRunnerBlocked.isPending ? "Checking" : "Check runner"}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[10px]"
-                            disabled={prepareBrowserLiveRunnerOpenReadiness.isPending || browserLiveRunnerPreflight.data.summary.missingCount > 0}
-                            title={
-                              browserLiveRunnerPreflight.data.summary.missingCount > 0
-                                ? `Blocked by ${browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "missing gate"}.`
-                                : "Mark the local tab runner-ready. This does not open a page."
-                            }
-                            onClick={() => prepareBrowserLiveRunnerOpenReadiness.mutate({ proposalId: selectedBrowserProposalId })}
-                          >
-                            {prepareBrowserLiveRunnerOpenReadiness.isPending ? "Preparing" : "Prepare runner"}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[10px]"
-                            disabled={recordBrowserSandboxFrameOpen.isPending || !canOpenSandboxFrame}
-                            title={canOpenSandboxFrame ? "Open the target in the sandbox frame." : "Requires open_ready tab state."}
-                            onClick={() => recordBrowserSandboxFrameOpen.mutate({ proposalId: selectedBrowserProposalId })}
-                          >
-                            {recordBrowserSandboxFrameOpen.isPending ? "Opening" : "Open frame"}
-                          </Button>
-                        </div>
-                        <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
-                      </div>
-                    ) : (
-                      <div className="mt-1">Runner gate is not available for this proposal.</div>
-                    )}
                   </div>
                 )}
               </div>

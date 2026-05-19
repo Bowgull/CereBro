@@ -1990,3 +1990,11 @@ Expected shape:
   download, or Raven path. Next Browser slice should improve the visible
   Browser page frame toward the approved 1:1 mockup or add the next honest
   source/workbench receipt lane.
+- 2026-05-19 0859 EDT: Browser Open Gate collapse landed. The proposal page no
+  longer exposes `Runner Gate` as primary UI. It now shows a compact `Open
+  Gate` strip with the useful `Open Frame` action and moves proposal/audit
+  machinery behind `Details`. This is UI compression only: no backend route,
+  schema, browser engine, provider call, install, download, external write,
+  fake source discovery, fake media progress, or Raven path. Next Browser slice
+  should continue visual frame polish toward the 1:1 Browser mockup or add the
+  next honest Source/Workbench receipt lane.
