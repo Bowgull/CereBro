@@ -2067,3 +2067,9 @@ Expected shape:
   backend route, schema, provider call, install, download, external write, fake
   capability, or Raven path was added. Next shell slice should continue the 1:1
   pass on left rail plaque treatment or command bar material.
+- 2026-05-19 1148 EDT: Main shell left rail plaque polish landed. The left rail
+  now uses a darker carved rail material, stronger active plaque gradient, brass
+  active edge, and beveled icon wells. This is visual shell polish only: no nav
+  behavior, backend route, schema, provider call, install, download, external
+  write, fake capability, or Raven path was added. Next shell slice should
+  continue the 1:1 pass on command bar material or right rail shape.

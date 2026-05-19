@@ -444,7 +444,11 @@ export default function Home() {
         <nav
           className="w-[68px] flex flex-col shrink-0 overflow-hidden"
           aria-label="CereBro zones"
-          style={{ background: "rgba(5, 10, 9, 0.94)", borderRight: `1px solid ${mockupShell.marbleLine}` }}
+          style={{
+            background: "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
+            borderRight: `1px solid ${mockupShell.marbleLine}`,
+            boxShadow: "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
+          }}
         >
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
@@ -457,25 +461,31 @@ export default function Home() {
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="h-[58px] w-full flex-col justify-center gap-1 rounded px-1 py-1 text-center"
+                  className="relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center"
                   variant="ghost"
                   style={{
                     background: isActive
-                      ? "linear-gradient(180deg, rgba(51, 72, 58, 0.98), rgba(13, 29, 25, 0.98))"
-                      : "linear-gradient(180deg, rgba(17, 30, 27, 0.96), rgba(7, 15, 14, 0.98))",
+                      ? "linear-gradient(180deg, rgba(58, 79, 63, 0.98), rgba(13, 30, 26, 0.98))"
+                      : "linear-gradient(180deg, rgba(18, 31, 28, 0.92), rgba(6, 13, 12, 0.98))",
                     border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
                     color: isActive ? C.textPrimary : C.textSecondary,
                     boxShadow: isActive
-                      ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, inset 0 1px 0 rgba(244, 239, 227, 0.12), inset 0 -10px 18px rgba(0, 0, 0, 0.28)`
-                      : "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -8px 16px rgba(0, 0, 0, 0.24)",
+                      ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, inset 0 1px 0 rgba(244, 239, 227, 0.13), inset 0 -12px 20px rgba(0, 0, 0, 0.3), 0 0 18px rgba(198, 155, 85, 0.1)`
+                      : "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -8px 16px rgba(0, 0, 0, 0.26)",
                   }}
                 >
                   <span
+                    className="pointer-events-none absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-r"
+                    aria-hidden="true"
+                    style={{ background: isActive ? shellFrame.brass : "transparent" }}
+                  />
+                  <span
                     className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[12px]"
                     style={{
-                      background: isActive ? "rgba(198, 155, 85, 0.12)" : "rgba(244, 239, 227, 0.04)",
+                      background: isActive ? "rgba(198, 155, 85, 0.14)" : "rgba(244, 239, 227, 0.035)",
                       color: isActive ? shellFrame.brass : C.textMuted,
                       border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
+                      boxShadow: mockupShell.bevel,
                     }}
                   >
                     <ZoneIcon size={13} strokeWidth={1.7} aria-hidden="true" />
