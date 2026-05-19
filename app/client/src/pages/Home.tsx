@@ -831,11 +831,31 @@ function HomeView({
           `,
         }}
       >
-        {keepView === "blueprint" ? (
-          <KeepFortressBlueprint />
-        ) : (
-          <KeepScene agentStates={agentStates} />
-        )}
+        <div
+          className="absolute left-2.5 right-2.5 top-2.5 bottom-14 overflow-hidden rounded"
+          style={{
+            background: `
+              radial-gradient(circle at 50% 45%, rgba(198, 155, 85, 0.08), transparent 36%),
+              rgba(3, 7, 7, 0.9)
+            `,
+            border: `1px solid ${mockupShell.marbleLine}`,
+            boxShadow: `inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.72), 0 18px 42px rgba(0, 0, 0, 0.34)`,
+          }}
+          aria-label="Framed Keep viewport"
+        >
+          <div className="pointer-events-none absolute left-2 top-2 z-[2] h-4 w-4 border-l border-t" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
+          <div className="pointer-events-none absolute right-2 top-2 z-[2] h-4 w-4 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+          <div className="pointer-events-none absolute bottom-2 left-2 z-[2] h-4 w-4 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+          <div className="pointer-events-none absolute bottom-2 right-2 z-[2] h-4 w-4 border-b border-r" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
+
+          <div className="relative h-full w-full overflow-hidden">
+            {keepView === "blueprint" ? (
+              <KeepFortressBlueprint />
+            ) : (
+              <KeepScene agentStates={agentStates} />
+            )}
+          </div>
+        </div>
 
         <KeepHomeDock
           activeAgents={activeAgents}

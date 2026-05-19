@@ -2105,3 +2105,11 @@ Expected shape:
   external write, fake capability, or Raven path was added. Next shell slice
   should continue the mockup compare on center castle framing and remaining
   proportion mismatches.
+- 2026-05-19 1326 EDT: Center castle framing polish landed. The Phaser Keep now
+  sits inside a carved viewport with brass/verdigris corner trim and dedicated
+  space above the quiet OS tabs, instead of reading as an unframed canvas behind
+  floating controls. This is visual shell polish only: no castle art, agent
+  count, room count, animation state, route behavior, backend route, schema,
+  provider call, install, download, external write, fake capability, or Raven
+  path was added. Next shell slice should continue proportion polish or move to
+  the next critical V1 surface after a brief mockup gap check.

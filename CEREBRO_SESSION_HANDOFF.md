@@ -35020,3 +35020,82 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the broader shell 1:1 pass. Browser chrome, Browser empty-state, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile polish, main shell frame corner/control-node polish, main shell header chrome polish, main shell left rail plaque polish, main shell command bar material polish, main shell right rail shape polish, Keep home dock 1:1 polish, and Keep top strip 1:1 polish exist. Next safest slice is center castle framing and remaining shell proportions against the approved high-fidelity mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 1326 EDT - Center Castle Framing Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Center Keep viewport moved closer to the approved
+  high-fidelity shell mockup.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Wrapped the live Phaser Keep in a carved viewport frame.
+- Added brass/verdigris corner trim around the castle viewport.
+- Reserved space below the castle frame for the quiet OS tabs.
+- Preserved the existing Phaser Keep renderer and Blueprint/Scene switch.
+- No castle art, room count, agent count, animation state, backend route,
+  schema, provider call, install, download, external write, fake capability,
+  fake source discovery, service resume, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1326 CereBro Session Handoff - center-castle-framing-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed. The browser plugin did not expose a
+  callable browser tool after discovery in this session, Playwright is not
+  installed in the available Node path, and Computer Use is blocked from
+  operating the Codex app.
+
+Mockup fidelity:
+
+- Target used: approved main shell high-fidelity mockup.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: castle now sits in a distinct framed viewport and the OS
+  tabs sit below it instead of floating over the main object.
+- Deviations: castle artwork itself is unchanged and still does not match the
+  generated mockup 1:1. Final visual proof still needs screenshot tooling.
+- Next fidelity gap: remaining shell proportions, then return to the broader V1
+  critical path.
+
+Drift check:
+
+- On path. This pass changes center viewport framing only.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, or Raven path.
+
+Known risks:
+
+- This is UI polish only.
+- Browser visual proof could not run with the currently available tools in this
+  turn.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell frame/header/left rail/command bar/right rail, Keep home dock, Keep top strip, and center castle framing polish exist. Do a brief mockup gap check, then either finish remaining shell proportion mismatches or return to the next critical V1 surface. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
+```
