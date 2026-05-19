@@ -421,7 +421,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded p-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-1.5 rounded p-1.5 sm:grid-cols-[auto_minmax(0,1fr)_auto]" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
             <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <Button
                 type="button"
@@ -471,7 +471,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               }}
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
-              className="h-8 min-w-0 font-mono text-[12px]"
+              className="order-3 col-span-2 h-8 min-w-0 font-mono text-[12px] sm:order-none sm:col-span-1"
               title="Stages a local page draft only. It does not open, fetch, search, save, or capture."
               style={{
                 background: browserFrame.address,
@@ -479,7 +479,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05), inset 0 -10px 20px rgba(0, 0, 0, 0.18)",
               }}
             />
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-self-end gap-1">
               <Button
                 type="button"
                 size="sm"

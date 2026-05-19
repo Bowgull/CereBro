@@ -2037,3 +2037,11 @@ Expected shape:
   route, schema, provider call, install, download, external write, fake source
   discovery, fake media progress, service resume, or Raven path. Next Browser
   slice should continue mobile polish or return to the broader shell 1:1 pass.
+- 2026-05-19 0925 EDT: Browser mobile address-row polish landed. The Browser
+  address/action strip now uses a two-column mobile grid with the URL field
+  spanning the second row, then returns to the three-column desktop layout at
+  `sm`. This reduces narrow-screen overflow without changing behavior. No
+  browser engine, backend route, schema, provider call, install, download,
+  external write, fake source discovery, fake media progress, service resume,
+  or Raven path was added. Next Browser slice can continue mobile polish or
+  return to the broader shell 1:1 pass.
