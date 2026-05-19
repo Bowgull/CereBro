@@ -146,6 +146,19 @@ function rowToWatchShelfItem(row: Record<string, unknown>) {
   };
 }
 
+function rowToBrowserTabHistoryItem(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    eventType: String(row.event_type),
+    sourceLabel: String(row.source_label),
+    createdAt: Number(row.created_at),
+  };
+}
+
 function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -969,7 +982,6 @@ export const workbenchRouter = router({
           browserProposalNoActionTaken.join("\n"),
         ],
       });
-
       return {
         ok: true as const,
         mode: "blocked_manual_browser_runner" as const,
@@ -1037,7 +1049,6 @@ export const workbenchRouter = router({
           ].join("\n"),
         ],
       });
-
       return {
         ok: true as const,
         mode: "blocked_live_browser_runner" as const,
@@ -1080,27 +1091,38 @@ export const workbenchRouter = router({
       `,
       args: [],
     });
+    const historyRows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               event_type, source_label, created_at
+        FROM browser_tab_history_items
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
 
     return {
       mode: "read_only" as const,
       tableName: "browser_tab_sessions" as const,
       canPersistTabs: false,
-      canPersistHistory: false,
+      canPersistHistory: true,
       canPersistCookies: false,
       storageShape: {
         requiredFields: ["tab_id", "target_url", "title", "state", "created_at", "updated_at"],
         optionalFields: ["proposal_id", "project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
       },
       items: rows.rows.map(rowToBrowserTabSession),
+      historyItems: historyRows.rows.map((row) => rowToBrowserTabHistoryItem(row as Record<string, unknown>)),
       gates: [
-        "Browser tab/session storage table exists, but persistence remains blocked.",
-        "Manual page open, history, cookies, credentials, page content cache, source saves, Watch Shelf saves, and Workbench captures require later receipts.",
+        "Browser tab/session storage table exists.",
+        "Local Browser history records are append-only receipts from approved open-frame events.",
+        "Cookies, credentials, page content cache, source saves, Watch Shelf saves, and Workbench captures require later receipts.",
       ],
       noActionTaken: [
         "No browser opened.",
         "No page fetched.",
         "No tab session persisted.",
-        "No history persisted.",
         "No cookies or credentials persisted.",
         "No source saved.",
         "No external write ran.",
@@ -1604,7 +1626,6 @@ export const workbenchRouter = router({
           ].join("\n"),
         ],
       });
-
       return {
         ok: true as const,
         mode: "browser_live_runner_open_ready" as const,
@@ -1713,6 +1734,23 @@ export const workbenchRouter = router({
           ].join("\n"),
         ],
       });
+      const history = await db.execute({
+        sql: `
+          INSERT INTO browser_tab_history_items (
+            browser_tab_session_id, proposal_id, target_url, title, event_type,
+            source_label
+          )
+          VALUES (?, ?, ?, ?, 'sandbox_frame_open', 'browser_sandbox_frame')
+          RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                    event_type, source_label, created_at
+        `,
+        args: [
+          tab.id,
+          proposal.id,
+          tab.targetUrl,
+          tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+        ],
+      });
 
       return {
         ok: true as const,
@@ -1723,6 +1761,7 @@ export const workbenchRouter = router({
         canExecute: false,
         writesExternal: false,
         audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        historyItem: rowToBrowserTabHistoryItem(history.rows[0] as Record<string, unknown>),
         framePolicy: {
           sandbox: "allow-scripts allow-forms",
           referrerPolicy: "no-referrer",
@@ -1740,7 +1779,6 @@ export const workbenchRouter = router({
         ],
         noActionTaken: [
           "No backend page fetch ran.",
-          "No history persisted.",
           "No cookies or credentials persisted.",
           "No source saved.",
           "No Workbench capture created.",

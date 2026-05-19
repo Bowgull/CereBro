@@ -210,7 +210,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserVisibleTabs = (browserTabSessionStorageContract.data?.items ?? [])
     .filter((item) => item.state === "draft" || item.state === "open_ready" || item.state === "open")
     .slice(0, 3);
+  const browserHistoryItems = browserTabSessionStorageContract.data?.historyItems ?? [];
   const selectedBrowserTab = browserVisibleTabs.find((tab) => tab.proposalId === selectedBrowserProposalId) ?? null;
+  const selectedBrowserHistoryItems = browserHistoryItems.filter((item) => item.proposalId === selectedBrowserProposalId).slice(0, 3);
   const canOpenSandboxFrame = selectedBrowserTab?.state === "open_ready" || selectedBrowserTab?.state === "open";
   const hasOpenSandboxFrame =
     sandboxFrameTarget != null &&
@@ -627,6 +629,25 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                               ))}
                             </div>
                             <div className="mt-1">{browserProjectPins.noActionText}</div>
+                          </div>
+                        </details>
+                      )}
+                      {selectedBrowserHistoryItems.length > 0 && (
+                        <details className="relative">
+                          <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                            History
+                          </summary>
+                          <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Local history</div>
+                            <div className="mt-1 grid gap-1">
+                              {selectedBrowserHistoryItems.map((item) => (
+                                <div key={item.id} className="rounded px-1.5 py-1" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}` }}>
+                                  <div className="truncate font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</div>
+                                  <div className="truncate" style={{ color: C.textMuted }}>{item.eventType.replace(/_/g, " ")}</div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-1">Local receipt only. No cookies, credentials, page cache, or external write.</div>
                           </div>
                         </details>
                       )}

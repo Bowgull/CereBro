@@ -33508,3 +33508,91 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, and collapsed open-page pins exist. Next safest slice is add simple local history records for sandbox frames or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
 ```
+
+## 2026-05-19 0824 EDT - Browser Local History Receipts
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: open Browser pages now show a compact `History`
+  disclosure when local history exists.
+- Backend/runtime: added append-only local Browser history receipts for
+  sandbox-frame opens.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `browser_tab_history_items` as a local append-only table.
+- `recordBrowserSandboxFrameOpen` now writes one history row with
+  `event_type = sandbox_frame_open`.
+- `browserTabSessionStorageContract` now reads the latest history rows.
+- Browser open-page chrome now shows a compact `History` disclosure when the
+  selected proposal has local history.
+- Kept history honest: no cookies, credentials, page cache, source save,
+  Workbench capture, Watch Shelf progress, provider call, install, download,
+  external write, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/server/cerebroDb.ts`
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0824 CereBro Session Handoff - browser-local-history-receipts.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red test first: `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed on missing `browser_tab_history_items`.
+- Green targeted test: same command passed, 42 tests.
+- `pnpm -C app check` passed.
+- Browser proof on localhost:
+  `output/playwright/browser-open-page-history-disclosure.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched elements: the browser page stays primary, history is available but
+  not a large debug panel, and controls remain compact.
+- Deviations: back/forward still do not navigate, history is receipt readback
+  only, and the live shell still needs final 1:1 visual polish.
+- Next fidelity gap: use local history to enable honest back/forward state, or
+  polish Watch Shelf cards toward the approved Browser mockup.
+
+Drift check:
+
+- On path. This pass creates the minimum state needed for honest browser
+  navigation controls.
+- No new primary surface.
+- No fake browser capability, fake watch progress, fake source discovery, or
+  external automation.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Local history only records approved sandbox-frame open events. It does not
+  track in-frame navigation because cross-origin iframe navigation is not
+  readable from the shell.
+- Some framed sites still block rendering.
+- Local dev database now contains proof/test Browser history rows.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- Local SQLite schema adds `browser_tab_history_items`.
+- No migration file.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, and local history receipts exist. Next safest slice is use local history to enable honest back/forward state or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
+```

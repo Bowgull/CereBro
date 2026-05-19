@@ -658,12 +658,13 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(storage.mode).toBe("read_only");
     expect(storage.tableName).toBe("browser_tab_sessions");
     expect(storage.canPersistTabs).toBe(false);
-    expect(storage.canPersistHistory).toBe(false);
+    expect(storage.canPersistHistory).toBe(true);
     expect(storage.canPersistCookies).toBe(false);
     expect(storage.storageShape.requiredFields).toContain("tab_id");
     expect(storage.storageShape.requiredFields).toContain("target_url");
     expect(storage.items.length).toBeLessThanOrEqual(10);
-    expect(storage.gates).toContain("Browser tab/session storage table exists, but persistence remains blocked.");
+    expect(storage.historyItems.length).toBeLessThanOrEqual(10);
+    expect(storage.gates).toContain("Local Browser history records are append-only receipts from approved open-frame events.");
     expect(storage.noActionTaken).toContain("No browser opened.");
     expect(storage.noActionTaken).toContain("No tab session persisted.");
 
@@ -1431,6 +1432,72 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits + 1);
     expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
     expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("appends local Browser history when a sandbox frame opens", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/frame-history",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      historyItems: await countRows("browser_tab_history_items"),
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const frameOpen = await caller.workbench.recordBrowserSandboxFrameOpen({
+      proposalId: created.proposal.id,
+    });
+    const db = await getCerebroDb();
+    const history = await db.execute({
+      sql: `
+        SELECT browser_tab_session_id, proposal_id, target_url, title, event_type,
+               source_label
+        FROM browser_tab_history_items
+        WHERE proposal_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      args: [created.proposal.id],
+    });
+    const storage = await caller.workbench.browserTabSessionStorageContract();
+
+    expect(frameOpen.ok).toBe(true);
+    expect(frameOpen.historyItem?.targetUrl).toBe("https://example.com/frame-history");
+    expect(frameOpen.historyItem?.eventType).toBe("sandbox_frame_open");
+    expect(frameOpen.noActionTaken).not.toContain("No history persisted.");
+    expect(history.rows[0]?.target_url).toBe("https://example.com/frame-history");
+    expect(history.rows[0]?.event_type).toBe("sandbox_frame_open");
+    expect(history.rows[0]?.source_label).toBe("browser_sandbox_frame");
+    expect(storage.historyItems[0]?.targetUrl).toBe("https://example.com/frame-history");
+    expect(storage.canPersistHistory).toBe(true);
+
+    expect(await countRows("browser_tab_history_items")).toBe(before.historyItems + 1);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
   });
 
   it("blocks Watch Shelf save until the Browser tab is open", async () => {

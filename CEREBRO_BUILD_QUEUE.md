@@ -1957,3 +1957,11 @@ Expected shape:
   source save, fake media progress, credential, download, external write, or
   Raven path was added. Next Browser slice should add simple local history
   records or polish Watch Shelf cards.
+- 2026-05-19 0824 EDT: Browser local history receipts landed. A new local
+  `browser_tab_history_items` table appends one receipt when an approved
+  sandbox frame opens. The Browser storage contract reads the latest history
+  rows, and the open-page header exposes them behind compact `History`.
+  This is local receipt state only: no cookies, credentials, page cache,
+  source save, Workbench capture, fake progress, external write, or Raven path.
+  Next Browser slice should use local history to enable honest back/forward
+  state or polish Watch Shelf cards.
