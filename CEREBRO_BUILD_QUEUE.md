@@ -1981,3 +1981,12 @@ Expected shape:
   Next Browser slice should only wire local back navigation if a real previous
   local-history URL exists, or continue final visual polish toward the 1:1
   Browser mockup.
+- 2026-05-19 0852 EDT: Browser local history navigation landed. The Browser
+  back/forward controls now use a client-side local history model that skips
+  duplicate URL rows and remounts the sandbox frame only when a real previous
+  or next local history target exists. This is local receipt navigation only:
+  no backend page fetch, proxy, cookies, credentials, page cache, source save,
+  Workbench capture, fake progress, external write, provider call, install,
+  download, or Raven path. Next Browser slice should improve the visible
+  Browser page frame toward the approved 1:1 mockup or add the next honest
+  source/workbench receipt lane.

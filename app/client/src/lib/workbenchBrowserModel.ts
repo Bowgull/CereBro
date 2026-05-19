@@ -97,6 +97,22 @@ export type WorkbenchBrowserProjectPins = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserLocalHistoryItem = {
+  id: number;
+  proposalId: number | null;
+  targetUrl: string;
+  title?: string | null;
+  createdAt: number;
+};
+
+export type WorkbenchBrowserLocalNavigationState = {
+  current: WorkbenchBrowserLocalHistoryItem | null;
+  backTarget: WorkbenchBrowserLocalHistoryItem | null;
+  forwardTarget: WorkbenchBrowserLocalHistoryItem | null;
+  canGoBack: boolean;
+  canGoForward: boolean;
+};
+
 type BrowserProjectPinInput = {
   name: string;
   localPath: string;
@@ -178,6 +194,41 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
         ? "Tab 1 is the only active local page frame."
         : "Draft tab is staged beside Tab 1. No page is open.",
     noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
+  };
+}
+
+export function workbenchBrowserLocalNavigationStateModel(
+  historyItems: WorkbenchBrowserLocalHistoryItem[],
+  currentProposalId: number | null,
+): WorkbenchBrowserLocalNavigationState {
+  const ordered = [...historyItems].sort((a, b) => a.createdAt - b.createdAt || a.id - b.id);
+  let currentIndex = -1;
+  for (let index = ordered.length - 1; index >= 0; index -= 1) {
+    if (ordered[index].proposalId === currentProposalId) {
+      currentIndex = index;
+      break;
+    }
+  }
+  const current = currentIndex >= 0 ? ordered[currentIndex] : null;
+
+  const findDistinctTarget = (start: number, direction: -1 | 1) => {
+    if (!current) return null;
+    for (let index = start; index >= 0 && index < ordered.length; index += direction) {
+      const item = ordered[index];
+      if (item.targetUrl !== current.targetUrl) return item;
+    }
+    return null;
+  };
+
+  const backTarget = findDistinctTarget(currentIndex - 1, -1);
+  const forwardTarget = findDistinctTarget(currentIndex + 1, 1);
+
+  return {
+    current,
+    backTarget,
+    forwardTarget,
+    canGoBack: backTarget != null,
+    canGoForward: forwardTarget != null,
   };
 }
 

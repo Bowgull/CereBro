@@ -33763,3 +33763,88 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, and polished Watch Shelf cards exist. Next safest slice is make local back navigation remount the sandbox frame to a previous local-history URL only when there is a real previous URL, or continue final visual polish toward the approved 1:1 Browser mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, or Raven paths. Browser-proof changes.
 ```
+
+## 2026-05-19 0852 EDT - Browser Local History Navigation
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser back/forward controls now remount the local
+  sandbox frame from real local history targets.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `workbenchBrowserLocalNavigationStateModel` as a pure Browser model.
+- The model sorts local history, finds the current proposal, and skips duplicate
+  URL rows so duplicate open receipts do not pretend to be navigation.
+- Wired Browser back and forward buttons to remount the sandbox frame to a real
+  previous or next local history URL when one exists.
+- Kept notices explicit: local history navigation says no backend fetch ran.
+- No backend fetch, proxy, cookies, credentials, page cache, source save,
+  Workbench capture, fake progress, provider call, install, download, external
+  write, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0852 CereBro Session Handoff - browser-local-history-navigation.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because the new helper did not exist, then passed after implementation.
+- `pnpm -C app check` failed first because `findLastIndex` is outside the app's current TS lib target, then passed after replacing it with a plain loop.
+- `git diff --check` passed.
+- Browser DOM proof on localhost:
+  `output/playwright/browser-local-history-navigation-proof.txt`.
+- In-app screenshot capture was attempted and timed out at `Page.captureScreenshot`.
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched behavior: top browser navigation controls now do useful local work
+  when real local history exists.
+- Deviations: this is still local history receipt navigation, not full browser
+  engine history, cross-origin iframe tracking, service session restore, or page
+  content capture.
+- Next fidelity gap: continue shaping the Browser page frame and compact header
+  toward the approved 1:1 Browser mockup, or add the next honest source or
+  Workbench receipt lane.
+
+Drift check:
+
+- On path. This pass makes an existing Browser control real without adding a new
+  surface or fake capability.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, unsafe
+  site automation, provider use, install, pull, external write, or Raven path.
+
+Known risks:
+
+- Navigation is based on local append-only Browser history receipts.
+- It does not track navigation that happens inside a cross-origin iframe.
+- Browser screenshot proof remains unstable in this environment.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One DOM proof text file written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, and real local-history back/forward remounts exist. Next safest slice is improve the visible Browser page frame toward the approved 1:1 mockup or add the next honest source/workbench receipt lane. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes.
+```

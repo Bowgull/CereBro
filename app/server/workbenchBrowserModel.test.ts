@@ -8,6 +8,7 @@ import {
   workbenchBrowserShellModel,
   workbenchBrowserProjectPinsModel,
   workbenchBrowserTabStateModel,
+  workbenchBrowserLocalNavigationStateModel,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
 } from "../client/src/lib/workbenchBrowserModel";
@@ -122,6 +123,46 @@ describe("workbenchBrowserModel", () => {
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(emptyTabs.tabSummary).toBe("Tab 1 is the only active local page frame.");
     expect(emptyTabs.canCreateTab).toBe(false);
+  });
+
+  it("finds real local browser history targets without pretending duplicate rows are navigation", () => {
+    const historyItems = [
+      {
+        id: 3,
+        proposalId: 30,
+        targetUrl: "https://example.com/episode-2",
+        title: "Episode 2",
+        createdAt: 300,
+      },
+      {
+        id: 2,
+        proposalId: 20,
+        targetUrl: "https://example.com/episode-1",
+        title: "Episode 1 duplicate open",
+        createdAt: 200,
+      },
+      {
+        id: 1,
+        proposalId: 10,
+        targetUrl: "https://example.com/episode-1",
+        title: "Episode 1",
+        createdAt: 100,
+      },
+    ];
+
+    const current = workbenchBrowserLocalNavigationStateModel(historyItems, 30);
+    const duplicateOnly = workbenchBrowserLocalNavigationStateModel(historyItems.slice(1), 20);
+
+    expect(current.current?.targetUrl).toBe("https://example.com/episode-2");
+    expect(current.backTarget?.targetUrl).toBe("https://example.com/episode-1");
+    expect(current.backTarget?.proposalId).toBe(20);
+    expect(current.forwardTarget).toBeNull();
+    expect(current.canGoBack).toBe(true);
+    expect(current.canGoForward).toBe(false);
+
+    expect(duplicateOnly.current?.targetUrl).toBe("https://example.com/episode-1");
+    expect(duplicateOnly.backTarget).toBeNull();
+    expect(duplicateOnly.canGoBack).toBe(false);
   });
 
   it("turns real project records into Browser pins without fake bookmarks", () => {
