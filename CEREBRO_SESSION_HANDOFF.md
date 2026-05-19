@@ -31508,3 +31508,91 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Prefer reducing visible machinery and improving mockup material/proportions over adding function. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-18 2244 EDT - Workbench Browser Frame Polish
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: Workbench Browser/Watch Shelf moved closer to the approved mockup
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian snapshot appended
+- Creative/freelance/watch: Watch Shelf UI only, no media or site automation
+
+What changed:
+
+- Reduced visible Workbench chrome around the Browser by compacting the
+  Workbench header, hiding the status line visually, and reducing main padding.
+- Strengthened the Browser shell frame with darker material, gold warmth, and
+  a heavier inset shadow so the Browser reads more like the primary surface.
+- Shortened the Browser helper copy to `Aang handles search intent.`
+- Preserved the Browser/Watch Shelf blocked state and current controls.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 2244 CereBro Session Handoff - workbench-browser-frame-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof on localhost:
+  `output/playwright/workbench-browser-frame-polish-current-page.png`
+  `output/playwright/workbench-browser-frame-polish-watch-shelf.png`
+- Snapshot checks confirmed `Browser`, `Current Page`, `Watch Shelf`, `Aang
+  handles search intent`, `Safety read`, `Watching`, `Want`, `YouTube`,
+  `Twitch`, `Anime`, and `Finished`.
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path: `output/playwright/workbench-browser-frame-polish-current-page.png`
+  and `output/playwright/workbench-browser-frame-polish-watch-shelf.png`.
+- Matched elements: Browser block owns more vertical space, surrounding
+  Workbench header is quieter, browser frame material is richer, URL/search
+  bar and page tabs remain prominent, Watch Shelf categories remain visible.
+- Deviations: still embedded in Workbench, route/context rails still visible,
+  top Workbench tab strip still visible, live page rendering blocked, Watch
+  Shelf saving blocked.
+- Next fidelity gap: reduce route/context rail dominance for Browser focus,
+  refine plaque/sidebar material, and move toward the full browser mockup
+  proportions without creating a new primary surface.
+
+Drift check:
+
+- On path. This pass only reduces machinery around the locked Browser mockup
+  target.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- The Browser still sits under Workbench tabs and beside the global context
+  rail, which keeps it short of the mockup.
+- The hidden Workbench status remains available to screen readers as route
+  context.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- No database rows created intentionally.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest Browser slice is reducing route/context rail dominance during Browser focus or refining plaque/sidebar material. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```

@@ -1743,3 +1743,10 @@ Expected shape:
   should reduce surrounding Workbench chrome and improve material/proportions
   against the approved Browser mockup, without faking page rendering or Watch
   Shelf saves.
+- 2026-05-18 2244 EDT: Workbench Browser frame polish landed. The Workbench
+  header is more compact, its status text is visually hidden, main padding is
+  tighter, and the Browser frame has richer dark material plus stronger inset
+  depth. Browser behavior remains blocked and honest. Next UI fidelity slice
+  should reduce route/context rail dominance during Browser focus or refine
+  plaque/sidebar material. Do not create a new Browser primary surface without
+  approval.

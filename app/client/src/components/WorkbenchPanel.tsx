@@ -783,11 +783,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-2" style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-[13px] font-bold uppercase tracking-widest">Workbench</h2>
-            <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
+      <header className="shrink-0 px-3 py-1.5" style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest">Workbench</h2>
+            <p className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
               {headerCopy.subtitle}
             </p>
           </div>
@@ -797,16 +797,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             aria-label="Close workbench"
             variant="outline"
             size="sm"
+            className="h-7 px-2 text-[11px]"
           >
             Close
           </Button>
         </div>
-        <div role="status" aria-live="polite" className="mt-2 text-[11px]" style={{ color: C.textMuted }}>
+        <div role="status" aria-live="polite" className="sr-only">
           {headerCopy.statusText}
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-3" aria-label="Workbench plan" aria-busy={plan.isLoading}>
+      <main className="flex-1 overflow-y-auto p-2" aria-label="Workbench plan" aria-busy={plan.isLoading}>
         {!data ? (
           <div className="rounded p-4 text-sm" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
             Loading workbench plan.
@@ -881,20 +882,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             )}
 
             <section
-              className="order-first rounded p-2.5"
+              className="order-first rounded p-3"
               aria-label="Manual browser shell"
               style={{
-                background: "linear-gradient(180deg, rgba(10, 16, 15, 0.98), rgba(5, 9, 8, 0.98))",
+                background:
+                  "linear-gradient(180deg, rgba(11, 18, 16, 0.99), rgba(5, 9, 8, 0.99)), radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.1), transparent 34%)",
                 border: `1px solid ${G.candleSoft}`,
-                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.06), 0 16px 42px rgba(0, 0, 0, 0.28)",
+                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 22px rgba(0, 0, 0, 0.34), 0 18px 44px rgba(0, 0, 0, 0.3)",
               }}
             >
-              <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h3 className="text-[11px] font-bold uppercase tracking-widest">{browserShell.title}</h3>
-                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    Page surface. Aang handles search intent.
-                  </p>
+                  <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Aang handles search intent.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-1">
                   <Chip label={browserShell.status} tone={C.success} />
