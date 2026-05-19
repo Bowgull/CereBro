@@ -783,11 +783,11 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: G.slabMuted, border: `1px solid ${G.line}`, color: C.textPrimary }}>
-      <header className="shrink-0 px-3 py-1.5" style={{ borderBottom: `1px solid ${G.line}`, background: G.slab }}>
+      <header className="shrink-0 px-2 py-1" style={{ borderBottom: `1px solid ${G.lineSoft}`, background: "rgba(5, 9, 9, 0.78)" }}>
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-[11px] font-bold uppercase tracking-widest">Workbench</h2>
-            <p className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>
+            <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Workbench</h2>
+            <p className="sr-only">
               {headerCopy.subtitle}
             </p>
           </div>
@@ -797,7 +797,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
             aria-label="Close workbench"
             variant="outline"
             size="sm"
-            className="h-7 px-2 text-[11px]"
+            className="h-6 px-2 text-[10px]"
           >
             Close
           </Button>

@@ -31943,3 +31943,88 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is reducing generic Workbench panel chrome around Browser or designing final custom shell icons. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-18 2343 EDT - Workbench Browser Chrome Reduction
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: Workbench Browser/Watch Shelf moved closer to the approved mockup
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian snapshot appended
+- Creative/freelance/watch: Watch Shelf UI only, no media or site automation
+
+What changed:
+
+- Reduced the duplicate Workbench header above the Browser into a thin utility
+  strip.
+- Hid the Workbench subtitle visually while preserving it for screen readers.
+- Reduced the Close button height and header padding.
+- No Browser, Watch Shelf, route, context rail, receipt, or castle behavior
+  changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 2343 CereBro Session Handoff - workbench-browser-chrome-reduction.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof on localhost:
+  `output/playwright/workbench-browser-chrome-reduction-current-page.png`
+  `output/playwright/workbench-browser-chrome-reduction-watch-shelf.png`
+- Snapshot checks confirmed `Workbench`, `Close`, `Browser`, `Watch Shelf tab`,
+  `Open a page`, and `Safety read`.
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/workbench-browser-chrome-reduction-current-page.png`
+  and `output/playwright/workbench-browser-chrome-reduction-watch-shelf.png`.
+- Matched elements: Workbench title chrome is less dominant, Browser owns more
+  of the visual field, Close remains available, URL/search controls and Watch
+  Shelf remain intact.
+- Deviations: Browser remains embedded in Workbench, route/context rail remains
+  visible, safety details sit lower in the scroll, live page rendering blocked,
+  Watch Shelf saving blocked.
+- Next fidelity gap: continue reducing generic receipt machinery below Browser,
+  or move to final custom shell/icon treatment.
+
+Drift check:
+
+- On path. This pass hides duplicate chrome only.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- The reduced Workbench header is intentionally quieter. If later non-browser
+  Workbench tasks need stronger page identity, this may need route-specific
+  variation.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- No database rows created intentionally.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is reducing generic receipt machinery below Browser or moving to final custom shell/icon treatment. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```

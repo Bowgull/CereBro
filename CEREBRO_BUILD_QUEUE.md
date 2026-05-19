@@ -1772,3 +1772,8 @@ Expected shape:
   stronger inner material depth. Browser behavior remains blocked and honest.
   Next UI fidelity slice should reduce generic Workbench panel chrome around
   Browser or continue final shell/icon treatment.
+- 2026-05-18 2343 EDT: Workbench Browser chrome reduction landed. The duplicate
+  Workbench header above Browser is now a thin utility strip, the subtitle is
+  screen-reader-only, and Close is smaller. Browser behavior remains blocked
+  and honest. Next UI fidelity slice should reduce generic receipt machinery
+  below Browser or move to final custom shell/icon treatment.
