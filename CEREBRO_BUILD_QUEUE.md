@@ -2060,3 +2060,10 @@ Expected shape:
   call, install, download, external write, fake capability, or Raven path was
   added. Next shell slice should continue the broader 1:1 pass on header chrome,
   left rail plaque treatment, or command bar material.
+- 2026-05-19 1143 EDT: Main shell header chrome polish landed. The header now
+  uses a richer plated background with subtle brass/verdigris blooms, small
+  corner trim, deeper brand plaque, quieter center route read, and plated status
+  and utility controls. This is visual shell polish only: no nav behavior,
+  backend route, schema, provider call, install, download, external write, fake
+  capability, or Raven path was added. Next shell slice should continue the 1:1
+  pass on left rail plaque treatment or command bar material.

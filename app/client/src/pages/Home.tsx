@@ -296,18 +296,24 @@ export default function Home() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header
-        className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 shrink-0 rounded"
+        className="relative flex items-center justify-between gap-1.5 overflow-hidden px-2.5 py-1.5 shrink-0 rounded"
         aria-label="Keep header"
         style={{
-          background: mockupShell.plaque,
+          background: `
+            radial-gradient(circle at 8% 0%, rgba(198, 155, 85, 0.12), transparent 28%),
+            radial-gradient(circle at 88% 12%, rgba(77, 170, 154, 0.1), transparent 30%),
+            ${mockupShell.plaque}
+          `,
           border: `1px solid ${mockupShell.marbleLine}`,
-          boxShadow: mockupShell.bevel,
+          boxShadow: `0 14px 38px rgba(0, 0, 0, 0.36), ${mockupShell.bevel}`,
         }}
       >
+        <div className="pointer-events-none absolute left-2 top-1.5 h-3 w-3 border-l border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+        <div className="pointer-events-none absolute right-2 top-1.5 h-3 w-3 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
         <div className="flex items-center gap-1.5 shrink-0">
           <div
-            className="w-6 h-6 flex items-center justify-center rounded"
-            style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass, boxShadow: mockupShell.bevel }}
+            className="w-7 h-7 flex items-center justify-center rounded"
+            style={{ background: "linear-gradient(180deg, rgba(32, 53, 45, 0.98), rgba(8, 18, 16, 0.98))", border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass, boxShadow: `${mockupShell.bevel}, 0 0 22px rgba(198, 155, 85, 0.1)` }}
           >
             <span className="text-sm leading-none">◆</span>
           </div>
@@ -324,7 +330,7 @@ export default function Home() {
         <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
           <div
             className="flex min-w-0 items-center gap-1.5 rounded px-2 py-1"
-            style={{ background: mockupShell.frameSoft, border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}
+            style={{ background: "rgba(5, 10, 9, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}
           >
             <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>
               {ZONE_NAV_ITEMS.find((item) => item.zone === NAV_TO_ZONE[nav])?.label ?? "Keep"}
@@ -343,7 +349,7 @@ export default function Home() {
             className="flex h-7 items-center gap-1.5 rounded px-1.5 text-[11px] shrink-0"
             role="status"
             aria-label={`Connection status: ${connected ? "Online" : "Offline"}`}
-            style={{ border: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}
+            style={{ border: `1px solid ${connected ? `${C.success}66` : `${C.danger}66`}`, background: "rgba(5, 10, 9, 0.74)", boxShadow: mockupShell.bevel }}
           >
             <span className="w-2 h-2 rounded-full" style={{ background: connected ? C.success : C.danger }} />
             <span className="hidden sm:inline text-[11px] font-semibold uppercase" style={{ color: connected ? C.success : C.danger }}>
@@ -361,7 +367,9 @@ export default function Home() {
             variant={isContextPanelOpen ? "secondary" : "outline"}
             size="sm"
             style={{
-              border: `1px solid ${isContextPanelOpen ? C.accent : C.borderSoft}`,
+              border: `1px solid ${isContextPanelOpen ? C.accent : mockupShell.marbleLineSoft}`,
+              background: isContextPanelOpen ? shellFrame.shellPlaqueActive : "rgba(8, 14, 13, 0.74)",
+              boxShadow: mockupShell.bevel,
             }}
             title={isContextPanelOpen ? "Hide context panel" : "Show context panel"}
           >
@@ -376,6 +384,7 @@ export default function Home() {
                 aria-label="Open developer tools"
                 variant="outline"
                 size="sm"
+                style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(8, 14, 13, 0.74)", boxShadow: mockupShell.bevel }}
               >
                 Tools
               </Button>
