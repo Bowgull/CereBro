@@ -742,9 +742,31 @@ function HomeView({
     <div className="h-full flex flex-col">
       <div
         className="flex items-center justify-between gap-2 px-3 py-1.5 shrink-0"
-        style={{ background: "rgba(6, 12, 11, 0.94)", borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}
+        style={{
+          background: `
+            radial-gradient(circle at 8% 50%, rgba(198, 155, 85, 0.1), transparent 28%),
+            linear-gradient(180deg, rgba(9, 17, 15, 0.98), rgba(4, 9, 8, 0.98))
+          `,
+          borderBottom: `1px solid ${mockupShell.marbleLineSoft}`,
+          boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.06)",
+        }}
       >
-        <div className="flex items-center gap-1" aria-label="Keep floor focus">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="hidden h-5 w-0.5 shrink-0 rounded-full sm:block" style={{ background: shellFrame.brass }} />
+          <div className="min-w-0">
+            <div className="truncate text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Direction A
+              <span className="mx-1.5" style={{ color: C.textMuted }}>-</span>
+              Black Marble Council
+            </div>
+            <div className="hidden truncate text-[10px] leading-none sm:block" style={{ color: C.textMuted }}>
+              {connMode === "live" ? "Live node" : "Demo node"} · {activeAgents > 0 ? `${activeAgents} moving` : "Calm watch"}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex min-w-0 items-center justify-end gap-1.5">
+          <div className="hidden items-center gap-1 rounded p-0.5 lg:flex" aria-label="Keep floor focus" style={{ background: "rgba(5, 11, 10, 0.66)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
           {(["upper", "ground", "crypts"] as FloorId[]).map((id) => {
             const f = FLOORS[id];
             const isActive = id === floor;
@@ -757,22 +779,22 @@ function HomeView({
                 aria-label={`Show ${f.name}`}
                 variant={isActive ? "secondary" : "ghost"}
                 size="sm"
-                className="h-7 px-2.5"
+                className="h-6 px-2"
                 style={{
-                  background: isActive ? C.surfaceRaised : "transparent",
+                  background: isActive ? shellFrame.shellPlaqueActive : "transparent",
                   color: isActive ? C.textPrimary : C.textMuted,
-                  border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
+                  border: `1px solid ${isActive ? shellFrame.brassSoft : "transparent"}`,
                   boxShadow: isActive ? mockupShell.bevel : undefined,
                 }}
                 title={f.blurb}
               >
-                {f.name}
+                <span className="hidden xl:inline">{f.name}</span>
+                <span className="xl:hidden">{id === "upper" ? "Upper" : id === "ground" ? "Ground" : "Crypts"}</span>
               </Button>
             );
           })}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.frameSoft }}>
+          </div>
+          <div className="flex rounded overflow-hidden" style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.66)", boxShadow: mockupShell.bevel }}>
             {(["blueprint", "scene"] as const).map((id) => {
               const isActive = keepView === id;
               return (
@@ -784,7 +806,7 @@ function HomeView({
                   aria-label={`Show Keep ${id} view`}
                   variant={isActive ? "secondary" : "ghost"}
                   size="sm"
-                  className="h-7 rounded-none px-2"
+                  className="h-6 rounded-none px-2"
                   style={{
                     background: isActive ? shellFrame.shellPlaqueActive : "transparent",
                     color: isActive ? C.textPrimary : C.textMuted,
@@ -794,9 +816,6 @@ function HomeView({
                 </Button>
               );
             })}
-          </div>
-          <div className="hidden sm:block text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            The Keep
           </div>
         </div>
       </div>

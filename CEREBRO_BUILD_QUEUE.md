@@ -2097,3 +2097,11 @@ Expected shape:
   targets, backend route, schema, provider call, install, download, external
   write, fake capability, or Raven path was added. Next shell slice should
   continue the mockup compare on the Keep top strip or center castle framing.
+- 2026-05-19 1217 EDT: Keep top strip 1:1 polish landed. The Keep surface now
+  leads with a mockup-style `Direction A - Black Marble Council` label and a
+  quiet live/demo state read, while floor focus and Scene/Blueprint controls are
+  demoted into compact plated controls. This is visual shell polish only: no
+  route behavior, backend route, schema, provider call, install, download,
+  external write, fake capability, or Raven path was added. Next shell slice
+  should continue the mockup compare on center castle framing and remaining
+  proportion mismatches.
