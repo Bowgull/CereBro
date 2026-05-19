@@ -560,11 +560,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             <section className="rounded p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
               {hasOpenSandboxFrame ? (
                 <div className="grid gap-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.78)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, boxShadow: browserFrame.bevel }}>
-                    <span>Sandbox frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling.</span>
-                    <div className="flex flex-wrap gap-1">
-                      <Chip label="sandbox" tone={C.accent} />
-                      <Chip label="no same-origin" tone={C.warning} />
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1" style={{ background: "rgba(5, 10, 10, 0.78)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                    <div className="min-w-0">
+                      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
+                        {selectedBrowserTab ? browserDraftTabLabel(selectedBrowserTab) : "Open page"}
+                      </div>
+                      <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
+                        {sandboxFrameTarget}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-1">
                       <Button
                         type="button"
                         size="sm"
@@ -582,6 +587,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       >
                         {createWatchShelfItemFromOpenTab.isPending ? "Saving" : "Save Watch"}
                       </Button>
+                      <details className="relative">
+                        <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                          Proof
+                        </summary>
+                        <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Open receipt</div>
+                          <div className="mt-1">Protected frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling ran.</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <Chip label="sandbox" tone={C.accent} />
+                            <Chip label="local receipt" tone={C.gold} />
+                          </div>
+                        </div>
+                      </details>
                     </div>
                   </div>
                   <iframe

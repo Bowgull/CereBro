@@ -1943,3 +1943,10 @@ Expected shape:
   external write was added. Next Browser slice should collapse runner machinery
   after frame open, add simple local history records, or polish Watch Shelf
   cards.
+- 2026-05-19 0810 EDT: Browser open-page proof collapse landed. Open Browser
+  pages now show the page title and URL first, keep `Save Watch` as the useful
+  page action, and move sandbox receipt language behind `Proof`. No backend,
+  schema, provider, install, source save, fake media progress, credential,
+  download, external write, or Raven path was added. Next Browser slice should
+  hide or compress project pins during open-page browsing, add simple local
+  history records, or polish Watch Shelf cards.
