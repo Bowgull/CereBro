@@ -33927,3 +33927,78 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, and collapsed Open Gate proposal UI exist. Next safest slice is continue visual Browser frame polish toward the approved 1:1 mockup or add the next honest Source/Workbench receipt lane. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes.
 ```
+
+## 2026-05-19 0904 EDT - Browser Project Pins Collapse
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: no-page Browser view exposes less project machinery.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Replaced the full-width Project Pins shelf with a compact `Pins` disclosure.
+- Kept project pins accessible from the Browser page.
+- Removed the visible project names from the primary no-page Browser state.
+- No project writes, browser opens, source saves, backend route, schema,
+  provider call, install, download, external write, fake source discovery, fake
+  media progress, or Raven path was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0904 CereBro Session Handoff - browser-project-pins-collapse.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser DOM proof on localhost:
+  `output/playwright/browser-project-pins-collapse-proof.txt`.
+- In-app screenshot capture was attempted and timed out at `Page.captureScreenshot`.
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched elements: Browser page now keeps project references available without
+  making them a shelf in the primary viewport.
+- Deviations: still not 1:1 visual polish. The Browser needs stronger
+  material framing, more accurate tab/address proportions, and a more refined
+  empty/page state.
+- Next fidelity gap: continue frame and address/tab polish toward the approved
+  1:1 Browser mockup.
+
+Drift check:
+
+- On path. This pass hides machinery without deleting access to project pins.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, unsafe
+  site automation, provider use, install, pull, external write, or Raven path.
+
+Known risks:
+
+- This is UI compression only.
+- Browser screenshot proof remains unstable in this environment.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One DOM proof text file written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, collapsed Open Gate proposal UI, and collapsed no-page Project Pins exist. Next safest slice is continue frame and address/tab polish toward the approved 1:1 Browser mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes.
+```

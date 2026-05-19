@@ -1998,3 +1998,10 @@ Expected shape:
   fake source discovery, fake media progress, or Raven path. Next Browser slice
   should continue visual frame polish toward the 1:1 Browser mockup or add the
   next honest Source/Workbench receipt lane.
+- 2026-05-19 0904 EDT: Browser project pins collapse landed. The no-page
+  Browser view no longer shows the full Project Pins shelf as primary UI. Pins
+  remain available behind a compact `Pins 5` disclosure. This is UI compression
+  only: no project writes, browser opens, source saves, backend route, schema,
+  provider call, install, download, external write, fake source discovery, fake
+  media progress, or Raven path. Next Browser slice should continue frame and
+  address/tab polish toward the approved 1:1 Browser mockup.
