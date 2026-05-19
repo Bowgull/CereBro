@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
+import { Castle, Hammer, ScrollText, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import KeepScene from "@/components/KeepScene";
 import KeepFortressBlueprint from "@/components/KeepFortressBlueprint";
 import EstablishingShot from "@/components/EstablishingShot";
@@ -82,7 +84,7 @@ interface ZoneNavItem {
   zone: ZoneId;
   id: NavId;
   label: string;
-  glyph: string;
+  Icon: LucideIcon;
   blurb: string;
 }
 
@@ -95,10 +97,10 @@ interface ZoneSurface {
 const shellCopy = homeShellCopy();
 
 const ZONE_NAV_ITEMS: ZoneNavItem[] = [
-  { zone: "keep", id: "home", label: "Keep", glyph: "◆", blurb: "Understand what is active." },
-  { zone: "workshop", id: "workbench", label: "Workshop", glyph: "▤", blurb: shellCopy.zoneBlurbs.workshop },
-  { zone: "ledger", id: "ledger", label: "Ledger", glyph: "◇", blurb: ledgerNavCopy().blurb },
-  { zone: "basement", id: "basement", label: "Basement", glyph: "⚙", blurb: "Configure the machine." },
+  { zone: "keep", id: "home", label: "Keep", Icon: Castle, blurb: "Understand what is active." },
+  { zone: "workshop", id: "workbench", label: "Workshop", Icon: Hammer, blurb: shellCopy.zoneBlurbs.workshop },
+  { zone: "ledger", id: "ledger", label: "Ledger", Icon: ScrollText, blurb: ledgerNavCopy().blurb },
+  { zone: "basement", id: "basement", label: "Basement", Icon: Settings, blurb: "Configure the machine." },
 ];
 
 const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
@@ -425,6 +427,7 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
               const isActive = NAV_TO_ZONE[nav] === item.zone;
+              const ZoneIcon = item.Icon;
               return (
                 <Button
                   key={item.zone}
@@ -453,7 +456,7 @@ export default function Home() {
                       border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
                     }}
                   >
-                    {item.glyph}
+                    <ZoneIcon size={13} strokeWidth={1.7} aria-hidden="true" />
                   </span>
                   <span className="block min-w-0">
                     <span className="block text-[9px] uppercase tracking-wider font-semibold leading-none">{item.label}</span>

@@ -1762,3 +1762,8 @@ Expected shape:
   blocked and honest. Next UI fidelity slice should replace temporary shell
   glyphs with approved icon treatment, refine Browser proportions, or reduce
   generic Workbench panel chrome.
+- 2026-05-18 2334 EDT: Shell rail icon treatment landed. Temporary left rail
+  text glyphs were replaced with `lucide-react` icons: Castle, Hammer,
+  ScrollText, and Settings. This keeps the four-zone model unchanged. Next UI
+  fidelity slice should refine Browser proportions, reduce generic Workbench
+  panel chrome, or design final custom shell icons.
