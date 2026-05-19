@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0704 EDT
+Last updated: 2026-05-19 0711 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0711 EDT: changed the direct Browser `Stage` action into a local
+  prepare-open package. Stage now creates the Browser proposal, draft tab,
+  pending approval preview, Workbench body receipt, Spock security receipt, and
+  blocked result/recovery scaffold, while still opening no page and writing no
+  external state. Fixed the staged proposal label so page tabs use `Open Page`
+  behavior instead of inheriting the selected page-menu action. Screenshot
+  saved at `output/playwright/browser-prepare-open-page-package.png`. No page
+  open, fetch, search request, Watch Shelf save, source save, provider call,
+  install, external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 0704 EDT: polished the direct Browser surface toward the locked
   Browser/Watch Shelf mockup. Added richer dark frame material, plaque tabs,
   tighter URL chrome, stronger project pins, larger page body, and a richer

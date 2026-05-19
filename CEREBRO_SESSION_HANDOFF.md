@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0704 EDT
+Last updated: 2026-05-19 0711 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0711 EDT - Browser Prepare Open Package
+
+### What Changed
+- Changed the direct Browser `Stage` action from a draft-tab-only save into a
+  local prepare-open package.
+- `Stage` now creates:
+  - Browser action proposal
+  - draft tab row
+  - pending Browser approval preview
+  - local Workbench body receipt
+  - local Spock security receipt
+  - blocked result/recovery scaffold
+- Fixed the proposal label so staged page tabs use `Open Page` behavior instead
+  of inheriting the selected page-menu action.
+- Preserved the hard gate. No page opens, fetches, searches, saves sources,
+  saves Watch Shelf items, captures pages, or writes externally.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- Browser proof against `http://localhost:3000/` staged:
+  - `https://example.com/browser-open-page-fix`
+  - confirmed `Browser proposal #2243 prepared. Approval is waiting. No page opened.`
+  - confirmed the active draft tab label is URL-derived, not `Add to Watch draft`
+  - confirmed the page body remains `open blocked`
+- Screenshot proof saved locally at:
+  - `output/playwright/browser-prepare-open-page-package.png`
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup.
+- Matched elements: Browser remains a real OS zone, the URL bar now prepares
+  page intent from the main chrome, tabs show staged page targets, and machinery
+  stays mostly hidden behind the receipt/approval system.
+- Deviations: still not 1:1. There is no live page renderer, history, durable
+  Watch Shelf save, source capture, or browser runner yet.
+- Next fidelity gap: expose the waiting approval cleanly, then implement the
+  manual browser runner contract without faking page content.
+
+### Drift Check
+- On path.
+- No fake browser function.
+- No page open, page fetch, search request, source save, Watch Shelf save,
+  provider call, install, external write, model pull, castle change, or Raven
+  path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- Browser proof created local Browser proposal, approval preview, permission
+  preflight, Workbench body, Spock receipt, tab draft, and result/recovery rows
+  for test URL `https://example.com/browser-open-page-fix`.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. The direct Browser Stage action now prepares local approval/body/Spock/result scaffolds for an Open Page proposal but still opens nothing. Next safest slice is the clean approval handoff/readback or the manual browser runner implementation contract. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0704 EDT - Browser Visual Polish
 

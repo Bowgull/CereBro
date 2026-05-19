@@ -89,6 +89,30 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const createBrowserActionApprovalPreview = trpc.workbench.createBrowserActionApprovalPreview.useMutation({
+    onSuccess: () => {
+      utils.approvals.list.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
+  const createBrowserActionWorkbenchBody = trpc.workbench.createBrowserActionWorkbenchBody.useMutation({
+    onSuccess: () => {
+      utils.workbench.evidence.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
+  const createBrowserActionSpockGate = trpc.workbench.createBrowserActionSpockGate.useMutation({
+    onSuccess: () => {
+      utils.securityGate.recent.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
+  const createBrowserResultRecoveryScaffold = trpc.workbench.createBrowserResultRecoveryScaffold.useMutation({
+    onSuccess: () => {
+      utils.workbench.browserActionProposals.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -102,6 +126,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserProjectPins = workbenchBrowserProjectPinsModel(projects.data?.projects ?? []);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
+  const isPreparingBrowserDraft =
+    createBrowserActionProposal.isPending ||
+    createBrowserTabSessionDraft.isPending ||
+    createBrowserActionApprovalPreview.isPending ||
+    createBrowserActionWorkbenchBody.isPending ||
+    createBrowserActionSpockGate.isPending ||
+    createBrowserResultRecoveryScaffold.isPending;
 
   return (
     <div
@@ -236,27 +267,35 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               size="sm"
               variant="outline"
               className="h-8 px-2"
-              disabled={browserDraft.kind === "empty" || createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending}
-              title="Stage a local Browser proposal and draft tab row. This does not open, fetch, search, save, or capture."
+              disabled={browserDraft.kind === "empty" || isPreparingBrowserDraft}
+              title="Prepare local Browser receipts. This does not open, fetch, search, save, or capture."
               aria-label="Stage browser page draft"
-              onClick={() => {
-                createBrowserActionProposal.mutate(
-                  {
-                    actionLabel: browserActionPreview.label,
+              onClick={async () => {
+                if (browserDraft.kind === "empty" || isPreparingBrowserDraft) return;
+                setBrowserNotice("Preparing local Browser receipts. No page will open.");
+                try {
+                  const result = await createBrowserActionProposal.mutateAsync({
+                    actionLabel: "Open Page",
                     target: browserDraft.raw,
                     draftKind: browserDraft.kind,
-                  },
-                  {
-                    onSuccess: (result) => {
-                      setSelectedBrowserProposalId(result.proposal.id);
-                      setBrowserNotice(`Browser proposal #${result.proposal.id} saved. Not run.`);
-                      createBrowserTabSessionDraft.mutate({ proposalId: result.proposal.id });
-                    },
-                  },
-                );
+                  });
+                  const proposalId = result.proposal.id;
+                  setSelectedBrowserProposalId(proposalId);
+                  await createBrowserTabSessionDraft.mutateAsync({ proposalId });
+                  await createBrowserActionApprovalPreview.mutateAsync({
+                    proposalId,
+                    reason: "Prepare Browser page open for user approval. This does not open the page.",
+                  });
+                  await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
+                  await createBrowserActionSpockGate.mutateAsync({ proposalId });
+                  await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
+                  setBrowserNotice(`Browser proposal #${proposalId} prepared. Approval is waiting. No page opened.`);
+                } catch {
+                  setBrowserNotice("Browser preparation failed before any page opened.");
+                }
               }}
             >
-              {createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending ? "Staging" : "Stage"}
+              {isPreparingBrowserDraft ? "Preparing" : "Stage"}
             </Button>
             <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
               <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
