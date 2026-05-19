@@ -1756,3 +1756,9 @@ Expected shape:
   Next visible. Browser behavior remains blocked and honest. Next UI fidelity
   slice should refine left rail plaque material, top Workbench tab treatment,
   or Browser proportions.
+- 2026-05-18 2330 EDT: Workbench shell plaque tabs landed. Left rail zone
+  buttons now use richer plaque gradients and inset shadows, and active
+  Workbench tabs read more attached to the shell. Browser behavior remains
+  blocked and honest. Next UI fidelity slice should replace temporary shell
+  glyphs with approved icon treatment, refine Browser proportions, or reduce
+  generic Workbench panel chrome.

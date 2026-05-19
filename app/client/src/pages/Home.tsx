@@ -435,10 +435,14 @@ export default function Home() {
                   className="h-[58px] w-full flex-col justify-center gap-1 rounded px-1 py-1 text-center"
                   variant="ghost"
                   style={{
-                    background: isActive ? mockupShell.plaqueActive : mockupShell.plaque,
+                    background: isActive
+                      ? "linear-gradient(180deg, rgba(51, 72, 58, 0.98), rgba(13, 29, 25, 0.98))"
+                      : "linear-gradient(180deg, rgba(17, 30, 27, 0.96), rgba(7, 15, 14, 0.98))",
                     border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
                     color: isActive ? C.textPrimary : C.textSecondary,
-                    boxShadow: isActive ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, ${mockupShell.bevel}` : mockupShell.bevel,
+                    boxShadow: isActive
+                      ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, inset 0 1px 0 rgba(244, 239, 227, 0.12), inset 0 -10px 18px rgba(0, 0, 0, 0.28)`
+                      : "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -8px 16px rgba(0, 0, 0, 0.24)",
                   }}
                 >
                   <span
@@ -919,7 +923,11 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
   return (
     <div
       className="flex shrink-0 items-center gap-1.5 overflow-hidden px-2.5 py-1.5"
-      style={{ background: "rgba(8, 14, 13, 0.96)", borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}
+      style={{
+        background: "linear-gradient(180deg, rgba(9, 16, 15, 0.98), rgba(5, 10, 10, 0.98))",
+        borderBottom: `1px solid ${mockupShell.marbleLineSoft}`,
+        boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.04)",
+      }}
     >
       <div className="hidden xl:flex min-w-[150px] items-center gap-2">
         <div className="h-7 w-1 rounded-full" style={{ background: shellFrame.brass }} />
@@ -948,13 +956,16 @@ function ZoneHeader({ nav, onNavigate }: { nav: NavId; onNavigate: (id: NavId) =
               onClick={() => onNavigate(surface.id)}
               aria-pressed={isActive}
               aria-label={`Open ${surface.label}`}
-              className="h-7 shrink-0 justify-start whitespace-normal px-2 text-left"
+              className="h-7 shrink-0 justify-start whitespace-normal rounded-b-none px-2 text-left"
               variant={isActive ? "secondary" : "outline"}
               style={{
-                background: isActive ? mockupShell.plaqueActive : "rgba(9, 15, 15, 0.82)",
+                background: isActive
+                  ? "linear-gradient(180deg, rgba(38, 59, 50, 0.98), rgba(12, 27, 24, 0.98))"
+                  : "rgba(8, 13, 13, 0.72)",
                 color: isActive ? C.textPrimary : C.textSecondary,
                 border: `1px solid ${isActive ? shellFrame.brassSoft : workFrame.lineSoft}`,
-                boxShadow: isActive ? mockupShell.bevel : undefined,
+                borderBottomColor: isActive ? "rgba(12, 27, 24, 0.98)" : workFrame.lineSoft,
+                boxShadow: isActive ? "inset 0 1px 0 rgba(244, 239, 227, 0.1), 0 -1px 0 rgba(198, 155, 85, 0.24)" : undefined,
               }}
               title={surface.meta}
             >

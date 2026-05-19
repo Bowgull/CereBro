@@ -31687,3 +31687,92 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is refining left rail plaque material, top Workbench tab treatment, or Browser proportions. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-18 2330 EDT - Workbench Shell Plaque Tabs
+
+Completion:
+
+- Overall: 95%
+- Frontend visible loop: main shell and Workbench Browser moved closer to the approved mockups
+- Backend/runtime: unchanged
+- Foundation/docs/planning: updated
+- Knowledge/storage/source: Obsidian snapshot appended
+- Creative/freelance/watch: Watch Shelf UI only, no media or site automation
+
+What changed:
+
+- Left rail zone buttons now use richer plaque gradients and inset shadows.
+- Active left rail state has a stronger carved plaque read without changing
+  the zone model.
+- Top zone/surface strip now has a darker material band.
+- Active Workbench surface tabs use an attached tab shape with a darker bottom
+  edge and subtle gold top edge.
+- No route, Browser, Watch Shelf, context rail, or castle behavior changed.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-18 2330 CereBro Session Handoff - workbench-shell-plaque-tabs.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git status --short`
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser proof on localhost:
+  `output/playwright/workbench-shell-plaque-tabs-current-page.png`
+  `output/playwright/workbench-shell-plaque-tabs-watch-shelf.png`
+- Snapshot checks confirmed `Open Keep`, `Open Workshop`, `Open Ledger`,
+  `Open Basement`, `Workbench`, `Project Lab`, `Terminal Lab`, `Research`,
+  `Watch Shelf`, and `Safety read`.
+
+Mockup fidelity:
+
+- Target used: approved main shell mockup and approved Browser/Watch Shelf
+  high-fidelity mockup.
+- Screenshot path: `output/playwright/workbench-shell-plaque-tabs-current-page.png`
+  and `output/playwright/workbench-shell-plaque-tabs-watch-shelf.png`.
+- Matched elements: left rail plaques are richer, active rail state is more
+  physical, Workbench tabs feel more attached to the shell, Browser/Watch Shelf
+  structure remains intact.
+- Deviations: glyphs remain text symbols instead of final icons, top Workbench
+  surface strip is still a route selector, Browser is still embedded in
+  Workbench, live page rendering blocked, Watch Shelf saving blocked.
+- Next fidelity gap: replace shell glyphs with approved icons or sprites,
+  refine Browser surface proportions, and continue reducing generic panel
+  chrome without creating a new primary surface.
+
+Drift check:
+
+- On path. This pass improves shell material language against the mockup.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Text-symbol rail glyphs still feel temporary compared with the approved
+  mockup.
+- The top surface strip is visually improved but still reads more like app tabs
+  than the final OS instrument rail.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- No database rows created intentionally.
+- Two Playwright screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is replacing temporary shell glyphs with approved icon treatment, refining Browser proportions, or reducing generic Workbench panel chrome. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
+```
