@@ -78,6 +78,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+  const watchShelfStorageContract = trpc.workbench.watchShelfStorageContract.useQuery(undefined, {
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation({
     onSuccess: () => {
       utils.workbench.browserActionProposals.invalidate();
@@ -170,6 +175,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const createWatchShelfItemFromOpenTab = trpc.workbench.createWatchShelfItemFromOpenTab.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Saved to Watch Shelf: ${result.item?.title ?? result.item?.targetUrl ?? "current page"}.`
+          : "Watch Shelf save blocked. Open the page first.",
+      );
+      utils.workbench.watchShelfStorageContract.invalidate();
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -207,6 +224,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserProjectPins = workbenchBrowserProjectPinsModel(projects.data?.projects ?? []);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
+  const watchShelfItems = (watchShelfStorageContract.data?.items ?? []).filter(
+    (item, index, items) => items.findIndex((candidate) => candidate.targetUrl === item.targetUrl) === index,
+  );
   const isPreparingBrowserDraft =
     createBrowserActionProposal.isPending ||
     createBrowserTabSessionDraft.isPending ||
@@ -217,7 +237,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     createBrowserLiveRunnerApprovalPreview.isPending ||
     runBrowserLiveRunnerBlocked.isPending ||
     prepareBrowserLiveRunnerOpenReadiness.isPending ||
-    recordBrowserSandboxFrameOpen.isPending;
+    recordBrowserSandboxFrameOpen.isPending ||
+    createWatchShelfItemFromOpenTab.isPending;
 
   useEffect(() => {
     let raw: string | null = null;
@@ -517,6 +538,23 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     <div className="flex flex-wrap gap-1">
                       <Chip label="sandbox" tone={C.accent} />
                       <Chip label="no same-origin" tone={C.warning} />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-[10px]"
+                        disabled={createWatchShelfItemFromOpenTab.isPending || selectedBrowserProposalId == null}
+                        title="Save this open page to Watch Shelf. No progress, thumbnail, source save, or external write."
+                        onClick={() => {
+                          if (selectedBrowserProposalId == null) return;
+                          createWatchShelfItemFromOpenTab.mutate({
+                            proposalId: selectedBrowserProposalId,
+                            category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
+                          });
+                        }}
+                      >
+                        {createWatchShelfItemFromOpenTab.isPending ? "Saving" : "Save Watch"}
+                      </Button>
                     </div>
                   </div>
                   <iframe
@@ -639,8 +677,21 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
                   <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved watch pages live here after the runner exists.</div>
                 </div>
-                <Button type="button" size="sm" variant="outline" disabled={!watchShelfDraft.canSave} title="Requires a real open page before it can save.">
-                  {watchShelfDraft.saveLabel}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createWatchShelfItemFromOpenTab.isPending}
+                  title={hasOpenSandboxFrame ? "Save the current open page to Watch Shelf." : "Requires a real open page before it can save."}
+                  onClick={() => {
+                    if (selectedBrowserProposalId == null) return;
+                    createWatchShelfItemFromOpenTab.mutate({
+                      proposalId: selectedBrowserProposalId,
+                      category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
+                    });
+                  }}
+                >
+                  {createWatchShelfItemFromOpenTab.isPending ? "Saving" : hasOpenSandboxFrame ? "Save Page" : watchShelfDraft.saveLabel}
                 </Button>
               </div>
               <div className="mt-3 flex flex-wrap gap-1">
@@ -661,14 +712,36 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               <div className="mt-3 rounded p-3 text-[11px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.82)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                    {watchShelfDraft.candidateLabel}
+                    {hasOpenSandboxFrame ? "Open page" : watchShelfDraft.candidateLabel}
                   </div>
                   <Chip label={watchShelfDraft.selectedCategory} tone={watchShelfDraft.selectedCategory === "Anime" ? C.warning : C.accent} />
                 </div>
-                <div className="mt-1 break-all" style={{ color: C.textMuted }}>{watchShelfDraft.candidateTarget}</div>
+                <div className="mt-1 break-all" style={{ color: C.textMuted }}>{hasOpenSandboxFrame ? sandboxFrameTarget : watchShelfDraft.candidateTarget}</div>
                 <div className="mt-1" style={{ color: C.textMuted }}>
-                  {browserDraft.kind === "empty" ? watchShelf.emptyBody : "This is only a local shelf readback. It cannot save until a real page is open."}
+                  {hasOpenSandboxFrame
+                    ? "This saves a local shelf row only. It does not track progress or save media."
+                    : browserDraft.kind === "empty"
+                      ? watchShelf.emptyBody
+                      : "This is only a local shelf readback. It cannot save until a real page is open."}
                 </div>
+              </div>
+              <div className="mt-3 grid gap-1.5">
+                {watchShelfItems.length > 0 ? (
+                  watchShelfItems.slice(0, 5).map((item) => (
+                    <div key={item.id} className="rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: "rgba(7, 12, 12, 0.82)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</span>
+                        <Chip label={item.category} tone={item.category === "Anime" ? C.warning : C.accent} />
+                      </div>
+                      <div className="mt-0.5 break-all text-[10px]" style={{ color: C.textMuted }}>{item.targetUrl}</div>
+                      <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Saved locally. No progress or media captured.</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded px-2 py-2 text-[11px]" style={{ background: "rgba(7, 12, 12, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                    Open a page, then save it here.
+                  </div>
+                )}
               </div>
               <div className="mt-3 text-[11px] leading-snug" style={{ color: C.textMuted }}>
                 {watchShelfDraft.noActionText}

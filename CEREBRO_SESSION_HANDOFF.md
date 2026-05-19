@@ -33185,3 +33185,90 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. The sandbox-frame render lane exists. Next safest slice is either collapse runner machinery after frame open, add reload/history controls for sandboxed frames, or enable a Watch Shelf draft save from a real open page. Do not add dependencies, proxies, scraping, source discovery, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
 ```
+
+## 2026-05-19 0756 EDT - Watch Shelf Open Page Save
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Watch Shelf can now save and display a real open
+  Browser page.
+- Backend/runtime: added local Watch Shelf save from an open sandbox-frame tab.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: Watch Shelf V1 now has local saved rows.
+
+What changed:
+
+- Added `createWatchShelfItemFromOpenTab`.
+- The route blocks unless the Browser tab is actually `open`.
+- The route saves one local `browser_watch_shelf_items` row.
+- Browser page frame now exposes `Save Watch` when a sandbox frame is open.
+- Watch Shelf tab can save the current open page and read back saved items.
+- Watch Shelf readback de-duplicates old local proof rows by URL for a cleaner
+  product surface.
+- No progress tracking, thumbnail, platform session, media save, source save,
+  backend page fetch, provider call, install, credential handling, download, or
+  external write was added.
+
+Files touched in this slice:
+
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0756 CereBro Session Handoff - watch-shelf-open-page-save.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 39 tests.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 49 tests.
+- Browser proof on localhost:
+  `output/playwright/browser-watch-shelf-save-readback.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/browser-watch-shelf-save-readback.png`.
+- Matched elements: Watch Shelf is a real Browser tab, categories are visible,
+  saved rows are compact, and machinery remains restrained.
+- Deviations: the shelf still has no thumbnails, resume progress, service
+  sessions, or media metadata. That is intentional for this safe V1 slice.
+- Next fidelity gap: improve Watch Shelf visual richness, add open-page reload
+  control, or collapse runner machinery once a page is open.
+
+Drift check:
+
+- On path. This pass builds Watch Shelf utility on top of the approved Browser
+  render lane.
+- No new primary surface.
+- No fake watch progress or fake source discovery.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Local dev database contains proof/test Watch Shelf rows.
+- Watch Shelf rows are local metadata only. They do not imply streaming login,
+  media ownership, progress tracking, or source validation.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Local dev database received test/proof Watch Shelf rows.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. The sandbox-frame render lane and local Watch Shelf save exist. Next safest slice is either collapse runner machinery after frame open, add reload/history controls for sandboxed frames, or polish Watch Shelf cards toward the approved Browser mockup without adding fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
+```

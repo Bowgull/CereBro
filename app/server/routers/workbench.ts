@@ -53,6 +53,16 @@ function browserProposalStatusLabel(status: unknown) {
   return String(status ?? "proposal_blocked").split("_").join(" ");
 }
 
+function browserDraftTabLabelForServer(targetUrl: string) {
+  try {
+    const url = new URL(targetUrl);
+    const path = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+    return `${url.hostname}${path}`.slice(0, 80);
+  } catch {
+    return targetUrl.slice(0, 80) || "Browser page";
+  }
+}
+
 function rowToBrowserActionProposal(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -216,7 +226,7 @@ async function browserProposalGateRows(proposalId: number) {
              source_id, workbench_evidence_id, watch_shelf_id, last_error,
              created_at, updated_at
       FROM browser_tab_sessions
-      WHERE proposal_id = ? AND state IN ('draft', 'open_ready')
+      WHERE proposal_id = ? AND state IN ('draft', 'open_ready', 'open')
       ORDER BY created_at DESC, id DESC
       LIMIT 1
     `,
@@ -1735,6 +1745,119 @@ export const workbenchRouter = router({
           "No source saved.",
           "No Workbench capture created.",
           "No Watch Shelf item saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createWatchShelfItemFromOpenTab: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        category: z.enum(["Watching", "Want to Watch", "Anime", "YouTube", "Twitch", "Research"]),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "watch_shelf_save_blocked" as const,
+          proposal,
+          tab,
+          item: null,
+          canSaveItem: false,
+          canPersistProgress: false,
+          writesExternal: false,
+          gates: [
+            "Watch Shelf save remains blocked.",
+            "A real open Browser tab is required before saving to Watch Shelf.",
+            "No Watch Shelf item saved, progress persisted, source saved, backend page fetch run, or external write ran.",
+          ],
+          noActionTaken: [
+            "No Watch Shelf item saved.",
+            "No progress persisted.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 category, source_label, progress_label, state, project_id,
+                 source_id, workbench_evidence_id, created_at, updated_at
+          FROM browser_watch_shelf_items
+          WHERE proposal_id = ? AND target_url = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [proposal.id, tab.targetUrl],
+      });
+      let item = existing.rows[0] as Record<string, unknown> | undefined;
+
+      if (!item) {
+        const created = await db.execute({
+          sql: `
+            INSERT INTO browser_watch_shelf_items (
+              browser_tab_session_id, proposal_id, target_url, title, category,
+              source_label, progress_label, state, project_id, source_id,
+              workbench_evidence_id
+            )
+            VALUES (?, ?, ?, ?, ?, 'browser_open_tab', NULL, 'saved', ?, ?, ?)
+            RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                      category, source_label, progress_label, state, project_id,
+                      source_id, workbench_evidence_id, created_at, updated_at
+          `,
+          args: [
+            tab.id,
+            proposal.id,
+            tab.targetUrl,
+            tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+            input.category,
+            tab.projectId,
+            tab.sourceId,
+            tab.workbenchEvidenceId,
+          ],
+        });
+        item = created.rows[0] as Record<string, unknown> | undefined;
+        if (item) {
+          await db.execute({
+            sql: "UPDATE browser_tab_sessions SET watch_shelf_id = ?, updated_at = unixepoch() WHERE id = ?",
+            args: [Number(item.id), tab.id],
+          });
+        }
+      }
+
+      if (!item) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Watch Shelf item could not be saved.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "watch_shelf_item_saved" as const,
+        proposal,
+        tab,
+        item: rowToWatchShelfItem(item),
+        canSaveItem: true,
+        canPersistProgress: false,
+        writesExternal: false,
+        gates: [
+          "Saved one local Watch Shelf item from an open Browser tab.",
+          "No progress, service login, thumbnail, source discovery, backend page fetch, or external write ran.",
+        ],
+        noActionTaken: [
+          "No progress persisted.",
+          "No backend page fetch ran.",
+          "No source saved.",
           "No external write ran.",
         ],
       };

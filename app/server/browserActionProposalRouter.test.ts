@@ -1433,6 +1433,94 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("blocks Watch Shelf save until the Browser tab is open", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/watch-blocked",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const save = await caller.workbench.createWatchShelfItemFromOpenTab({
+      proposalId: created.proposal.id,
+      category: "Anime",
+    });
+
+    expect(save.ok).toBe(false);
+    expect(save.mode).toBe("watch_shelf_save_blocked");
+    expect(save.canSaveItem).toBe(false);
+    expect(save.canPersistProgress).toBe(false);
+    expect(save.item).toBeNull();
+    expect(save.gates).toContain("A real open Browser tab is required before saving to Watch Shelf.");
+    expect(save.noActionTaken).toContain("No Watch Shelf item saved.");
+
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("saves one Watch Shelf item from an open Browser tab without progress or source writes", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/watch-open",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({ proposalId: created.proposal.id });
+    await caller.workbench.recordBrowserSandboxFrameOpen({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const save = await caller.workbench.createWatchShelfItemFromOpenTab({
+      proposalId: created.proposal.id,
+      category: "Anime",
+    });
+    const second = await caller.workbench.createWatchShelfItemFromOpenTab({
+      proposalId: created.proposal.id,
+      category: "Anime",
+    });
+    const shelf = await caller.workbench.watchShelfStorageContract();
+
+    expect(save.ok).toBe(true);
+    expect(save.mode).toBe("watch_shelf_item_saved");
+    expect(save.canSaveItem).toBe(true);
+    expect(save.canPersistProgress).toBe(false);
+    expect(save.item?.targetUrl).toBe("https://example.com/watch-open");
+    expect(save.item?.category).toBe("Anime");
+    expect(save.item?.state).toBe("saved");
+    expect(save.noActionTaken).toContain("No progress persisted.");
+    expect(save.noActionTaken).toContain("No source saved.");
+    expect(second.item?.id).toBe(save.item?.id);
+    expect(shelf.items.some((item) => item.id === save.item?.id)).toBe(true);
+
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems + 1);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads live-runner approval detail as a blocked Browser runner gate", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

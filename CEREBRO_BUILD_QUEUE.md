@@ -1927,3 +1927,11 @@ Expected shape:
   Some sites will refuse iframe rendering. Next Browser slice should collapse
   runner machinery after frame open, add reload/history controls for sandboxed
   frames, or enable Watch Shelf draft save from a real open page.
+- 2026-05-19 0756 EDT: Watch Shelf open-page save landed. The Workbench router
+  now saves a local `browser_watch_shelf_items` row only from an actually open
+  Browser tab. Browser exposes `Save Watch` from an open sandbox frame, and the
+  Watch Shelf tab reads back saved rows while de-duplicating old proof rows by
+  URL. No progress tracking, thumbnails, platform sessions, media saves, source
+  saves, backend page fetch, provider call, install, credential handling,
+  download, or external write was added. Next Browser slice should add reload
+  controls, collapse runner machinery after open, or polish Watch Shelf cards.
