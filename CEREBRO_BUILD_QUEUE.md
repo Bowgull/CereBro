@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2205 EDT
+Last updated: 2026-05-18 2216 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2216 EDT: reduced main-shell right-rail machinery. Changed the
+  route rail into compact route/surface/chain/contract/session/next context,
+  removed exposed proof/tool-scope/Oak validation blocks from the primary
+  shell, narrowed the rail, and removed the floating `The Hub waits` overlay
+  from the castle scene. Browser proof saved at
+  `output/playwright/main-shell-right-rail-low-machinery-clean.png`. Next best
+  slice is Browser/Watch Shelf mockup fidelity inside Workbench.
 - 2026-05-18 2205 EDT: moved the main shell toward the locked high-fidelity
   mockup. Added carved/marble outer shell framing, compact plaque-style left
   rail, live Keep scene as the default home view, richer Keep dock/surface tabs,

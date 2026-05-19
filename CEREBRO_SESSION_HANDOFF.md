@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 2205 EDT
+Last updated: 2026-05-18 2216 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 2216 EDT - Main Shell Right Rail Low Machinery Pass
+
+### What Changed
+- Reduced visible machinery in the main shell right rail.
+- Changed `Aang Route Read` to a quieter `Route read` card.
+- Replaced the exposed proof/tool-scope/Oak validation blocks with compact
+  route, surface, chain, contract, sessions, and next-action context.
+- Narrowed the right rail from 270px to 250px to give the castle more room.
+- Removed the floating `The Hub waits` empty-state panel from the castle scene.
+  The session empty state now lives in the right rail where it belongs.
+
+### Files Touched
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `git diff --check`
+- Local Playwright proof against `http://localhost:3000/` confirmed the shell
+  renders `Route read`, `Chain`, `Active contract`, `Sessions`, and `Next`,
+  while `The Hub waits`, `Proof`, `Oak Validation`, and `Aang Route Read` are no
+  longer visible in the primary shell snapshot.
+- Screenshot proof saved locally at
+  `output/playwright/main-shell-right-rail-low-machinery-clean.png`.
+
+### Mockup Fidelity
+- Target used: locked main CereBro shell high-fidelity mockup.
+- Matched elements: quieter right rail, smaller route read, compact chain
+  chips, no castle overlay, castle-first center, plaque shell treatment, Aang
+  still attached to command input.
+- Deviations: right rail still uses existing live route/contract data, not the
+  final council-chamber composition; Browser/Watch Shelf mockup is still
+  untouched in this slice.
+- Next fidelity gap: Browser/Watch Shelf mockup pass, richer rail icon craft,
+  tighter command-bar controls, and council-chamber routing visual polish.
+
+### Drift Check
+- On path. This removes exposed machinery from the Keep shell and follows the
+  locked mockup contract.
+- It does not replace the Phaser Keep, add rooms, add agents, create a new
+  primary surface, fake Browser/Watch behavior, open/fetch/search pages, save
+  sources, call providers/models, install, pull, write externally, or touch
+  Raven paths.
+
+### Known Risks
+- This improves low-machinery presentation but does not finish the full 1:1
+  shell target.
+- Right-rail contract data is still real but visually temporary.
+
+### Storage Impact
+- No schema change.
+- No database rows were written by the code change.
+- One local screenshot proof was written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, CEREBRO_FRONTEND_SYSTEM.md, CEREBRO_UX_SYSTEM.md, CEREBRO_UI_TASTE_AUDIT.md, and app/client/src/pages/Home.tsx first. Continue CereBro on the locked mockup-fidelity UI path. The shell now has carved/marble framing, plaque left rail, live Keep scene default, Aang beside command input, and a quieter low-machinery right rail. Next best slice is Browser/Watch Shelf mockup fidelity inside Workbench, unless the user asks for another main-shell pass. Do not replace the Phaser Keep, add rooms, add agents, create a new primary surface, fake Browser/Watch behavior, open/fetch/search pages, save sources, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 2205 EDT - Main Shell Mockup Frame Pass
 

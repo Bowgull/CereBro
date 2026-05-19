@@ -537,10 +537,10 @@ export default function Home() {
           </div>
         </main>
 
-        {/* Right context panel — active agent + state + sessions + Oak + perms */}
+        {/* Right context panel — quiet route context only */}
         {isContextPanelOpen && (
           <aside
-            className="w-[270px] shrink-0 flex flex-col overflow-hidden"
+            className="w-[250px] shrink-0 flex flex-col overflow-hidden"
             aria-label="Context panel"
             style={{ background: "rgba(7, 15, 13, 0.96)", borderLeft: `1px solid ${mockupShell.marbleLine}`, boxShadow: "inset 1px 0 0 rgba(244, 239, 227, 0.05)" }}
           >
@@ -770,27 +770,6 @@ function HomeView({
           onNavigate={onNavigate}
         />
 
-        {keepView === "scene" && heroesCount === 0 && (
-          <div className="absolute bottom-3 right-3 pointer-events-none">
-            <div
-              className="px-3 py-2 rounded"
-              style={{
-                background: `${C.background}f0`,
-                border: `1px solid ${C.borderSoft}`,
-                maxWidth: 220,
-              }}
-            >
-              <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-                The Hub waits
-              </div>
-              <div className="text-[11px] mt-1 leading-relaxed" style={{ color: C.textSecondary }}>
-                {connMode === "demo"
-                  ? "Press Demo to spawn simulated sessions."
-                  : "Start a Claude Code session in any project. The Hub orb will light when you arrive."}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -3057,6 +3036,7 @@ function ContextPanel({
   const owner = route[2] ?? "Cortana";
   const activeSurface = activeSurfaceLabel(nav);
   const nextAction = nextActionForSurface(nav, heroes.length, mode);
+  const selectedHero = selectedHeroId == null ? null : heroes.find((hero) => hero.id === selectedHeroId) ?? null;
   const activeVisions = trpc.visions.list.useQuery(
     { status: "active", limit: 1 },
     {
@@ -3072,26 +3052,34 @@ function ContextPanel({
       {/* Active Agent */}
       <div
         className="px-2.5 py-2 shrink-0"
-        style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}
+        style={{
+          borderBottom: `1px solid ${mockupShell.marbleLineSoft}`,
+          background: "linear-gradient(180deg, rgba(24, 42, 35, 0.98), rgba(8, 17, 15, 0.98))",
+          boxShadow: mockupShell.bevel,
+        }}
       >
-        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: shellFrame.ivoryMuted }}>
-          Aang Route Read
+        <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: shellFrame.ivoryMuted }}>
+          Route read
         </div>
         {agent ? (
           <>
-            <div className="flex items-center justify-between mb-1">
-              <div className="text-[13px] font-semibold" style={{ color: C.textPrimary }}>
-                {agent.name}
-              </div>
-              <Badge
-                variant="violet"
-                className="px-1.5 py-0.5"
-                style={{ background: `${C.accent}22`, color: C.accent }}
+            <div className="flex items-center gap-2">
+              <div
+                className="h-8 w-8 shrink-0 rounded flex items-center justify-center"
+                style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: mockupShell.bevel }}
               >
-                {agent.chamber}
-              </Badge>
+                <img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-7 w-7" style={{ imageRendering: "pixelated" }} />
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[13px] font-semibold" style={{ color: C.textPrimary }}>
+                  {agent.name}
+                </div>
+                <div className="truncate text-[11px]" style={{ color: C.textSecondary }}>
+                  {agent.chamber}
+                </div>
+              </div>
             </div>
-            <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+            <div className="mt-1.5 text-[11px] leading-snug" style={{ color: C.textSecondary }}>
               {agent.role.split(". ")[0]}.
             </div>
           </>
@@ -3100,42 +3088,42 @@ function ContextPanel({
         )}
       </div>
 
-      {/* Mode + Model Class */}
-      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Mode</div>
-            <div className="text-xs font-semibold" style={{ color: C.textPrimary }}>{MODE_LABELS[mode]}</div>
+      <div className="px-2.5 py-2 shrink-0 space-y-2" style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}` }}>
+        <div className="grid grid-cols-2 gap-1.5">
+          <ShellMiniStat label="Mode" value={MODE_LABELS[mode]} />
+          <ShellMiniStat label="Surface" value={activeSurface} />
+        </div>
+        <div className="rounded p-2" style={{ background: "rgba(5, 11, 10, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
+          <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: C.textMuted }}>
+            Chain
           </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>Owner</div>
-            <div className="text-xs font-semibold truncate" style={{ color: C.textPrimary }} title={agent?.defaultModelClass}>
-              {owner}
-            </div>
+          <div className="flex flex-wrap items-center gap-1">
+            {route.map((agentName, index) => (
+              <Badge
+                key={`${agentName}-${index}`}
+                variant={index === 0 ? "warning" : index === 1 ? "violet" : "secondary"}
+                className="px-1.5 py-0.5"
+                style={{
+                  background: index === 0
+                    ? "rgba(198, 155, 85, 0.14)"
+                    : index === 1
+                      ? "rgba(154, 114, 255, 0.12)"
+                      : "rgba(77, 170, 154, 0.10)",
+                  border: `1px solid ${mockupShell.marbleLineSoft}`,
+                  color: index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary,
+                }}
+              >
+                {agentName}
+              </Badge>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellSoft }}>
+      <div className="px-2.5 py-2 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(5, 11, 10, 0.55)" }}>
         <div className="flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Visible Chain
-          </div>
-          <Badge variant="violet" className="px-1.5 py-0.5" style={{ background: shellFrame.shellPlaque, color: C.accentViolet, border: `1px solid ${shellFrame.shellLineSoft}` }}>
-            {activeSurface}
-          </Badge>
-        </div>
-        <RailRow label="Aang" value={`Reads ${MODE_LABELS[mode]} mode`} tone={C.gold} />
-        <RailRow label="Cortana" value={`Routes ${owner}`} tone={C.accentViolet} />
-        <RailRow label="Owner" value={owner} tone={C.accent} />
-        <RailRow label="Receipt" value="Workbench body. Ledger audit." tone={C.gold} />
-        <RailRow label="Approval" value="Spock gates external or risky action." tone={C.warning} />
-      </div>
-
-      <div className="px-2.5 py-1.5 shrink-0 space-y-1.5" style={{ borderBottom: `1px solid ${shellFrame.shellLineSoft}`, background: shellFrame.shellPlaque }}>
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Operating Contract
+            Active contract
           </div>
           <Badge variant={activeVision ? "warning" : "secondary"} className="px-1.5 py-0.5 uppercase" style={{ color: activeVision ? C.gold : C.textMuted, background: shellFrame.shellSoft, border: `1px solid ${shellFrame.shellLineSoft}` }}>
             {activeVision ? activeVision.status.replace(/_/g, " ") : "none"}
@@ -3146,65 +3134,25 @@ function ContextPanel({
             <div className="truncate text-[12px] font-semibold" style={{ color: C.textPrimary }} title={activeVision.title}>
               {activeVision.title}
             </div>
-            <RailRow label="Owner" value={activeVision.ownerAgent} tone={C.accent} />
-            <RailRow label="Stop" value={activeVision.stopRule} tone={C.gold} />
-            <RailRow label="Next" value={activeVision.taskId ? `Task #${activeVision.taskId}` : "Create first task"} tone={activeVision.taskId ? C.success : C.warning} />
+            <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
+              {activeVision.taskId ? `Task #${activeVision.taskId}` : "Create first task"}.
+            </div>
           </>
         ) : (
           <div className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-            No active contract. Aang should hold one when the outcome needs a stop rule.
+            No active contract.
           </div>
         )}
-      </div>
-
-      {/* Tool Permissions */}
-      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Proof
-        </div>
-        {agent?.toolScope?.length ? (
-          <div className="flex flex-wrap gap-1">
-            {agent.toolScope.slice(0, 6).map((t) => (
-              <Badge
-                key={t}
-                variant="secondary"
-                className="px-1.5 py-0.5"
-                style={{ background: shellFrame.shellPlaque, color: C.textSecondary, border: `1px solid ${shellFrame.shellLineSoft}` }}
-              >
-                {t}
-              </Badge>
-            ))}
-            {agent.toolScope.length > 6 && (
-              <Badge variant="outline" className="px-1.5 py-0.5" style={{ color: C.textMuted }}>
-                +{agent.toolScope.length - 6}
-              </Badge>
-            )}
-          </div>
-        ) : (
-          <div className="text-xs" style={{ color: C.textMuted }}>—</div>
-        )}
-      </div>
-
-      {/* Oak Validation */}
-      <div className="px-2.5 py-1.5 shrink-0" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div className="flex items-center justify-between">
-          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Oak Validation
-          </div>
-          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Not wired
-          </div>
-        </div>
       </div>
 
       {/* Sessions list (moved from left rail) */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div
           className="px-2.5 py-1.5 flex items-center justify-between shrink-0"
-          style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.surface }}
+          style={{ borderBottom: `1px solid ${mockupShell.marbleLineSoft}`, background: "rgba(6, 13, 12, 0.7)" }}
         >
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Sessions
+            {selectedHero ? "Selected" : "Sessions"}
           </span>
           <Badge
             variant={heroes.length > 0 ? "violet" : "secondary"}
@@ -3219,7 +3167,28 @@ function ContextPanel({
           </Badge>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {heroes.length === 0 ? (
+          {selectedHero ? (
+            <div className="p-2.5">
+              <div className="rounded p-2" style={{ background: shellFrame.shellPlaque, border: `1px solid ${mockupShell.marbleLineSoft}` }}>
+                <div className="truncate text-xs font-semibold" style={{ color: C.textPrimary }} title={selectedHero.name}>
+                  {selectedHero.name}
+                </div>
+                <div className="mt-1 text-[10px] uppercase tracking-wider" style={{ color: STATE_COLORS[selectedHero.state as keyof typeof STATE_COLORS] }}>
+                  {STATE_LABELS[selectedHero.state as keyof typeof STATE_LABELS]}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="mt-2 h-7 w-full px-2"
+                  onClick={() => onSelectHero(null)}
+                  aria-label="Clear selected session"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          ) : heroes.length === 0 ? (
             <div className="p-2.5 text-[11px] leading-relaxed" style={{ color: C.textMuted }}>
               {connMode === "demo"
                 ? "Press Demo to spawn simulated sessions."
@@ -3240,9 +3209,9 @@ function ContextPanel({
                   variant="ghost"
                   className="h-auto w-full justify-start rounded-none px-2.5 py-1.5 text-left whitespace-normal"
                   style={{
-                    background: isSelected ? C.surfaceRaised : "transparent",
-                    borderBottom: `1px solid ${C.borderSoft}`,
-                    borderLeft: isSelected ? `2px solid ${C.accent}` : "2px solid transparent",
+                    background: isSelected ? shellFrame.shellPlaque : "transparent",
+                    borderBottom: `1px solid ${mockupShell.marbleLineSoft}`,
+                    borderLeft: isSelected ? `2px solid ${shellFrame.brass}` : "2px solid transparent",
                   }}
                 >
                   <span className="block min-w-0">
@@ -3261,9 +3230,9 @@ function ContextPanel({
       </div>
 
       {/* Next Actions */}
-      <div className="px-2.5 py-1.5 shrink-0" style={{ borderTop: `1px solid ${C.borderSoft}`, background: C.surface }}>
+      <div className="px-2.5 py-2 shrink-0" style={{ borderTop: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque }}>
         <div className="text-[10px] uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
-          Next Action
+          Next
         </div>
         <div className="text-[11px] leading-snug" style={{ color: C.textSecondary }}>
           {nextAction}
@@ -3287,13 +3256,13 @@ function ContextPanel({
   );
 }
 
-function RailRow({ label, value, tone }: { label: string; value: string; tone: string }) {
+function ShellMiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[64px_minmax(0,1fr)] gap-2 rounded px-2 py-1" style={{ background: shellFrame.shellPlaque, border: `1px solid ${shellFrame.shellLineSoft}` }}>
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: tone }}>
+    <div className="rounded px-2 py-1.5" style={{ background: shellFrame.shellPlaque, border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
+      <div className="text-[9px] uppercase tracking-wider" style={{ color: C.textMuted }}>
         {label}
       </div>
-      <div className="min-w-0 truncate text-[11px]" style={{ color: C.textSecondary }} title={value}>
+      <div className="mt-0.5 truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={value}>
         {value}
       </div>
     </div>
