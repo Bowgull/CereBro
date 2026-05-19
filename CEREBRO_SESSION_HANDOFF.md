@@ -34082,3 +34082,83 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, collapsed Open Gate proposal UI, collapsed no-page Project Pins, and Browser chrome polish exist. Next safest slice is refine the empty/page state toward the approved 1:1 Browser mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes.
 ```
+
+## 2026-05-19 0915 EDT - Browser Empty State Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser no-frame page state moved closer to the
+  approved 1:1 Browser mockup.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Replaced the plain centered Browser empty state with a larger framed page
+  pane.
+- Added subtle corner trim and a stronger material panel for the no-frame
+  Browser view.
+- Kept the current target and approval-gated status visible without exposing
+  long machinery copy.
+- Moved proof/no-action language behind a collapsed `Proof` disclosure.
+- Added a compact `Page State` plaque for draft/local readback.
+- No browser engine, backend route, schema, provider call, install, download,
+  external write, fake source discovery, fake media progress, or Raven path was
+  added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0915 CereBro Session Handoff - browser-empty-state-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser proof was attempted but not completed in this turn because Playwright
+  is not installed in the available Node path and Computer Use is blocked from
+  operating the Codex app.
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus low-machinery rule.
+- Matched elements: empty/current page state now has a stronger framed browser
+  body and keeps machinery out of the primary view.
+- Deviations: still not 1:1 visual polish. The open-page frame, Watch Shelf
+  tab proportions, and full material palette still need more work.
+- Next fidelity gap: refine the open-page frame and Watch Shelf layout toward
+  the approved 1:1 Browser mockup.
+
+Drift check:
+
+- On path. This pass improves Browser presentation without adding fake
+  capability or a new surface.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, unsafe
+  site automation, provider use, install, pull, external write, or Raven path.
+
+Known risks:
+
+- This is UI polish only.
+- Browser visual proof could not run with the currently available tools in this
+  turn.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, polished Watch Shelf cards, real local-history back/forward remounts, collapsed Open Gate proposal UI, collapsed no-page Project Pins, Browser chrome polish, and Browser empty-state polish exist. Next safest slice is refine the open-page frame and Watch Shelf layout toward the approved 1:1 Browser mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
+```

@@ -722,23 +722,44 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   />
                 </div>
               ) : (
-              <div className="mx-auto flex max-w-2xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
-                <div className="mb-3 h-10 w-10 rounded" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }} />
-                <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                  {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+              <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
+                <div className="relative overflow-hidden rounded p-4" style={{ background: "radial-gradient(circle at 50% 18%, rgba(77, 170, 154, 0.11), transparent 34%), linear-gradient(180deg, rgba(8, 16, 15, 0.86), rgba(2, 6, 6, 0.94))", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: "inset 0 1px 40px rgba(0, 0, 0, 0.44)" }}>
+                  <div className="pointer-events-none absolute left-3 top-3 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                  <div className="pointer-events-none absolute right-3 top-3 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                  <div className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                  <div className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                  <div className="mx-auto flex max-w-xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(300px, 46dvh, 520px)" }}>
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserDraft.kind === "empty" ? browserFrame.lineSoft : C.gold}`, boxShadow: `${browserFrame.bevel}, 0 0 32px rgba(77, 170, 154, 0.12)` }}>
+                      <ShieldCheck size={18} strokeWidth={1.7} />
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>
+                      {browserDraft.kind === "empty" ? "Current Page" : browserDraft.kind}
+                    </div>
+                    <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: C.textPrimary }}>
+                      {browserDraft.kind === "empty" ? "Enter a site or search." : browserDraft.tabLabel}
+                    </div>
+                    <div className="mt-2 max-w-md break-words text-[12px] leading-snug" style={{ color: browserDraft.kind === "empty" ? C.textMuted : C.textSecondary }}>
+                      {browserDraft.kind === "empty" ? "Use the address bar. Stage creates the approval package before any page opens." : browserDraft.displayTarget}
+                    </div>
+                    <div className="mt-3 flex justify-center gap-1">
+                      <Chip label={browserDraft.kind === "empty" ? "empty" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                      <Chip label={browserDraft.canOpen ? "ready" : "approval gated"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                  {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
-                </div>
-                <div className="mt-2 flex justify-center gap-1">
-                  <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
-                  <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
-                </div>
-                <div className="mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                  {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
-                </div>
-                {selectedBrowserProposalId != null && (
-                  <div className="mt-4 w-full max-w-xl rounded p-2 text-left text-[10px] leading-snug" aria-label="Browser open gate" style={{ background: "rgba(5, 10, 10, 0.64)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel, color: C.textMuted }}>
+                <div className="grid gap-2">
+                  <div className="rounded p-3 text-[11px] leading-snug" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                    <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Page State</div>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      <Chip label={browserDraft.kind === "empty" ? "no draft" : "draft staged"} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                      <Chip label="local" tone={C.gold} />
+                    </div>
+                    <div className="mt-2" style={{ color: C.textMuted }}>
+                      {browserDraft.kind === "empty" ? "Nothing opens until you stage a target." : "Stage the target to create the approval gate."}
+                    </div>
+                  </div>
+                  {selectedBrowserProposalId != null && (
+                  <div className="rounded p-2 text-left text-[10px] leading-snug" aria-label="Browser open gate" style={{ background: "rgba(5, 10, 10, 0.64)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel, color: C.textMuted }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Open Gate</div>
@@ -833,6 +854,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     </div>
                   </div>
                 )}
+                  <details className="rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.56)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Proof</summary>
+                    <div className="mt-1">{browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}</div>
+                  </details>
+                </div>
               </div>
               )}
             </section>

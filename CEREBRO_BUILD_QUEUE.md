@@ -2013,3 +2013,11 @@ Expected shape:
   write, fake source discovery, fake media progress, or Raven path. Next
   Browser slice should refine the empty/page state toward the approved 1:1
   Browser mockup.
+- 2026-05-19 0915 EDT: Browser empty/page state polish landed. The no-frame
+  Browser view now uses a larger framed page pane, corner trim, a compact page
+  state plaque, and a collapsed proof disclosure instead of a plain centered
+  text block. This is UI polish only: no browser engine, backend route, schema,
+  provider call, install, download, external write, fake source discovery, fake
+  media progress, or Raven path. Next Browser slice should continue matching
+  the approved 1:1 Browser mockup by refining the open-page frame and Watch
+  Shelf tab proportions.
