@@ -2073,3 +2073,11 @@ Expected shape:
   behavior, backend route, schema, provider call, install, download, external
   write, fake capability, or Raven path was added. Next shell slice should
   continue the 1:1 pass on command bar material or right rail shape.
+- 2026-05-19 1154 EDT: Main shell command bar material polish landed. The
+  bottom Aang command bar now reads more like an instrument control with brass
+  corner marks, a darker carved input well, a stronger Aang avatar well,
+  quieter route preview plaque, and clearer disabled/action states. This is
+  visual shell polish only: no nav behavior, route behavior, backend route,
+  schema, provider call, install, download, external write, fake capability, or
+  Raven path was added. Next shell slice should continue the 1:1 pass on right
+  rail shape or remaining command bar refinement.

@@ -3367,15 +3367,24 @@ function CommandBar({
         event.preventDefault();
         onSubmit();
       }}
-      className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-1.5 rounded px-2.5 py-1.5 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
+      className="relative grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 rounded px-2.5 py-2 shrink-0 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto]"
       aria-label="Ask Aang command bar"
       style={{
-        background: mockupShell.plaque,
+        background: `
+          radial-gradient(circle at 7% 12%, rgba(198, 155, 85, 0.12), transparent 28%),
+          radial-gradient(circle at 82% 86%, rgba(77, 170, 154, 0.09), transparent 30%),
+          linear-gradient(180deg, rgba(27, 46, 39, 0.98), rgba(6, 13, 12, 0.99))
+        `,
         border: `1px solid ${mockupShell.marbleLine}`,
-        boxShadow: `0 -18px 42px rgba(0, 0, 0, 0.55), ${mockupShell.bevel}`,
+        boxShadow: `0 -20px 46px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(244, 239, 227, 0.11), inset 0 -1px 0 rgba(0, 0, 0, 0.75)`,
       }}
     >
-      <div className="flex h-7 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ border: `1px solid ${shellFrame.brassSoft}` }}>
+      <div className="pointer-events-none absolute left-1.5 top-1.5 h-2.5 w-2.5 border-l border-t" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
+      <div className="pointer-events-none absolute right-1.5 top-1.5 h-2.5 w-2.5 border-r border-t" aria-hidden="true" style={{ borderColor: shellFrame.brassSoft }} />
+      <div className="pointer-events-none absolute bottom-1.5 left-1.5 h-2.5 w-2.5 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+      <div className="pointer-events-none absolute bottom-1.5 right-1.5 h-2.5 w-2.5 border-b border-r" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+
+      <div className="flex h-8 overflow-hidden rounded shrink-0" role="group" aria-label="Command mode" style={{ background: "rgba(4, 9, 8, 0.72)", border: `1px solid ${shellFrame.brassSoft}`, boxShadow: mockupShell.bevel }}>
         {(["quick", "explore", "build"] as Mode[]).map((m) => (
           <Button
             key={m}
@@ -3387,8 +3396,12 @@ function CommandBar({
             size="sm"
             className="h-full rounded-none px-1.5 sm:px-2"
             style={{
-              background: mode === m ? shellFrame.shellPlaqueActive : "transparent",
+              background: mode === m
+                ? "linear-gradient(180deg, rgba(39, 65, 54, 0.98), rgba(14, 31, 27, 0.98))"
+                : "transparent",
               color: mode === m ? C.textPrimary : C.textMuted,
+              borderRight: m === "build" ? "0" : `1px solid ${shellFrame.shellLineSoft}`,
+              boxShadow: mode === m ? "inset 0 0 0 1px rgba(198, 155, 85, 0.2), inset 0 1px 0 rgba(244, 239, 227, 0.08)" : undefined,
             }}
           >
             {MODE_LABELS[m]}
@@ -3396,17 +3409,21 @@ function CommandBar({
         ))}
       </div>
 
-      <div className="min-w-0">
+      <div className="min-w-0 rounded p-1" style={{ background: "rgba(3, 8, 7, 0.58)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: "inset 0 1px 8px rgba(0, 0, 0, 0.45)" }}>
         <div className="flex items-center gap-2">
           <div
-            className="hidden h-8 w-8 shrink-0 items-center justify-center rounded sm:flex"
-            style={{ background: mockupShell.frameSoft, border: `1px solid ${shellFrame.brassSoft}`, boxShadow: mockupShell.bevel }}
+            className="hidden h-9 w-9 shrink-0 items-center justify-center rounded sm:flex"
+            style={{
+              background: "linear-gradient(180deg, rgba(38, 63, 53, 0.96), rgba(7, 16, 14, 0.98))",
+              border: `1px solid ${shellFrame.brassSoft}`,
+              boxShadow: `${mockupShell.bevel}, 0 0 18px rgba(198, 155, 85, 0.08)`,
+            }}
             aria-hidden="true"
           >
             <img
               src="/sprites/keep/aang/rotations/south.png"
               alt=""
-              className="h-7 w-7"
+              className="h-8 w-8"
               style={{ imageRendering: "pixelated" }}
             />
           </div>
@@ -3416,12 +3433,12 @@ function CommandBar({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Ask Aang. Cortana routes it."
-            className="h-8 flex-1 min-w-0"
+            className="h-9 flex-1 min-w-0"
             style={{
-              background: "rgba(5, 10, 9, 0.86)",
-              border: `1px solid ${mockupShell.marbleLineSoft}`,
+              background: "rgba(5, 10, 9, 0.92)",
+              border: `1px solid rgba(244, 239, 227, 0.1)`,
               color: C.textPrimary,
-              boxShadow: "inset 0 1px 5px rgba(0, 0, 0, 0.45)",
+              boxShadow: "inset 0 1px 8px rgba(0, 0, 0, 0.58)",
             }}
           />
         </div>
@@ -3433,7 +3450,7 @@ function CommandBar({
         </div>
       </div>
 
-      <div className="hidden xl:block shrink-0 w-44">
+      <div className="hidden xl:block shrink-0 w-44 rounded px-2 py-1.5" style={{ background: "rgba(5, 11, 10, 0.62)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
         <div className="text-[10px] uppercase tracking-wider leading-none mb-1" style={{ color: C.textMuted }}>
           Route Preview
         </div>
@@ -3464,8 +3481,8 @@ function CommandBar({
         aria-label="Open latest Security Gate receipt"
         variant="outline"
         size="sm"
-        className="hidden h-7 shrink-0 px-2 lg:block"
-        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: latestRiskTone, background: shellFrame.shellPlaque }}
+        className="hidden h-8 shrink-0 px-2 lg:block"
+        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: latestRiskTone, background: "rgba(5, 11, 10, 0.72)", boxShadow: mockupShell.bevel }}
         title={latestReceipt ? latestReceipt.targetUri : "No security receipts recorded"}
       >
         {latestReceipt ? `Spock ${latestReceipt.riskLevel}` : "Spock clear"}
@@ -3477,8 +3494,8 @@ function CommandBar({
         aria-label="Attach artifact unavailable until Phase 6"
         variant="secondary"
         size="sm"
-        className="h-7 shrink-0 px-2"
-        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textMuted, background: shellFrame.shellPlaque, opacity: 0.6 }}
+        className="h-8 shrink-0 px-2"
+        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textMuted, background: "rgba(5, 11, 10, 0.56)", opacity: 0.54, boxShadow: mockupShell.bevel }}
         title="Phase 6"
       >
         Attach
@@ -3489,12 +3506,13 @@ function CommandBar({
         aria-label={isClassifying ? "Reading command intent" : "Preview command routing"}
         variant={value.trim() && !isClassifying ? "secondary" : "outline"}
         size="sm"
-        className="h-7 shrink-0 px-2"
+        className="h-8 shrink-0 px-2"
         style={{
           border: `1px solid ${value.trim() && !isClassifying ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
           color: value.trim() && !isClassifying ? C.textPrimary : C.textMuted,
-          background: value.trim() && !isClassifying ? shellFrame.shellPlaqueActive : "transparent",
+          background: value.trim() && !isClassifying ? "linear-gradient(180deg, rgba(39, 65, 54, 0.98), rgba(14, 31, 27, 0.98))" : "rgba(5, 11, 10, 0.48)",
           opacity: value.trim() && !isClassifying ? 1 : 0.6,
+          boxShadow: value.trim() && !isClassifying ? `${mockupShell.bevel}, 0 0 18px rgba(198, 155, 85, 0.1)` : mockupShell.bevel,
         }}
         title="Preview routing"
       >
