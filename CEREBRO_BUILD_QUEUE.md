@@ -2113,3 +2113,12 @@ Expected shape:
   provider call, install, download, external write, fake capability, or Raven
   path was added. Next shell slice should continue proportion polish or move to
   the next critical V1 surface after a brief mockup gap check.
+- 2026-05-19 1356 EDT: Terminal Lab runner-state label hardening landed. The
+  action contract chip now distinguishes `read runnable`, `contract blocked`,
+  and `runner blocked` instead of showing every complete contract as `contract
+  ready`. This keeps git-write and mutating contracts visibly blocked even when
+  their approval/body contract is complete. No runner policy, backend route,
+  schema, command allowlist, provider call, install, download, external write,
+  fake capability, or Raven path changed. Next critical slice should continue
+  approval-gated execution clarity or return to the next V1 surface with real
+  behavior gaps.

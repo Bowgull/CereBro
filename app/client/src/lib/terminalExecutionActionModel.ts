@@ -10,6 +10,7 @@ export type TerminalExecutionActionInput = {
 export type TerminalExecutionActionModel = {
   canRunReadOnly: boolean;
   runButtonLabel: "Run Approved Read" | "Read Run Gate";
+  contractStateLabel: "read runnable" | "runner blocked" | "contract blocked";
   readyText: string;
   runnerBoundary: string;
   showStageApproval: boolean;
@@ -24,6 +25,11 @@ export function terminalExecutionActionModel(input: TerminalExecutionActionInput
   return {
     canRunReadOnly,
     runButtonLabel: canRunReadOnly ? "Run Approved Read" : "Read Run Gate",
+    contractStateLabel: canRunReadOnly
+      ? "read runnable"
+      : input.canExecute
+        ? "runner blocked"
+        : "contract blocked",
     readyText: input.canExecute
       ? canRunReadOnly
         ? "Approved read-only contract is ready. This button runs one allowlisted local command and records a Ledger receipt."

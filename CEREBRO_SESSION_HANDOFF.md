@@ -35099,3 +35099,87 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell frame/header/left rail/command bar/right rail, Keep home dock, Keep top strip, and center castle framing polish exist. Do a brief mockup gap check, then either finish remaining shell proportion mismatches or return to the next critical V1 surface. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 1356 EDT - Terminal Lab Runner State Label Hardening
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Terminal Lab execution contract cards now distinguish
+  runnable read-only contracts from complete-but-blocked contracts.
+- Backend/runtime: unchanged runner policy.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `contractStateLabel` to `terminalExecutionActionModel`.
+- Terminal Lab action cards now show:
+  - `read runnable` for approved read-only contracts that can use the V1 runner.
+  - `contract blocked` when required body or approval pieces are missing.
+  - `runner blocked` when the contract is complete but not eligible for the
+    V1 read-only runner.
+- Added targeted model test coverage for all three labels.
+- No runner policy, backend route, schema, command allowlist, provider call,
+  install, download, external write, fake capability, fake source discovery,
+  service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/lib/terminalExecutionActionModel.ts`
+- `app/client/src/components/TerminalLabPanel.tsx`
+- `app/server/terminalExecutionActionModel.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1356 CereBro Session Handoff - terminal-runner-state-label-hardening.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/terminalExecutionActionModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed. The changed surface is a text-state
+  label in Terminal Lab, and the browser plugin is not callable in this
+  session.
+
+Mockup fidelity:
+
+- Target used: approved main shell high-fidelity mockup for shell work, then V1
+  execution contract clarity for this slice.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: no shell visual change in this slice.
+- Deviations: none for the execution contract. The UI now states the runner
+  boundary more accurately.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass returns from shell polish to the approval-gated execution
+  critical path.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, or Raven path.
+
+Known risks:
+
+- This is label and model-state hardening only.
+- It does not expand the runner beyond read-only allowlisted local commands.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/terminalExecutionActionModel.ts, app/server/terminalExecutionActionModel.test.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/BrowserPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening exists and now distinguishes read runnable, contract blocked, and runner blocked. Next critical slice should continue approval-gated execution clarity or move to the next V1 surface with real behavior gaps. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
+```

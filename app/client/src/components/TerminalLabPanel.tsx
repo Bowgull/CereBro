@@ -1230,7 +1230,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
                           <Chip label={`action #${proposal.id}`} tone={C.textMuted} />
                           <Chip label={proposal.riskClass.replace(/_/g, " ")} tone={toneForRisk(proposal.riskClass)} />
                           <Chip label={proposal.approvalStatus ?? "no approval"} tone={proposal.approvalStatus === "approved" ? C.success : C.warning} />
-                          <Chip label={proposal.readiness.canExecute ? "contract ready" : "blocked"} tone={proposal.readiness.canExecute ? C.success : C.warning} />
+                          <Chip label={executionActions.contractStateLabel} tone={executionActions.canRunReadOnly ? C.success : C.warning} />
                           <Chip label={proposal.resultState.replace(/_/g, " ")} tone={C.textSecondary} />
                         </div>
                         <div className="mt-1 rounded px-2 py-1 text-[10px] leading-snug" style={{ background: C.surface, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
