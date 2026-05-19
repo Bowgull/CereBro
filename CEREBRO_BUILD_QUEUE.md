@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2354 EDT
+Last updated: 2026-05-18 2358 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2358 EDT: collapsed the visible Workbench receipt creation form
+  into a compact `Manual receipt` disclosure. Receipt kind, title, summary,
+  links, details, temporary preview, and local save controls remain reachable
+  when opened, but the default Workbench no longer opens with a form stack under
+  the Browser. Screenshots saved at
+  `output/playwright/workbench-manual-receipt-collapsed-current-page.png`,
+  `output/playwright/workbench-manual-receipt-collapsed-watch-shelf.png`, and
+  `output/playwright/workbench-manual-receipt-open.png`. No page open, fetch,
+  search request, Watch Shelf save, source save, provider call, install,
+  external write, or Raven path was added.
 - 2026-05-18 2354 EDT: collapsed the lower Workbench receipt list into a
   compact `Receipt archive` disclosure. Search, filters, groups, read gates,
   receipt rows, and detail inspection remain reachable when opened, but the

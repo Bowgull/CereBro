@@ -1984,16 +1984,22 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
               </div>
             </details>
 
-            <section className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-widest">{receiptBodyCopy.title}</h3>
-                  <p className="text-[11px] mt-0.5" style={{ color: C.textMuted }}>
-                    {receiptBodyCopy.subtitle}
-                  </p>
+            <details className="rounded p-2" aria-label="Create local Workbench receipt" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest">Manual receipt</h3>
+                    <p className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>
+                      Save a local Workbench body.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-1">
+                    <Chip label={receiptBodyCopy.badge} tone={C.success} />
+                    <Chip label="open to write" tone={C.accent} />
+                  </div>
                 </div>
-                <Chip label={receiptBodyCopy.badge} tone={C.success} />
-              </div>
+              </summary>
+              <div className="mt-2">
               {stagedDraftNotice && (
                 <div className="mb-2 rounded p-1.5 text-[11px] leading-snug" style={{ background: G.slabMuted, border: `1px solid ${G.candleSoft}`, color: C.textSecondary }}>
                   <span className="font-semibold uppercase tracking-wider" style={{ color: C.gold }}>{receiptBodyCopy.draftPrefix}</span> {stagedDraftNotice}
@@ -2355,7 +2361,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   {createEvidence.isPending ? "Saving" : "Save Local Receipt"}
                 </Button>
               </div>
-            </section>
+              </div>
+            </details>
 
             <details className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
               <summary className="cursor-pointer text-[11px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
