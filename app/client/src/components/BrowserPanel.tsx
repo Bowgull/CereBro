@@ -51,6 +51,16 @@ function browserDraftTabLabel(tab: BrowserDraftTab) {
   }
 }
 
+function browserOriginLabel(targetUrl: string | null) {
+  if (!targetUrl) return "Open page";
+  try {
+    const url = new URL(targetUrl);
+    return url.hostname.replace(/^www\./, "");
+  } catch {
+    return targetUrl.slice(0, 42) || "Open page";
+  }
+}
+
 function Chip({ label, tone }: { label: string; tone: string }) {
   return (
     <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)", boxShadow: browserFrame.bevel }}>
@@ -886,16 +896,14 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       </div>
                     </details>
                   </div>
-                  <div className="relative overflow-hidden rounded p-2" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.96), rgba(2, 6, 6, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
-                    <div className="pointer-events-none absolute left-2 top-2 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-                    <div className="pointer-events-none absolute right-2 top-2 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-                    <div className="pointer-events-none absolute bottom-2 left-2 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-                    <div className="pointer-events-none absolute bottom-2 right-2 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-                    <div className="mb-1.5 flex items-center gap-1.5 px-1">
-                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.warning }} />
-                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.gold }} />
-                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.success }} />
-                      <span className="ml-1 truncate text-[10px] font-mono" style={{ color: C.textMuted }}>{sandboxFrameTarget}</span>
+                  <div className="relative overflow-hidden rounded p-1.5" style={{ background: "linear-gradient(180deg, rgba(13, 23, 20, 0.98), rgba(2, 6, 6, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5), 0 16px 36px rgba(0, 0, 0, 0.32)" }}>
+                    <div className="mb-1.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded px-1.5 py-1" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                      <ShieldCheck size={12} strokeWidth={1.8} aria-hidden="true" style={{ color: C.accent }} />
+                      <div className="min-w-0">
+                        <div className="truncate text-[10px] font-semibold" style={{ color: C.textPrimary }}>{browserOriginLabel(sandboxFrameTarget)}</div>
+                        <div className="truncate text-[9px] font-mono" style={{ color: C.textMuted }}>{sandboxFrameTarget}</div>
+                      </div>
+                      <span className="rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider" style={{ color: C.gold, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)" }}>open</span>
                     </div>
                     <iframe
                       key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
@@ -903,8 +911,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       src={sandboxFrameTarget}
                       sandbox="allow-scripts allow-forms"
                       referrerPolicy="no-referrer"
-                      className="h-[clamp(300px,52dvh,620px)] w-full rounded sm:h-[clamp(350px,56dvh,620px)]"
-                      style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.16)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
+                      className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
+                      style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
                     />
                   </div>
                 </div>

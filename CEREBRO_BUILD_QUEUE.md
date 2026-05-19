@@ -2224,3 +2224,11 @@ Expected shape:
   source save, Watch Shelf change, external write, fake progress, or Raven path
   changed. Next Browser slice should return to frame chrome polish or the next
   build-plan surface.
+- 2026-05-19 1940 EDT: Browser frame chrome polish landed. Removed fake desktop
+  traffic-light dots and corner bracket ornaments from the open frame, replaced
+  them with a compact browser address strip, host label, target URL, and open
+  state badge, and gave the embedded frame more vertical space. No backend
+  behavior changed. No page fetch, cookies, credentials, source save, Watch
+  Shelf change, external write, fake progress, or Raven path changed. Next
+  slice should move to the next build-plan surface unless Browser proof tooling
+  becomes available for visual QA.
