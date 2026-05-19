@@ -1910,3 +1910,11 @@ Expected shape:
   contract with tests or collapse the runner machinery once a safe page render
   lane exists. Do not fake page rendering, Watch Shelf saves, source discovery,
   or external actions.
+- 2026-05-19 0739 EDT: Browser open-readiness gate landed. The Workbench router
+  can now mark a local Browser tab `open_ready` only after approved Browser
+  review, Spock receipt, Workbench body, tab row, result scaffold, recovery
+  note, and approved live-runner approval all exist. It still keeps
+  `canOpenPage: false` and writes only a local audit receipt. Browser Runner
+  Gate shows `Prepare runner` disabled until preflight has zero missing gates.
+  Next Browser slice should decide and build the actual in-app manual page
+  render lane without faking rendering or adding unapproved dependencies.

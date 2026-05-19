@@ -149,6 +149,18 @@ function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
   };
 }
 
+function missingBrowserLiveRunnerOpenGates(proposal: ReturnType<typeof rowToBrowserActionProposal>, gateRows: Awaited<ReturnType<typeof browserProposalGateRows>>) {
+  const missing: string[] = [];
+  if (!gateRows.executionApproval) missing.push("approved Browser review approval");
+  if (!gateRows.spock) missing.push("Spock target safety receipt");
+  if (!gateRows.body) missing.push("Workbench body receipt");
+  if (!gateRows.tabDraft) missing.push("Browser tab draft row");
+  if (String(proposal.resultState) !== "blocked_before_runner") missing.push("blocked result receipt");
+  if (!proposal.recoveryNote) missing.push("recovery note");
+  if (!gateRows.liveRunnerApproval) missing.push("approved live-runner approval");
+  return missing;
+}
+
 async function browserProposalGateRows(proposalId: number) {
   const db = await getCerebroDb();
   const approvalPreview = await db.execute({
@@ -203,7 +215,7 @@ async function browserProposalGateRows(proposalId: number) {
              source_id, workbench_evidence_id, watch_shelf_id, last_error,
              created_at, updated_at
       FROM browser_tab_sessions
-      WHERE proposal_id = ? AND state = 'draft'
+      WHERE proposal_id = ? AND state IN ('draft', 'open_ready')
       ORDER BY created_at DESC, id DESC
       LIMIT 1
     `,
@@ -1495,6 +1507,113 @@ export const workbenchRouter = router({
           "No Workbench capture created.",
           "No runner audit written.",
           "No external write ran.",
+        ],
+      };
+    }),
+
+  prepareBrowserLiveRunnerOpenReadiness: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const missingGates = missingBrowserLiveRunnerOpenGates(proposal, gateRows);
+
+      if (missingGates.length > 0) {
+        return {
+          ok: false as const,
+          mode: "browser_live_runner_open_readiness_blocked" as const,
+          proposal,
+          tab: gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null,
+          missingGates,
+          canOpenPage: false,
+          canExecute: false,
+          writesExternal: false,
+          audit: null,
+          gates: [
+            "Browser live-runner open readiness remains blocked.",
+            "No tab session state changed.",
+            "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, or external write ran.",
+          ],
+          noActionTaken: browserProposalNoActionTaken,
+        };
+      }
+
+      const updated = await db.execute({
+        sql: `
+          UPDATE browser_tab_sessions
+          SET state = 'open_ready',
+              updated_at = unixepoch()
+          WHERE proposal_id = ?
+            AND state IN ('draft', 'open_ready')
+          RETURNING id, proposal_id, tab_id, target_url, title, state, project_id,
+                    source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                    created_at, updated_at
+        `,
+        args: [proposal.id],
+      });
+      const tab = updated.rows[0] as Record<string, unknown> | undefined;
+      if (!tab) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser tab readiness could not be prepared.",
+        });
+      }
+
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'open_ready_waiting_for_runner_implementation', 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser proposal #${proposal.id} is open-ready for live runner implementation.`,
+            `Target: ${proposal.target}.`,
+            "Approved Browser review approval, Spock receipt, Workbench body, tab row, result scaffold, recovery note, and approved live-runner approval are present.",
+            "Live runner implementation is still not present.",
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            ...browserProposalNoActionTaken,
+            "No runner implementation invoked.",
+          ].join("\n"),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_live_runner_open_ready" as const,
+        proposal,
+        tab: rowToBrowserTabSession(tab),
+        missingGates: [] as string[],
+        implementationPresent: false,
+        canOpenPage: false,
+        canExecute: false,
+        writesExternal: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "All approval and receipt gates are present.",
+          "Tab state moved to open_ready.",
+          "Live runner implementation is still not present.",
+          "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner implementation invoked.",
         ],
       };
     }),

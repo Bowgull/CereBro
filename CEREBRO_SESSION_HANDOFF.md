@@ -33006,3 +33006,90 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, and app/server/routers/workbench.ts first. Continue the Browser V1 critical path. Next safest slice is either the real manual browser runner contract implementation plan/tests or collapsing Runner Gate machinery into a tighter approval receipt while preserving the no-page-open hard gate. Preserve the castle. Do not fake browser rendering, Watch Shelf saves, source discovery, or external actions. Screenshot-proof material UI changes and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-19 0739 EDT - Browser Open Readiness Gate
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser Runner Gate now exposes a disabled
+  `Prepare runner` control until all approval and receipt gates exist.
+- Backend/runtime: added the open-readiness transition that can mark a tab
+  `open_ready` after every required gate is present, while still keeping
+  `canOpenPage: false`.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `prepareBrowserLiveRunnerOpenReadiness` to the Workbench router.
+- The route blocks without writing rows when required gates are missing.
+- When every gate exists, it updates the local browser tab state to
+  `open_ready` and writes a local audit receipt.
+- The route still does not open, fetch, render, save, capture, download,
+  authenticate, call providers, install tools, or write externally.
+- Browser Runner Gate now shows `Prepare runner`, disabled until the preflight
+  missing count reaches zero.
+
+Files touched in this slice:
+
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0739 CereBro Session Handoff - browser-open-readiness-gate.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 35 tests.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 45 tests.
+- Browser proof on localhost:
+  `output/playwright/browser-open-readiness-gate.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/browser-open-readiness-gate.png`.
+- Matched elements: Browser stays the direct OS zone, URL bar remains central,
+  draft tabs remain visible, runner machinery stays compact and local.
+- Deviations: `Prepare runner` is visible because the Browser runner is still
+  under construction. It should collapse behind approval receipts after real
+  page rendering exists.
+- Next fidelity gap: build the actual in-app manual page render lane or reduce
+  Runner Gate visibility once the open-ready state is reliable.
+
+Drift check:
+
+- On path. This pass advances the Browser V1 execution state machine.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Tests and browser proof created local dev database rows for Browser proposals,
+  approvals, gates, audits, and open-readiness fixtures.
+- `open_ready` is a local state only. It is not a page-render permission.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Local dev database received test/proof rows only.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Next safest slice is the actual in-app manual page render lane design/implementation gate: decide whether the stack can use a sandboxed iframe/webview-like frame or needs a separate local runner adapter. Do not fake rendering. Do not add dependencies, external services, provider calls, source discovery, Watch Shelf saves, installs, or Raven paths. Keep page opens approval-gated and screenshot-proof any UI change.
+```

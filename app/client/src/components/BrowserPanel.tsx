@@ -138,6 +138,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const prepareBrowserLiveRunnerOpenReadiness = trpc.workbench.prepareBrowserLiveRunnerOpenReadiness.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Browser tab ${result.tab.tabId} is runner-ready. No page opened.`
+          : `Runner readiness blocked: ${result.missingGates[0] ?? "missing gate"}. No page opened.`,
+      );
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -177,7 +190,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     createBrowserActionSpockGate.isPending ||
     createBrowserResultRecoveryScaffold.isPending ||
     createBrowserLiveRunnerApprovalPreview.isPending ||
-    runBrowserLiveRunnerBlocked.isPending;
+    runBrowserLiveRunnerBlocked.isPending ||
+    prepareBrowserLiveRunnerOpenReadiness.isPending;
 
   useEffect(() => {
     let raw: string | null = null;
@@ -532,6 +546,21 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                             onClick={() => runBrowserLiveRunnerBlocked.mutate({ proposalId: selectedBrowserProposalId })}
                           >
                             {runBrowserLiveRunnerBlocked.isPending ? "Checking" : "Check runner"}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[10px]"
+                            disabled={prepareBrowserLiveRunnerOpenReadiness.isPending || browserLiveRunnerPreflight.data.summary.missingCount > 0}
+                            title={
+                              browserLiveRunnerPreflight.data.summary.missingCount > 0
+                                ? `Blocked by ${browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "missing gate"}.`
+                                : "Mark the local tab runner-ready. This does not open a page."
+                            }
+                            onClick={() => prepareBrowserLiveRunnerOpenReadiness.mutate({ proposalId: selectedBrowserProposalId })}
+                          >
+                            {prepareBrowserLiveRunnerOpenReadiness.isPending ? "Preparing" : "Prepare runner"}
                           </Button>
                         </div>
                         <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>

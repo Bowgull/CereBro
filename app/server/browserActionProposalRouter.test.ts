@@ -1243,6 +1243,103 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("blocks Browser open readiness until all approval and receipt gates exist", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/open-ready-blocked",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const readiness = await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({
+      proposalId: created.proposal.id,
+    });
+
+    expect(readiness.ok).toBe(false);
+    expect(readiness.mode).toBe("browser_live_runner_open_readiness_blocked");
+    expect(readiness.canOpenPage).toBe(false);
+    expect(readiness.canExecute).toBe(false);
+    expect(readiness.audit).toBeNull();
+    expect(readiness.missingGates).toContain("approved Browser review approval");
+    expect(readiness.missingGates).toContain("approved live-runner approval");
+    expect(readiness.gates).toContain("No tab session state changed.");
+    expect(readiness.noActionTaken).toContain("No browser opened.");
+    expect(readiness.noActionTaken).toContain("No page fetched.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("marks a Browser tab open-ready after all gates without opening a page", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/open-ready-after-gates",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    const before = {
+      sources: await countRows("sources"),
+      browserTabs: await countRows("browser_tab_sessions"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const readiness = await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({
+      proposalId: created.proposal.id,
+    });
+    const db = await getCerebroDb();
+    const tabState = await db.execute({
+      sql: "SELECT state FROM browser_tab_sessions WHERE proposal_id = ? ORDER BY id DESC LIMIT 1",
+      args: [created.proposal.id],
+    });
+    const preflight = await caller.workbench.browserLiveRunnerPreflight({
+      proposalId: created.proposal.id,
+    });
+
+    expect(readiness.ok).toBe(true);
+    expect(readiness.mode).toBe("browser_live_runner_open_ready");
+    expect(readiness.tab.state).toBe("open_ready");
+    expect(readiness.missingGates).toEqual([]);
+    expect(readiness.implementationPresent).toBe(false);
+    expect(readiness.canOpenPage).toBe(false);
+    expect(readiness.canExecute).toBe(false);
+    expect(readiness.audit.runnerState).toBe("open_ready_waiting_for_runner_implementation");
+    expect(readiness.audit.canOpenPage).toBe(false);
+    expect(readiness.noActionTaken).toContain("No runner implementation invoked.");
+    expect(tabState.rows[0]?.state).toBe("open_ready");
+    expect(preflight.gates.tabDraft.present).toBe(true);
+    expect(preflight.latestRunnerAudit?.runnerState).toBe("open_ready_waiting_for_runner_implementation");
+    expect(preflight.canOpenPage).toBe(false);
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits + 1);
+    expect(await countRows("browser_tab_sessions")).toBe(before.browserTabs);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads live-runner approval detail as a blocked Browser runner gate", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({
