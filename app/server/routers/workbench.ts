@@ -159,6 +159,32 @@ function rowToBrowserTabHistoryItem(row: Record<string, unknown>) {
   };
 }
 
+function browserHistoryNavigationItems(items: ReturnType<typeof rowToBrowserTabHistoryItem>[]) {
+  const grouped = new Map<number, ReturnType<typeof rowToBrowserTabHistoryItem>[]>();
+  for (const item of items) {
+    if (item.proposalId == null) continue;
+    const existing = grouped.get(item.proposalId) ?? [];
+    existing.push(item);
+    grouped.set(item.proposalId, existing);
+  }
+
+  return Array.from(grouped.entries()).map(([proposalId, proposalItems]) => {
+    const ordered = [...proposalItems].sort((a, b) => a.createdAt - b.createdAt || a.id - b.id);
+    const currentIndex = Math.max(ordered.length - 1, 0);
+    const current = ordered[currentIndex];
+    return {
+      proposalId,
+      historyCount: ordered.length,
+      currentIndex,
+      canGoBack: currentIndex > 0,
+      canGoForward: false,
+      currentTargetUrl: current?.targetUrl ?? null,
+      previousTargetUrl: currentIndex > 0 ? ordered[currentIndex - 1]?.targetUrl ?? null : null,
+      nextTargetUrl: null,
+    };
+  });
+}
+
 function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
   return {
     id: Number(row.id),
@@ -1102,6 +1128,8 @@ export const workbenchRouter = router({
       args: [],
     });
 
+    const historyItems = historyRows.rows.map((row) => rowToBrowserTabHistoryItem(row as Record<string, unknown>));
+
     return {
       mode: "read_only" as const,
       tableName: "browser_tab_sessions" as const,
@@ -1113,7 +1141,8 @@ export const workbenchRouter = router({
         optionalFields: ["proposal_id", "project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
       },
       items: rows.rows.map(rowToBrowserTabSession),
-      historyItems: historyRows.rows.map((row) => rowToBrowserTabHistoryItem(row as Record<string, unknown>)),
+      historyItems,
+      navigationItems: browserHistoryNavigationItems(historyItems),
       gates: [
         "Browser tab/session storage table exists.",
         "Local Browser history records are append-only receipts from approved open-frame events.",

@@ -1965,3 +1965,11 @@ Expected shape:
   source save, Workbench capture, fake progress, external write, or Raven path.
   Next Browser slice should use local history to enable honest back/forward
   state or polish Watch Shelf cards.
+- 2026-05-19 0837 EDT: Browser local navigation state landed. The Browser
+  storage contract now derives `navigationItems` from append-only local history,
+  and Browser back/forward controls read that state instead of generic planned
+  labels. This is still local-only state: no browser engine, proxy, cookies,
+  credentials, page cache, source save, Workbench capture, fake progress,
+  external write, or Raven path. Next Browser slice should make local back
+  navigation remount the sandbox frame to the previous local-history URL, or
+  polish Watch Shelf cards.

@@ -211,8 +211,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     .filter((item) => item.state === "draft" || item.state === "open_ready" || item.state === "open")
     .slice(0, 3);
   const browserHistoryItems = browserTabSessionStorageContract.data?.historyItems ?? [];
+  const browserNavigationItems = browserTabSessionStorageContract.data?.navigationItems ?? [];
   const selectedBrowserTab = browserVisibleTabs.find((tab) => tab.proposalId === selectedBrowserProposalId) ?? null;
   const selectedBrowserHistoryItems = browserHistoryItems.filter((item) => item.proposalId === selectedBrowserProposalId).slice(0, 3);
+  const selectedBrowserNavigation = browserNavigationItems.find((item) => item.proposalId === selectedBrowserProposalId) ?? null;
   const canOpenSandboxFrame = selectedBrowserTab?.state === "open_ready" || selectedBrowserTab?.state === "open";
   const hasOpenSandboxFrame =
     sandboxFrameTarget != null &&
@@ -387,10 +389,28 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           </div>
 
           <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser back planned">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 px-0"
+              disabled={!selectedBrowserNavigation?.canGoBack}
+              aria-label={selectedBrowserNavigation?.canGoBack ? "Go back through local Browser history" : "No previous local Browser history"}
+              title={selectedBrowserNavigation?.canGoBack ? "Local history can go back." : "No previous local history for this page."}
+              onClick={() => setBrowserNotice("Back is staged from local history but navigation execution is not wired yet.")}
+            >
               <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
             </Button>
-            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 px-0"
+              disabled={!selectedBrowserNavigation?.canGoForward}
+              aria-label={selectedBrowserNavigation?.canGoForward ? "Go forward through local Browser history" : "No next local Browser history"}
+              title={selectedBrowserNavigation?.canGoForward ? "Local history can go forward." : "No next local history for this page."}
+              onClick={() => setBrowserNotice("Forward is staged from local history but navigation execution is not wired yet.")}
+            >
               <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
             </Button>
             <Button

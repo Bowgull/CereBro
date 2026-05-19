@@ -33596,3 +33596,87 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, and local history receipts exist. Next safest slice is use local history to enable honest back/forward state or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
 ```
+
+## 2026-05-19 0837 EDT - Browser Local Navigation State
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser back/forward controls now read local history
+  state instead of staying generic planned buttons.
+- Backend/runtime: Browser storage contract now returns local navigation state.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `navigationItems` to `browserTabSessionStorageContract`.
+- Navigation state is derived from append-only local history receipts.
+- Browser back/forward button labels and disabled state now come from local
+  navigation state.
+- Back/forward remain local-only and non-external. They do not add a browser
+  engine, proxy, cookies, credential handling, source save, Workbench capture,
+  Watch Shelf progress, provider call, install, download, external write, or
+  Raven path.
+
+Files touched in this slice:
+
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0837 CereBro Session Handoff - browser-local-navigation-state.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red test first: `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed because `navigationItems` did not exist.
+- Green targeted test: same command passed, 42 tests.
+- `pnpm -C app check` passed.
+- Browser DOM proof on localhost:
+  `output/playwright/browser-local-history-nav-state.txt`.
+- Screenshot capture in the in-app browser timed out twice after DOM proof; no
+  screenshot was saved for this slice.
+
+Mockup fidelity:
+
+- Target used: approved Browser high-fidelity mockup plus honest controls rule.
+- Matched elements: back/forward now have real local state behind them instead
+  of generic placeholder copy.
+- Deviations: back/forward are not full browser-engine navigation yet. The next
+  step must either make local-history navigation actually change the sandbox
+  frame or keep disabled states conservative.
+
+Drift check:
+
+- On path. This pass uses the history foundation to make Browser controls more
+  honest.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, or
+  external automation.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Local history can contain repeated same-URL open receipts from proof runs.
+- This is not cross-origin iframe navigation tracking.
+- In-app screenshot capture timed out, but DOM proof confirmed the state.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change beyond the prior history table.
+- No migration file.
+- One DOM proof text file written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, and local navigation state exist. Next safest slice is make local back navigation actually remount the sandbox frame to the previous local-history URL, or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Browser-proof changes.
+```

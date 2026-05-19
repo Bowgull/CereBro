@@ -1493,6 +1493,10 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(history.rows[0]?.event_type).toBe("sandbox_frame_open");
     expect(history.rows[0]?.source_label).toBe("browser_sandbox_frame");
     expect(storage.historyItems[0]?.targetUrl).toBe("https://example.com/frame-history");
+    expect(storage.navigationItems[0]?.proposalId).toBe(created.proposal.id);
+    expect(storage.navigationItems[0]?.canGoBack).toBe(false);
+    expect(storage.navigationItems[0]?.canGoForward).toBe(false);
+    expect(storage.navigationItems[0]?.currentTargetUrl).toBe("https://example.com/frame-history");
     expect(storage.canPersistHistory).toBe(true);
 
     expect(await countRows("browser_tab_history_items")).toBe(before.historyItems + 1);
