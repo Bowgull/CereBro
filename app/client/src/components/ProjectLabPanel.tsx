@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { compactCommandLabel, compactPathLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
-import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
+import { projectLabGuideCopy, projectLabPushContractCopy, projectLabPushCopy, projectLabReceiptCopy } from "@/lib/projectLabCopyModel";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -665,6 +665,11 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
               const scoreParts = signalBreakdown(project, projectFilter);
               const pushReadiness = project.pushReadiness;
               const pushContract = pushReadiness.contract;
+              const pushContractCopy = projectLabPushContractCopy({
+                contractId: pushContract?.id ?? null,
+                approvalStatus: pushContract?.approvalStatus ?? null,
+                canRunInV1: pushContract?.canRunInV1 ?? false,
+              });
               const pushTone = toneForPushState(pushReadiness.state);
               const showPushReceipt = pushReceiptSlug === project.slug;
               const autoPushArmed = autoPushSlugs.has(project.slug);
@@ -867,11 +872,12 @@ export default function ProjectLabPanel({ onClose }: { onClose: () => void }) {
                                 Action Contract
                               </div>
                               <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
-                                {pushContract
-                                  ? `Contract #${pushContract.id}. Approval ${pushContract.approvalStatus ?? "unknown"}. Git write blocked in V1.`
-                                  : "Create approval receipt and execution proposal. The runner still blocks git remote writes."}
+                                {pushContractCopy.body}
                               </div>
                             </div>
+                            <Badge variant="warning" className="uppercase" style={{ color: pushContractCopy.stateTone === "danger" ? C.danger : C.warning }}>
+                              <span className="min-w-0 truncate">{pushContractCopy.stateLabel}</span>
+                            </Badge>
                             <Button
                               type="button"
                               variant="risk"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projectLabGuideCopy, projectLabPushCopy, projectLabReceiptCopy } from "../client/src/lib/projectLabCopyModel";
+import { projectLabGuideCopy, projectLabPushContractCopy, projectLabPushCopy, projectLabReceiptCopy } from "../client/src/lib/projectLabCopyModel";
 
 describe("projectLabCopyModel", () => {
   it("names the local rule drawer as a project map guide", () => {
@@ -45,5 +45,23 @@ describe("projectLabCopyModel", () => {
     expect(copy.presentText(2)).toBe("2 bodies exist. Use Workbench for bodies and Ledger for the audit trail.");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("readiness");
     expect(Object.values(copy).join(" ").toLowerCase()).not.toContain("git-state");
+  });
+
+  it("keeps Project Lab push contracts visibly blocked in V1", () => {
+    const missing = projectLabPushContractCopy({
+      contractId: null,
+      approvalStatus: null,
+      canRunInV1: false,
+    });
+    const blocked = projectLabPushContractCopy({
+      contractId: 42,
+      approvalStatus: "approved",
+      canRunInV1: false,
+    });
+
+    expect(missing.stateLabel).toBe("runner blocked");
+    expect(missing.body).toContain("blocks git remote writes");
+    expect(blocked.stateLabel).toBe("runner blocked");
+    expect(blocked.body).toContain("Git remote writes stay manual");
   });
 });

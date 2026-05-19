@@ -49,3 +49,27 @@ export function projectLabPushCopy() {
     presentLabel: "body present",
   };
 }
+
+export function projectLabPushContractCopy(input: {
+  contractId: number | null;
+  approvalStatus: string | null;
+  canRunInV1: boolean;
+}) {
+  if (input.canRunInV1) {
+    return {
+      stateLabel: "runner open",
+      stateTone: "danger" as const,
+      body: input.contractId == null
+        ? "No contract exists."
+        : `Contract #${input.contractId}. Approval ${input.approvalStatus ?? "unknown"}. Runner policy must be rechecked before any git action.`,
+    };
+  }
+
+  return {
+    stateLabel: "runner blocked",
+    stateTone: "warning" as const,
+    body: input.contractId == null
+      ? "Create approval receipt and execution proposal. The V1 runner still blocks git remote writes."
+      : `Contract #${input.contractId}. Approval ${input.approvalStatus ?? "unknown"}. V1 records the decision only. Git remote writes stay manual.`,
+  };
+}

@@ -2131,3 +2131,11 @@ Expected shape:
   provider call, install, download, external write, fake capability, or Raven
   path was added. Next critical slice should continue execution-core hardening
   or inspect Project Lab push-readiness gates.
+- 2026-05-19 1411 EDT: Project Lab push contract runner-state clarity landed.
+  Push decision cards now use tested copy to show `runner blocked` for Project
+  Lab git-write contracts, even when approval and Workbench body records exist.
+  This keeps the manual push path visible without implying CereBro can run git
+  remote writes in V1. No runner policy, command allowlist, git-write runner,
+  backend route, schema, provider call, install, download, external write, fake
+  capability, or Raven path changed. Next critical slice should continue
+  Project Lab/Approval/Ledger clarity or move to the next real V1 behavior gap.

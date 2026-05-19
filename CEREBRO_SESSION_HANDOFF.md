@@ -35263,3 +35263,84 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/terminalExecutionActionModel.ts, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening exists. Read-only runner path containment hardening exists and blocks outside path args before spawn. Next critical slice should continue execution-core hardening or inspect Project Lab push-readiness gates. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1411 EDT - Project Lab Push Contract Runner-State Clarity
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Project Lab push contract cards now state the runner
+  boundary more clearly.
+- Backend/runtime: unchanged runner policy.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `projectLabPushContractCopy` to centralize push-contract runner-state
+  wording.
+- Project Lab push decision details now show a `runner blocked` badge for git
+  remote write contracts.
+- Existing and missing push contracts both state that V1 records the decision
+  only and keeps git remote writes manual.
+- Added targeted copy model coverage for the blocked push-contract state.
+- No runner policy, command allowlist, git-write runner, backend route, schema,
+  provider call, install, download, external write, fake capability, fake source
+  discovery, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/lib/projectLabCopyModel.ts`
+- `app/client/src/components/ProjectLabPanel.tsx`
+- `app/server/projectLabCopyModel.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1411 CereBro Session Handoff - project-lab-push-contract-runner-state-clarity.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/projectLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed. The browser plugin is not callable in
+  this session.
+
+Mockup fidelity:
+
+- Target used: no shell visual target in this slice.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: unchanged.
+- Deviations: none.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass hardens Project Lab clarity around approval-gated git
+  remote write contracts.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- This is copy/model clarity only.
+- Project Lab still does not run git commands.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/server/projectLabCopyModel.test.ts, app/server/routers/projectIntelligence.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening and read-only runner path containment hardening exist. Project Lab push contract runner-state clarity exists and shows git-write push contracts as runner blocked. Next critical slice should continue Project Lab/Approval/Ledger clarity or move to the next real V1 behavior gap. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```
