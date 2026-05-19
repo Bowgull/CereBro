@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Plus, RotateCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
@@ -55,6 +55,18 @@ function Chip({ label, tone }: { label: string; tone: string }) {
       {label}
     </span>
   );
+}
+
+function watchShelfTone(category: string) {
+  if (category === "Anime") return C.warning;
+  if (category === "Watching") return C.success;
+  if (category === "Research") return C.gold;
+  return C.accent;
+}
+
+function watchShelfInitial(title: string | null, targetUrl: string) {
+  const value = (title ?? targetUrl).trim();
+  return (value[0] ?? "W").toUpperCase();
 }
 
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
@@ -821,6 +833,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     className="h-7 px-2"
                     onClick={() => setWatchShelfCategory(category)}
                     aria-pressed={watchShelfDraft.selectedCategory === category}
+                    style={watchShelfDraft.selectedCategory === category ? { color: C.textPrimary, borderColor: watchShelfTone(category), boxShadow: `inset 0 -1px 0 ${watchShelfTone(category)}66` } : undefined}
                   >
                     {category}
                   </Button>
@@ -842,20 +855,49 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       : "This is only a local shelf readback. It cannot save until a real page is open."}
                 </div>
               </div>
-              <div className="mt-3 grid gap-1.5">
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {watchShelfItems.length > 0 ? (
                   watchShelfItems.slice(0, 5).map((item) => (
-                    <div key={item.id} className="rounded px-2 py-1.5 text-[11px] leading-snug" style={{ background: "rgba(7, 12, 12, 0.82)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</span>
-                        <Chip label={item.category} tone={item.category === "Anime" ? C.warning : C.accent} />
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-[38px_minmax(0,1fr)] gap-2 rounded p-2 text-[11px] leading-snug"
+                      style={{
+                        background: "linear-gradient(145deg, rgba(11, 20, 18, 0.94), rgba(4, 8, 8, 0.96))",
+                        border: `1px solid ${browserFrame.lineSoft}`,
+                        boxShadow: `${browserFrame.bevel}, inset 0 0 0 1px rgba(244, 239, 227, 0.02)`,
+                      }}
+                    >
+                      <div
+                        className="flex h-[38px] w-[38px] items-center justify-center rounded text-[13px] font-bold"
+                        aria-hidden="true"
+                        style={{
+                          color: watchShelfTone(item.category),
+                          background: browserFrame.plaque,
+                          border: `1px solid ${watchShelfTone(item.category)}55`,
+                          boxShadow: browserFrame.bevel,
+                        }}
+                      >
+                        {watchShelfInitial(item.title, item.targetUrl)}
                       </div>
-                      <div className="mt-0.5 break-all text-[10px]" style={{ color: C.textMuted }}>{item.targetUrl}</div>
-                      <div className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Saved locally. No progress or media captured.</div>
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</span>
+                          <Chip label={item.category} tone={watchShelfTone(item.category)} />
+                        </div>
+                        <div className="mt-0.5 truncate text-[10px]" style={{ color: C.textMuted }}>{item.targetUrl}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px]" style={{ color: C.textMuted }}>
+                          <span className="inline-flex items-center gap-1">
+                            <Bookmark size={10} strokeWidth={1.8} aria-hidden="true" />
+                            Local shelf row
+                          </span>
+                          <span aria-hidden="true">/</span>
+                          <span>No progress or media</span>
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="rounded px-2 py-2 text-[11px]" style={{ background: "rgba(7, 12, 12, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                  <div className="rounded px-2 py-2 text-[11px] md:col-span-2" style={{ background: "rgba(7, 12, 12, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
                     Open a page, then save it here.
                   </div>
                 )}

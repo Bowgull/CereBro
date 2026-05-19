@@ -33680,3 +33680,86 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, and local navigation state exist. Next safest slice is make local back navigation actually remount the sandbox frame to the previous local-history URL, or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Browser-proof changes.
 ```
+
+## 2026-05-19 0843 EDT - Browser Watch Shelf Card Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Watch Shelf saved rows now read as richer saved browser
+  items.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Reworked Watch Shelf saved rows into compact two-column cards on wider
+  screens.
+- Added a small category-toned plaque initial to each saved row.
+- Category tabs now carry a subtle active color cue.
+- Kept copy honest: cards still say `Local shelf row` and `No progress or
+  media`.
+- No thumbnails, fake progress, media state, source discovery, provider call,
+  backend route, schema, install, download, external write, or Raven path was
+  added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0843 CereBro Session Handoff - browser-watch-shelf-card-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser DOM proof on localhost:
+  `output/playwright/browser-watch-shelf-card-polish.txt`.
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup plus
+  low-machinery rule.
+- Matched elements: saved shelf rows now feel more like browser objects instead
+  of debug rows, while still avoiding fake thumbnails and fake resume progress.
+- Deviations: Watch Shelf still lacks real thumbnails, service identity,
+  resume progress, or platform sessions by design.
+- Next fidelity gap: make local back navigation remount the sandbox frame to a
+  previous local-history URL when there is a real previous URL, or continue
+  final visual polish toward the 1:1 Browser mockup.
+
+Drift check:
+
+- On path. This pass improves the approved Browser/Watch Shelf surface without
+  adding fake capability.
+- No new primary surface.
+- No fake browser engine, fake watch progress, fake source discovery, or
+  external automation.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Browser proof is DOM proof because screenshots have recently timed out in
+  the in-app browser.
+- Watch Shelf remains local metadata only.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One DOM proof text file written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, local Watch Shelf save, collapsed open-page proof, collapsed open-page pins, local history receipts, local navigation state, and polished Watch Shelf cards exist. Next safest slice is make local back navigation remount the sandbox frame to a previous local-history URL only when there is a real previous URL, or continue final visual polish toward the approved 1:1 Browser mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, or Raven paths. Browser-proof changes.
+```

@@ -1973,3 +1973,11 @@ Expected shape:
   external write, or Raven path. Next Browser slice should make local back
   navigation remount the sandbox frame to the previous local-history URL, or
   polish Watch Shelf cards.
+- 2026-05-19 0843 EDT: Browser Watch Shelf card polish landed. Saved rows now
+  render as compact, category-toned cards with a small plaque initial, URL
+  readback, and explicit local-only labels. This is visual polish only: no
+  thumbnails, fake progress, media state, source discovery, provider call,
+  backend route, schema, install, download, external write, or Raven path.
+  Next Browser slice should only wire local back navigation if a real previous
+  local-history URL exists, or continue final visual polish toward the 1:1
+  Browser mockup.
