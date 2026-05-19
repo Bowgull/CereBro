@@ -2021,3 +2021,12 @@ Expected shape:
   media progress, or Raven path. Next Browser slice should continue matching
   the approved 1:1 Browser mockup by refining the open-page frame and Watch
   Shelf tab proportions.
+- 2026-05-19 0920 EDT: Browser open-frame and Watch Shelf proportion polish
+  landed. Open sandbox pages now sit inside a stronger framed viewport with
+  small browser-window controls and corner trim, and Watch Shelf now uses a
+  quieter plated header, side category rail, denser shelf body, and collapsed
+  proof text. This is UI polish only: no browser engine, backend route, schema,
+  provider call, install, download, external write, fake source discovery, fake
+  media progress, service resume, or Raven path. Next Browser slice should
+  continue toward 1:1 by tightening mobile behavior and remaining footer
+  machinery.

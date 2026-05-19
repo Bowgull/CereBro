@@ -620,7 +620,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             <section className="rounded p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
               {hasOpenSandboxFrame ? (
                 <div className="grid gap-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1" style={{ background: "rgba(5, 10, 10, 0.78)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                     <div className="min-w-0">
                       <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
                         {selectedBrowserTab ? browserDraftTabLabel(selectedBrowserTab) : "Open page"}
@@ -711,15 +711,27 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       )}
                     </div>
                   </div>
-                  <iframe
-                    key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
-                    title="CereBro sandbox browser frame"
-                    src={sandboxFrameTarget}
-                    sandbox="allow-scripts allow-forms"
-                    referrerPolicy="no-referrer"
-                    className="h-[clamp(360px,58dvh,640px)] w-full rounded"
-                    style={{ background: "#fff", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.42)" }}
-                  />
+                  <div className="relative overflow-hidden rounded p-2" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.96), rgba(2, 6, 6, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
+                    <div className="pointer-events-none absolute left-2 top-2 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                    <div className="pointer-events-none absolute right-2 top-2 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                    <div className="pointer-events-none absolute bottom-2 left-2 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                    <div className="pointer-events-none absolute bottom-2 right-2 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                    <div className="mb-1.5 flex items-center gap-1.5 px-1">
+                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.warning }} />
+                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.gold }} />
+                      <span className="h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: C.success }} />
+                      <span className="ml-1 truncate text-[10px] font-mono" style={{ color: C.textMuted }}>{sandboxFrameTarget}</span>
+                    </div>
+                    <iframe
+                      key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
+                      title="CereBro sandbox browser frame"
+                      src={sandboxFrameTarget}
+                      sandbox="allow-scripts allow-forms"
+                      referrerPolicy="no-referrer"
+                      className="h-[clamp(350px,56dvh,620px)] w-full rounded"
+                      style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.16)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
+                    />
+                  </div>
                 </div>
               ) : (
               <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
@@ -864,10 +876,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </section>
           ) : (
             <section id="browser-watch-shelf" className="rounded p-3" aria-label="Watch Shelf tab" style={{ background: "radial-gradient(circle at 18% 0%, rgba(198, 155, 85, 0.1), transparent 34%), linear-gradient(180deg, rgba(8, 15, 14, 0.99), rgba(3, 7, 7, 0.99))", border: `1px solid ${browserFrame.line}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.46)" }}>
-              <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
-                  <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved watch pages live here after the runner exists.</div>
+                  <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved pages. Local rows only.</div>
                 </div>
                 <Button
                   type="button"
@@ -886,23 +898,26 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   {createWatchShelfItemFromOpenTab.isPending ? "Saving" : hasOpenSandboxFrame ? "Save Page" : watchShelfDraft.saveLabel}
                 </Button>
               </div>
-              <div className="mt-3 flex flex-wrap gap-1">
-                {watchShelf.categories.map((category) => (
-                  <Button
-                    key={category}
-                    type="button"
-                    size="sm"
-                    variant={watchShelfDraft.selectedCategory === category ? "secondary" : "outline"}
-                    className="h-7 px-2"
-                    onClick={() => setWatchShelfCategory(category)}
-                    aria-pressed={watchShelfDraft.selectedCategory === category}
-                    style={watchShelfDraft.selectedCategory === category ? { color: C.textPrimary, borderColor: watchShelfTone(category), boxShadow: `inset 0 -1px 0 ${watchShelfTone(category)}66` } : undefined}
-                  >
-                    {category}
-                  </Button>
-                ))}
-              </div>
-              <div className="mt-3 rounded p-3 text-[11px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.82)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+              <div className="mt-3 grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)]">
+                <div className="grid content-start gap-1 rounded p-2" style={{ background: "rgba(5, 10, 10, 0.62)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+                  {watchShelf.categories.map((category) => (
+                    <Button
+                      key={category}
+                      type="button"
+                      size="sm"
+                      variant={watchShelfDraft.selectedCategory === category ? "secondary" : "ghost"}
+                      className="h-7 justify-between px-2 text-[11px]"
+                      onClick={() => setWatchShelfCategory(category)}
+                      aria-pressed={watchShelfDraft.selectedCategory === category}
+                      style={watchShelfDraft.selectedCategory === category ? { color: C.textPrimary, borderColor: watchShelfTone(category), boxShadow: `inset 2px 0 0 ${watchShelfTone(category)}` } : { color: C.textMuted }}
+                    >
+                      <span>{category}</span>
+                      {watchShelfDraft.selectedCategory === category && <span aria-hidden="true" style={{ color: watchShelfTone(category) }}>•</span>}
+                    </Button>
+                  ))}
+                </div>
+                <div className="grid gap-3">
+              <div className="rounded p-3 text-[11px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.82)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                     {hasOpenSandboxFrame ? "Open page" : watchShelfDraft.candidateLabel}
@@ -918,7 +933,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       : "This is only a local shelf readback. It cannot save until a real page is open."}
                 </div>
               </div>
-              <div className="mt-3 grid gap-2 md:grid-cols-2">
+              <div className="grid gap-2 md:grid-cols-2">
                 {watchShelfItems.length > 0 ? (
                   watchShelfItems.slice(0, 5).map((item) => (
                     <div
@@ -965,8 +980,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 )}
               </div>
-              <div className="mt-3 text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                {watchShelfDraft.noActionText}
+                  <details className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Proof</summary>
+                    <div className="mt-1">{watchShelfDraft.noActionText}</div>
+                  </details>
+                </div>
               </div>
             </section>
           )}
