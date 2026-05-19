@@ -2139,3 +2139,12 @@ Expected shape:
   backend route, schema, provider call, install, download, external write, fake
   capability, or Raven path changed. Next critical slice should continue
   Project Lab/Approval/Ledger clarity or move to the next real V1 behavior gap.
+- 2026-05-19 1420 EDT: Approval and Ledger git-write runner boundary clarity
+  landed. Approval detail now shows a tested execution-state strip that marks
+  Project Lab manual-push approvals as `runner blocked`, and Ledger Project Lab
+  contract rows now repeat that approval only records the decision while git
+  remote writes stay manual in V1. No runner policy, command allowlist,
+  git-write runner, backend route, schema, provider call, install, download,
+  external write, fake capability, or Raven path changed. Next critical slice
+  should move to the next real V1 behavior gap after this approval/ledger
+  boundary is consistent across the push path.

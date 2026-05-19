@@ -63,6 +63,13 @@ export function ledgerOverviewCopy() {
   };
 }
 
+export function ledgerGitWriteRunnerCopy() {
+  return {
+    badge: "runner blocked",
+    body: "Approval records the decision only. Git remote writes stay manual in V1.",
+  };
+}
+
 export function ledgerRouteText(text: string) {
   return text.replace(/\bproof\b/gi, "audit note");
 }

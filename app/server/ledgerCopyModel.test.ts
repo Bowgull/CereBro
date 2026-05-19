@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ledgerKindLabel,
+  ledgerGitWriteRunnerCopy,
   ledgerNavCopy,
   ledgerOverviewCopy,
   ledgerReceiptSummary,
@@ -61,5 +62,14 @@ describe("ledgerCopyModel", () => {
 
     expect(display).toBe("continue CereBro staged route receipt audit note");
     expect(display.toLowerCase()).not.toContain("proof");
+  });
+
+  it("frames git-write contracts as manual runner-blocked records", () => {
+    const copy = ledgerGitWriteRunnerCopy();
+
+    expect(copy.badge).toBe("runner blocked");
+    expect(copy.body).toContain("Git remote writes stay manual");
+    expect(copy.body).toContain("records the decision only");
+    expect(copy.body).not.toContain("automatic");
   });
 });

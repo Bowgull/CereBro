@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
-import { approvalPanelCopy } from "@/lib/approvalPanelCopyModel";
+import { approvalPanelCopy, approvalRunnerStateCopy } from "@/lib/approvalPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -833,6 +833,12 @@ function ApprovalReceiptChain({
   onOpenSecurity: (target: string | null | undefined) => void;
 }) {
   const copy = approvalPanelCopy();
+  const runnerState = approvalRunnerStateCopy({
+    actionType: selected.actionType,
+    costRisk: selected.costRisk,
+    origin: selected.origin,
+    targetType: selected.targetType,
+  });
   const nextSurface = nextSurfaceForApproval(selected);
   const executionLinks = selected.executionLinks ?? [];
   const browserProposalReceipt = selected.browserProposalReceipt ?? null;
@@ -944,6 +950,17 @@ function ApprovalReceiptChain({
       <p className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
         {nextSurface.reason}
       </p>
+      <div className="grid gap-1 rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div className="flex items-center gap-1">
+          <Chip label={runnerState.label} tone={runnerState.tone === "warning" ? C.warning : C.accent} />
+          <span className="min-w-0 truncate text-[10px] uppercase" style={{ color: C.textMuted }}>
+            Execution state
+          </span>
+        </div>
+        <p className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+          {runnerState.body}
+        </p>
+      </div>
       <div className="flex flex-wrap gap-1">
         <Button
           type="button"

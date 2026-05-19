@@ -63,3 +63,29 @@ export function approvalPanelCopy() {
     securityReceiptTitle: "Open Security Gate for this target. Approval Queue does not execute it.",
   };
 }
+
+export function approvalRunnerStateCopy(input: {
+  actionType: string | null | undefined;
+  costRisk: string | null | undefined;
+  origin: string | null | undefined;
+  targetType: string | null | undefined;
+}) {
+  const isGitWrite =
+    input.actionType === "project_manual_push"
+    || input.costRisk === "git_remote_write"
+    || (input.origin === "project_lab" && input.targetType === "project");
+
+  if (isGitWrite) {
+    return {
+      label: "runner blocked",
+      tone: "warning" as const,
+      body: "Approval records the decision only. Git remote writes stay manual in V1.",
+    };
+  }
+
+  return {
+    label: "review gate",
+    tone: "accent" as const,
+    body: "Approval records the decision. This queue does not execute work.",
+  };
+}

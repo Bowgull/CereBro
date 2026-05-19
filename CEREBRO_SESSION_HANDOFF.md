@@ -35344,3 +35344,91 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/server/projectLabCopyModel.test.ts, app/server/routers/projectIntelligence.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Terminal Lab runner-state label hardening and read-only runner path containment hardening exist. Project Lab push contract runner-state clarity exists and shows git-write push contracts as runner blocked. Next critical slice should continue Project Lab/Approval/Ledger clarity or move to the next real V1 behavior gap. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1420 EDT - Approval Ledger Git-Write Runner Boundary Clarity
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Approval detail and Ledger git-write rows now repeat
+  the same runner-blocked truth for Project Lab push contracts.
+- Backend/runtime: unchanged runner policy.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `approvalRunnerStateCopy` so approval details can distinguish normal
+  review gates from Project Lab git-write proposals.
+- Approval detail now shows an execution-state strip with `runner blocked` for
+  Project Lab manual-push approvals.
+- Added `ledgerGitWriteRunnerCopy` so Ledger Project Lab contract rows repeat
+  that approval records the decision only.
+- Ledger Project Lab push contract rows now show `runner blocked` instead of a
+  broad Spock-gate label.
+- No runner policy, command allowlist, git-write runner, backend route, schema,
+  provider call, install, download, external write, fake capability, fake source
+  discovery, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/lib/approvalPanelCopyModel.ts`
+- `app/client/src/components/ApprovalDashboardPanel.tsx`
+- `app/server/approvalPanelCopyModel.test.ts`
+- `app/client/src/lib/ledgerCopyModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/server/ledgerCopyModel.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1420 CereBro Session Handoff - approval-ledger-git-write-runner-boundary-clarity.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/approvalPanelCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected before the helper existed.
+- `pnpm -C app exec vitest run server/ledgerCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected before the helper existed.
+- `pnpm -C app exec vitest run server/approvalPanelCopyModel.test.ts server/ledgerCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. The browser plugin is not callable in
+  this session.
+
+Mockup fidelity:
+
+- Target used: no shell visual target in this slice.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: unchanged.
+- Deviations: none.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass hardens the approval-gated git-write boundary across
+  Approval and Ledger.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- This is copy/model clarity only.
+- Approval and Ledger still do not run git commands.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/lib/approvalPanelCopyModel.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/lib/ledgerCopyModel.ts, app/client/src/pages/Home.tsx, app/server/approvalPanelCopyModel.test.ts, app/server/ledgerCopyModel.test.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, and mobile polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, and Approval/Ledger git-write runner-boundary clarity exist. Next critical slice should move to the next real V1 behavior gap after the push path now consistently says git remote writes are decision-only and manual in V1. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

@@ -48,7 +48,7 @@ import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
 import { compactCommandLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel";
 import { FLOORS, cerebroColors as C, cerebroTheme as T, type FloorId, type AgentState } from "@/lib/keepConfig";
-import { ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
+import { ledgerGitWriteRunnerCopy, ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
 import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
@@ -1151,6 +1151,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
   );
   const ledgerCopy = ledgerOverviewCopy();
+  const ledgerGitWriteRunner = ledgerGitWriteRunnerCopy();
 
   const overviewCards = ledgerOverview.data?.cards;
   const memoryContract = ledgerOverview.data?.memoryContract;
@@ -1989,7 +1990,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                     Project Lab Contract
                   </span>
                   <Badge variant="warning" className="uppercase">
-                    Spock gate
+                    {ledgerGitWriteRunner.badge}
                   </Badge>
                 </div>
                 {latestProjectPushContractRows.length === 0 ? (
@@ -2026,7 +2027,7 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
                             Open Project Lab
                           </Button>
                           <span className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                            Manual push stays blocked until the Project Lab gate is explicit.
+                            {ledgerGitWriteRunner.body}
                           </span>
                         </div>
                       </div>
