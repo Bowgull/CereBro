@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2233 EDT
+Last updated: 2026-05-18 2350 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,16 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-18 2350 EDT: collapsed Workbench receipt lane machinery into a
+  compact `Receipt tools` disclosure below the Browser. Browser and Watch Shelf
+  remain the first visible Workbench object, while receipt body copy, lane
+  staging, and receipt-chain readback stay reachable on request. Screenshots
+  saved at
+  `output/playwright/workbench-receipt-tools-collapsed-current-page.png`,
+  `output/playwright/workbench-receipt-tools-collapsed-watch-shelf.png`, and
+  `output/playwright/workbench-receipt-tools-open.png`. No page open, fetch,
+  search request, Watch Shelf save, source save, provider call, install,
+  external write, or Raven path was added.
 - 2026-05-18 2233 EDT: polished Workbench Browser proportions. Added stronger
   browser-frame material, attached tab styling, folder-style bookmark markers,
   larger address controls, larger Current Page/Watch Shelf bodies, and richer

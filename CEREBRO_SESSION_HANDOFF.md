@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 2233 EDT
+Last updated: 2026-05-18 2350 EDT
 
 ## Current North Star
 
@@ -20,6 +20,70 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-18 2350 EDT - Workbench Receipt Tools Disclosure
+
+### What Changed
+- Collapsed the Workbench receipt lane machinery into a compact `Receipt tools`
+  disclosure below the Browser.
+- Kept Browser and Watch Shelf as the first visible Workbench object.
+- Preserved the receipt body copy, lane staging buttons, and receipt-chain
+  readback inside the disclosure.
+- Reduced default visual noise without deleting Workbench receipt functions.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `git diff --check`
+- Local Playwright proof against `http://localhost:3000/` opened Workshop and
+  captured the collapsed `Current Page` Browser state.
+- Local Playwright proof clicked `Watch Shelf` and captured the collapsed Watch
+  Shelf tab state.
+- Local Playwright proof opened `Receipt tools` and confirmed hidden receipt
+  lane controls remain reachable.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-receipt-tools-collapsed-current-page.png`
+  - `output/playwright/workbench-receipt-tools-collapsed-watch-shelf.png`
+  - `output/playwright/workbench-receipt-tools-open.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup.
+- Matched elements: Browser-first Workbench, larger browser viewport, Watch
+  Shelf as named tab, quiet command/browser controls, and hidden receipt
+  machinery by default.
+- Deviations: no real page render, no real tab persistence, no saved Watch
+  Shelf rows, no playback, no login/session state, and no external page open.
+- Next fidelity gap: continue trimming lower Workbench receipt lists and then
+  return to the manual browser runner contract only when gates are complete.
+
+### Drift Check
+- On path. This is a low-machinery visual pass inside the approved
+  Browser/Watch Shelf mockup lane.
+- It does not add a new primary surface, fake Browser/Watch behavior,
+  open/fetch/search pages, save sources, persist watch progress, call
+  providers/models, install, pull, write externally, or touch Raven paths.
+
+### Known Risks
+- Accessibility snapshots still include some details content when the disclosure
+  is present. The primary visual shell now hides that machinery by default.
+- The Browser shell remains a blocked local surface until the approved manual
+  runner contract is implemented.
+
+### Storage Impact
+- No schema change.
+- No database rows were written by the code change.
+- Three local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/components/WorkbenchPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/routers/workbench.ts first. Continue CereBro on the locked Browser/Watch Shelf path. Workbench now opens Browser first, with Current Page and Watch Shelf tabs, one address/search field, bookmark rail, quiet controls, and receipt tools collapsed below the Browser by default. Next best slice is trimming lower Workbench receipt lists or returning to the backend manual page-open runner contract only if gates are complete. Do not add a new primary surface, fake Browser/Watch behavior, open/fetch/search pages, save sources, persist watch progress, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 2233 EDT - Workbench Browser Proportion Polish
 

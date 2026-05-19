@@ -814,63 +814,74 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
           </div>
         ) : (
           <div className="grid gap-2">
-            <section className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-[0.95fr_repeat(4,1fr)]" aria-label="Workbench receipt lanes">
-              <div className="rounded p-2 sm:col-span-2 xl:col-span-1" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-                    {currentBodyCopy.label}
-                  </div>
-                  <Chip label={currentBodyCopy.badge} tone={C.warning} />
-                </div>
-                <div className="text-sm font-semibold mt-1" style={{ color: C.textPrimary }}>
-                  {currentBodyCopy.title}
-                </div>
-                <p className="text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
-                  {currentBodyCopy.text}
-                </p>
-              </div>
-
-              {workbenchLanes.map((lane) => (
-                <Button
-                  key={lane.label}
-                  type="button"
-                  onClick={() => stageLane(lane)}
-                  aria-label={`Stage ${lane.label} receipt`}
-                  className="h-auto justify-start rounded p-2 text-left"
-                  variant="secondary"
-                  style={{
-                    background: kind === lane.kind ? G.slabRaised : G.slab,
-                    border: `1px solid ${kind === lane.kind ? lane.tone : G.lineSoft}`,
-                    color: C.textSecondary,
-                  }}
-                >
-                  <span className="block w-full">
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: lane.tone }}>
-                        {lane.label}
-                      </span>
-                      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
-                        {lane.agent}
-                      </span>
-                    </span>
-                    <span className="block text-[11px] leading-snug mt-1" style={{ color: C.textMuted }}>
-                      {lane.meta}
-                    </span>
+            <details className="rounded p-2" aria-label="Workbench receipt tools" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+              <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                    Receipt tools
                   </span>
-                </Button>
-              ))}
-            </section>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <Chip label={currentBodyCopy.badge} tone={C.warning} />
+                    <Chip label="local only" tone={C.accent} />
+                  </div>
+                </div>
+              </summary>
+              <div className="mt-2 grid gap-1.5">
+                <div className="rounded p-2" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+                      {currentBodyCopy.label}
+                    </div>
+                    <Chip label={currentBodyCopy.badge} tone={C.warning} />
+                  </div>
+                  <div className="mt-1 text-xs font-semibold" style={{ color: C.textPrimary }}>
+                    {currentBodyCopy.title}
+                  </div>
+                  <p className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                    {currentBodyCopy.text}
+                  </p>
+                </div>
 
-            <WorkbenchReceiptChainStrip
-              draft={stagedDraftChain}
-              selectedEvidenceId={selectedEvidenceId}
-              selectedEvidence={evidenceDetail.data?.found ? evidenceDetail.data.evidence : null}
-              projectLabel={
-                projectId !== "none"
-                  ? projectOptions.find((project) => project.tasks.projectId === projectId)?.name ?? "linked project"
-                : null
-              }
-            />
+                <div className="grid grid-cols-2 gap-1 md:grid-cols-4" aria-label="Workbench receipt lanes">
+                  {workbenchLanes.map((lane) => (
+                    <Button
+                      key={lane.label}
+                      type="button"
+                      onClick={() => stageLane(lane)}
+                      aria-label={`Stage ${lane.label} receipt`}
+                      className="h-8 justify-start rounded px-2 text-left"
+                      variant="secondary"
+                      style={{
+                        background: kind === lane.kind ? G.slabRaised : G.slab,
+                        border: `1px solid ${kind === lane.kind ? lane.tone : G.lineSoft}`,
+                        color: C.textSecondary,
+                      }}
+                    >
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: lane.tone }} />
+                        <span className="truncate text-[10px] font-bold uppercase tracking-wider" style={{ color: kind === lane.kind ? lane.tone : C.textSecondary }}>
+                          {lane.label}
+                        </span>
+                        <span className="sr-only">
+                          {lane.agent}. {lane.meta}
+                        </span>
+                      </span>
+                    </Button>
+                  ))}
+                </div>
+
+                <WorkbenchReceiptChainStrip
+                  draft={stagedDraftChain}
+                  selectedEvidenceId={selectedEvidenceId}
+                  selectedEvidence={evidenceDetail.data?.found ? evidenceDetail.data.evidence : null}
+                  projectLabel={
+                    projectId !== "none"
+                      ? projectOptions.find((project) => project.tasks.projectId === projectId)?.name ?? "linked project"
+                    : null
+                  }
+                />
+              </div>
+            </details>
             {stagedDraftNotice && (
               <div
                 className="rounded p-1.5 text-[11px] leading-snug"
