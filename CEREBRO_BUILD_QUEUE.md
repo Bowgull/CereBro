@@ -2201,3 +2201,11 @@ Expected shape:
   page fetch, cookies, credentials, source save, media save, external write, or
   Watch Shelf save runs. Next Browser slice should continue reducing visible
   machinery in the open page state or harden bookmark deletion/rename if needed.
+- 2026-05-19 1927 EDT: Browser open-page machinery reduction landed. The open
+  frame header now shows only the page title, URL, and one page-actions menu.
+  Bookmark, Watch Shelf save, pins, local history, and proof stay available
+  inside that menu instead of appearing as exposed chips/buttons across the
+  primary browser surface. No backend behavior changed. No page fetch, source
+  save, cookie persistence, external write, fake progress, or Raven path
+  changed. Next Browser slice can harden bookmark rename/delete or continue
+  visual polish around the frame chrome.

@@ -714,45 +714,50 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                         {sandboxFrameTarget}
                       </div>
                     </div>
-                    <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto sm:shrink-0">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 text-[10px]"
-                        disabled={createWatchShelfItemFromOpenTab.isPending || selectedBrowserProposalId == null}
-                        title="Save this open page to Watch Shelf. No progress, thumbnail, source save, or external write."
-                        onClick={() => {
-                          if (selectedBrowserProposalId == null) return;
-                          createWatchShelfItemFromOpenTab.mutate({
-                            proposalId: selectedBrowserProposalId,
-                            category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
-                          });
-                        }}
-                      >
-                        {createWatchShelfItemFromOpenTab.isPending ? "Saving" : "Save Watch"}
-                      </Button>
-                      <details className="relative">
-                        <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                          Proof
-                        </summary>
-                        <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
-                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Open receipt</div>
-                          <div className="mt-1">Protected frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling ran.</div>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            <Chip label="sandbox" tone={C.accent} />
-                            <Chip label="local receipt" tone={C.gold} />
-                          </div>
+                    <details className="relative w-full sm:w-auto sm:shrink-0">
+                      <summary className="ml-auto flex h-7 w-8 cursor-pointer list-none items-center justify-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Open page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                        <MoreHorizontal size={14} strokeWidth={1.8} aria-hidden="true" />
+                      </summary>
+                      <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                        <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Page Actions</div>
+                        <div className="mt-1 grid gap-1">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 justify-start px-1.5 text-[11px]"
+                            disabled={createBrowserBookmarkFromOpenTab.isPending || selectedBrowserProposalId == null}
+                            role="menuitem"
+                            title="Save this open page as a local bookmark. No page fetch or source save."
+                            onClick={() => {
+                              if (selectedBrowserProposalId == null) return;
+                              createBrowserBookmarkFromOpenTab.mutate({ proposalId: selectedBrowserProposalId });
+                            }}
+                          >
+                            {createBrowserBookmarkFromOpenTab.isPending ? "Saving bookmark" : "Bookmark page"}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 justify-start px-1.5 text-[11px]"
+                            disabled={createWatchShelfItemFromOpenTab.isPending || selectedBrowserProposalId == null}
+                            role="menuitem"
+                            title="Save this open page to Watch Shelf. No progress, thumbnail, source save, or external write."
+                            onClick={() => {
+                              if (selectedBrowserProposalId == null) return;
+                              createWatchShelfItemFromOpenTab.mutate({
+                                proposalId: selectedBrowserProposalId,
+                                category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
+                              });
+                            }}
+                          >
+                            {createWatchShelfItemFromOpenTab.isPending ? "Saving to Watch Shelf" : "Save to Watch Shelf"}
+                          </Button>
                         </div>
-                      </details>
-                      {browserProjectPins.items.length > 0 && (
-                        <details className="relative">
-                          <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                            <Folder size={11} strokeWidth={1.8} aria-hidden="true" />
-                            Pins
-                          </summary>
-                          <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
-                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{browserProjectPins.title}</div>
+                        {browserProjectPins.items.length > 0 && (
+                          <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
+                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>{browserProjectPins.title}</div>
                             <div className="mt-1 grid gap-1">
                               {browserProjectPins.items.map((pin) => (
                                 <Button
@@ -762,6 +767,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                   variant="ghost"
                                   className="h-6 w-full justify-between px-1.5 text-[10px]"
                                   title={`${pin.target}. Local project pin only. No browser page opens.`}
+                                  role="menuitem"
                                   onClick={() => setBrowserNotice(`${pin.label} project pin selected. No page opened.`)}
                                 >
                                   <span className="truncate">{pin.label}</span>
@@ -771,17 +777,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                 </Button>
                               ))}
                             </div>
-                            <div className="mt-1">{browserProjectPins.noActionText}</div>
                           </div>
-                        </details>
-                      )}
-                      {selectedBrowserHistoryItems.length > 0 && (
-                        <details className="relative">
-                          <summary className="flex h-6 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                            History
-                          </summary>
-                          <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
-                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Local history</div>
+                        )}
+                        {selectedBrowserHistoryItems.length > 0 && (
+                          <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
+                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Local History</div>
                             <div className="mt-1 grid gap-1">
                               {selectedBrowserHistoryItems.map((item) => (
                                 <div key={item.id} className="rounded px-1.5 py-1" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}` }}>
@@ -790,11 +790,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                 </div>
                               ))}
                             </div>
-                            <div className="mt-1">Local receipt only. No cookies, credentials, page cache, or external write.</div>
                           </div>
-                        </details>
-                      )}
-                    </div>
+                        )}
+                        <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
+                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Proof</div>
+                          <div className="mt-1">Protected frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling ran.</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <Chip label="sandbox" tone={C.accent} />
+                            <Chip label="local receipt" tone={C.gold} />
+                          </div>
+                        </div>
+                      </div>
+                    </details>
                   </div>
                   <div className="relative overflow-hidden rounded p-2" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.96), rgba(2, 6, 6, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
                     <div className="pointer-events-none absolute left-2 top-2 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
