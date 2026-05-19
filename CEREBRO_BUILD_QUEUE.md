@@ -2177,3 +2177,11 @@ Expected shape:
   call, install, download, external write, fake progress, or Raven path changed.
   Next Browser slice should reduce the open flow steps or add honest bookmark
   storage, without pretending to own login sessions or service resume.
+- 2026-05-19 1910 EDT: Browser open package staging landed. The Browser
+  primary `Stage` action now stages the live-runner approval preview after the
+  local proposal, draft tab, review approval, Workbench body, Spock gate, and
+  recovery scaffold. This removes one exposed manual setup step while still
+  requiring explicit approval before readiness or frame open. No page opens, no
+  backend fetch runs, no cookies or credentials persist, no source save occurs,
+  and no external write runs. Next Browser slice should make the approval
+  return path clearer or add honest local bookmarks.

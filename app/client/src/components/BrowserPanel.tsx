@@ -508,7 +508,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
                     await createBrowserActionSpockGate.mutateAsync({ proposalId });
                     await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
-                    setBrowserNotice(`Browser proposal #${proposalId} prepared. Approval is waiting. No page opened.`);
+                    const liveApprovalPreview = await createBrowserLiveRunnerApprovalPreview.mutateAsync({
+                      proposalId,
+                      reason: "Prepare Browser open gate after the local proposal package is staged. This does not open the page.",
+                    });
+                    setBrowserNotice(
+                      `Browser proposal #${proposalId} prepared. Review approval #${approvalPreview.approval?.id ?? "pending"} and live gate #${liveApprovalPreview.approval?.id ?? "pending"} are waiting. No page opened.`,
+                    );
                   } catch {
                     setBrowserNotice("Browser preparation failed before any page opened.");
                     setPreparedApprovalId(null);

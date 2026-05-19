@@ -35699,3 +35699,86 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/client/src/components/BrowserPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, and address normalization. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice should reduce the open flow steps or add honest bookmark storage. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1910 EDT - Browser Open Package Staging
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser `Stage` now prepares both Browser review and
+  live-runner approval previews in one pass.
+- Backend/runtime: unchanged Browser runner policy.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- BrowserPanel `Stage` now creates the live-runner approval preview after the
+  proposal, draft tab, review approval, Workbench body, Spock gate, and recovery
+  scaffold are staged.
+- The status notice now names both the Browser review approval and the live
+  gate approval.
+- This removes one exposed manual setup step from the Browser open flow.
+- No approval is decided automatically.
+- No page opens.
+- No backend fetch, proxy, cookies, credentials, scraping, source save,
+  provider call, install, download, external write, fake capability, fake
+  progress, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1910 CereBro Session Handoff - browser-open-package-staging.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not completed. Browser proof tooling is not callable
+  in this session.
+
+Mockup fidelity:
+
+- Target used: Browser high-fidelity source-of-truth direction, workflow only.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: Browser stays lower-machinery by hiding one extra live-gate
+  setup step behind the primary stage action.
+- Deviations: approval decision, readiness, and open frame remain explicit.
+- Next fidelity gap: approval return path and bookmarks still need work.
+
+Drift check:
+
+- On path. This pass makes Browser more useful without pretending it has a
+  full browser engine.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- The user still needs to approve the staged gates before readiness/open frame.
+- Many sites may still refuse iframe rendering.
+- Browser still does not own cookies, durable login sessions, bookmarks,
+  service resume, source capture, page content cache, or Aang-driven browsing.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/browserActionProposalRouter.test.ts, app/server/routers/workbench.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, and open-package staging. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, execution route-record gate hardening, and Terminal/Project route-gate copy exist. Next Browser slice should make the approval return path clearer or add honest local bookmarks. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```
