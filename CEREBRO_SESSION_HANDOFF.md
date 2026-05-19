@@ -35432,3 +35432,91 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/lib/approvalPanelCopyModel.ts, app/client/src/components/ApprovalDashboardPanel.tsx, app/client/src/lib/ledgerCopyModel.ts, app/client/src/pages/Home.tsx, app/server/approvalPanelCopyModel.test.ts, app/server/ledgerCopyModel.test.ts, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/components/TerminalLabPanel.tsx, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, and mobile polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, and Approval/Ledger git-write runner-boundary clarity exist. Next critical slice should move to the next real V1 behavior gap after the push path now consistently says git remote writes are decision-only and manual in V1. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 1424 EDT - Execution Route Record Gate Hardening
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: unchanged in this slice.
+- Backend/runtime: execution proposals now require a saved route record before
+  `canExecute` can become true.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Execution proposals now derive `routeRecordId` from the task-linked runtime
+  route record.
+- `rowToProposal` now marks `route record` missing before task, Workbench body,
+  approval receipt, and not-run state checks.
+- `requiredBeforeExecution` now includes `route record`.
+- Targeted tests now create route-linked tasks for the successful read-only
+  runner path.
+- Added coverage proving an otherwise complete command contract remains blocked
+  when no route record exists.
+- Updated Project Lab push-contract expectations so route absence blocks before
+  any runner policy review.
+- No command allowlist expansion, git-write runner, backend schema change,
+  provider call, install, download, external write, fake capability, fake source
+  discovery, service resume, or Raven path changed.
+
+Files touched in this slice:
+
+- `app/server/routers/execution.ts`
+- `app/server/execution.contract.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1424 CereBro Session Handoff - execution-route-record-gate-hardening.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first as expected when the no-route assertion exposed the missing route gate.
+- `pnpm -C app exec vitest run server/execution.contract.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed after the route gate and test updates.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not needed because this is backend runner policy.
+
+Mockup fidelity:
+
+- Target used: no shell visual target in this slice.
+- Screenshot path: not applicable.
+- Matched elements: unchanged.
+- Deviations: none.
+- Next fidelity gap: visual proof still needs browser tooling before final 1:1
+  shell signoff.
+
+Drift check:
+
+- On path. This pass hardens the approval-gated execution core against running
+  work without the saved route spine.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- Route linkage is derived by latest `runtime_route_records.task_id`, not a
+  stored `execution_action_proposals.route_record_id` column.
+- Existing direct-task command proposals will now stay blocked until a route
+  record exists for the task.
+- Terminal Lab and Project Lab UI should be checked next to make sure the new
+  missing `route record` state reads clearly.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/server/routers/execution.ts, app/server/execution.contract.test.ts, app/client/src/lib/terminalExecutionActionModel.ts, app/client/src/components/TerminalLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/routeActionModel.ts, app/server/runtimeExecutionReadiness.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, and mobile polish. Terminal Lab runner-state label hardening, read-only runner path containment hardening, Project Lab push contract runner-state clarity, Approval/Ledger git-write runner-boundary clarity, and execution route-record gate hardening exist. Next critical slice should inspect Terminal Lab and Project Lab UI for the new missing `route record` state, then move to the next real V1 behavior gap. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

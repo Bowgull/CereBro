@@ -2148,3 +2148,14 @@ Expected shape:
   external write, fake capability, or Raven path changed. Next critical slice
   should move to the next real V1 behavior gap after this approval/ledger
   boundary is consistent across the push path.
+- 2026-05-19 1424 EDT: Execution route-record gate hardening landed. Execution
+  proposals now derive a linked runtime route record from their task and keep
+  `canExecute` false until that route record exists alongside task, Workbench
+  body, approved approval receipt, and not-run state. Targeted tests now cover
+  the no-route block, route-linked read-only success path, mutating-command
+  block, path-containment block, and Project Lab push contracts staying blocked
+  before a route exists. No command allowlist expansion, git-write runner,
+  schema change, provider call, install, download, external write, fake
+  capability, or Raven path changed. Next critical slice should inspect how
+  Terminal Lab/Project Lab surface the new `route record` missing state and
+  then move to the next real V1 behavior gap.

@@ -9,13 +9,21 @@ function createCaller() {
   });
 }
 
+async function createRoutedTask(caller: ReturnType<typeof createCaller>, text: string) {
+  const route = await caller.runtime.commitRoute({
+    text,
+    mode: "build",
+  });
+  const task = await caller.runtime.createTaskFromRouteRecord({
+    routeRecordId: route.record.id,
+  });
+  return { routeRecordId: route.record.id, task: task.task };
+}
+
 describe("execution action contract", () => {
   it("keeps command execution blocked until the local contract is complete, then runs one approved read-only command", async () => {
     const caller = createCaller();
-    const task = await caller.tasks.create({
-      title: "Execution contract test task",
-      agent: "tony",
-    });
+    const { routeRecordId, task } = await createRoutedTask(caller, "Build CereBro execution contract test task");
     const preview = await caller.terminalLab.previewCommand({
       command: "pwd",
       cwd: "/Users/lindsaybell/Desktop/CereBro",
@@ -72,6 +80,7 @@ describe("execution action contract", () => {
       workbenchEvidenceId: evidence.evidence.id,
     });
     expect(ready.proposal?.approvalStatus).toBe("approved");
+    expect(ready.proposal?.routeRecordId).toBe(routeRecordId);
     expect(ready.proposal?.readiness.canExecute).toBe(true);
 
     const runnerGuard = await caller.execution.runApprovedAction({
@@ -186,10 +195,7 @@ describe("execution action contract", () => {
 
   it("blocks approved contracts that are not read-only allowlisted commands", async () => {
     const caller = createCaller();
-    const task = await caller.tasks.create({
-      title: "Execution mutating contract test task",
-      agent: "tony",
-    });
+    const { task } = await createRoutedTask(caller, "Build CereBro blocked mutating execution contract test task");
     const preview = await caller.terminalLab.previewCommand({
       command: "rm -rf app/client/public/sprites",
       cwd: "/Users/lindsaybell/Desktop/CereBro",
@@ -228,12 +234,60 @@ describe("execution action contract", () => {
     expect(blocked.reason).toContain("Only approved read-only command contracts");
   });
 
-  it("blocks read-only commands that target paths outside the project boundary", async () => {
+  it("blocks otherwise complete command contracts until a route record exists", async () => {
     const caller = createCaller();
     const task = await caller.tasks.create({
-      title: "Execution path containment test task",
+      title: "Execution no-route contract test task",
       agent: "tony",
     });
+    const preview = await caller.terminalLab.previewCommand({
+      command: "pwd",
+      cwd: "/Users/lindsaybell/Desktop/CereBro",
+      taskId: task.id,
+    });
+    const approvalPreview = await caller.terminalLab.createApprovalPreviewFromObservation({
+      observationId: preview.observationId,
+      reason: "Test approval preview only.",
+    });
+    const approvalId = approvalPreview.approval?.id ?? -1;
+    await caller.approvals.decide({
+      id: approvalId,
+      decision: "approved",
+      reason: "Test approval receipt.",
+    });
+    const evidence = await caller.workbench.createEvidence({
+      kind: "terminal_output",
+      title: "No-route execution contract body",
+      summary: "Body exists, approval exists, but no saved route record exists for this task.",
+      targetUri: `terminal_lab:observation:${preview.observationId}`,
+      taskId: task.id,
+      commandObservationId: preview.observationId,
+      ownerAgent: "tony",
+      routeAgent: "tony",
+      permissionClass: "manual_note",
+    });
+    const proposal = await caller.execution.proposeFromCommandObservation({
+      observationId: preview.observationId,
+      approvalId,
+      workbenchEvidenceId: evidence.evidence.id,
+    });
+    expect(proposal.proposal?.routeRecordId).toBeNull();
+    expect(proposal.proposal?.readiness.canExecute).toBe(false);
+    expect(proposal.proposal?.readiness.missing).toContain("route record");
+
+    const blocked = await caller.execution.runApprovedAction({
+      proposalId: proposal.proposal?.id ?? -1,
+      approved: true,
+    });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.wouldExecute).toBe(false);
+    expect(blocked.resultState).toBe("blocked_before_runner");
+    expect(blocked.reason).toContain("route record");
+  });
+
+  it("blocks read-only commands that target paths outside the project boundary", async () => {
+    const caller = createCaller();
+    const { task } = await createRoutedTask(caller, "Build CereBro execution path containment test task");
     const preview = await caller.terminalLab.previewCommand({
       command: "cat /etc/hosts",
       cwd: "/Users/lindsaybell/Desktop/CereBro",
@@ -326,7 +380,7 @@ describe("execution action contract", () => {
     expect(firstRun.ok).toBe(false);
     expect(firstRun.wouldExecute).toBe(false);
     expect(["blocked_before_runner", "blocked_by_runner_policy"]).toContain(firstRun.resultState);
-    expect(firstRun.reason).toMatch(/Workbench receipt body|Only approved read-only command contracts/);
+    expect(firstRun.reason).toMatch(/route record|Workbench receipt body|Only approved read-only command contracts/);
 
     const evidence = await caller.workbench.createEvidence({
       kind: "validation_note",
@@ -361,7 +415,8 @@ describe("execution action contract", () => {
     const proposal = proposals.items.find((item) => item.id === ready.proposalId);
     expect(proposal?.actionType).toBe("project_manual_push");
     expect(proposal?.riskClass).toBe("git_remote_write");
-    expect(proposal?.readiness.canExecute).toBe(true);
+    expect(proposal?.readiness.canExecute).toBe(false);
+    expect(proposal?.readiness.missing).toContain("route record");
 
     const approvalStatus = ready.contract?.approvalStatus === "approved" ? "approved" : "pending";
     const projectApprovals = await caller.approvals.queue({
@@ -405,8 +460,8 @@ describe("execution action contract", () => {
     });
     expect(blocked.ok).toBe(false);
     expect(blocked.wouldExecute).toBe(false);
-    expect(blocked.resultState).toBe("blocked_by_runner_policy");
-    expect(blocked.reason).toContain("Only approved read-only command contracts");
-    expect(blocked.gates.join(" ")).toContain("git write");
+    expect(blocked.resultState).toBe("blocked_before_runner");
+    expect(blocked.reason).toContain("route record");
+    expect(blocked.gates.join(" ")).toContain("route record");
   });
 });

@@ -205,7 +205,9 @@ function rowToProposal(row: ProposalJoinRow) {
   const taskId = row.task_id == null ? null : Number(row.task_id);
   const workbenchEvidenceId = row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id);
   const approvalId = row.approval_id == null ? null : Number(row.approval_id);
+  const routeRecordId = row.route_record_id == null ? null : Number(row.route_record_id);
   const missing: string[] = [];
+  if (routeRecordId == null) missing.push("route record");
   if (taskId == null) missing.push("local task record");
   if (workbenchEvidenceId == null) missing.push("Workbench receipt body");
   if (approvalId == null) missing.push("approval receipt");
@@ -227,6 +229,7 @@ function rowToProposal(row: ProposalJoinRow) {
     projectId: row.project_id == null ? null : Number(row.project_id),
     projectPath: row.project_path == null ? null : String(row.project_path),
     taskId,
+    routeRecordId,
     approvalId,
     approvalStatus,
     workbenchEvidenceId,
@@ -241,6 +244,7 @@ function rowToProposal(row: ProposalJoinRow) {
       executionState,
       missing,
       requiredBeforeExecution: [
+        "route record",
         "local action proposal",
         "local task record",
         "Workbench receipt body",
@@ -265,10 +269,18 @@ async function proposalById(id: number) {
       SELECT eap.*,
              a.status AS approval_status,
              a.decided_at AS approval_decided_at,
-             p.path AS project_path
+             p.path AS project_path,
+             rr.id AS route_record_id
       FROM execution_action_proposals eap
       LEFT JOIN approvals a ON a.id = eap.approval_id
       LEFT JOIN projects p ON p.id = eap.project_id
+      LEFT JOIN runtime_route_records rr ON rr.id = (
+        SELECT latest_route.id
+        FROM runtime_route_records latest_route
+        WHERE latest_route.task_id = eap.task_id
+        ORDER BY latest_route.created_at DESC, latest_route.id DESC
+        LIMIT 1
+      )
       WHERE eap.id = ?
       LIMIT 1
     `,
@@ -435,10 +447,18 @@ export const executionRouter = router({
           SELECT eap.*,
                  a.status AS approval_status,
                  a.decided_at AS approval_decided_at,
-                 p.path AS project_path
+                 p.path AS project_path,
+                 rr.id AS route_record_id
           FROM execution_action_proposals eap
           LEFT JOIN approvals a ON a.id = eap.approval_id
           LEFT JOIN projects p ON p.id = eap.project_id
+          LEFT JOIN runtime_route_records rr ON rr.id = (
+            SELECT latest_route.id
+            FROM runtime_route_records latest_route
+            WHERE latest_route.task_id = eap.task_id
+            ORDER BY latest_route.created_at DESC, latest_route.id DESC
+            LIMIT 1
+          )
           ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
           ORDER BY eap.created_at DESC, eap.id DESC
           LIMIT ?
