@@ -841,44 +841,46 @@ function KeepHomeDock({
   const actions: Array<{
     label: string;
     meta: string;
-    value: string;
     tone: string;
-    target: NavId;
+    target?: NavId;
+    disabled?: boolean;
   }> = [
     {
-      label: "Workbench",
-      meta: "Open Workbench",
-      value: "Workbench",
+      label: "Browser",
+      meta: "Open browser surface",
       tone: C.accent,
-      target: "workbench",
+      target: "browser",
     },
     {
-      label: "Resume",
-      meta: "Active work",
-      value: heroesCount > 0 ? `${heroesCount} session${heroesCount === 1 ? "" : "s"}` : "No sessions",
-      tone: heroesCount > 0 ? C.success : C.textMuted,
-      target: "projects",
+      label: "Terminal",
+      meta: "Open Terminal Lab",
+      tone: C.success,
+      target: "terminal",
     },
     {
-      label: "Approvals",
-      meta: "Waiting gates",
-      value: "Review",
-      tone: C.warning,
-      target: "approvals",
+      label: "Files",
+      meta: "File lane not wired",
+      tone: C.textMuted,
+      disabled: true,
     },
     {
-      label: "Capture",
-      meta: "Hedwig intake",
-      value: "Inbox",
+      label: "Sources",
+      meta: "Open source review",
       tone: C.gold,
-      target: "inbox",
+      target: "sources",
+    },
+    {
+      label: "Outputs",
+      meta: "Open saved outputs",
+      tone: C.warning,
+      target: "outputs",
     },
   ];
 
   return (
     <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
       <div
-        className="pointer-events-auto grid grid-cols-2 lg:grid-cols-[0.95fr_repeat(4,1fr)] gap-1.5 rounded p-1.5"
+        className="pointer-events-auto grid grid-cols-[0.9fr_repeat(5,minmax(0,1fr))] gap-1 rounded p-1.5 max-lg:grid-cols-5"
         style={{
           background: "rgba(5, 9, 8, 0.92)",
           border: `1px solid ${mockupShell.marbleLine}`,
@@ -887,15 +889,15 @@ function KeepHomeDock({
         }}
         aria-label="Keep first actions"
       >
-        <div className="hidden lg:block px-2 py-1">
-          <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-            Keep State
-          </div>
-          <div className="text-xs font-semibold mt-1" style={{ color: C.textPrimary }}>
-            {activeAgents > 0 ? `${activeAgents} chamber${activeAgents === 1 ? "" : "s"} moving` : "Calm watch"}
-          </div>
-          <div className="hidden xl:block text-[10px] leading-snug mt-1" style={{ color: C.textMuted }}>
-            Ask through Aang. Cortana routes the work.
+        <div className="hidden lg:flex min-w-0 items-center gap-2 rounded px-2 py-1" style={{ background: "rgba(3, 8, 7, 0.55)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
+          <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: activeAgents > 0 ? C.success : C.textMuted, boxShadow: activeAgents > 0 ? `0 0 12px ${C.success}44` : undefined }} />
+          <div className="min-w-0">
+            <div className="truncate text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+              Keep
+            </div>
+            <div className="truncate text-[10px] leading-none" style={{ color: C.textMuted }}>
+              {activeAgents > 0 ? `${activeAgents} moving` : heroesCount > 0 ? `${heroesCount} active` : "Calm watch"}
+            </div>
           </div>
         </div>
 
@@ -903,23 +905,24 @@ function KeepHomeDock({
           <Button
             key={action.label}
             type="button"
-            onClick={() => onNavigate(action.target)}
+            onClick={() => action.target && onNavigate(action.target)}
             aria-label={`${action.label}: ${action.meta}`}
+            disabled={action.disabled}
             variant="outline"
-            className="h-auto justify-start whitespace-normal px-2 py-1.5 text-left"
-            style={{ background: mockupShell.plaque, border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textSecondary, boxShadow: mockupShell.bevel }}
+            className="h-8 justify-center whitespace-nowrap px-2 text-center"
+            style={{
+              background: action.disabled ? "rgba(5, 11, 10, 0.46)" : mockupShell.plaque,
+              border: `1px solid ${action.disabled ? shellFrame.shellLineSoft : mockupShell.marbleLineSoft}`,
+              color: action.disabled ? C.textMuted : C.textSecondary,
+              boxShadow: action.disabled ? "inset 0 1px 6px rgba(0, 0, 0, 0.42)" : mockupShell.bevel,
+              opacity: action.disabled ? 0.58 : 1,
+            }}
+            title={action.meta}
           >
-            <span className="block w-full min-w-0">
-              <span className="flex items-center justify-between gap-2">
-                <span className="text-[10px] uppercase tracking-widest" style={{ color: action.tone }}>
-                  {action.label}
-                </span>
-                <span className="hidden xl:inline text-[10px]" style={{ color: C.textMuted }}>
-                  {action.meta}
-                </span>
-              </span>
-              <span className="block truncate text-[11px] font-semibold mt-1" style={{ color: C.textPrimary }}>
-                {action.value}
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: action.tone }} />
+              <span className="truncate text-[10px] font-semibold uppercase tracking-wider" style={{ color: action.disabled ? C.textMuted : C.textPrimary }}>
+                {action.label}
               </span>
             </span>
           </Button>

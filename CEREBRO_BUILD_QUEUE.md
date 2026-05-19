@@ -2089,3 +2089,11 @@ Expected shape:
   write, fake capability, or Raven path was added. Next shell slice should
   compare the whole shell against the 1:1 mockup and choose the remaining
   highest-fidelity gap.
+- 2026-05-19 1211 EDT: Keep home dock 1:1 polish landed. The old large
+  workflow dock over the castle was replaced with quiet OS tabs for Browser,
+  Terminal, Files, Sources, and Outputs. Files is disabled because the file lane
+  is not wired yet, so the UI matches the mockup shape without implying fake
+  function. This is visual shell polish only: no nav behavior beyond existing
+  targets, backend route, schema, provider call, install, download, external
+  write, fake capability, or Raven path was added. Next shell slice should
+  continue the mockup compare on the Keep top strip or center castle framing.

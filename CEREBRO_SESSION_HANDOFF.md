@@ -34856,3 +34856,85 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the broader shell 1:1 pass. Browser chrome, Browser empty-state, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile polish, main shell frame corner/control-node polish, main shell header chrome polish, main shell left rail plaque polish, main shell command bar material polish, and main shell right rail shape polish exist. Next safest slice is a full shell compare against the approved 1:1 mockup followed by the highest-impact remaining shell mismatch. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, or Raven paths. Browser-proof changes when the proof tool is available.
 ```
+
+## 2026-05-19 1211 EDT - Keep Home Dock 1:1 Polish
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Keep home dock moved closer to the approved
+  high-fidelity shell mockup.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Replaced the large workflow dock over the castle with quiet OS tabs.
+- Dock tabs now read: Browser, Terminal, Files, Sources, Outputs.
+- Browser, Terminal, Sources, and Outputs route to existing surfaces.
+- Files is visible but disabled because the file lane is not wired yet.
+- Kept the small Keep state read without turning it into a large dashboard
+  block.
+- No backend route, schema, provider call, install, download, external write,
+  fake capability, fake source discovery, service resume, or Raven path was
+  added.
+
+Files touched in this slice:
+
+- `app/client/src/pages/Home.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 1211 CereBro Session Handoff - keep-home-dock-1-1-polish.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- Browser visual proof was not completed. The browser plugin did not expose a
+  callable browser tool after discovery in this session, Playwright is not
+  installed in the available Node path, and Computer Use is blocked from
+  operating the Codex app.
+
+Mockup fidelity:
+
+- Target used: approved main shell high-fidelity mockup.
+- Screenshot path: unavailable in this session because browser proof tooling is
+  not callable.
+- Matched elements: the Keep home dock now follows the quiet OS tab pattern
+  under the castle instead of the prior large workflow-button strip.
+- Deviations: Files is disabled because a real Files surface is not wired yet.
+  The castle artwork and top Keep strip still do not match the approved mockup
+  1:1.
+- Next fidelity gap: continue the mockup compare on the Keep top strip or
+  center castle framing.
+
+Drift check:
+
+- On path. This pass changes Keep home dock presentation only.
+- No new primary surface.
+- No fake file browser, fake browser engine, fake watch progress, fake source
+  discovery, unsafe site automation, provider use, install, pull, external
+  write, or Raven path.
+
+Known risks:
+
+- This is UI polish only.
+- Browser visual proof could not run with the currently available tools in this
+  turn.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration file.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/workbenchBrowserModel.test.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and app/server/cerebroDb.ts first. Continue the broader shell 1:1 pass. Browser chrome, Browser empty-state, Browser open-frame/Watch Shelf polish, Browser footer machinery collapse, Browser mobile polish, main shell frame corner/control-node polish, main shell header chrome polish, main shell left rail plaque polish, main shell command bar material polish, main shell right rail shape polish, and Keep home dock 1:1 polish exist. Next safest slice is Keep top strip or center castle framing against the approved high-fidelity mockup. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, or Raven paths. Browser-proof changes when the proof tool is available.
+```
