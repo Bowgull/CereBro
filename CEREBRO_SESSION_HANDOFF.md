@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-18 2358 EDT
+Last updated: 2026-05-19 0005 EDT
 
 ## Current North Star
 
@@ -20,6 +20,69 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 0005 EDT - Workbench Browser Safety Read Gate
+
+### What Changed
+- Hid the Browser `Safety read` disclosure on the empty Browser default state.
+- Kept the safety/proof readback available when a browser address draft exists
+  or a Browser proposal is focused.
+- Preserved the runner readiness, recent proposal, and blocked-runner controls
+  inside the safety read when it appears.
+- Reduced default Browser machinery without changing any browser execution
+  behavior.
+
+### Files Touched
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- Local Playwright proof against `http://localhost:3000/` opened Workshop and
+  captured the empty Browser state with `Safety read` hidden.
+- Local Playwright proof typed `https://example.com` into the Browser address
+  field and confirmed `Safety read` returns for the staged address draft.
+- Screenshot proof saved locally at:
+  - `output/playwright/workbench-safety-read-hidden-empty-browser.png`
+  - `output/playwright/workbench-safety-read-visible-staged-address.png`
+  - `output/playwright/workbench-safety-read-visible-after-scroll.png`
+
+### Mockup Fidelity
+- Target used: locked Browser and Watch Shelf high-fidelity mockup.
+- Matched elements: Browser-first Workbench, automatic quiet safety on the
+  default state, hidden proof machinery until there is a target to evaluate,
+  one address/search field, and no fake page open.
+- Deviations: no real page render, no real tab persistence, no saved Watch
+  Shelf rows, no playback, no login/session state, and no external page open.
+- Next fidelity gap: return to the manual browser runner contract when gates
+  are complete, or continue visual polish on the remaining lower disclosure
+  density.
+
+### Drift Check
+- On path. This follows the Browser mockup rule that security is mostly
+  automatic and Spock surfaces only meaningful blocks.
+- It does not add a new primary surface, fake Browser/Watch behavior,
+  open/fetch/search pages, save sources, persist watch progress, call
+  providers/models, install, pull, write externally, or touch Raven paths.
+
+### Known Risks
+- Safety read is hidden on the empty Browser state. That is intentional because
+  there is no page target to inspect.
+- The Browser shell remains a blocked local surface until the approved manual
+  runner contract is implemented.
+
+### Storage Impact
+- No schema change.
+- No database rows were written by the code change.
+- Three local screenshot proofs were written under ignored `output/playwright/`.
+- Obsidian session archive snapshot and index entry appended.
+
+### Next-session Starter Prompt
+
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, DESIGN.md, app/client/src/components/WorkbenchPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, and app/server/routers/workbench.ts first. Continue CereBro on the locked Browser/Watch Shelf path. Workbench now opens Browser first, with receipt tools, Project Receipts, Manual receipt, Workbench Rules, Receipt archive, and Browser safety/proof machinery hidden by default. Safety read appears only when a browser draft or focused proposal exists. Next best slice is the manual browser runner contract if gates are complete, or a final lower-disclosure density pass if staying frontend-only. Do not add a new primary surface, fake Browser/Watch behavior, open/fetch/search pages, save sources, persist watch progress, call providers/models, install/pull, write externally, or touch Raven paths. Prefer in-app Browser proof if available; otherwise state the fallback. Run targeted tests when behavior changes, pnpm check for app code changes, browser-proof UI changes, update handoff, archive to Obsidian, commit, and push when clean.
+```
 
 ## 2026-05-18 2358 EDT - Workbench Manual Receipt Collapse
 

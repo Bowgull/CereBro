@@ -391,6 +391,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   });
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
+  const showBrowserSafetyRead = browserDraft.kind !== "empty" || selectedBrowserProposalId != null;
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
   const visibleEvidenceItems = evidenceItems.slice(0, 12);
@@ -1182,6 +1183,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 )}
 
+                {showBrowserSafetyRead && (
                 <details className="rounded p-2" aria-label="Browser safety read" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
                   <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1902,6 +1904,7 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                 </div>
                   </div>
                 </details>
+                )}
               </div>
             </section>
 

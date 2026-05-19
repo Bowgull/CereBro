@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-18 2358 EDT
+Last updated: 2026-05-19 0005 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 0005 EDT: hid the Browser `Safety read` disclosure on the empty
+  Browser default state. Safety/proof readback returns when a browser address
+  draft exists or a Browser proposal is focused. Screenshots saved at
+  `output/playwright/workbench-safety-read-hidden-empty-browser.png`,
+  `output/playwright/workbench-safety-read-visible-staged-address.png`, and
+  `output/playwright/workbench-safety-read-visible-after-scroll.png`. No page
+  open, fetch, search request, Watch Shelf save, source save, provider call,
+  install, external write, or Raven path was added.
 - 2026-05-18 2358 EDT: collapsed the visible Workbench receipt creation form
   into a compact `Manual receipt` disclosure. Receipt kind, title, summary,
   links, details, temporary preview, and local save controls remain reachable
