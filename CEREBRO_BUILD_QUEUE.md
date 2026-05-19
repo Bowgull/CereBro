@@ -1935,3 +1935,11 @@ Expected shape:
   saves, backend page fetch, provider call, install, credential handling,
   download, or external write was added. Next Browser slice should add reload
   controls, collapse runner machinery after open, or polish Watch Shelf cards.
+- 2026-05-19 0803 EDT: Browser sandbox-frame reload landed. The Workbench router
+  records `sandbox_frame_reload_requested` only for an actually open Browser
+  tab, and the client remounts the iframe with the same URL after the receipt.
+  No backend page fetch, history persistence, source save, Watch Shelf save,
+  Workbench capture, credential action, provider call, install, download, or
+  external write was added. Next Browser slice should collapse runner machinery
+  after frame open, add simple local history records, or polish Watch Shelf
+  cards.

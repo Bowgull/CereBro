@@ -1521,6 +1521,84 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("blocks sandbox frame reload until the Browser tab is open", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/reload-blocked",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const reload = await caller.workbench.recordBrowserSandboxFrameReload({
+      proposalId: created.proposal.id,
+    });
+
+    expect(reload.ok).toBe(false);
+    expect(reload.mode).toBe("browser_sandbox_frame_reload_blocked");
+    expect(reload.canReloadFrame).toBe(false);
+    expect(reload.audit).toBeNull();
+    expect(reload.gates).toContain("A real open Browser tab is required before reload.");
+    expect(reload.noActionTaken).toContain("No backend page fetch ran.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
+  it("records sandbox frame reload from an open Browser tab without backend fetch or source writes", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/reload-open",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({ proposalId: created.proposal.id });
+    await caller.workbench.recordBrowserSandboxFrameOpen({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const reload = await caller.workbench.recordBrowserSandboxFrameReload({
+      proposalId: created.proposal.id,
+    });
+
+    expect(reload.ok).toBe(true);
+    expect(reload.mode).toBe("browser_sandbox_frame_reload_recorded");
+    expect(reload.canReloadFrame).toBe(true);
+    expect(reload.canExecute).toBe(false);
+    expect(reload.audit.runnerState).toBe("sandbox_frame_reload_requested");
+    expect(reload.audit.canOpenPage).toBe(true);
+    expect(reload.audit.canExecute).toBe(false);
+    expect(reload.noActionTaken).toContain("No backend page fetch ran.");
+    expect(reload.noActionTaken).toContain("No source saved.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits + 1);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("reads live-runner approval detail as a blocked Browser runner gate", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

@@ -33272,3 +33272,86 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. The sandbox-frame render lane and local Watch Shelf save exist. Next safest slice is either collapse runner machinery after frame open, add reload/history controls for sandboxed frames, or polish Watch Shelf cards toward the approved Browser mockup without adding fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
 ```
+
+## 2026-05-19 0803 EDT - Browser Sandbox Reload
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser reload now works for open sandbox-frame pages.
+- Backend/runtime: added a local reload receipt before the iframe remounts.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `recordBrowserSandboxFrameReload`.
+- The route blocks unless the Browser tab is actually `open`.
+- The route records a local `sandbox_frame_reload_requested` audit receipt.
+- Browser reload icon now enables only when a sandbox frame is open.
+- Clicking reload remounts the sandbox iframe with the same URL after the
+  receipt records.
+- No backend page fetch, history persistence, source save, Watch Shelf save,
+  Workbench capture, credential action, provider call, install, download, or
+  external write was added.
+
+Files touched in this slice:
+
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0803 CereBro Session Handoff - browser-sandbox-reload.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 41 tests.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 51 tests.
+- Browser proof on localhost:
+  `output/playwright/browser-sandbox-frame-reload.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/browser-sandbox-frame-reload.png`.
+- Matched elements: reload now behaves like a real browser control while the
+  Browser keeps its compact URL bar, tabs, and page viewport.
+- Deviations: back/forward/history remain disabled. Reload remounts the
+  sandbox frame; it is not a full browser engine reload.
+- Next fidelity gap: collapse runner machinery after frame open, add simple
+  history records, or polish Watch Shelf cards.
+
+Drift check:
+
+- On path. This pass extends the approved Browser render lane.
+- No new primary surface.
+- No fake browser history, fake watch progress, or fake source discovery.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Some framed sites still block rendering. Reload cannot bypass frame blockers.
+- Local dev database contains proof/test reload audit rows.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Local dev database received test/proof reload audit rows.
+- One screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser V1 critical path. Sandbox-frame render, reload, and local Watch Shelf save exist. Next safest slice is collapse runner machinery after frame open, add simple local history records for sandbox frames, or polish Watch Shelf cards toward the approved Browser mockup without fake thumbnails/progress/source discovery. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, or Raven paths. Screenshot-proof Browser changes.
+```

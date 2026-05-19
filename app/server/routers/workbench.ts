@@ -1863,6 +1863,99 @@ export const workbenchRouter = router({
       };
     }),
 
+  recordBrowserSandboxFrameReload: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "browser_sandbox_frame_reload_blocked" as const,
+          proposal,
+          tab,
+          canReloadFrame: false,
+          canExecute: false,
+          writesExternal: false,
+          audit: null,
+          gates: [
+            "Browser sandbox frame reload remains blocked.",
+            "A real open Browser tab is required before reload.",
+            "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+          ],
+          noActionTaken: [
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'sandbox_frame_reload_requested', 1, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser sandbox frame reload requested for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            "The client may remount the sandboxed Browser frame with the same URL.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No Workbench capture created.",
+            "No credential action ran.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_sandbox_frame_reload_recorded" as const,
+        proposal,
+        tab,
+        canReloadFrame: true,
+        canExecute: false,
+        writesExternal: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "Open tab receipt is present.",
+          "Sandbox frame reload receipt is recorded.",
+          "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No Watch Shelf item saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   createBrowserLiveRunnerApprovalPreview: publicProcedure
     .input(
       z.object({

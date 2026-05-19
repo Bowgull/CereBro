@@ -67,6 +67,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [browserNotice, setBrowserNotice] = useState<string | null>(null);
   const [sandboxFrameTarget, setSandboxFrameTarget] = useState<string | null>(null);
   const [sandboxFrameProposalId, setSandboxFrameProposalId] = useState<number | null>(null);
+  const [sandboxFrameReloadKey, setSandboxFrameReloadKey] = useState(0);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
@@ -187,6 +188,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const recordBrowserSandboxFrameReload = trpc.workbench.recordBrowserSandboxFrameReload.useMutation({
+    onSuccess: (result) => {
+      if (result.ok) {
+        setSandboxFrameReloadKey((key) => key + 1);
+        setBrowserNotice(`Sandbox frame reloaded for ${result.tab.tabId}. No backend fetch ran.`);
+      } else {
+        setBrowserNotice("Sandbox frame reload blocked. Open the page first.");
+      }
+      utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      utils.ledger.overview.invalidate();
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -238,7 +251,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     runBrowserLiveRunnerBlocked.isPending ||
     prepareBrowserLiveRunnerOpenReadiness.isPending ||
     recordBrowserSandboxFrameOpen.isPending ||
-    createWatchShelfItemFromOpenTab.isPending;
+    createWatchShelfItemFromOpenTab.isPending ||
+    recordBrowserSandboxFrameReload.isPending;
 
   useEffect(() => {
     let raw: string | null = null;
@@ -258,6 +272,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setPreparedApprovalId(null);
       setSandboxFrameTarget(null);
       setSandboxFrameProposalId(null);
+      setSandboxFrameReloadKey(0);
     } catch {
       setBrowserNotice("Browser focus could not be read. No page opened.");
     }
@@ -376,7 +391,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">
               <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
             </Button>
-            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser reload planned">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 px-0"
+              disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
+              aria-label="Reload sandbox frame"
+              title={hasOpenSandboxFrame ? "Reload the sandbox frame. No backend fetch runs." : "Open a page before reload."}
+              onClick={() => {
+                if (selectedBrowserProposalId == null) return;
+                recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
+              }}
+            >
               <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
             <Input
@@ -558,6 +585,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     </div>
                   </div>
                   <iframe
+                    key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
                     title="CereBro sandbox browser frame"
                     src={sandboxFrameTarget}
                     sandbox="allow-scripts allow-forms"
