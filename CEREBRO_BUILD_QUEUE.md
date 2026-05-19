@@ -1902,3 +1902,11 @@ Expected shape:
   fetch, or external write. `CEREBRO_UI_TRUTH_PASS.md` is active for live-vs-
   mockup comparison. Next Browser slice should polish this direct surface
   toward the approved 1:1 mockup or build the real manual runner contract.
+- 2026-05-19 0730 EDT: Browser direct surface now reads the live-runner gate
+  for a staged Browser proposal. It shows open-blocked state, missing gate
+  count, launch gate reason, latest audit, and can stage the separate
+  live-runner approval or write a blocked runner audit without opening a page.
+  Next Browser slice should either build the real manual browser runner
+  contract with tests or collapse the runner machinery once a safe page render
+  lane exists. Do not fake page rendering, Watch Shelf saves, source discovery,
+  or external actions.

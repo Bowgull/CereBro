@@ -32916,3 +32916,93 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, and app/client/src/components/WorkbenchPanel.tsx first. Continue the UI fidelity track only if the slice moves the live shell or Browser/Watch Shelf closer to the approved 1:1 mockups. Next safest UI slice is reducing generic receipt machinery below Browser or moving to final custom shell/icon treatment. Do not create a new Browser primary surface without approval. Preserve the castle and do not fake browser/watch behavior. Screenshot-proof the changed surface and include the required Mockup fidelity closeout line.
 ```
+
+## 2026-05-19 0730 EDT - Browser Runner Gate Readback
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: Browser direct surface now shows the live-runner gate
+  for a staged Browser proposal.
+- Backend/runtime: existing runner preflight, launch gate, live approval
+  preview, and blocked audit contracts are surfaced from Browser.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added compact Runner Gate readback to the direct Browser current-page body
+  when a staged Browser proposal is selected.
+- Shows proposal id, open-blocked state, missing gate count, next runner action,
+  launch gate reason, latest blocked audit, and no-action text.
+- Added Browser-local actions to stage the separate live-runner approval preview
+  and to write a blocked live-runner audit.
+- Kept page opening blocked. No page render, fetch, login, save, source write,
+  Watch Shelf save, provider call, install, or external write was added.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 0730 CereBro Session Handoff - browser-runner-gate-readback.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm -C app check` passed.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed, 43 tests.
+- Browser proof on localhost:
+  `output/playwright/browser-runner-gate-readback.png`
+  `output/playwright/browser-runner-gate-live-approval.png`
+  `output/playwright/browser-runner-gate-blocked-audit.png`
+
+Mockup fidelity:
+
+- Target used: approved Browser and Watch Shelf high-fidelity mockup.
+- Screenshot path:
+  `output/playwright/browser-runner-gate-readback.png`,
+  `output/playwright/browser-runner-gate-live-approval.png`, and
+  `output/playwright/browser-runner-gate-blocked-audit.png`.
+- Matched elements: Browser owns the OS zone, draft tabs stay visible, URL bar
+  remains central, project pins remain quiet, and runner status is compact.
+- Deviations: Runner Gate is visible after staging because the live runner is
+  not implemented yet. Final 1:1 mockup should hide this machinery once the
+  browser can safely render pages behind the proper approval gates.
+- Next fidelity gap: implement the real manual browser runner contract or
+  continue shell/panel visual polish toward the 1:1 mockups.
+
+Drift check:
+
+- On path. This pass surfaces an existing gate on the Browser surface.
+- No new primary surface.
+- No fake browser function.
+- No castle, renderer, agent routing, model, tool, provider, install, pull,
+  external write, or Raven path change.
+
+Known risks:
+
+- Runner Gate exposes necessary machinery because the page runner is not live.
+  This should collapse or disappear from the primary view after real page
+  rendering exists.
+- Browser proof created local database approval/audit rows while testing.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No migration.
+- Browser proof created local Browser proposal, approval preview, workbench
+  evidence, Spock gate, result scaffold, live-runner approval, and blocked audit
+  rows in the local dev database.
+- Three screenshots written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, and app/server/routers/workbench.ts first. Continue the Browser V1 critical path. Next safest slice is either the real manual browser runner contract implementation plan/tests or collapsing Runner Gate machinery into a tighter approval receipt while preserving the no-page-open hard gate. Preserve the castle. Do not fake browser rendering, Watch Shelf saves, source discovery, or external actions. Screenshot-proof material UI changes and include the required Mockup fidelity closeout line.
+```
