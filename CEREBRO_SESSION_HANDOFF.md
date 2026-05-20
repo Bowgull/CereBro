@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2121 EDT
+Last updated: 2026-05-20 1106 EDT
 
 ## Current North Star
 
@@ -20,6 +20,56 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-20 1106 EDT - Capability Intake Plan Amendment
+
+### What Changed
+- Added a Capability Intake Layer to the master plan and build queue.
+- Classified new repo/tool research into five lanes: core logic pattern,
+  agent-owned capability, Basement adapter later, research-only, or reject.
+- Locked the required review fields before any external repo/tool can affect
+  product shape: source URL, license, maintenance signal, install surface,
+  storage impact, privacy impact, runtime/network risk, V1 relevance, owner
+  agent, user-visible surface, adapter path, and proof required.
+- Kept the current Browser/shell polish lane active. This was a docs guardrail,
+  not a UI detour.
+
+### Files Touched
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git diff --check`
+- Docs-only change. No app code changed, so `pnpm -C app check` and targeted
+  Vitest were not required for this slice.
+
+### Mockup Fidelity
+- No UI changed.
+- The locked 1:1 Keep shell and Browser high-fidelity mockup targets remain
+  active.
+- Next fidelity gap remains Browser/shell polish, not capability-registry UI.
+
+### Drift Check
+- On path.
+- This adds governance to the existing Basement/Model/Tool Registry lane. It
+  does not create a new primary surface.
+- No install, clone, third-party script, model pull, provider call, external
+  write, browser automation, network routing, trading behavior, castle change,
+  or Raven path was added.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No screenshot.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_UI_TASTE_AUDIT.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue Browser/shell polish. Capability intake is now a Basement/plan guardrail only: classify new repos/tools as core logic pattern, agent-owned capability, Basement adapter later, research-only, or reject before they affect product shape. Do not install, clone, run, or add new primary surfaces. Preserve the castle and screenshot-proof visual changes.
+```
 
 ## 2026-05-19 2121 EDT - Browser Chrome Proportion Tightening
 

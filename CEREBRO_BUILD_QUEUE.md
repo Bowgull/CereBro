@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2121 EDT
+Last updated: 2026-05-20 1106 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -39,9 +39,10 @@ Build in this order:
 7. Workbench as receipt body and visual proof.
 8. Ledger as receipts and audit trail.
 9. Knowledge contracts before knowledge automation.
-10. Backend route receipts before agent execution.
-11. Model and Tool Registry as basement capability map.
-12. Animation, companion overlay, and walkthrough last.
+10. Capability Intake Layer before Model and Tool Registry expansion.
+11. Backend route receipts before agent execution.
+12. Model and Tool Registry as basement capability map.
+13. Animation, companion overlay, and walkthrough last.
 
 Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
 
@@ -62,6 +63,22 @@ Stop and ask when:
 - context bloat makes a summary and clear better than continuing
 
 ## Now
+
+### 2026-05-20 Capability Intake Amendment
+
+- Current Browser/shell polish remains active.
+- Capability intake is now a plan guardrail, not a UI detour.
+- New GitHub repos, MCPs, skills, plugins, models, and external tools must be
+  classified before they affect product shape: core logic pattern, agent-owned
+  capability, Basement adapter later, research-only, or reject.
+- Candidate records must include source URL, license, maintenance signal,
+  install surface, storage impact, privacy impact, runtime/network risk, V1
+  relevance, owner agent, user-visible surface, adapter path, and proof
+  required.
+- Stable patterns can feed core contracts. Tool chaos stays out of the primary
+  UI.
+- Next actual build slice remains Browser/shell fidelity unless a harder gate
+  appears.
 
 ### 2026-05-17 Active Redesign Foundation
 
@@ -119,6 +136,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-20 1106 EDT: added the Capability Intake Layer to the master plan
+  and build queue as a Basement/plan guardrail. Trending repos and new tools
+  now classify as core logic pattern, agent-owned capability, Basement adapter
+  later, research-only, or reject before they can affect product shape. This did
+  not install, clone, run, or add any new primary surface. Browser/shell polish
+  remains the active build lane.
 - 2026-05-19 2121 EDT: tightened the direct Browser tab strip and address row
   proportions. Removed the visible `Local` tab-strip badge, lowered tab height,
   tightened tab spacing, and aligned nav, address, open, shield, and page menu

@@ -1,6 +1,6 @@
 # CereBro Master Build Plan
 
-Last updated: 2026-05-17
+Last updated: 2026-05-20 1106 EDT
 
 ## Summary
 
@@ -46,6 +46,30 @@ Current build instruction:
   Evaluate the tool, borrow lessons, and borrow code only after
   license/security review. Wrap useful pieces inside CereBro's existing Keep,
   Workshop, agent, memory, permission, and receipt model.
+- Capability intake is now a standing plan rule. Trending GitHub repos, new
+  skills, MCP servers, plugins, models, and tools do not automatically become
+  CereBro features. Each candidate is classified before it affects product:
+  core logic pattern, agent-owned capability, Basement adapter later,
+  research-only, or reject.
+- Capability intake records must include source URL, license, maintenance
+  signal, install surface, storage impact, privacy impact, runtime/network
+  risk, V1 relevance, owner agent, user-visible surface, adapter path, and
+  proof required. If those fields are not known, the candidate stays research.
+- Stable external patterns that may become core logic: model/provider gateway
+  ideas from 9router, Portkey, and Helicone-style systems; memory architecture
+  from agentmemory and mem0-style systems; document/source intake from Docling;
+  browser action contracts from Stagehand, browser-use, Playwright, and
+  CloakBrowser lessons; terminal/coding UX from DeepSeek-TUI, Aider, and
+  OpenCode-style tools; and repo intelligence from Repomix, Gitingest, and SCIP
+  style analyzers.
+- Agent-owned or gated lanes: CloakBrowser-style browser profile/detection
+  lessons belong to Spock plus Browser and are not default browsing;
+  UI-TARS/OmniParser-style computer use belongs to a future operator lane with
+  Spock gates; Hysteria-style network routing belongs to Basement as a later
+  network capability; AI-Trader-style systems are Oak/Spock research only and
+  do not make CereBro a trading product; ComfyUI, Remotion, SuperSplat,
+  PixelLab, and related creative tools belong to Gojo/Creative Studio later and
+  do not interrupt the current Browser/shell pass.
 - Build autonomy in stages. First make the work visible and recoverable. Then
   move repeated, proven steps into CereBro itself.
 - Visions are the CereBro-native `/goal` lesson. A Vision is the operating
@@ -99,7 +123,12 @@ Current front-end build path:
    external services are readable capability proposals, not primary product
    surfaces. Use this for Nano Banana-style vision, PixelLab, Hugging Face,
    GitHub, Notion, Browser Use, and future tools.
-8. **Backend agent runtime after proof.** Build the backend agent only after the
+8. **Capability Intake Layer as Basement logic.** New GitHub repos, skills,
+   MCPs, plugins, models, and external tools are triaged in Basement before
+   they change the product. The layer feeds Model/Tool Registry readiness,
+   agent ownership, source review, and proof requirements. It is not a new
+   primary surface.
+9. **Backend agent runtime after proof.** Build the backend agent only after the
    visible Project Lab -> Terminal Lab -> Workbench -> Ledger loop is coherent.
    The backend agent should consume the visible receipts, not replace them.
 
@@ -127,7 +156,11 @@ Current critical path gate:
 8. **Knowledge contracts before knowledge automation.** Centralize artifact
    kinds, lifecycle states, retention rules, Obsidian lanes, RAG metadata, and
    GitHub/project bridge paths before Source Library or RAG automation expands.
-9. **Backend route receipts before agent execution.** Build local-only Aang to
+9. **Capability intake before tool expansion.** Classify new repos/tools as
+   core pattern, agent-owned capability, Basement adapter later, research-only,
+   or reject before installing, cloning, running, or presenting them as
+   product features.
+10. **Backend route receipts before agent execution.** Build local-only Aang to
    Cortana route receipt support before model calls, browser actions, command
    execution, or external writes.
 
