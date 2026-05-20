@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2033 EDT
+Last updated: 2026-05-19 2037 EDT
 
 ## Current North Star
 
@@ -20,6 +20,62 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2037 EDT - Browser Utility Menu Removal
+
+### What Changed
+- Removed the bottom direct Browser `Tools` menu.
+- Removed duplicated visible links to Workbench receipts, Approvals, Sources,
+  and Spock gate from the Browser page footer.
+- Kept existing global navigation and approval handoff paths intact.
+- Increased page viewport dominance by ending the Browser surface at the page or
+  Watch Shelf body instead of an extra machinery menu.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserToolsRemovedProof=1779203000001`.
+  - Opened the direct Browser surface.
+  - Confirmed the bottom `Tools` menu is gone.
+  - Screenshot saved at `output/playwright/browser-tools-removed-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: the page body is more dominant and the Browser footer no
+  longer exposes duplicate machine routes.
+- Deviations: still not 1:1. Proof disclosures and some saved local rows are
+  still more visible than the high-fidelity target.
+- Next fidelity gap: reduce visible proof/readback copy inside the empty Browser
+  page state without hiding required safety gates.
+
+### Drift Check
+- On path.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. The direct Browser footer Tools menu was removed; global nav and approval handoff remain. Next safest slice is reducing visible proof/readback copy inside the empty Browser page state while preserving gates. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2033 EDT - Browser Permission Copy Collapse
 

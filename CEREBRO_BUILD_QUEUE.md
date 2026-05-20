@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2033 EDT
+Last updated: 2026-05-19 2037 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,12 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2037 EDT: removed the bottom direct Browser `Tools` menu and its
+  duplicated links to Workbench receipts, Approvals, Sources, and Spock gate.
+  Global navigation and approval handoff remain. Screenshot saved at
+  `output/playwright/browser-tools-removed-proof.png`. No behavior loosening,
+  page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 2033 EDT: added `workbenchBrowserOpenGateCopy` and collapsed the
   direct Browser permission row from machinery language into product language:
   `Page permission`, `Needs approval`, `Ready`, and `Open Page`. Proposal,
