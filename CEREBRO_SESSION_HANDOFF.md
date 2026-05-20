@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2047 EDT
+Last updated: 2026-05-19 2121 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2121 EDT - Browser Chrome Proportion Tightening
+
+### What Changed
+- Tightened the direct Browser tab strip height, spacing, and label width.
+- Removed the visible `Local` badge from the Browser tab strip.
+- Tightened the address row into one compact browser control with nav buttons,
+  address field, `Open`, shield, and page menu aligned on one row.
+- Kept tab creation disabled and honest. No fake multi-tab behavior was added.
+- Kept all Browser gating, local bookmark behavior, Watch Shelf state, and
+  approval paths unchanged.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserChromeTightProof=1779206450001`.
+  - Opened the direct Browser surface.
+  - Confirmed the Browser tab strip and address row render in the tighter
+    browser-chrome shape.
+  - Screenshot saved at `output/playwright/browser-chrome-tight-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: tab strip and address controls now read more like a single
+  browser instrument instead of stacked utility panels.
+- Deviations: still not 1:1. The global shell still has more demo/header chrome
+  than the approved mockup, and saved local rows still show seeded local data.
+- Next fidelity gap: continue reducing global/demo chrome around Browser or
+  move to the next critical surface if Browser visual chrome is good enough for
+  the current V1 execution path.
+
+### Drift Check
+- On path.
+- Rejected generic move: no new browser manager, dashboard card, profile
+  picker, search tab, or fake browser capability was added.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_UI_TASTE_AUDIT.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the V1 critical path. Browser tabs/address chrome were tightened toward the approved Browser mockup without adding fake multi-tab behavior. Next decision: either continue Browser shell fidelity by reducing global/demo chrome around the Browser, or move to the next critical execution surface if Browser is sufficient for now. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2047 EDT - Browser Saved Row Chrome
 

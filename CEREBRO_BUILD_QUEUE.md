@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2047 EDT
+Last updated: 2026-05-19 2121 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2121 EDT: tightened the direct Browser tab strip and address row
+  proportions. Removed the visible `Local` tab-strip badge, lowered tab height,
+  tightened tab spacing, and aligned nav, address, open, shield, and page menu
+  into one browser-control row. Screenshot saved at
+  `output/playwright/browser-chrome-tight-proof.png`. No behavior loosening,
+  page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, fake multi-tab behavior,
+  or Raven path was added.
 - 2026-05-19 2047 EDT: replaced the two stacked direct Browser Pins and
   Bookmarks utility popovers with one compact saved row under the address bar.
   Project pins and local bookmarks now read like browser chrome; bookmark

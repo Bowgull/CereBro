@@ -411,7 +411,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       <main className="flex-1 overflow-y-auto p-2" aria-label="Browser workspace">
         <div className="grid gap-1.5">
           <div
-            className="flex items-end gap-1 overflow-x-auto rounded-t px-1.5 pt-1.5"
+            className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1.5"
             aria-label="Browser page tabs"
             style={{ background: "rgba(4, 8, 8, 0.96)", border: `1px solid ${browserFrame.lineSoft}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)" }}
           >
@@ -419,7 +419,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "page" && selectedBrowserProposalId == null ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2.5 text-[11px]"
+              className="h-6 shrink-0 rounded-b-none px-2 text-[10px]"
               aria-pressed={browserSurface === "page" && selectedBrowserProposalId == null}
               onClick={() => {
                 setBrowserSurface("page");
@@ -444,7 +444,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   size="sm"
                   variant={active ? "secondary" : "outline"}
-                  className="h-7 max-w-[170px] shrink-0 rounded-b-none px-2.5 text-[11px]"
+                  className="h-6 max-w-[150px] shrink-0 rounded-b-none px-2 text-[10px]"
                   aria-pressed={active}
                   title={`${tab.targetUrl}. Draft tab only. No page opens.`}
                   onClick={() => {
@@ -470,7 +470,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "watch" ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2.5 text-[11px]"
+              className="h-6 shrink-0 rounded-b-none px-2 text-[10px]"
               aria-pressed={browserSurface === "watch"}
               onClick={() => setBrowserSurface("watch")}
               style={{
@@ -483,21 +483,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Watch Shelf
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab planned">
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab planned">
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
-            <div className="ml-auto hidden shrink-0 rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-widest md:block" style={{ color: C.textMuted, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.7)", boxShadow: browserFrame.bevel }}>
-              Local
-            </div>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-1.5 rounded p-1.5 sm:grid-cols-[auto_minmax(0,1fr)_auto]" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
             <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="h-7 w-7 px-0"
+                className="h-8 w-8 px-0"
                 disabled={!browserLocalNavigation.canGoBack}
                 aria-label={browserLocalNavigation.canGoBack ? "Go back through local Browser history" : "No previous local Browser history"}
                 title={browserLocalNavigation.backTarget ? `Open previous local history row: ${browserLocalNavigation.backTarget.targetUrl}` : "No previous local history for this page."}
@@ -509,7 +506,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="h-7 w-7 px-0"
+                className="h-8 w-8 px-0"
                 disabled={!browserLocalNavigation.canGoForward}
                 aria-label={browserLocalNavigation.canGoForward ? "Go forward through local Browser history" : "No next local Browser history"}
                 title={browserLocalNavigation.forwardTarget ? `Open next local history row: ${browserLocalNavigation.forwardTarget.targetUrl}` : "No next local history for this page."}
@@ -521,7 +518,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="h-7 w-7 px-0"
+                className="h-8 w-8 px-0"
                 disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
                 aria-label="Reload sandbox frame"
                 title={hasOpenSandboxFrame ? "Reload the sandbox frame. No backend fetch runs." : "Open a page before reload."}
@@ -541,7 +538,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               }}
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
-              className="order-3 col-span-2 h-8 min-w-0 font-mono text-[12px] sm:order-none sm:col-span-1"
+              className="h-9 min-w-0 font-mono text-[12px]"
               title="Stages a local page draft only. It does not open, fetch, search, save, or capture."
               style={{
                 background: browserFrame.address,
@@ -554,7 +551,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 type="button"
                 size="sm"
                 variant="outline"
-                className="h-8 px-2"
+                className="h-9 px-3"
                 disabled={browserPrimaryAction.disabled}
                 title={browserPrimaryAction.title}
                 aria-label={browserPrimaryAction.ariaLabel}
@@ -593,11 +590,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               >
                 {browserPrimaryAction.label}
               </Button>
-              <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
+              <Button type="button" size="sm" variant="ghost" className="h-9 w-9 px-0" disabled aria-label="Browser quiet shield">
                 <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
               </Button>
               <details className="relative">
-                <summary className="flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 </summary>
                 <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
