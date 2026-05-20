@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 0723 EDT
+Last updated: 2026-05-19 2023 EDT
 
 ## Current North Star
 
@@ -20,6 +20,72 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2023 EDT - Browser Watch Shelf Category Alignment
+
+### What Changed
+- Aligned the Watch Shelf save contract with the visible product categories:
+  `Watching`, `Want`, `Anime`, `YouTube`, `Twitch`, and `Finished`.
+- Fixed the direct Browser surface so it sends the same categories as the server.
+- Added a regression test proving the visible `Want` category can save from an
+  open Browser tab without source writes.
+- Wired Workbench's Browser frame affordance to the existing gated sandbox-frame
+  contracts for prepare-open, open-frame, reload, local bookmark, and Watch Shelf
+  save.
+
+### Files Touched
+- `app/server/routers/workbench.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  - first run failed as expected because `Want` was rejected by the server enum.
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?workbenchBrowserFrameProof=1779200000001`.
+  - Confirmed Browser and Workbench surfaces render.
+  - Screenshot saved at `output/playwright/browser-watch-category-aligned.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and approval-gated
+  autonomy contract.
+- Matched elements: visible Watch Shelf categories now match the storage
+  contract, and the Browser frame path stays inside the quiet Browser/Workbench
+  surfaces.
+- Deviations: still not 1:1. The Browser still has too much receipt machinery
+  in Workbench detail paths, and the sandbox frame will be limited by sites that
+  block iframe rendering.
+- Next fidelity gap: move the clean open-page path fully into the direct Browser
+  surface and keep Workbench as proof/receipt support.
+
+### Drift Check
+- On path.
+- No fake Watch Shelf progress.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- Tests create local Browser proposal, approval, tab, runner audit, history,
+  Watch Shelf, and bookmark rows in the test database only.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. Watch Shelf visible categories now match the server save contract. Workbench has gated sandbox-frame affordances, but the direct Browser surface should remain the primary user-facing browser. Next safest slice is to simplify the direct Browser open-page path and reduce remaining receipt machinery while preserving approval gates. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 0723 EDT - Browser Approval Decision Return
 

@@ -32,6 +32,7 @@ const validationAgents = ["oak", "spock"] as const;
 const evidenceGroupBys = ["project", "task", "session", "kind", "source", "command", "artifact", "validation_status"] as const;
 const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
 const browserDraftKinds = ["empty", "url", "search"] as const;
+const watchShelfCategories = ["Watching", "Want", "Anime", "YouTube", "Twitch", "Finished"] as const;
 const browserProposalNoActionTaken = [
   "No browser opened.",
   "No page fetched.",
@@ -1884,7 +1885,7 @@ export const workbenchRouter = router({
     .input(
       z.object({
         proposalId: z.number().int().positive(),
-        category: z.enum(["Watching", "Want to Watch", "Anime", "YouTube", "Twitch", "Research"]),
+        category: z.enum(watchShelfCategories),
       }),
     )
     .mutation(async ({ input }) => {

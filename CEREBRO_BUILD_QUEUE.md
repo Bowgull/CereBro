@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 0723 EDT
+Last updated: 2026-05-19 2023 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2023 EDT: aligned Watch Shelf visible categories with the server
+  save contract. Added a failing-then-passing regression for the visible `Want`
+  category, fixed the direct Browser category casts, and wired Workbench Browser
+  affordances to the existing prepare-open, sandbox-frame open, reload, local
+  bookmark, and Watch Shelf save contracts. Screenshot saved at
+  `output/playwright/browser-watch-category-aligned.png`. No fake progress,
+  page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 0723 EDT: added the Browser approval decision return path. Approvals
   can now approve or reject pending receipts as local metadata only, selected
   receipt detail persists after status changes, and Browser receipts can return

@@ -251,6 +251,65 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
       }
     },
   });
+  const prepareBrowserLiveRunnerOpenReadiness = trpc.workbench.prepareBrowserLiveRunnerOpenReadiness.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserActionProposals.invalidate();
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      if (selectedBrowserPreflightId === result.proposal.id) {
+        utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      }
+      setBrowserProposalNotice(
+        result.ok
+          ? `Browser proposal #${result.proposal.id} is open-ready. No page opened yet.`
+          : `Browser proposal #${result.proposal.id} still needs ${result.missingGates[0] ?? "a gate"}.`,
+      );
+    },
+  });
+  const [browserFrameReloadKey, setBrowserFrameReloadKey] = useState(0);
+  const recordBrowserSandboxFrameOpen = trpc.workbench.recordBrowserSandboxFrameOpen.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserActionProposals.invalidate();
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      setBrowserFrameReloadKey((current) => current + 1);
+      setBrowserProposalNotice(
+        result.ok
+          ? `Sandbox frame opened for proposal #${result.proposal.id}. Backend fetch stayed off.`
+          : `Sandbox frame blocked for proposal #${result.proposal.id}.`,
+      );
+    },
+  });
+  const recordBrowserSandboxFrameReload = trpc.workbench.recordBrowserSandboxFrameReload.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      if (result.ok) setBrowserFrameReloadKey((current) => current + 1);
+      setBrowserProposalNotice(
+        result.ok
+          ? `Sandbox frame reload recorded for proposal #${result.proposal.id}. Backend fetch stayed off.`
+          : `Sandbox reload blocked for proposal #${result.proposal.id}.`,
+      );
+    },
+  });
+  const createWatchShelfItemFromOpenTab = trpc.workbench.createWatchShelfItemFromOpenTab.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.watchShelfStorageContract.invalidate();
+      utils.workbench.browserTabSessionStorageContract.invalidate();
+      setBrowserProposalNotice(
+        result.ok
+          ? `Watch Shelf item #${result.item.id} saved locally. No progress or source write.`
+          : "Watch Shelf save blocked. Open a Browser page first.",
+      );
+    },
+  });
+  const createBrowserBookmarkFromOpenTab = trpc.workbench.createBrowserBookmarkFromOpenTab.useMutation({
+    onSuccess: (result) => {
+      utils.workbench.browserBookmarkStorageContract.invalidate();
+      setBrowserProposalNotice(
+        result.ok
+          ? `Bookmark #${result.bookmark.id} saved locally. No source write.`
+          : "Bookmark save blocked. Open a Browser page first.",
+      );
+    },
+  });
   const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
     onSuccess: (result) => {
       utils.workbench.browserActionProposals.invalidate();
@@ -418,6 +477,8 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
   const browserDraftTabs = (browserTabSessionStorageContract.data?.items ?? [])
     .filter((item) => item.state === "draft")
     .slice(0, 3);
+  const openBrowserTab = (browserTabSessionStorageContract.data?.items ?? [])
+    .find((item) => item.state === "open") ?? null;
   const browserProjectPins = workbenchBrowserProjectPinsModel(projects.data?.projects ?? []);
   const data = plan.data;
   const evidenceItems = evidence.data?.items ?? [];
@@ -1030,7 +1091,19 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">
                     <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
                   </Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser reload planned">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 px-0"
+                    disabled={!openBrowserTab || recordBrowserSandboxFrameReload.isPending}
+                    aria-label="Reload browser frame"
+                    title={openBrowserTab ? "Record a local sandbox-frame reload receipt. No backend fetch runs." : "Open a Browser page before reload."}
+                    onClick={() => {
+                      if (!openBrowserTab?.proposalId) return;
+                      recordBrowserSandboxFrameReload.mutate({ proposalId: openBrowserTab.proposalId });
+                    }}
+                  >
                     <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
                   </Button>
                   <Input
@@ -1215,21 +1288,57 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       boxShadow: "inset 0 1px 18px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(244, 239, 227, 0.02)",
                     }}
                   >
-                    <div className="mx-auto flex max-w-2xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(260px, 36dvh, 340px)" }}>
-                      <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                        {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                    {openBrowserTab ? (
+                      <div className="overflow-hidden rounded" aria-label="Browser sandbox frame" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
+                        <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1.5 text-[10px]" style={{ background: G.slabMuted, borderBottom: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                          <div className="min-w-0 break-all">
+                            <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Sandbox frame</span>
+                            {" "}{openBrowserTab.targetUrl}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Chip label="backend fetch off" tone={C.warning} />
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px]"
+                              disabled={!openBrowserTab.proposalId || createBrowserBookmarkFromOpenTab.isPending}
+                              title="Save a local bookmark for the open Browser page. No source write runs."
+                              onClick={() => {
+                                if (!openBrowserTab.proposalId) return;
+                                createBrowserBookmarkFromOpenTab.mutate({ proposalId: openBrowserTab.proposalId });
+                              }}
+                            >
+                              {createBrowserBookmarkFromOpenTab.isPending ? "Saving" : "Bookmark"}
+                            </Button>
+                          </div>
+                        </div>
+                        <iframe
+                          key={`${openBrowserTab.id}-${browserFrameReloadKey}`}
+                          title={openBrowserTab.title ?? openBrowserTab.targetUrl}
+                          src={openBrowserTab.targetUrl}
+                          sandbox="allow-scripts allow-forms"
+                          referrerPolicy="no-referrer"
+                          className="h-[320px] w-full bg-white"
+                        />
                       </div>
-                      <div className="mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                        {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                    ) : (
+                      <div className="mx-auto flex max-w-2xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(260px, 36dvh, 340px)" }}>
+                        <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                          {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                        </div>
+                        <div className="mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                          {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                        </div>
+                        <div className="mt-2 flex justify-center gap-1">
+                          <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                          <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                        </div>
+                        <div className="mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                          {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
+                        </div>
                       </div>
-                      <div className="mt-2 flex justify-center gap-1">
-                        <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
-                        <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
-                      </div>
-                      <div className="mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                        {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 ) : (
                   <div
@@ -1252,10 +1361,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={!watchShelfDraft.canSave}
-                        title="Requires a real open page before it can save."
+                        disabled={!openBrowserTab?.proposalId || createWatchShelfItemFromOpenTab.isPending}
+                        title={openBrowserTab ? "Save the open Browser page to Watch Shelf. No progress, thumbnail, source write, or service state is inferred." : "Requires a real open page before it can save."}
+                        onClick={() => {
+                          if (!openBrowserTab?.proposalId) return;
+                          createWatchShelfItemFromOpenTab.mutate({
+                            proposalId: openBrowserTab.proposalId,
+                            category: watchShelfCategory as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
+                          });
+                        }}
                       >
-                        {watchShelfDraft.saveLabel}
+                        {createWatchShelfItemFromOpenTab.isPending ? "Saving" : openBrowserTab ? "Save Page" : watchShelfDraft.saveLabel}
                       </Button>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1">
@@ -1590,6 +1706,36 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                                     }}
                                   >
                                     Check Live
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={prepareBrowserLiveRunnerOpenReadiness.isPending}
+                                    title="Move this proposal to open-ready only after all Browser gates exist. This does not open a page."
+                                    onClick={() => {
+                                      prepareBrowserLiveRunnerOpenReadiness.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Prepare Open
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    className="h-6 px-2 text-[10px]"
+                                    disabled={recordBrowserSandboxFrameOpen.isPending}
+                                    title="Open this approved target inside the local sandbox frame. No backend fetch, source save, Watch Shelf save, or external write runs."
+                                    onClick={() => {
+                                      recordBrowserSandboxFrameOpen.mutate({
+                                        proposalId: proposal.id,
+                                      });
+                                    }}
+                                  >
+                                    Open Frame
                                   </Button>
                                 </div>
                               </div>
@@ -1929,10 +2075,17 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={!watchShelfDraft.canSave}
-                        title="Requires a real open page before it can save."
+                        disabled={!openBrowserTab?.proposalId || createWatchShelfItemFromOpenTab.isPending}
+                        title={openBrowserTab ? "Save the open Browser page to Watch Shelf. No progress, thumbnail, source write, or service state is inferred." : "Requires a real open page before it can save."}
+                        onClick={() => {
+                          if (!openBrowserTab?.proposalId) return;
+                          createWatchShelfItemFromOpenTab.mutate({
+                            proposalId: openBrowserTab.proposalId,
+                            category: watchShelfCategory as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
+                          });
+                        }}
                       >
-                        {watchShelfDraft.saveLabel}
+                        {createWatchShelfItemFromOpenTab.isPending ? "Saving" : watchShelfDraft.saveLabel}
                       </Button>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -1997,24 +2150,60 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   </div>
                 )}
 
-                <div className="rounded p-3 text-center" aria-label="Browser first-run page" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
-                  <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-                    {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                {openBrowserTab ? (
+                  <div className="overflow-hidden rounded" aria-label="Browser sandbox frame" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1.5 text-[10px]" style={{ background: G.slabMuted, borderBottom: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
+                      <div className="min-w-0 break-all">
+                        <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>Sandbox frame</span>
+                        {" "}{openBrowserTab.targetUrl}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Chip label="backend fetch off" tone={C.warning} />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px]"
+                          disabled={!openBrowserTab.proposalId || createBrowserBookmarkFromOpenTab.isPending}
+                          title="Save a local bookmark for the open Browser page. No source write runs."
+                          onClick={() => {
+                            if (!openBrowserTab.proposalId) return;
+                            createBrowserBookmarkFromOpenTab.mutate({ proposalId: openBrowserTab.proposalId });
+                          }}
+                        >
+                          {createBrowserBookmarkFromOpenTab.isPending ? "Saving" : "Bookmark"}
+                        </Button>
+                      </div>
+                    </div>
+                    <iframe
+                      key={`${openBrowserTab.id}-${browserFrameReloadKey}`}
+                      title={openBrowserTab.title ?? openBrowserTab.targetUrl}
+                      src={openBrowserTab.targetUrl}
+                      sandbox="allow-scripts allow-forms"
+                      referrerPolicy="no-referrer"
+                      className="h-[420px] w-full bg-white"
+                    />
                   </div>
-                  <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                ) : (
+                  <div className="rounded p-3 text-center" aria-label="Browser first-run page" style={{ background: C.background, border: `1px solid ${G.lineSoft}` }}>
+                    <div className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+                      {browserDraft.kind === "empty" ? browserShell.emptyTitle : browserDraft.tabLabel}
+                    </div>
+                    <div className="mx-auto mt-1 max-w-lg text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserDraft.kind === "empty" ? browserShell.emptyBody : browserDraft.displayTarget}
+                    </div>
+                    <div className="mt-2 flex justify-center gap-1">
+                      <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
+                      <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                    </div>
+                    <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
+                    </div>
+                    <div className="mx-auto mt-1 max-w-xl text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                      {browserTabState.noActionText}
+                    </div>
                   </div>
-                  <div className="mt-2 flex justify-center gap-1">
-                    <Chip label={browserDraft.kind === "empty" ? "no draft" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
-                    <Chip label={browserDraft.canOpen ? "can open" : "open blocked"} tone={browserDraft.canOpen ? C.success : C.warning} />
-                  </div>
-                  <div className="mx-auto mt-2 max-w-xl text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    {browserDraft.kind === "empty" ? browserShell.noActionText : browserDraft.noActionText}
-                  </div>
-                  <div className="mx-auto mt-1 max-w-xl text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                    {browserTabState.noActionText}
-                  </div>
-                </div>
+                )}
                   </div>
                 </details>
                 )}

@@ -72,7 +72,7 @@ function Chip({ label, tone }: { label: string; tone: string }) {
 function watchShelfTone(category: string) {
   if (category === "Anime") return C.warning;
   if (category === "Watching") return C.success;
-  if (category === "Research") return C.gold;
+  if (category === "Finished") return C.gold;
   return C.accent;
 }
 
@@ -841,7 +841,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                               if (selectedBrowserProposalId == null) return;
                               createWatchShelfItemFromOpenTab.mutate({
                                 proposalId: selectedBrowserProposalId,
-                                category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
+                                category: watchShelfCategory as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
                               });
                             }}
                           >
@@ -1075,7 +1075,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     if (selectedBrowserProposalId == null) return;
                     createWatchShelfItemFromOpenTab.mutate({
                       proposalId: selectedBrowserProposalId,
-                      category: watchShelfCategory as "Watching" | "Want to Watch" | "Anime" | "YouTube" | "Twitch" | "Research",
+                      category: watchShelfCategory as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
                     });
                   }}
                 >

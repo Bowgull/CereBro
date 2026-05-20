@@ -1592,6 +1592,51 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("sources")).toBe(before.sources);
   });
 
+  it("accepts the visible Watch Shelf Want category without source writes", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/watch-want",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({ proposalId: created.proposal.id });
+    await caller.workbench.recordBrowserSandboxFrameOpen({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const save = await caller.workbench.createWatchShelfItemFromOpenTab({
+      proposalId: created.proposal.id,
+      category: "Want",
+    });
+
+    expect(save.ok).toBe(true);
+    expect(save.item?.category).toBe("Want");
+    expect(save.noActionTaken).toContain("No source saved.");
+
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems + 1);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("blocks Browser bookmark save until the Browser tab is open", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({
