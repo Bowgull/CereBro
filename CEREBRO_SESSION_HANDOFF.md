@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2043 EDT
+Last updated: 2026-05-19 2047 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2047 EDT - Browser Saved Row Chrome
+
+### What Changed
+- Replaced the two stacked Browser Pins and Bookmarks utility popovers with one
+  compact saved row under the address bar.
+- Showed honest local project pins and local bookmarks as browser-row
+  shortcuts, closer to the approved Browser mockup.
+- Kept bookmark rename and remove controls under a small `Manage` disclosure.
+- Removed the visible project-pin proof sentence from the primary Browser
+  surface.
+- Kept saved-row actions local. Project pins do not open a page. Bookmarks only
+  load the address field for user-controlled open.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserSavedRowProof=1779204450001`.
+  - Opened the direct Browser surface.
+  - Confirmed Browser saved row shows project pins, bookmarks, and `Manage`.
+  - Screenshot saved at `output/playwright/browser-saved-row-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: saved project/bookmark rows now sit as browser chrome below
+  the address bar instead of stacked machinery popovers.
+- Deviations: still not 1:1. The tab strip still carries extra local labels and
+  the global shell still exposes more demo chrome than the approved mockup.
+- Next fidelity gap: tighten Browser tab strip and address row proportions
+  without implying real multi-tab execution beyond current contracts.
+
+### Drift Check
+- On path.
+- Rejected generic move: no new dashboard card, source panel, or browser
+  manager surface was added.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_UI_TASTE_AUDIT.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. Browser saved project/bookmark shortcuts now sit in one saved row under the address bar. Next safest slice is tightening Browser tab strip and address row proportions toward the approved high-fidelity Browser mockup without adding fake multi-tab behavior. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2043 EDT - Browser Empty State Reduction
 

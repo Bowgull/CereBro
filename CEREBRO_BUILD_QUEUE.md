@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2043 EDT
+Last updated: 2026-05-19 2047 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,13 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2047 EDT: replaced the two stacked direct Browser Pins and
+  Bookmarks utility popovers with one compact saved row under the address bar.
+  Project pins and local bookmarks now read like browser chrome; bookmark
+  rename/remove remains behind `Manage`. Screenshot saved at
+  `output/playwright/browser-saved-row-proof.png`. No behavior loosening, page
+  fetch, source save, provider call, install, download, credential handling,
+  external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 2043 EDT: reduced the direct Browser empty page state. The empty
   page now shows one centered prompt, hides `empty` / `no draft` chips, hides
   Page State and Proof panels until a real page or search draft exists, and uses
