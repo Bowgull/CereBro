@@ -2262,3 +2262,10 @@ Expected shape:
   execution, external write, or Raven path changed. Next slice should continue
   Terminal Lab teaching-lane hardening or move to the next build-plan surface
   after queue review.
+- 2026-05-19 2008 EDT: Terminal Lab manifest diagnostic copy correction
+  landed. The `cat package.json` diagnostic no longer says Node executes a
+  local read; the approval gate now describes read-only manifest inspection.
+  No UI, schema, provider call, install, download, command execution, external
+  write, or Raven path changed. Next slice should continue Terminal Lab
+  teaching-lane hardening or move to the next build-plan surface after queue
+  review.

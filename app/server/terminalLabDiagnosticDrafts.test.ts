@@ -50,5 +50,6 @@ describe("Terminal Lab diagnostic drafts", () => {
     expect(commands).toContain("which pnpm");
     expect(commands.some((command) => /&&|;|\|\|/.test(command))).toBe(false);
     expect(commands.some((command) => command.startsWith("node ") || command.startsWith("pnpm "))).toBe(false);
+    expect(row?.diagnosticDrafts.find((item) => item.command === "cat package.json")?.approvalGate).not.toContain("Node executes");
   });
 });

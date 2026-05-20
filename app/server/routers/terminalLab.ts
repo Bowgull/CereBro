@@ -307,7 +307,7 @@ function buildDiagnosticDrafts(observation: CommandObservation) {
       reason: "Script failures should be grounded in the local manifest before Tony proposes a next command.",
       evidence: "Observed output looks like a Node/package-tool failure.",
       expectedSignal: "Shows the local package manifest without installing packages or modifying files.",
-      approvalGate: "Suggested only. Node executes a local read of package.json and still needs normal approval.",
+      approvalGate: "Suggested only. Read-only manifest inspection still runs through Codex if approved.",
     });
     drafts.push({
       title: "Locate Node runtime",

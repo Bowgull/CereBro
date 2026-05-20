@@ -36616,3 +36616,78 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, and app/server/routers/execution.ts first. Continue in CereBro Prime mode. Terminal Lab diagnostic drafts now stay runner-compatible for package failures and port conflicts. Port conflicts use `rg -n "<port>" .` instead of `lsof`; package failures use `cat package.json`, `which node`, and `which pnpm`. Next slice should continue Terminal Lab teaching-lane hardening or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 2008 EDT - Terminal Lab Manifest Diagnostic Copy
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: unchanged.
+- Backend/runtime: Terminal Lab diagnostic copy now matches the generated
+  command.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added regression coverage for stale `Node executes` copy on the
+  `cat package.json` diagnostic draft.
+- Updated the approval gate to say read-only manifest inspection.
+- No command runs from Terminal Lab.
+
+Files touched in this slice:
+
+- `app/server/routers/terminalLab.ts`
+- `app/server/terminalLabDiagnosticDrafts.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 2008 CereBro Session Handoff - terminal-manifest-diagnostic-copy.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red check: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first on stale `Node executes` copy.
+- Targeted checks: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts server/terminalLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not run because this pass changed backend
+  diagnostic copy only.
+
+Mockup fidelity:
+
+- Target used: no visual mockup target. This was Terminal Lab behavior/copy
+  accuracy.
+- Screenshot path: not applicable.
+- Matched elements: Terminal Lab remains proposal-only and low machinery.
+- Deviations: none from visual source-of-truth because no UI changed.
+- Next fidelity gap: later Terminal Lab visual polish still needs the 1:1 shell
+  pass after behavior gaps are closed.
+
+Drift check:
+
+- On path. This pass removes stale command-specific copy after the diagnostic
+  command changed.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- None introduced.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No DB writes from this code change.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, and app/server/routers/execution.ts first. Continue in CereBro Prime mode. Terminal Lab diagnostic drafts now stay runner-compatible for package failures and port conflicts, and manifest diagnostic copy no longer claims Node executes the read. Next slice should continue Terminal Lab teaching-lane hardening or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```
