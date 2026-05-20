@@ -349,9 +349,11 @@ function buildDiagnosticDrafts(observation: CommandObservation) {
   }
 
   if (/\b(permission denied|denied|eacces)\b/i.test(summary)) {
+    const absoluteDeniedPath = summary.match(/(?:permission denied|denied|eacces)[^/\n]*(\/[^\s'"]+)/i)?.[1] ?? null;
+    const safePathHint = absoluteDeniedPath ? null : pathHint;
     drafts.push({
       title: "Inspect file metadata",
-      command: pathHint ? `stat ${shellQuote(pathHint)}` : "ls -la",
+      command: safePathHint ? `stat ${shellQuote(safePathHint)}` : "ls -la",
       reason: "Permission-looking failures should start with read-only metadata before chmod/chown or other mutation is considered.",
       evidence: "Observed output includes permission-denied language.",
       expectedSignal: "Shows ownership, mode, and file metadata without changing permissions.",

@@ -2269,3 +2269,10 @@ Expected shape:
   write, or Raven path changed. Next slice should continue Terminal Lab
   teaching-lane hardening or move to the next build-plan surface after queue
   review.
+- 2026-05-19 2011 EDT: Terminal Lab permission diagnostic runner-fit landed.
+  Permission-denied output that names an absolute outside path now falls back
+  to `ls -la` instead of suggesting `stat /outside/path`. This keeps Tony's
+  diagnostic draft inside the current path-containment policy. No UI, schema,
+  provider call, install, download, command execution, external write, or Raven
+  path changed. Next slice should move to Workbench receipt-body hardening or
+  continue Terminal Lab only if another runner-fit mismatch is found.

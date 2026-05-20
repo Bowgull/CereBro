@@ -36691,3 +36691,80 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, and app/server/routers/execution.ts first. Continue in CereBro Prime mode. Terminal Lab diagnostic drafts now stay runner-compatible for package failures and port conflicts, and manifest diagnostic copy no longer claims Node executes the read. Next slice should continue Terminal Lab teaching-lane hardening or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 2011 EDT - Terminal Lab Permission Diagnostic Runner Fit
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: unchanged.
+- Backend/runtime: Terminal Lab permission diagnostics now avoid suggesting
+  absolute outside-path reads.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added regression coverage for permission-denied output that names an
+  absolute outside path.
+- Terminal Lab now falls back to `ls -la` instead of suggesting
+  `stat /outside/path`.
+- Diagnostic drafts remain suggestions only. No command runs from Terminal Lab.
+
+Files touched in this slice:
+
+- `app/server/routers/terminalLab.ts`
+- `app/server/terminalLabDiagnosticDrafts.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 2011 CereBro Session Handoff - terminal-permission-diagnostic-runner-fit.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red check: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because Terminal Lab suggested `stat` for the outside path.
+- Targeted checks: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts server/terminalLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not run because this pass changed backend
+  diagnostic behavior only.
+
+Mockup fidelity:
+
+- Target used: no visual mockup target. This was Terminal Lab behavior
+  hardening.
+- Screenshot path: not applicable.
+- Matched elements: Terminal Lab remains proposal-only and low machinery.
+- Deviations: none from visual source-of-truth because no UI changed.
+- Next fidelity gap: later Terminal Lab visual polish still needs the 1:1 shell
+  pass after behavior gaps are closed.
+
+Drift check:
+
+- On path. This pass keeps Tony's diagnostic drafts consistent with the V1
+  path-containment policy.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- `ls -la` is less specific than `stat`, but it is runner-compatible and avoids
+  outside-path suggestions.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No DB writes from this code change.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, app/server/routers/execution.ts, app/client/src/components/WorkbenchPanel.tsx, and app/server/routers/workbench.ts first. Continue in CereBro Prime mode. Terminal Lab diagnostic drafts now stay runner-compatible for package failures, port conflicts, and permission-denied outside paths. Next slice should move to Workbench receipt-body hardening unless a higher-priority queue item is found. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

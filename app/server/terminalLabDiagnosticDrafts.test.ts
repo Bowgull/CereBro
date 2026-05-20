@@ -10,6 +10,26 @@ function createCaller() {
 }
 
 describe("Terminal Lab diagnostic drafts", () => {
+  it("does not suggest stat for absolute permission-denied paths", async () => {
+    const caller = createCaller();
+    const preview = await caller.terminalLab.previewCommand({
+      command: "cat /var/root/secret.txt",
+      cwd: "/Users/lindsaybell/Desktop/CereBro/app",
+    });
+    await caller.terminalLab.observeOutput({
+      observationId: preview.observationId,
+      output: "permission denied: /var/root/secret.txt",
+      exitCode: 1,
+    });
+
+    const rows = await caller.terminalLab.observations({ limit: 20 });
+    const row = rows.find((item) => item.id === preview.observationId);
+    const commands = row?.diagnosticDrafts.map((item) => item.command) ?? [];
+
+    expect(commands).toContain("ls -la");
+    expect(commands.some((command) => command.includes("/var/root"))).toBe(false);
+  });
+
   it("keeps port-conflict diagnostics inside the read-only runner allowlist", async () => {
     const caller = createCaller();
     const preview = await caller.terminalLab.previewCommand({
