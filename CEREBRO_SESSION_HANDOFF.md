@@ -36457,3 +36457,83 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/ProjectLabPanel.tsx, app/client/src/lib/projectLabCopyModel.ts, app/server/projectLabCopyModel.test.ts, app/server/projectPushPolicy.test.ts, app/server/routers/projectIntelligence.ts, and app/server/cerebroDb.ts first. Continue in CereBro Prime mode. Main shell 1:1 polish exists through center castle framing. Browser mockup polish exists through local history, open gate collapse, project pins collapse, chrome, empty/page state, open-frame Watch Shelf proportions, footer machinery collapse, mobile polish, address normalization, open-package staging, approval return copy, local bookmarks, open-page machinery reduction, bookmark removal, bookmark rename, and frame chrome polish. Project Lab now has approval-gated push contracts, saved local assisted/manual push policy, and read-existing-contract behavior that does not create duplicate contracts. Next slice should continue Project Lab critical-path behavior or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-05-19 2001 EDT - Terminal Lab Diagnostic Draft Runner Fit
+
+Completion:
+
+- Overall: 55%
+- Frontend visible loop: unchanged.
+- Backend/runtime: Terminal Lab diagnostic suggestions now align with the V1
+  read-only runner allowlist.
+- Foundation/docs/planning: updated.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added `terminalLabDiagnosticDrafts.test.ts`.
+- Package-failure diagnostics now suggest `cat package.json`, `which node`,
+  and `which pnpm`.
+- Removed the chained `node -v && pnpm -v` diagnostic draft.
+- Removed the local `node -e` package-script diagnostic draft.
+- Diagnostic drafts remain suggestions only. No command runs from Terminal Lab.
+
+Files touched in this slice:
+
+- `app/server/routers/terminalLab.ts`
+- `app/server/terminalLabDiagnosticDrafts.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- Obsidian:
+  `90_Archive/CereBro Session History/snapshots/2026-05-19 2001 CereBro Session Handoff - terminal-diagnostic-runner-fit.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- Red check: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` failed first because the safe draft commands were missing.
+- Targeted checks: `pnpm -C app exec vitest run server/terminalLabDiagnosticDrafts.test.ts server/terminalLabCopyModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1` passed.
+- `pnpm -C app check` passed.
+- `git diff --check` passed.
+- Browser visual proof was not run because this pass changed backend
+  diagnostic behavior only.
+
+Mockup fidelity:
+
+- Target used: no visual mockup target. This was Terminal Lab behavior
+  hardening.
+- Screenshot path: not applicable.
+- Matched elements: Terminal Lab remains proposal-only and low machinery.
+- Deviations: none from visual source-of-truth because no UI changed.
+- Next fidelity gap: later Terminal Lab visual polish still needs the 1:1 shell
+  pass after behavior gaps are closed.
+
+Drift check:
+
+- On path. This pass prevents Tony diagnostic drafts from suggesting command
+  shapes the V1 runner blocks.
+- No new primary surface.
+- No fake file browser, fake source discovery, fake browser engine, fake watch
+  progress, unsafe site automation, provider use, install, pull, external
+  write, git-write runner, or Raven path.
+
+Known risks:
+
+- `cat package.json` is broader than a script-only read but fits the current
+  allowlist.
+- Visual proof remains unavailable for UI passes, but this pass did not change
+  UI.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+Storage impact:
+
+- No schema change.
+- No DB writes from this code change.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, and app/server/routers/execution.ts first. Continue in CereBro Prime mode. Terminal Lab now keeps package-failure diagnostic drafts runner-compatible with `cat package.json`, `which node`, and `which pnpm`, and no chained or local script diagnostic command. Next slice should continue Terminal Lab teaching-lane hardening or move to the next build-plan surface after checking current queue priority. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
+```

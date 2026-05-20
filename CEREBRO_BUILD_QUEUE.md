@@ -2247,3 +2247,11 @@ Expected shape:
   command, provider call, external write, or Raven path changed. Next slice
   should continue Project Lab behavior gaps or move to the next build-plan
   surface after queue review.
+- 2026-05-19 2001 EDT: Terminal Lab diagnostic draft runner-fit landed.
+  Tony's package-failure diagnostic drafts now suggest only read-only
+  runner-compatible commands: `cat package.json`, `which node`, and
+  `which pnpm`. The old chained `node -v && pnpm -v` shape and local `node -e`
+  script read are gone from this draft path. No UI, schema, provider call,
+  install, download, command execution, external write, or Raven path changed.
+  Next slice should continue Terminal Lab teaching-lane hardening or move to
+  the next build-plan surface after queue review.

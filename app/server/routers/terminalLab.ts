@@ -303,19 +303,27 @@ function buildDiagnosticDrafts(observation: CommandObservation) {
   if (packageFailure && /\b(failed|error|exception|ELIFECYCLE|Command failed)\b/i.test(summary)) {
     drafts.push({
       title: "Inspect package scripts",
-      command: "node -e \"const p=require('./package.json'); console.log(JSON.stringify(p.scripts||{}, null, 2))\"",
-      reason: "Script failures should be grounded in the exact package script before Tony proposes a next command.",
+      command: "cat package.json",
+      reason: "Script failures should be grounded in the local manifest before Tony proposes a next command.",
       evidence: "Observed output looks like a Node/package-tool failure.",
-      expectedSignal: "Shows the local package scripts without installing packages or modifying files.",
+      expectedSignal: "Shows the local package manifest without installing packages or modifying files.",
       approvalGate: "Suggested only. Node executes a local read of package.json and still needs normal approval.",
     });
     drafts.push({
-      title: "Check runtime versions",
-      command: "node -v && pnpm -v",
-      reason: "Version mismatches can explain package-tool failures, and this is the smallest environment check.",
+      title: "Locate Node runtime",
+      command: "which node",
+      reason: "Runtime path mismatches can explain package-tool failures, and this stays inside the read-only runner allowlist.",
       evidence: "The command/output mentions package tooling or a JS/TS test/build step.",
-      expectedSignal: "Shows local Node and pnpm versions for comparison with repo requirements.",
-      approvalGate: "Suggested only. Read-only version checks still run through Codex if approved.",
+      expectedSignal: "Shows which Node binary would be used without running package scripts.",
+      approvalGate: "Suggested only. Read-only path checks still run through Codex if approved.",
+    });
+    drafts.push({
+      title: "Locate pnpm runtime",
+      command: "which pnpm",
+      reason: "Package manager path mismatches can explain script failures, and this stays inside the read-only runner allowlist.",
+      evidence: "The command/output mentions pnpm, npm, yarn, or a JS/TS test/build step.",
+      expectedSignal: "Shows which pnpm binary would be used without installing packages.",
+      approvalGate: "Suggested only. Read-only path checks still run through Codex if approved.",
     });
     return drafts;
   }
