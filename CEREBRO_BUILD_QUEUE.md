@@ -2255,3 +2255,10 @@ Expected shape:
   install, download, command execution, external write, or Raven path changed.
   Next slice should continue Terminal Lab teaching-lane hardening or move to
   the next build-plan surface after queue review.
+- 2026-05-19 2004 EDT: Terminal Lab port diagnostic runner-fit landed. Port
+  conflict diagnostics now suggest `rg -n "<port>" .` instead of `lsof`, so
+  the generated next command stays inside the current read-only runner
+  allowlist. No UI, schema, provider call, install, download, command
+  execution, external write, or Raven path changed. Next slice should continue
+  Terminal Lab teaching-lane hardening or move to the next build-plan surface
+  after queue review.

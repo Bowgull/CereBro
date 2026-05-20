@@ -256,12 +256,12 @@ function buildDiagnosticDrafts(observation: CommandObservation) {
   if (portMatch) {
     const port = portMatch[1] ?? portMatch[2] ?? "3000";
     drafts.push({
-      title: "Inspect the occupied port",
-      command: `lsof -nP -iTCP:${port} -sTCP:LISTEN`,
-      reason: "Port conflicts should start by identifying the listener before stopping anything or changing app config.",
+      title: "Find local port references",
+      command: `rg -n ${shellQuote(port)} .`,
+      reason: "Port conflicts should first find local config references before stopping a process or changing app settings.",
       evidence: `Observed output mentions a port conflict around ${port}.`,
-      expectedSignal: "Shows the local process, PID, and command currently listening on that port.",
-      approvalGate: "Suggested only. Read-only inspection still runs through Codex if approved.",
+      expectedSignal: "Shows scripts, env examples, or config files that mention the conflicting port.",
+      approvalGate: "Suggested only. Read-only repo search still runs through Codex if approved.",
     });
     return drafts;
   }
