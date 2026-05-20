@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2037 EDT
+Last updated: 2026-05-19 2043 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,14 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2043 EDT: reduced the direct Browser empty page state. The empty
+  page now shows one centered prompt, hides `empty` / `no draft` chips, hides
+  Page State and Proof panels until a real page or search draft exists, and uses
+  user-facing safety copy instead of approval-package language. Screenshot saved
+  at `output/playwright/browser-empty-state-reduced-proof.png`. No behavior
+  loosening, page fetch, source save, provider call, install, download,
+  credential handling, external write, model pull, castle change, or Raven path
+  was added.
 - 2026-05-19 2037 EDT: removed the bottom direct Browser `Tools` menu and its
   duplicated links to Workbench receipts, Approvals, Sources, and Spock gate.
   Global navigation and approval handoff remain. Screenshot saved at

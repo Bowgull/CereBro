@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2037 EDT
+Last updated: 2026-05-19 2043 EDT
 
 ## Current North Star
 
@@ -20,6 +20,67 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2043 EDT - Browser Empty State Reduction
+
+### What Changed
+- Reduced the direct Browser empty page state to one centered page prompt.
+- Removed visible `empty` and `no draft` status chips from the empty page.
+- Hid the Page State and Proof side panels until a real page or search draft
+  exists.
+- Changed empty-state copy from approval-package language to user-facing safety
+  language.
+- Kept existing Browser gates, proof disclosures, proposal creation, Watch
+  Shelf storage rules, and approval paths unchanged.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app check`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserEmptyProof=1779204200001`.
+  - Opened the direct Browser surface.
+  - Confirmed the empty Browser page no longer shows the empty chips, Page
+    State side card, or empty Proof block.
+  - Screenshot saved at
+    `output/playwright/browser-empty-state-reduced-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: the empty Browser page is quieter, page-first, and no
+  longer exposes proof/readback machinery before a page exists.
+- Deviations: still not 1:1. The global shell still has more demo chrome and
+  the Browser visual treatment is still short of the approved high-fidelity
+  mockup.
+- Next fidelity gap: align Browser tabs, pins/bookmarks, and address chrome
+  more tightly to the approved Browser mockup while preserving honest state.
+
+### Drift Check
+- On path.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. The empty Browser page now hides draft/proof machinery until a target exists. Next safest slice is Browser chrome fidelity: tabs, pins/bookmarks, and address row alignment toward the approved high-fidelity Browser mockup without adding fake function. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2037 EDT - Browser Utility Menu Removal
 
