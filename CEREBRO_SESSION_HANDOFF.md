@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2023 EDT
+Last updated: 2026-05-19 2029 EDT
 
 ## Current North Star
 
@@ -20,6 +20,71 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2029 EDT - Browser Open Action Copy
+
+### What Changed
+- Moved the direct Browser primary action copy into
+  `workbenchBrowserPrimaryActionCopy`.
+- Changed the main Browser button from receipt-facing `Stage` language to
+  user-facing `Open` / `Opening` language.
+- Kept the action approval-gated. `Open` still prepares the proposal, approval,
+  Workbench body, Spock receipt, result scaffold, and live-runner gate before
+  any page can open.
+- Updated empty-state Browser copy so it says `Open creates the approval package`
+  instead of `Stage creates...`.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  - first run failed as expected because `workbenchBrowserPrimaryActionCopy` did
+    not exist yet.
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserOpenCopyProof=1779201000001`.
+  - Confirmed the direct Browser primary action renders as `Open`.
+  - Screenshot saved at `output/playwright/browser-open-copy-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: the direct Browser now reads more like a browser and less
+  like a receipt console.
+- Deviations: still not 1:1. Approval and open-gate detail copy still exists
+  below the primary surface and should be further collapsed after the next
+  browser gate pass.
+- Next fidelity gap: keep direct Browser as the primary user surface while
+  moving receipt details behind quieter proof controls.
+
+### Drift Check
+- On path.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. The direct Browser primary action now says Open/Opening while preserving approval-gated preparation. Next safest slice is to collapse remaining open-gate machinery behind quieter proof controls and keep Browser close to the high-fidelity mockup. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2023 EDT - Browser Watch Shelf Category Alignment
 

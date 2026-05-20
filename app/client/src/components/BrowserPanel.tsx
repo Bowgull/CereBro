@@ -8,6 +8,7 @@ import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserLocalNavigationStateModel,
+  workbenchBrowserPrimaryActionCopy,
   workbenchBrowserProjectPinsModel,
   workbenchBrowserShellModel,
   workbenchBrowserTabStateModel,
@@ -345,6 +346,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     removeBrowserBookmark.isPending ||
     renameBrowserBookmark.isPending ||
     recordBrowserSandboxFrameReload.isPending;
+  const browserPrimaryAction = workbenchBrowserPrimaryActionCopy({
+    draftKind: browserDraft.kind,
+    isPreparing: isPreparingBrowserDraft,
+  });
 
   useEffect(() => {
     let raw: string | null = null;
@@ -543,12 +548,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 size="sm"
                 variant="outline"
                 className="h-8 px-2"
-                disabled={browserDraft.kind === "empty" || isPreparingBrowserDraft}
-                title="Prepare local Browser receipts. This does not open, fetch, search, save, or capture."
-                aria-label="Stage browser page draft"
+                disabled={browserPrimaryAction.disabled}
+                title={browserPrimaryAction.title}
+                aria-label={browserPrimaryAction.ariaLabel}
                 onClick={async () => {
                   if (browserDraft.kind === "empty" || isPreparingBrowserDraft) return;
-                  setBrowserNotice("Preparing local Browser receipts. No page will open.");
+                  setBrowserNotice(browserPrimaryAction.pendingNotice);
                   try {
                     const result = await createBrowserActionProposal.mutateAsync({
                       actionLabel: "Open Page",
@@ -574,12 +579,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       `Browser proposal #${proposalId} prepared. Review approval #${approvalPreview.approval?.id ?? "pending"} and live gate #${liveApprovalPreview.approval?.id ?? "pending"} are waiting. No page opened.`,
                     );
                   } catch {
-                    setBrowserNotice("Browser preparation failed before any page opened.");
+                    setBrowserNotice(browserPrimaryAction.failureNotice);
                     setPreparedApprovalId(null);
                   }
                 }}
               >
-                {isPreparingBrowserDraft ? "Preparing" : "Stage"}
+                {browserPrimaryAction.label}
               </Button>
               <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser quiet shield">
                 <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
@@ -934,7 +939,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       {browserDraft.kind === "empty" ? "Enter a site or search." : browserDraft.tabLabel}
                     </div>
                     <div className="mt-2 max-w-md break-words text-[12px] leading-snug" style={{ color: browserDraft.kind === "empty" ? C.textMuted : C.textSecondary }}>
-                      {browserDraft.kind === "empty" ? "Use the address bar. Stage creates the approval package before any page opens." : browserDraft.displayTarget}
+                      {browserDraft.kind === "empty" ? "Use the address bar. Open creates the approval package before any page opens." : browserDraft.displayTarget}
                     </div>
                     <div className="mt-3 flex justify-center gap-1">
                       <Chip label={browserDraft.kind === "empty" ? "empty" : browserDraft.kind} tone={browserDraft.kind === "empty" ? C.textMuted : C.accent} />
@@ -950,7 +955,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       <Chip label="local" tone={C.gold} />
                     </div>
                     <div className="mt-2" style={{ color: C.textMuted }}>
-                      {browserDraft.kind === "empty" ? "Nothing opens until you stage a target." : "Stage the target to create the approval gate."}
+                      {browserDraft.kind === "empty" ? "Nothing opens until you enter a target." : "Open the target to create the approval gate."}
                     </div>
                   </div>
                   {selectedBrowserProposalId != null && (

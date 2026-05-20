@@ -4,6 +4,7 @@ import {
   workbenchBrowserDraftModel,
   workbenchBrowserReadinessModel,
   workbenchBrowserRunnerContractModel,
+  workbenchBrowserPrimaryActionCopy,
   workbenchBrowserSessionStorageContractModel,
   workbenchBrowserShellModel,
   workbenchBrowserProjectPinsModel,
@@ -89,6 +90,33 @@ describe("workbenchBrowserModel", () => {
     expect(draft.kind).toBe("url");
     expect(draft.displayTarget).toBe("example.com/watch/episode-1");
     expect(draft.targetUrl).toBe("https://example.com/watch/episode-1");
+  });
+
+  it("keeps the primary Browser action user-facing instead of receipt-facing", () => {
+    const idle = workbenchBrowserPrimaryActionCopy({
+      draftKind: "url",
+      isPreparing: false,
+    });
+    const pending = workbenchBrowserPrimaryActionCopy({
+      draftKind: "url",
+      isPreparing: true,
+    });
+    const empty = workbenchBrowserPrimaryActionCopy({
+      draftKind: "empty",
+      isPreparing: false,
+    });
+    const combined = JSON.stringify([idle, pending, empty]).toLowerCase();
+
+    expect(idle.label).toBe("Open");
+    expect(pending.label).toBe("Opening");
+    expect(empty.label).toBe("Open");
+    expect(idle.disabled).toBe(false);
+    expect(pending.disabled).toBe(true);
+    expect(empty.disabled).toBe(true);
+    expect(idle.ariaLabel).toBe("Prepare browser page open");
+    expect(idle.title).toContain("approval package");
+    expect(combined).not.toContain("stage");
+    expect(combined).not.toContain("receipt");
   });
 
   it("reads Watch Shelf draft state without saving fake media state", () => {

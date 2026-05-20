@@ -20,6 +20,15 @@ export type WorkbenchBrowserDraft = {
   noActionText: string;
 };
 
+export type WorkbenchBrowserPrimaryActionCopy = {
+  label: "Open" | "Opening";
+  disabled: boolean;
+  ariaLabel: string;
+  title: string;
+  pendingNotice: string;
+  failureNotice: string;
+};
+
 export type WorkbenchWatchShelfDraft = {
   selectedCategory: string;
   candidateLabel: "No open page" | "Page draft" | "Search draft";
@@ -159,6 +168,20 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
     tabLabel: kind === "url" ? "Page Draft" : "Search Draft",
     canOpen: false,
     noActionText: "No browser automation, page fetch, search request, credential action, file transfer, source save, Workbench capture, or external write runs from this draft.",
+  };
+}
+
+export function workbenchBrowserPrimaryActionCopy(input: {
+  draftKind: WorkbenchBrowserDraft["kind"];
+  isPreparing: boolean;
+}): WorkbenchBrowserPrimaryActionCopy {
+  return {
+    label: input.isPreparing ? "Opening" : "Open",
+    disabled: input.draftKind === "empty" || input.isPreparing,
+    ariaLabel: "Prepare browser page open",
+    title: "Prepare the approval package before this page can open. No page fetch, search request, source save, or external write runs.",
+    pendingNotice: "Preparing the page gate. No page will open yet.",
+    failureNotice: "Browser open preparation failed before any page opened.",
   };
 }
 

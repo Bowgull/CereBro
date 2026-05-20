@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-19 2023 EDT
+Last updated: 2026-05-19 2029 EDT
 
 This file is CereBro Prime's active queue.
 
@@ -119,6 +119,15 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-19 2029 EDT: moved the direct Browser primary action copy into
+  `workbenchBrowserPrimaryActionCopy` and changed the main button from
+  receipt-facing `Stage` language to user-facing `Open` / `Opening` language.
+  The action remains approval-gated and still prepares the local proposal,
+  approval, Workbench body, Spock receipt, result scaffold, and live-runner gate
+  before any page can open. Screenshot saved at
+  `output/playwright/browser-open-copy-proof.png`. No behavior loosening, page
+  fetch, source save, provider call, install, download, credential handling,
+  external write, model pull, castle change, or Raven path was added.
 - 2026-05-19 2023 EDT: aligned Watch Shelf visible categories with the server
   save contract. Added a failing-then-passing regression for the visible `Want`
   category, fixed the direct Browser category casts, and wired Workbench Browser
