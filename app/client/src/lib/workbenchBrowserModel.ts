@@ -29,6 +29,14 @@ export type WorkbenchBrowserPrimaryActionCopy = {
   failureNotice: string;
 };
 
+export type WorkbenchBrowserOpenGateCopy = {
+  visibleTitle: "Page permission";
+  visibleStatus: "No page" | "Needs approval" | "Ready" | "Checking";
+  visibleBody: string;
+  primaryActionLabel: "Open Page";
+  proofLabel: "Proof";
+};
+
 export type WorkbenchWatchShelfDraft = {
   selectedCategory: string;
   candidateLabel: "No open page" | "Page draft" | "Search draft";
@@ -182,6 +190,51 @@ export function workbenchBrowserPrimaryActionCopy(input: {
     title: "Prepare the approval package before this page can open. No page fetch, search request, source save, or external write runs.",
     pendingNotice: "Preparing the page gate. No page will open yet.",
     failureNotice: "Browser open preparation failed before any page opened.",
+  };
+}
+
+export function workbenchBrowserOpenGateCopy(input: {
+  hasProposal: boolean;
+  canOpenPage: boolean;
+  isLoading: boolean;
+  nextAction: string | null | undefined;
+}): WorkbenchBrowserOpenGateCopy {
+  if (!input.hasProposal) {
+    return {
+      visibleTitle: "Page permission",
+      visibleStatus: "No page",
+      visibleBody: "Enter a page before permission is checked.",
+      primaryActionLabel: "Open Page",
+      proofLabel: "Proof",
+    };
+  }
+
+  if (input.isLoading) {
+    return {
+      visibleTitle: "Page permission",
+      visibleStatus: "Checking",
+      visibleBody: "Checking whether this page can open.",
+      primaryActionLabel: "Open Page",
+      proofLabel: "Proof",
+    };
+  }
+
+  if (input.canOpenPage) {
+    return {
+      visibleTitle: "Page permission",
+      visibleStatus: "Ready",
+      visibleBody: "This page can open in the protected frame.",
+      primaryActionLabel: "Open Page",
+      proofLabel: "Proof",
+    };
+  }
+
+  return {
+    visibleTitle: "Page permission",
+    visibleStatus: "Needs approval",
+    visibleBody: "Review the permission step before this page opens.",
+    primaryActionLabel: "Open Page",
+    proofLabel: "Proof",
   };
 }
 

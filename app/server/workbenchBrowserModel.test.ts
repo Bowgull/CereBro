@@ -10,6 +10,7 @@ import {
   workbenchBrowserProjectPinsModel,
   workbenchBrowserTabStateModel,
   workbenchBrowserLocalNavigationStateModel,
+  workbenchBrowserOpenGateCopy,
   workbenchWatchShelfDraftModel,
   workbenchWatchShelfModel,
 } from "../client/src/lib/workbenchBrowserModel";
@@ -117,6 +118,39 @@ describe("workbenchBrowserModel", () => {
     expect(idle.title).toContain("approval package");
     expect(combined).not.toContain("stage");
     expect(combined).not.toContain("receipt");
+  });
+
+  it("keeps Browser open-gate machinery behind proof copy", () => {
+    const blocked = workbenchBrowserOpenGateCopy({
+      hasProposal: true,
+      canOpenPage: false,
+      isLoading: false,
+      nextAction: "Live runner remains blocked until explicit live-runner approval exists.",
+    });
+    const ready = workbenchBrowserOpenGateCopy({
+      hasProposal: true,
+      canOpenPage: true,
+      isLoading: false,
+      nextAction: "All gates present.",
+    });
+    const empty = workbenchBrowserOpenGateCopy({
+      hasProposal: false,
+      canOpenPage: false,
+      isLoading: false,
+      nextAction: null,
+    });
+    const visible = JSON.stringify([blocked.visibleTitle, blocked.visibleStatus, blocked.visibleBody, ready.visibleStatus, empty.visibleBody]).toLowerCase();
+
+    expect(blocked.visibleTitle).toBe("Page permission");
+    expect(blocked.visibleStatus).toBe("Needs approval");
+    expect(blocked.primaryActionLabel).toBe("Open Page");
+    expect(blocked.proofLabel).toBe("Proof");
+    expect(ready.visibleStatus).toBe("Ready");
+    expect(empty.visibleBody).toBe("Enter a page before permission is checked.");
+    expect(visible).not.toContain("runner");
+    expect(visible).not.toContain("proposal");
+    expect(visible).not.toContain("gate");
+    expect(visible).not.toContain("receipt");
   });
 
   it("reads Watch Shelf draft state without saving fake media state", () => {

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-19 2029 EDT
+Last updated: 2026-05-19 2033 EDT
 
 ## Current North Star
 
@@ -20,6 +20,68 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-19 2033 EDT - Browser Permission Copy Collapse
+
+### What Changed
+- Added `workbenchBrowserOpenGateCopy` to keep the direct Browser permission
+  read user-facing.
+- Changed visible Browser permission wording from `Open Gate` / `blocked` /
+  runner language to `Page permission` / `Needs approval` / `Ready`.
+- Renamed the visible open action in that permission row to `Open Page`.
+- Moved proposal, runner, missing-gate, and audit language behind the existing
+  `Proof` disclosure.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/server/workbenchBrowserModel.test.ts`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+  - first run failed as expected because `workbenchBrowserOpenGateCopy` did not
+    exist yet.
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app exec vitest run server/workbenchBrowserModel.test.ts server/browserActionProposalRouter.test.ts --pool=forks --minWorkers=1 --maxWorkers=1`
+- `pnpm -C app check`
+- `git diff --check`
+- Browser proof:
+  - Dev server running at `http://localhost:3000/`.
+  - Opened `http://localhost:3000/?browserPermissionCopyProof=1779202000001`.
+  - Opened the direct Browser surface.
+  - Screenshot saved at `output/playwright/browser-permission-copy-proof.png`.
+
+### Mockup Fidelity
+- Target used: locked Browser/Watch Shelf high-fidelity mockup and low-machinery
+  Browser contract.
+- Matched elements: the direct Browser hides more machinery by default and keeps
+  proof/detail behind a small disclosure.
+- Deviations: still not 1:1. The Browser still has visible proof controls and
+  some utility disclosures that need one more reduction pass.
+- Next fidelity gap: collapse Browser utility/proof details further and keep
+  the page viewport visually dominant.
+
+### Drift Check
+- On path.
+- No behavior loosening.
+- No fake browser function.
+- No page fetch, source save, provider call, install, download, credential
+  handling, external write, model pull, castle change, or Raven path change.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- One Playwright screenshot written under `output/playwright/`.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue the Browser critical path. The direct Browser permission row now says Page permission / Needs approval, while proposal and runner machinery lives behind Proof. Next safest slice is to collapse remaining Browser utility/proof details and increase page viewport dominance without loosening gates. Preserve the castle. Screenshot-proof changes and include the required Mockup fidelity closeout line.
+```
 
 ## 2026-05-19 2029 EDT - Browser Open Action Copy
 

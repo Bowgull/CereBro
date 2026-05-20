@@ -8,6 +8,7 @@ import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
   workbenchBrowserLocalNavigationStateModel,
+  workbenchBrowserOpenGateCopy,
   workbenchBrowserPrimaryActionCopy,
   workbenchBrowserProjectPinsModel,
   workbenchBrowserShellModel,
@@ -307,6 +308,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       refetchOnReconnect: false,
     },
   );
+  const browserOpenGateCopy = workbenchBrowserOpenGateCopy({
+    hasProposal: selectedBrowserProposalId != null,
+    canOpenPage: Boolean(browserLiveRunnerPreflight.data?.canOpenPage),
+    isLoading: browserLiveRunnerPreflight.isLoading,
+    nextAction: browserLiveRunnerPreflight.data?.nextAction,
+  });
   const browserProjectPins = workbenchBrowserProjectPinsModel(projects.data?.projects ?? []);
   const watchShelf = workbenchWatchShelfModel();
   const watchShelfDraft = workbenchWatchShelfDraftModel(browserDraft, watchShelfCategory);
@@ -962,15 +969,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <div className="rounded p-2 text-left text-[10px] leading-snug" aria-label="Browser open gate" style={{ background: "rgba(5, 10, 10, 0.64)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel, color: C.textMuted }}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Open Gate</div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>{browserOpenGateCopy.visibleTitle}</div>
                         <div className="mt-0.5 truncate">
-                          {browserLiveRunnerPreflight.isLoading
-                            ? "Reading approval state."
-                            : browserLiveRunnerPreflight.data?.nextAction ?? "Open gate is unavailable for this proposal."}
+                          {browserOpenGateCopy.visibleBody}
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center gap-1">
-                        <Chip label={browserLiveRunnerPreflight.data?.canOpenPage ? "ready" : "blocked"} tone={browserLiveRunnerPreflight.data?.canOpenPage ? C.success : C.warning} />
+                        <Chip label={browserOpenGateCopy.visibleStatus} tone={browserLiveRunnerPreflight.data?.canOpenPage ? C.success : C.warning} />
                         <Button
                           type="button"
                           size="sm"
@@ -980,11 +985,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           title={canOpenSandboxFrame ? "Open the target in the sandbox frame." : "Requires open-ready state."}
                           onClick={() => recordBrowserSandboxFrameOpen.mutate({ proposalId: selectedBrowserProposalId })}
                         >
-                          {recordBrowserSandboxFrameOpen.isPending ? "Opening" : "Open Frame"}
+                          {recordBrowserSandboxFrameOpen.isPending ? "Opening" : browserOpenGateCopy.primaryActionLabel}
                         </Button>
                         <details className="relative">
                           <summary className="flex h-6 cursor-pointer list-none items-center rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                            Details
+                            {browserOpenGateCopy.proofLabel}
                           </summary>
                           <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
                             <div className="flex flex-wrap gap-1">
