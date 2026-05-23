@@ -31,17 +31,17 @@ function ItemSeparator({
 }
 
 const itemVariants = cva(
-  "group/item flex items-center border border-transparent text-sm rounded-md transition-colors [a]:hover:bg-accent/50 [a]:transition-colors duration-100 flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+  "group/item flex flex-wrap items-center rounded-md border border-transparent text-[13px] text-[#F4EFE3] outline-none transition-[background-color,border-color,color,box-shadow] duration-100 [a]:transition-colors [a]:hover:bg-[#202A38] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        outline: "border-border",
-        muted: "bg-muted/50",
+        outline: "border-[#253041] bg-[#151A23]",
+        muted: "bg-[#151A23]",
       },
       size: {
-        default: "p-4 gap-4 ",
-        sm: "py-3 px-4 gap-2.5",
+        default: "gap-3 p-3",
+        sm: "gap-2 px-3 py-2",
       },
     },
     defaultVariants: {
@@ -77,7 +77,7 @@ const itemMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "size-8 border rounded-sm bg-muted [&_svg:not([class*='size-'])]:size-4",
+        icon: "size-8 rounded border border-[#253041] bg-[#181F2A] text-[#B8C0CC] [&_svg:not([class*='size-'])]:size-4",
         image:
           "size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover",
       },
@@ -121,7 +121,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
+        "flex w-fit items-center gap-2 text-[13px] leading-snug font-medium text-[#F4EFE3]",
         className
       )}
       {...props}
@@ -134,8 +134,8 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="item-description"
       className={cn(
-        "text-muted-foreground line-clamp-2 text-sm leading-normal font-normal text-balance",
-        "[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
+        "line-clamp-2 text-[12px] leading-snug font-normal text-balance text-[#B8C0CC]",
+        "[&>a:hover]:text-[#6BA6FF] [&>a]:underline [&>a]:underline-offset-4",
         className
       )}
       {...props}

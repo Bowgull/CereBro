@@ -1,0 +1,672 @@
+import { describe, expect, it } from "vitest";
+import { appRouter } from "./routers";
+import { getCerebroDb } from "./cerebroDb";
+
+function createCaller() {
+  return appRouter.createCaller({
+    user: null,
+    req: {} as never,
+    res: {} as never,
+  });
+}
+
+async function countRows(table: string) {
+  const db = await getCerebroDb();
+  const result = await db.execute(`SELECT COUNT(*) AS count FROM ${table}`);
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+describe("Model Tools local-first routing policy", () => {
+  it("keeps Ollama on the core fast local-first path without installing anything", async () => {
+    const caller = createCaller();
+    const policy = await caller.modelTools.policy();
+    const route = await caller.modelTools.routePreview({
+      taskKind: "summarize a private source card",
+      modality: "text",
+      privacyClass: "local_private",
+    });
+
+    const ollama = policy.localModelLanes.find((lane) => lane.id === "ollama_local_fast_lane");
+    const embedding = policy.localModelLanes.find((lane) => lane.id === "local_embedding_smoke_lane");
+
+    expect(policy.routingStance).toContain("local-first");
+    expect(policy.speedStance).toContain("Instant shell");
+    expect(policy.capabilityMap.find((lane) => lane.id === "local_first")?.uiRule).toContain("Basement readiness");
+    expect(policy.capabilityMap.find((lane) => lane.id === "external_gateway")?.approvalRule).toContain("Confirm each use");
+    expect(ollama?.tool).toBe("Ollama");
+    expect(ollama?.defaultUse).toContain("summaries");
+    expect(ollama?.installStatus).toBe("not_verified");
+    expect(ollama?.approvalGate).toContain("approval before install");
+    expect(embedding?.modelClass).toBe("embedding");
+    expect(policy.gates.join(" ")).toContain("Ollama stays on the core local-first path");
+
+    expect(route.recommendedLane).toBe("ollama_local_fast_lane");
+    expect(route.lanes[0]?.lane).toBe("ollama_local_fast_lane");
+    expect(route.lanes[0]?.status).toBe("not_verified_no_install");
+    expect(route.decisionPath.map((step) => step.step)).toEqual(["Source", "Eval", "Approval"]);
+    expect(route.decisionPath.find((step) => step.step === "Approval")?.status).toBe("local_receipt");
+    expect(route.noActionTaken.join(" ")).toContain("No Ollama install");
+  });
+
+  it("defines the approved Ollama setup plan before the install pass", async () => {
+    const caller = createCaller();
+    const policy = await caller.modelTools.policy();
+
+    expect(policy.ollamaSetupPlan.status).toBe("not_started");
+    expect(policy.ollamaSetupPlan.executionMode).toBe("approval_required");
+    expect(policy.ollamaSetupPlan.noActionTaken).toContain("No Ollama install ran.");
+    expect(policy.ollamaSetupPlan.firstApprovalBatch.map((item) => item.model)).toEqual([
+      "all-minilm:22m",
+      "gemma3:1b",
+    ]);
+    expect(policy.ollamaSetupPlan.stretchCandidates.map((item) => item.model)).toEqual([
+      "qwen3:1.7b",
+      "llama3.2:3b",
+    ]);
+    expect(policy.ollamaSetupPlan.blockedFirstInstalls).toContain("7B+ chat/coding models");
+    expect(policy.ollamaSetupPlan.testProcedure).toContain("Run a health prompt.");
+    expect(policy.ollamaSetupPlan.storageRule).toContain("Mac is the workbench");
+    expect(policy.ollamaSetupPlan.uiRule).toContain("Basement");
+    expect(policy.ollamaSetupPlan.nextApprovalSteps.map((item) => item.label)).toEqual([
+      "Check Install Status",
+      "Install Ollama",
+      "Pull First Batch",
+      "Run Local Eval",
+    ]);
+    expect(policy.ollamaSetupPlan.nextApprovalSteps.every((item) => item.runsFromPolicy === false)).toBe(true);
+    expect(policy.ollamaSetupPlan.installStatusCheck.status).toBe("not_run");
+    expect(policy.ollamaSetupPlan.installStatusCheck.allowedCommands).toEqual([
+      "command -v ollama",
+      "ollama --version",
+      "ollama list",
+    ]);
+    expect(policy.ollamaSetupPlan.installStatusCheck.forbiddenCommands).toContain("ollama pull");
+    expect(policy.ollamaSetupPlan.installStatusCheck.receiptFields).toContain("no_install_or_pull_confirmation");
+    expect(policy.ollamaSetupPlan.installStatusCheck.noActionTaken).toContain("No status command has run");
+  });
+
+  it("stages the Ollama status check as a local approval preview without running it", async () => {
+    const caller = createCaller();
+    const result = await caller.modelTools.createOllamaStatusApprovalPreview({
+      reason: "Test approval preview only.",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.executesCommands).toBe(false);
+    expect(result.installsDependencies).toBe(false);
+    expect(result.pullsModels).toBe(false);
+    expect(result.callsLocalModels).toBe(false);
+    expect(result.approval?.actionType).toBe("ollama_status_read_only_check");
+    expect(result.approval?.targetType).toBe("model_tool_ollama_status_check");
+    expect(result.approval?.contextSummary).toContain("Allowed commands: command -v ollama, ollama --version, ollama list");
+    expect(result.gates.join(" ")).toContain("No command was executed.");
+
+    const previews = await caller.modelTools.ollamaStatusApprovalPreviews({ limit: 10 });
+    expect(previews.mode).toBe("read_only");
+    expect(previews.executesCommands).toBe(false);
+    expect(previews.installsDependencies).toBe(false);
+    expect(previews.pullsModels).toBe(false);
+    expect(previews.callsLocalModels).toBe(false);
+    expect(previews.items.map((item) => item.id)).toContain(result.approval?.id);
+    const preview = previews.items.find((item) => item.id === result.approval?.id);
+    expect(preview?.status).toBe("pending");
+    expect(preview?.costRisk).toBe("local_read_only_command_review");
+    expect(preview?.permissionPreflightId).toBe(result.approval?.permissionPreflightId);
+  });
+
+  it("returns live registry counts without running a model or provider", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const before = await caller.modelTools.policy();
+    const local = await caller.modelTools.proposeCapability({
+      provider: `Local Test ${stamp}`,
+      toolName: "Small local formatter",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:test",
+    });
+    await caller.modelTools.proposeCapability({
+      provider: `Gateway Test ${stamp}`,
+      toolName: "External gateway candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/gateway",
+    });
+    await caller.modelTools.recordEval({
+      capabilityId: local.capability.id,
+      evalTaskKey: "handoff_prompt_gate",
+      taskSummary: "Local count test. No model ran.",
+      status: "recorded",
+      evaluatorAgent: "spock",
+    });
+
+    const after = await caller.modelTools.policy();
+
+    expect(after.capabilityMapSummary.totalRecords).toBeGreaterThanOrEqual(before.capabilityMapSummary.totalRecords + 2);
+    expect(after.capabilityMapSummary.evalNotes).toBeGreaterThanOrEqual(before.capabilityMapSummary.evalNotes + 1);
+    expect(after.capabilityMap.find((lane) => lane.id === "local_first")?.registryRecordCount).toBeGreaterThanOrEqual(1);
+    expect(after.capabilityMap.find((lane) => lane.id === "external_gateway")?.registryRecordCount).toBeGreaterThanOrEqual(1);
+    expect(after.capabilityMapSummary.noActionTaken.join(" ")).toContain("No provider");
+  });
+
+  it("computes source readiness from local registry fields only", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const missing = await caller.modelTools.proposeCapability({
+      provider: `Missing Source ${stamp}`,
+      toolName: "Unverified local helper",
+      capabilityKind: "text_reasoning",
+      accessMethod: "manual_copy_paste",
+      privacyClass: "unknown",
+      approvalLevel: "explicit_approval",
+    });
+    const sourced = await caller.modelTools.proposeCapability({
+      provider: `Source Review ${stamp}`,
+      toolName: "Documented helper",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+    });
+
+    expect(missing.capability.sourceReadiness.status).toBe("missing_sources");
+    expect(missing.capability.sourceReadiness.requiredBeforeTrust).toContain("Source URLs.");
+    expect(sourced.capability.sourceReadiness.status).toBe("needs_source_review");
+    expect(sourced.capability.sourceReadiness.sourceUriCount).toBe(1);
+    expect(sourced.capability.sourceReadiness.noActionTaken.join(" ")).toContain("No browser");
+
+    const policy = await caller.modelTools.policy();
+    const route = await caller.modelTools.routePreview({
+      taskKind: "research current model options",
+      modality: "text",
+      privacyClass: "public_safe",
+    });
+    expect(policy.sourceVerificationGate.mode).toBe("read_only");
+    expect(policy.sourceVerificationGate.trustedStates).toEqual(["source_verified", "tested_pass"]);
+    expect(policy.sourceVerificationGate.noActionTaken.join(" ")).toContain("No browser");
+    expect(policy.capabilityMapSummary.sourceReadiness.missingSources).toBeGreaterThanOrEqual(1);
+    expect(policy.capabilityMapSummary.sourceReadiness.needsSourceReview).toBeGreaterThanOrEqual(1);
+    expect(route.decisionPath.find((step) => step.step === "Source")?.status).toBe("required_before_trust");
+    expect(route.decisionPath.find((step) => step.step === "Eval")?.ownerAgent).toBe("spock");
+  });
+
+  it("uses source check date, risk review, and validation notes in proposal readiness", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Reviewed Source ${stamp}`,
+      toolName: "Reviewed candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "No install. Public docs only.",
+      validationNotes: "Docs identify owner, limits, and current fit.",
+    });
+
+    expect(proposal.capability.lastVerifiedAt).toBe(checkedAt);
+    expect(proposal.capability.sourceReadiness.status).toBe("needs_source_review");
+    expect(proposal.capability.sourceReadiness.requiredBeforeTrust).toEqual([
+      "Source verification status or eval result.",
+    ]);
+    expect(proposal.capability.sourceReadiness.nextStep).toContain("Oak mark source verification");
+  });
+
+  it("connects eval notes to readiness without auto-promoting trust", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Eval Evidence ${stamp}`,
+      toolName: "Evidence candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "No install. Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+    await caller.modelTools.recordEval({
+      capabilityId: proposal.capability.id,
+      evalTaskKey: "source_summary_privacy",
+      taskSummary: "Local eval evidence. No provider ran.",
+      status: "pass",
+      evaluatorAgent: "spock",
+      validationNotes: "Passed the local handoff shape check.",
+    });
+
+    const capabilities = await caller.modelTools.capabilities({
+      provider: `Eval Evidence ${stamp}`,
+      limit: 5,
+    });
+    const item = capabilities.items.find((row) => row.id === proposal.capability.id);
+
+    expect(item?.evalStatus).toBe("untested");
+    expect(item?.latestEval?.status).toBe("pass");
+    expect(item?.latestEval?.count).toBe(1);
+    expect(item?.sourceReadiness.status).toBe("eval_recorded");
+    expect(item?.sourceReadiness.requiredBeforeTrust).toEqual([
+      "Explicit trusted-status decision.",
+    ]);
+    expect(item?.sourceReadiness.nextStep).toContain("does not mark this trusted");
+  });
+
+  it("updates capability trust status locally without running providers or changing route defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+    const checkedAt = Math.floor(new Date("2026-05-16T12:00:00Z").getTime() / 1000);
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Status Update ${stamp}`,
+      toolName: "Status candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      sourceCheckedAt: checkedAt,
+      riskReview: "Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+
+    const update = await caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "source_verified",
+      validationNotes: "Oak verified the source record and limits. Local status update only.",
+    });
+
+    expect(update.ok).toBe(true);
+    expect(update.mode).toBe("local_registry_status_update");
+    expect(update.callsExternalModels).toBe(false);
+    expect(update.browsesOrFetches).toBe(false);
+    expect(update.previousEvalStatus).toBe("untested");
+    expect(update.capability.evalStatus).toBe("source_verified");
+    expect(update.capability.sourceReadiness.status).toBe("source_ready");
+    expect(update.gates.join(" ")).toContain("did not call a model/tool");
+
+    const capabilities = await caller.modelTools.capabilities({
+      provider: `Status Update ${stamp}`,
+      limit: 5,
+    });
+    const item = capabilities.items.find((row) => row.id === proposal.capability.id);
+    expect(item?.evalStatus).toBe("source_verified");
+    expect(item?.sourceReadiness.status).toBe("source_ready");
+  });
+
+  it("blocks trusted model tool status without a risk review", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Missing Risk ${stamp}`,
+      toolName: "No risk review candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      validationNotes: "Source URL exists, but risk review is missing.",
+    });
+
+    await expect(caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "source_verified",
+      validationNotes: "Attempted trust promotion without risk review.",
+    })).rejects.toThrow("Risk review is required before this capability can be marked source verified or tested pass.");
+  });
+
+  it("shows status decisions in route readiness without making them defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Route Evidence ${stamp}`,
+      toolName: "Route evidence candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      riskReview: "Public docs only.",
+      validationNotes: "Source shape is readable.",
+    });
+    await caller.modelTools.updateCapabilityStatus({
+      capabilityId: proposal.capability.id,
+      evalStatus: "tested_pass",
+      validationNotes: "Spock accepted the local eval result as registry evidence only.",
+    });
+
+    const route = await caller.modelTools.routePreview({
+      taskKind: "research current model options",
+      modality: "text",
+      privacyClass: "public_safe",
+    });
+
+    expect(route.routeStatus).toBe("proposal_only");
+    expect(route.statusDecisionReadback.evalReady).toBeGreaterThanOrEqual(1);
+    expect(route.statusDecisionReadback.trustedEvidenceStates).toEqual(["source_verified", "tested_pass"]);
+    expect(route.statusDecisionReadback.routeDefaultRule).toContain("not automatic route defaults");
+    expect(route.statusDecisionReadback.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(route.validationPlan).toContain("Read status decisions as registry evidence, not route defaults.");
+
+    const policy = await caller.modelTools.policy();
+    expect(policy.statusDecisionReadback.mode).toBe("local_registry_readback");
+    expect(policy.statusDecisionReadback.routeDefaultsChanged).toBe(false);
+    expect(policy.statusDecisionReadback.evalReady).toBeGreaterThanOrEqual(1);
+  });
+
+  it("reads a registry audit without running models, providers, installs, or writes", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    await caller.modelTools.proposeCapability({
+      provider: `Audit Source ${stamp}`,
+      toolName: "Audit source candidate",
+      capabilityKind: "research",
+      accessMethod: "web_handoff",
+      privacyClass: "public_safe",
+      approvalLevel: "confirm_each_use",
+      sourceUris: "https://example.com/docs",
+      riskReview: "Public docs only.",
+      validationNotes: "Local registry audit test.",
+    });
+    const trusted = await caller.modelTools.proposeCapability({
+      provider: `Audit Trusted ${stamp}`,
+      toolName: "Audit trusted candidate",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:audit",
+      riskReview: "Local only.",
+      validationNotes: "Local registry audit test.",
+    });
+    await caller.modelTools.updateCapabilityStatus({
+      capabilityId: trusted.capability.id,
+      evalStatus: "tested_pass",
+      validationNotes: "Spock accepted local registry evidence for audit test.",
+    });
+
+    const before = {
+      capabilities: await countRows("model_tool_capabilities"),
+      evals: await countRows("model_tool_evals"),
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+    };
+    const audit = await caller.modelTools.registryAudit();
+
+    expect(audit).toMatchObject({
+      mode: "read_only",
+      register: "basement_model_registry",
+      ownerAgent: "spock",
+      routeDefaultsChanged: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      writesExternal: false,
+    });
+    expect(audit.totalRecords).toBeGreaterThanOrEqual(2);
+    expect(audit.trust.evalReady).toBeGreaterThanOrEqual(1);
+    expect(audit.source.needsSourceReview).toBeGreaterThanOrEqual(1);
+    expect(audit.lanes.local_first).toBeGreaterThanOrEqual(1);
+    expect(audit.lanes.external_gateway).toBeGreaterThanOrEqual(1);
+    expect(audit.gates.join(" ")).toContain("not route defaults");
+    expect(audit.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(audit.noActionTaken.join(" ")).toContain("local model_tool_capabilities");
+
+    expect(await countRows("model_tool_capabilities")).toBe(before.capabilities);
+    expect(await countRows("model_tool_evals")).toBe(before.evals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights);
+  });
+
+  it("reads model tool call receipts without running models, providers, installs, or writes", async () => {
+    const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Call Receipt ${stamp}`,
+      toolName: "Call receipt candidate",
+      capabilityKind: "text_reasoning",
+      accessMethod: "local",
+      privacyClass: "local_private",
+      approvalLevel: "explicit_approval",
+      sourceUris: "local:call-receipt",
+      riskReview: "Local receipt readback only.",
+      validationNotes: "Test fixture for call-log receipt readback.",
+    });
+    await db.execute({
+      sql: `
+        INSERT INTO model_tool_call_logs (
+          capability_id, provider, tool_name, task_kind, agent_id,
+          input_summary, output_summary, token_or_input_size,
+          cost_or_free_tier_note, result_status, validation_notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        proposal.capability.id,
+        `Call Receipt ${stamp}`,
+        "Call receipt candidate",
+        "local eval receipt read",
+        "spock",
+        "Fixture input summary. No model ran.",
+        "Fixture output summary. No model ran.",
+        "0 tokens",
+        "No cost.",
+        "logged",
+        "Readback fixture only.",
+      ],
+    });
+
+    const before = {
+      calls: await countRows("model_tool_call_logs"),
+      capabilities: await countRows("model_tool_capabilities"),
+      evals: await countRows("model_tool_evals"),
+      approvals: await countRows("approvals"),
+    };
+    const audit = await caller.modelTools.callLogAudit();
+    const logs = await caller.modelTools.callLogs({ limit: 5 });
+
+    expect(audit).toMatchObject({
+      mode: "read_only",
+      register: "basement_model_tool_call_logs",
+      ownerAgent: "spock",
+      routeDefaultsChanged: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      writesExternal: false,
+    });
+    expect(audit.totalCalls).toBeGreaterThanOrEqual(1);
+    expect(audit.byStatus.logged).toBeGreaterThanOrEqual(1);
+    expect(audit.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(logs.mode).toBe("read_only");
+    expect(logs.items.some((item) => item.capabilityId === proposal.capability.id)).toBe(true);
+    expect(logs.items.find((item) => item.capabilityId === proposal.capability.id)?.resultStatus).toBe("logged");
+    expect(logs.noActionTaken.join(" ")).toContain("No provider");
+
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+    expect(await countRows("model_tool_capabilities")).toBe(before.capabilities);
+    expect(await countRows("model_tool_evals")).toBe(before.evals);
+    expect(await countRows("approvals")).toBe(before.approvals);
+  });
+
+  it("stages a model tool route approval preview without running the tool or changing defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Route Approval ${stamp}`,
+      toolName: "Route approval candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      sourceUris: "https://example.com/route-approval",
+      riskReview: "External gateway candidate. Confirm data leaving the machine before use.",
+      validationNotes: "Source identifies the tool shape. Not trusted for default routing.",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+      calls: await countRows("model_tool_call_logs"),
+    };
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "research current model options",
+      dataSummary: "Public-safe prompt summary only.",
+      reason: "Review this gateway candidate before any provider use.",
+    });
+
+    expect(staged).toMatchObject({
+      ok: true,
+      mode: "local_model_tool_route_approval_preview",
+      created: true,
+      writesExternal: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      routeDefaultsChanged: false,
+    });
+    expect(staged.approval?.actionType).toBe("model_tool_route_review");
+    expect(staged.approval?.targetType).toBe("model_tool_capability");
+    expect(staged.approval?.targetId).toBe(proposal.capability.id);
+    expect(staged.approval?.requestedByAgent).toBe("spock");
+    expect(staged.approval?.contextSummary).toContain("Route approval candidate");
+    expect(staged.approval?.contextSummary).toContain("Data summary: Public-safe prompt summary only.");
+    expect(staged.gates.join(" ")).toContain("No model/tool");
+
+    const queued = await caller.approvals.queue({
+      status: "pending",
+      query: `Route Approval ${stamp}`,
+      limit: 5,
+    });
+    const queuedItem = queued.items.find((item) => item.id === staged.approval?.id);
+    expect(queuedItem?.targetLabel).toContain("Route Approval");
+    expect(queuedItem?.targetLabel).toContain("Route approval candidate");
+
+    const detail = await caller.approvals.detail({ id: staged.approval?.id ?? -1 });
+    expect(detail.approval?.targetLabel).toContain("Route Approval");
+    expect(detail.approval?.validationPreview.oakNotes.join(" ")).toContain("Model/tool");
+    expect(detail.approval?.validationPreview.spockNotes.join(" ")).toContain("does not run the capability");
+
+    const duplicate = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "research current model options",
+    });
+    expect(duplicate.created).toBe(false);
+    expect(duplicate.approval?.id).toBe(staged.approval?.id);
+
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights + 1);
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+  });
+
+  it("reads capability approval previews without running the tool or changing defaults", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Capability Preview ${stamp}`,
+      toolName: "Approval readback candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      sourceUris: "https://example.com/capability-preview",
+      riskReview: "External gateway candidate. Approval readback only.",
+      validationNotes: "Source identifies the tool shape. Not trusted for default routing.",
+    });
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "browser source review",
+      dataSummary: "Public-safe route summary only.",
+      reason: "Review this capability before use.",
+    });
+    const before = {
+      approvals: await countRows("approvals"),
+      preflights: await countRows("permission_preflight_records"),
+      calls: await countRows("model_tool_call_logs"),
+    };
+
+    const previews = await caller.modelTools.capabilityApprovalPreviews({
+      capabilityId: proposal.capability.id,
+      limit: 5,
+    });
+
+    expect(previews).toMatchObject({
+      mode: "read_only",
+      register: "model_tool_capability_approvals",
+      writesExternal: false,
+      callsExternalModels: false,
+      callsLocalModels: false,
+      installsDependencies: false,
+      pullsModels: false,
+      browsesOrFetches: false,
+      routeDefaultsChanged: false,
+    });
+    expect(previews.capabilityId).toBe(proposal.capability.id);
+    expect(previews.counts.pending).toBeGreaterThanOrEqual(1);
+    expect(previews.items.map((item) => item.id)).toContain(staged.approval?.id);
+    expect(previews.items.find((item) => item.id === staged.approval?.id)?.status).toBe("pending");
+    expect(previews.noActionTaken.join(" ")).toContain("No model/tool");
+    expect(previews.gates.join(" ")).toContain("approval receipts");
+
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("permission_preflight_records")).toBe(before.preflights);
+    expect(await countRows("model_tool_call_logs")).toBe(before.calls);
+  });
+
+  it("includes source readiness warnings in model tool approval previews", async () => {
+    const caller = createCaller();
+    const stamp = Date.now();
+
+    const proposal = await caller.modelTools.proposeCapability({
+      provider: `Untrusted Route ${stamp}`,
+      toolName: "Missing source approval candidate",
+      capabilityKind: "gateway",
+      accessMethod: "gateway",
+      privacyClass: "limited_external",
+      approvalLevel: "explicit_approval",
+      validationNotes: "Approval preview should expose missing source readiness.",
+    });
+
+    const staged = await caller.modelTools.createCapabilityRouteApprovalPreview({
+      capabilityId: proposal.capability.id,
+      taskKind: "browser source review",
+      dataSummary: "Public-safe route summary only.",
+      reason: "Review this capability before use.",
+    });
+
+    expect(staged.sourceReadiness.status).toBe("missing_sources");
+    expect(staged.sourceReadiness.requiredBeforeTrust).toContain("Source URLs.");
+    expect(staged.approval?.contextSummary).toContain("Source readiness: missing sources");
+    expect(staged.approval?.contextSummary).toContain("Required before trust: Source URLs.");
+    expect(staged.gates.join(" ")).toContain("Source readiness is recorded in the approval context.");
+
+    const detail = await caller.approvals.detail({ id: staged.approval?.id ?? -1 });
+    expect(detail.approval?.contextSummary).toContain("Source readiness: missing sources");
+    expect(detail.approval?.contextSummary).toContain("Required before trust: Source URLs.");
+  });
+});

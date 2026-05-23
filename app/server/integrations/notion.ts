@@ -1,19 +1,22 @@
 /**
- * Notion adapter — inbox/outbox pattern.
+ * Notion adapter — inbox/outbox/capture pattern.
  *
  * Inbox: a Notion database the user pushes notes/links/briefs into.
- *   pollInbox() ingests new pages into memory_entries with
- *   source='notion:<page_id>'. Re-runs are idempotent because the source
- *   column is checked before insert.
+ *   pollInbox() stages new pages as memory_proposals with
+ *   source='notion:<page_id>'. Re-runs are idempotent because memory entries
+ *   and proposals are both checked before staging.
  *
  * Outbox: a separate database CereBro publishes outputs to.
  *   publishToOutbox() creates a page with title + body.
  *
+ * Capture: proposed Hedwig/Slack structured capture database. V1 status only
+ *   until the user approves the exact schema and workspace target.
+ *
  * Auth via env: NOTION_TOKEN (internal integration secret),
- * NOTION_INBOX_DATABASE_ID, NOTION_OUTBOX_DATABASE_ID. Without the
- * token the adapter is a no-op.
+ * NOTION_INBOX_DATABASE_ID, NOTION_OUTBOX_DATABASE_ID,
+ * NOTION_CAPTURE_DATABASE_ID. Without the token the adapter is a no-op.
  */
-import { getCerebroDb } from "../cerebroDb";
+import { getCerebroDb, recordArtifact } from "../cerebroDb";
 
 const NOTION_API = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -22,8 +25,10 @@ export interface NotionStatus {
   configured: boolean;
   hasInbox: boolean;
   hasOutbox: boolean;
+  hasCapture: boolean;
   inboxDatabaseId: string | null;
   outboxDatabaseId: string | null;
+  captureDatabaseId: string | null;
   workspaceName: string | null;
   lastError: string | null;
 }
@@ -105,13 +110,16 @@ export async function getNotionStatus(): Promise<NotionStatus> {
   const token = process.env.NOTION_TOKEN;
   const inbox = process.env.NOTION_INBOX_DATABASE_ID ?? null;
   const outbox = process.env.NOTION_OUTBOX_DATABASE_ID ?? null;
+  const capture = process.env.NOTION_CAPTURE_DATABASE_ID ?? null;
   if (token) await refreshIdentity();
   return {
     configured: Boolean(token),
     hasInbox: Boolean(token && inbox),
     hasOutbox: Boolean(token && outbox),
+    hasCapture: Boolean(token && capture),
     inboxDatabaseId: inbox,
     outboxDatabaseId: outbox,
+    captureDatabaseId: capture,
     workspaceName: _workspaceName,
     lastError: _lastError,
   };
@@ -187,11 +195,15 @@ export async function pollInbox(): Promise<{
       for (const page of res.results) {
         const pageId = page.id;
         const source = `notion:${pageId}`;
-        const existing = await db.execute({
+        const existingMemory = await db.execute({
           sql: `SELECT id FROM memory_entries WHERE source = ? LIMIT 1`,
           args: [source],
         });
-        if (existing.rows[0]) {
+        const existingProposal = await db.execute({
+          sql: `SELECT id FROM memory_proposals WHERE source = ? LIMIT 1`,
+          args: [source],
+        });
+        if (existingMemory.rows[0] || existingProposal.rows[0]) {
           skipped++;
           continue;
         }
@@ -199,8 +211,24 @@ export async function pollInbox(): Promise<{
         const body = await blocksToText(pageId);
         const composed = body ? `${title}\n\n${body}` : title;
         await db.execute({
-          sql: `INSERT INTO memory_entries (kind, body, source) VALUES ('note', ?, ?)`,
+          sql: `
+            INSERT INTO memory_proposals
+              (kind, body, source, proposed_by_agent, status, oak_status)
+            VALUES ('note', ?, ?, 'piccolo', 'pending', 'pending')
+          `,
           args: [composed, source],
+        });
+        await recordArtifact({
+          kind: "source_note",
+          lifecycleState: "review",
+          title,
+          ownerAgent: "piccolo",
+          storageProvider: "notion",
+          storagePath: pageId,
+          sourceUri: source,
+          byteSize: Buffer.byteLength(composed, "utf8"),
+          mimeType: "text/plain",
+          retentionRule: "keep_until_project_archive",
         });
         ingested++;
       }
@@ -265,6 +293,20 @@ export async function publishToOutbox(payload: {
         children: chunkBodyToBlocks(payload.body),
       },
     })) as { id: string; url?: string };
+    await recordArtifact({
+      kind: "notion_page",
+      lifecycleState: "published",
+      title: payload.title,
+      sessionId: payload.sessionId ?? null,
+      ownerAgent: "c3po",
+      storageProvider: "notion",
+      storagePath: page.id,
+      sourceUri: page.url ?? `notion:${page.id}`,
+      byteSize: Buffer.byteLength(payload.body, "utf8"),
+      mimeType: "text/markdown",
+      retentionRule: "keep_forever",
+      clientVisible: true,
+    });
     return { ok: true, pageId: page.id, url: page.url };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

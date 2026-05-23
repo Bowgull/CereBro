@@ -1,0 +1,394 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { trpc } from "@/lib/trpc";
+import { sourceDisplayName } from "@/lib/displayLabels";
+import { cerebroColors as C } from "@/lib/keepConfig";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select as UiSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+function labelize(value: string | null | undefined) {
+  if (!value) return "unknown";
+  return value.replace(/_/g, " ");
+}
+
+function riskTone(value: string) {
+  if (value === "blocked") return C.danger;
+  if (value === "high") return C.danger;
+  if (value === "medium") return C.warning;
+  return C.success;
+}
+
+function formatTime(unixSec: number) {
+  return new Date(unixSec * 1000).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function initialSecurityTarget() {
+  try {
+    const value = window.sessionStorage.getItem("cerebro:security-target") ?? "";
+    window.sessionStorage.removeItem("cerebro:security-target");
+    return value;
+  } catch {
+    return "";
+  }
+}
+
+function linkedProjectName(receipt: object) {
+  return "projectName" in receipt && typeof receipt.projectName === "string" ? receipt.projectName : null;
+}
+
+function linkedSourceTitle(receipt: object) {
+  return "sourceTitle" in receipt && typeof receipt.sourceTitle === "string" ? receipt.sourceTitle : null;
+}
+
+function linkedSourceUri(receipt: object) {
+  return "sourceUri" in receipt && typeof receipt.sourceUri === "string" ? receipt.sourceUri : null;
+}
+
+export default function SecurityGatePanel({ onClose }: { onClose: () => void }) {
+  const utils = trpc.useUtils();
+  const [target, setTarget] = useState(initialSecurityTarget);
+  const [projectId, setProjectId] = useState<number | "none">("none");
+  const [sourceId, setSourceId] = useState<number | "none">("none");
+  const [sourceLinksOpen, setSourceLinksOpen] = useState(false);
+  const plan = trpc.securityGate.plan.useQuery();
+  const recent = trpc.securityGate.recent.useQuery({ limit: 12 });
+  const projects = trpc.projectIntelligence.overview.useQuery();
+  const linkOptions = trpc.workbench.linkOptions.useQuery(undefined, {
+    enabled: sourceLinksOpen,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const inspect = trpc.securityGate.inspectTarget.useMutation();
+  const createReview = trpc.securityGate.createReview.useMutation({
+    onSuccess: () => {
+      utils.securityGate.recent.invalidate();
+    },
+  });
+
+  const receipt = createReview.data?.review ?? inspect.data?.receipt ?? null;
+  const receiptProjectName = receipt ? linkedProjectName(receipt) : null;
+  const receiptSourceTitle = receipt ? linkedSourceTitle(receipt) : null;
+  const receiptSourceUri = receipt ? linkedSourceUri(receipt) : null;
+
+  function inspectTarget(event: FormEvent) {
+    event.preventDefault();
+    const trimmed = target.trim();
+    if (!trimmed || inspect.isPending) return;
+    inspect.mutate({ target: trimmed });
+  }
+
+  function recordReceipt() {
+    const trimmed = target.trim();
+    if (!trimmed || createReview.isPending) return;
+    createReview.mutate({
+      target: trimmed,
+      projectId: projectId === "none" ? undefined : projectId,
+      sourceId: sourceId === "none" ? undefined : sourceId,
+    });
+  }
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: C.background, border: `1px solid ${C.borderSoft}`, color: C.textPrimary }}>
+      <header className="shrink-0 px-2 py-1.5" style={{ borderBottom: `1px solid ${C.borderSoft}`, background: C.backgroundSoft }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h2 className="text-[12px] font-bold uppercase tracking-wider">Security Gate</h2>
+              <Badge variant="warning" className="uppercase">No browsing</Badge>
+              <Badge variant="secondary" className="uppercase">No execution</Badge>
+            </div>
+          </div>
+          <Button type="button" onClick={onClose} aria-label="Close Security Gate" variant="outline" size="sm">
+            Close
+          </Button>
+        </div>
+
+        <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4" aria-label="Security gate posture">
+          <Stat label="Mode" value={plan.data?.mode ?? "proposal_only"} tone={C.textSecondary} />
+          <Stat label="Owner" value={plan.data?.ownerAgent ?? "spock"} tone={C.accent} />
+          <Stat label="Receipts" value={String(recent.data?.items.length ?? 0)} tone={C.gold} />
+          <Stat label="Default" value="gated" tone={C.warning} />
+        </div>
+      </header>
+
+      <main className="grid flex-1 gap-2 overflow-y-auto p-2 xl:grid-cols-[minmax(0,1fr)_340px]" aria-label="Security Gate workspace">
+        <section className="grid content-start gap-2">
+          <form onSubmit={inspectTarget} className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <SectionTitle title="Inspect Target" detail="local string review" />
+            <Input
+              value={target}
+              onChange={(event) => setTarget(event.target.value)}
+              aria-label="Security target"
+              placeholder="URL, GitHub repo, package, file, or site."
+            />
+            <div className="grid grid-cols-1 gap-1.5">
+              <AppSelect
+                label="Project link"
+                value={String(projectId)}
+                onChange={(value) => setProjectId(value === "none" ? "none" : Number(value))}
+                options={[
+                  { value: "none", label: "No project link" },
+                  ...(projects.data?.projects ?? [])
+                    .filter((project) => project.tasks.projectId != null)
+                    .map((project) => ({
+                      value: String(project.tasks.projectId),
+                      label: project.name,
+                  })),
+                ]}
+              />
+              <details
+                className="rounded p-1.5"
+                onToggle={(event) => setSourceLinksOpen(event.currentTarget.open)}
+                style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
+              >
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  Source Link
+                  <span className="ml-2 font-normal normal-case" style={{ color: C.textMuted }}>
+                    {sourceLinksOpen ? `${linkOptions.data?.sources.length ?? 0} local sources` : "open to read"}
+                  </span>
+                </summary>
+                <div className="mt-1.5">
+                  <AppSelect
+                    label="Source link"
+                    value={String(sourceId)}
+                    onChange={(value) => setSourceId(value === "none" ? "none" : Number(value))}
+                    options={[
+                      { value: "none", label: linkOptions.isLoading ? "Reading local source links" : "No source link" },
+                      ...(linkOptions.data?.sources ?? []).map((source) => ({
+                        value: String(source.id),
+                        label: `#${source.id} ${source.projectName ?? "unlinked"} ${source.title ?? sourceDisplayName(source.uri)}`,
+                      })),
+                    ]}
+                  />
+                </div>
+              </details>
+            </div>
+            <div className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              Link known work when available. Standalone targets can remain unlinked.
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                type="submit"
+                disabled={!target.trim() || inspect.isPending}
+                title={!target.trim() ? "Enter a target before inspecting." : "Inspect the target string locally. No browser, clone, install, download, or execution runs."}
+                aria-label="Inspect security target locally"
+                variant="secondary"
+              >
+                {inspect.isPending ? "Inspecting" : "Inspect"}
+              </Button>
+              <Button
+                type="button"
+                disabled={!target.trim() || createReview.isPending}
+                onClick={recordReceipt}
+                title={!target.trim() ? "Enter a target before recording a security receipt." : "Record a local security receipt. External actions stay gated."}
+                aria-label="Record local security receipt"
+                variant="risk"
+              >
+                {createReview.isPending ? "Recording" : "Record Receipt"}
+              </Button>
+            </div>
+            <p className="text-[10px] leading-snug" style={{ color: C.textMuted }}>
+              This creates a local receipt only. Browser, clone, download, install, and execution stay gated.
+            </p>
+          </form>
+
+          {receipt && (
+            <section className="grid gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+              <div className="flex items-start justify-between gap-2">
+                <SectionTitle title="Receipt" detail={labelize(receipt.targetKind)} />
+                <Chip label={labelize(receipt.riskLevel)} tone={riskTone(receipt.riskLevel)} />
+              </div>
+              <Meta label="Target" value={sourceDisplayName(receipt.targetUri)} title={receipt.targetUri} />
+              <div className="flex flex-wrap gap-1">
+                {receiptProjectName && <Chip label={receiptProjectName} tone={C.gold} />}
+                {receiptSourceTitle && <Chip label={receiptSourceTitle} tone={C.accent} />}
+                {!receiptSourceTitle && receiptSourceUri && <Chip label={sourceDisplayName(receiptSourceUri)} tone={C.accent} />}
+              </div>
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                <Meta label="Project Link" value={receiptProjectName ?? "unlinked"} />
+                <Meta
+                  label="Source Link"
+                  value={receiptSourceTitle ?? (receiptSourceUri ? sourceDisplayName(receiptSourceUri) : "unlinked")}
+                  title={receiptSourceUri ?? undefined}
+                />
+              </div>
+              <details className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  Receipt Details
+                </summary>
+                <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                  <ReceiptList title="Findings" items={receipt.findings} tone={C.warning} />
+                  <ReceiptList title="Blocked" items={receipt.blockedActions} tone={C.danger} />
+                  <ReceiptList title="Allowed" items={receipt.allowedActions} tone={C.success} />
+                  <ReceiptList title="Checks" items={receipt.checks} tone={C.accent} />
+                </div>
+                <div className="mt-1.5 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+                  Browser profile: {receipt.browserPolicy.profile}. Downloads {receipt.browserPolicy.blockDownloads ? "blocked" : "allowed only after approval"}.
+                </div>
+              </details>
+            </section>
+          )}
+
+          <details className="rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+            <summary className="cursor-pointer">
+              <SectionTitle title="Scanner Plan" detail={`${plan.data?.scannerPlan.length ?? 0} adapters`} />
+            </summary>
+            <div className="mt-2 grid gap-1.5">
+              {(plan.data?.scannerPlan ?? []).map((item) => (
+                <div key={item.tool} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                  <div className="flex flex-wrap gap-1">
+                    <Chip label={item.tool} tone={C.accent} />
+                    <Chip label={labelize(item.status)} tone={C.textMuted} />
+                  </div>
+                  <p className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>{item.target}</p>
+                  <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.source}>
+                    Source: {sourceDisplayName(item.source)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+        </section>
+
+        <aside className="grid content-start gap-1.5 rounded p-1.5" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+          <SectionTitle title="Recent Receipts" detail="append-only" />
+          {recent.isLoading ? (
+            <div className="text-[11px]" style={{ color: C.textMuted }}>Reading local receipts.</div>
+          ) : (recent.data?.items ?? []).length === 0 ? (
+            <div className="text-[11px]" style={{ color: C.textMuted }}>No security receipts recorded yet.</div>
+          ) : (
+            recent.data?.items.map((item) => (
+              <article key={item.id} className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+                <div className="flex flex-wrap gap-1">
+                  <Chip label={`#${item.id}`} tone={C.textMuted} />
+                  <Chip label={labelize(item.targetKind)} tone={C.accent} />
+                  <Chip label={labelize(item.riskLevel)} tone={riskTone(item.riskLevel)} />
+                  {item.projectName && <Chip label={item.projectName} tone={C.gold} />}
+                  {item.permissionPreflightId != null && <Chip label={`preflight #${item.permissionPreflightId}`} tone={C.warning} />}
+                </div>
+                <div className="mt-1 truncate text-[11px] font-semibold" style={{ color: C.textPrimary }} title={item.targetUri}>
+                  {sourceDisplayName(item.targetUri)}
+                </div>
+                {(item.sourceTitle || item.sourceUri) && (
+                  <div className="mt-1 text-[10px] truncate" style={{ color: C.textMuted }} title={item.sourceUri ?? undefined}>
+                    Source: {item.sourceTitle ?? sourceDisplayName(item.sourceUri ?? "")}
+                  </div>
+                )}
+                <div className="mt-1 text-[10px]" style={{ color: C.textMuted }}>{formatTime(item.createdAt)}</div>
+              </article>
+            ))
+          )}
+          {(plan.data?.gates ?? []).map((gate) => (
+            <div key={gate} className="rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              {gate}
+            </div>
+          ))}
+        </aside>
+      </main>
+    </div>
+  );
+}
+
+function SectionTitle({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <h3 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>{title}</h3>
+      <span className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>{detail}</span>
+    </div>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded px-1.5 py-1" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>{label}</div>
+      <div className="mt-0.5 text-[11px] font-semibold truncate" style={{ color: tone }} title={value}>{value}</div>
+    </div>
+  );
+}
+
+function Meta({ label, value, title }: { label: string; value: string; title?: string }) {
+  return (
+    <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-1.5 text-[10px] leading-snug">
+      <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
+      <div className="break-words" style={{ color: C.textSecondary }} title={title}>{value}</div>
+    </div>
+  );
+}
+
+function AppSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  return (
+    <label className="grid gap-1 text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>
+      {label}
+      <UiSelect value={value} onValueChange={onChange} aria-label={label}>
+        <SelectTrigger className="w-full normal-case">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={`${option.value}-${option.label}`} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </UiSelect>
+    </label>
+  );
+}
+
+function ReceiptList({ title, items, tone }: { title: string; items: string[]; tone: string }) {
+  return (
+    <div className="rounded p-1.5" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+      <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: tone }}>{title}</div>
+      <div className="grid gap-0.5">
+        {items.slice(0, 5).map((item) => (
+          <div key={item} className="text-[10px] leading-snug" style={{ color: C.textMuted }}>{item}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Chip({ label, tone }: { label: string; tone: string }) {
+  const variant = tone === C.danger
+    ? "destructive"
+    : tone === C.warning || tone === C.gold
+      ? "warning"
+      : tone === C.success
+        ? "success"
+        : tone === C.accentViolet || tone === C.glowViolet
+          ? "violet"
+          : tone === C.accent
+            ? "default"
+            : "secondary";
+
+  return (
+    <Badge variant={variant} className="uppercase">
+      {label}
+    </Badge>
+  );
+}

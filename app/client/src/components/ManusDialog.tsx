@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cerebroColors as C } from "@/lib/keepConfig";
 
 interface ManusDialogProps {
   title?: string;
@@ -51,34 +52,35 @@ export function ManusDialog({
       open={onOpenChange ? open : internalOpen}
       onOpenChange={handleOpenChange}
     >
-      <DialogContent className="py-5 bg-[#f8f8f7] rounded-[20px] w-[400px] shadow-[0px_4px_11px_0px_rgba(0,0,0,0.08)] border border-[rgba(0,0,0,0.08)] backdrop-blur-2xl p-0 gap-0 text-center">
-        <div className="flex flex-col items-center gap-2 p-5 pt-12">
+      <DialogContent className="w-[400px] gap-0 p-0 text-center">
+        <div className="flex flex-col items-center gap-2 p-4 pt-8">
           {logo ? (
-            <div className="w-16 h-16 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] flex items-center justify-center">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded border"
+              style={{ background: C.surfaceMuted, borderColor: C.borderSoft }}
+            >
               <img
                 src={logo}
                 alt="Dialog graphic"
-                className="w-10 h-10 rounded-md"
+                className="h-8 w-8 rounded"
               />
             </div>
           ) : null}
 
-          {/* Title and subtitle */}
           {title ? (
-            <DialogTitle className="text-xl font-semibold text-[#34322d] leading-[26px] tracking-[-0.44px]">
+            <DialogTitle className="text-[13px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
               {title}
             </DialogTitle>
           ) : null}
-          <DialogDescription className="text-sm text-[#858481] leading-5 tracking-[-0.154px]">
+          <DialogDescription className="text-[12px] leading-snug" style={{ color: C.textSecondary }}>
             Please login with Manus to continue
           </DialogDescription>
         </div>
 
-        <DialogFooter className="px-5 py-5">
-          {/* Login button */}
+        <DialogFooter className="px-4 py-4">
           <Button
             onClick={onLogin}
-            className="w-full h-10 bg-[#1a1a19] hover:bg-[#1a1a19]/90 text-white rounded-[10px] text-sm font-medium leading-5 tracking-[-0.154px]"
+            className="w-full"
           >
             Login with Manus
           </Button>

@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CereBro Keep Fortress Wireframe V2</title>
+  <style>
+    :root {
+      --bg: #0e1116;
+      --bg2: #131821;
+      --panel: #181f2a;
+      --panel2: #202a38;
+      --line: #334155;
+      --soft-line: #253041;
+      --text: #f4efe3;
+      --muted: #b8c0cc;
+      --dim: #7e8898;
+      --blue: #6ba6ff;
+      --violet: #a78bfa;
+      --green: #9fd2b7;
+      --gold: #d9b56a;
+      --amber: #f6c177;
+      --red: #ef6f6c;
+      --stone: #6b7280;
+      --crypt: #4ade80;
+      --owl: #e9d5ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #080b10;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: 16px 20px;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(107, 166, 255, 0.14), transparent 34%),
+        linear-gradient(180deg, #111827 0%, #0e1116 48%, #070a0f 100%);
+    }
+
+    header,
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .subhead {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 12px;
+      max-width: 780px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border: 1px solid rgba(244, 239, 227, 0.25);
+    }
+
+    .preview {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      overflow: auto;
+      border: 1px solid var(--soft-line);
+      background:
+        linear-gradient(180deg, rgba(19, 24, 33, 0.92), rgba(8, 11, 16, 0.98));
+    }
+
+    .stage {
+      position: relative;
+      width: min(1500px, 96vw);
+      aspect-ratio: 16 / 8.9;
+      min-width: 1120px;
+      min-height: 620px;
+      overflow: hidden;
+      border-bottom: 18px solid #05070b;
+    }
+
+    .sky {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(26, 38, 58, 0.98) 0%, rgba(15, 21, 32, 0.98) 46%, rgba(7, 10, 16, 1) 100%),
+        repeating-linear-gradient(90deg, transparent 0 62px, rgba(107, 166, 255, 0.045) 62px 63px);
+    }
+
+    .rain {
+      position: absolute;
+      inset: -40px;
+      background: repeating-linear-gradient(108deg, transparent 0 19px, rgba(184, 192, 204, 0.18) 19px 20px);
+      opacity: 0.34;
+    }
+
+    .fortress {
+      position: absolute;
+      left: 2.2%;
+      right: 2.2%;
+      top: 4.4%;
+      bottom: 3%;
+      filter: drop-shadow(0 24px 38px rgba(0, 0, 0, 0.48));
+    }
+
+    .shell {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(26, 31, 42, 0.82), rgba(12, 15, 22, 0.88));
+      clip-path: polygon(
+        0 100%, 0 28%, 5% 28%, 5% 18%, 11% 18%, 11% 28%,
+        20% 28%, 20% 20%, 26% 20%, 26% 28%,
+        35% 28%, 35% 13%, 42% 13%, 42% 28%,
+        46% 28%, 46% 7%, 54% 7%, 54% 28%,
+        58% 28%, 58% 13%, 65% 13%, 65% 28%,
+        74% 28%, 74% 20%, 80% 20%, 80% 28%,
+        89% 28%, 89% 18%, 95% 18%, 95% 28%, 100% 28%, 100% 100%
+      );
+      border: 2px solid rgba(107, 114, 128, 0.62);
+    }
+
+    .stone-course {
+      position: absolute;
+      left: 2.2%;
+      right: 2.2%;
+      height: 8px;
+      background:
+        repeating-linear-gradient(90deg, #3b4658 0 26px, #252f3f 26px 28px);
+      border-top: 1px solid rgba(244, 239, 227, 0.16);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+    }
+
+    .course-roof { top: 25.5%; }
+    .course-upper { top: 45.5%; }
+    .course-command { top: 67%; }
+    .course-ground { top: 86.5%; }
+
+    .grid {
+      position: absolute;
+      left: 3.1%;
+      right: 3.1%;
+      top: 9%;
+      bottom: 4%;
+      display: grid;
+      grid-template-columns: repeat(32, 1fr);
+      grid-template-rows: repeat(18, 1fr);
+      gap: 7px;
+    }
+
+    .room,
+    .sealed,
+    .crypt-room,
+    .hall {
+      position: relative;
+      min-height: 0;
+      padding: 8px;
+      border: 1px solid rgba(107, 114, 128, 0.68);
+      background:
+        linear-gradient(180deg, rgba(32, 42, 56, 0.82), rgba(15, 20, 28, 0.9));
+      box-shadow: inset 0 0 0 1px rgba(244, 239, 227, 0.035);
+      overflow: hidden;
+    }
+
+    .room::after,
+    .sealed::after,
+    .crypt-room::after,
+    .hall::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 20px;
+      height: 2px;
+      background: rgba(244, 239, 227, 0.16);
+    }
+
+    .name {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .note {
+      position: relative;
+      z-index: 2;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.32;
+      max-width: 32ch;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(244, 239, 227, 0.72);
+      background: var(--panel);
+      flex: 0 0 auto;
+    }
+
+    .sealed {
+      border-style: dashed;
+      border-color: rgba(126, 136, 152, 0.56);
+      background:
+        repeating-linear-gradient(135deg, rgba(32, 42, 56, 0.48) 0 12px, rgba(9, 12, 18, 0.68) 12px 24px);
+    }
+
+    .sealed .name,
+    .sealed .note {
+      color: var(--dim);
+    }
+
+    .windows {
+      position: absolute;
+      inset: 32px 10px auto 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      opacity: 0.78;
+    }
+
+    .window {
+      width: 18px;
+      height: 30px;
+      border: 1px solid rgba(107, 166, 255, 0.5);
+      background: rgba(107, 166, 255, 0.12);
+    }
+
+    .door {
+      position: absolute;
+      bottom: 12px;
+      width: 20px;
+      height: 34px;
+      border: 2px solid rgba(217, 181, 106, 0.72);
+      background: rgba(8, 11, 16, 0.68);
+    }
+
+    .door.left { left: 8px; }
+    .door.right { right: 8px; }
+    .door.center { left: 50%; translate: -50% 0; }
+
+    .anchor {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border: 1px solid rgba(244, 239, 227, 0.72);
+      background: rgba(107, 166, 255, 0.44);
+    }
+
+    .entry-anchor { left: 18px; bottom: 48px; background: rgba(159, 210, 183, 0.62); }
+    .exit-anchor { right: 18px; bottom: 48px; }
+    .call-anchor { right: 18px; top: 42px; background: rgba(167, 139, 250, 0.62); }
+
+    .gojo {
+      grid-column: 23 / 31;
+      grid-row: 2 / 6;
+      border-color: rgba(107, 166, 255, 0.9);
+    }
+
+    .upper-left {
+      grid-column: 2 / 9;
+      grid-row: 2 / 6;
+    }
+
+    .upper-mid {
+      grid-column: 10 / 16;
+      grid-row: 2 / 6;
+    }
+
+    .oak {
+      grid-column: 17 / 22;
+      grid-row: 2 / 6;
+      border-color: rgba(143, 180, 217, 0.82);
+    }
+
+    .cortana {
+      grid-column: 11 / 23;
+      grid-row: 5 / 13;
+      border: 2px solid rgba(167, 139, 250, 0.92);
+      background:
+        linear-gradient(90deg, rgba(20, 26, 37, 0.96), rgba(56, 45, 83, 0.82), rgba(20, 26, 37, 0.96));
+    }
+
+    .command-left {
+      grid-column: 2 / 10;
+      grid-row: 7 / 11;
+    }
+
+    .command-right {
+      grid-column: 24 / 31;
+      grid-row: 7 / 11;
+    }
+
+    .aang {
+      grid-column: 3 / 10;
+      grid-row: 12 / 16;
+      border-color: rgba(159, 210, 183, 0.92);
+    }
+
+    .ground-right {
+      grid-column: 24 / 31;
+      grid-row: 12 / 16;
+    }
+
+    .piccolo {
+      grid-column: 5 / 15;
+      grid-row: 16 / 19;
+      border-color: rgba(74, 222, 128, 0.78);
+      background: linear-gradient(180deg, rgba(15, 35, 27, 0.82), rgba(9, 16, 14, 0.96));
+    }
+
+    .hedwig {
+      grid-column: 18 / 28;
+      grid-row: 16 / 19;
+      border-color: rgba(233, 213, 255, 0.8);
+      background: linear-gradient(180deg, rgba(37, 31, 49, 0.82), rgba(13, 12, 18, 0.96));
+    }
+
+    .undercroft-label {
+      grid-column: 1 / 33;
+      grid-row: 16 / 19;
+      border: 1px solid rgba(74, 222, 128, 0.16);
+      background: rgba(5, 8, 10, 0.42);
+      pointer-events: none;
+    }
+
+    .cortana .tube {
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      width: 68px;
+      height: 47%;
+      translate: -50% 0;
+      border: 2px solid rgba(167, 139, 250, 0.78);
+      background: linear-gradient(180deg, rgba(167, 139, 250, 0.24), rgba(107, 166, 255, 0.08));
+      box-shadow: 0 0 38px rgba(167, 139, 250, 0.24);
+    }
+
+    .routing-wall {
+      position: absolute;
+      top: 18%;
+      right: 9%;
+      width: 19%;
+      height: 28%;
+      border: 1px solid rgba(107, 166, 255, 0.42);
+      background:
+        repeating-linear-gradient(0deg, rgba(107, 166, 255, 0.18) 0 2px, transparent 2px 9px);
+    }
+
+    .ledger {
+      position: absolute;
+      top: 20%;
+      left: 8%;
+      width: 18%;
+      height: 22%;
+      border: 1px solid rgba(217, 181, 106, 0.56);
+      background:
+        repeating-linear-gradient(90deg, rgba(217, 181, 106, 0.18) 0 3px, transparent 3px 12px);
+    }
+
+    .table {
+      position: absolute;
+      left: 50%;
+      bottom: 18%;
+      width: 53%;
+      height: 19%;
+      translate: -50% 0;
+      border: 2px solid rgba(217, 181, 106, 0.72);
+      background: rgba(5, 7, 11, 0.6);
+    }
+
+    .seat {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 1px solid rgba(217, 181, 106, 0.78);
+      background: rgba(217, 181, 106, 0.18);
+    }
+
+    .s1 { left: 23%; bottom: 13%; } .s2 { left: 31%; bottom: 9%; }
+    .s3 { left: 40%; bottom: 7%; } .s4 { left: 49%; bottom: 6%; }
+    .s5 { left: 58%; bottom: 7%; } .s6 { left: 67%; bottom: 9%; }
+    .s7 { left: 75%; bottom: 13%; } .s8 { left: 28%; bottom: 38%; }
+    .s9 { left: 49%; bottom: 41%; } .s10 { left: 70%; bottom: 38%; }
+
+    .threshold {
+      position: absolute;
+      left: 15%;
+      bottom: 33%;
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--green);
+      background: rgba(159, 210, 183, 0.2);
+    }
+
+    .plinth {
+      position: absolute;
+      left: 38%;
+      top: 42%;
+      width: 28%;
+      height: 22%;
+      border: 1px solid rgba(107, 166, 255, 0.56);
+      background: rgba(107, 166, 255, 0.1);
+    }
+
+    .proof-rail {
+      position: absolute;
+      left: 16%;
+      bottom: 26%;
+      width: 68%;
+      height: 4px;
+      background: rgba(107, 166, 255, 0.6);
+    }
+
+    .desk {
+      position: absolute;
+      left: 34%;
+      bottom: 24%;
+      width: 30%;
+      height: 18%;
+      border: 1px solid rgba(159, 210, 183, 0.56);
+      background: rgba(159, 210, 183, 0.12);
+    }
+
+    .crypt-line {
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      top: 55%;
+      height: 2px;
+      background: rgba(74, 222, 128, 0.26);
+    }
+
+    .roost {
+      position: absolute;
+      right: 13%;
+      top: 30%;
+      width: 32px;
+      height: 28px;
+      border: 1px solid rgba(233, 213, 255, 0.58);
+      background: rgba(233, 213, 255, 0.12);
+    }
+
+    .path {
+      position: absolute;
+      height: 4px;
+      background: rgba(107, 166, 255, 0.66);
+      box-shadow: 0 0 15px rgba(107, 166, 255, 0.24);
+    }
+
+    .path.aang-to-stair { left: 18%; bottom: 25.3%; width: 16%; }
+    .path.command-main { left: 31%; top: 55.4%; width: 38%; background: rgba(167, 139, 250, 0.66); }
+    .path.gojo-link { right: 12%; top: 29.8%; width: 23%; }
+    .path.crypt-link { left: 29%; bottom: 10.4%; width: 42%; background: rgba(74, 222, 128, 0.5); }
+
+    .stair {
+      position: absolute;
+      width: 142px;
+      height: 68px;
+      border-left: 4px solid rgba(217, 181, 106, 0.76);
+      border-bottom: 4px solid rgba(217, 181, 106, 0.76);
+      transform: skewX(-24deg);
+    }
+
+    .stair.entry-command { left: 28.5%; bottom: 27%; }
+    .stair.command-upper { right: 28.5%; top: 29%; transform: skewX(24deg); }
+    .stair.crypt-drop { left: 47%; bottom: 12.3%; height: 46px; width: 82px; opacity: 0.75; }
+
+    .call {
+      position: absolute;
+      border: 1px solid currentColor;
+      background: currentColor;
+      opacity: 0.18;
+    }
+
+    .call.aang-call { color: var(--green); left: 18.5%; bottom: 30%; width: 42px; height: 42px; }
+    .call.gojo-call { color: var(--blue); right: 18%; top: 20%; width: 42px; height: 42px; }
+    .call.cortana-call { color: var(--violet); left: 49%; top: 42%; width: 58px; height: 58px; }
+    .call.crypt-call { color: var(--crypt); left: 49%; bottom: 7.5%; width: 38px; height: 38px; }
+
+    .zoom {
+      position: absolute;
+      border: 2px dotted rgba(244, 239, 227, 0.46);
+      pointer-events: none;
+    }
+
+    .zoom.aang-zone { left: 7.5%; bottom: 18%; width: 26%; height: 24%; }
+    .zoom.cortana-zone { left: 31%; top: 28%; width: 38%; height: 43%; }
+    .zoom.gojo-zone { right: 4.5%; top: 10%; width: 30%; height: 24%; }
+    .zoom.crypt-zone { left: 13%; bottom: 1%; width: 74%; height: 16%; border-color: rgba(74, 222, 128, 0.5); }
+
+    .label {
+      position: absolute;
+      z-index: 8;
+      padding: 4px 6px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: rgba(8, 11, 16, 0.78);
+      color: var(--muted);
+      font-size: 10.5px;
+      white-space: nowrap;
+    }
+
+    .label.main-entry { left: 2.4%; bottom: 22%; color: var(--green); }
+    .label.council { left: 46%; top: 62%; color: var(--gold); }
+    .label.tube-label { left: 46%; top: 32%; color: var(--violet); }
+    .label.weather-label { right: 4%; top: 6%; }
+    .label.sealed-label { right: 6%; top: 45%; color: var(--dim); }
+    .label.crypt-label { left: 40%; bottom: 1.5%; color: var(--crypt); }
+    .label.paths-label { left: 33%; top: 49%; color: var(--blue); }
+
+    .entry-gate {
+      position: absolute;
+      left: 2.2%;
+      bottom: 21.4%;
+      width: 54px;
+      height: 96px;
+      border: 2px solid rgba(217, 181, 106, 0.78);
+      background: rgba(6, 8, 12, 0.74);
+    }
+
+    footer {
+      align-items: flex-start;
+    }
+
+    .stance {
+      color: var(--text);
+      max-width: 90ch;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 900px) {
+      .page { padding: 12px; }
+      header, footer { align-items: flex-start; flex-direction: column; }
+      .preview { place-items: start; }
+      .stage { width: 1260px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <h1>Keep fortress wireframe V2</h1>
+        <div class="subhead">Full 11-agent residency map. Some rooms can stay sealed in the first art pass, but every agent now has a real address.</div>
+      </div>
+      <div class="legend" aria-label="Wireframe legend">
+        <span><i class="swatch" style="background: var(--violet)"></i>Cortana command</span>
+        <span><i class="swatch" style="background: var(--green)"></i>Aang threshold</span>
+        <span><i class="swatch" style="background: var(--blue)"></i>Gojo gallery</span>
+        <span><i class="swatch" style="background: var(--crypt)"></i>Piccolo watch</span>
+        <span><i class="swatch" style="background: var(--owl)"></i>Hedwig relay</span>
+        <span><i class="swatch" style="background: var(--stone)"></i>assigned sealed rooms</span>
+        <span><i class="swatch" style="background: var(--gold)"></i>stairs and council</span>
+      </div>
+    </header>
+
+    <section class="preview" aria-label="Detailed Keep fortress wireframe">
+      <div class="stage">
+        <div class="sky"></div>
+        <div class="rain"></div>
+        <div class="fortress">
+          <div class="shell"></div>
+          <div class="stone-course course-roof"></div>
+          <div class="stone-course course-upper"></div>
+          <div class="stone-course course-command"></div>
+          <div class="stone-course course-ground"></div>
+          <div class="entry-gate"></div>
+
+          <div class="grid">
+            <div class="undercroft-label"></div>
+
+            <section class="sealed upper-left">
+              <div class="name">Batman war room <span class="dot" style="background: var(--amber)"></span></div>
+              <p class="note">Strategy, threat model, sequencing. Sealed/dim until ceremonies and planning views need it.</p>
+              <div class="windows"><i class="window"></i><i class="window"></i><i class="window"></i></div>
+              <i class="door right"></i>
+            </section>
+
+            <section class="sealed upper-mid">
+              <div class="name">Spock observatory <span class="dot" style="background: var(--blue)"></span></div>
+              <p class="note">Logic and security gate sightline. Near Gojo and above Cortana for review paths.</p>
+              <div class="windows"><i class="window"></i><i class="window"></i></div>
+              <i class="door left"></i><i class="door right"></i>
+            </section>
+
+            <section class="sealed oak">
+              <div class="name">Oak archive lab <span class="dot" style="background: #8fb4d9"></span></div>
+              <p class="note">Research curator. Source shelves and memory review between Spock and Gojo.</p>
+              <div class="windows"><i class="window"></i><i class="window"></i></div>
+              <i class="door left"></i><i class="door right"></i>
+            </section>
+
+            <section class="room gojo">
+              <div class="name">Gojo gallery <span class="dot" style="background: var(--blue)"></span></div>
+              <p class="note">Elevated proof room. Plinth, proof rail, palette wall, direct call path to Cortana.</p>
+              <div class="windows"><i class="window"></i><i class="window"></i><i class="window"></i></div>
+              <div class="plinth"></div>
+              <div class="proof-rail"></div>
+              <i class="door left"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i><i class="anchor call-anchor"></i>
+            </section>
+
+            <section class="sealed command-left">
+              <div class="name">Tony forge <span class="dot" style="background: var(--red)"></span></div>
+              <p class="note">Build room beside command. Code work can move from Cortana into Workshop later.</p>
+              <i class="door right"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i>
+            </section>
+
+            <section class="room cortana">
+              <div class="name">Cortana command nave <span class="dot" style="background: var(--violet)"></span></div>
+              <p class="note">Oversized chamber. Vertical tube, routing wall, decision ledger, council table, 10 seats, threshold spot for Aang.</p>
+              <div class="tube"></div>
+              <div class="routing-wall"></div>
+              <div class="ledger"></div>
+              <div class="table"></div>
+              <i class="seat s1"></i><i class="seat s2"></i><i class="seat s3"></i><i class="seat s4"></i><i class="seat s5"></i>
+              <i class="seat s6"></i><i class="seat s7"></i><i class="seat s8"></i><i class="seat s9"></i><i class="seat s10"></i>
+              <i class="threshold"></i>
+              <i class="door left"></i><i class="door right"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i><i class="anchor call-anchor"></i>
+            </section>
+
+            <section class="sealed command-right">
+              <div class="name">Surfer cartography <span class="dot" style="background: var(--blue)"></span></div>
+              <p class="note">Source scout and browser lane. Close to Cortana, gated by Spock before risky travel.</p>
+              <i class="door left"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i>
+            </section>
+
+            <section class="room aang">
+              <div class="name">Aang threshold <span class="dot" style="background: var(--green)"></span></div>
+              <p class="note">Main entrance. Mode read, request cards, correction shelf, threshold stand point.</p>
+              <div class="desk"></div>
+              <i class="door left"></i><i class="door right"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i><i class="anchor call-anchor"></i>
+            </section>
+
+            <section class="sealed ground-right">
+              <div class="name">C-3PO scriptorium <span class="dot" style="background: var(--gold)"></span></div>
+              <p class="note">Format, translate, polish. Ground floor keeps output handling close to Aang intake.</p>
+              <i class="door left"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor exit-anchor"></i>
+            </section>
+
+            <section class="crypt-room piccolo">
+              <div class="name">Piccolo watch crypt <span class="dot" style="background: var(--crypt)"></span></div>
+              <p class="note">Long-running jobs, watchers, heartbeat runs, maintenance board.</p>
+              <div class="crypt-line"></div>
+              <i class="door right"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor call-anchor"></i>
+            </section>
+
+            <section class="crypt-room hedwig">
+              <div class="name">Hedwig relay roost <span class="dot" style="background: var(--owl)"></span></div>
+              <p class="note">Capture chute, Slack and Notion relay, reminders, message queue.</p>
+              <div class="roost"></div>
+              <i class="door left"></i>
+              <i class="anchor entry-anchor"></i><i class="anchor call-anchor"></i>
+            </section>
+          </div>
+
+          <div class="path aang-to-stair"></div>
+          <div class="path command-main"></div>
+          <div class="path gojo-link"></div>
+          <div class="path crypt-link"></div>
+          <div class="stair entry-command"></div>
+          <div class="stair command-upper"></div>
+          <div class="stair crypt-drop"></div>
+          <div class="call aang-call"></div>
+          <div class="call cortana-call"></div>
+          <div class="call gojo-call"></div>
+          <div class="call crypt-call"></div>
+          <div class="zoom aang-zone"></div>
+          <div class="zoom cortana-zone"></div>
+          <div class="zoom gojo-zone"></div>
+          <div class="zoom crypt-zone"></div>
+
+          <div class="label main-entry">main entry</div>
+          <div class="label tube-label">vertical Cortana tube</div>
+          <div class="label council">10 council seats plus Aang threshold</div>
+          <div class="label weather-label">time and weather visible through openings</div>
+          <div class="label sealed-label">assigned rooms can ship dim before final art</div>
+          <div class="label crypt-label">short undercroft for Piccolo and Hedwig</div>
+          <div class="label paths-label">visible route lane: Aang to Cortana to Gojo</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="stance">
+        Stance: every agent has a room now. The first art pass can still build only Aang, Cortana, Gojo, Piccolo, and Hedwig, but the castle shell no longer lies about future capacity.
+      </div>
+      <div>File: mockups/keep-fortress-wireframe.html</div>
+    </footer>
+  </main>
+</body>
+</html>

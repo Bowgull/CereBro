@@ -1,0 +1,3778 @@
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import { publicProcedure, router } from "../_core/trpc";
+import { browserActionProposalModel } from "../browserActionProposalModel";
+import { workbenchBrowserDraftModel, workbenchBrowserRunnerContractModel, workbenchWatchShelfModel } from "../../client/src/lib/workbenchBrowserModel";
+import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
+import {
+  GITHUB_PROJECT_MAP_PATH,
+  GITHUB_SOURCES_INDEX_PATH,
+  githubProjectBridgePath,
+  githubRepositorySourcePath,
+} from "../knowledge/contracts";
+import { type PerceptionClass, recordPermissionPreflight } from "../permissionPolicy";
+import { receiptFor, rowToSecurityReview } from "./securityGate";
+import { sessionDisplayName } from "./sessions";
+
+const evidenceKinds = [
+  "manual_note",
+  "localhost_preview",
+  "public_browser",
+  "screenshot",
+  "image_review",
+  "video_frame",
+  "annotation",
+  "terminal_output",
+  "validation_note",
+  "before_after",
+] as const;
+
+const permissionClasses = ["manual_note", "local_preview", "public_browser", "media_review", "annotation", "validation"] as const;
+const validationAgents = ["oak", "spock"] as const;
+const evidenceGroupBys = ["project", "task", "session", "kind", "source", "command", "artifact", "validation_status"] as const;
+const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
+const browserDraftKinds = ["empty", "url", "search"] as const;
+const watchShelfCategories = ["Watching", "Want", "Anime", "YouTube", "Twitch", "Finished"] as const;
+const browserProposalNoActionTaken = [
+  "No browser opened.",
+  "No page fetched.",
+  "No source saved.",
+  "No Workbench capture created.",
+  "No Watch Shelf item saved.",
+  "No credential action ran.",
+  "No external write ran.",
+];
+
+function splitStoredList(value: unknown) {
+  return String(value ?? "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function browserProposalStatusLabel(status: unknown) {
+  return String(status ?? "proposal_blocked").split("_").join(" ");
+}
+
+function browserDraftTabLabelForServer(targetUrl: string) {
+  try {
+    const url = new URL(targetUrl);
+    const path = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
+    return `${url.hostname}${path}`.slice(0, 80);
+  } catch {
+    return targetUrl.slice(0, 80) || "Browser page";
+  }
+}
+
+function rowToBrowserActionProposal(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    surface: "workbench_browser" as const,
+    actionLabel: String(row.action_label),
+    target: String(row.target),
+    draftKind: String(row.draft_kind),
+    riskClass: String(row.risk_class),
+    executorAgent: String(row.executor_agent),
+    statusLabel: browserProposalStatusLabel(row.status),
+    canExecute: Boolean(row.can_execute),
+    resultState: String(row.result_state),
+    recoveryNote: row.recovery_note == null ? null : String(row.recovery_note),
+    runnerAuditCount: Number(row.runner_audit_count ?? 0),
+    latestRunnerAuditId: row.latest_runner_audit_id == null ? null : Number(row.latest_runner_audit_id),
+    latestRunnerState: row.latest_runner_state == null ? null : String(row.latest_runner_state),
+    latestRunnerCanOpenPage: row.latest_runner_can_open_page == null ? false : Boolean(row.latest_runner_can_open_page),
+    latestRunnerCanExecute: row.latest_runner_can_execute == null ? false : Boolean(row.latest_runner_can_execute),
+    latestRunnerAuditAt: row.latest_runner_audit_at == null ? null : Number(row.latest_runner_audit_at),
+    blockers: splitStoredList(row.blockers),
+    requiredGates: splitStoredList(row.required_gates),
+    receiptBody: String(row.receipt_body),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function rowToBrowserApprovalPreview(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    actionType: String(row.action_type),
+    targetType: row.target_type == null ? null : String(row.target_type),
+    targetId: row.target_id == null ? null : Number(row.target_id),
+    requestedByAgent: row.requested_by_agent == null ? null : String(row.requested_by_agent),
+    status: String(row.status),
+    reason: row.reason == null ? null : String(row.reason),
+    contextSummary: row.context_summary == null ? null : String(row.context_summary),
+    sensitiveDataFlag: Boolean(row.sensitive_data_flag),
+    costRisk: row.cost_risk == null ? null : String(row.cost_risk),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    decidedAt: row.decided_at == null ? null : Number(row.decided_at),
+    createdAt: Number(row.created_at),
+  };
+}
+
+function rowToBrowserTabSession(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    tabId: String(row.tab_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    watchShelfId: row.watch_shelf_id == null ? null : Number(row.watch_shelf_id),
+    lastError: row.last_error == null ? null : String(row.last_error),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function rowToWatchShelfItem(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    category: String(row.category),
+    sourceLabel: row.source_label == null ? null : String(row.source_label),
+    progressLabel: row.progress_label == null ? null : String(row.progress_label),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function rowToBrowserTabHistoryItem(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    eventType: String(row.event_type),
+    sourceLabel: String(row.source_label),
+    createdAt: Number(row.created_at),
+  };
+}
+
+function rowToBrowserBookmark(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    browserTabSessionId: row.browser_tab_session_id == null ? null : Number(row.browser_tab_session_id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    targetUrl: String(row.target_url),
+    title: row.title == null ? null : String(row.title),
+    state: String(row.state),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    workbenchEvidenceId: row.workbench_evidence_id == null ? null : Number(row.workbench_evidence_id),
+    createdAt: Number(row.created_at),
+    updatedAt: Number(row.updated_at),
+  };
+}
+
+function browserHistoryNavigationItems(items: ReturnType<typeof rowToBrowserTabHistoryItem>[]) {
+  const grouped = new Map<number, ReturnType<typeof rowToBrowserTabHistoryItem>[]>();
+  for (const item of items) {
+    if (item.proposalId == null) continue;
+    const existing = grouped.get(item.proposalId) ?? [];
+    existing.push(item);
+    grouped.set(item.proposalId, existing);
+  }
+
+  return Array.from(grouped.entries()).map(([proposalId, proposalItems]) => {
+    const ordered = [...proposalItems].sort((a, b) => a.createdAt - b.createdAt || a.id - b.id);
+    const currentIndex = Math.max(ordered.length - 1, 0);
+    const current = ordered[currentIndex];
+    return {
+      proposalId,
+      historyCount: ordered.length,
+      currentIndex,
+      canGoBack: currentIndex > 0,
+      canGoForward: false,
+      currentTargetUrl: current?.targetUrl ?? null,
+      previousTargetUrl: currentIndex > 0 ? ordered[currentIndex - 1]?.targetUrl ?? null : null,
+      nextTargetUrl: null,
+    };
+  });
+}
+
+function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    proposalId: row.proposal_id == null ? null : Number(row.proposal_id),
+    runnerState: String(row.runner_state),
+    canOpenPage: Boolean(row.can_open_page),
+    canExecute: Boolean(row.can_execute),
+    receiptBody: String(row.receipt_body),
+    noActionTaken: splitStoredList(row.no_action_taken),
+    createdAt: Number(row.created_at),
+  };
+}
+
+function missingBrowserLiveRunnerOpenGates(proposal: ReturnType<typeof rowToBrowserActionProposal>, gateRows: Awaited<ReturnType<typeof browserProposalGateRows>>) {
+  const missing: string[] = [];
+  if (proposal.draftKind !== "url") missing.push("URL draft");
+  if (!gateRows.executionApproval) missing.push("approved Browser review approval");
+  if (!gateRows.spock) missing.push("Spock target safety receipt");
+  if (!gateRows.body) missing.push("Workbench body receipt");
+  if (!gateRows.tabDraft) missing.push("Browser tab draft row");
+  if (String(proposal.resultState) !== "blocked_before_runner") missing.push("blocked result receipt");
+  if (!proposal.recoveryNote) missing.push("recovery note");
+  if (!gateRows.liveRunnerApproval) missing.push("approved live-runner approval");
+  return missing;
+}
+
+async function browserProposalGateRows(proposalId: number) {
+  const db = await getCerebroDb();
+  const approvalPreview = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_action_review'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const executionApproval = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_action_review'
+        AND status = 'approved'
+      ORDER BY decided_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const body = await db.execute({
+    sql: `
+      SELECT id
+      FROM workbench_evidence_records
+      WHERE target_uri = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [`browser_action_proposal:${proposalId}`],
+  });
+  const spock = await db.execute({
+    sql: `
+      SELECT srr.id
+      FROM security_review_records srr
+      INNER JOIN permission_preflight_records ppr ON ppr.id = srr.permission_preflight_id
+      WHERE ppr.target_summary LIKE ?
+      ORDER BY srr.created_at DESC, srr.id DESC
+      LIMIT 1
+    `,
+    args: [`browser_action_proposal:${proposalId}%`],
+  });
+  const tabDraft = await db.execute({
+    sql: `
+      SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+             source_id, workbench_evidence_id, watch_shelf_id, last_error,
+             created_at, updated_at
+      FROM browser_tab_sessions
+      WHERE proposal_id = ? AND state IN ('draft', 'open_ready', 'open')
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const liveRunnerApproval = await db.execute({
+    sql: `
+      SELECT id, status
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_live_runner'
+        AND status = 'approved'
+      ORDER BY decided_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const latestRunnerAudit = await db.execute({
+    sql: `
+      SELECT id, proposal_id, runner_state, can_open_page, can_execute,
+             receipt_body, no_action_taken, created_at
+      FROM browser_runner_audit_records
+      WHERE proposal_id = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+
+  return {
+    approvalPreview: approvalPreview.rows[0],
+    executionApproval: executionApproval.rows[0],
+    body: body.rows[0],
+    spock: spock.rows[0],
+    tabDraft: tabDraft.rows[0],
+    liveRunnerApproval: liveRunnerApproval.rows[0],
+    latestRunnerAudit: latestRunnerAudit.rows[0],
+  };
+}
+
+async function pendingBrowserApprovalByProposalId(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, task_id, action_type, target_type, target_id,
+             requested_by_agent, status, reason, context_summary,
+             sensitive_data_flag, cost_risk, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND status = 'pending'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  return result.rows[0] ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>) : null;
+}
+
+async function pendingBrowserLiveRunnerApprovalByProposalId(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT id, task_id, action_type, target_type, target_id,
+             requested_by_agent, status, reason, context_summary,
+             sensitive_data_flag, cost_risk, permission_preflight_id,
+             decided_at, created_at
+      FROM approvals
+      WHERE target_type = 'browser_action_proposal'
+        AND target_id = ?
+        AND action_type = 'browser_live_runner'
+        AND status = 'pending'
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  return result.rows[0] ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>) : null;
+}
+
+function rowToEvidence(row: Record<string, unknown>) {
+  return {
+    id: Number(row.id),
+    kind: String(row.kind),
+    title: String(row.title),
+    summary: String(row.summary),
+    targetUri: row.target_uri == null ? null : String(row.target_uri),
+    projectId: row.project_id == null ? null : Number(row.project_id),
+    projectName: row.project_name == null ? null : String(row.project_name),
+    taskId: row.task_id == null ? null : Number(row.task_id),
+    sessionId: row.session_id == null ? null : Number(row.session_id),
+    sourceId: row.source_id == null ? null : Number(row.source_id),
+    commandObservationId: row.command_observation_id == null ? null : Number(row.command_observation_id),
+    artifactId: row.artifact_id == null ? null : Number(row.artifact_id),
+    ownerAgent: String(row.owner_agent),
+    routeAgent: row.route_agent == null ? null : String(row.route_agent),
+    viewport: row.viewport == null ? null : String(row.viewport),
+    coordinates: row.coordinates == null ? null : String(row.coordinates),
+    annotationText: row.annotation_text == null ? null : String(row.annotation_text),
+    mediaName: row.media_name == null ? null : String(row.media_name),
+    mediaMimeType: row.media_mime_type == null ? null : String(row.media_mime_type),
+    mediaByteSize: row.media_byte_size == null ? null : Number(row.media_byte_size),
+    mediaKind: row.media_kind == null ? null : String(row.media_kind),
+    mediaFrameTimeSec: row.media_frame_time_sec == null ? null : Number(row.media_frame_time_sec),
+    mediaDurationSec: row.media_duration_sec == null ? null : Number(row.media_duration_sec),
+    mediaTemporary: Boolean(row.media_temporary_flag),
+    beforeEvidenceId: row.before_evidence_id == null ? null : Number(row.before_evidence_id),
+    afterEvidenceId: row.after_evidence_id == null ? null : Number(row.after_evidence_id),
+    comparisonResult: row.comparison_result == null ? null : String(row.comparison_result),
+    validationStatus: String(row.validation_status),
+    permissionClass: String(row.permission_class),
+    permissionPreflightId: row.permission_preflight_id == null ? null : Number(row.permission_preflight_id),
+    sensitive: Boolean(row.sensitive_data_flag),
+    createdAt: Number(row.created_at),
+    taskTitle: row.task_title == null ? null : String(row.task_title),
+    sessionClaudeId: row.claude_session_id == null ? null : String(row.claude_session_id),
+    sessionDisplayName:
+      row.session_id == null
+        ? null
+        : sessionDisplayName({
+            id: Number(row.session_id),
+            title: row.session_title == null ? null : String(row.session_title),
+            projectName: row.session_project_name == null ? (row.project_name == null ? null : String(row.project_name)) : String(row.session_project_name),
+            heroClass: row.session_hero_class == null ? null : String(row.session_hero_class),
+            endedAt: row.session_ended_at == null ? null : Number(row.session_ended_at),
+          }),
+    sourceTitle: row.source_title == null ? null : String(row.source_title),
+    sourceUri: row.source_uri == null ? null : String(row.source_uri),
+    command: row.command == null ? null : String(row.command),
+    artifactTitle: row.artifact_title == null ? null : String(row.artifact_title),
+    artifactPath: row.storage_path == null ? null : String(row.storage_path),
+    executionResultId: row.execution_result_id == null ? null : Number(row.execution_result_id),
+    executionResultStatus: row.execution_result_status == null ? null : String(row.execution_result_status),
+    executionResultExitCode: row.execution_result_exit_code == null ? null : Number(row.execution_result_exit_code),
+  };
+}
+
+async function browserProposalById(proposalId: number) {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT *
+      FROM browser_action_proposals
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [proposalId],
+  });
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+  if (!row) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Browser action proposal not found.",
+    });
+  }
+  return rowToBrowserActionProposal(row);
+}
+
+function projectKnowledgeRoute(projectName: string | null) {
+  if (!projectName) return null;
+  return {
+    mode: "read_only" as const,
+    projectBridgePath: githubProjectBridgePath(projectName),
+    repositorySourcePath: githubRepositorySourcePath(projectName),
+    projectMapPath: GITHUB_PROJECT_MAP_PATH,
+    sourcesIndexPath: GITHUB_SOURCES_INDEX_PATH,
+    archiveLane: "90_Archive" as const,
+    archiveRetrieval: "archive_only" as const,
+    writesExternalSystems: false,
+    approvalGate: "Creating or updating bridge/source notes requires an explicit write approval.",
+  };
+}
+
+function preflightInputForEvidence(input: {
+  permissionClass: (typeof permissionClasses)[number];
+}) {
+  const perceptionClass: PerceptionClass =
+    input.permissionClass === "public_browser" ? "public_browser"
+    : input.permissionClass === "local_preview" ? "local_files"
+    : input.permissionClass === "manual_note" ? "explicit_context"
+    : "workbench_media";
+
+  const additionalReasons = ["Workbench evidence records are local append-only history."];
+  if (input.permissionClass === "media_review" || input.permissionClass === "annotation") {
+    additionalReasons.push("Local Workbench evidence and annotations may be recorded without opening browser/media capture tools.");
+  }
+  if (input.permissionClass === "local_preview") {
+    additionalReasons.push("Local preview metadata can be recorded as evidence, but opening or capturing a preview stays separately gated.");
+  }
+  if (input.permissionClass === "validation") {
+    additionalReasons.push("Validation notes are local evidence records. They do not approve external claims or actions.");
+  }
+
+  return {
+    perceptionClass,
+    actionClass: "local_note" as const,
+    additionalReasons,
+  };
+}
+
+async function recordEvidencePreflight(input: {
+  permissionClass: (typeof permissionClasses)[number];
+  sensitive: boolean;
+  requestedByAgent: string;
+  targetSummary: string;
+}) {
+  const db = await getCerebroDb();
+  const preflight = preflightInputForEvidence({
+    permissionClass: input.permissionClass,
+  });
+  const { row } = await recordPermissionPreflight(db, {
+    perceptionClass: preflight.perceptionClass,
+    actionClass: preflight.actionClass,
+    sensitiveData: input.sensitive,
+    requestedByAgent: input.requestedByAgent,
+    targetSummary: input.targetSummary,
+    additionalReasons: preflight.additionalReasons,
+  });
+  return Number(row.id);
+}
+
+function runtimeRouteIdFromTarget(targetUri: string | null | undefined) {
+  const match = targetUri?.match(/^runtime_route:(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+async function resolveRuntimeRouteEvidenceLink(input: {
+  targetUri: string | null | undefined;
+  projectId: number | null | undefined;
+  taskId: number | null | undefined;
+}) {
+  const routeRecordId = runtimeRouteIdFromTarget(input.targetUri);
+  if (routeRecordId == null) {
+    return {
+      projectId: input.projectId ?? null,
+      taskId: input.taskId ?? null,
+    };
+  }
+
+  const db = await getCerebroDb();
+  const route = await db.execute({
+    sql: `
+      SELECT project_name, project_path, task_id
+      FROM runtime_route_records
+      WHERE id = ?
+      LIMIT 1
+    `,
+    args: [routeRecordId],
+  });
+  const row = route.rows[0];
+  if (!row) {
+    return {
+      projectId: input.projectId ?? null,
+      taskId: input.taskId ?? null,
+    };
+  }
+
+  let projectId = input.projectId ?? null;
+  if (projectId == null && row.project_name != null && row.project_path != null) {
+    projectId = await getOrCreateProjectByPath(String(row.project_name), String(row.project_path));
+  }
+
+  return {
+    projectId,
+    taskId: input.taskId ?? (row.task_id == null ? null : Number(row.task_id)),
+  };
+}
+
+function evidenceWhere(input?: {
+  projectId?: number;
+  kind?: (typeof evidenceKinds)[number];
+  query?: string;
+  executionLinked?: boolean;
+}) {
+  const where: string[] = [];
+  const args: (number | string)[] = [];
+  if (input?.projectId !== undefined) {
+    where.push("wer.project_id = ?");
+    args.push(input.projectId);
+  }
+  if (input?.kind !== undefined) {
+    where.push("wer.kind = ?");
+    args.push(input.kind);
+  }
+  if (input?.executionLinked) {
+    where.push(`
+      EXISTS (
+        SELECT 1
+        FROM execution_action_results ear
+        INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+        WHERE eap.workbench_evidence_id = wer.id
+      )
+    `);
+  }
+  const query = input?.query?.trim();
+  if (query) {
+    where.push(`
+      (
+        wer.title LIKE ?
+        OR wer.summary LIKE ?
+        OR COALESCE(wer.target_uri, '') LIKE ?
+        OR COALESCE(wer.media_name, '') LIKE ?
+        OR COALESCE(wer.media_mime_type, '') LIKE ?
+        OR COALESCE(wer.validation_status, '') LIKE ?
+        OR COALESCE(p.name, '') LIKE ?
+        OR COALESCE(t.title, '') LIKE ?
+        OR COALESCE(s.claude_session_id, '') LIKE ?
+        OR COALESCE(src.title, '') LIKE ?
+        OR COALESCE(src.uri, '') LIKE ?
+        OR COALESCE(co.command, '') LIKE ?
+        OR COALESCE(a.title, '') LIKE ?
+        OR COALESCE(a.storage_path, '') LIKE ?
+      )
+    `);
+    const like = `%${query}%`;
+    args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like);
+  }
+  return { where, args };
+}
+
+export const workbenchRouter = router({
+  plan: publicProcedure.query(() => ({
+    mode: "proposal_only" as const,
+    writesExternal: false,
+    opensBrowser: false,
+    capturesMedia: false,
+    ownerAgent: "cortana",
+    supportAgents: ["gojo", "surfer", "tony", "oak", "spock", "aang"],
+    summary:
+      "The modular workbench is the visible evidence surface for previews, browser views, screenshots, images, video frames, annotations, terminal output, validation notes, and before/after review.",
+    surfaces: [
+      {
+        id: "localhost_preview",
+        label: "Localhost preview",
+        ownerAgent: "tony",
+        status: "planned",
+        permission: "Requires explicit local preview approval and a target URL.",
+        records: ["url", "project_id", "task_id", "session_id", "opened_at", "last_refresh_at"],
+      },
+      {
+        id: "public_browser",
+        label: "Public browser view",
+        ownerAgent: "surfer",
+        status: "planned",
+        permission: "Public HTTP/HTTPS only. No login, private workspace, crawling, or form submission without separate approval.",
+        records: ["url", "source_id", "trust_level", "freshness_status", "opened_at"],
+      },
+      {
+        id: "screenshots",
+        label: "Screenshots",
+        ownerAgent: "gojo",
+        status: "planned",
+        permission: "Capture only from approved workbench targets.",
+        records: ["image_path", "target_url", "viewport", "created_at", "owner_agent"],
+      },
+      {
+        id: "image_video_review",
+        label: "Image and video review",
+        ownerAgent: "gojo",
+        status: "partially_live",
+        permission: "Local/uploaded/generated assets only. Temporary image/video previews stay browser-local. Durable saves use vault artifact rules.",
+        records: ["file_name", "mime_type", "byte_size", "artifact_id", "frame_time", "media_kind", "notes"],
+      },
+      {
+        id: "annotation_canvas",
+        label: "Annotation canvas",
+        ownerAgent: "gojo",
+        status: "planned",
+        permission: "Annotations are local evidence records. Routing to agents is explicit.",
+        records: ["x", "y", "width", "height", "viewport", "note", "target_agent", "project_id", "task_id", "session_id"],
+      },
+      {
+        id: "terminal_output",
+        label: "Terminal and log output",
+        ownerAgent: "tony",
+        status: "partially_live",
+        permission: "Read from Terminal Lab observations only. No command execution from Workbench.",
+        records: ["command_observation_id", "output_summary", "risk", "status"],
+      },
+      {
+        id: "validation_notes",
+        label: "Validation notes",
+        ownerAgent: "oak",
+        status: "partially_live",
+        permission: "Deterministic preflight notes are allowed. Human approval still gates action.",
+        records: ["validator_agent", "target_type", "target_id", "findings"],
+      },
+      {
+        id: "before_after",
+        label: "Before and after comparison",
+        ownerAgent: "spock",
+        status: "partially_live",
+        permission: "Compare local evidence records. No hidden capture.",
+        records: ["before_evidence_id", "after_evidence_id", "comparison_notes", "result"],
+      },
+    ],
+    permissionModel: [
+      {
+        class: "local_preview",
+        allowed: ["Open approved localhost URL", "Refresh view", "Record visible target metadata"],
+        blocked: ["Start dev server automatically", "Edit repo", "Run terminal commands"],
+      },
+      {
+        class: "public_browser",
+        allowed: ["Open approved public URL", "Record source metadata", "Route visible evidence to Surfer/Oak"],
+        blocked: ["Login", "Private pages", "Crawling", "Form submission", "Download without approval"],
+      },
+      {
+        class: "media_review",
+        allowed: ["Show local artifact", "Capture annotation coordinates", "Create local review notes"],
+        blocked: ["Generate new media", "Save durable artifact", "Upload externally"],
+      },
+      {
+        class: "annotation",
+        allowed: ["Attach coordinates to a task/session/project", "Route note to selected agent"],
+        blocked: ["Mutate target file", "Approve implementation", "Write external notes"],
+      },
+      {
+        class: "validation",
+        allowed: ["Show Oak/Spock preflight notes", "Link evidence records"],
+        blocked: ["Mark high-stakes claims validated without review", "Approve external action"],
+      },
+    ],
+    groupingModel: [
+      "Project grouping shows which local project owns the evidence.",
+      "Source grouping shows saved-source links without fetching the source.",
+      "Command grouping shows Terminal Lab observation links without executing the command.",
+      "Validation grouping shows current local status based on appended records.",
+    ],
+    evidenceRecordShape: {
+      required: ["kind", "target_uri_or_artifact", "project_id", "task_id", "session_id", "owner_agent", "created_at"],
+      optional: ["source_id", "command_observation_id", "viewport", "coordinates", "annotation_text", "validation_status"],
+      appendOnly: true,
+      note: "Evidence records are history. They append or version. Current-state summaries can update separately.",
+    },
+    gates: [
+      "This plan does not open a browser, iframe, camera, file picker, screenshot tool, video tool, or terminal.",
+      "Workbench evidence must be user-visible and agent-readable.",
+      "Browser, media capture, durable saves, external tools, and command execution each need explicit approval when implemented.",
+    ],
+  })),
+
+  browserActionProposalPreview: publicProcedure
+    .input(
+      z.object({
+        actionLabel: z.string().min(1).max(80),
+        target: z.string().max(1000),
+        draftKind: z.enum(browserDraftKinds),
+      }),
+    )
+    .query(({ input }) => browserActionProposalModel(input)),
+
+  createBrowserActionProposal: publicProcedure
+    .input(
+      z.object({
+        actionLabel: z.string().min(1).max(80),
+        target: z.string().max(1000),
+        draftKind: z.enum(browserDraftKinds),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const proposal = browserActionProposalModel(input);
+      const db = await getCerebroDb();
+      const receiptBody = [
+        `${proposal.actionLabel} Browser action proposal.`,
+        `Target: ${proposal.target}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        "Status: proposal blocked.",
+        proposal.noActionTaken.join(" "),
+      ].join("\n");
+      const saved = await db.execute({
+        sql: `
+          INSERT INTO browser_action_proposals (
+            action_label, target, draft_kind, risk_class, executor_agent,
+            required_gates, blockers, receipt_body, status, result_state,
+            can_execute
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'proposal_blocked', 'not_run', 0)
+          RETURNING *
+        `,
+        args: [
+          proposal.actionLabel,
+          proposal.target,
+          proposal.draftKind,
+          proposal.riskClass,
+          proposal.executorAgent,
+          proposal.requiredGates.join("\n"),
+          proposal.blockers.join("\n"),
+          receiptBody,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        proposal: {
+          ...proposal,
+          id: Number(saved.rows[0]!.id),
+          createdAt: Number(saved.rows[0]!.created_at),
+          updatedAt: Number(saved.rows[0]!.updated_at),
+        },
+        noActionTaken: proposal.noActionTaken,
+      };
+    }),
+
+  browserActionProposals: publicProcedure
+    .input(
+      z
+        .object({
+          limit: z.number().int().min(1).max(20).optional(),
+          focusedProposalId: z.number().int().positive().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const limit = input?.limit ?? 5;
+      const focusedProposal = input?.focusedProposalId
+        ? await db.execute({
+            sql: `
+              SELECT
+                bap.*,
+                COUNT(bra.id) AS runner_audit_count,
+                latest.id AS latest_runner_audit_id,
+                latest.runner_state AS latest_runner_state,
+                latest.can_open_page AS latest_runner_can_open_page,
+                latest.can_execute AS latest_runner_can_execute,
+                latest.created_at AS latest_runner_audit_at
+              FROM browser_action_proposals bap
+              LEFT JOIN browser_runner_audit_records bra ON bra.proposal_id = bap.id
+              LEFT JOIN browser_runner_audit_records latest ON latest.id = (
+                SELECT latest_inner.id
+                FROM browser_runner_audit_records latest_inner
+                WHERE latest_inner.proposal_id = bap.id
+                ORDER BY latest_inner.created_at DESC, latest_inner.id DESC
+                LIMIT 1
+              )
+              WHERE bap.id = ?
+              GROUP BY bap.id
+              LIMIT 1
+            `,
+            args: [input.focusedProposalId],
+          })
+        : null;
+      const result = await db.execute({
+        sql: `
+          SELECT
+            bap.*,
+            COUNT(bra.id) AS runner_audit_count,
+            latest.id AS latest_runner_audit_id,
+            latest.runner_state AS latest_runner_state,
+            latest.can_open_page AS latest_runner_can_open_page,
+            latest.can_execute AS latest_runner_can_execute,
+            latest.created_at AS latest_runner_audit_at
+          FROM browser_action_proposals bap
+          LEFT JOIN browser_runner_audit_records bra ON bra.proposal_id = bap.id
+          LEFT JOIN browser_runner_audit_records latest ON latest.id = (
+            SELECT latest_inner.id
+            FROM browser_runner_audit_records latest_inner
+            WHERE latest_inner.proposal_id = bap.id
+            ORDER BY latest_inner.created_at DESC, latest_inner.id DESC
+            LIMIT 1
+          )
+          GROUP BY bap.id
+          ORDER BY bap.created_at DESC, bap.id DESC
+          LIMIT ?
+        `,
+        args: [limit],
+      });
+      const totalRows = await db.execute("SELECT COUNT(*) AS count FROM browser_action_proposals");
+      const rows = [
+        ...(focusedProposal?.rows ?? []),
+        ...result.rows.filter((row) => Number(row.id) !== input?.focusedProposalId),
+      ];
+      const totalProposalRows = Number(totalRows.rows[0]?.count ?? 0);
+      const visibleProposalRows = rows.length;
+
+      return {
+        items: rows.map(rowToBrowserActionProposal),
+        totalProposalRows,
+        visibleProposalRows,
+        hiddenProposalRows: Math.max(0, totalProposalRows - visibleProposalRows),
+        focusedProposalPinned: Boolean(focusedProposal?.rows.length),
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  browserActionProposalReadiness: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const gates = [
+        {
+          key: "runner_contract",
+          label: "Runner contract",
+          present: false,
+          detail: "Missing. Browser runner is not wired.",
+        },
+        {
+          key: "approval_receipt",
+          label: "Approval receipt",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not execution permission.` : "Missing pending approval preview.",
+        },
+        {
+          key: "spock_gate",
+          label: "Spock gate",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing local Spock receipt.",
+        },
+        {
+          key: "workbench_body",
+          label: "Workbench body",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing local Workbench body.",
+        },
+        {
+          key: "result_receipt",
+          label: "Result receipt",
+          present: false,
+          detail: "Missing. No Browser result runner exists.",
+        },
+        {
+          key: "recovery_note",
+          label: "Recovery note",
+          present: false,
+          detail: "Missing. Recovery note waits for result contract.",
+        },
+      ];
+      const readyCount = gates.filter((gate) => gate.present).length;
+      return {
+        mode: "read_only" as const,
+        proposal,
+        canExecute: false,
+        statusLabel: "blocked" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: gates.length - readyCount,
+          nextMissingGate: gates.find((gate) => !gate.present)?.label ?? null,
+        },
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  browserActionResultRecoveryContract: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      return {
+        mode: "read_only" as const,
+        proposal,
+        canExecute: false,
+        resultContract: {
+          receiptTitle: `Browser result receipt for proposal #${proposal.id}`,
+          resultState: "not_run" as const,
+          requiredFields: [
+            "proposal_id",
+            "approval_id",
+            "executor_agent",
+            "browser_target",
+            "action_label",
+            "result_state",
+            "stdout_summary",
+            "stderr_summary",
+            "artifact_or_source_id",
+            "created_at",
+          ],
+          blockedUntil: [
+            "Runner contract exists.",
+            "Approval receipt is approved.",
+            "Spock gate is present.",
+            "Workbench body is present.",
+          ],
+        },
+        recoveryContract: {
+          status: "not_ready" as const,
+          note: "No browser action has run. Recovery is a required note after a real result, not before.",
+          requiredWhen: [
+            "Browser runner fails.",
+            "Source save fails.",
+            "Workbench capture fails.",
+            "User revokes approval.",
+            "Spock blocks the target.",
+          ],
+        },
+        gates: [
+          "This result/recovery contract does not run the Browser proposal.",
+          "No Browser result receipt is written until an approved runner exists.",
+          "Recovery notes stay required before canExecute can become true.",
+        ],
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  runBrowserActionBlocked: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const contract = workbenchBrowserRunnerContractModel(workbenchBrowserDraftModel(proposal.target));
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, ?, 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          "blocked_before_runner",
+          [
+            `Blocked manual Browser runner check for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          browserProposalNoActionTaken.join("\n"),
+        ],
+      });
+      return {
+        ok: true as const,
+        mode: "blocked_manual_browser_runner" as const,
+        proposal,
+        contract,
+        wouldOpenBrowser: false,
+        wouldFetchPage: false,
+        writesExternal: false,
+        canExecute: false,
+        resultState: "blocked_before_runner" as const,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "Manual Browser runner route exists but is blocked before page open.",
+          "Runner contract, approved approval receipt, Spock gate, Workbench body, result receipt, and recovery note are required before any future runner can execute.",
+          "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
+        ],
+        noActionTaken: browserProposalNoActionTaken,
+      };
+    }),
+
+  runBrowserLiveRunnerBlocked: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const liveRunnerApproved = Boolean(gateRows.liveRunnerApproval);
+      const runnerState = liveRunnerApproved
+        ? "blocked_before_live_runner_implementation"
+        : "blocked_before_live_runner_approval";
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, ?, 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          runnerState,
+          [
+            `Blocked live Browser runner check for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            liveRunnerApproved
+              ? `Live runner approval #${Number(gateRows.liveRunnerApproval?.id)} is approved.`
+              : "Approved live runner approval is missing.",
+            "Live runner implementation is not present.",
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            ...browserProposalNoActionTaken,
+            "No runner implementation invoked.",
+          ].join("\n"),
+        ],
+      });
+      return {
+        ok: true as const,
+        mode: "blocked_live_browser_runner" as const,
+        proposal,
+        liveRunnerApproved,
+        implementationPresent: false,
+        requiresImplementation: true,
+        wouldOpenBrowser: false,
+        wouldFetchPage: false,
+        writesExternal: false,
+        canOpenPage: false,
+        canExecute: false,
+        resultState: runnerState,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          liveRunnerApproved
+            ? "Approved live-runner gate is present."
+            : "Approved live-runner gate is missing.",
+          "Live runner implementation is not present.",
+          "This route writes a local blocked audit receipt only.",
+          "No browser opened, page fetched, source saved, Workbench capture created, Watch Shelf item saved, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner implementation invoked.",
+        ],
+      };
+    }),
+
+  browserTabSessionStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, proposal_id, tab_id, target_url, title, state, project_id, source_id,
+               workbench_evidence_id, watch_shelf_id, last_error, created_at,
+               updated_at
+        FROM browser_tab_sessions
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+    const historyRows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               event_type, source_label, created_at
+        FROM browser_tab_history_items
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    const historyItems = historyRows.rows.map((row) => rowToBrowserTabHistoryItem(row as Record<string, unknown>));
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_tab_sessions" as const,
+      canPersistTabs: false,
+      canPersistHistory: true,
+      canPersistCookies: false,
+      storageShape: {
+        requiredFields: ["tab_id", "target_url", "title", "state", "created_at", "updated_at"],
+        optionalFields: ["proposal_id", "project_id", "source_id", "workbench_evidence_id", "watch_shelf_id", "last_error"],
+      },
+      items: rows.rows.map(rowToBrowserTabSession),
+      historyItems,
+      navigationItems: browserHistoryNavigationItems(historyItems),
+      gates: [
+        "Browser tab/session storage table exists.",
+        "Local Browser history records are append-only receipts from approved open-frame events.",
+        "Cookies, credentials, page content cache, source saves, Watch Shelf saves, and Workbench captures require later receipts.",
+      ],
+      noActionTaken: [
+        "No browser opened.",
+        "No page fetched.",
+        "No tab session persisted.",
+        "No cookies or credentials persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
+  watchShelfStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const shelf = workbenchWatchShelfModel();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               category, source_label, progress_label, state, project_id,
+               source_id, workbench_evidence_id, created_at, updated_at
+        FROM browser_watch_shelf_items
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_watch_shelf_items" as const,
+      categories: shelf.categories,
+      canSaveItems: false,
+      canPersistProgress: false,
+      canOpenPage: false,
+      storageShape: {
+        requiredFields: ["target_url", "category", "state", "created_at", "updated_at"],
+        optionalFields: [
+          "browser_tab_session_id",
+          "proposal_id",
+          "title",
+          "source_label",
+          "progress_label",
+          "project_id",
+          "source_id",
+          "workbench_evidence_id",
+        ],
+      },
+      items: rows.rows.map(rowToWatchShelfItem),
+      gates: [
+        "Watch Shelf storage table exists, but saves remain blocked.",
+        "Saving a Watch Shelf item requires a real open page, approved Browser runner, tab session row, and receipt body.",
+        "Progress, thumbnails, service sessions, source searches, and media files are not inferred or faked.",
+      ],
+      noActionTaken: [
+        "No Watch Shelf item saved.",
+        "No browser opened.",
+        "No page fetched.",
+        "No progress persisted.",
+        "No service session persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
+  browserBookmarkStorageContract: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const rows = await db.execute({
+      sql: `
+        SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+               state, project_id, source_id, workbench_evidence_id,
+               created_at, updated_at
+        FROM browser_bookmarks
+        ORDER BY created_at DESC, id DESC
+        LIMIT 10
+      `,
+      args: [],
+    });
+
+    return {
+      mode: "read_only" as const,
+      tableName: "browser_bookmarks" as const,
+      canSaveBookmarks: true,
+      canPersistCookies: false,
+      canFetchPage: false,
+      storageShape: {
+        requiredFields: ["target_url", "state", "created_at", "updated_at"],
+        optionalFields: [
+          "browser_tab_session_id",
+          "proposal_id",
+          "title",
+          "project_id",
+          "source_id",
+          "workbench_evidence_id",
+        ],
+      },
+      items: rows.rows.map((row) => rowToBrowserBookmark(row as Record<string, unknown>)),
+      gates: [
+        "Bookmark storage table exists.",
+        "Saving a bookmark requires a real open Browser tab.",
+        "Bookmarks are local rows only. They do not save cookies, credentials, page content, sources, or media.",
+      ],
+      noActionTaken: [
+        "No browser opened.",
+        "No backend page fetch ran.",
+        "No cookies or credentials persisted.",
+        "No source saved.",
+        "No external write ran.",
+      ],
+    };
+  }),
+
+  browserManualOpenPageContract: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+
+      return {
+        mode: "blocked_manual_open_page_contract" as const,
+        proposal,
+        targetUrl: proposal.target,
+        canOpenPage: false,
+        canPersistTab: false,
+        canFetchPage: false,
+        canExecute: false,
+        requiredBeforeOpen: [
+          "approved Browser action approval receipt",
+          "Spock target safety receipt",
+          "Workbench body receipt",
+          "browser_tab_sessions draft row policy",
+          "result receipt contract",
+          "recovery note contract",
+        ],
+        gates: [
+          "Manual page open is still blocked.",
+          "A future page open must attach to an approved Browser proposal, a Spock target receipt, a Workbench body, and a tab storage policy.",
+          "This contract does not open a browser tab, fetch a page, persist a session, save a source, or write external state.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserTabSessionDraft: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const tabId = `draft-proposal-${proposal.id}`;
+      const existing = await db.execute({
+        sql: `
+          SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+                 source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                 created_at, updated_at
+          FROM browser_tab_sessions
+          WHERE proposal_id = ? AND state = 'draft'
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [proposal.id],
+      });
+
+      let row = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        await db.execute({
+          sql: `
+            INSERT INTO browser_tab_sessions (proposal_id, tab_id, target_url, title, state)
+            VALUES (?, ?, ?, ?, 'draft')
+          `,
+          args: [proposal.id, tabId, proposal.target, `${proposal.actionLabel} draft`,],
+        });
+        const created = await db.execute({
+          sql: `
+            SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+                   source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                   created_at, updated_at
+            FROM browser_tab_sessions
+            WHERE proposal_id = ? AND state = 'draft'
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+          `,
+          args: [proposal.id],
+        });
+        row = created.rows[0] as Record<string, unknown> | undefined;
+      }
+
+      if (!row) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser tab draft could not be created.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "local_browser_tab_draft" as const,
+        proposal,
+        tab: rowToBrowserTabSession(row),
+        canOpenPage: false,
+        canFetchPage: false,
+        canPersistHistory: false,
+        canPersistCookies: false,
+        gates: [
+          "Local draft tab row exists, but manual page open remains blocked.",
+          "Draft tab rows do not persist history, cookies, credentials, page content, source rows, or Watch Shelf items.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  browserManualOpenRunnerPolicy: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const gates = {
+        approvalPreview: {
+          label: "Approval preview",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not execution permission.` : "Missing approval preview.",
+        },
+        executionApproval: {
+          label: "Approved execution approval",
+          present: Boolean(gateRows.executionApproval),
+          detail: gateRows.executionApproval ? `Approved approval #${Number(gateRows.executionApproval.id)} recorded. Runner still blocked.` : "Missing approved execution approval.",
+        },
+        spock: {
+          label: "Spock target safety receipt",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing Spock target safety receipt.",
+        },
+        workbenchBody: {
+          label: "Workbench body receipt",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing Workbench body receipt.",
+        },
+        tabDraft: {
+          label: "Draft tab row",
+          present: Boolean(gateRows.tabDraft),
+          detail: gateRows.tabDraft ? `Draft tab ${String(gateRows.tabDraft.tab_id)}.` : "Missing browser_tab_sessions draft row.",
+        },
+        resultReceipt: {
+          label: "Result receipt",
+          present: String(proposal.resultState) === "blocked_before_runner",
+          detail: String(proposal.resultState) === "blocked_before_runner" ? "Blocked result scaffold recorded. No page opened." : "Missing. No Browser result has run.",
+        },
+        recoveryNote: {
+          label: "Recovery note",
+          present: Boolean(proposal.recoveryNote),
+          detail: proposal.recoveryNote ? proposal.recoveryNote : "Missing. Recovery note waits for an attempted result.",
+        },
+      };
+      const gateList = Object.values(gates);
+      const readyCount = gateList.filter((gate) => gate.present).length;
+      const nextMissingGate = gateList.find((gate) => !gate.present)?.label.toLowerCase() ?? null;
+
+      return {
+        mode: "blocked_manual_open_runner_policy" as const,
+        proposal,
+        canOpenPage: false,
+        canExecute: false,
+        runnerState: "blocked_before_runner" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: gateList.length - readyCount,
+          nextMissingGate,
+        },
+        gatesText: [
+          gateList.every((gate) => gate.present)
+            ? "All policy scaffolds are present, but manual open runner remains disabled."
+            : "Manual open runner remains blocked.",
+          "Result receipt and recovery note are required before any future runner can execute.",
+          "This policy read does not open a browser tab, fetch a page, persist history, save a source, or write external state.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  browserLiveRunnerPreflight: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const gates = {
+        runnerContract: {
+          label: "Runner contract",
+          present: true,
+          detail: "Blocked runner contract is present. It still cannot open a page.",
+        },
+        approvalPreview: {
+          label: "Approval preview",
+          present: Boolean(gateRows.approvalPreview),
+          detail: gateRows.approvalPreview ? `Approval preview #${Number(gateRows.approvalPreview.id)} is ${String(gateRows.approvalPreview.status)}. Not live runner permission.` : "Missing approval preview.",
+        },
+        executionApproval: {
+          label: "Approved execution approval",
+          present: Boolean(gateRows.executionApproval),
+          detail: gateRows.executionApproval ? `Approved approval #${Number(gateRows.executionApproval.id)} recorded. Still not live runner permission.` : "Missing approved execution approval.",
+        },
+        spock: {
+          label: "Spock target safety receipt",
+          present: Boolean(gateRows.spock),
+          detail: gateRows.spock ? `Spock receipt #${Number(gateRows.spock.id)}.` : "Missing Spock target safety receipt.",
+        },
+        workbenchBody: {
+          label: "Workbench body receipt",
+          present: Boolean(gateRows.body),
+          detail: gateRows.body ? `Workbench body #${Number(gateRows.body.id)}.` : "Missing Workbench body receipt.",
+        },
+        tabDraft: {
+          label: "Draft tab row",
+          present: Boolean(gateRows.tabDraft),
+          detail: gateRows.tabDraft ? `Draft tab ${String(gateRows.tabDraft.tab_id)}.` : "Missing browser_tab_sessions draft row.",
+        },
+        resultReceipt: {
+          label: "Result receipt",
+          present: String(proposal.resultState) === "blocked_before_runner",
+          detail: String(proposal.resultState) === "blocked_before_runner" ? "Blocked result scaffold recorded. No page opened." : "Missing blocked result scaffold.",
+        },
+        recoveryNote: {
+          label: "Recovery note",
+          present: Boolean(proposal.recoveryNote),
+          detail: proposal.recoveryNote ? proposal.recoveryNote : "Missing recovery note scaffold.",
+        },
+        liveRunnerApproval: {
+          label: "Explicit live runner approval",
+          present: Boolean(gateRows.liveRunnerApproval),
+          detail: gateRows.liveRunnerApproval ? `Live runner approval #${Number(gateRows.liveRunnerApproval.id)} recorded.` : "Missing. V1 requires a separate explicit live-runner approval before page open.",
+        },
+        latestRunnerAudit: {
+          label: "Latest runner audit",
+          present: Boolean(gateRows.latestRunnerAudit),
+          detail: gateRows.latestRunnerAudit ? `Runner audit #${Number(gateRows.latestRunnerAudit.id)} recorded. ${String(gateRows.latestRunnerAudit.runner_state).replace(/_/g, " ")}.` : "No blocked runner audit recorded yet.",
+        },
+      };
+      const preflightGateList = [
+        gates.approvalPreview,
+        gates.executionApproval,
+        gates.spock,
+        gates.workbenchBody,
+        gates.tabDraft,
+        gates.resultReceipt,
+        gates.recoveryNote,
+        gates.liveRunnerApproval,
+      ];
+      const readyCount = preflightGateList.filter((gate) => gate.present).length;
+      const nextMissingGate = preflightGateList.find((gate) => !gate.present)?.label.toLowerCase() ?? null;
+
+      return {
+        mode: "preflight_only" as const,
+        proposal,
+        latestRunnerAudit: gateRows.latestRunnerAudit ? rowToBrowserRunnerAudit(gateRows.latestRunnerAudit as Record<string, unknown>) : null,
+        liveRunnerApproved: Boolean(gateRows.liveRunnerApproval),
+        requiresExplicitLiveRunnerApproval: true,
+        canOpenPage: false,
+        canExecute: false,
+        runnerState: "blocked_before_live_runner" as const,
+        gates,
+        summary: {
+          readyCount,
+          missingCount: preflightGateList.length - readyCount,
+          nextMissingGate,
+        },
+        nextAction: gateRows.liveRunnerApproval
+          ? "Live runner remains blocked until the live runner implementation exists."
+          : "Live runner remains blocked until a separate explicit live-runner approval contract exists.",
+        gatesText: [
+          "This preflight is read-only.",
+          "A pending or approved Browser review approval is not enough to open a page.",
+          gateRows.liveRunnerApproval
+            ? "No browser tab opens until the live runner implementation exists."
+            : "No browser tab opens until the separate live-runner approval path exists and is approved.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No runner audit written.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  browserLiveRunnerLaunchGate: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const latestRunnerAudit = gateRows.latestRunnerAudit
+        ? rowToBrowserRunnerAudit(gateRows.latestRunnerAudit as Record<string, unknown>)
+        : null;
+
+      return {
+        mode: "read_only_launch_gate" as const,
+        proposal,
+        liveRunnerApproved: Boolean(gateRows.liveRunnerApproval),
+        latestRunnerAudit,
+        implementationPresent: false,
+        canOpenPage: false,
+        canExecute: false,
+        hardGate: "live runner implementation missing" as const,
+        gates: [
+          gateRows.liveRunnerApproval
+            ? `Approved live-runner gate #${Number(gateRows.liveRunnerApproval.id)} is present.`
+            : "Approved live-runner gate is missing.",
+          latestRunnerAudit
+            ? `Latest runner audit #${latestRunnerAudit.id} confirms ${latestRunnerAudit.runnerState.replace(/_/g, " ")}.`
+            : "No blocked runner audit receipt exists yet.",
+          "Live runner implementation is not present.",
+          "This launch gate is read-only and cannot open pages.",
+        ],
+        nextAction: "Keep page open blocked until a separate live runner implementation contract exists and passes no-page regression gates.",
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No tab session persisted.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No runner audit written.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  prepareBrowserLiveRunnerOpenReadiness: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const missingGates = missingBrowserLiveRunnerOpenGates(proposal, gateRows);
+
+      if (missingGates.length > 0) {
+        return {
+          ok: false as const,
+          mode: "browser_live_runner_open_readiness_blocked" as const,
+          proposal,
+          tab: gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null,
+          missingGates,
+          canOpenPage: false,
+          canExecute: false,
+          writesExternal: false,
+          audit: null,
+          gates: [
+            "Browser live-runner open readiness remains blocked.",
+            "No tab session state changed.",
+            "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, or external write ran.",
+          ],
+          noActionTaken: browserProposalNoActionTaken,
+        };
+      }
+
+      const updated = await db.execute({
+        sql: `
+          UPDATE browser_tab_sessions
+          SET state = 'open_ready',
+              updated_at = unixepoch()
+          WHERE proposal_id = ?
+            AND state IN ('draft', 'open_ready')
+          RETURNING id, proposal_id, tab_id, target_url, title, state, project_id,
+                    source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                    created_at, updated_at
+        `,
+        args: [proposal.id],
+      });
+      const tab = updated.rows[0] as Record<string, unknown> | undefined;
+      if (!tab) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser tab readiness could not be prepared.",
+        });
+      }
+
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'open_ready_waiting_for_runner_implementation', 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser proposal #${proposal.id} is open-ready for live runner implementation.`,
+            `Target: ${proposal.target}.`,
+            "Approved Browser review approval, Spock receipt, Workbench body, tab row, result scaffold, recovery note, and approved live-runner approval are present.",
+            "Live runner implementation is still not present.",
+            "No browser opened.",
+            "No page fetched.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            ...browserProposalNoActionTaken,
+            "No runner implementation invoked.",
+          ].join("\n"),
+        ],
+      });
+      return {
+        ok: true as const,
+        mode: "browser_live_runner_open_ready" as const,
+        proposal,
+        tab: rowToBrowserTabSession(tab),
+        missingGates: [] as string[],
+        implementationPresent: false,
+        canOpenPage: false,
+        canExecute: false,
+        writesExternal: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "All approval and receipt gates are present.",
+          "Tab state moved to open_ready.",
+          "Live runner implementation is still not present.",
+          "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner implementation invoked.",
+        ],
+      };
+    }),
+
+  recordBrowserSandboxFrameOpen: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (proposal.draftKind !== "url" || !tab || (tab.state !== "open_ready" && tab.state !== "open")) {
+        return {
+          ok: false as const,
+          mode: "browser_sandbox_frame_open_blocked" as const,
+          proposal,
+          tab,
+          canOpenPage: false,
+          canExecute: false,
+          writesExternal: false,
+          audit: null,
+          gates: [
+            "Browser sandbox frame remains blocked.",
+            ...(proposal.draftKind !== "url" ? ["Only URL drafts can open in the sandbox frame."] : []),
+            "Tab must be open_ready or open before a local frame can receive the target URL.",
+            "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, or external write ran.",
+          ],
+          noActionTaken: browserProposalNoActionTaken,
+        };
+      }
+
+      const updated = await db.execute({
+        sql: `
+          UPDATE browser_tab_sessions
+          SET state = 'open',
+              updated_at = unixepoch()
+          WHERE id = ?
+          RETURNING id, proposal_id, tab_id, target_url, title, state, project_id,
+                    source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                    created_at, updated_at
+        `,
+        args: [tab.id],
+      });
+      const updatedTab = updated.rows[0] as Record<string, unknown> | undefined;
+      if (!updatedTab) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser tab frame open receipt could not be recorded.",
+        });
+      }
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'sandbox_frame_open_requested', 1, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser sandbox frame open requested for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            "The client may assign this URL to the sandboxed Browser frame.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No Workbench capture created.",
+            "No credential action ran.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            "No backend page fetch ran.",
+            "No history persisted.",
+            "No cookies or credentials persisted.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+        ],
+      });
+      const history = await db.execute({
+        sql: `
+          INSERT INTO browser_tab_history_items (
+            browser_tab_session_id, proposal_id, target_url, title, event_type,
+            source_label
+          )
+          VALUES (?, ?, ?, ?, 'sandbox_frame_open', 'browser_sandbox_frame')
+          RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                    event_type, source_label, created_at
+        `,
+        args: [
+          tab.id,
+          proposal.id,
+          tab.targetUrl,
+          tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_sandbox_frame_open_recorded" as const,
+        proposal,
+        tab: rowToBrowserTabSession(updatedTab),
+        canOpenPage: true,
+        canExecute: false,
+        writesExternal: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        historyItem: rowToBrowserTabHistoryItem(history.rows[0] as Record<string, unknown>),
+        framePolicy: {
+          sandbox: "allow-scripts allow-forms",
+          referrerPolicy: "no-referrer",
+          notes: [
+            "No same-origin permission.",
+            "No downloads.",
+            "No popups.",
+            "Some sites may refuse iframe rendering.",
+          ],
+        },
+        gates: [
+          "Open-ready tab receipt is present.",
+          "Sandbox frame open receipt is recorded.",
+          "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No Watch Shelf item saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createWatchShelfItemFromOpenTab: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        category: z.enum(watchShelfCategories),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "watch_shelf_save_blocked" as const,
+          proposal,
+          tab,
+          item: null,
+          canSaveItem: false,
+          canPersistProgress: false,
+          writesExternal: false,
+          gates: [
+            "Watch Shelf save remains blocked.",
+            "A real open Browser tab is required before saving to Watch Shelf.",
+            "No Watch Shelf item saved, progress persisted, source saved, backend page fetch run, or external write ran.",
+          ],
+          noActionTaken: [
+            "No Watch Shelf item saved.",
+            "No progress persisted.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 category, source_label, progress_label, state, project_id,
+                 source_id, workbench_evidence_id, created_at, updated_at
+          FROM browser_watch_shelf_items
+          WHERE proposal_id = ? AND target_url = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [proposal.id, tab.targetUrl],
+      });
+      let item = existing.rows[0] as Record<string, unknown> | undefined;
+
+      if (!item) {
+        const created = await db.execute({
+          sql: `
+            INSERT INTO browser_watch_shelf_items (
+              browser_tab_session_id, proposal_id, target_url, title, category,
+              source_label, progress_label, state, project_id, source_id,
+              workbench_evidence_id
+            )
+            VALUES (?, ?, ?, ?, ?, 'browser_open_tab', NULL, 'saved', ?, ?, ?)
+            RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                      category, source_label, progress_label, state, project_id,
+                      source_id, workbench_evidence_id, created_at, updated_at
+          `,
+          args: [
+            tab.id,
+            proposal.id,
+            tab.targetUrl,
+            tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+            input.category,
+            tab.projectId,
+            tab.sourceId,
+            tab.workbenchEvidenceId,
+          ],
+        });
+        item = created.rows[0] as Record<string, unknown> | undefined;
+        if (item) {
+          await db.execute({
+            sql: "UPDATE browser_tab_sessions SET watch_shelf_id = ?, updated_at = unixepoch() WHERE id = ?",
+            args: [Number(item.id), tab.id],
+          });
+        }
+      }
+
+      if (!item) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Watch Shelf item could not be saved.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "watch_shelf_item_saved" as const,
+        proposal,
+        tab,
+        item: rowToWatchShelfItem(item),
+        canSaveItem: true,
+        canPersistProgress: false,
+        writesExternal: false,
+        gates: [
+          "Saved one local Watch Shelf item from an open Browser tab.",
+          "No progress, service login, thumbnail, source discovery, backend page fetch, or external write ran.",
+        ],
+        noActionTaken: [
+          "No progress persisted.",
+          "No backend page fetch ran.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserBookmarkFromOpenTab: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_save_blocked" as const,
+          proposal,
+          tab,
+          bookmark: null,
+          canSaveBookmark: false,
+          writesExternal: false,
+          gates: [
+            "Bookmark save remains blocked.",
+            "A real open Browser tab is required before saving a bookmark.",
+            "No bookmark saved, source saved, backend page fetch run, cookie persisted, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark saved.",
+            "No backend page fetch ran.",
+            "No cookies or credentials persisted.",
+            "No source saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 state, project_id, source_id, workbench_evidence_id,
+                 created_at, updated_at
+          FROM browser_bookmarks
+          WHERE target_url = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [tab.targetUrl],
+      });
+      let bookmark = existing.rows[0] as Record<string, unknown> | undefined;
+
+      if (!bookmark) {
+        const created = await db.execute({
+          sql: `
+            INSERT INTO browser_bookmarks (
+              browser_tab_session_id, proposal_id, target_url, title, state,
+              project_id, source_id, workbench_evidence_id
+            )
+            VALUES (?, ?, ?, ?, 'saved', ?, ?, ?)
+            RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                      state, project_id, source_id, workbench_evidence_id,
+                      created_at, updated_at
+          `,
+          args: [
+            tab.id,
+            proposal.id,
+            tab.targetUrl,
+            tab.title ?? browserDraftTabLabelForServer(tab.targetUrl),
+            tab.projectId,
+            tab.sourceId,
+            tab.workbenchEvidenceId,
+          ],
+        });
+        bookmark = created.rows[0] as Record<string, unknown> | undefined;
+      }
+
+      if (!bookmark) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser bookmark could not be saved.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_saved" as const,
+        proposal,
+        tab,
+        bookmark: rowToBrowserBookmark(bookmark),
+        canSaveBookmark: true,
+        writesExternal: false,
+        gates: [
+          "Saved one local Browser bookmark from an open Browser tab.",
+          "No cookies, credentials, page content, source discovery, backend page fetch, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  removeBrowserBookmark: publicProcedure
+    .input(
+      z.object({
+        bookmarkId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 state, project_id, source_id, workbench_evidence_id,
+                 created_at, updated_at
+          FROM browser_bookmarks
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.bookmarkId],
+      });
+      const bookmark = existing.rows[0] as Record<string, unknown> | undefined;
+      if (!bookmark) {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_remove_missing" as const,
+          removedBookmark: null,
+          writesExternal: false,
+          gates: [
+            "Bookmark row was not found.",
+            "No bookmark removed, source saved, Watch Shelf item changed, backend page fetch run, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark removed.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item changed.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      await db.execute({
+        sql: "DELETE FROM browser_bookmarks WHERE id = ?",
+        args: [input.bookmarkId],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_removed" as const,
+        removedBookmark: rowToBrowserBookmark(bookmark),
+        writesExternal: false,
+        gates: [
+          "Removed one local Browser bookmark row.",
+          "No page fetch, source save, Watch Shelf change, cookie persistence, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Watch Shelf item changed.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  renameBrowserBookmark: publicProcedure
+    .input(
+      z.object({
+        bookmarkId: z.number().int().positive(),
+        title: z.string().trim().min(1).max(120),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const renamed = await db.execute({
+        sql: `
+          UPDATE browser_bookmarks
+          SET title = ?,
+              updated_at = unixepoch()
+          WHERE id = ?
+          RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                    state, project_id, source_id, workbench_evidence_id,
+                    created_at, updated_at
+        `,
+        args: [input.title, input.bookmarkId],
+      });
+      const bookmark = renamed.rows[0] as Record<string, unknown> | undefined;
+      if (!bookmark) {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_rename_missing" as const,
+          bookmark: null,
+          writesExternal: false,
+          gates: [
+            "Bookmark row was not found.",
+            "No bookmark renamed, source saved, Watch Shelf item changed, backend page fetch run, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark renamed.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item changed.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_renamed" as const,
+        bookmark: rowToBrowserBookmark(bookmark),
+        writesExternal: false,
+        gates: [
+          "Renamed one local Browser bookmark row.",
+          "No page fetch, source save, Watch Shelf change, cookie persistence, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Watch Shelf item changed.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  recordBrowserSandboxFrameReload: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (!tab || tab.state !== "open") {
+        return {
+          ok: false as const,
+          mode: "browser_sandbox_frame_reload_blocked" as const,
+          proposal,
+          tab,
+          canReloadFrame: false,
+          canExecute: false,
+          writesExternal: false,
+          audit: null,
+          gates: [
+            "Browser sandbox frame reload remains blocked.",
+            "A real open Browser tab is required before reload.",
+            "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+          ],
+          noActionTaken: [
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'sandbox_frame_reload_requested', 1, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser sandbox frame reload requested for proposal #${proposal.id}.`,
+            `Target: ${proposal.target}.`,
+            "The client may remount the sandboxed Browser frame with the same URL.",
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No Workbench capture created.",
+            "No credential action ran.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            "No backend page fetch ran.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ].join("\n"),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_sandbox_frame_reload_recorded" as const,
+        proposal,
+        tab,
+        canReloadFrame: true,
+        canExecute: false,
+        writesExternal: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "Open tab receipt is present.",
+          "Sandbox frame reload receipt is recorded.",
+          "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No Watch Shelf item saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserLiveRunnerApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const existingApproval = await pendingBrowserLiveRunnerApprovalByProposalId(proposal.id);
+      if (existingApproval) {
+        return {
+          ok: true as const,
+          mode: "local_browser_live_runner_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          opensBrowser: false,
+          wouldExecute: false,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local Browser live-runner approval preview returned.",
+            "No browser opened, page fetched, source saved, Workbench capture created, runner audit written, or external write ran.",
+          ],
+          noActionTaken: [
+            ...browserProposalNoActionTaken,
+            "No runner audit written.",
+          ],
+        };
+      }
+
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "public_browser",
+        actionClass: "browser_or_media_capture",
+        externalTarget: true,
+        sensitiveData: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `Browser live runner approval preview: proposal #${proposal.id} ${proposal.target}`,
+        additionalReasons: [
+          "Live-runner approval is separate from Browser proposal review approval.",
+          "This approval preview does not open, fetch, search, save, capture, or write externally.",
+          "Even if approved, the Browser runner remains blocked until the live runner implementation exists.",
+        ],
+      });
+      const contextSummary = [
+        `Live runner approval preview for Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Result state: ${proposal.resultState}`,
+        "This is explicit live-runner approval only.",
+        "It does not open a browser page.",
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'browser_live_runner', 'browser_action_proposal', ?, ?,
+                  'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          proposal.id,
+          proposal.executorAgent,
+          input.reason ?? "Local Browser live-runner approval preview only. This does not open or run browser work.",
+          contextSummary,
+          proposal.riskClass,
+          Number(preflight.row.id),
+        ],
+      });
+      const approval = result.rows[0]
+        ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>)
+        : await pendingBrowserLiveRunnerApprovalByProposalId(proposal.id);
+
+      return {
+        ok: Boolean(approval),
+        mode: "local_browser_live_runner_approval_preview" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        opensBrowser: false,
+        wouldExecute: false,
+        approval,
+        gates: [
+          "Created one pending local Browser live-runner approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "This is separate from Browser proposal review approval.",
+          "No browser opened, page fetched, source saved, Workbench capture created, runner audit written, or external write ran.",
+        ],
+        noActionTaken: [
+          ...browserProposalNoActionTaken,
+          "No runner audit written.",
+        ],
+      };
+    }),
+
+  createBrowserResultRecoveryScaffold: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const recoveryNote = [
+        "Recovery scaffold recorded before runner.",
+        "No browser opened.",
+        "No page fetched.",
+        "If a future runner fails, explain visible state and next safe action here.",
+      ].join(" ");
+      const result = await db.execute({
+        sql: `
+          UPDATE browser_action_proposals
+          SET result_state = 'blocked_before_runner',
+              recovery_note = ?,
+              updated_at = unixepoch()
+          WHERE id = ?
+          RETURNING *
+        `,
+        args: [recoveryNote, proposal.id],
+      });
+      const row = result.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser result scaffold could not be created.",
+        });
+      }
+      const updatedProposal = rowToBrowserActionProposal(row);
+
+      return {
+        ok: true as const,
+        mode: "blocked_browser_result_recovery_scaffold" as const,
+        proposal: updatedProposal,
+        resultReceipt: {
+          present: true,
+          resultState: updatedProposal.resultState,
+          detail: "Blocked result scaffold recorded. No page opened.",
+        },
+        recoveryNote: {
+          present: true,
+          status: "draft" as const,
+          detail: updatedProposal.recoveryNote,
+        },
+        canOpenPage: false,
+        canExecute: false,
+        gates: [
+          "Result and recovery scaffolds exist, but manual page open remains blocked.",
+          "This does not run the Browser proposal.",
+        ],
+        noActionTaken: [
+          "No browser opened.",
+          "No page fetched.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  createBrowserActionApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        reason: z.string().max(1000).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const existingApproval = await pendingBrowserApprovalByProposalId(input.proposalId);
+      if (existingApproval) {
+        return {
+          ok: true as const,
+          mode: "local_browser_action_approval_preview" as const,
+          created: false,
+          writesExternal: false,
+          opensBrowser: false,
+          wouldExecute: false,
+          approval: existingApproval,
+          gates: [
+            "Existing pending local Browser approval preview returned.",
+            "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
+          ],
+        };
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "public_browser",
+        actionClass: proposal.riskClass === "browser_write" ? "external_write" : "browser_or_media_capture",
+        externalTarget: proposal.draftKind !== "empty",
+        sensitiveData: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `Browser action approval preview: ${proposal.actionLabel} ${proposal.target}`,
+        additionalReasons: [
+          "Browser approval previews are local metadata only.",
+          "The browser proposal still needs runner, Spock gate, Workbench body, result receipt, and recovery note before execution can be considered.",
+          "This preview does not open, fetch, search, save, capture, or write externally.",
+        ],
+      });
+      const contextSummary = [
+        `Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Result state: ${proposal.resultState}`,
+        `Required gates: ${proposal.requiredGates.join(", ")}`,
+        `Blockers: ${proposal.blockers.join(", ")}`,
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'browser_action_review', 'browser_action_proposal', ?, ?,
+                  'pending', ?, ?, 0, ?, ?)
+          RETURNING id, task_id, action_type, target_type, target_id,
+                    requested_by_agent, status, reason, context_summary,
+                    sensitive_data_flag, cost_risk, permission_preflight_id,
+                    decided_at, created_at
+        `,
+        args: [
+          proposal.id,
+          proposal.executorAgent,
+          input.reason ?? "Local Browser action approval preview only. This does not run or approve browser work.",
+          contextSummary,
+          proposal.riskClass,
+          Number(preflight.row.id),
+        ],
+      });
+      const approval = result.rows[0]
+        ? rowToBrowserApprovalPreview(result.rows[0] as Record<string, unknown>)
+        : await pendingBrowserApprovalByProposalId(proposal.id);
+
+      return {
+        ok: Boolean(approval),
+        mode: "local_browser_action_approval_preview" as const,
+        created: Boolean(result.rows[0]),
+        writesExternal: false,
+        opensBrowser: false,
+        wouldExecute: false,
+        approval,
+        gates: [
+          "Created one pending local Browser approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "No browser opened, page fetched, source saved, Workbench capture created, or external write ran.",
+          "Approval preview is not execution permission.",
+        ],
+      };
+    }),
+
+  createBrowserActionWorkbenchBody: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const permissionPreflightId = await recordEvidencePreflight({
+        permissionClass: "public_browser",
+        sensitive: false,
+        requestedByAgent: proposal.executorAgent,
+        targetSummary: `browser_action_proposal:${proposal.id}`,
+      });
+      const summary = [
+        `Browser proposal #${proposal.id}: ${proposal.actionLabel}`,
+        `Target: ${proposal.target}`,
+        `Draft kind: ${proposal.draftKind}`,
+        `Risk: ${proposal.riskClass}`,
+        `Executor: ${proposal.executorAgent}`,
+        `Status: ${proposal.statusLabel}`,
+        `Result state: ${proposal.resultState}`,
+        `Required gates: ${proposal.requiredGates.join(", ")}`,
+        `No action: ${browserProposalNoActionTaken.join(" ")}`,
+      ].join("\n");
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, owner_agent, route_agent,
+            validation_status, permission_class, permission_preflight_id,
+            sensitive_data_flag
+          )
+          VALUES ('public_browser', ?, ?, ?, 'cortana', ?, 'unvalidated', 'public_browser', ?, 0)
+          RETURNING *
+        `,
+        args: [
+          `Browser proposal #${proposal.id} body`,
+          summary,
+          `browser_action_proposal:${proposal.id}`,
+          proposal.executorAgent,
+          permissionPreflightId,
+        ],
+      });
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created one local Workbench body receipt for a Browser proposal.",
+          "Recorded one local permission preflight audit row for this evidence record.",
+          "This did not open a browser, fetch a page, save a source, capture media, approve work, or write externally.",
+        ],
+      };
+    }),
+
+  createBrowserActionSpockGate: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposalResult = await db.execute({
+        sql: `
+          SELECT *
+          FROM browser_action_proposals
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.proposalId],
+      });
+      const row = proposalResult.rows[0] as Record<string, unknown> | undefined;
+      if (!row) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Browser action proposal not found.",
+        });
+      }
+
+      const proposal = rowToBrowserActionProposal(row);
+      const receipt = receiptFor(proposal.target);
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "explicit_context",
+        actionClass: "local_note",
+        sensitiveData: false,
+        externalTarget: false,
+        requestedByAgent: "spock",
+        targetSummary: `browser_action_proposal:${proposal.id} ${receipt.targetUri}`,
+        additionalReasons: [
+          "Spock Browser proposal receipt records local review state only.",
+          "Browser, source save, download, credential, install, and execution paths need separate approval.",
+        ],
+      });
+      const result = await db.execute({
+        sql: `
+          INSERT INTO security_review_records (
+            target_uri, target_kind, risk_level, status, owner_agent, route_chain,
+            checks_json, findings_json, allowed_actions_json, blocked_actions_json,
+            scanner_plan_json, browser_policy_json, permission_preflight_id
+          )
+          VALUES (?, ?, ?, 'receipt', 'spock', ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING *
+        `,
+        args: [
+          receipt.targetUri,
+          receipt.targetKind,
+          receipt.riskLevel,
+          JSON.stringify(receipt.routeChain),
+          JSON.stringify(receipt.checks),
+          JSON.stringify(receipt.findings),
+          JSON.stringify(receipt.allowedActions),
+          JSON.stringify(receipt.blockedActions),
+          JSON.stringify(receipt.scannerPlan),
+          JSON.stringify(receipt.browserPolicy),
+          Number(preflight.row.id),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        executesCommand: false,
+        review: rowToSecurityReview(result.rows[0]!),
+        permissionPreflightId: Number(preflight.row.id),
+        gates: [
+          "Recorded one local Spock security receipt for a Browser proposal.",
+          "Recorded one local permission preflight audit row for this Spock gate.",
+          "This did not open a browser, fetch a page, save a source, approve work, or write externally.",
+        ],
+      };
+    }),
+
+  evidence: publicProcedure
+    .input(
+      z
+        .object({
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          executionLinked: z.boolean().optional(),
+          limit: z.number().int().min(1).max(100).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const { where, args } = evidenceWhere(input);
+      args.push(input?.limit ?? 30);
+      const result = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            (
+              SELECT ear.id
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_id,
+            (
+              SELECT ear.status
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_status,
+            (
+              SELECT ear.exit_code
+              FROM execution_action_results ear
+              INNER JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+              WHERE eap.workbench_evidence_id = wer.id
+              ORDER BY ear.created_at DESC, ear.id DESC
+              LIMIT 1
+            ) AS execution_result_exit_code
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+      const items = result.rows.map(rowToEvidence);
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        items,
+        summary: {
+          total: items.length,
+          sensitive: items.filter((item) => item.sensitive).length,
+          annotations: items.filter((item) => item.kind === "annotation").length,
+          validationNotes: items.filter((item) => item.kind === "validation_note").length,
+        },
+        gates: [
+          "Workbench evidence is local append-only history.",
+          "Listing evidence does not open browser/media tools, execute commands, or write externally.",
+        ],
+      };
+    }),
+
+  evidencePicker: publicProcedure
+    .input(
+      z
+        .object({
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          excludeId: z.number().int().optional(),
+          limit: z.number().int().min(1).max(200).optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const { where, args } = evidenceWhere(input);
+      if (input?.excludeId !== undefined) {
+        where.push("wer.id != ?");
+        args.push(input.excludeId);
+      }
+      args.push(input?.limit ?? 80);
+      const result = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT ?
+        `,
+        args,
+      });
+      const items = result.rows.map(rowToEvidence);
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        executesCommand: false,
+        items,
+        summary: {
+          total: items.length,
+          sensitive: items.filter((item) => item.sensitive).length,
+          media: items.filter((item) => item.mediaName != null || item.kind === "image_review" || item.kind === "video_frame").length,
+          comparisons: items.filter((item) => item.kind === "before_after").length,
+        },
+        gates: [
+          "Evidence picker reads local Workbench records only.",
+          "Picking evidence does not open linked targets, fetch sources, execute commands, capture media, or write externally.",
+        ],
+      };
+    }),
+
+  evidenceGroups: publicProcedure
+    .input(
+      z
+        .object({
+          groupBy: z.enum(evidenceGroupBys).default("project"),
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          executionLinked: z.boolean().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const groupBy = input?.groupBy ?? "project";
+      const { where, args } = evidenceWhere(input);
+      const result = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT 300
+        `,
+        args,
+      });
+      const groups = new Map<string, {
+        key: string;
+        label: string;
+        count: number;
+        sensitive: number;
+        validationNotes: number;
+        latestAt: number;
+        sampleIds: number[];
+      }>();
+      for (const row of result.rows) {
+        const item = rowToEvidence(row);
+        const key =
+          groupBy === "project" ? String(item.projectId ?? "unlinked")
+          : groupBy === "task" ? String(item.taskId ?? "unlinked")
+          : groupBy === "session" ? String(item.sessionId ?? "unlinked")
+          : groupBy === "kind" ? item.kind
+          : groupBy === "source" ? String(item.sourceId ?? "unlinked")
+          : groupBy === "command" ? String(item.commandObservationId ?? "unlinked")
+          : groupBy === "artifact" ? String(item.artifactId ?? "unlinked")
+          : item.validationStatus;
+        const label =
+          groupBy === "project" ? (item.projectName ?? "Unlinked project")
+          : groupBy === "task" ? (item.taskTitle ?? "Unlinked task")
+          : groupBy === "session" ? (item.sessionClaudeId ?? "Unlinked session")
+          : groupBy === "kind" ? item.kind.replace(/_/g, " ")
+          : groupBy === "source" ? (item.sourceTitle ?? item.sourceUri ?? "Unlinked source")
+          : groupBy === "command" ? (item.command ?? "Unlinked command")
+          : groupBy === "artifact" ? (item.artifactTitle ?? item.artifactPath ?? "Unlinked artifact")
+          : item.validationStatus.replace(/_/g, " ");
+        const existing = groups.get(key) ?? {
+          key,
+          label,
+          count: 0,
+          sensitive: 0,
+          validationNotes: 0,
+          latestAt: 0,
+          sampleIds: [],
+        };
+        existing.count += 1;
+        existing.sensitive += item.sensitive ? 1 : 0;
+        existing.validationNotes += item.kind === "validation_note" ? 1 : 0;
+        existing.latestAt = Math.max(existing.latestAt, item.createdAt);
+        if (existing.sampleIds.length < 4) existing.sampleIds.push(item.id);
+        groups.set(key, existing);
+      }
+
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        executesCommand: false,
+        groupBy,
+        groups: Array.from(groups.values()).sort((a, b) => b.count - a.count || b.latestAt - a.latestAt),
+        gates: [
+          "Evidence grouping reads local records only.",
+          "Source and command groups are links to existing metadata. They do not fetch sources or execute commands.",
+        ],
+      };
+    }),
+
+  evidenceSummary: publicProcedure
+    .input(
+      z
+        .object({
+          groupBy: z.enum(evidenceGroupBys).default("project"),
+          projectId: z.number().int().optional(),
+          kind: z.enum(evidenceKinds).optional(),
+          query: z.string().max(200).optional(),
+          latestLimit: z.number().int().min(1).max(100).default(40),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const groupBy = input?.groupBy ?? "project";
+      const { where, args } = evidenceWhere(input);
+      const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+      const baseFrom = `
+        FROM workbench_evidence_records wer
+        LEFT JOIN projects p ON p.id = wer.project_id
+        LEFT JOIN tasks t ON t.id = wer.task_id
+        LEFT JOIN sessions s ON s.id = wer.session_id
+        LEFT JOIN sources src ON src.id = wer.source_id
+        LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+        LEFT JOIN artifacts a ON a.id = wer.artifact_id
+        ${whereSql}
+      `;
+
+      const summaryResult = await db.execute({
+        sql: `
+          SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN wer.sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+            SUM(CASE WHEN wer.kind = 'terminal_output' THEN 1 ELSE 0 END) AS terminal,
+            SUM(CASE WHEN wer.kind = 'validation_note' THEN 1 ELSE 0 END) AS validation_notes,
+            SUM(CASE WHEN wer.validation_status = 'needs_review' THEN 1 ELSE 0 END) AS needs_review,
+            SUM(CASE WHEN wer.validation_status IN ('validated_for_local_use', 'looks_consistent') THEN 1 ELSE 0 END) AS validated
+          ${baseFrom}
+        `,
+        args,
+      });
+
+      const latestResult = await db.execute({
+        sql: `
+          SELECT
+            wer.id,
+            wer.kind,
+            wer.title,
+            wer.project_id,
+            p.name AS project_name,
+            wer.task_id,
+            wer.session_id,
+            wer.command_observation_id,
+            wer.artifact_id,
+            wer.validation_status,
+            wer.sensitive_data_flag,
+            wer.created_at
+          ${baseFrom}
+          ORDER BY wer.created_at DESC, wer.id DESC
+          LIMIT ?
+        `,
+        args: [...args, input?.latestLimit ?? 40],
+      });
+
+      const groupKeySql =
+        groupBy === "project" ? "COALESCE(CAST(wer.project_id AS TEXT), 'unlinked')"
+        : groupBy === "task" ? "COALESCE(CAST(wer.task_id AS TEXT), 'unlinked')"
+        : groupBy === "session" ? "COALESCE(CAST(wer.session_id AS TEXT), 'unlinked')"
+        : groupBy === "kind" ? "wer.kind"
+        : groupBy === "source" ? "COALESCE(CAST(wer.source_id AS TEXT), 'unlinked')"
+        : groupBy === "command" ? "COALESCE(CAST(wer.command_observation_id AS TEXT), 'unlinked')"
+        : groupBy === "artifact" ? "COALESCE(CAST(wer.artifact_id AS TEXT), 'unlinked')"
+        : "wer.validation_status";
+      const groupLabelSql =
+        groupBy === "project" ? "COALESCE(p.name, 'Unlinked project')"
+        : groupBy === "task" ? "COALESCE(t.title, 'Unlinked task')"
+        : groupBy === "session" ? "COALESCE(s.claude_session_id, 'Unlinked session')"
+        : groupBy === "kind" ? "REPLACE(wer.kind, '_', ' ')"
+        : groupBy === "source" ? "COALESCE(src.title, src.uri, 'Unlinked source')"
+        : groupBy === "command" ? "COALESCE(co.command, 'Unlinked command')"
+        : groupBy === "artifact" ? "COALESCE(a.title, a.storage_path, 'Unlinked artifact')"
+        : "REPLACE(wer.validation_status, '_', ' ')";
+
+      const groupsResult = await db.execute({
+        sql: `
+          SELECT
+            ${groupKeySql} AS group_key,
+            ${groupLabelSql} AS group_label,
+            COUNT(*) AS total,
+            SUM(CASE WHEN wer.sensitive_data_flag = 1 THEN 1 ELSE 0 END) AS sensitive,
+            SUM(CASE WHEN wer.kind = 'terminal_output' THEN 1 ELSE 0 END) AS terminal,
+            SUM(CASE WHEN wer.kind = 'validation_note' THEN 1 ELSE 0 END) AS validation_notes,
+            SUM(CASE WHEN wer.validation_status = 'needs_review' THEN 1 ELSE 0 END) AS needs_review,
+            SUM(CASE WHEN wer.validation_status IN ('validated_for_local_use', 'looks_consistent') THEN 1 ELSE 0 END) AS validated,
+            MAX(wer.created_at) AS latest_at
+          ${baseFrom}
+          GROUP BY group_key, group_label
+          ORDER BY total DESC, latest_at DESC
+          LIMIT 100
+        `,
+        args,
+      });
+
+      const summary = summaryResult.rows[0] ?? {};
+      return {
+        mode: "read_only" as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        executesCommand: false,
+        groupBy,
+        summary: {
+          total: Number(summary.total ?? 0),
+          sensitive: Number(summary.sensitive ?? 0),
+          terminal: Number(summary.terminal ?? 0),
+          validationNotes: Number(summary.validation_notes ?? 0),
+          needsReview: Number(summary.needs_review ?? 0),
+          validated: Number(summary.validated ?? 0),
+        },
+        groups: groupsResult.rows.map((row) => ({
+          key: String(row.group_key),
+          label: String(row.group_label),
+          count: Number(row.total ?? 0),
+          sensitive: Number(row.sensitive ?? 0),
+          terminal: Number(row.terminal ?? 0),
+          validationNotes: Number(row.validation_notes ?? 0),
+          needsReview: Number(row.needs_review ?? 0),
+          validated: Number(row.validated ?? 0),
+          latestAt: Number(row.latest_at ?? 0),
+        })),
+        latest: latestResult.rows.map((row) => ({
+          id: Number(row.id),
+          kind: String(row.kind),
+          title: String(row.title),
+          projectId: row.project_id == null ? null : Number(row.project_id),
+          projectName: row.project_name == null ? null : String(row.project_name),
+          taskId: row.task_id == null ? null : Number(row.task_id),
+          sessionId: row.session_id == null ? null : Number(row.session_id),
+          commandObservationId: row.command_observation_id == null ? null : Number(row.command_observation_id),
+          artifactId: row.artifact_id == null ? null : Number(row.artifact_id),
+          validationStatus: String(row.validation_status),
+          sensitive: Boolean(row.sensitive_data_flag),
+          createdAt: Number(row.created_at),
+        })),
+        gates: [
+          "Workbench evidence summary is read-only.",
+          "This summary reads local receipts only. It does not fetch sources, execute commands, open browsers, capture media, or write externally.",
+        ],
+      };
+    }),
+
+  evidenceDetail: publicProcedure
+    .input(z.object({ id: z.number().int() }))
+    .query(async ({ input }) => {
+      const db = await getCerebroDb();
+      const result = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path,
+            ppr.decision AS preflight_decision,
+            ppr.required_approvals AS preflight_required_approvals,
+            ppr.reasons AS preflight_reasons,
+            ppr.mode AS preflight_mode
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          LEFT JOIN permission_preflight_records ppr ON ppr.id = wer.permission_preflight_id
+          WHERE wer.id = ?
+          LIMIT 1
+        `,
+        args: [input.id],
+      });
+      const row = result.rows[0];
+      if (!row) {
+        return {
+          found: false as const,
+          id: input.id,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          gates: ["No Workbench evidence record exists for this id."],
+        };
+      }
+      const [validationHistory, comparisonHistory, executionResult] = await Promise.all([
+        db.execute({
+          sql: `
+            SELECT
+              wer.*,
+              p.name AS project_name,
+              s.claude_session_id,
+              s.title AS session_title,
+              s.hero_class AS session_hero_class,
+              s.ended_at AS session_ended_at
+            FROM workbench_evidence_records wer
+            LEFT JOIN projects p ON p.id = wer.project_id
+            LEFT JOIN sessions s ON s.id = wer.session_id
+            WHERE wer.kind = 'validation_note' AND wer.target_uri = ?
+            ORDER BY wer.created_at ASC, wer.id ASC
+          `,
+          args: [`evidence:${input.id}`],
+        }),
+        db.execute({
+          sql: `
+            SELECT
+              wer.*,
+              p.name AS project_name,
+              s.claude_session_id,
+              s.title AS session_title,
+              s.hero_class AS session_hero_class,
+              s.ended_at AS session_ended_at
+            FROM workbench_evidence_records wer
+            LEFT JOIN projects p ON p.id = wer.project_id
+            LEFT JOIN sessions s ON s.id = wer.session_id
+            WHERE wer.kind = 'before_after'
+              AND (wer.before_evidence_id = ? OR wer.after_evidence_id = ?)
+            ORDER BY wer.created_at ASC, wer.id ASC
+          `,
+          args: [input.id, input.id],
+        }),
+        db.execute({
+          sql: `
+            SELECT
+              ear.id,
+              ear.proposal_id,
+              ear.approval_id,
+              ear.executor_agent,
+              ear.command,
+              ear.cwd,
+              ear.exit_code,
+              ear.stdout_summary,
+              ear.stderr_summary,
+              ear.duration_ms,
+              ear.timed_out,
+              ear.status,
+              ear.receipt_body,
+              ear.recovery_note,
+              ear.created_at,
+              eap.action_type,
+              eap.risk_class
+            FROM execution_action_results ear
+            LEFT JOIN execution_action_proposals eap ON eap.id = ear.proposal_id
+            WHERE eap.workbench_evidence_id = ?
+            ORDER BY ear.created_at DESC, ear.id DESC
+            LIMIT 1
+          `,
+          args: [input.id],
+        }),
+      ]);
+      const executionRow = executionResult.rows[0];
+
+      return {
+        found: true as const,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(row),
+        knowledgeRoute: projectKnowledgeRoute(row.project_name == null ? null : String(row.project_name)),
+        permissionPreflight: row.permission_preflight_id == null ? null : {
+          id: Number(row.permission_preflight_id),
+          mode: row.preflight_mode == null ? null : String(row.preflight_mode),
+          decision: row.preflight_decision == null ? null : String(row.preflight_decision),
+          requiredApprovals: row.preflight_required_approvals == null ? [] : String(row.preflight_required_approvals).split("\n").filter(Boolean),
+          reasons: row.preflight_reasons == null ? [] : String(row.preflight_reasons).split("\n").filter(Boolean),
+        },
+        validationHistory: validationHistory.rows.map(rowToEvidence),
+        comparisonHistory: comparisonHistory.rows.map(rowToEvidence),
+        executionResult: executionRow
+          ? {
+              id: Number(executionRow.id),
+              proposalId: executionRow.proposal_id == null ? null : Number(executionRow.proposal_id),
+              approvalId: executionRow.approval_id == null ? null : Number(executionRow.approval_id),
+              executorAgent: String(executionRow.executor_agent),
+              command: String(executionRow.command),
+              cwd: String(executionRow.cwd),
+              exitCode: executionRow.exit_code == null ? null : Number(executionRow.exit_code),
+              stdoutSummary: executionRow.stdout_summary == null ? "" : String(executionRow.stdout_summary),
+              stderrSummary: executionRow.stderr_summary == null ? "" : String(executionRow.stderr_summary),
+              durationMs: Number(executionRow.duration_ms),
+              timedOut: Boolean(executionRow.timed_out),
+              status: String(executionRow.status),
+              receiptBody: String(executionRow.receipt_body),
+              recoveryNote: executionRow.recovery_note == null ? null : String(executionRow.recovery_note),
+              actionType: executionRow.action_type == null ? null : String(executionRow.action_type),
+              riskClass: executionRow.risk_class == null ? null : String(executionRow.risk_class),
+              createdAt: Number(executionRow.created_at),
+            }
+          : null,
+        gates: [
+          "This detail view reads local append-only evidence only.",
+          "It does not open linked targets, execute commands, fetch sources, capture media, or write externally.",
+        ],
+      };
+    }),
+
+  linkOptions: publicProcedure.query(async () => {
+    const db = await getCerebroDb();
+    const [sources, commands, tasks, sessions, artifacts] = await Promise.all([
+      db.execute({
+        sql: `
+          SELECT src.id, src.uri, src.title, src.source_type, src.trust_level, src.freshness_status, src.project_id, p.name AS project_name, src.created_at
+          FROM sources src
+          LEFT JOIN projects p ON p.id = src.project_id
+          ORDER BY src.created_at DESC, src.id DESC
+          LIMIT 30
+        `,
+      }),
+      db.execute({
+        sql: `
+          SELECT co.id, co.command, co.risk, co.status, co.project_id, p.name AS project_name, co.created_at
+          FROM command_observations co
+          LEFT JOIN projects p ON p.id = co.project_id
+          ORDER BY co.created_at DESC, co.id DESC
+          LIMIT 30
+        `,
+      }),
+      db.execute({
+        sql: `
+          SELECT t.id, t.title, t.status, t.agent, t.project_id, p.name AS project_name, t.updated_at
+          FROM tasks t
+          LEFT JOIN projects p ON p.id = t.project_id
+          ORDER BY
+            CASE t.status
+              WHEN 'in_progress' THEN 0
+              WHEN 'open' THEN 1
+              WHEN 'done' THEN 2
+              WHEN 'cancelled' THEN 3
+            END,
+            t.updated_at DESC,
+            t.id DESC
+          LIMIT 40
+        `,
+      }),
+      db.execute({
+        sql: `
+          SELECT s.id, s.claude_session_id, s.title, s.hero_class, s.project_id, p.name AS project_name, s.started_at, s.ended_at
+          FROM sessions s
+          LEFT JOIN projects p ON p.id = s.project_id
+          ORDER BY COALESCE(s.ended_at, s.last_seen_at, s.started_at) DESC, s.id DESC
+          LIMIT 30
+        `,
+      }),
+      db.execute({
+        sql: `
+          SELECT a.id, a.kind, a.lifecycle_state, a.title, a.project_id, p.name AS project_name, a.storage_provider, a.storage_path, a.created_at
+          FROM artifacts a
+          LEFT JOIN projects p ON p.id = a.project_id
+          ORDER BY a.created_at DESC, a.id DESC
+          LIMIT 40
+        `,
+      }),
+    ]);
+
+    return {
+      mode: "read_only" as const,
+      writesExternal: false,
+      opensBrowser: false,
+      executesCommand: false,
+      sources: sources.rows.map((row) => ({
+        id: Number(row.id),
+        uri: String(row.uri),
+        title: row.title == null ? null : String(row.title),
+        sourceType: String(row.source_type),
+        trustLevel: String(row.trust_level),
+        freshnessStatus: String(row.freshness_status),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        createdAt: Number(row.created_at),
+      })),
+      commandObservations: commands.rows.map((row) => ({
+        id: Number(row.id),
+        command: String(row.command),
+        risk: String(row.risk),
+        status: String(row.status),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        createdAt: Number(row.created_at),
+      })),
+      tasks: tasks.rows.map((row) => ({
+        id: Number(row.id),
+        title: String(row.title),
+        status: String(row.status),
+        agent: row.agent == null ? null : String(row.agent),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        updatedAt: Number(row.updated_at),
+      })),
+      sessions: sessions.rows.map((row) => ({
+        id: Number(row.id),
+        displayName: sessionDisplayName({
+          id: Number(row.id),
+          title: row.title == null ? null : String(row.title),
+          projectName: row.project_name == null ? null : String(row.project_name),
+          heroClass: row.hero_class == null ? null : String(row.hero_class),
+          endedAt: row.ended_at == null ? null : Number(row.ended_at),
+        }),
+        claudeSessionId: String(row.claude_session_id),
+        heroClass: row.hero_class == null ? null : String(row.hero_class),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        startedAt: Number(row.started_at),
+        endedAt: row.ended_at == null ? null : Number(row.ended_at),
+      })),
+      artifacts: artifacts.rows.map((row) => ({
+        id: Number(row.id),
+        kind: String(row.kind),
+        lifecycleState: String(row.lifecycle_state),
+        title: row.title == null ? null : String(row.title),
+        projectId: row.project_id == null ? null : Number(row.project_id),
+        projectName: row.project_name == null ? null : String(row.project_name),
+        storageProvider: String(row.storage_provider),
+        storagePath: String(row.storage_path),
+        createdAt: Number(row.created_at),
+      })),
+      gates: [
+        "Link options read existing local records only.",
+        "Selecting a source does not fetch it. Selecting a command observation does not execute it. Selecting a task/session/artifact does not mutate it.",
+      ],
+    };
+  }),
+
+  createValidationNote: publicProcedure
+    .input(
+      z.object({
+        evidenceId: z.number().int(),
+        validatorAgent: z.enum(validationAgents),
+        status: z.enum(["needs_review", "looks_consistent", "blocked", "validated_for_local_use"]),
+        note: z.string().min(1).max(1600),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT id, title, project_id, task_id, session_id, source_id,
+                 command_observation_id, artifact_id, permission_preflight_id,
+                 sensitive_data_flag
+          FROM workbench_evidence_records
+          WHERE id = ?
+          LIMIT 1
+        `,
+        args: [input.evidenceId],
+      });
+      const row = existing.rows[0];
+      if (!row) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          reason: "No Workbench evidence record exists for this id.",
+        };
+      }
+
+      const title = `${input.validatorAgent.toUpperCase()} note for evidence #${input.evidenceId}`;
+      const summary = [
+        `Status: ${input.status.replace(/_/g, " ")}`,
+        input.note,
+      ].join("\n");
+      const preflight = preflightInputForEvidence({ permissionClass: "validation" });
+      const { row: preflightRow } = await recordPermissionPreflight(db, {
+        perceptionClass: preflight.perceptionClass,
+        actionClass: preflight.actionClass,
+        sensitiveData: Boolean(row.sensitive_data_flag),
+        requestedByAgent: input.validatorAgent,
+        targetSummary: `validation_note: evidence #${input.evidenceId}`,
+        additionalReasons: preflight.additionalReasons,
+      });
+      const permissionPreflightId = Number(preflightRow.id);
+
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, project_id, task_id, session_id,
+            source_id, command_observation_id, artifact_id, owner_agent,
+            route_agent, annotation_text, validation_status,
+            permission_class, permission_preflight_id, sensitive_data_flag
+          )
+          VALUES (
+            'validation_note', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, 'validation', ?, ?
+          )
+          RETURNING *
+        `,
+        args: [
+          title,
+          summary,
+          `evidence:${input.evidenceId}`,
+          row.project_id ?? null,
+          row.task_id ?? null,
+          row.session_id ?? null,
+          row.source_id ?? null,
+          row.command_observation_id ?? null,
+          row.artifact_id ?? null,
+          input.validatorAgent,
+          input.note,
+          input.status,
+          permissionPreflightId,
+          row.sensitive_data_flag ?? 0,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created a new validation note record. The original evidence record was not overwritten.",
+          "Recorded one local permission preflight audit row for this validation note.",
+          "This did not validate any external claim, open a target, run a command, fetch a source, or write externally.",
+        ],
+      };
+    }),
+
+  createEvidence: publicProcedure
+    .input(
+      z.object({
+        kind: z.enum(evidenceKinds),
+        title: z.string().min(1).max(160),
+        summary: z.string().min(1).max(2000),
+        targetUri: z.string().max(1000).nullable().optional(),
+        projectId: z.number().int().nullable().optional(),
+        taskId: z.number().int().nullable().optional(),
+        sessionId: z.number().int().nullable().optional(),
+        sourceId: z.number().int().nullable().optional(),
+        commandObservationId: z.number().int().nullable().optional(),
+        artifactId: z.number().int().nullable().optional(),
+        ownerAgent: z.string().min(1).max(80).default("cortana"),
+        routeAgent: z.string().max(80).nullable().optional(),
+        viewport: z.string().max(200).nullable().optional(),
+        coordinates: z.string().max(500).nullable().optional(),
+        annotationText: z.string().max(1200).nullable().optional(),
+        mediaName: z.string().max(255).nullable().optional(),
+        mediaMimeType: z.string().max(120).nullable().optional(),
+        mediaByteSize: z.number().int().min(0).nullable().optional(),
+        mediaKind: z.enum(mediaKinds).nullable().optional(),
+        mediaFrameTimeSec: z.number().min(0).nullable().optional(),
+        mediaDurationSec: z.number().min(0).nullable().optional(),
+        beforeEvidenceId: z.number().int().nullable().optional(),
+        afterEvidenceId: z.number().int().nullable().optional(),
+        comparisonResult: z.string().max(800).nullable().optional(),
+        mediaTemporary: z.boolean().default(false),
+        permissionClass: z.enum(permissionClasses).default("manual_note"),
+        sensitive: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const routeLink = await resolveRuntimeRouteEvidenceLink({
+        targetUri: input.targetUri ?? null,
+        projectId: input.projectId ?? null,
+        taskId: input.taskId ?? null,
+      });
+      const permissionPreflightId = await recordEvidencePreflight({
+        permissionClass: input.permissionClass,
+        sensitive: input.sensitive,
+        requestedByAgent: input.routeAgent ?? input.ownerAgent,
+        targetSummary: `${input.kind}: ${input.title}`,
+      });
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, project_id, task_id, session_id,
+            source_id, command_observation_id, artifact_id, owner_agent,
+            route_agent, viewport, coordinates, annotation_text,
+            media_name, media_mime_type, media_byte_size, media_kind,
+            media_frame_time_sec, media_duration_sec, media_temporary_flag,
+            before_evidence_id, after_evidence_id, comparison_result,
+            validation_status, permission_class, permission_preflight_id,
+            sensitive_data_flag
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unvalidated', ?, ?, ?)
+          RETURNING *
+        `,
+        args: [
+          input.kind,
+          input.title,
+          input.summary,
+          input.targetUri ?? null,
+          routeLink.projectId,
+          routeLink.taskId,
+          input.sessionId ?? null,
+          input.sourceId ?? null,
+          input.commandObservationId ?? null,
+          input.artifactId ?? null,
+          input.ownerAgent,
+          input.routeAgent ?? null,
+          input.viewport ?? null,
+          input.coordinates ?? null,
+          input.annotationText ?? null,
+          input.mediaName ?? null,
+          input.mediaMimeType ?? null,
+          input.mediaByteSize ?? null,
+          input.mediaKind ?? null,
+          input.mediaFrameTimeSec ?? null,
+          input.mediaDurationSec ?? null,
+          input.mediaTemporary ? 1 : 0,
+          input.beforeEvidenceId ?? null,
+          input.afterEvidenceId ?? null,
+          input.comparisonResult ?? null,
+          input.permissionClass,
+          permissionPreflightId,
+          input.sensitive ? 1 : 0,
+        ],
+      });
+      const saved = await db.execute({
+        sql: `
+          SELECT
+            wer.*,
+            p.name AS project_name,
+            t.title AS task_title,
+            s.claude_session_id,
+            s.title AS session_title,
+            s.hero_class AS session_hero_class,
+            s.ended_at AS session_ended_at,
+            src.title AS source_title,
+            src.uri AS source_uri,
+            co.command,
+            a.title AS artifact_title,
+            a.storage_path
+          FROM workbench_evidence_records wer
+          LEFT JOIN projects p ON p.id = wer.project_id
+          LEFT JOIN tasks t ON t.id = wer.task_id
+          LEFT JOIN sessions s ON s.id = wer.session_id
+          LEFT JOIN sources src ON src.id = wer.source_id
+          LEFT JOIN command_observations co ON co.id = wer.command_observation_id
+          LEFT JOIN artifacts a ON a.id = wer.artifact_id
+          WHERE wer.id = ?
+          LIMIT 1
+        `,
+        args: [Number(result.rows[0]!.id)],
+      });
+      return {
+        ok: true,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(saved.rows[0] ?? result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created one local Workbench evidence record.",
+          "Recorded one local permission preflight audit row for this evidence record.",
+          "This did not capture a screenshot, open a browser, run a command, save a file, or write externally.",
+        ],
+      };
+    }),
+
+  createBeforeAfterComparison: publicProcedure
+    .input(
+      z.object({
+        beforeEvidenceId: z.number().int(),
+        afterEvidenceId: z.number().int(),
+        title: z.string().min(1).max(160),
+        summary: z.string().min(1).max(2000),
+        result: z.string().min(1).max(800),
+        routeAgent: z.string().max(80).nullable().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      if (input.beforeEvidenceId === input.afterEvidenceId) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          reason: "Before and after evidence must be different records.",
+        };
+      }
+
+      const db = await getCerebroDb();
+      const existing = await db.execute({
+        sql: `
+          SELECT id, project_id, task_id, session_id, source_id,
+                 command_observation_id, artifact_id, sensitive_data_flag
+          FROM workbench_evidence_records
+          WHERE id IN (?, ?)
+          ORDER BY id ASC
+        `,
+        args: [input.beforeEvidenceId, input.afterEvidenceId],
+      });
+      if (existing.rows.length !== 2) {
+        return {
+          ok: false as const,
+          writesExternal: false,
+          opensBrowser: false,
+          capturesMedia: false,
+          reason: "Both local evidence records must exist before a comparison can be appended.",
+        };
+      }
+
+      const beforeRow = existing.rows.find((row) => Number(row.id) === input.beforeEvidenceId)!;
+      const afterRow = existing.rows.find((row) => Number(row.id) === input.afterEvidenceId)!;
+      const sensitive = Boolean(beforeRow.sensitive_data_flag) || Boolean(afterRow.sensitive_data_flag);
+      const permissionPreflightId = await recordEvidencePreflight({
+        permissionClass: "validation",
+        sensitive,
+        requestedByAgent: input.routeAgent ?? "spock",
+        targetSummary: `before_after: evidence #${input.beforeEvidenceId} -> #${input.afterEvidenceId}`,
+      });
+
+      const projectId = afterRow.project_id ?? beforeRow.project_id ?? null;
+      const taskId = afterRow.task_id ?? beforeRow.task_id ?? null;
+      const sessionId = afterRow.session_id ?? beforeRow.session_id ?? null;
+      const sourceId = afterRow.source_id ?? beforeRow.source_id ?? null;
+      const commandObservationId = afterRow.command_observation_id ?? beforeRow.command_observation_id ?? null;
+      const artifactId = afterRow.artifact_id ?? beforeRow.artifact_id ?? null;
+      const result = await db.execute({
+        sql: `
+          INSERT INTO workbench_evidence_records (
+            kind, title, summary, target_uri, project_id, task_id, session_id,
+            source_id, command_observation_id, artifact_id, owner_agent,
+            route_agent, annotation_text, before_evidence_id, after_evidence_id,
+            comparison_result, validation_status, permission_class,
+            permission_preflight_id, sensitive_data_flag
+          )
+          VALUES (
+            'before_after', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'spock', ?, ?, ?, ?, ?, 'needs_review', 'validation', ?, ?
+          )
+          RETURNING *
+        `,
+        args: [
+          input.title,
+          input.summary,
+          `before:${input.beforeEvidenceId};after:${input.afterEvidenceId}`,
+          projectId,
+          taskId,
+          sessionId,
+          sourceId,
+          commandObservationId,
+          artifactId,
+          input.routeAgent ?? "spock",
+          input.result,
+          input.beforeEvidenceId,
+          input.afterEvidenceId,
+          input.result,
+          permissionPreflightId,
+          sensitive ? 1 : 0,
+        ],
+      });
+
+      return {
+        ok: true as const,
+        appendOnly: true,
+        writesExternal: false,
+        opensBrowser: false,
+        capturesMedia: false,
+        evidence: rowToEvidence(result.rows[0]!),
+        permissionPreflightId,
+        gates: [
+          "Created one local before/after comparison record.",
+          "The compared evidence records were not overwritten.",
+          "This did not open targets, capture media, run commands, fetch sources, save files, or write externally.",
+        ],
+      };
+    }),
+});
