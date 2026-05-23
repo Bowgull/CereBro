@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-05-20 1106 EDT
+Last updated: 2026-05-23 1525 ADT
 
 ## Current North Star
 
@@ -20,6 +20,58 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-05-23 1525 ADT - No-Billing Power Pivot
+
+### What Changed
+- Locked the V1 execution stance: CereBro remains powerful, but not always-on.
+- Defined worker execution as bounded pulses that wake, inspect, build/check,
+  write receipts, and stop.
+- Locked the cost rule: no billing, no trials, no card-backed free tiers, and
+  no paid fallback.
+- Made GitHub Actions on the public repo the primary no-billing automation lane
+  for scheduled build/test/audit/report pulses.
+- Added a hardware/storage gate before heavy local tools. Current hardware is
+  Apple M2, 8 GB memory, with low free disk, so Ollama models, ComfyUI,
+  video/voice models, local-deep-research, Docling OCR, vector indexes, and
+  browser automation stacks need a receipt before install.
+- Kept Browser/shell polish as the active product path.
+
+### Files Touched
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git diff --check`
+- Docs-only change. No app code changed, so `pnpm -C app check` and targeted
+  Vitest were not required.
+
+### Mockup Fidelity
+- No UI changed.
+- The locked 1:1 Keep shell and Browser high-fidelity mockup targets remain
+  active.
+- This pass changes execution architecture, not the immediate visual target.
+
+### Drift Check
+- On path.
+- This narrows execution scope. It does not shrink CereBro's product ambition.
+- No install, clone, third-party script, model pull, provider call, billing
+  setup, trial signup, external write, browser automation, network routing,
+  castle change, or Raven path was added.
+- `CEREBRO_CLI_MCP_RESEARCH.md` remains unrelated untracked work and was not
+  staged.
+
+### Storage Impact
+- No schema change.
+- No migration.
+- No screenshot.
+- One Obsidian handoff snapshot and one index link appended.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_TRUTH_PASS.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_UI_TASTE_AUDIT.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_MASTER_BUILD_PLAN.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and app/server/browserActionProposalRouter.test.ts first. Continue Browser/shell polish. CereBro V1 remains powerful, but not always-on: use bounded worker pulses, no billing, no trials, no card-backed free tiers, and hardware/storage receipts before heavy local installs. Preserve the castle and screenshot-proof visual changes.
+```
 
 ## 2026-05-20 1106 EDT - Capability Intake Plan Amendment
 

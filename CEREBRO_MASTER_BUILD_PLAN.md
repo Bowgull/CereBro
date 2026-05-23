@@ -1,6 +1,6 @@
 # CereBro Master Build Plan
 
-Last updated: 2026-05-20 1106 EDT
+Last updated: 2026-05-23 1525 ADT
 
 ## Summary
 
@@ -72,6 +72,21 @@ Current build instruction:
   do not interrupt the current Browser/shell pass.
 - Build autonomy in stages. First make the work visible and recoverable. Then
   move repeated, proven steps into CereBro itself.
+- V1 stays powerful, but it is not an always-on cloud brain. The execution
+  model is bounded worker pulses: user-triggered or scheduled checks that wake,
+  inspect, build, verify, write receipts, and stop.
+- No billing, no trials, no card-backed free tiers. Do not route CereBro toward
+  VPS, paid GPU, hosted model, paid worker, free-credit trial, or card-required
+  infrastructure without a new explicit user decision.
+- The current Mac is the control surface, not the compute warehouse. With an
+  Apple M2, 8 GB memory, and low free disk, heavy local installs are gated:
+  Ollama models, ComfyUI, video/voice models, local-deep-research, Docling OCR,
+  vector indexes, and browser automation stacks require a storage and hardware
+  receipt before installation.
+- GitHub Actions on the public repo is the primary no-billing automation lane
+  for V1 worker pulses. Use it for scheduled checks, audits, build/test reports,
+  and receipt-style summaries. Do not design it as an autonomous always-running
+  agent.
 - Visions are the CereBro-native `/goal` lesson. A Vision is the operating
   contract for the current session or workstream: intent, success criteria,
   stop rule, owner route, state, and receipt trail. Codex `/goal` inspired the
@@ -131,6 +146,9 @@ Current front-end build path:
 9. **Backend agent runtime after proof.** Build the backend agent only after the
    visible Project Lab -> Terminal Lab -> Workbench -> Ledger loop is coherent.
    The backend agent should consume the visible receipts, not replace them.
+10. **No-billing worker pulses.** Add GitHub Actions-style pulse workers only
+   after the visible receipts can describe what happened. Pulses can check,
+   audit, test, report, and propose. They do not run as a 24/7 cloud brain.
 
 Current critical path gate:
 
@@ -163,6 +181,10 @@ Current critical path gate:
 10. **Backend route receipts before agent execution.** Build local-only Aang to
    Cortana route receipt support before model calls, browser actions, command
    execution, or external writes.
+11. **Hardware and no-billing gates before heavy power.** Any heavy local tool,
+   cloud worker, model download, media pipeline, source crawler, or external
+   service needs explicit proof that it costs nothing, requires no trial or
+   billing, fits current disk/memory constraints, and can stop cleanly.
 
 Worker rule: if a proposed task does not serve one of the gates above, it waits.
 
@@ -171,6 +193,8 @@ Core defaults:
 - Cloud-backed, not cloud-blind.
 - Local-controlled, not local-hoarded.
 - Free cloud only unless explicitly approved.
+- Free cloud means no billing, no trials, no card-backed free tier, and no paid
+  fallback. If a service needs a card or trial to activate, it is out of V1.
 - Google Drive vault for generated files and deliverables.
 - Turso/libSQL cloud is the preferred structured brain once configured.
   Local SQLite is the development cache and fallback, not the long-term center.

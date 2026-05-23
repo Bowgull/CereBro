@@ -1,6 +1,6 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-20 1106 EDT
+Last updated: 2026-05-23 1525 ADT
 
 This file is CereBro Prime's active queue.
 
@@ -40,9 +40,11 @@ Build in this order:
 8. Ledger as receipts and audit trail.
 9. Knowledge contracts before knowledge automation.
 10. Capability Intake Layer before Model and Tool Registry expansion.
-11. Backend route receipts before agent execution.
-12. Model and Tool Registry as basement capability map.
-13. Animation, companion overlay, and walkthrough last.
+11. Hardware/no-billing gate before heavy tools or cloud workers.
+12. Backend route receipts before agent execution.
+13. Model and Tool Registry as basement capability map.
+14. No-billing worker pulses after receipts can prove what happened.
+15. Animation, companion overlay, and walkthrough last.
 
 Do not add a separate Code Lab. Terminal Lab absorbs the code teaching path.
 
@@ -58,11 +60,27 @@ Stop and ask when:
 - a worker needs to cross lane ownership
 - external credentials, paid services, package installs, clone/build/run of
   third-party repos, model downloads, or account setup are needed
+- a cloud service requires billing, a card-backed free tier, a trial, paid
+  fallback, or paid usage to activate
+- a heavy local install would stress the current 8 GB memory or low free disk
 - a destructive action, push, deployment, or storage migration is proposed
 - Raven boundaries are involved
 - context bloat makes a summary and clear better than continuing
 
 ## Now
+
+### 2026-05-23 No-Billing Power Pivot
+
+- CereBro V1 remains powerful, but not always-on.
+- Execution model: bounded worker pulses that wake, inspect, build/check,
+  write receipts, and stop.
+- No billing, no trials, no card-backed free tiers, no paid fallback.
+- GitHub Actions on the public repo is the primary no-billing automation lane
+  for scheduled build/test/audit/report pulses.
+- Current Mac hardware is a gate: Apple M2, 8 GB memory, and low free disk mean
+  heavy local installs wait for storage/hardware receipts.
+- Browser/shell polish remains the active product lane. The power pivot changes
+  execution shape, not the immediate UI path.
 
 ### 2026-05-20 Capability Intake Amendment
 
@@ -136,6 +154,11 @@ Current integration order:
 
 Recent Prime slices:
 
+- 2026-05-23 1525 ADT: locked the no-billing power pivot. CereBro V1 stays a
+  powerful command OS, but not an always-on cloud brain. Worker execution is
+  bounded pulse-based work; GitHub Actions on the public repo is the main
+  no-billing automation lane; heavy local tools require storage and hardware
+  receipts before installation. Browser/shell polish remains active.
 - 2026-05-20 1106 EDT: added the Capability Intake Layer to the master plan
   and build queue as a Basement/plan guardrail. Trending repos and new tools
   now classify as core logic pattern, agent-owned capability, Basement adapter
