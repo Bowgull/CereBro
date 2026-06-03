@@ -37524,3 +37524,84 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_SESSION_HANDOFF.md, and Obsidian 10_Projects/CereBro/CereBro Finish Path.md first. Continue in CereBro Prime mode on branch codex/raven-airlock. The finish path note is canonical and Browser-first. Browser V1 target is command browser, not a fake full Chrome/Firefox replacement. Surfer/Cloak machinery stays in Basement. Cortana Council owns active agent coordination. Next slice should come from the finish path queue, preferably Browser frame-failure fallback or Browser manual open copy reduction. Do not add stealth, CAPTCHA bypass, login bypass, scraping abuse, proxy rotation, hidden automation, installs, paid services, external credentials, fake browser success, or Raven paths.
 ```
+
+## 2026-06-03 2021 NDT - Browser Frame Fallback
+
+Completion:
+
+- Overall: 64%
+- Frontend visible loop: Browser protected-frame fallback added.
+- Backend/runtime: fallback receipt route added. Browser approval origin fixed.
+- Foundation/docs/planning: finish path checklist and progress log updated.
+- Knowledge/storage/source: Obsidian snapshot and session index updated.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added Browser `Open External` fallback under the sandbox frame.
+- Copy now tells the user when a site may not open inside CereBro and sends
+  them to their normal browser.
+- Added `recordBrowserSandboxFrameFallback` on the Workbench router.
+- The fallback route writes a local runner audit receipt only.
+- The fallback route does not fetch the page, save a source, create a
+  Workbench capture, save Watch Shelf, handle credentials, or write externally.
+- Fixed approval origin classification so Browser proposal approvals stay under
+  Browser even when Surfer is the executor agent.
+- Updated the canonical finish path note and checked off Browser
+  frame-failure fallback.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `10_Projects/CereBro/CereBro Finish Path.md`
+  `90_Archive/CereBro Session History/snapshots/2026-06-03 2021 CereBro Session Handoff - browser-frame-fallback.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm --dir app exec vitest run server/browserActionProposalRouter.test.ts`
+  passed.
+- `pnpm --dir app run check` passed.
+- `pnpm --dir app run build` passed. Vite still reports the existing large
+  chunk warning.
+- Raven boundary grep returned no production/client/server matches outside
+  tests.
+- In-app Browser smoke check passed: Browser opens, protected frame opens,
+  fallback copy appears, and `Open External` is visible.
+
+Drift check:
+
+- On path. This advances the Browser command surface without pretending iframe
+  rendering always works.
+- No Cloak execution, stealth, CAPTCHA bypass, login bypass, scraping abuse,
+  proxy rotation, hidden automation, install, paid service, credential
+  handling, source save automation, fake browser success, or Raven path was
+  added.
+- Surfer remains executor for Browser proposal work, but Browser approvals now
+  classify as Browser in the approval surface.
+
+Known risks:
+
+- Frame-block detection is user-marked. Browser engines do not reliably expose
+  cross-origin frame refusal in a clean way.
+- `Open External` opens from the client after the local receipt is recorded.
+  The backend does not open an external browser.
+- Manual open still has too much ceremony. That is the next Browser slice.
+
+Storage impact:
+
+- No schema change.
+- New fallback receipts use existing `browser_runner_audit_records`.
+- The UI smoke created local receipt/history data in the dev database while
+  opening an existing test tab.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_SESSION_HANDOFF.md, and Obsidian 10_Projects/CereBro/CereBro Finish Path.md first. Continue in CereBro Prime mode on branch codex/raven-airlock. Browser frame-failure fallback is complete. Next slice should be Browser manual open copy reduction unless the user redirects. Keep Browser as command browser. Keep Surfer/Cloak machinery in Basement. Keep Cortana Council as the active agent coordination surface. Do not add stealth, CAPTCHA bypass, login bypass, scraping abuse, proxy rotation, hidden automation, installs, paid services, credentials, fake browser success, or Raven paths.
+```

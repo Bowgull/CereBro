@@ -1881,6 +1881,114 @@ export const workbenchRouter = router({
       };
     }),
 
+  recordBrowserSandboxFrameFallback: publicProcedure
+    .input(
+      z.object({
+        proposalId: z.number().int().positive(),
+        reason: z.string().trim().max(500).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const proposal = await browserProposalById(input.proposalId);
+      const gateRows = await browserProposalGateRows(proposal.id);
+      const tab = gateRows.tabDraft ? rowToBrowserTabSession(gateRows.tabDraft as Record<string, unknown>) : null;
+      if (proposal.draftKind !== "url" || !tab || (tab.state !== "open_ready" && tab.state !== "open")) {
+        return {
+          ok: false as const,
+          mode: "browser_sandbox_frame_fallback_blocked" as const,
+          proposal,
+          tab,
+          externalUrl: null,
+          userMayOpenExternal: false,
+          serverOpenedExternalBrowser: false,
+          canOpenPage: false,
+          canExecute: false,
+          writesExternal: false,
+          savesSource: false,
+          capturesWorkbench: false,
+          audit: null,
+          gates: [
+            "External fallback remains blocked.",
+            ...(proposal.draftKind !== "url" ? ["Only URL drafts can use external fallback."] : []),
+            "Tab must be open_ready or open before fallback can hand the target to the user.",
+            "No browser opened, page fetched, source saved, Watch Shelf item saved, Workbench capture created, credential action, or external write ran.",
+          ],
+          noActionTaken: browserProposalNoActionTaken,
+        };
+      }
+
+      const fallbackReason = input.reason?.trim() || "Site did not render inside the protected frame.";
+      const audit = await db.execute({
+        sql: `
+          INSERT INTO browser_runner_audit_records (
+            proposal_id, runner_state, can_open_page, can_execute,
+            receipt_body, no_action_taken
+          )
+          VALUES (?, 'sandbox_frame_external_fallback_requested', 0, 0, ?, ?)
+          RETURNING id, proposal_id, runner_state, can_open_page, can_execute,
+                    receipt_body, no_action_taken, created_at
+        `,
+        args: [
+          proposal.id,
+          [
+            `Browser sandbox frame fallback requested for proposal #${proposal.id}.`,
+            `Target: ${tab.targetUrl}.`,
+            `Reason: ${fallbackReason}`,
+            "The user may open this URL in their normal browser.",
+            "CereBro did not fetch the page.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No Workbench capture created.",
+            "No credential action ran.",
+            "No external write ran.",
+          ].join("\n"),
+          [
+            "No backend page fetch ran.",
+            "No history persisted.",
+            "No cookies or credentials persisted.",
+            "No source saved.",
+            "No Workbench capture created.",
+            "No Watch Shelf item saved.",
+            "No credential action ran.",
+            "No external write ran.",
+          ].join("\n"),
+        ],
+      });
+
+      return {
+        ok: true as const,
+        mode: "browser_sandbox_frame_fallback_recorded" as const,
+        proposal,
+        tab,
+        externalUrl: tab.targetUrl,
+        reason: fallbackReason,
+        userMayOpenExternal: true,
+        serverOpenedExternalBrowser: false,
+        canOpenPage: false,
+        canExecute: false,
+        writesExternal: false,
+        savesSource: false,
+        capturesWorkbench: false,
+        audit: rowToBrowserRunnerAudit(audit.rows[0] as Record<string, unknown>),
+        gates: [
+          "Fallback receipt is recorded.",
+          "The user controls the external open action.",
+          "No backend page fetch, source save, Watch Shelf save, Workbench capture, credential action, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No history persisted.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No Workbench capture created.",
+          "No Watch Shelf item saved.",
+          "No credential action ran.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   createWatchShelfItemFromOpenTab: publicProcedure
     .input(
       z.object({

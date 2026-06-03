@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, ExternalLink, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
@@ -209,6 +209,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const recordBrowserSandboxFrameFallback = trpc.workbench.recordBrowserSandboxFrameFallback.useMutation({
+    onSuccess: (result) => {
+      if (result.ok && result.externalUrl) {
+        setBrowserNotice("This site will not open inside CereBro. Open it in your normal browser. No backend fetch ran.");
+        window.open(result.externalUrl, "_blank", "noopener,noreferrer");
+      } else {
+        setBrowserNotice("External fallback blocked. Open the page first.");
+      }
+      utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
+      utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
+      utils.ledger.overview.invalidate();
+    },
+  });
   const createWatchShelfItemFromOpenTab = trpc.workbench.createWatchShelfItemFromOpenTab.useMutation({
     onSuccess: (result) => {
       setBrowserNotice(
@@ -348,6 +361,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     runBrowserLiveRunnerBlocked.isPending ||
     prepareBrowserLiveRunnerOpenReadiness.isPending ||
     recordBrowserSandboxFrameOpen.isPending ||
+    recordBrowserSandboxFrameFallback.isPending ||
     createWatchShelfItemFromOpenTab.isPending ||
     createBrowserBookmarkFromOpenTab.isPending ||
     removeBrowserBookmark.isPending ||
@@ -925,6 +939,27 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
                       style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
                     />
+                    <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded px-1.5 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                      <span>This site may not open inside CereBro. Open it in your normal browser.</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 gap-1 px-2 text-[10px]"
+                        disabled={selectedBrowserProposalId == null || recordBrowserSandboxFrameFallback.isPending}
+                        title="Record a local fallback receipt, then open the URL in your normal browser. No backend fetch or source save."
+                        onClick={() => {
+                          if (selectedBrowserProposalId == null) return;
+                          recordBrowserSandboxFrameFallback.mutate({
+                            proposalId: selectedBrowserProposalId,
+                            reason: "Site did not render inside the protected frame.",
+                          });
+                        }}
+                      >
+                        <ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" />
+                        {recordBrowserSandboxFrameFallback.isPending ? "Recording" : "Open External"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : (

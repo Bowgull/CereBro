@@ -1504,6 +1504,103 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
   });
 
+  it("records sandbox frame external fallback without backend fetch or content saves", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/frame-fallback",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({ proposalId: created.proposal.id });
+    await caller.workbench.recordBrowserSandboxFrameOpen({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+      workbenchEvidence: await countRows("workbench_evidence_records"),
+      browserHistory: await countRows("browser_tab_history_items"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const fallback = await caller.workbench.recordBrowserSandboxFrameFallback({
+      proposalId: created.proposal.id,
+      reason: "Site stayed blank in the protected frame.",
+    });
+
+    expect(fallback.ok).toBe(true);
+    expect(fallback.mode).toBe("browser_sandbox_frame_fallback_recorded");
+    expect(fallback.externalUrl).toBe("https://example.com/frame-fallback");
+    expect(fallback.userMayOpenExternal).toBe(true);
+    expect(fallback.serverOpenedExternalBrowser).toBe(false);
+    expect(fallback.canOpenPage).toBe(false);
+    expect(fallback.canExecute).toBe(false);
+    expect(fallback.writesExternal).toBe(false);
+    expect(fallback.savesSource).toBe(false);
+    expect(fallback.capturesWorkbench).toBe(false);
+    expect(fallback.audit.runnerState).toBe("sandbox_frame_external_fallback_requested");
+    expect(fallback.audit.canOpenPage).toBe(false);
+    expect(fallback.audit.canExecute).toBe(false);
+    expect(fallback.audit.receiptBody).toContain("The user may open this URL in their normal browser.");
+    expect(fallback.noActionTaken).toContain("No backend page fetch ran.");
+    expect(fallback.noActionTaken).toContain("No source saved.");
+    expect(fallback.noActionTaken).toContain("No Workbench capture created.");
+    expect(fallback.noActionTaken).toContain("No credential action ran.");
+    expect(fallback.noActionTaken).toContain("No external write ran.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits + 1);
+    expect(await countRows("browser_tab_history_items")).toBe(before.browserHistory);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+    expect(await countRows("workbench_evidence_records")).toBe(before.workbenchEvidence);
+  });
+
+  it("blocks sandbox frame external fallback before an open-ready tab exists", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/frame-fallback-blocked",
+      draftKind: "url",
+    });
+    await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    const before = {
+      sources: await countRows("sources"),
+      browserRunnerAudits: await countRows("browser_runner_audit_records"),
+    };
+
+    const fallback = await caller.workbench.recordBrowserSandboxFrameFallback({
+      proposalId: created.proposal.id,
+    });
+
+    expect(fallback.ok).toBe(false);
+    expect(fallback.mode).toBe("browser_sandbox_frame_fallback_blocked");
+    expect(fallback.externalUrl).toBeNull();
+    expect(fallback.userMayOpenExternal).toBe(false);
+    expect(fallback.serverOpenedExternalBrowser).toBe(false);
+    expect(fallback.audit).toBeNull();
+    expect(fallback.gates).toContain("Tab must be open_ready or open before fallback can hand the target to the user.");
+    expect(fallback.noActionTaken).toContain("No browser opened.");
+
+    expect(await countRows("browser_runner_audit_records")).toBe(before.browserRunnerAudits);
+    expect(await countRows("sources")).toBe(before.sources);
+  });
+
   it("blocks Watch Shelf save until the Browser tab is open", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({
