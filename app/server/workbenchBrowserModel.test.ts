@@ -115,17 +115,17 @@ describe("workbenchBrowserModel", () => {
     expect(pending.disabled).toBe(true);
     expect(empty.disabled).toBe(true);
     expect(idle.ariaLabel).toBe("Prepare browser page open");
-    expect(idle.title).toContain("approval package");
+    expect(idle.title).toBe("Check this page before opening it.");
     expect(combined).not.toContain("stage");
     expect(combined).not.toContain("receipt");
   });
 
-  it("keeps Browser open-gate machinery behind proof copy", () => {
+  it("keeps Browser open permission low-machinery", () => {
     const blocked = workbenchBrowserOpenGateCopy({
       hasProposal: true,
       canOpenPage: false,
       isLoading: false,
-      nextAction: "Live runner remains blocked until explicit live-runner approval exists.",
+      nextAction: "Page remains blocked until explicit page approval exists.",
     });
     const ready = workbenchBrowserOpenGateCopy({
       hasProposal: true,
@@ -144,7 +144,7 @@ describe("workbenchBrowserModel", () => {
     expect(blocked.visibleTitle).toBe("Page permission");
     expect(blocked.visibleStatus).toBe("Needs approval");
     expect(blocked.primaryActionLabel).toBe("Open Page");
-    expect(blocked.proofLabel).toBe("Proof");
+    expect(blocked.proofLabel).toBe("Details");
     expect(ready.visibleStatus).toBe("Ready");
     expect(empty.visibleBody).toBe("Enter a page before permission is checked.");
     expect(visible).not.toContain("runner");
@@ -194,7 +194,7 @@ describe("workbenchBrowserModel", () => {
     expect(urlTabs.noActionText).toContain("No browser tab");
 
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
-    expect(emptyTabs.tabSummary).toBe("Tab 1 is the only active local page frame.");
+    expect(emptyTabs.tabSummary).toBe("Tab 1 is the active page.");
     expect(emptyTabs.canCreateTab).toBe(false);
   });
 
@@ -280,7 +280,7 @@ describe("workbenchBrowserModel", () => {
     expect(watchPreview.targetLabel).toBe("https://example.com/path");
     expect(watchPreview.canPropose).toBe(false);
     expect(watchPreview.statusLabel).toBe("blocked");
-    expect(watchPreview.routeLabel).toBe("Needs runner and approval contract.");
+    expect(watchPreview.routeLabel).toBe("Needs page permission.");
     expect(watchPreview.noActionText).toContain("No page action");
 
     expect(emptyPreview.label).toBe("Save to Sources");
@@ -301,19 +301,18 @@ describe("workbenchBrowserModel", () => {
     expect(urlReadiness.canOpen).toBe(false);
     expect(urlReadiness.canRunAutomation).toBe(false);
     expect(urlReadiness.requiredGates).toEqual([
-      "Runner contract",
-      "Approval receipt",
-      "Spock gate",
-      "Workbench body",
+      "Page permission",
+      "Safety check",
+      "Page record",
     ]);
-    expect(urlReadiness.noActionText).toContain("No browser runner");
+    expect(urlReadiness.noActionText).toContain("No browser automation");
 
     expect(emptyReadiness.pageStateLabel).toBe("no page");
     expect(emptyReadiness.canOpen).toBe(false);
     expect(emptyReadiness.canRunAutomation).toBe(false);
   });
 
-  it("defines the manual browser runner contract without granting runner access", () => {
+  it("defines the manual browser contract without granting page access", () => {
     const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
     const emptyDraft = workbenchBrowserDraftModel("");
 
@@ -326,9 +325,9 @@ describe("workbenchBrowserModel", () => {
     expect(urlContract.canFetchPage).toBe(false);
     expect(urlContract.canPersistHistory).toBe(false);
     expect(urlContract.targetLabel).toBe("https://example.com/path");
-    expect(urlContract.allowedManualActions).toContain("Open one user-entered URL after runner contract approval.");
+    expect(urlContract.allowedManualActions).toContain("Open one user-entered URL after page permission.");
     expect(urlContract.blockedActions).toContain("No credential entry.");
-    expect(urlContract.requiredReceipts).toContain("Runner contract receipt");
+    expect(urlContract.requiredReceipts).toContain("Page permission");
     expect(urlContract.noActionText).toContain("No browser page opens");
 
     expect(emptyContract.targetLabel).toBe("No page draft.");

@@ -21,6 +21,37 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-03 2315 NDT - Native Browser Shell Attack Path
+
+### What Changed
+- Kept Browser as the active priority.
+- Chose Electron with `WebContentsView` as the first native Browser Shell path.
+- Kept Tauri as a fallback to revisit if Electron becomes too heavy.
+- Kept Lightpanda as a future read-only worker tool, not the human browser.
+- Added a repo implementation plan at `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`.
+- Updated the canonical Obsidian roadmap at `10_Projects/CereBro/CereBro Finish Path.md`.
+- Started the Browser copy pass so the main surface says page, permission, reload, bookmark, and watch instead of sandbox, runner, receipt, proposal, audit, and gate.
+- Kept outside open optional only. It is not the product answer.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+- In-app Browser smoke: opened Browser surface and scanned visible text. No hits for sandbox, runner, receipt, proposal #, Open External, normal browser, Live runner, or Proof.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue Browser-first. Native Browser Shell is now the attack path: Electron with WebContentsView first, Tauri fallback, Lightpanda worker-only. Do not make outside open the product answer. Keep the main Browser surface low-learning-curve and hide machinery words. No paid services, no hidden automation, no bypass/evasion features.
+```
+
 ## 2026-05-23 1525 ADT - No-Billing Power Pivot
 
 ### What Changed

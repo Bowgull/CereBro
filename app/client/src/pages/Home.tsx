@@ -3543,12 +3543,12 @@ function CommandBar({
       <Button
         type="button"
         onClick={() => onNavigate("security")}
-        aria-label="Open latest Security Gate receipt"
+        aria-label="Open latest Spock safety check"
         variant="outline"
         size="sm"
         className="hidden h-8 shrink-0 px-2 lg:block"
         style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: latestRiskTone, background: "rgba(5, 11, 10, 0.72)", boxShadow: mockupShell.bevel }}
-        title={latestReceipt ? latestReceipt.targetUri : "No security receipts recorded"}
+        title={latestReceipt ? latestReceipt.targetUri : "No safety checks recorded"}
       >
         {latestReceipt ? `Spock ${latestReceipt.riskLevel}` : "Spock clear"}
       </Button>

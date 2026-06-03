@@ -160,8 +160,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setPreparedApprovalId(result.approval?.id ?? null);
       setBrowserNotice(
         result.approval
-          ? `Live runner approval #${result.approval.id} staged. No page opened.`
-          : "Live runner approval was not staged.",
+          ? `Page approval #${result.approval.id} is ready. No page opened yet.`
+          : "Page approval was not created.",
       );
       if (typeof result.approval?.targetId === "number") {
         utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.approval.targetId });
@@ -173,7 +173,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   });
   const runBrowserLiveRunnerBlocked = trpc.workbench.runBrowserLiveRunnerBlocked.useMutation({
     onSuccess: (result) => {
-      setBrowserNotice(`Live runner audit #${result.audit.id} blocked proposal #${result.proposal.id}. No page opened.`);
+      setBrowserNotice(`Page check blocked this open. No page opened.`);
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
       utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
       utils.ledger.overview.invalidate();
@@ -183,8 +183,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     onSuccess: (result) => {
       setBrowserNotice(
         result.ok
-          ? `Browser tab ${result.tab.tabId} is runner-ready. No page opened.`
-          : `Runner readiness blocked: ${result.missingGates[0] ?? "missing gate"}. No page opened.`,
+          ? `Browser tab ${result.tab.tabId} is ready. No page opened yet.`
+          : `Page is not ready: ${result.missingGates[0] ?? "approval needed"}. No page opened.`,
       );
       utils.workbench.browserTabSessionStorageContract.invalidate();
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
@@ -197,11 +197,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       if (result.ok) {
         setSandboxFrameTarget(result.tab.targetUrl);
         setSandboxFrameProposalId(result.proposal.id);
-        setBrowserNotice(`Sandbox frame opened for ${result.tab.tabId}. Some sites may refuse frame rendering.`);
+        setBrowserNotice(`Page opened in ${result.tab.tabId}. Some sites may block this view.`);
       } else {
         setSandboxFrameTarget(null);
         setSandboxFrameProposalId(null);
-        setBrowserNotice("Sandbox frame blocked. Prepare runner first.");
+        setBrowserNotice("Page blocked. Finish permission first.");
       }
       utils.workbench.browserTabSessionStorageContract.invalidate();
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
@@ -212,10 +212,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const recordBrowserSandboxFrameFallback = trpc.workbench.recordBrowserSandboxFrameFallback.useMutation({
     onSuccess: (result) => {
       if (result.ok && result.externalUrl) {
-        setBrowserNotice("This site will not open inside CereBro. Open it in your normal browser. No backend fetch ran.");
+        setBrowserNotice("This site blocked CereBro's page view. Outside open used by request. No page content was saved.");
         window.open(result.externalUrl, "_blank", "noopener,noreferrer");
       } else {
-        setBrowserNotice("External fallback blocked. Open the page first.");
+        setBrowserNotice("Outside open blocked. Open the page first.");
       }
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
       utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
@@ -273,9 +273,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     onSuccess: (result) => {
       if (result.ok) {
         setSandboxFrameReloadKey((key) => key + 1);
-        setBrowserNotice(`Sandbox frame reloaded for ${result.tab.tabId}. No backend fetch ran.`);
+        setBrowserNotice(`Page reloaded for ${result.tab.tabId}.`);
       } else {
-        setBrowserNotice("Sandbox frame reload blocked. Open the page first.");
+        setBrowserNotice("Reload blocked. Open the page first.");
       }
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
       utils.ledger.overview.invalidate();
@@ -348,7 +348,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     setSandboxFrameProposalId(target.proposalId);
     setSandboxFrameReloadKey((key) => key + 1);
     setPreparedApprovalId(null);
-    setBrowserNotice(`Local history opened ${target.title ?? target.targetUrl}. No backend fetch ran.`);
+    setBrowserNotice(`Local history opened ${target.title ?? target.targetUrl}.`);
   };
   const isPreparingBrowserDraft =
     createBrowserActionProposal.isPending ||
@@ -386,7 +386,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       if (typeof focus.query === "string") setBrowserAddressDraft(focus.query);
       if (typeof focus.proposalId === "number") setSelectedBrowserProposalId(focus.proposalId);
       setBrowserSurface("page");
-      setBrowserNotice(focus.notice ?? "Browser proposal focused. No page opened.");
+      setBrowserNotice(focus.notice ?? "Page focused. No page opened.");
       setPreparedApprovalId(null);
       setSandboxFrameTarget(null);
       setSandboxFrameProposalId(null);
@@ -534,8 +534,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 variant="ghost"
                 className="h-8 w-8 px-0"
                 disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
-                aria-label="Reload sandbox frame"
-                title={hasOpenSandboxFrame ? "Reload the sandbox frame. No backend fetch runs." : "Open a page before reload."}
+                aria-label="Reload page"
+                title={hasOpenSandboxFrame ? "Reload the page." : "Open a page before reload."}
                 onClick={() => {
                   if (selectedBrowserProposalId == null) return;
                   recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
@@ -553,7 +553,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
               className="h-9 min-w-0 font-mono text-[12px]"
-              title="Stages a local page draft only. It does not open, fetch, search, save, or capture."
+              title="Enter a site or search."
               style={{
                 background: browserFrame.address,
                 border: `1px solid ${browserFrame.line}`,
@@ -591,10 +591,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
                     const liveApprovalPreview = await createBrowserLiveRunnerApprovalPreview.mutateAsync({
                       proposalId,
-                      reason: "Prepare Browser open gate after the local proposal package is staged. This does not open the page.",
+                      reason: "Prepare Browser open permission after the local page package is staged. This does not open the page.",
                     });
                     setBrowserNotice(
-                      `Browser proposal #${proposalId} prepared. Review approval #${approvalPreview.approval?.id ?? "pending"} and live gate #${liveApprovalPreview.approval?.id ?? "pending"} are waiting. No page opened.`,
+                      `Page is ready for review. Approval #${approvalPreview.approval?.id ?? "pending"} is waiting. No page opened.`,
                     );
                   } catch {
                     setBrowserNotice(browserPrimaryAction.failureNotice);
@@ -672,7 +672,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           status: "pending",
                           origin: "browser",
                           query: browserDraft.raw,
-                          notice: `Browser proposal #${selectedBrowserProposalId ?? "current"} approval focused. No page opens from this handoff.`,
+                          notice: "Page approval focused. No page opens from this handoff.",
                         }),
                       );
                     } catch {
@@ -911,11 +911,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           </div>
                         )}
                         <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
-                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Proof</div>
-                          <div className="mt-1">Protected frame. No backend fetch, source save, Watch Shelf save, downloads, popups, or credential handling ran.</div>
+                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Safety</div>
+                          <div className="mt-1">Protected page view. CereBro did not save page content, downloads, popups, or credentials.</div>
                           <div className="mt-1 flex flex-wrap gap-1">
-                            <Chip label="sandbox" tone={C.accent} />
-                            <Chip label="local receipt" tone={C.gold} />
+                            <Chip label="protected" tone={C.accent} />
+                            <Chip label="local" tone={C.gold} />
                           </div>
                         </div>
                       </div>
@@ -932,7 +932,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     </div>
                     <iframe
                       key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
-                      title="CereBro sandbox browser frame"
+                      title="CereBro page view"
                       src={sandboxFrameTarget}
                       sandbox="allow-scripts allow-forms"
                       referrerPolicy="no-referrer"
@@ -940,24 +940,24 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
                     />
                     <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded px-1.5 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
-                      <span>This site may not open inside CereBro. Open it in your normal browser.</span>
+                      <span>Some sites block this page view. Native CereBro Browser is the next build path.</span>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         className="h-7 gap-1 px-2 text-[10px]"
                         disabled={selectedBrowserProposalId == null || recordBrowserSandboxFrameFallback.isPending}
-                        title="Record a local fallback receipt, then open the URL in your normal browser. No backend fetch or source save."
+                        title="Open this URL outside CereBro by request."
                         onClick={() => {
                           if (selectedBrowserProposalId == null) return;
                           recordBrowserSandboxFrameFallback.mutate({
                             proposalId: selectedBrowserProposalId,
-                            reason: "Site did not render inside the protected frame.",
+                            reason: "Site did not render inside the protected page view.",
                           });
                         }}
                       >
                         <ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" />
-                        {recordBrowserSandboxFrameFallback.isPending ? "Recording" : "Open External"}
+                        {recordBrowserSandboxFrameFallback.isPending ? "Opening" : "Open Outside"}
                       </Button>
                     </div>
                   </div>
@@ -999,7 +999,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       <Chip label="local" tone={C.gold} />
                     </div>
                     <div className="mt-2" style={{ color: C.textMuted }}>
-                      Open the target to create the approval gate.
+                      Open the target to start the page permission step.
                     </div>
                   </div>
                   {selectedBrowserProposalId != null && (
@@ -1019,7 +1019,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           variant="outline"
                           className="h-6 px-2 text-[10px]"
                           disabled={recordBrowserSandboxFrameOpen.isPending || !canOpenSandboxFrame}
-                          title={canOpenSandboxFrame ? "Open the target in the sandbox frame." : "Requires open-ready state."}
+                          title={canOpenSandboxFrame ? "Open the target in CereBro." : "Finish permission first."}
                           onClick={() => recordBrowserSandboxFrameOpen.mutate({ proposalId: selectedBrowserProposalId })}
                         >
                           {recordBrowserSandboxFrameOpen.isPending ? "Opening" : browserOpenGateCopy.primaryActionLabel}
@@ -1030,7 +1030,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           </summary>
                           <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
                             <div className="flex flex-wrap gap-1">
-                              <Chip label={`proposal #${selectedBrowserProposalId}`} tone={C.accent} />
+                              <Chip label="page" tone={C.accent} />
                               {browserLiveRunnerPreflight.data && (
                                 <Chip label={`${browserLiveRunnerPreflight.data.summary.missingCount} missing`} tone={browserLiveRunnerPreflight.data.summary.missingCount > 0 ? C.warning : C.accent} />
                               )}
@@ -1038,7 +1038,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                             {browserLiveRunnerPreflight.data ? (
                               <div className="mt-2 grid gap-1">
                                 {browserLiveRunnerPreflight.data.latestRunnerAudit && (
-                                  <div>Latest audit #{browserLiveRunnerPreflight.data.latestRunnerAudit.id}: {browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")}.</div>
+                                  <div>Last page check: {browserLiveRunnerPreflight.data.latestRunnerAudit.runnerState.replace(/_/g, " ")}.</div>
                                 )}
                                 {browserLiveRunnerLaunchGate.data && (
                                   <div>{browserLiveRunnerLaunchGate.data.nextAction}</div>
@@ -1050,13 +1050,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                     variant="outline"
                                     className="h-6 px-2 text-[10px]"
                                     disabled={createBrowserLiveRunnerApprovalPreview.isPending}
-                                    title="Create the separate live-runner approval preview. This does not open a page."
+                                    title="Ask for page approval. This does not open a page."
                                     onClick={() => createBrowserLiveRunnerApprovalPreview.mutate({
                                       proposalId: selectedBrowserProposalId,
                                       reason: "Prepare explicit live-runner approval. This does not open the page.",
                                     })}
                                   >
-                                    {createBrowserLiveRunnerApprovalPreview.isPending ? "Staging" : "Stage Gate"}
+                                    {createBrowserLiveRunnerApprovalPreview.isPending ? "Asking" : "Ask"}
                                   </Button>
                                   <Button
                                     type="button"
@@ -1064,7 +1064,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                     variant="outline"
                                     className="h-6 px-2 text-[10px]"
                                     disabled={runBrowserLiveRunnerBlocked.isPending}
-                                    title="Write a blocked live-runner audit. This does not open a page."
+                                    title="Check whether this page can open."
                                     onClick={() => runBrowserLiveRunnerBlocked.mutate({ proposalId: selectedBrowserProposalId })}
                                   >
                                     {runBrowserLiveRunnerBlocked.isPending ? "Checking" : "Check"}
@@ -1077,18 +1077,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                     disabled={prepareBrowserLiveRunnerOpenReadiness.isPending || browserLiveRunnerPreflight.data.summary.missingCount > 0}
                                     title={
                                       browserLiveRunnerPreflight.data.summary.missingCount > 0
-                                        ? `Blocked by ${browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "missing gate"}.`
-                                        : "Mark the local tab runner-ready. This does not open a page."
+                                        ? `Blocked by ${browserLiveRunnerPreflight.data.summary.nextMissingGate ?? "permission"}.`
+                                        : "Mark this tab ready. This does not open a page."
                                     }
                                     onClick={() => prepareBrowserLiveRunnerOpenReadiness.mutate({ proposalId: selectedBrowserProposalId })}
                                   >
                                     {prepareBrowserLiveRunnerOpenReadiness.isPending ? "Preparing" : "Ready"}
                                   </Button>
                                 </div>
-                                <div>{browserLiveRunnerPreflight.data.noActionTaken.slice(0, 2).join(" ")}</div>
+                                <div>CereBro is waiting for page permission.</div>
                               </div>
                             ) : (
-                              <div className="mt-2">Open gate is not available for this proposal.</div>
+                              <div className="mt-2">Page permission is not available yet.</div>
                             )}
                           </div>
                         </details>
@@ -1097,7 +1097,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 )}
                   <details className="rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.56)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
-                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Proof</summary>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Details</summary>
                     <div className="mt-1">{browserDraft.noActionText}</div>
                   </details>
                 </div>
@@ -1213,7 +1213,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 )}
               </div>
                   <details className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Proof</summary>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Details</summary>
                     <div className="mt-1">{watchShelfDraft.noActionText}</div>
                   </details>
                 </div>

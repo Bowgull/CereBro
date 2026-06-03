@@ -34,7 +34,7 @@ export type WorkbenchBrowserOpenGateCopy = {
   visibleStatus: "No page" | "Needs approval" | "Ready" | "Checking";
   visibleBody: string;
   primaryActionLabel: "Open Page";
-  proofLabel: "Proof";
+  proofLabel: "Details";
 };
 
 export type WorkbenchWatchShelfDraft = {
@@ -187,8 +187,8 @@ export function workbenchBrowserPrimaryActionCopy(input: {
     label: input.isPreparing ? "Opening" : "Open",
     disabled: input.draftKind === "empty" || input.isPreparing,
     ariaLabel: "Prepare browser page open",
-    title: "Prepare the approval package before this page can open. No page fetch, search request, source save, or external write runs.",
-    pendingNotice: "Preparing the page gate. No page will open yet.",
+    title: "Check this page before opening it.",
+    pendingNotice: "Checking this page before it opens.",
     failureNotice: "Browser open preparation failed before any page opened.",
   };
 }
@@ -205,7 +205,7 @@ export function workbenchBrowserOpenGateCopy(input: {
       visibleStatus: "No page",
       visibleBody: "Enter a page before permission is checked.",
       primaryActionLabel: "Open Page",
-      proofLabel: "Proof",
+      proofLabel: "Details",
     };
   }
 
@@ -215,7 +215,7 @@ export function workbenchBrowserOpenGateCopy(input: {
       visibleStatus: "Checking",
       visibleBody: "Checking whether this page can open.",
       primaryActionLabel: "Open Page",
-      proofLabel: "Proof",
+      proofLabel: "Details",
     };
   }
 
@@ -223,9 +223,9 @@ export function workbenchBrowserOpenGateCopy(input: {
     return {
       visibleTitle: "Page permission",
       visibleStatus: "Ready",
-      visibleBody: "This page can open in the protected frame.",
+      visibleBody: "This page can open here.",
       primaryActionLabel: "Open Page",
-      proofLabel: "Proof",
+      proofLabel: "Details",
     };
   }
 
@@ -234,7 +234,7 @@ export function workbenchBrowserOpenGateCopy(input: {
     visibleStatus: "Needs approval",
     visibleBody: "Review the permission step before this page opens.",
     primaryActionLabel: "Open Page",
-    proofLabel: "Proof",
+    proofLabel: "Details",
   };
 }
 
@@ -258,7 +258,7 @@ export function workbenchBrowserShellModel() {
       { label: "Copy Link", enabled: false, plannedReason: "Planned until a real page is open." },
     ] satisfies WorkbenchBrowserAction[],
     emptyTitle: "Open a page.",
-    emptyBody: "Use the address field when the manual browser runner is wired. This first pass locks the shell and disabled actions.",
+    emptyBody: "Use the address bar to open a page.",
     noActionText: "No browser automation, page fetch, credential action, file transfer, source save, Workbench capture, or external write runs from this shell.",
   };
 }
@@ -279,7 +279,7 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
     canCreateTab: false,
     tabSummary:
       draft.kind === "empty"
-        ? "Tab 1 is the only active local page frame."
+        ? "Tab 1 is the active page."
         : "Draft tab is staged beside Tab 1. No page is open.",
     noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
   };
@@ -345,7 +345,7 @@ export function workbenchBrowserActionPreviewModel(
     targetLabel: draft.kind === "empty" ? "No page draft." : draft.displayTarget,
     canPropose: false,
     statusLabel: draft.kind === "empty" ? "no page" : "blocked",
-    routeLabel: draft.kind === "empty" ? "Open or stage a page first." : "Needs runner and approval contract.",
+    routeLabel: draft.kind === "empty" ? "Open a page first." : "Needs page permission.",
     noActionText: "No page action, browser automation, page fetch, source save, Workbench capture, shelf save, project pin, explanation route, clipboard write, or external write runs from this preview.",
   };
 }
@@ -356,8 +356,8 @@ export function workbenchBrowserReadinessModel(draft: WorkbenchBrowserDraft): Wo
     pageStateLabel: draft.kind === "empty" ? "no page" : "draft staged",
     canOpen: false,
     canRunAutomation: false,
-    requiredGates: ["Runner contract", "Approval receipt", "Spock gate", "Workbench body"],
-    noActionText: "No browser runner, browser automation, page open, page fetch, credential action, source save, Workbench capture, download, or external write is available from this readiness read.",
+    requiredGates: ["Page permission", "Safety check", "Page record"],
+    noActionText: "No browser automation, page fetch, credential action, source save, Workbench capture, download, or outside write is available from this check.",
   };
 }
 
@@ -371,9 +371,9 @@ export function workbenchBrowserRunnerContractModel(draft: WorkbenchBrowserDraft
     canFetchPage: false,
     canPersistHistory: false,
     allowedManualActions: [
-      "Open one user-entered URL after runner contract approval.",
+      "Open one user-entered URL after page permission.",
       "Keep page state local to the manual browser surface.",
-      "Record a local result receipt after the page opens.",
+      "Record local page state after the page opens.",
     ],
     blockedActions: [
       "No credential entry.",
@@ -386,14 +386,13 @@ export function workbenchBrowserRunnerContractModel(draft: WorkbenchBrowserDraft
     ],
     requiredReceipts: [
       ...(draft.kind === "empty" ? ["Page draft"] : []),
-      "Runner contract receipt",
-      "Approval receipt",
-      "Spock gate",
+      "Page permission",
+      "Safety check",
       "Workbench body",
-      "Result receipt",
+      "Page state",
       "Recovery note",
     ],
-    noActionText: "No browser page opens, fetches, persists history, saves sources, captures Workbench proof, downloads files, enters credentials, or writes externally from this contract.",
+    noActionText: "No browser page opens, fetches, persists history, saves sources, captures Workbench proof, downloads files, enters credentials, or writes outside CereBro from this contract.",
   };
 }
 
@@ -424,9 +423,9 @@ export function workbenchBrowserSessionStorageContractModel(draft: WorkbenchBrow
     },
     requiredBeforePersist: [
       ...(draft.kind === "empty" ? ["Page draft"] : []),
-      "Runner contract receipt",
+      "Page permission",
       "Local tab storage table",
-      "Result receipt",
+      "Page state",
       "Recovery note",
     ],
     blockedState: [
@@ -447,7 +446,7 @@ export function workbenchWatchShelfModel() {
     categories: ["Watching", "Want", "YouTube", "Twitch", "Anime", "Finished"],
     rows: [] as Array<{ title: string; sourceNote: string; actionLabel: "Open" | "Resume" }>,
     emptyTitle: "Nothing saved yet.",
-    emptyBody: "Save the current page after the manual browser runner and shelf storage are wired.",
+    emptyBody: "Open a page, then save it here.",
     emptyAction: "Add current page",
     noActionText: "No fake progress, service session, thumbnail, platform state, media file action, or source search is created here.",
   };
