@@ -21,6 +21,7 @@ const G = T.graphiteCandle;
 export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: "security") => void }) {
   const [query, setQuery] = useState("");
   const [url, setUrl] = useState("");
+  const [adapterPurpose, setAdapterPurpose] = useState("Approved public-source research with isolated Surfer profile.");
   const [eventOwner, setEventOwner] = useState<"all" | "surfer" | "hedwig">("all");
   const [sensitiveEventsOnly, setSensitiveEventsOnly] = useState(false);
   const utils = trpc.useUtils();
@@ -38,6 +39,9 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
   );
   const preview = trpc.surfer.previewResearch.useMutation();
   const ingestUrl = trpc.surfer.ingestPublicUrl.useMutation({
+    onSuccess: () => utils.surfer.panel.invalidate(),
+  });
+  const createAdapterPreview = trpc.surfer.createBrowserAdapterApprovalPreview.useMutation({
     onSuccess: () => utils.surfer.panel.invalidate(),
   });
   const validateSource = trpc.surfer.validateSource.useMutation({
@@ -74,6 +78,18 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
     const trimmed = url.trim();
     if (!trimmed || ingestUrl.isPending) return;
     ingestUrl.mutate({ url: trimmed, approved: true });
+  }
+
+  function submitAdapterPreview(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmedUrl = url.trim();
+    const trimmedPurpose = adapterPurpose.trim();
+    if (!trimmedUrl || trimmedPurpose.length < 8 || createAdapterPreview.isPending) return;
+    createAdapterPreview.mutate({
+      adapter: "cloak_browser",
+      targetUrl: trimmedUrl,
+      purpose: trimmedPurpose,
+    });
   }
 
   function openSecurityGate() {
@@ -392,6 +408,31 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             {data?.browserAdapterContract && (
               <section className="rounded p-1.5" aria-label="Surfer browser adapter contract" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <SectionTitle title="Browser Adapters" detail={data.browserAdapterContract.mode.replace(/_/g, " ")} />
+                <form onSubmit={submitAdapterPreview} className="mt-2 space-y-1.5">
+                  <Input
+                    value={adapterPurpose}
+                    onChange={(event) => setAdapterPurpose(event.target.value)}
+                    placeholder="Purpose for this adapter approval preview."
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="secondary"
+                    disabled={!url.trim() || adapterPurpose.trim().length < 8 || createAdapterPreview.isPending}
+                    title={url.trim() ? "Create a local Cloak adapter approval preview. No browser opens." : "Enter a URL above before creating a Cloak adapter preview."}
+                    aria-label="Create Surfer Cloak adapter approval preview"
+                  >
+                    {createAdapterPreview.isPending ? "Staging" : "Stage Cloak Preview"}
+                  </Button>
+                  {createAdapterPreview.data && (
+                    <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}>
+                      <div className="font-semibold" style={{ color: C.success }}>
+                        Adapter receipt #{createAdapterPreview.data.receipt.id}. Approval #{createAdapterPreview.data.approvalId}.
+                      </div>
+                      <div className="mt-1">{createAdapterPreview.data.gates.slice(0, 2).join(" ")}</div>
+                    </div>
+                  )}
+                </form>
                 <div className="mt-2 grid gap-1.5">
                   {data.browserAdapterContract.adapters.map((adapter) => (
                     <div key={adapter.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
@@ -435,6 +476,31 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                 <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   {data.browserAdapterContract.nextAction}
                 </div>
+                {data.browserAdapterReceipts.length > 0 && (
+                  <div className="mt-2 space-y-1.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textMuted }}>
+                      Recent Adapter Receipts
+                    </div>
+                    {data.browserAdapterReceipts.slice(0, 3).map((receipt) => (
+                      <div key={receipt.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                            {receipt.adapter.replace(/_/g, " ")}
+                          </div>
+                          <MiniBadge label={receipt.status.replace(/_/g, " ")} tone={C.accent} />
+                        </div>
+                        <div className="mt-1 text-[10px] leading-snug truncate" title={receipt.targetUrl} style={{ color: C.textMuted }}>
+                          {receipt.targetUrl}
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          <MiniBadge label={receipt.canRun ? "can run" : "no run"} tone={receipt.canRun ? C.danger : C.success} />
+                          <MiniBadge label={receipt.opensBrowser ? "opens browser" : "no browser"} tone={receipt.opensBrowser ? C.danger : C.success} />
+                          <MiniBadge label={receipt.writesMemory ? "memory write" : "no memory"} tone={receipt.writesMemory ? C.danger : C.success} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 

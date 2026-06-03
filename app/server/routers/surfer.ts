@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getCerebroDb, recordArtifact, recordSourceEvent, type SourceKind, type SourceRow } from "../cerebroDb";
 import { sourceDisplayName } from "../displayLabels";
+import { recordPermissionPreflight } from "../permissionPolicy";
 import {
   GITHUB_PROJECT_MAP_PATH,
   GITHUB_REPOSITORY_SOURCE_PATH,
@@ -14,6 +15,29 @@ const TRUST_LEVELS = ["official", "primary", "high", "medium", "low", "unknown"]
 const SOURCE_VALIDATION_DECISIONS = ["trusted", "needs_review", "rejected"] as const;
 const SOURCE_VALIDATION_REVIEWERS = ["oak", "spock"] as const;
 const SURFER_BROWSER_ADAPTERS = ["public_fetch", "standard_browser", "cloak_browser"] as const;
+const CLOAK_ALLOWED_ACTIONS = [
+  "Approved public-source research.",
+  "Owned or explicitly approved login sessions.",
+  "Fingerprint and rendering reliability comparison.",
+  "Human CAPTCHA handoff where the user decides.",
+  "Isolated profile testing with receipts.",
+] as const;
+const CLOAK_BLOCKED_ACTIONS = [
+  "Account abuse.",
+  "Credential stuffing.",
+  "Auth bypass.",
+  "Paywall bypass.",
+  "Impersonation.",
+  "Unapproved bulk scraping.",
+  "Private-module browsing or shared profile use.",
+] as const;
+const SURFER_BROWSER_ADAPTER_NO_ACTION = [
+  "No CloakBrowser install ran.",
+  "No browser opened.",
+  "No page fetched.",
+  "No profile created.",
+  "No cookies, credentials, memory, or external systems were touched.",
+] as const;
 
 function validationDecisionToTrustLevel(decision: (typeof SOURCE_VALIDATION_DECISIONS)[number]) {
   if (decision === "trusted") return "high";
@@ -72,6 +96,29 @@ function rowToSourceEvent(r: Record<string, unknown>) {
     ownerAgent: r.owner_agent == null ? null : String(r.owner_agent),
     sourceLabel: r.source_label == null ? null : String(r.source_label),
     createdAt: Number(r.created_at),
+  };
+}
+
+function rowToSurferBrowserAdapterReceipt(r: Record<string, unknown>) {
+  return {
+    id: Number(r.id),
+    adapter: String(r.adapter) as typeof SURFER_BROWSER_ADAPTERS[number],
+    targetUrl: String(r.target_url),
+    purpose: String(r.purpose),
+    profileId: String(r.profile_id),
+    approvalId: r.approval_id == null ? null : Number(r.approval_id),
+    status: String(r.status),
+    ownerAgent: String(r.owner_agent),
+    canRun: Boolean(r.can_run),
+    installConfigured: Boolean(r.install_configured),
+    opensBrowser: Boolean(r.opens_browser),
+    writesMemory: Boolean(r.writes_memory),
+    writesExternalSystems: Boolean(r.writes_external_systems),
+    allowedActions: JSON.parse(String(r.allowed_actions_json)) as string[],
+    blockedActions: JSON.parse(String(r.blocked_actions_json)) as string[],
+    noActionTaken: String(r.no_action_taken).split("\n").filter(Boolean),
+    createdAt: Number(r.created_at),
+    updatedAt: Number(r.updated_at),
   };
 }
 
@@ -234,20 +281,10 @@ function surferBrowserAdapterContract() {
     ],
     cloakPolicy: {
       allowed: [
-        "Approved public-source research.",
-        "Owned or explicitly approved login sessions.",
-        "Fingerprint and rendering reliability comparison.",
-        "Human CAPTCHA handoff where the user decides.",
-        "Isolated profile testing with receipts.",
+        ...CLOAK_ALLOWED_ACTIONS,
       ],
       blocked: [
-        "Account abuse.",
-        "Credential stuffing.",
-        "Auth bypass.",
-        "Paywall bypass.",
-        "Impersonation.",
-        "Unapproved bulk scraping.",
-        "Private-module browsing or shared profile use.",
+        ...CLOAK_BLOCKED_ACTIONS,
       ],
       receiptFields: [
         "adapter",
@@ -271,11 +308,7 @@ function surferBrowserAdapterContract() {
     writesExternalSystems: false,
     nextAction: "Create the adapter receipt table and approval preview before installing or launching any browser adapter.",
     noActionTaken: [
-      "No CloakBrowser install ran.",
-      "No browser opened.",
-      "No page fetched.",
-      "No profile created.",
-      "No cookies, credentials, memory, or external systems were touched.",
+      ...SURFER_BROWSER_ADAPTER_NO_ACTION,
     ],
   };
 }
@@ -397,6 +430,20 @@ async function readSourceResearchLoopAudit() {
   };
 }
 
+async function readSurferBrowserAdapterReceipts() {
+  const db = await getCerebroDb();
+  const result = await db.execute({
+    sql: `
+      SELECT *
+      FROM surfer_browser_adapter_receipts
+      ORDER BY created_at DESC, id DESC
+      LIMIT 8
+    `,
+    args: [],
+  });
+  return result.rows.map((row) => rowToSurferBrowserAdapterReceipt(row as Record<string, unknown>));
+}
+
 export const surferRouter = router({
   panel: publicProcedure
     .input(
@@ -474,6 +521,7 @@ export const surferRouter = router({
         },
         sourceLibraryRoute: sourceLibraryRouteContract(),
         browserAdapterContract: surferBrowserAdapterContract(),
+        browserAdapterReceipts: await readSurferBrowserAdapterReceipts(),
         sourceLibraryReceipt: await readSourceLibraryReceipt(),
         sourceResearchLoopAudit: await readSourceResearchLoopAudit(),
       };
@@ -529,6 +577,107 @@ export const surferRouter = router({
           "Private/logged-in browsing requires explicit per-session approval.",
           "Saved source records and screenshots require approval.",
         ],
+      };
+    }),
+
+  createBrowserAdapterApprovalPreview: publicProcedure
+    .input(
+      z.object({
+        adapter: z.enum(SURFER_BROWSER_ADAPTERS).default("cloak_browser"),
+        targetUrl: z.string().url().max(1200),
+        purpose: z.string().min(8).max(700),
+        profileId: z.string().min(3).max(120).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const url = new URL(input.targetUrl);
+      const adapterLabel = input.adapter === "cloak_browser" ? "CloakBrowser" : input.adapter === "standard_browser" ? "Standard Browser" : "Public Fetch";
+      const profileId = input.profileId ?? `surfer-${input.adapter}-${url.hostname.replace(/[^a-z0-9-]+/gi, "-").toLowerCase()}`;
+      const preflight = await recordPermissionPreflight(db, {
+        perceptionClass: "public_browser",
+        actionClass: "browser_or_media_capture",
+        externalTarget: true,
+        sensitiveData: false,
+        requestedByAgent: "surfer",
+        targetSummary: `${adapterLabel} adapter approval preview: ${url.toString()}`,
+        additionalReasons: [
+          "Surfer browser adapter approval preview only.",
+          "This approval does not install, launch, fetch, save, or write memory.",
+          "Adapter use still needs a separate implementation and run receipt.",
+        ],
+      });
+      const approvalResult = await db.execute({
+        sql: `
+          INSERT INTO approvals (
+            task_id, action_type, target_type, target_id, requested_by_agent,
+            status, reason, context_summary, sensitive_data_flag, cost_risk,
+            permission_preflight_id
+          )
+          VALUES (NULL, 'surfer_browser_adapter_preview', 'surfer_browser_adapter_receipt', NULL, 'surfer',
+                  'pending', ?, ?, 0, ?, ?)
+          RETURNING id
+        `,
+        args: [
+          `Approve ${adapterLabel} adapter planning for ${url.hostname}. This does not run the adapter.`,
+          [
+            `Adapter: ${adapterLabel}`,
+            `Target: ${url.toString()}`,
+            `Purpose: ${input.purpose}`,
+            `Profile: ${profileId}`,
+            "No install, launch, fetch, memory write, or external write runs from this preview.",
+          ].join("\n"),
+          input.adapter === "cloak_browser" ? "restricted_browser_adapter" : "public_browser_adapter",
+          Number(preflight.row.id),
+        ],
+      });
+      const approvalId = Number(approvalResult.rows[0]?.id);
+      const receiptResult = await db.execute({
+        sql: `
+          INSERT INTO surfer_browser_adapter_receipts (
+            adapter, target_url, purpose, profile_id, approval_id, status,
+            owner_agent, can_run, install_configured, opens_browser,
+            writes_memory, writes_external_systems, allowed_actions_json,
+            blocked_actions_json, no_action_taken
+          )
+          VALUES (?, ?, ?, ?, ?, 'approval_preview',
+                  'surfer', 0, 0, 0, 0, 0, ?, ?, ?)
+          RETURNING *
+        `,
+        args: [
+          input.adapter,
+          url.toString(),
+          input.purpose,
+          profileId,
+          approvalId,
+          JSON.stringify(input.adapter === "cloak_browser" ? CLOAK_ALLOWED_ACTIONS : ["Approved public browsing with receipts."]),
+          JSON.stringify(input.adapter === "cloak_browser" ? CLOAK_BLOCKED_ACTIONS : ["No unapproved browsing.", "No memory write by default."]),
+          SURFER_BROWSER_ADAPTER_NO_ACTION.join("\n"),
+        ],
+      });
+      const receipt = rowToSurferBrowserAdapterReceipt(receiptResult.rows[0] as Record<string, unknown>);
+      await db.execute({
+        sql: "UPDATE approvals SET target_id = ? WHERE id = ?",
+        args: [receipt.id, approvalId],
+      });
+
+      return {
+        ok: true as const,
+        mode: "surfer_browser_adapter_approval_preview" as const,
+        created: true,
+        approvalId,
+        receipt: { ...receipt, approvalId },
+        canRun: false,
+        opensBrowser: false,
+        writesMemory: false,
+        writesExternalSystems: false,
+        gates: [
+          "Created one pending local Surfer browser adapter approval preview.",
+          "Recorded one local permission preflight audit row.",
+          "Recorded one local adapter receipt row.",
+          "This does not install, launch, fetch, save, browse, write memory, or write externally.",
+        ],
+        noActionTaken: [...SURFER_BROWSER_ADAPTER_NO_ACTION],
       };
     }),
 

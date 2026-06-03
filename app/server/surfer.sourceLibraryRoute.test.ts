@@ -200,4 +200,43 @@ describe("Surfer Source Library route", () => {
     expect(await countRows("approvals")).toBe(before.approvals);
     expect(await countRows("memory_entries")).toBe(before.memoryEntries);
   });
+
+  it("stages a Cloak browser adapter approval preview without installing or opening a browser", async () => {
+    const caller = createCaller();
+    const before = {
+      artifacts: await countRows("artifacts"),
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+      receipts: await countRows("surfer_browser_adapter_receipts"),
+    };
+
+    const result = await caller.surfer.createBrowserAdapterApprovalPreview({
+      adapter: "cloak_browser",
+      targetUrl: `https://docs.example.com/surfer-cloak-${Date.now()}`,
+      purpose: "Approved public-source research reliability test.",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.mode).toBe("surfer_browser_adapter_approval_preview");
+    expect(result.receipt.adapter).toBe("cloak_browser");
+    expect(result.receipt.ownerAgent).toBe("surfer");
+    expect(result.receipt.status).toBe("approval_preview");
+    expect(result.receipt.approvalId).toBe(result.approvalId);
+    expect(result.receipt.canRun).toBe(false);
+    expect(result.receipt.installConfigured).toBe(false);
+    expect(result.receipt.opensBrowser).toBe(false);
+    expect(result.receipt.writesMemory).toBe(false);
+    expect(result.receipt.writesExternalSystems).toBe(false);
+    expect(result.receipt.allowedActions.join(" ")).toContain("Approved public-source research");
+    expect(result.receipt.blockedActions.join(" ")).toContain("Auth bypass");
+    expect(result.noActionTaken.join(" ")).toContain("No CloakBrowser install ran");
+    expect(result.gates.join(" ")).toContain("does not install");
+
+    const panel = await caller.surfer.panel();
+    expect(panel.browserAdapterReceipts.map((receipt) => receipt.id)).toContain(result.receipt.id);
+    expect(await countRows("surfer_browser_adapter_receipts")).toBe(before.receipts + 1);
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
 });
