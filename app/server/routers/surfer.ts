@@ -100,6 +100,28 @@ function rowToSourceEvent(r: Record<string, unknown>) {
 }
 
 function rowToSurferBrowserAdapterReceipt(r: Record<string, unknown>) {
+  const approvalStatus = r.approval_status == null ? null : String(r.approval_status);
+  const receiptStatus = String(r.status);
+  const status =
+    approvalStatus === "approved"
+      ? "approved_adapter_not_built"
+      : approvalStatus === "pending"
+        ? "approval_waiting"
+        : approvalStatus === "rejected"
+          ? "approval_rejected"
+          : approvalStatus === "cancelled"
+            ? "approval_cancelled"
+            : receiptStatus;
+  const readinessLabel =
+    status === "approved_adapter_not_built"
+      ? "Approved. Adapter implementation missing."
+      : status === "approval_waiting"
+        ? "Approval waiting."
+        : status === "approval_rejected"
+          ? "Approval rejected."
+          : status === "approval_cancelled"
+            ? "Approval cancelled."
+            : "Approval preview staged.";
   return {
     id: Number(r.id),
     adapter: String(r.adapter) as typeof SURFER_BROWSER_ADAPTERS[number],
@@ -107,7 +129,12 @@ function rowToSurferBrowserAdapterReceipt(r: Record<string, unknown>) {
     purpose: String(r.purpose),
     profileId: String(r.profile_id),
     approvalId: r.approval_id == null ? null : Number(r.approval_id),
-    status: String(r.status),
+    approvalStatus,
+    approvalDecidedAt: r.approval_decided_at == null ? null : Number(r.approval_decided_at),
+    status,
+    receiptStatus,
+    readinessLabel,
+    implementationPresent: false,
     ownerAgent: String(r.owner_agent),
     canRun: Boolean(r.can_run),
     installConfigured: Boolean(r.install_configured),
@@ -434,9 +461,12 @@ async function readSurferBrowserAdapterReceipts() {
   const db = await getCerebroDb();
   const result = await db.execute({
     sql: `
-      SELECT *
-      FROM surfer_browser_adapter_receipts
-      ORDER BY created_at DESC, id DESC
+      SELECT sbar.*,
+             a.status AS approval_status,
+             a.decided_at AS approval_decided_at
+      FROM surfer_browser_adapter_receipts sbar
+      LEFT JOIN approvals a ON a.id = sbar.approval_id
+      ORDER BY sbar.created_at DESC, sbar.id DESC
       LIMIT 8
     `,
     args: [],

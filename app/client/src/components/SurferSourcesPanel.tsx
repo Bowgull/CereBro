@@ -497,8 +497,12 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                           <div className="mt-1 text-[10px] leading-snug truncate" title={receipt.targetUrl} style={{ color: C.textMuted }}>
                             {receipt.targetUrl}
                           </div>
+                          <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
+                            {receipt.readinessLabel}
+                          </div>
                           <div className="mt-1 flex flex-wrap gap-1">
                             <MiniBadge label={receipt.canRun ? "can run" : "no run"} tone={receipt.canRun ? C.danger : C.success} />
+                            <MiniBadge label={receipt.implementationPresent ? "built" : "not built"} tone={receipt.implementationPresent ? C.warning : C.success} />
                             <MiniBadge label={receipt.opensBrowser ? "opens browser" : "no browser"} tone={receipt.opensBrowser ? C.danger : C.success} />
                             <MiniBadge label={receipt.writesMemory ? "memory write" : "no memory"} tone={receipt.writesMemory ? C.danger : C.success} />
                           </div>

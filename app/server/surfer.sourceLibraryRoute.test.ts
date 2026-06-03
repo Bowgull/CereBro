@@ -243,6 +243,23 @@ describe("Surfer Source Library route", () => {
     expect(approvals.summary.surfer).toBeGreaterThanOrEqual(1);
     expect(approvals.items.find((item) => item.id === result.approvalId)?.origin).toBe("surfer");
     expect(approvals.items.find((item) => item.id === result.approvalId)?.targetLabel ?? "").toContain("cloak_browser");
+
+    await caller.approvals.decide({
+      id: result.approvalId,
+      decision: "approved",
+      reason: "Adapter planning approved. Do not run until implementation exists.",
+    });
+    const approvedPanel = await caller.surfer.panel();
+    const approvedReceipt = approvedPanel.browserAdapterReceipts.find((receipt) => receipt.id === result.receipt.id);
+    expect(approvedReceipt?.approvalStatus).toBe("approved");
+    expect(approvedReceipt?.status).toBe("approved_adapter_not_built");
+    expect(approvedReceipt?.readinessLabel).toBe("Approved. Adapter implementation missing.");
+    expect(approvedReceipt?.implementationPresent).toBe(false);
+    expect(approvedReceipt?.canRun).toBe(false);
+    expect(approvedReceipt?.opensBrowser).toBe(false);
+    expect(approvedReceipt?.writesMemory).toBe(false);
+    expect(approvedReceipt?.writesExternalSystems).toBe(false);
+
     expect(await countRows("surfer_browser_adapter_receipts")).toBe(before.receipts + 1);
     expect(await countRows("approvals")).toBe(before.approvals + 1);
     expect(await countRows("artifacts")).toBe(before.artifacts);
