@@ -37302,3 +37302,144 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/components/TerminalLabPanel.tsx, app/server/routers/terminalLab.ts, app/server/terminalLabDiagnosticDrafts.test.ts, app/server/terminalLabCopyModel.test.ts, app/server/routers/execution.ts, app/client/src/components/WorkbenchPanel.tsx, and app/server/routers/workbench.ts first. Continue in CereBro Prime mode. Terminal Lab diagnostic drafts now stay runner-compatible for package failures, port conflicts, and permission-denied outside paths. Next slice should move to Workbench receipt-body hardening unless a higher-priority queue item is found. Do not add dependencies, proxies, scraping, provider calls, installs, downloads, credential handling, fake thumbnails/progress, fake source discovery, service session restore, fake Files behavior, git-write runner behavior, or Raven paths.
 ```
+
+## 2026-06-03 2000 NDT - Raven Airlock, Surfer Basement, Cortana Council
+
+Completion:
+
+- Overall: 61%
+- Frontend visible loop: Browser and Keep navigation corrected for lower
+  machinery exposure.
+- Backend/runtime: Raven public router removed, Surfer adapter contract and
+  approval receipts added, approval decisions read back into Surfer status.
+- Foundation/docs/planning: low-machinery UI law updated in repo and Obsidian.
+- Knowledge/storage/source: Obsidian snapshot appended.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Airlocked Raven from public CereBro:
+  - removed public Raven router wiring and sealed launcher path from core UI.
+  - removed private lane exposure from model tools and public schema creation.
+  - added `privateModuleAirlock` guard surface.
+- Added Surfer browser adapter contract:
+  - `public_fetch`, `standard_browser`, and `cloak_browser` are now modeled.
+  - Cloak is a restricted Surfer candidate, not a study-only reference.
+  - allowed and blocked actions are explicit.
+- Added Surfer adapter approval preview receipts:
+  - approval preview creates a Spock-gated local approval and receipt.
+  - preview does not install, launch, browse, fetch, save memory, or write
+    external systems.
+  - Surfer approvals route into the approval queue under origin `surfer`.
+- Hid Surfer adapter machinery:
+  - Cloak preview stays primary.
+  - adapter details, policy, and receipts are behind disclosure controls.
+  - low-machinery UI law now says receipts, gates, adapters, and profile state
+    stay behind Details, Why, Audit, History, or Basement.
+- Added adapter readiness readback:
+  - approved Cloak preview now reads as approved but unavailable.
+  - user-facing copy in receipt detail says Surfer still cannot use it to open
+    pages.
+  - implementation remains absent and `canRun` remains false.
+- Moved Surfer machinery into Basement:
+  - Browser no longer shows Sources.
+  - Keep quick actions no longer expose Sources.
+  - Basement has a Surfer card and Surfer surface.
+  - Surfer panel title is now `Surfer Spellbook`.
+- Reframed Keep coordination as Cortana Council:
+  - right context rail says `Cortana Council`.
+  - route chips now read as table seats, with `Cortana host`.
+  - command bar preview says `Council Table`.
+  - Aang remains intake. Cortana owns the coordination surface.
+
+Commits in this checkpoint:
+
+- `06c3837` Airlock private module from public CereBro
+- `17dd7e6` Add Surfer browser adapter contract
+- `2af3328` Add Surfer adapter approval receipts
+- `0fa6bbb` Hide Surfer adapter machinery
+- `292767c` Show Surfer adapter readiness
+- `e95ee5c` Move Surfer machinery to Basement
+- `bce01ae` Frame Keep routing as Cortana Council
+
+Files touched in this checkpoint:
+
+- `app/server/routers/raven.ts`
+- `app/server/routers.ts`
+- `app/server/privateModuleAirlock.ts`
+- `app/server/routers/surfer.ts`
+- `app/server/routers/approvals.ts`
+- `app/server/cerebroDb.ts`
+- `app/server/surfer.sourceLibraryRoute.test.ts`
+- `app/client/src/lib/ravenSealedLauncher.ts`
+- `app/client/src/components/SurferSourcesPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/homeShellCopyModel.ts`
+- `app/client/src/lib/routeActionModel.ts`
+- `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md`
+- `CEREBRO_ANTI_DRIFT_LAW.md`
+- Obsidian:
+  `20_Knowledge/Playbooks/Low Machinery Software Design Law.md`
+  `90_Archive/CereBro Session History/snapshots/2026-06-03 2000 CereBro Session Handoff - raven-airlock-surfer-basement-council.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `pnpm --dir app exec vitest run server/surfer.sourceLibraryRoute.test.ts`
+  passed.
+- `pnpm --dir app run check` passed after the latest UI placement changes.
+- `pnpm --dir app run build` passed after the latest UI placement changes.
+- In-app Browser live proof at `http://localhost:3000/`:
+  - Browser zone no longer shows Sources.
+  - Basement shows Surfer.
+  - Keep context panel shows `Cortana Council`, `Table`, and `Cortana host`.
+- Production Raven boundary grep passed clean:
+  `rg -n "raven" app/dist app/client app/server -g '!**/*.test.ts' -g '!**/*.test.tsx' -g '!**/*.spec.ts' -g '!**/*.spec.tsx'`
+  returned no matches.
+
+Mockup fidelity:
+
+- Target used: current live CereBro shell, not a separate mockup.
+- Screenshot path: no screenshot captured. Verification used in-app Browser DOM
+  reads against the live app.
+- Matched elements:
+  - main Browser surface is cleaner.
+  - Surfer machinery is under Basement.
+  - Cortana Council is the visible coordination frame.
+- Deviations:
+  - The actual animated council-table scene is not built yet. This pass fixed
+    nav, copy, and state framing only.
+  - Surfer still has a detailed Basement panel. That is acceptable because
+    Basement is the spellbook/settings layer.
+
+Drift check:
+
+- On path. This pass reduced primary-surface machinery and corrected the
+  Aang/Cortana mental model.
+- No browser adapter execution was added.
+- No Cloak install, launch, fetch, login handling, CAPTCHA handling, evasion,
+  scraping abuse, external write, provider call, paid service, trial, card-backed
+  service, or Raven data path was added.
+- Raven remains sealed out of public CereBro production surfaces.
+
+Known risks:
+
+- Cloak is approved only as a planning and receipt path. It cannot open pages.
+- Surfer still needs a real run contract before any adapter execution exists.
+- Cortana Council is still mostly a UI frame. The backend route record exists,
+  but agent-to-agent runtime seating is not live execution.
+- Security/Shield appears in both Browser and Basement navigation today. That
+  may need a later placement decision.
+
+Storage impact:
+
+- Schema change: `surfer_browser_adapter_receipts` table added.
+- No Raven storage or memory path added.
+- One Obsidian handoff snapshot and one index link appended.
+- Branch will be pushed to GitHub after this handoff commit.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/SurferSourcesPanel.tsx, app/server/routers/surfer.ts, app/server/routers/approvals.ts, app/server/cerebroDb.ts, and app/server/surfer.sourceLibraryRoute.test.ts first. Continue in CereBro Prime mode on branch codex/raven-airlock. Raven is airlocked from public CereBro. Surfer machinery has moved to Basement as the spellbook/settings layer. Keep coordination is framed as Cortana Council, with Aang as intake and Cortana as host. Cloak has contract and approval-preview receipts only. It cannot open pages yet. Next slice should build the Cortana Council active-work read for Surfer and Spock, or add the Surfer Cloak run contract without execution. Do not add adapter execution, installs, downloads, proxies, CAPTCHA bypass, login bypass, evasion, scraping abuse, provider calls, paid services, credential handling, fake source discovery, fake browser progress, or Raven paths.
+```
