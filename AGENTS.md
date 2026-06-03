@@ -18,6 +18,9 @@ CereBro V1 is a cloud-backed, local-controlled, harness-first personal AI operat
 - `.Codex/launch.json` — preview-tool config for `pnpm dev` on port 3002.
 - `mockups/` — early HTML mockups. `keep-v2.html` and `keep-v3.html` are reference only; the live app supersedes them. `mockups/shell.html` predates the project and has scope violations (Declyne/Raven references) — do not use as reference.
 - `CEREBRO_MASTER_BUILD_PLAN.md` — current 15-session master plan folding backend, model routing, storage, learning, creative studio, Hedwig, and Keep UX.
+- Obsidian `10_Projects/CereBro/CereBro Finish Path.md` — canonical active
+  finish-path checklist. Read it at session start. Update its checkboxes and
+  progress log at session end.
 - `CEREBRO_SESSION_HANDOFF.md` — live handoff file. Read first and update at the end of every session. After updating it, save a dated snapshot into the configured Obsidian vault under `90_Archive/CereBro Session History/snapshots/` and update `90_Archive/CereBro Session History/CereBro Session History.md`.
 - `CereBro_V1_*` and `CereBro_Final_Implementation_Pack/` (root) — locked planning docs. `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md` is the canonical visual spec.
 - `.nvmrc` pins Node 22 LTS.
@@ -163,7 +166,9 @@ context is getting heavy, or the block is complete. The user explicitly called
 out that returning every 2-3 minutes just to say "keep going" creates pointless
 friction and burns attention.
 
-Every session closes by updating `CEREBRO_SESSION_HANDOFF.md` with what changed, files touched, tests/checks run, known risks, storage impact, and the next-session starter prompt. Then write a unique Obsidian snapshot of that handoff to `90_Archive/CereBro Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md` and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md`. Never overwrite or replace an earlier handoff snapshot/index entry. This append-only Obsidian handoff archive is now user-approved standing behavior for CereBro build sessions.
+Every session starts by reading Obsidian `10_Projects/CereBro/CereBro Finish Path.md` and the latest `CEREBRO_SESSION_HANDOFF.md`. The finish path is canonical. Do not mirror the whole roadmap in the repo.
+
+Every session closes by updating the finish path checkboxes and appending one dated progress entry, then updating `CEREBRO_SESSION_HANDOFF.md` with what changed, files touched, tests/checks run, known risks, storage impact, and the next-session starter prompt. Then write a unique Obsidian snapshot of that handoff to `90_Archive/CereBro Session History/snapshots/<YYYY-MM-DD HHMM CereBro Session Handoff - short-slice-name>.md` and append a new link to `90_Archive/CereBro Session History/CereBro Session History.md`. Never overwrite or replace an earlier handoff snapshot/index entry. This append-only Obsidian handoff archive is now user-approved standing behavior for CereBro build sessions.
 
 ## Scope discipline
 

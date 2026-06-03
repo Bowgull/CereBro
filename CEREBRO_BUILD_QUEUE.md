@@ -1,11 +1,19 @@
 # CereBro Build Queue
 
-Last updated: 2026-05-23 1525 ADT
+Last updated: 2026-06-03 2009 NDT
 
 This file is CereBro Prime's active queue.
 
 Workers may read this file. Workers do not edit it unless the lead assigns that
 specific job.
+
+Canonical finish path:
+
+- Obsidian `10_Projects/CereBro/CereBro Finish Path.md` is the active
+  Browser-first roadmap and ritual checklist.
+- Read it before assigning a slice.
+- Update its checkboxes and progress log during handoff.
+- Do not mirror the whole roadmap in this repo file.
 
 ## Current Build Mode
 
@@ -31,7 +39,7 @@ cross-lane conflict, or dirty-worktree ambiguity.
 Build in this order:
 
 1. Redesign contract and shell foundation.
-2. Handoff integrity.
+2. Handoff integrity and finish-path alignment.
 3. Keep-first visible loop.
 4. Project Lab as map.
 5. Terminal Lab as Aang's build-teaching lane.
@@ -68,6 +76,19 @@ Stop and ask when:
 - context bloat makes a summary and clear better than continuing
 
 ## Now
+
+### 2026-06-03 Browser-First Finish Path
+
+- Obsidian `10_Projects/CereBro/CereBro Finish Path.md` is canonical.
+- Current product priority is Browser where safe.
+- Browser V1 target is command browser, not a fake full Chrome/Firefox
+  replacement.
+- Surfer/Cloak machinery stays in Basement.
+- Cortana Council owns active agent coordination.
+- Ritual handoffs must check this note, update completed items, append progress,
+  and choose the next slice from its queue.
+- Next actual build slice should serve the Browser-first queue unless a harder
+  gate appears.
 
 ### 2026-05-23 No-Billing Power Pivot
 

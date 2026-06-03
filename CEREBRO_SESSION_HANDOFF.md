@@ -37443,3 +37443,84 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, DESIGN.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_UI_REDESIGN_CONTRACT.md, CEREBRO_ANTI_DRIFT_LAW.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_UI_TASTE_AUDIT.md, app/client/src/pages/Home.tsx, app/client/src/components/SurferSourcesPanel.tsx, app/server/routers/surfer.ts, app/server/routers/approvals.ts, app/server/cerebroDb.ts, and app/server/surfer.sourceLibraryRoute.test.ts first. Continue in CereBro Prime mode on branch codex/raven-airlock. Raven is airlocked from public CereBro. Surfer machinery has moved to Basement as the spellbook/settings layer. Keep coordination is framed as Cortana Council, with Aang as intake and Cortana as host. Cloak has contract and approval-preview receipts only. It cannot open pages yet. Next slice should build the Cortana Council active-work read for Surfer and Spock, or add the Surfer Cloak run contract without execution. Do not add adapter execution, installs, downloads, proxies, CAPTCHA bypass, login bypass, evasion, scraping abuse, provider calls, paid services, credential handling, fake source discovery, fake browser progress, or Raven paths.
 ```
+
+## 2026-06-03 2010 NDT - Finish Path Roadmap Note
+
+Completion:
+
+- Overall: 62%
+- Frontend visible loop: unchanged.
+- Backend/runtime: unchanged.
+- Foundation/docs/planning: canonical Browser-first finish path created in
+  Obsidian and linked from repo ritual docs.
+- Knowledge/storage/source: Obsidian project bridge, finish path, session
+  snapshot, and session index updated.
+- Creative/freelance/watch: unchanged.
+
+What changed:
+
+- Added canonical Obsidian roadmap:
+  `10_Projects/CereBro/CereBro Finish Path.md`.
+- Locked the current Browser target as command browser, not a fake full
+  Chrome/Firefox replacement.
+- Added actionable checklist sections:
+  - Current North Star
+  - What Is Done
+  - What Is Left
+  - Browser-First Roadmap
+  - Worker Rules
+  - Ritual Handoff Checklist
+  - Next Slice Queue
+  - Session Progress Log
+- Updated the CereBro project bridge to link the finish path note.
+- Updated `AGENTS.md` so sessions start by reading the finish path and end by
+  updating its checklist/progress log.
+- Updated `CEREBRO_BUILD_QUEUE.md` to point workers and Prime at the Obsidian
+  finish path without mirroring the full roadmap in the repo.
+
+Files touched in this slice:
+
+- `AGENTS.md`
+- `CEREBRO_BUILD_QUEUE.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian:
+  `10_Projects/CereBro/CereBro Finish Path.md`
+  `10_Projects/CereBro/CereBro.md`
+  `90_Archive/CereBro Session History/snapshots/2026-06-03 2010 CereBro Session Handoff - finish-path-roadmap-note.md`
+  and `90_Archive/CereBro Session History/CereBro Session History.md`
+
+Checks run:
+
+- `git diff --check` passed.
+- `pnpm --dir app run check` passed.
+- No browser screenshot was needed. This was a documentation and ritual slice.
+
+Drift check:
+
+- On path. This pass makes the Browser-first finish path durable and gives
+  ritual handoffs a canonical checklist.
+- No primary UI surface was added.
+- No browser execution, adapter execution, install, download, paid service,
+  credential handling, external browsing, external write, or Raven path was
+  added.
+
+Known risks:
+
+- The roadmap is canonical in Obsidian only, so repo-only workers must be given
+  the path explicitly.
+- The next implementation slice still needs to update the finish path checklist
+  as work completes.
+
+Storage impact:
+
+- No schema change.
+- No DB writes.
+- One Obsidian roadmap note created.
+- One Obsidian project bridge updated.
+- One Obsidian handoff snapshot and one index link appended.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_SESSION_HANDOFF.md, and Obsidian 10_Projects/CereBro/CereBro Finish Path.md first. Continue in CereBro Prime mode on branch codex/raven-airlock. The finish path note is canonical and Browser-first. Browser V1 target is command browser, not a fake full Chrome/Firefox replacement. Surfer/Cloak machinery stays in Basement. Cortana Council owns active agent coordination. Next slice should come from the finish path queue, preferably Browser frame-failure fallback or Browser manual open copy reduction. Do not add stealth, CAPTCHA bypass, login bypass, scraping abuse, proxy rotation, hidden automation, installs, paid services, external credentials, fake browser success, or Raven paths.
+```
