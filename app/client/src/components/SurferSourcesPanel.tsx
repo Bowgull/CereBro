@@ -389,6 +389,55 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
               </section>
             )}
 
+            {data?.browserAdapterContract && (
+              <section className="rounded p-1.5" aria-label="Surfer browser adapter contract" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                <SectionTitle title="Browser Adapters" detail={data.browserAdapterContract.mode.replace(/_/g, " ")} />
+                <div className="mt-2 grid gap-1.5">
+                  {data.browserAdapterContract.adapters.map((adapter) => (
+                    <div key={adapter.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                          {adapter.label}
+                        </div>
+                        <MiniBadge
+                          label={adapter.status}
+                          tone={adapter.status === "available" ? C.success : adapter.status === "candidate" ? C.accent : C.textMuted}
+                        />
+                      </div>
+                      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
+                        {adapter.role}
+                      </div>
+                      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                        {adapter.profileIsolation}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <MiniBadge label={data.browserAdapterContract.canRunNow ? "can run" : "no run"} tone={data.browserAdapterContract.canRunNow ? C.danger : C.success} />
+                  <MiniBadge label={data.browserAdapterContract.installConfigured ? "install configured" : "not installed"} tone={data.browserAdapterContract.installConfigured ? C.warning : C.textMuted} />
+                  <MiniBadge label={data.browserAdapterContract.opensBrowserFromContract ? "opens browser" : "no browser"} tone={data.browserAdapterContract.opensBrowserFromContract ? C.danger : C.success} />
+                  <MiniBadge label={data.browserAdapterContract.writesMemoryFromContract ? "memory write" : "no memory"} tone={data.browserAdapterContract.writesMemoryFromContract ? C.danger : C.success} />
+                </div>
+                <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                    Cloak Policy
+                  </summary>
+                  <div className="mt-1.5 grid gap-1">
+                    {data.browserAdapterContract.cloakPolicy.allowed.slice(0, 5).map((item) => (
+                      <RailLine key={`allowed-${item}`} marker="allow" text={item} tone={C.success} />
+                    ))}
+                    {data.browserAdapterContract.cloakPolicy.blocked.slice(0, 7).map((item) => (
+                      <RailLine key={`blocked-${item}`} marker="block" text={item} tone={C.warning} />
+                    ))}
+                  </div>
+                </details>
+                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  {data.browserAdapterContract.nextAction}
+                </div>
+              </section>
+            )}
+
             {data?.sourceLibraryRoute && (
               <section className="rounded p-1.5" aria-label="Source Library route" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
                 <SectionTitle title="Source Route" detail={data.sourceLibraryRoute.mode.replace(/_/g, " ")} />

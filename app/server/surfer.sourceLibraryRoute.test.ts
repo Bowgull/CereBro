@@ -79,6 +79,19 @@ describe("Surfer Source Library route", () => {
     expect(panel.sourceResearchLoopAudit.canWriteMemoryFromAudit).toBe(false);
     expect(panel.sourceResearchLoopAudit.retrievalAutomationEnabled).toBe(false);
     expect(panel.sourceResearchLoopAudit.gates.join(" ")).toContain("does not browse");
+    expect(panel.browserAdapterContract.mode).toBe("read_only_contract");
+    expect(panel.browserAdapterContract.ownerAgent).toBe("surfer");
+    expect(panel.browserAdapterContract.defaultAdapter).toBe("public_fetch");
+    expect(panel.browserAdapterContract.adapters.map((adapter) => adapter.id)).toContain("cloak_browser");
+    expect(panel.browserAdapterContract.adapters.find((adapter) => adapter.id === "cloak_browser")?.status).toBe("candidate");
+    expect(panel.browserAdapterContract.cloakPolicy.allowed.join(" ")).toContain("Approved public-source research");
+    expect(panel.browserAdapterContract.cloakPolicy.blocked.join(" ")).toContain("Auth bypass");
+    expect(panel.browserAdapterContract.canRunNow).toBe(false);
+    expect(panel.browserAdapterContract.installConfigured).toBe(false);
+    expect(panel.browserAdapterContract.opensBrowserFromContract).toBe(false);
+    expect(panel.browserAdapterContract.writesMemoryFromContract).toBe(false);
+    expect(panel.browserAdapterContract.writesExternalSystems).toBe(false);
+    expect(panel.browserAdapterContract.noActionTaken.join(" ")).toContain("No CloakBrowser install ran");
 
     expect(await countRows("artifacts")).toBe(before.artifacts);
     expect(await countRows("approvals")).toBe(before.approvals);

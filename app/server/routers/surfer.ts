@@ -13,6 +13,7 @@ import { publicProcedure, router } from "../_core/trpc";
 const TRUST_LEVELS = ["official", "primary", "high", "medium", "low", "unknown"] as const;
 const SOURCE_VALIDATION_DECISIONS = ["trusted", "needs_review", "rejected"] as const;
 const SOURCE_VALIDATION_REVIEWERS = ["oak", "spock"] as const;
+const SURFER_BROWSER_ADAPTERS = ["public_fetch", "standard_browser", "cloak_browser"] as const;
 
 function validationDecisionToTrustLevel(decision: (typeof SOURCE_VALIDATION_DECISIONS)[number]) {
   if (decision === "trusted") return "high";
@@ -197,6 +198,85 @@ function sourceLibraryRouteContract() {
     retrievalMetadataFields: OBSIDIAN_RETRIEVAL_METADATA_FIELDS,
     writesExternalSystems: false,
     approvalGate: "Source Library saves can create local records. Obsidian, Notion, Drive, browser, and long-term memory writes still need explicit approval.",
+  };
+}
+
+function surferBrowserAdapterContract() {
+  return {
+    mode: "read_only_contract" as const,
+    ownerAgent: "surfer" as const,
+    defaultAdapter: "public_fetch" as const,
+    adapters: [
+      {
+        id: "public_fetch" as const,
+        label: "Public Fetch",
+        status: "available" as const,
+        role: "Default public URL metadata and static page read path.",
+        profileIsolation: "No browser profile. HTTP fetch only.",
+        approvalRequired: "Approved public URL ingest.",
+      },
+      {
+        id: "standard_browser" as const,
+        label: "Standard Browser",
+        status: "planned" as const,
+        role: "Normal human browser session for pages that need real rendering.",
+        profileIsolation: "Dedicated Surfer public profile. Separate from the daily CereBro browser.",
+        approvalRequired: "Per-session browser approval.",
+      },
+      {
+        id: "cloak_browser" as const,
+        label: "CloakBrowser",
+        status: "candidate" as const,
+        role: "Restricted Surfer adapter for approved public-source browsing when normal automation is blocked or brittle.",
+        profileIsolation: "Dedicated Cloak profile per target or project. Never shared with daily browsing, memory, or private modules.",
+        approvalRequired: "Explicit target, purpose, profile, and receipt approval before any run.",
+      },
+    ],
+    cloakPolicy: {
+      allowed: [
+        "Approved public-source research.",
+        "Owned or explicitly approved login sessions.",
+        "Fingerprint and rendering reliability comparison.",
+        "Human CAPTCHA handoff where the user decides.",
+        "Isolated profile testing with receipts.",
+      ],
+      blocked: [
+        "Account abuse.",
+        "Credential stuffing.",
+        "Auth bypass.",
+        "Paywall bypass.",
+        "Impersonation.",
+        "Unapproved bulk scraping.",
+        "Private-module browsing or shared profile use.",
+      ],
+      receiptFields: [
+        "adapter",
+        "targetUrl",
+        "purpose",
+        "profileId",
+        "approvalId",
+        "openedAt",
+        "closedAt",
+        "pageTitle",
+        "sourceIds",
+        "extractedFields",
+        "blockedActions",
+        "noActionTaken",
+      ],
+    },
+    canRunNow: false,
+    installConfigured: false,
+    opensBrowserFromContract: false,
+    writesMemoryFromContract: false,
+    writesExternalSystems: false,
+    nextAction: "Create the adapter receipt table and approval preview before installing or launching any browser adapter.",
+    noActionTaken: [
+      "No CloakBrowser install ran.",
+      "No browser opened.",
+      "No page fetched.",
+      "No profile created.",
+      "No cookies, credentials, memory, or external systems were touched.",
+    ],
   };
 }
 
@@ -393,6 +473,7 @@ export const surferRouter = router({
           limit: input?.limit ?? 25,
         },
         sourceLibraryRoute: sourceLibraryRouteContract(),
+        browserAdapterContract: surferBrowserAdapterContract(),
         sourceLibraryReceipt: await readSourceLibraryReceipt(),
         sourceResearchLoopAudit: await readSourceResearchLoopAudit(),
       };
