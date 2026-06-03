@@ -5,7 +5,7 @@ import { publicProcedure, router } from "../_core/trpc";
 import { privateModuleApprovalAgent, privateModuleApprovalTarget } from "../privateModuleAirlock";
 
 const statusOptions = ["pending", "approved", "rejected", "cancelled"] as const;
-const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "browser", "model_tools", "other"] as const;
+const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "surfer", "browser", "model_tools", "other"] as const;
 const groupOptions = ["origin", "project", "action_type", "status", "risk"] as const;
 const preflightDecisions = ["allowed_local", "proposal_only", "approval_required", "blocked_by_hard_gate"] as const;
 const perceptionClasses = ["explicit_context", "local_files", "terminal_logs", "workbench_media", "public_browser"] as const;
@@ -188,6 +188,7 @@ function originForApproval(input: {
   requestedByAgent: string | null;
 }) {
   if (input.requestedByAgent === "hedwig") return "hedwig";
+  if (input.requestedByAgent === "surfer" || input.targetType === "surfer_browser_adapter_receipt" || input.actionType.startsWith("surfer_")) return "surfer";
   if (input.targetType === "runtime_route_record" || input.actionType.startsWith("runtime_")) return "runtime";
   if (input.targetType === "command_observation" || input.actionType.startsWith("terminal_")) return "terminal";
   if (input.targetType === "browser_action_proposal" || input.actionType.includes("browser")) return "browser";
@@ -263,8 +264,10 @@ function applyOriginWhere(origin: (typeof originOptions)[number], where: string[
     where.push("(a.target_type = 'command_observation' OR a.action_type LIKE 'terminal_%')");
   } else if (origin === "source") {
     where.push("(a.target_type = 'source_event' OR a.action_type LIKE '%source%')");
+  } else if (origin === "surfer") {
+    where.push("(a.requested_by_agent = 'surfer' OR a.target_type = 'surfer_browser_adapter_receipt' OR a.action_type LIKE 'surfer_%')");
   } else if (origin === "browser") {
-    where.push("(a.target_type = 'browser_action_proposal' OR a.action_type LIKE '%browser%')");
+    where.push("(a.target_type = 'browser_action_proposal' OR (a.action_type LIKE '%browser%' AND a.action_type NOT LIKE 'surfer_%'))");
   } else if (origin === "model_tools") {
     where.push("(a.target_type IN ('model_tool_capability', 'model_tool_ollama_status_check') OR a.action_type LIKE '%model%' OR a.action_type LIKE '%ollama%')");
   } else if (origin === "project_lab") {
@@ -280,6 +283,9 @@ function applyOriginWhere(origin: (typeof originOptions)[number], where: string[
       AND a.action_type NOT LIKE 'terminal_%'
       AND COALESCE(a.target_type, '') != 'source_event'
       AND a.action_type NOT LIKE '%source%'
+      AND a.requested_by_agent != 'surfer'
+      AND COALESCE(a.target_type, '') != 'surfer_browser_adapter_receipt'
+      AND a.action_type NOT LIKE 'surfer_%'
       AND COALESCE(a.target_type, '') != 'browser_action_proposal'
       AND a.action_type NOT LIKE '%browser%'
       AND COALESCE(a.target_type, '') NOT IN ('model_tool_capability', 'model_tool_ollama_status_check')
@@ -530,7 +536,7 @@ export const approvalsRouter = router({
             ppr.approval_required AS preflight_approval_required,
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, sbar.adapter || ': ' || sbar.target_url, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -541,6 +547,7 @@ export const approvalsRouter = router({
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
+          LEFT JOIN surfer_browser_adapter_receipts sbar ON a.target_type = 'surfer_browser_adapter_receipt' AND sbar.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
@@ -567,6 +574,7 @@ export const approvalsRouter = router({
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,
           source: items.filter((item) => item.origin === "source").length,
+          surfer: items.filter((item) => item.origin === "surfer").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
           browser: items.filter((item) => item.origin === "browser").length,
           projectLab: items.filter((item) => item.origin === "project_lab").length,
@@ -604,7 +612,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label,
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, sbar.adapter || ': ' || sbar.target_url, p.name, 'runtime_route:' || rr.id) AS target_label,
             bap.id AS browser_proposal_id,
             bap.action_label AS browser_action_label,
             bap.target AS browser_target,
@@ -625,6 +633,7 @@ export const approvalsRouter = router({
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
+          LEFT JOIN surfer_browser_adapter_receipts sbar ON a.target_type = 'surfer_browser_adapter_receipt' AND sbar.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE a.id = ?
@@ -759,7 +768,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, sbar.adapter || ': ' || sbar.target_url, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -770,6 +779,7 @@ export const approvalsRouter = router({
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
+          LEFT JOIN surfer_browser_adapter_receipts sbar ON a.target_type = 'surfer_browser_adapter_receipt' AND sbar.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
@@ -793,6 +803,7 @@ export const approvalsRouter = router({
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,
           source: items.filter((item) => item.origin === "source").length,
+          surfer: items.filter((item) => item.origin === "surfer").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
           browser: items.filter((item) => item.origin === "browser").length,
           projectLab: items.filter((item) => item.origin === "project_lab").length,
@@ -871,7 +882,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, sbar.adapter || ': ' || sbar.target_url, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -882,6 +893,7 @@ export const approvalsRouter = router({
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
+          LEFT JOIN surfer_browser_adapter_receipts sbar ON a.target_type = 'surfer_browser_adapter_receipt' AND sbar.id = a.target_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE ${where.join(" AND ")}
           ORDER BY a.created_at DESC, a.id DESC

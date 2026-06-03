@@ -407,59 +407,66 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
 
             {data?.browserAdapterContract && (
               <section className="rounded p-1.5" aria-label="Surfer browser adapter contract" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
-                <SectionTitle title="Browser Adapters" detail={data.browserAdapterContract.mode.replace(/_/g, " ")} />
+                <SectionTitle title="Cloak Preview" detail={data.browserAdapterContract.installConfigured ? "configured" : "not installed"} />
                 <form onSubmit={submitAdapterPreview} className="mt-2 space-y-1.5">
                   <Input
                     value={adapterPurpose}
                     onChange={(event) => setAdapterPurpose(event.target.value)}
-                    placeholder="Purpose for this adapter approval preview."
+                    placeholder="Why should Surfer use a stronger browser here?"
                   />
                   <Button
                     type="submit"
                     size="sm"
                     variant="secondary"
                     disabled={!url.trim() || adapterPurpose.trim().length < 8 || createAdapterPreview.isPending}
-                    title={url.trim() ? "Create a local Cloak adapter approval preview. No browser opens." : "Enter a URL above before creating a Cloak adapter preview."}
+                    title={url.trim() ? "Stage a local Cloak preview. No browser opens." : "Enter a URL above before staging a Cloak preview."}
                     aria-label="Create Surfer Cloak adapter approval preview"
                   >
-                    {createAdapterPreview.isPending ? "Staging" : "Stage Cloak Preview"}
+                    {createAdapterPreview.isPending ? "Staging" : "Stage Preview"}
                   </Button>
                   {createAdapterPreview.data && (
                     <div className="rounded p-1.5 text-[10px] leading-snug" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, color: C.textSecondary }}>
                       <div className="font-semibold" style={{ color: C.success }}>
-                        Adapter receipt #{createAdapterPreview.data.receipt.id}. Approval #{createAdapterPreview.data.approvalId}.
+                        Preview staged for {createAdapterPreview.data.receipt.targetUrl}.
                       </div>
-                      <div className="mt-1">{createAdapterPreview.data.gates.slice(0, 2).join(" ")}</div>
+                      <div className="mt-1">No browser opened. Approval #{createAdapterPreview.data.approvalId} is waiting.</div>
                     </div>
                   )}
                 </form>
-                <div className="mt-2 grid gap-1.5">
-                  {data.browserAdapterContract.adapters.map((adapter) => (
-                    <div key={adapter.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                          {adapter.label}
-                        </div>
-                        <MiniBadge
-                          label={adapter.status}
-                          tone={adapter.status === "available" ? C.success : adapter.status === "candidate" ? C.accent : C.textMuted}
-                        />
-                      </div>
-                      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
-                        {adapter.role}
-                      </div>
-                      <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
-                        {adapter.profileIsolation}
-                      </div>
-                    </div>
-                  ))}
+                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  Stage a preview when a normal source read is too brittle. This creates a local approval and receipt only.
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  <MiniBadge label={data.browserAdapterContract.canRunNow ? "can run" : "no run"} tone={data.browserAdapterContract.canRunNow ? C.danger : C.success} />
-                  <MiniBadge label={data.browserAdapterContract.installConfigured ? "install configured" : "not installed"} tone={data.browserAdapterContract.installConfigured ? C.warning : C.textMuted} />
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  <MiniBadge label={data.browserAdapterContract.canRunNow ? "can run" : "preview only"} tone={data.browserAdapterContract.canRunNow ? C.danger : C.success} />
                   <MiniBadge label={data.browserAdapterContract.opensBrowserFromContract ? "opens browser" : "no browser"} tone={data.browserAdapterContract.opensBrowserFromContract ? C.danger : C.success} />
                   <MiniBadge label={data.browserAdapterContract.writesMemoryFromContract ? "memory write" : "no memory"} tone={data.browserAdapterContract.writesMemoryFromContract ? C.danger : C.success} />
                 </div>
+                <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                    Adapter Details
+                  </summary>
+                  <div className="mt-1.5 grid gap-1.5">
+                    {data.browserAdapterContract.adapters.map((adapter) => (
+                      <div key={adapter.id} className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                            {adapter.label}
+                          </div>
+                          <MiniBadge
+                            label={adapter.status}
+                            tone={adapter.status === "available" ? C.success : adapter.status === "candidate" ? C.accent : C.textMuted}
+                          />
+                        </div>
+                        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textSecondary }}>
+                          {adapter.role}
+                        </div>
+                        <div className="mt-1 text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                          {adapter.profileIsolation}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
                 <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
                   <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                     Cloak Policy
@@ -473,33 +480,32 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
                     ))}
                   </div>
                 </details>
-                <div className="mt-2 rounded p-1.5 text-[10px] leading-snug" style={{ color: C.textMuted, background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
-                  {data.browserAdapterContract.nextAction}
-                </div>
                 {data.browserAdapterReceipts.length > 0 && (
-                  <div className="mt-2 space-y-1.5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textMuted }}>
+                  <details className="mt-2 rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
+                    <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>
                       Recent Adapter Receipts
-                    </div>
-                    {data.browserAdapterReceipts.slice(0, 3).map((receipt) => (
-                      <div key={receipt.id} className="rounded p-1.5" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}` }}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-                            {receipt.adapter.replace(/_/g, " ")}
+                    </summary>
+                    <div className="mt-1.5 space-y-1.5">
+                      {data.browserAdapterReceipts.slice(0, 3).map((receipt) => (
+                        <div key={receipt.id} className="rounded p-1.5" style={{ background: G.slab, border: `1px solid ${G.lineSoft}` }}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                              {receipt.adapter.replace(/_/g, " ")}
+                            </div>
+                            <MiniBadge label={receipt.status.replace(/_/g, " ")} tone={C.accent} />
                           </div>
-                          <MiniBadge label={receipt.status.replace(/_/g, " ")} tone={C.accent} />
+                          <div className="mt-1 text-[10px] leading-snug truncate" title={receipt.targetUrl} style={{ color: C.textMuted }}>
+                            {receipt.targetUrl}
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <MiniBadge label={receipt.canRun ? "can run" : "no run"} tone={receipt.canRun ? C.danger : C.success} />
+                            <MiniBadge label={receipt.opensBrowser ? "opens browser" : "no browser"} tone={receipt.opensBrowser ? C.danger : C.success} />
+                            <MiniBadge label={receipt.writesMemory ? "memory write" : "no memory"} tone={receipt.writesMemory ? C.danger : C.success} />
+                          </div>
                         </div>
-                        <div className="mt-1 text-[10px] leading-snug truncate" title={receipt.targetUrl} style={{ color: C.textMuted }}>
-                          {receipt.targetUrl}
-                        </div>
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          <MiniBadge label={receipt.canRun ? "can run" : "no run"} tone={receipt.canRun ? C.danger : C.success} />
-                          <MiniBadge label={receipt.opensBrowser ? "opens browser" : "no browser"} tone={receipt.opensBrowser ? C.danger : C.success} />
-                          <MiniBadge label={receipt.writesMemory ? "memory write" : "no memory"} tone={receipt.writesMemory ? C.danger : C.success} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </details>
                 )}
               </section>
             )}

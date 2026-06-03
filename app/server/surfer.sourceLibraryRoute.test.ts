@@ -234,6 +234,15 @@ describe("Surfer Source Library route", () => {
 
     const panel = await caller.surfer.panel();
     expect(panel.browserAdapterReceipts.map((receipt) => receipt.id)).toContain(result.receipt.id);
+    const approvals = await caller.approvals.queue({
+      origin: "surfer",
+      status: "pending",
+      query: "cloak",
+      limit: 10,
+    });
+    expect(approvals.summary.surfer).toBeGreaterThanOrEqual(1);
+    expect(approvals.items.find((item) => item.id === result.approvalId)?.origin).toBe("surfer");
+    expect(approvals.items.find((item) => item.id === result.approvalId)?.targetLabel ?? "").toContain("cloak_browser");
     expect(await countRows("surfer_browser_adapter_receipts")).toBe(before.receipts + 1);
     expect(await countRows("approvals")).toBe(before.approvals + 1);
     expect(await countRows("artifacts")).toBe(before.artifacts);

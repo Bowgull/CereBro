@@ -26,6 +26,8 @@ newest direct user instruction updates the rule.
 CereBro V1 is a fast, local-controlled AI OS with a beautiful low-learning-curve
 Keep. It hides machinery until requested, shows proof when needed, routes
 through Aang and Cortana, and keeps manual approval visible for risky actions.
+New UI work must preserve this as a style law: user action and object first,
+machinery behind Details, Why, Audit, History, or Basement.
 
 The build path is not:
 
