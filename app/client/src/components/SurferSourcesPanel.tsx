@@ -122,7 +122,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
-              Research
+              Surfer Spellbook
             </div>
             <Badge variant={data?.browserEnabled ? "success" : "warning"} className="uppercase">Browser {data?.browserEnabled ? "enabled" : "locked"}</Badge>
             <Badge variant="secondary" className="uppercase">{savedSources.length} sources</Badge>

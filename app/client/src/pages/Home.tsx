@@ -113,7 +113,6 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
   ],
   browser: [
     { id: "browser", label: "Browser", meta: shellCopy.surfaceMeta.browser },
-    { id: "sources", label: "Sources", meta: "Source review" },
     { id: "security", label: "Shield", meta: "Spock gates" },
   ],
   workshop: [
@@ -132,6 +131,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
   basement: [
     { id: "basement", label: "Overview", meta: "Machine map" },
     { id: "settings", label: "Settings", meta: "Storage and app config" },
+    { id: "sources", label: "Surfer", meta: "Source and browser capability book" },
     { id: "model_tools", label: "Models", meta: "Capability proposals" },
     { id: "security", label: "Security", meta: "Spock receipts" },
     { id: "automation", label: "Automation", meta: "Piccolo watchers" },
@@ -143,7 +143,7 @@ const ZONE_RECEIPTS: Record<ZoneId, string[]> = {
   browser: shellCopy.zoneMarkers.browser,
   workshop: shellCopy.zoneMarkers.workshop,
   ledger: ["tasks", "sessions", "approvals", "outputs", "memory"],
-  basement: ["permissions", "models", "storage"],
+  basement: ["permissions", "surfer", "models", "storage"],
 };
 
 const NAV_TO_ZONE = Object.entries(ZONE_SURFACES).reduce<Record<NavId, ZoneId>>(
@@ -896,12 +896,6 @@ function KeepHomeDock({
       meta: "File lane not wired",
       tone: C.textMuted,
       disabled: true,
-    },
-    {
-      label: "Sources",
-      meta: "Open source review",
-      tone: C.gold,
-      target: "sources",
     },
     {
       label: "Outputs",
@@ -2621,6 +2615,13 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       tone: C.accent,
     },
     {
+      label: "Surfer",
+      value: "Spellbook",
+      meta: "Sources, Cloak, and browser policy",
+      target: "sources" as NavId,
+      tone: C.gold,
+    },
+    {
       label: "Security",
       value: riskyReceipts > 0 ? `${riskyReceipts} risk` : latestRisk,
       meta: `${securityRows.length} Spock receipt${securityRows.length === 1 ? "" : "s"}`,
@@ -2655,7 +2656,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4" aria-label="Basement configuration map">
+        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-5" aria-label="Basement configuration map">
           {cards.map((card) => (
             <Button
               key={card.label}

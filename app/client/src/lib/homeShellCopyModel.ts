@@ -10,7 +10,7 @@ export function homeShellCopy() {
       terminal: "Command teaching",
     },
     zoneMarkers: {
-      browser: ["tabs", "watch", "sources"],
+      browser: ["tabs", "watch", "manual"],
       workshop: ["bodies", "tools", "validation"],
     },
     zoneMarkerLabel: "surface markers",
@@ -30,6 +30,6 @@ export function homeShellNextActionCopy(nav: string, activeSessionCount: number,
   if (nav === "ledger") return "Read the audit trail first. Open Workbench for bodies or Project Lab for push context.";
   if (nav === "approvals") return "Review gates. Approval changes risk state but does not run hidden work.";
   if (nav === "security") return "Record Spock receipt before browser, clone, install, download, or execution.";
-  if (mode === "explore") return "Review source lane and keep Reddit as signal, not sole proof.";
+  if (mode === "explore") return "Use Cortana Council for active source work. Surfer policy stays in Basement.";
   return "Keep the route visible. Use Workbench for the body and Ledger for the audit trail.";
 }
