@@ -21,7 +21,7 @@ export const hardGates = [
   "saving sensitive screenshots to memory",
   "installs",
   "tokens and API keys",
-  "sealed Raven or NSFW scope",
+  "sealed private module scope",
 ];
 
 export const perceptionClasses = [

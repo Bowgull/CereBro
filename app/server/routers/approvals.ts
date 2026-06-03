@@ -2,14 +2,20 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { getCerebroDb } from "../cerebroDb";
 import { publicProcedure, router } from "../_core/trpc";
+import { privateModuleApprovalAgent, privateModuleApprovalTarget } from "../privateModuleAirlock";
 
 const statusOptions = ["pending", "approved", "rejected", "cancelled"] as const;
-const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "browser", "model_tools", "raven", "other"] as const;
+const originOptions = ["all", "hedwig", "terminal", "runtime", "project_lab", "source", "browser", "model_tools", "other"] as const;
 const groupOptions = ["origin", "project", "action_type", "status", "risk"] as const;
 const preflightDecisions = ["allowed_local", "proposal_only", "approval_required", "blocked_by_hard_gate"] as const;
 const perceptionClasses = ["explicit_context", "local_files", "terminal_logs", "workbench_media", "public_browser"] as const;
 const actionClasses = ["local_note", "code_edit", "command_execution", "browser_or_media_capture", "external_write", "cleanup"] as const;
 const projectIdSql = "COALESCE(t.project_id, co.project_id, cap.project_id, rp.project_id, mp.project_id, se.project_id, CASE WHEN a.target_type = 'project' THEN a.target_id END)";
+
+function pushPublicApprovalWhere(where: string[]) {
+  where.push(`COALESCE(a.requested_by_agent, '') != '${privateModuleApprovalAgent}'`);
+  where.push(`COALESCE(a.target_type, '') != '${privateModuleApprovalTarget}'`);
+}
 
 function rowToApproval(row: Record<string, unknown>) {
   const targetType = row.target_type == null ? null : String(row.target_type);
@@ -182,7 +188,6 @@ function originForApproval(input: {
   requestedByAgent: string | null;
 }) {
   if (input.requestedByAgent === "hedwig") return "hedwig";
-  if (input.requestedByAgent === "raven" || input.targetType === "raven_bridge_export_proposal") return "raven";
   if (input.targetType === "runtime_route_record" || input.actionType.startsWith("runtime_")) return "runtime";
   if (input.targetType === "command_observation" || input.actionType.startsWith("terminal_")) return "terminal";
   if (input.targetType === "browser_action_proposal" || input.actionType.includes("browser")) return "browser";
@@ -242,10 +247,6 @@ function validationPreviewForApproval(input: {
   if (input.requestedByAgent === "hedwig" && !["capture_observation", "reminder_proposal", "message_draft_proposal"].includes(input.targetType ?? "")) {
     spockNotes.push("Hedwig approval should point at a capture, reminder, or message proposal.");
   }
-  if (input.requestedByAgent === "raven") {
-    oakNotes.push("Raven approval is sealed private scope. Confirm scrub receipt and exact export target before any bridge action.");
-    spockNotes.push("Raven approval remains preview-only. It must not write core memory or external systems from the queue.");
-  }
   if (spockNotes.length === 0) {
     spockNotes.push("Shape check passed for a local approval preview. This is not approval.");
   }
@@ -256,8 +257,6 @@ function validationPreviewForApproval(input: {
 function applyOriginWhere(origin: (typeof originOptions)[number], where: string[]) {
   if (origin === "hedwig") {
     where.push("a.requested_by_agent = 'hedwig'");
-  } else if (origin === "raven") {
-    where.push("(a.requested_by_agent = 'raven' OR a.target_type = 'raven_bridge_export_proposal')");
   } else if (origin === "runtime") {
     where.push("(a.target_type = 'runtime_route_record' OR a.action_type LIKE 'runtime_%')");
   } else if (origin === "terminal") {
@@ -273,8 +272,8 @@ function applyOriginWhere(origin: (typeof originOptions)[number], where: string[
   } else if (origin === "other") {
     where.push(`
       a.requested_by_agent != 'hedwig'
-      AND a.requested_by_agent != 'raven'
-      AND COALESCE(a.target_type, '') != 'raven_bridge_export_proposal'
+      AND a.requested_by_agent != '${privateModuleApprovalAgent}'
+      AND COALESCE(a.target_type, '') != '${privateModuleApprovalTarget}'
       AND COALESCE(a.target_type, '') != 'runtime_route_record'
       AND a.action_type NOT LIKE 'runtime_%'
       AND COALESCE(a.target_type, '') != 'command_observation'
@@ -308,6 +307,8 @@ export const approvalsRouter = router({
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN projects p ON p.id = t.project_id
           WHERE a.id = ?
+            AND COALESCE(a.requested_by_agent, '') != '${privateModuleApprovalAgent}'
+            AND COALESCE(a.target_type, '') != '${privateModuleApprovalTarget}'
           LIMIT 1
         `,
         args: [input.id],
@@ -464,6 +465,7 @@ export const approvalsRouter = router({
       const origin = input?.origin ?? "all";
 
       where.push("a.status = ?");
+      pushPublicApprovalWhere(where);
       args.push(status);
 
       if (input?.projectId !== undefined) {
@@ -486,8 +488,6 @@ export const approvalsRouter = router({
             OR COALESCE(rp.title, '') LIKE ?
             OR COALESCE(mp.title, '') LIKE ?
             OR COALESCE(se.title, '') LIKE ?
-            OR COALESCE(rbp.title, '') LIKE ?
-            OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
             OR COALESCE(mtc.provider, '') LIKE ?
@@ -497,7 +497,7 @@ export const approvalsRouter = router({
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       const queueLimit = input?.limit ?? 40;
@@ -511,7 +511,6 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
-          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
@@ -531,7 +530,7 @@ export const approvalsRouter = router({
             ppr.approval_required AS preflight_approval_required,
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -539,7 +538,6 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
-          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
@@ -569,7 +567,6 @@ export const approvalsRouter = router({
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,
           source: items.filter((item) => item.origin === "source").length,
-          raven: items.filter((item) => item.origin === "raven").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
           browser: items.filter((item) => item.origin === "browser").length,
           projectLab: items.filter((item) => item.origin === "project_lab").length,
@@ -607,7 +604,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label,
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label,
             bap.id AS browser_proposal_id,
             bap.action_label AS browser_action_label,
             bap.target AS browser_target,
@@ -625,13 +622,14 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
-          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
           LEFT JOIN permission_preflight_records ppr ON ppr.id = a.permission_preflight_id
           LEFT JOIN projects p ON p.id = ${projectIdSql}
           WHERE a.id = ?
+            AND COALESCE(a.requested_by_agent, '') != '${privateModuleApprovalAgent}'
+            AND COALESCE(a.target_type, '') != '${privateModuleApprovalTarget}'
           LIMIT 1
         `,
         args: [input.id],
@@ -706,6 +704,7 @@ export const approvalsRouter = router({
       const origin = input?.origin ?? "all";
 
       where.push("a.status = ?");
+      pushPublicApprovalWhere(where);
       args.push(status);
 
       if (input?.projectId !== undefined) {
@@ -728,8 +727,6 @@ export const approvalsRouter = router({
             OR COALESCE(rp.title, '') LIKE ?
             OR COALESCE(mp.title, '') LIKE ?
             OR COALESCE(se.title, '') LIKE ?
-            OR COALESCE(rbp.title, '') LIKE ?
-            OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
             OR COALESCE(mtc.provider, '') LIKE ?
@@ -739,7 +736,7 @@ export const approvalsRouter = router({
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       args.push(input?.limit ?? 40);
@@ -762,7 +759,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -770,7 +767,6 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
-          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id
@@ -797,7 +793,6 @@ export const approvalsRouter = router({
           terminal: items.filter((item) => item.origin === "terminal").length,
           hedwig: items.filter((item) => item.origin === "hedwig").length,
           source: items.filter((item) => item.origin === "source").length,
-          raven: items.filter((item) => item.origin === "raven").length,
           runtime: items.filter((item) => item.origin === "runtime").length,
           browser: items.filter((item) => item.origin === "browser").length,
           projectLab: items.filter((item) => item.origin === "project_lab").length,
@@ -831,6 +826,7 @@ export const approvalsRouter = router({
       const origin = input?.origin ?? "all";
 
       where.push("a.status = ?");
+      pushPublicApprovalWhere(where);
       args.push(status);
 
       if (input?.projectId !== undefined) {
@@ -853,8 +849,6 @@ export const approvalsRouter = router({
             OR COALESCE(rp.title, '') LIKE ?
             OR COALESCE(mp.title, '') LIKE ?
             OR COALESCE(se.title, '') LIKE ?
-            OR COALESCE(rbp.title, '') LIKE ?
-            OR COALESCE(rbp.summary, '') LIKE ?
             OR COALESCE(rr.original_text, '') LIKE ?
             OR COALESCE(rr.next_action, '') LIKE ?
             OR COALESCE(mtc.provider, '') LIKE ?
@@ -864,7 +858,7 @@ export const approvalsRouter = router({
           )
         `);
         const like = `%${query}%`;
-        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
+        args.push(like, like, like, like, like, like, like, like, like, like, like, like, like, like, like);
       }
 
       const result = await db.execute({
@@ -877,7 +871,7 @@ export const approvalsRouter = router({
             ${projectIdSql} AS project_id,
             COALESCE(p.name, rr.project_name) AS project_name,
             p.path AS project_path,
-            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, rbp.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
+            COALESCE(co.command, cap.title, rp.title, mp.title, se.title, mtc.provider || ' / ' || mtc.tool_name, bap.action_label || ': ' || bap.target, p.name, 'runtime_route:' || rr.id) AS target_label
           FROM approvals a
           LEFT JOIN tasks t ON t.id = a.task_id
           LEFT JOIN command_observations co ON a.target_type = 'command_observation' AND co.id = a.target_id
@@ -885,7 +879,6 @@ export const approvalsRouter = router({
           LEFT JOIN reminder_proposals rp ON a.target_type = 'reminder_proposal' AND rp.id = a.target_id
           LEFT JOIN message_draft_proposals mp ON a.target_type = 'message_draft_proposal' AND mp.id = a.target_id
           LEFT JOIN source_events se ON a.target_type = 'source_event' AND se.id = a.target_id
-          LEFT JOIN raven_bridge_export_proposals rbp ON a.target_type = 'raven_bridge_export_proposal' AND rbp.id = a.target_id
           LEFT JOIN runtime_route_records rr ON a.target_type = 'runtime_route_record' AND rr.id = a.target_id
           LEFT JOIN model_tool_capabilities mtc ON a.target_type = 'model_tool_capability' AND mtc.id = a.target_id
           LEFT JOIN browser_action_proposals bap ON a.target_type = 'browser_action_proposal' AND bap.id = a.target_id

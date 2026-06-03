@@ -57,7 +57,7 @@ decision.
 | Pixelle-Video | https://github.com/AIDC-AI/Pixelle-Video | Apache-2.0 | Video pipeline reference for Gojo/media. Park as heavy future adapter. |
 | VoxCPM | https://github.com/OpenBMB/VoxCPM | Apache-2.0 | TTS and voice-design candidate. Voice cloning requires explicit consent and safety gates. |
 | Maigret | https://github.com/soxoj/maigret | MIT | Restricted OSINT candidate. Self-audit or approved public-source research only. No people search by default. |
-| CloakBrowser | https://github.com/CloakHQ/CloakBrowser | MIT | Restricted browser-evasion reference. Study isolation ideas only. Do not use stealth or bot-bypass behavior. |
+| CloakBrowser | https://github.com/CloakHQ/CloakBrowser | MIT | Restricted Surfer adapter candidate. Use for approved public-source browsing when normal automation is blocked or brittle. Keep profiles isolated, log receipts, and block account abuse, auth bypass, paywall bypass, and unapproved bulk scraping. |
 | Awesome Codex Skills | https://github.com/ComposioHQ/awesome-codex-skills | GitHub API: no license detected 2026-05-08 | Discovery index only. Verify each linked skill separately. |
 | Agent Reach | https://github.com/Panniantong/Agent-Reach | MIT verified 2026-05-09, HEAD `17624268a059ccfb23eba8a2ba50f9f92c8dc0ca` | Required source-access scaffold reference for Surfer, Raven, and future agents. Study and adapt the channel registry, doctor checks, and upstream-tool handoff pattern. Do not install, configure cookies, proxies, browser automation, downloads, or upstream tools without Spock receipt and explicit approval. |
 | Zero | https://github.com/vercel-labs/zero | Apache-2.0 | Tony explicit-effects reference. Study small native tools, structured diagnostics, explicit effects, and agent-readable repair loops. Do not install or add the toolchain until approval-gated execution is stable and a separate install receipt is approved. |
@@ -402,8 +402,10 @@ paths, and hardware fit.
 Maigret is restricted. It can support self-audit or user-approved public-source
 research. It cannot become a default people-search tool.
 
-CloakBrowser is restricted. CereBro needs safer browsing and isolated profiles,
-not stealth automation or bot-detection bypass.
+CloakBrowser is restricted but usable for Surfer. CereBro needs safer browsing,
+isolated profiles, and reliable public-source collection. Treat CloakBrowser as
+a gated Surfer adapter, not the default daily browser and not an unlogged
+scraping engine.
 
 ### Agent Harness Rule
 
@@ -546,7 +548,8 @@ No promise enters the product until it has a receipt.
 - Do not send private documents to external models when Docling or another
   local parser can extract the needed structure first.
 - Do not run Maigret against another person without explicit, narrow approval.
-- Do not use CloakBrowser for stealth, bot bypass, scraping evasion, or terms
-  bypass.
+- Do not use CloakBrowser for account abuse, credential stuffing, auth bypass,
+  paywall bypass, impersonation, or unapproved bulk scraping. Surfer may use it
+  only as an explicit, logged public-source browser adapter.
 - Do not download voice/video/model weights without storage, license, and safety
   receipts.

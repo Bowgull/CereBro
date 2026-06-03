@@ -797,7 +797,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                 className="rounded p-2 text-[11px] leading-snug"
                 style={{
                   background: G.slabMuted,
-                  border: `1px solid ${lane.privacyLane === "sealed_private" ? C.danger : G.lineSoft}`,
+                  border: `1px solid ${G.lineSoft}`,
                 }}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -810,7 +810,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
                   <Badge label={labelize(lane.installStatus)} tone={lane.installStatus === "not_installed" ? C.warning : C.textSecondary} />
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
-                  <Badge label={labelize(lane.privacyLane)} tone={lane.privacyLane === "sealed_private" ? C.danger : C.success} />
+                  <Badge label={labelize(lane.privacyLane)} tone={C.success} />
                   <Badge label={labelize(lane.accessMethod)} tone={C.textSecondary} />
                 </div>
                 <div className="mt-2 space-y-1">

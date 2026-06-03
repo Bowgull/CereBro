@@ -25,7 +25,6 @@ import { modelToolsRouter } from "./routers/modelTools";
 import { permissionsRouter } from "./routers/permissions";
 import { designReviewRouter } from "./routers/designReview";
 import { securityGateRouter } from "./routers/securityGate";
-import { ravenRouter } from "./routers/raven";
 import { runtimeRouter } from "./routers/runtime";
 import { ledgerRouter } from "./routers/ledger";
 import { executionRouter } from "./routers/execution";
@@ -57,7 +56,6 @@ export const appRouter = router({
   permissions: permissionsRouter,
   designReview: designReviewRouter,
   securityGate: securityGateRouter,
-  raven: ravenRouter,
   runtime: runtimeRouter,
   ledger: ledgerRouter,
   execution: executionRouter,

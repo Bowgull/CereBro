@@ -250,7 +250,7 @@ export const OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT = {
     "Normal retrieval requires a non-empty llm_summary.",
     "Normal retrieval allows only public or internal privacy classes.",
     "Archive route notes stay archive_only unless the user asks for history.",
-    "Raven private data never enters this contract.",
+    "Sealed private module data never enters this contract.",
   ],
 } as const;
 

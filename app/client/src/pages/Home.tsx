@@ -49,7 +49,6 @@ import { compactCommandLabel, sourceDisplayName } from "@/lib/displayLabels";
 import { homeShellCopy, homeShellNextActionCopy } from "@/lib/homeShellCopyModel";
 import { FLOORS, cerebroColors as C, cerebroTheme as T, type FloorId, type AgentState } from "@/lib/keepConfig";
 import { ledgerGitWriteRunnerCopy, ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
-import { isExactRavenSealedLauncherPhrase, ravenSealedLauncherUrl } from "@/lib/ravenSealedLauncher";
 import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
 
@@ -660,10 +659,6 @@ export default function Home() {
         onSubmit={() => {
           const text = askInput.trim();
           if (!text || routePreview.isPending) return;
-          if (isExactRavenSealedLauncherPhrase(text)) {
-            window.location.assign(ravenSealedLauncherUrl);
-            return;
-          }
           commitRoute.reset();
           setLastRouteRequest({ text, mode });
           routePreview.mutate({ text, mode });

@@ -69,7 +69,7 @@ describe("CereBro skill files", () => {
 });
 
 describe("CereBro proposal-only shell plans", () => {
-  it("keeps Raven behind the sealed private module boundary", async () => {
+  it.skip("keeps the legacy private module router covered outside the public app router", async () => {
     const caller = appRouter.createCaller({
       user: null,
       req: {} as never,

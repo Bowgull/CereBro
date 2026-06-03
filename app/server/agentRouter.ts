@@ -63,7 +63,7 @@ export type ToolCategory =
   | "block_write"        // Oak only. Refuse a memory or artifact write.
   | "logic_check"        // Spock only. Detect contradictions, schema mismatches.
   | "bloat_check"        // Spock only. Flag scope creep / overengineering.
-  | "sealed_module";     // Cortana only. Enter/exit sealed modules (Raven future).
+  | "sealed_module";     // Cortana only. Enter/exit sealed private modules.
 
 export interface AgentRouting {
   id: string;

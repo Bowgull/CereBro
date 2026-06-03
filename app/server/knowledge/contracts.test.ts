@@ -74,7 +74,7 @@ describe("knowledge contracts", () => {
       canonical_status: "archived",
       retrieval_status: "archive_only",
     });
-    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.rules.join(" ")).toContain("Raven private data never enters");
+    expect(OBSIDIAN_RAG_READY_NOTE_METADATA_CONTRACT.rules.join(" ")).toContain("Sealed private module data never enters");
   });
 
   it("classifies RAG-ready metadata without scanning or writing notes", () => {
