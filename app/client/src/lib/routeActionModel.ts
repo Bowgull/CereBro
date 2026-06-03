@@ -257,8 +257,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
       label: "Open Project",
       status: "read",
       executes: false,
-      ariaLabel: "Open Project Lab focused on route preview",
-      title: "Open Project Lab for this route preview. No project write is saved.",
+      ariaLabel: "Open Project Lab focused on council read",
+      title: "Open Project Lab for this council read. No project write is saved.",
     },
     {
       key: "workbench",
@@ -266,8 +266,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
       label: "Stage Body",
       status: "read",
       executes: false,
-      ariaLabel: "Stage route receipt draft in Workbench",
-      title: "Stage this route preview as a Workbench draft. This does not save evidence or run work.",
+      ariaLabel: "Stage council receipt draft in Workbench",
+      title: "Stage this council read as a Workbench draft. This does not save evidence or run work.",
     },
     {
       key: "gate",
@@ -275,8 +275,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
       label: "Open Ledger",
       status: "read",
       executes: false,
-      ariaLabel: "Open Ledger focused on route preview",
-      title: "Open Ledger audit focus for this route preview. No audit row is saved.",
+      ariaLabel: "Open Ledger focused on council read",
+      title: "Open Ledger audit focus for this council read. No audit row is saved.",
     },
     {
       key: "task",
@@ -284,8 +284,8 @@ export function routePreviewActionModel(input: RoutePreviewActionInput): RouteAc
       label: input.taskCreated ? "Task Saved" : input.creatingTask ? "Saving Task" : "Create Task",
       status: input.taskCreated ? "saved" : input.creatingTask ? "pending" : "read",
       executes: false,
-      ariaLabel: input.taskCreated ? "Task saved from route receipt" : input.creatingTask ? "Saving route task" : "Create task from route preview",
-      title: "Create one local task from this route preview. This does not run the task.",
+      ariaLabel: input.taskCreated ? "Task saved from council read" : input.creatingTask ? "Saving council task" : "Create task from council read",
+      title: "Create one local task from this council read. This does not run the task.",
     },
   ];
 }

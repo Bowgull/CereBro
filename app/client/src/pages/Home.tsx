@@ -163,9 +163,9 @@ const MODE_LABELS: Record<Mode, string> = {
 };
 
 const MODE_HINTS: Record<Mode, string> = {
-  quick: "Aang answers or captures the next object.",
-  explore: "Aang routes Surfer and Oak for source work.",
-  build: "Aang routes Cortana, Tony, and Spock.",
+  quick: "Cortana seats the intake route.",
+  explore: "Cortana seats Surfer and Oak.",
+  build: "Cortana seats Tony and Spock.",
 };
 
 const MODE_ROUTES: Record<Mode, string[]> = {
@@ -2957,7 +2957,7 @@ function RuntimeRouteReceipt({
           gates: draft.gates,
           nextAction: draft.nextAction,
           modelLane: draft.modelLane,
-          notice: "Runtime route receipt staged as a Workbench draft. Review before saving.",
+          notice: "Cortana Council read staged as a Workbench draft. Review before saving.",
         }),
       );
     } catch {
@@ -2996,7 +2996,7 @@ function RuntimeRouteReceipt({
           projectName: draft?.projectName ?? result.taskDraft.projectName,
           projectPath: draft?.projectPath ?? result.taskDraft.projectPath,
           projectFocus: draft,
-          notice: draft?.focusSummary ?? "Route preview opened Project Lab. No project write is saved.",
+          notice: draft?.focusSummary ?? "Cortana Council read opened Project Lab. No project write is saved.",
         }),
       );
     } catch {
@@ -3007,11 +3007,11 @@ function RuntimeRouteReceipt({
 
   return (
     <div className="px-3 py-2 shrink-0" style={{ background: C.backgroundSoft, borderTop: `1px solid ${C.borderSoft}` }}>
-      <section className="rounded p-2" aria-label="Runtime route receipt preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+      <section className="rounded p-2" aria-label="Cortana Council preview" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-1">
-              <PreviewChip label="runtime preview" tone={C.gold} />
+              <PreviewChip label="Cortana Council" tone={C.accentViolet} />
               <PreviewChip label={result.category.replace(/_/g, " ")} tone={C.accent} />
               <PreviewChip label={`${result.confidence} confidence`} tone={result.confidence === "high" ? C.success : C.warning} />
               {result.project && <PreviewChip label={result.project.label} tone={C.gold} />}
@@ -3019,6 +3019,11 @@ function RuntimeRouteReceipt({
             </div>
             <div className="mt-1 text-[11px] leading-snug" style={{ color: C.textMuted }}>
               {result.receipt.summary}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1" aria-label="Council table seats">
+              {result.cortanaRoute.map((agentName, index) => (
+                <CouncilSeat key={`${agentName}-${index}`} agent={agentName} index={index} />
+              ))}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
@@ -3030,16 +3035,16 @@ function RuntimeRouteReceipt({
               onClick={onSaveRoute}
               disabled={isSavingRoute || routeSavedId != null}
               aria-label={routeSavedId ? `Route saved as record ${routeSavedId}` : isSavingRoute ? "Saving route record" : "Save route record"}
-              title="Save this Aang to Cortana route read locally. No routed work runs."
+              title="Save this Cortana Council read locally. No routed work runs."
             >
               {routeSavedId ? `Route #${routeSavedId}` : isSavingRoute ? "Saving" : "Save Route"}
             </Button>
-            <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss runtime route receipt">
+            <Button type="button" size="sm" variant="ghost" className="h-7 px-2" onClick={onDismiss} aria-label="Dismiss Cortana Council read">
               Dismiss
             </Button>
           </div>
         </div>
-        <div className="mt-2 rounded p-1.5" aria-label="Route preview safe actions" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+        <div className="mt-2 rounded p-1.5" aria-label="Council preview safe actions" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
           <div className="mb-1 flex items-center justify-between gap-2">
             <span className="text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
               Safe destinations
@@ -3081,7 +3086,7 @@ function RuntimeRouteReceipt({
           <summary className="cursor-pointer text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>
             {routePreviewProof.detailsSummary}
           </summary>
-          <div className="mt-2 flex flex-wrap gap-1" aria-label="Runtime route proof">
+          <div className="mt-2 flex flex-wrap gap-1" aria-label="Cortana Council proof">
             {routePreviewProof.detailChips.map((chip) => (
               <PreviewChip key={chip.label} label={chip.label} tone={proofTone(chip.tone)} />
             ))}
@@ -3106,6 +3111,29 @@ function PreviewChip({ label, tone }: { label: string; tone: string }) {
       style={{ color: tone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}
     >
       <span className="min-w-0 truncate">{label}</span>
+    </Badge>
+  );
+}
+
+function CouncilSeat({ agent, index }: { agent: string; index: number }) {
+  const isIntake = index === 0;
+  const isHost = agent.toLowerCase() === "cortana";
+  const tone = isIntake ? C.gold : isHost ? C.accentViolet : C.textSecondary;
+  return (
+    <Badge
+      variant={isIntake ? "warning" : isHost ? "violet" : "secondary"}
+      className="px-1.5 py-0.5"
+      style={{
+        background: isIntake
+          ? "rgba(198, 155, 85, 0.14)"
+          : isHost
+            ? "rgba(154, 114, 255, 0.12)"
+            : "rgba(77, 170, 154, 0.10)",
+        border: `1px solid ${mockupShell.marbleLineSoft}`,
+        color: tone,
+      }}
+    >
+      <span className="min-w-0 truncate">{isHost ? `${agent} host` : agent}</span>
     </Badge>
   );
 }
@@ -3164,7 +3192,7 @@ function ContextPanel({
       >
         <div className="mb-1.5 flex items-center justify-between gap-2">
           <div className="text-[10px] uppercase tracking-widest" style={{ color: shellFrame.ivoryMuted }}>
-            Aang route read
+            Cortana Council
           </div>
           <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${shellFrame.brassSoft}, transparent)` }} />
         </div>
@@ -3206,26 +3234,11 @@ function ContextPanel({
         </div>
         <div className={`${compact ? "rounded px-2 py-1.5" : "rounded p-2"}`} style={{ background: "rgba(5, 11, 10, 0.64)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: "inset 0 1px 8px rgba(0, 0, 0, 0.34)" }}>
           <div className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: C.textMuted }}>
-            Route
+            Table
           </div>
           <div className="flex flex-wrap items-center gap-1">
             {route.map((agentName, index) => (
-              <Badge
-                key={`${agentName}-${index}`}
-                variant={index === 0 ? "warning" : index === 1 ? "violet" : "secondary"}
-                className="px-1.5 py-0.5"
-                style={{
-                  background: index === 0
-                    ? "rgba(198, 155, 85, 0.14)"
-                    : index === 1
-                      ? "rgba(154, 114, 255, 0.12)"
-                      : "rgba(77, 170, 154, 0.10)",
-                  border: `1px solid ${mockupShell.marbleLineSoft}`,
-                  color: index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary,
-                }}
-              >
-                {agentName}
-              </Badge>
+              <CouncilSeat key={`${agentName}-${index}`} agent={agentName} index={index} />
             ))}
           </div>
         </div>
@@ -3515,22 +3528,11 @@ function CommandBar({
 
       <div className="hidden xl:block shrink-0 w-44 rounded px-2 py-1.5" style={{ background: "rgba(5, 11, 10, 0.62)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}>
         <div className="text-[10px] uppercase tracking-wider leading-none mb-1" style={{ color: C.textMuted }}>
-          Route Preview
+          Council Table
         </div>
         <div className="flex flex-wrap gap-1">
           {MODE_ROUTES[mode].map((agent, index) => (
-            <Badge
-              key={agent}
-              variant={index === 0 ? "warning" : index === 1 ? "violet" : "secondary"}
-              className="px-1.5 py-0.5"
-              style={{
-                color: index === 0 ? C.gold : index === 1 ? C.accentViolet : C.textSecondary,
-                background: C.surfaceMuted,
-                border: `1px solid ${C.borderSoft}`,
-              }}
-            >
-              {agent}
-            </Badge>
+            <CouncilSeat key={agent} agent={agent} index={index} />
           ))}
         </div>
         <div className="text-[10px] leading-none mt-1" style={{ color: C.warning }}>
