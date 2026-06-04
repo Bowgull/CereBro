@@ -39,7 +39,7 @@ Sources checked:
 
 ## Task 1: Lock Native Browser Contracts
 
-- [ ] Create `app/shared/nativeBrowser.ts`.
+- [x] Create `app/shared/nativeBrowser.ts`.
 
 ```ts
 export type NativeBrowserOpenRequest = {
@@ -63,7 +63,7 @@ export type NativeBrowserPageEvent =
   | { type: "title-updated"; tabId: string; title: string; at: string };
 ```
 
-- [ ] Add `app/server/nativeBrowserContract.test.ts`.
+- [x] Add `app/server/nativeBrowserContract.test.ts`.
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -94,7 +94,7 @@ describe("native browser contract", () => {
 });
 ```
 
-- [ ] Run `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts`.
+- [x] Run `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts`.
 
 Expected: pass.
 

@@ -21,6 +21,37 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-04 0105 NDT - Native Browser Contract Types
+
+### What Changed
+- Completed Native Browser Shell Task 1 from `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`.
+- Added `app/shared/nativeBrowser.ts`.
+- Added narrow shared contracts for native open requests, open results, page events, event types, and blocked reasons.
+- Added runtime vocabularies for Electron-facing event and blocked-reason strings.
+- Added `app/server/nativeBrowserContract.test.ts`.
+- Marked Task 1 complete in the native Browser implementation plan.
+- Updated the canonical Obsidian finish path.
+
+### Files Touched
+- `app/shared/nativeBrowser.ts`
+- `app/server/nativeBrowserContract.test.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts` failed before `app/shared/nativeBrowser.ts` existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts`
+- `pnpm --dir app exec vitest run server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/server/nativeBrowserContract.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue Native Browser Shell Task 2. Install Electron only for this local desktop shell slice, then create an Electron bootstrap that opens the existing local CereBro app without native page-view power yet. Do not build bypass/evasion features. Do not touch Raven. Keep outside open optional, not the product answer.
+```
+
 ## 2026-06-03 2315 NDT - Native Browser Shell Attack Path
 
 ### What Changed
