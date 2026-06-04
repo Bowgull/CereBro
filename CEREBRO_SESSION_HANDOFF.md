@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-04 0650 NDT
+Last updated: 2026-06-04 0722 NDT
 
 ## Current North Star
 
@@ -20,6 +20,32 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-04 0722 NDT - VPN Critical Path Decision
+
+### What Changed
+- Recorded the VPN V1 shape before the user moves hotels.
+- Main Browser VPN UI is one shield button, not separate connect/disconnect/check controls.
+- Browser `...` menu gets `VPN Settings`.
+- Settings/Basement holds provider, setup status, diagnostics, logs, routes, DNS, and adapter details.
+- Long-term architecture is a generic VPN adapter contract first.
+- First provider target is Proton Free WireGuard only if free `.conf` access works without card, trial, or paid plan.
+- RiseupVPN stays the fallback first provider if Proton config is gated or clumsy.
+- Custom WireGuard import is later.
+- Random free WireGuard config sites are rejected.
+
+### Files Touched
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- `git status --short --branch`
+- Obsidian roadmap grep for VPN queue and progress lines.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/client/src/components/BrowserPanel.tsx, app/shared/nativeBrowser.ts, app/electron/browserBridge.ts, app/electron/browserSession.ts, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Branch codex/raven-airlock is pushed through b1ec34c. Next critical path is VPN V1 architecture: design the generic VPN adapter contract and one-shield Browser UI first, then manually verify Proton Free WireGuard `.conf` viability. RiseupVPN is fallback if Proton is gated or clumsy. Do not use random free VPN config sites, fake VPN protection, store credentials in plaintext, build bypass/evasion features, or surface Raven.
+```
 
 ## 2026-06-04 0650 NDT - Browser Fallback Push Handoff
 
