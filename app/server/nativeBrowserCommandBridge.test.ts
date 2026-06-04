@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { normalizeNativeBrowserOpenRequest } from "../electron/browserRequest";
+import { nativeBrowserContentBounds, normalizeNativeBrowserOpenRequest } from "../electron/browserRequest";
 
 const appRoot = resolve(__dirname, "..");
 
@@ -39,9 +39,26 @@ describe("native browser command bridge", () => {
     expect(preloadSource).toContain("contextBridge.exposeInMainWorld");
     expect(preloadSource).toContain("cerebroNativeBrowser");
     expect(preloadSource).toContain("nativeBrowserOpenPageChannel");
+    expect(preloadSource).toContain("nativeBrowserClosePageChannel");
     expect(bridgeSource).toContain("ipcMain.handle");
     expect(bridgeSource).toContain("nativeBrowserOpenPageChannel");
+    expect(bridgeSource).toContain("nativeBrowserClosePageChannel");
     expect(mainSource).toContain("installNativeBrowserCommandBridge");
     expect(packageSource).toContain("electron/preload.ts");
+  });
+
+  it("keeps native page content below the CereBro command chrome", () => {
+    expect(nativeBrowserContentBounds({ width: 1320, height: 860 })).toEqual({
+      x: 0,
+      y: 168,
+      width: 1320,
+      height: 692,
+    });
+    expect(nativeBrowserContentBounds({ width: 320, height: 220 })).toEqual({
+      x: 0,
+      y: 168,
+      width: 320,
+      height: 52,
+    });
   });
 });

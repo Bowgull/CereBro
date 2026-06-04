@@ -7,6 +7,21 @@ export type NormalizedNativeBrowserOpenRequest =
   | { ok: true; tabId: string; targetUrl: string }
   | { ok: false; tabId: string; blockedReason: NativeBrowserBlockedReason };
 
+export type NativeBrowserContentBounds = {
+  width: number;
+  height: number;
+};
+
+export function nativeBrowserContentBounds(bounds: NativeBrowserContentBounds) {
+  const chromeHeight = 168;
+  return {
+    x: 0,
+    y: chromeHeight,
+    width: Math.max(1, bounds.width),
+    height: Math.max(1, bounds.height - chromeHeight),
+  };
+}
+
 export function normalizeNativeBrowserOpenRequest(input: unknown): NormalizedNativeBrowserOpenRequest {
   const request = input as Partial<NativeBrowserOpenRequest> | null;
   const tabId = typeof request?.tabId === "string" && request.tabId.trim() ? request.tabId.trim() : "native_tab_1";

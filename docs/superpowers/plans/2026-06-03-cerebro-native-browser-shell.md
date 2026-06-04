@@ -129,6 +129,9 @@ Expected: pass.
 - [x] Add main-process IPC handler for one user-initiated open command.
 - [x] Validate native open commands as user-initiated `http` or `https` only.
 - [x] Wire BrowserPanel to call the bridge when Electron provides it.
+- [x] Add native close command through preload and IPC.
+- [x] Keep the native page view below the CereBro command chrome.
+- [x] Add a visible `Return` control that closes native page view and returns to the Browser surface.
 
 - [ ] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
 - [ ] Add trusted-site persistent partitions later.

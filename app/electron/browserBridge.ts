@@ -1,14 +1,16 @@
 import { ipcMain, type BrowserWindow, type Rectangle } from "electron";
 import {
+  nativeBrowserClosePageChannel,
   nativeBrowserOpenPageChannel,
+  type NativeBrowserCloseResult,
   type NativeBrowserOpenResult,
 } from "../shared/nativeBrowser";
-import { normalizeNativeBrowserOpenRequest } from "./browserRequest";
+import { nativeBrowserContentBounds, normalizeNativeBrowserOpenRequest } from "./browserRequest";
 import { layoutNativeBrowserPageView, type NativeBrowserPageView } from "./browserViews";
 
 function nativePageBounds(mainWindow: BrowserWindow): Rectangle {
   const bounds = mainWindow.getContentBounds();
-  return { x: 0, y: 0, width: Math.max(1, bounds.width), height: Math.max(1, bounds.height) };
+  return nativeBrowserContentBounds(bounds);
 }
 
 export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pageView: NativeBrowserPageView) {
@@ -34,6 +36,20 @@ export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pag
       currentUrl: request.targetUrl,
       title: pageView.view.webContents.getTitle() || null,
       blockedReason: null,
+    };
+  });
+
+  ipcMain.handle(nativeBrowserClosePageChannel, async (): Promise<NativeBrowserCloseResult> => {
+    const currentUrl = pageView.view.webContents.getURL() || null;
+    const title = pageView.view.webContents.getTitle() || null;
+    pageView.view.setVisible(false);
+    layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
+
+    return {
+      ok: true,
+      tabId: pageView.tabId,
+      currentUrl,
+      title,
     };
   });
 }

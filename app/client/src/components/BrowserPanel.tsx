@@ -361,6 +361,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     setPreparedApprovalId(null);
     setBrowserNotice(`Local history opened ${target.title ?? target.targetUrl}.`);
   };
+  const closeNativeBrowserPage = async () => {
+    setSandboxFrameTarget(null);
+    setSandboxFrameProposalId(null);
+    try {
+      await window.cerebroNativeBrowser?.closePage();
+    } catch {
+      // The web fallback has no native page view to close.
+    }
+    setBrowserNotice("Returned to Browser.");
+  };
   const isPreparingBrowserDraft =
     createBrowserActionProposal.isPending ||
     createBrowserTabSessionDraft.isPending ||
@@ -843,6 +853,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                         {sandboxFrameTarget}
                       </div>
                     </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-[10px]"
+                      title="Return to the Browser start view."
+                      onClick={() => void closeNativeBrowserPage()}
+                    >
+                      Return
+                    </Button>
                     <details className="relative w-full sm:w-auto sm:shrink-0">
                       <summary className="ml-auto flex h-7 w-8 cursor-pointer list-none items-center justify-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Open page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                         <MoreHorizontal size={14} strokeWidth={1.8} aria-hidden="true" />

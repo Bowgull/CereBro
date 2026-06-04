@@ -21,6 +21,43 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-04 0205 NDT - Native Browser Return Control
+
+### What Changed
+- Added `nativeBrowserClosePageChannel` and `NativeBrowserCloseResult`.
+- Exposed `window.cerebroNativeBrowser.closePage` from Electron preload.
+- Added the main-process close handler that hides the native page view and returns current page metadata.
+- Kept native page content below the CereBro command chrome instead of covering the whole app.
+- Added a visible `Return` control in BrowserPanel for leaving the open page view.
+- Marked the close/return slice complete in the native Browser shell plan and the canonical Obsidian finish path.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/electron/browserBridge.ts`
+- `app/electron/browserRequest.ts`
+- `app/electron/preload.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- `app/server/nativeBrowserCommandBridge.test.ts`
+- `app/server/nativeBrowserContract.test.ts`
+- `app/shared/nativeBrowser.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts` failed before the close channel, content bounds, bridge close handler, and Return control existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts`
+- `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/nativeBrowserWebContentsView.test.ts server/nativeBrowserDesktopBootstrap.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/electron/browserBridge.ts, app/electron/browserRequest.ts, app/electron/browserViews.ts, app/electron/preload.ts, app/client/src/components/BrowserPanel.tsx, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue the native Browser path by adding in-memory Electron session partitions for normal browsing, then wire native page events into CereBro tab/history state. Do not build bypass/evasion features. Do not touch Raven.
+```
+
 ## 2026-06-04 0155 NDT - Native Browser Command Bridge
 
 ### What Changed
