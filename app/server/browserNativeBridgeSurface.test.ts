@@ -21,4 +21,14 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("userInitiated: true");
     expect(browserPanelSource).toContain("Return");
   });
+
+  it("keeps native Browser fallback copy out of the main machinery language", async () => {
+    const browserPanelSource = await readFile(resolve(appRoot, "client/src/components/BrowserPanel.tsx"), "utf8");
+
+    expect(browserPanelSource).not.toContain("Open Outside");
+    expect(browserPanelSource).not.toContain("outside CereBro");
+    expect(browserPanelSource).not.toContain("desktop Browser for the best page view");
+    expect(browserPanelSource).toContain("Fallback");
+    expect(browserPanelSource).toContain("System Browser");
+  });
 });

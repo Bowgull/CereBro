@@ -146,8 +146,8 @@ Expected: pass.
 
 ## Task 5: Replace Outside Open
 
-- [ ] When native shell is available, page opens must use the native page view.
-- [ ] Outside open stays optional and off the main path.
+- [x] When native shell is available, page opens must use the native page view.
+- [x] Outside open stays optional and off the main path.
 - [ ] Sites that fail to render show a normal browser error state.
 - [ ] No fake success state.
 

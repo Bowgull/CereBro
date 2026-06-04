@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-04 0225 NDT
+Last updated: 2026-06-04 0237 NDT
 
 ## Current North Star
 
@@ -20,6 +20,38 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-04 0237 NDT - Browser Fallback Copy Reduction
+
+### What Changed
+- Moved the non-native page fallback behind a collapsed `Fallback` detail.
+- Replaced exposed outside-open language with `System Browser` wording.
+- Removed visible `desktop Browser`, `outside CereBro`, and `Open Outside` copy from BrowserPanel.
+- Kept fallback behavior explicit and user-requested. It still does not save page content.
+- Marked the native Browser shell Task 5 items complete in the implementation plan.
+- Marked finish path queue item 13 complete in Obsidian.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/browserNativeBridgeSurface.test.ts` failed before the fallback copy was removed.
+- `pnpm --dir app exec vitest run server/browserNativeBridgeSurface.test.ts`
+- `pnpm --dir app exec vitest run server/nativeBrowserSession.test.ts server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/nativeBrowserWebContentsView.test.ts server/nativeBrowserDesktopBootstrap.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+- Electron smoke: `electron dist-electron/main.mjs` started and stayed running until the smoke test killed it.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/client/src/components/BrowserPanel.tsx, app/shared/nativeBrowser.ts, app/electron/browserBridge.ts, app/electron/browserSession.ts, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue the native Browser path with verified VPN badge architecture, then Keychain-backed password manager architecture. Do not fake VPN status, store plaintext passwords, build bypass/evasion features, or surface Raven.
+```
 
 ## 2026-06-04 0225 NDT - Native Browser Visible Page Path
 
