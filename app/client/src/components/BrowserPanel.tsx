@@ -292,6 +292,14 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const recordNativeBrowserPageEvent = trpc.workbench.recordNativeBrowserPageEvent.useMutation({
+    onSuccess: (result) => {
+      if (result.ok) {
+        utils.workbench.browserTabSessionStorageContract.invalidate();
+        utils.ledger.overview.invalidate();
+      }
+    },
+  });
 
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
@@ -416,6 +424,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setBrowserNotice("Browser focus could not be read. No page opened.");
     }
   }, []);
+
+  useEffect(() => {
+    return window.cerebroNativeBrowser?.onPageEvent((event) => {
+      recordNativeBrowserPageEvent.mutate(event);
+    });
+  }, [recordNativeBrowserPageEvent]);
 
   return (
     <div

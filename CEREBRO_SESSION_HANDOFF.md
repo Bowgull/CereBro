@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-04 0215 NDT
+Last updated: 2026-06-04 0147 NDT
 
 ## Current North Star
 
@@ -20,6 +20,46 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-04 0147 NDT - Native Browser Page Event Writeback
+
+### What Changed
+- Added `nativeBrowserPageEventChannel`.
+- Exposed `window.cerebroNativeBrowser.onPageEvent` from Electron preload.
+- Updated the native `WebContentsView` to emit mapped navigation and title events.
+- Updated Electron main to send native page events to the Browser renderer.
+- Added `recordNativeBrowserPageEvent` to Workbench.
+- BrowserPanel now subscribes to native page events and records them through tRPC.
+- Native navigation events update the matching open tab and append local history rows with `source_label = native_browser`.
+- No page content, sources, Watch Shelf items, Workbench captures, credentials, or external writes are saved by the event writeback.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/electron/browserViews.ts`
+- `app/electron/main.ts`
+- `app/electron/preload.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- `app/server/nativeBrowserCommandBridge.test.ts`
+- `app/server/routers/workbench.ts`
+- `app/shared/nativeBrowser.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/browserActionProposalRouter.test.ts` failed before the event channel, UI listener, and Workbench mutation existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/browserActionProposalRouter.test.ts`
+- `pnpm --dir app exec vitest run server/nativeBrowserSession.test.ts server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/nativeBrowserWebContentsView.test.ts server/nativeBrowserDesktopBootstrap.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/electron/browserEvents.ts, app/electron/browserViews.ts, app/electron/browserBridge.ts, app/electron/preload.ts, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue the native Browser path by making native page open the primary path and reducing the remaining iframe/outside-open language. Do not build bypass/evasion features. Do not touch Raven.
+```
 
 ## 2026-06-04 0215 NDT - Native Browser In-Memory Session Policy
 

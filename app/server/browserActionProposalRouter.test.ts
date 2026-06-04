@@ -1504,6 +1504,85 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
   });
 
+  it("records native Browser page events into open tab history without content saves", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/native-start",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    const draft = await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({
+      proposalId: created.proposal.id,
+    });
+    await caller.workbench.recordBrowserSandboxFrameOpen({
+      proposalId: created.proposal.id,
+    });
+    const before = {
+      historyItems: await countRows("browser_tab_history_items"),
+      sources: await countRows("sources"),
+      watchShelfItems: await countRows("browser_watch_shelf_items"),
+    };
+
+    const writeback = await caller.workbench.recordNativeBrowserPageEvent({
+      type: "navigation-finished",
+      tabId: draft.tab.tabId,
+      url: "https://example.com/native-finished",
+      title: "Native Finished",
+      at: "2026-06-04T04:30:00.000Z",
+    });
+    const db = await getCerebroDb();
+    const tab = await db.execute({
+      sql: "SELECT target_url, title, state, last_error FROM browser_tab_sessions WHERE proposal_id = ? ORDER BY id DESC LIMIT 1",
+      args: [created.proposal.id],
+    });
+    const history = await db.execute({
+      sql: `
+        SELECT target_url, title, event_type, source_label
+        FROM browser_tab_history_items
+        WHERE proposal_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      args: [created.proposal.id],
+    });
+
+    expect(writeback.ok).toBe(true);
+    expect(writeback.mode).toBe("native_browser_page_event_recorded");
+    expect(writeback.tab?.targetUrl).toBe("https://example.com/native-finished");
+    expect(writeback.tab?.title).toBe("Native Finished");
+    expect(writeback.historyItem?.eventType).toBe("native_navigation_finished");
+    expect(writeback.historyItem?.sourceLabel).toBe("native_browser");
+    expect(writeback.noActionTaken).toContain("No page content saved.");
+    expect(tab.rows[0]?.target_url).toBe("https://example.com/native-finished");
+    expect(tab.rows[0]?.title).toBe("Native Finished");
+    expect(tab.rows[0]?.state).toBe("open");
+    expect(tab.rows[0]?.last_error).toBeNull();
+    expect(history.rows[0]?.event_type).toBe("native_navigation_finished");
+    expect(history.rows[0]?.source_label).toBe("native_browser");
+
+    expect(await countRows("browser_tab_history_items")).toBe(before.historyItems + 1);
+    expect(await countRows("sources")).toBe(before.sources);
+    expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
+  });
+
   it("records sandbox frame external fallback without backend fetch or content saves", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

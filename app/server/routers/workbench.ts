@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc";
 import { browserActionProposalModel } from "../browserActionProposalModel";
+import type { NativeBrowserPageEvent } from "../../shared/nativeBrowser";
 import { workbenchBrowserDraftModel, workbenchBrowserRunnerContractModel, workbenchWatchShelfModel } from "../../client/src/lib/workbenchBrowserModel";
 import { getCerebroDb, getOrCreateProjectByPath } from "../cerebroDb";
 import {
@@ -33,6 +34,35 @@ const evidenceGroupBys = ["project", "task", "session", "kind", "source", "comma
 const mediaKinds = ["image", "video", "video_frame", "unknown"] as const;
 const browserDraftKinds = ["empty", "url", "search"] as const;
 const watchShelfCategories = ["Watching", "Want", "Anime", "YouTube", "Twitch", "Finished"] as const;
+const nativeBrowserPageEventSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("navigation-started"),
+    tabId: z.string().min(1),
+    url: z.string().url(),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("navigation-finished"),
+    tabId: z.string().min(1),
+    url: z.string().url(),
+    title: z.string().nullable(),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("navigation-failed"),
+    tabId: z.string().min(1),
+    url: z.string().url(),
+    errorCode: z.number().int(),
+    errorDescription: z.string(),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("title-updated"),
+    tabId: z.string().min(1),
+    title: z.string(),
+    at: z.string().min(1),
+  }),
+]);
 const browserProposalNoActionTaken = [
   "No browser opened.",
   "No page fetched.",
@@ -213,6 +243,22 @@ function rowToBrowserRunnerAudit(row: Record<string, unknown>) {
     noActionTaken: splitStoredList(row.no_action_taken),
     createdAt: Number(row.created_at),
   };
+}
+
+function nativeBrowserHistoryEventType(event: NativeBrowserPageEvent) {
+  if (event.type === "navigation-started") return "native_navigation_started";
+  if (event.type === "navigation-finished") return "native_navigation_finished";
+  if (event.type === "navigation-failed") return "native_navigation_failed";
+  return null;
+}
+
+function nativeBrowserEventUrl(event: NativeBrowserPageEvent, fallbackUrl: string) {
+  return "url" in event ? event.url : fallbackUrl;
+}
+
+function nativeBrowserEventTitle(event: NativeBrowserPageEvent, fallbackTitle: string | null, fallbackUrl: string) {
+  if ("title" in event && event.title?.trim()) return event.title.trim();
+  return fallbackTitle ?? browserDraftTabLabelForServer(nativeBrowserEventUrl(event, fallbackUrl));
 }
 
 function missingBrowserLiveRunnerOpenGates(proposal: ReturnType<typeof rowToBrowserActionProposal>, gateRows: Awaited<ReturnType<typeof browserProposalGateRows>>) {
@@ -1876,6 +1922,115 @@ export const workbenchRouter = router({
           "No source saved.",
           "No Workbench capture created.",
           "No Watch Shelf item saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
+  recordNativeBrowserPageEvent: publicProcedure
+    .input(nativeBrowserPageEventSchema)
+    .mutation(async ({ input }) => {
+      const db = await getCerebroDb();
+      const event = input as NativeBrowserPageEvent;
+      const tabRows = await db.execute({
+        sql: `
+          SELECT id, proposal_id, tab_id, target_url, title, state, project_id,
+                 source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                 created_at, updated_at
+          FROM browser_tab_sessions
+          WHERE tab_id = ?
+          ORDER BY updated_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [event.tabId],
+      });
+      const tabRow = tabRows.rows[0] as Record<string, unknown> | undefined;
+      if (!tabRow || (String(tabRow.state) !== "open" && String(tabRow.state) !== "open_ready")) {
+        return {
+          ok: false as const,
+          mode: "native_browser_page_event_blocked" as const,
+          event,
+          tab: tabRow ? rowToBrowserTabSession(tabRow) : null,
+          historyItem: null,
+          canPersistHistory: false,
+          writesExternal: false,
+          gates: [
+            "Native Browser page event ignored.",
+            "A matching open Browser tab row is required before native page events can write local history.",
+          ],
+          noActionTaken: [
+            "No history persisted.",
+            "No page content saved.",
+            "No source saved.",
+            "No Watch Shelf item saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const tab = rowToBrowserTabSession(tabRow);
+      const targetUrl = nativeBrowserEventUrl(event, tab.targetUrl);
+      const title = nativeBrowserEventTitle(event, tab.title, tab.targetUrl);
+      const lastError = event.type === "navigation-failed"
+        ? `${event.errorCode}: ${event.errorDescription}`.slice(0, 240)
+        : null;
+      const updated = await db.execute({
+        sql: `
+          UPDATE browser_tab_sessions
+          SET target_url = ?,
+              title = ?,
+              state = 'open',
+              last_error = ?,
+              updated_at = unixepoch()
+          WHERE id = ?
+          RETURNING id, proposal_id, tab_id, target_url, title, state, project_id,
+                    source_id, workbench_evidence_id, watch_shelf_id, last_error,
+                    created_at, updated_at
+        `,
+        args: [targetUrl, title, lastError, tab.id],
+      });
+      const historyEventType = nativeBrowserHistoryEventType(event);
+      const history = historyEventType
+        ? await db.execute({
+            sql: `
+              INSERT INTO browser_tab_history_items (
+                browser_tab_session_id, proposal_id, target_url, title, event_type,
+                source_label
+              )
+              VALUES (?, ?, ?, ?, ?, 'native_browser')
+              RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                        event_type, source_label, created_at
+            `,
+            args: [
+              tab.id,
+              tab.proposalId,
+              targetUrl,
+              title,
+              historyEventType,
+            ],
+          })
+        : null;
+
+      return {
+        ok: true as const,
+        mode: "native_browser_page_event_recorded" as const,
+        event,
+        tab: rowToBrowserTabSession(updated.rows[0] as Record<string, unknown>),
+        historyItem: history?.rows[0]
+          ? rowToBrowserTabHistoryItem(history.rows[0] as Record<string, unknown>)
+          : null,
+        canPersistHistory: Boolean(historyEventType),
+        writesExternal: false,
+        gates: [
+          "Native Browser page event wrote local Browser tab state.",
+          historyEventType ? "Native Browser page event appended local Browser history." : "Native Browser title event updated tab title only.",
+        ],
+        noActionTaken: [
+          "No page content saved.",
+          "No backend page fetch ran.",
+          "No source saved.",
+          "No Watch Shelf item saved.",
+          "No Workbench capture created.",
           "No external write ran.",
         ],
       };

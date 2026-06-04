@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
 import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 
@@ -29,7 +30,9 @@ function createMainWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  const pageView = createNativeBrowserPageView(mainWindow);
+  const pageView = createNativeBrowserPageView(mainWindow, "native_tab_1", (event) => {
+    mainWindow.webContents.send(nativeBrowserPageEventChannel, event);
+  });
   layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
   installNativeBrowserCommandBridge(mainWindow, pageView);
   void mainWindow.loadURL(getStartUrl());

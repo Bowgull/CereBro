@@ -1,4 +1,5 @@
 import { WebContentsView, type BrowserWindow, type Rectangle } from "electron";
+import type { NativeBrowserPageEvent } from "../shared/nativeBrowser";
 import { installNativeBrowserPermissionPolicy } from "./browserPermissions";
 import {
   mapNativeNavigationFailed,
@@ -15,7 +16,11 @@ export type NativeBrowserPageView = {
   setBounds: (bounds: Rectangle) => void;
 };
 
-export function createNativeBrowserPageView(mainWindow: BrowserWindow, tabId = "native_tab_1"): NativeBrowserPageView {
+export function createNativeBrowserPageView(
+  mainWindow: BrowserWindow,
+  tabId = "native_tab_1",
+  emitPageEvent: (event: NativeBrowserPageEvent) => void = () => {},
+): NativeBrowserPageView {
   const view = new WebContentsView({
     webPreferences: nativeBrowserSessionWebPreferences(),
   });
@@ -23,16 +28,16 @@ export function createNativeBrowserPageView(mainWindow: BrowserWindow, tabId = "
   installNativeBrowserPermissionPolicy(view.webContents.session);
   view.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   view.webContents.on("did-start-navigation", (_event, url) => {
-    mapNativeNavigationStarted(tabId, url);
+    emitPageEvent(mapNativeNavigationStarted(tabId, url));
   });
   view.webContents.on("did-finish-load", () => {
-    mapNativeNavigationFinished(tabId, view.webContents.getURL(), view.webContents.getTitle() || null);
+    emitPageEvent(mapNativeNavigationFinished(tabId, view.webContents.getURL(), view.webContents.getTitle() || null));
   });
   view.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
-    mapNativeNavigationFailed(tabId, validatedURL, errorCode, errorDescription);
+    emitPageEvent(mapNativeNavigationFailed(tabId, validatedURL, errorCode, errorDescription));
   });
   view.webContents.on("page-title-updated", (_event, title) => {
-    mapNativeTitleUpdated(tabId, title);
+    emitPageEvent(mapNativeTitleUpdated(tabId, title));
   });
 
   mainWindow.contentView.addChildView(view);

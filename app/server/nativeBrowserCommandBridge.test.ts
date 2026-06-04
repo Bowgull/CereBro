@@ -40,10 +40,13 @@ describe("native browser command bridge", () => {
     expect(preloadSource).toContain("cerebroNativeBrowser");
     expect(preloadSource).toContain("nativeBrowserOpenPageChannel");
     expect(preloadSource).toContain("nativeBrowserClosePageChannel");
+    expect(preloadSource).toContain("nativeBrowserPageEventChannel");
+    expect(preloadSource).toContain("onPageEvent");
     expect(bridgeSource).toContain("ipcMain.handle");
     expect(bridgeSource).toContain("nativeBrowserOpenPageChannel");
     expect(bridgeSource).toContain("nativeBrowserClosePageChannel");
     expect(mainSource).toContain("installNativeBrowserCommandBridge");
+    expect(mainSource).toContain("webContents.send");
     expect(packageSource).toContain("electron/preload.ts");
   });
 

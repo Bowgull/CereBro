@@ -132,6 +132,8 @@ Expected: pass.
 - [x] Add native close command through preload and IPC.
 - [x] Keep the native page view below the CereBro command chrome.
 - [x] Add a visible `Return` control that closes native page view and returns to the Browser surface.
+- [x] Send native page events from Electron to BrowserPanel.
+- [x] Write native page events back into local Browser tab/history state.
 
 - [x] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
 - [ ] Add trusted-site persistent partitions later.

@@ -1,5 +1,6 @@
 export const nativeBrowserOpenPageChannel = "cerebro:native-browser:open-page";
 export const nativeBrowserClosePageChannel = "cerebro:native-browser:close-page";
+export const nativeBrowserPageEventChannel = "cerebro:native-browser:page-event";
 
 export const nativeBrowserPageEventTypes = [
   "navigation-started",
@@ -41,6 +42,7 @@ export type NativeBrowserCloseResult = {
 export type NativeBrowserBridge = {
   openPage: (request: NativeBrowserOpenRequest) => Promise<NativeBrowserOpenResult>;
   closePage: () => Promise<NativeBrowserCloseResult>;
+  onPageEvent: (callback: (event: NativeBrowserPageEvent) => void) => () => void;
 };
 
 export type NativeBrowserPageEvent =
