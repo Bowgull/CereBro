@@ -1,3 +1,5 @@
+export const nativeBrowserOpenPageChannel = "cerebro:native-browser:open-page";
+
 export const nativeBrowserPageEventTypes = [
   "navigation-started",
   "navigation-finished",
@@ -28,8 +30,18 @@ export type NativeBrowserOpenResult = {
   blockedReason: NativeBrowserBlockedReason | null;
 };
 
+export type NativeBrowserBridge = {
+  openPage: (request: NativeBrowserOpenRequest) => Promise<NativeBrowserOpenResult>;
+};
+
 export type NativeBrowserPageEvent =
   | { type: "navigation-started"; tabId: string; url: string; at: string }
   | { type: "navigation-finished"; tabId: string; url: string; title: string | null; at: string }
   | { type: "navigation-failed"; tabId: string; url: string; errorCode: number; errorDescription: string; at: string }
   | { type: "title-updated"; tabId: string; title: string; at: string };
+
+declare global {
+  interface Window {
+    cerebroNativeBrowser?: NativeBrowserBridge;
+  }
+}

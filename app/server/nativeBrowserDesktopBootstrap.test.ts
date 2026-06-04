@@ -12,8 +12,11 @@ describe("native browser desktop bootstrap", () => {
     };
 
     expect(packageJson.devDependencies?.electron).toMatch(/^\^?\d+\./);
-    expect(packageJson.scripts?.["desktop:build"]).toBe(
+    expect(packageJson.scripts?.["desktop:build"]).toContain(
       "esbuild electron/main.ts --platform=node --packages=external --bundle --format=esm --outfile=dist-electron/main.mjs",
+    );
+    expect(packageJson.scripts?.["desktop:build"]).toContain(
+      "esbuild electron/preload.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist-electron/preload.cjs",
     );
     expect(packageJson.scripts?.["desktop:dev"]).toBe(
       "pnpm run desktop:build && ELECTRON_START_URL=http://localhost:3000 electron dist-electron/main.mjs",

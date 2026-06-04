@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  nativeBrowserOpenPageChannel,
   nativeBrowserBlockedReasons,
   nativeBrowserPageEventTypes,
   type NativeBrowserOpenRequest,
@@ -30,6 +31,7 @@ describe("native browser contract", () => {
   });
 
   it("exports the narrow runtime vocabularies used by Electron", () => {
+    expect(nativeBrowserOpenPageChannel).toBe("cerebro:native-browser:open-page");
     expect(nativeBrowserPageEventTypes).toEqual([
       "navigation-started",
       "navigation-finished",

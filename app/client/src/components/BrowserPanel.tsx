@@ -198,6 +198,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         setSandboxFrameTarget(result.tab.targetUrl);
         setSandboxFrameProposalId(result.proposal.id);
         setBrowserNotice(`Page opened in ${result.tab.tabId}. Some sites may block this view.`);
+        void window.cerebroNativeBrowser?.openPage({
+          tabId: result.tab.tabId,
+          targetUrl: result.tab.targetUrl,
+          userInitiated: true,
+        }).then((nativeResult) => {
+          if (nativeResult.ok) {
+            setBrowserNotice("Page opened in CereBro.");
+          }
+        }).catch(() => {
+          setBrowserNotice(`Page opened in ${result.tab.tabId}. Some sites may block this view.`);
+        });
       } else {
         setSandboxFrameTarget(null);
         setSandboxFrameProposalId(null);

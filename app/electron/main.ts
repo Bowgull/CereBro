@@ -1,7 +1,11 @@
 import { app, BrowserWindow } from "electron";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 
 const defaultStartUrl = "http://localhost:3000";
+const electronDirname = dirname(fileURLToPath(import.meta.url));
 
 function getStartUrl() {
   const value = process.env.ELECTRON_START_URL?.trim();
@@ -19,6 +23,7 @@ function createMainWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: join(electronDirname, "preload.cjs"),
       sandbox: true,
     },
   });
@@ -26,6 +31,7 @@ function createMainWindow() {
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   const pageView = createNativeBrowserPageView(mainWindow);
   layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
+  installNativeBrowserCommandBridge(mainWindow, pageView);
   void mainWindow.loadURL(getStartUrl());
 
   return mainWindow;

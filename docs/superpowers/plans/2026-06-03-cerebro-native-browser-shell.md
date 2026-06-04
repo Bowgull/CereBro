@@ -125,6 +125,11 @@ Expected: pass.
 
 ## Task 4: Add Privacy Defaults
 
+- [x] Add preload bridge for `window.cerebroNativeBrowser.openPage`.
+- [x] Add main-process IPC handler for one user-initiated open command.
+- [x] Validate native open commands as user-initiated `http` or `https` only.
+- [x] Wire BrowserPanel to call the bridge when Electron provides it.
+
 - [ ] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
 - [ ] Add trusted-site persistent partitions later.
 - [ ] Add forget-site action before broad privacy modes.
