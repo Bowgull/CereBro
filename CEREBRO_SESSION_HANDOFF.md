@@ -21,6 +21,38 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-04 0215 NDT - Native Browser In-Memory Session Policy
+
+### What Changed
+- Added `app/electron/browserSession.ts`.
+- Added `nativeBrowserDefaultSessionPartition` as `cerebro-native-browser-normal`.
+- Added `nativeBrowserSessionWebPreferences()` so native page views use one explicit session policy.
+- Updated `WebContentsView` creation to use the in-memory normal browsing partition instead of a hard-coded partition string.
+- Added `app/server/nativeBrowserSession.test.ts`.
+- Marked the in-memory partition slice complete in the native Browser shell plan and the canonical Obsidian finish path.
+
+### Files Touched
+- `app/electron/browserSession.ts`
+- `app/electron/browserViews.ts`
+- `app/server/nativeBrowserSession.test.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserSession.test.ts` failed before `app/electron/browserSession.ts` existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserSession.test.ts`
+- `pnpm --dir app exec vitest run server/nativeBrowserSession.test.ts server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts server/nativeBrowserWebContentsView.test.ts server/nativeBrowserDesktopBootstrap.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/electron/browserSession.ts, app/electron/browserEvents.ts, app/electron/browserViews.ts, app/electron/browserBridge.ts, app/client/src/components/BrowserPanel.tsx, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue the native Browser path by wiring native page events back into CereBro tab/history state. Do not build bypass/evasion features. Do not touch Raven.
+```
+
 ## 2026-06-04 0205 NDT - Native Browser Return Control
 
 ### What Changed

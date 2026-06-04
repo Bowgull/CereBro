@@ -133,7 +133,7 @@ Expected: pass.
 - [x] Keep the native page view below the CereBro command chrome.
 - [x] Add a visible `Return` control that closes native page view and returns to the Browser surface.
 
-- [ ] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
+- [x] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
 - [ ] Add trusted-site persistent partitions later.
 - [ ] Add forget-site action before broad privacy modes.
 - [ ] Add Ghostery adblocker-electron first only after native navigation is stable.

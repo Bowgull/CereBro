@@ -6,6 +6,7 @@ import {
   mapNativeNavigationStarted,
   mapNativeTitleUpdated,
 } from "./browserEvents";
+import { nativeBrowserSessionWebPreferences } from "./browserSession";
 
 export type NativeBrowserPageView = {
   tabId: string;
@@ -16,12 +17,7 @@ export type NativeBrowserPageView = {
 
 export function createNativeBrowserPageView(mainWindow: BrowserWindow, tabId = "native_tab_1"): NativeBrowserPageView {
   const view = new WebContentsView({
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      partition: "cerebro-native-browser",
-    },
+    webPreferences: nativeBrowserSessionWebPreferences(),
   });
 
   installNativeBrowserPermissionPolicy(view.webContents.session);
