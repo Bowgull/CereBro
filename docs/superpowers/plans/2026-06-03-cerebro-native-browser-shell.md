@@ -116,12 +116,12 @@ Expected: pass.
 
 ## Task 3: Add One Real Page View
 
-- [ ] Add `browserViews.ts` with one `WebContentsView`.
-- [ ] Add popup blocking through `setWindowOpenHandler`.
-- [ ] Add download blocking through Electron `session` events.
-- [ ] Add permission denial by default.
-- [ ] Add page load events mapped to `NativeBrowserPageEvent`.
-- [ ] Keep the current iframe path as fallback until the native shell is proven.
+- [x] Add `browserViews.ts` with one `WebContentsView`.
+- [x] Add popup blocking through `setWindowOpenHandler`.
+- [x] Add download blocking through Electron `session` events.
+- [x] Add permission denial by default.
+- [x] Add page load events mapped to `NativeBrowserPageEvent`.
+- [x] Keep the current iframe path as fallback until the native shell is proven.
 
 ## Task 4: Add Privacy Defaults
 

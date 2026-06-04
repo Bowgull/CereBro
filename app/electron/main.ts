@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 
 const defaultStartUrl = "http://localhost:3000";
 
@@ -23,6 +24,8 @@ function createMainWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  const pageView = createNativeBrowserPageView(mainWindow);
+  layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
   void mainWindow.loadURL(getStartUrl());
 
   return mainWindow;

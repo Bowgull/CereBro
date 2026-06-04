@@ -21,6 +21,42 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-04 0125 NDT - WebContentsView Foundation
+
+### What Changed
+- Completed Native Browser Shell Task 3 foundation from `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`.
+- Added `app/electron/browserViews.ts` with one hidden `WebContentsView`.
+- Added `app/electron/browserPermissions.ts` with default permission denial and download cancellation.
+- Added `app/electron/browserEvents.ts` with page-event mappers into the shared native Browser contract.
+- Updated `app/electron/main.ts` to attach the hidden native page view without replacing the React command surface.
+- Added `app/server/nativeBrowserWebContentsView.test.ts`.
+- Kept the current iframe/page-view path in the web Browser. Browser UI is not wired to command the native view yet.
+
+### Files Touched
+- `app/electron/browserEvents.ts`
+- `app/electron/browserPermissions.ts`
+- `app/electron/browserViews.ts`
+- `app/electron/main.ts`
+- `app/server/nativeBrowserWebContentsView.test.ts`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserWebContentsView.test.ts` failed before `browserEvents.ts`, `browserViews.ts`, and `browserPermissions.ts` existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserWebContentsView.test.ts server/nativeBrowserDesktopBootstrap.test.ts server/nativeBrowserContract.test.ts`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run check`
+- `pnpm --dir app run build`
+- Electron smoke: spawned `pnpm --dir app exec electron dist-electron/main.mjs` with `ELECTRON_START_URL=http://localhost:3000`; process stayed alive for the smoke window and was killed.
+- Process check: no CereBro Electron smoke process left running. Existing process matches belong to the local dev server and esbuild helpers.
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/electron/main.ts, app/electron/browserViews.ts, app/electron/browserPermissions.ts, app/electron/browserEvents.ts, app/server/nativeBrowserWebContentsView.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue the native Browser path by wiring a narrow command bridge from the Browser surface to the native WebContentsView. The current hidden view exists, but Browser UI cannot command it yet. Do not build bypass/evasion features. Do not touch Raven.
+```
+
 ## 2026-06-04 0115 NDT - Electron Bootstrap
 
 ### What Changed
