@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-04 0237 NDT
+Last updated: 2026-06-04 0650 NDT
 
 ## Current North Star
 
@@ -20,6 +20,25 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-04 0650 NDT - Browser Fallback Push Handoff
+
+### What Changed
+- Pushed `codex/raven-airlock` to origin.
+- Origin now includes `d272944 Hide browser fallback machinery`.
+- Branch was clean and synced immediately after push.
+
+### Files Touched
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git status --short --branch`
+- `git push origin codex/raven-airlock`
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/client/src/components/BrowserPanel.tsx, app/shared/nativeBrowser.ts, app/electron/browserBridge.ts, app/electron/browserSession.ts, app/server/routers/workbench.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Branch codex/raven-airlock is pushed through d272944. Continue the native Browser path with verified VPN badge architecture, then Keychain-backed password manager architecture. Do not fake VPN status, store plaintext passwords, build bypass/evasion features, or surface Raven.
+```
 
 ## 2026-06-04 0237 NDT - Browser Fallback Copy Reduction
 
