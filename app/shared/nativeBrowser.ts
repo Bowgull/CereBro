@@ -1,5 +1,8 @@
 export const nativeBrowserOpenPageChannel = "cerebro:native-browser:open-page";
 export const nativeBrowserClosePageChannel = "cerebro:native-browser:close-page";
+export const nativeBrowserReloadPageChannel = "cerebro:native-browser:reload-page";
+export const nativeBrowserGoBackPageChannel = "cerebro:native-browser:go-back-page";
+export const nativeBrowserForwardPageChannel = "cerebro:native-browser:forward-page";
 export const nativeBrowserPageEventChannel = "cerebro:native-browser:page-event";
 
 export const nativeBrowserPageEventTypes = [
@@ -39,9 +42,19 @@ export type NativeBrowserCloseResult = {
   title: string | null;
 };
 
+export type NativeBrowserNavigationResult = {
+  ok: boolean;
+  tabId: string;
+  currentUrl: string | null;
+  title: string | null;
+};
+
 export type NativeBrowserBridge = {
   openPage: (request: NativeBrowserOpenRequest) => Promise<NativeBrowserOpenResult>;
   closePage: () => Promise<NativeBrowserCloseResult>;
+  reloadPage: () => Promise<NativeBrowserNavigationResult>;
+  goBack: () => Promise<NativeBrowserNavigationResult>;
+  goForward: () => Promise<NativeBrowserNavigationResult>;
   onPageEvent: (callback: (event: NativeBrowserPageEvent) => void) => () => void;
 };
 

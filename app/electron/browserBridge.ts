@@ -1,8 +1,12 @@
 import { ipcMain, type BrowserWindow, type Rectangle } from "electron";
 import {
   nativeBrowserClosePageChannel,
+  nativeBrowserForwardPageChannel,
+  nativeBrowserGoBackPageChannel,
   nativeBrowserOpenPageChannel,
+  nativeBrowserReloadPageChannel,
   type NativeBrowserCloseResult,
+  type NativeBrowserNavigationResult,
   type NativeBrowserOpenResult,
 } from "../shared/nativeBrowser";
 import { nativeBrowserContentBounds, normalizeNativeBrowserOpenRequest } from "./browserRequest";
@@ -11,6 +15,15 @@ import { layoutNativeBrowserPageView, type NativeBrowserPageView } from "./brows
 function nativePageBounds(mainWindow: BrowserWindow): Rectangle {
   const bounds = mainWindow.getContentBounds();
   return nativeBrowserContentBounds(bounds);
+}
+
+function nativeNavigationResult(pageView: NativeBrowserPageView, ok = true): NativeBrowserNavigationResult {
+  return {
+    ok,
+    tabId: pageView.tabId,
+    currentUrl: pageView.view.webContents.getURL() || null,
+    title: pageView.view.webContents.getTitle() || null,
+  };
 }
 
 export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pageView: NativeBrowserPageView) {
@@ -51,5 +64,22 @@ export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pag
       currentUrl,
       title,
     };
+  });
+
+  ipcMain.handle(nativeBrowserReloadPageChannel, async (): Promise<NativeBrowserNavigationResult> => {
+    pageView.view.webContents.reload();
+    return nativeNavigationResult(pageView);
+  });
+
+  ipcMain.handle(nativeBrowserGoBackPageChannel, async (): Promise<NativeBrowserNavigationResult> => {
+    if (!pageView.view.webContents.canGoBack()) return nativeNavigationResult(pageView, false);
+    pageView.view.webContents.goBack();
+    return nativeNavigationResult(pageView);
+  });
+
+  ipcMain.handle(nativeBrowserForwardPageChannel, async (): Promise<NativeBrowserNavigationResult> => {
+    if (!pageView.view.webContents.canGoForward()) return nativeNavigationResult(pageView, false);
+    pageView.view.webContents.goForward();
+    return nativeNavigationResult(pageView);
   });
 }

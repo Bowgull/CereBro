@@ -11,6 +11,9 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("cerebroNativeBrowser");
     expect(browserPanelSource).toContain("openPage");
     expect(browserPanelSource).toContain("closePage");
+    expect(browserPanelSource).toContain("reloadPage");
+    expect(browserPanelSource).toContain("goBack");
+    expect(browserPanelSource).toContain("goForward");
     expect(browserPanelSource).toContain("onPageEvent");
     expect(browserPanelSource).toContain("recordNativeBrowserPageEvent");
     expect(browserPanelSource).toContain("userInitiated: true");

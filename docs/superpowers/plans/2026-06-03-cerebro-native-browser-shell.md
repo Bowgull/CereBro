@@ -134,6 +134,7 @@ Expected: pass.
 - [x] Add a visible `Return` control that closes native page view and returns to the Browser surface.
 - [x] Send native page events from Electron to BrowserPanel.
 - [x] Write native page events back into local Browser tab/history state.
+- [x] Wire Browser toolbar reload, back, and forward to the native `WebContentsView`.
 
 - [x] Default to in-memory session partitions for normal browsing until trusted-site profiles exist.
 - [ ] Add trusted-site persistent partitions later.

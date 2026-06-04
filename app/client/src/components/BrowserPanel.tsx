@@ -369,6 +369,43 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     setPreparedApprovalId(null);
     setBrowserNotice(`Local history opened ${target.title ?? target.targetUrl}.`);
   };
+  const goBack = async () => {
+    try {
+      const result = await window.cerebroNativeBrowser?.goBack();
+      if (result?.ok) {
+        setBrowserNotice("Back.");
+        return;
+      }
+    } catch {
+      // Fall back to local Browser history below.
+    }
+    navigateBrowserLocalHistory(browserLocalNavigation.backTarget);
+  };
+  const goForward = async () => {
+    try {
+      const result = await window.cerebroNativeBrowser?.goForward();
+      if (result?.ok) {
+        setBrowserNotice("Forward.");
+        return;
+      }
+    } catch {
+      // Fall back to local Browser history below.
+    }
+    navigateBrowserLocalHistory(browserLocalNavigation.forwardTarget);
+  };
+  const reloadPage = async () => {
+    try {
+      const result = await window.cerebroNativeBrowser?.reloadPage();
+      if (result?.ok) {
+        setBrowserNotice("Reloaded.");
+        return;
+      }
+    } catch {
+      // Fall back to the web page receipt below.
+    }
+    if (selectedBrowserProposalId == null) return;
+    recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
+  };
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
     setSandboxFrameProposalId(null);
@@ -544,10 +581,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 size="sm"
                 variant="ghost"
                 className="h-8 w-8 px-0"
-                disabled={!browserLocalNavigation.canGoBack}
-                aria-label={browserLocalNavigation.canGoBack ? "Go back through local Browser history" : "No previous local Browser history"}
-                title={browserLocalNavigation.backTarget ? `Open previous local history row: ${browserLocalNavigation.backTarget.targetUrl}` : "No previous local history for this page."}
-                onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.backTarget)}
+                disabled={!hasOpenSandboxFrame && !browserLocalNavigation.canGoBack}
+                aria-label="Go back"
+                title="Go back."
+                onClick={() => void goBack()}
               >
                 <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
               </Button>
@@ -556,10 +593,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 size="sm"
                 variant="ghost"
                 className="h-8 w-8 px-0"
-                disabled={!browserLocalNavigation.canGoForward}
-                aria-label={browserLocalNavigation.canGoForward ? "Go forward through local Browser history" : "No next local Browser history"}
-                title={browserLocalNavigation.forwardTarget ? `Open next local history row: ${browserLocalNavigation.forwardTarget.targetUrl}` : "No next local history for this page."}
-                onClick={() => navigateBrowserLocalHistory(browserLocalNavigation.forwardTarget)}
+                disabled={!hasOpenSandboxFrame && !browserLocalNavigation.canGoForward}
+                aria-label="Go forward"
+                title="Go forward."
+                onClick={() => void goForward()}
               >
                 <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
               </Button>
@@ -571,10 +608,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
                 aria-label="Reload page"
                 title={hasOpenSandboxFrame ? "Reload the page." : "Open a page before reload."}
-                onClick={() => {
-                  if (selectedBrowserProposalId == null) return;
-                  recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
-                }}
+                onClick={() => void reloadPage()}
               >
                 <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
               </Button>
