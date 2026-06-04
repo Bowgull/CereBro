@@ -100,18 +100,19 @@ Expected: pass.
 
 ## Task 2: Add Electron Shell Without Browser Power
 
-- [ ] Install only the local desktop dependency after approval for this slice: `pnpm --dir app add -D electron`.
-- [ ] Create `app/electron/main.ts` that opens the existing local CereBro URL and does not create web page views yet.
-- [ ] Add scripts:
+- [x] Install only the local desktop dependency after approval for this slice: `pnpm --dir app add -D electron`.
+- [x] Create `app/electron/main.ts` that opens the existing local CereBro URL and does not create web page views yet.
+- [x] Add scripts:
 
 ```json
 {
-  "desktop:dev": "ELECTRON_START_URL=http://localhost:3000 electron electron/main.ts"
+  "desktop:build": "esbuild electron/main.ts --platform=node --packages=external --bundle --format=esm --outfile=dist-electron/main.mjs",
+  "desktop:dev": "pnpm run desktop:build && ELECTRON_START_URL=http://localhost:3000 electron dist-electron/main.mjs"
 }
 ```
 
-- [ ] Run the app server and Electron shell together.
-- [ ] Verify the existing CereBro app opens in the native shell.
+- [x] Run the app server and Electron shell together.
+- [x] Verify the existing CereBro app opens in the native shell.
 
 ## Task 3: Add One Real Page View
 

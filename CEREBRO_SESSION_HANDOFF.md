@@ -21,6 +21,49 @@ The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
 
+## 2026-06-04 0115 NDT - Electron Bootstrap
+
+### What Changed
+- Completed Native Browser Shell Task 2 from `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`.
+- Installed Electron as a local dev dependency.
+- Added `app/electron/main.ts`.
+- Added `desktop:build` and `desktop:dev`.
+- Corrected the original plan script so Electron runs bundled ESM output instead of raw TypeScript.
+- Added `app/server/nativeBrowserDesktopBootstrap.test.ts`.
+- Included `electron/**/*` in `app/tsconfig.json`.
+- Added `dist-electron/` to `app/.gitignore`.
+- Smoke-started the Electron shell against the live local app on `http://localhost:3000`.
+- No native page view power was added. No `WebContentsView` exists yet.
+
+### Files Touched
+- `app/.gitignore`
+- `app/electron/main.ts`
+- `app/package.json`
+- `app/pnpm-lock.yaml`
+- `app/server/nativeBrowserDesktopBootstrap.test.ts`
+- `app/tsconfig.json`
+- `docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Red check: `pnpm --dir app exec vitest run server/nativeBrowserDesktopBootstrap.test.ts` failed before Electron, scripts, and `app/electron/main.ts` existed.
+- `pnpm --dir app exec vitest run server/nativeBrowserDesktopBootstrap.test.ts server/nativeBrowserContract.test.ts`
+- `pnpm --dir app run desktop:build`
+- `curl -I --max-time 3 http://localhost:3000/`
+- Electron smoke: spawned `pnpm --dir app exec electron dist-electron/main.mjs` with `ELECTRON_START_URL=http://localhost:3000`; process stayed alive for the smoke window and was killed.
+- Process check: no CereBro Electron smoke process left running. Existing Electron crashpad helpers belong to Codex and Claude.
+- `pnpm --dir app exec vitest run server/nativeBrowserDesktopBootstrap.test.ts server/nativeBrowserContract.test.ts server/browserActionProposalRouter.test.ts server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run build`
+- `pnpm --dir app run desktop:build`
+- Raven production grep outside tests: clean. Command returned no matches.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, app/shared/nativeBrowser.ts, app/electron/main.ts, app/server/nativeBrowserDesktopBootstrap.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Continue Native Browser Shell Task 3. Add one real WebContentsView with popup blocking, download blocking, default permission denial, and page events mapped to NativeBrowserPageEvent. Do not build bypass/evasion features. Do not touch Raven. Keep the current Browser UI as the command surface.
+```
+
 ## 2026-06-04 0105 NDT - Native Browser Contract Types
 
 ### What Changed
