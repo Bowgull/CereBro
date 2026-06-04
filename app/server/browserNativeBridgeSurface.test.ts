@@ -16,6 +16,8 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("goForward");
     expect(browserPanelSource).toContain("onPageEvent");
     expect(browserPanelSource).toContain("recordNativeBrowserPageEvent");
+    expect(browserPanelSource).toContain("nativePageActive");
+    expect(browserPanelSource).toContain("Native page viewport");
     expect(browserPanelSource).toContain("userInitiated: true");
     expect(browserPanelSource).toContain("Return");
   });

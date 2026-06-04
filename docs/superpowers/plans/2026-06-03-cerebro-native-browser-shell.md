@@ -141,6 +141,8 @@ Expected: pass.
 - [ ] Add forget-site action before broad privacy modes.
 - [ ] Add Ghostery adblocker-electron first only after native navigation is stable.
 - [ ] Revisit Brave `adblock-rust` only if Electron-side blocking is too slow or too limited.
+- [ ] Add verified VPN status badge in V1. No fake protected badge.
+- [ ] Add password manager in V1 with encrypted storage, preferably macOS Keychain. No plaintext passwords in SQLite, logs, receipts, or Obsidian.
 
 ## Task 5: Replace Outside Open
 

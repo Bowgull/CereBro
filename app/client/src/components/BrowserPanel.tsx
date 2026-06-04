@@ -94,6 +94,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [sandboxFrameTarget, setSandboxFrameTarget] = useState<string | null>(null);
   const [sandboxFrameProposalId, setSandboxFrameProposalId] = useState<number | null>(null);
   const [sandboxFrameReloadKey, setSandboxFrameReloadKey] = useState(0);
+  const [nativePageActive, setNativePageActive] = useState(false);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const utils = trpc.useUtils();
@@ -197,21 +198,31 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       if (result.ok) {
         setSandboxFrameTarget(result.tab.targetUrl);
         setSandboxFrameProposalId(result.proposal.id);
-        setBrowserNotice(`Page opened in ${result.tab.tabId}. Some sites may block this view.`);
-        void window.cerebroNativeBrowser?.openPage({
-          tabId: result.tab.tabId,
-          targetUrl: result.tab.targetUrl,
-          userInitiated: true,
-        }).then((nativeResult) => {
-          if (nativeResult.ok) {
-            setBrowserNotice("Page opened in CereBro.");
-          }
-        }).catch(() => {
-          setBrowserNotice(`Page opened in ${result.tab.tabId}. Some sites may block this view.`);
-        });
+        setNativePageActive(false);
+        const nativeBridge = window.cerebroNativeBrowser;
+        if (nativeBridge) {
+          void nativeBridge.openPage({
+            tabId: result.tab.tabId,
+            targetUrl: result.tab.targetUrl,
+            userInitiated: true,
+          }).then((nativeResult) => {
+            if (nativeResult.ok) {
+              setNativePageActive(true);
+              setBrowserNotice("Page opened in CereBro.");
+              return;
+            }
+            setBrowserNotice("Page blocked. Try again.");
+          }).catch(() => {
+            setNativePageActive(false);
+            setBrowserNotice(`Page opened in ${result.tab.tabId}.`);
+          });
+        } else {
+          setBrowserNotice(`Page opened in ${result.tab.tabId}.`);
+        }
       } else {
         setSandboxFrameTarget(null);
         setSandboxFrameProposalId(null);
+        setNativePageActive(false);
         setBrowserNotice("Page blocked. Finish permission first.");
       }
       utils.workbench.browserTabSessionStorageContract.invalidate();
@@ -409,6 +420,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
     setSandboxFrameProposalId(null);
+    setNativePageActive(false);
     try {
       await window.cerebroNativeBrowser?.closePage();
     } catch {
@@ -457,6 +469,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setSandboxFrameTarget(null);
       setSandboxFrameProposalId(null);
       setSandboxFrameReloadKey(0);
+      setNativePageActive(false);
     } catch {
       setBrowserNotice("Browser focus could not be read. No page opened.");
     }
@@ -537,7 +550,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     setBrowserSurface("page");
                     setBrowserAddressDraft(tab.targetUrl);
                     setSelectedBrowserProposalId(tab.proposalId);
-                    if (sandboxFrameProposalId !== tab.proposalId) setSandboxFrameTarget(null);
+                    if (sandboxFrameProposalId !== tab.proposalId) {
+                      setSandboxFrameTarget(null);
+                      setNativePageActive(false);
+                    }
                     setBrowserNotice(`${tab.state === "open" ? "Open" : "Draft"} tab ${tab.tabId} selected. No page opened.`);
                   }}
                   style={{
@@ -786,6 +802,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     setSelectedBrowserProposalId(null);
                     setSandboxFrameTarget(null);
                     setSandboxFrameProposalId(null);
+                    setNativePageActive(false);
                     setBrowserNotice("Bookmark loaded into the address bar. Open it when ready.");
                   }}
                 >
@@ -836,6 +853,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                   setSelectedBrowserProposalId(null);
                                   setSandboxFrameTarget(null);
                                   setSandboxFrameProposalId(null);
+                                  setNativePageActive(false);
                                   setBrowserNotice("Bookmark loaded into the address bar. Open it when ready.");
                                 }}
                               >
@@ -1009,36 +1027,46 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       </div>
                       <span className="rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider" style={{ color: C.gold, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)" }}>open</span>
                     </div>
-                    <iframe
-                      key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
-                      title="CereBro page view"
-                      src={sandboxFrameTarget}
-                      sandbox="allow-scripts allow-forms"
-                      referrerPolicy="no-referrer"
-                      className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
-                      style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
-                    />
-                    <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded px-1.5 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
-                      <span>Some sites block this page view. Native CereBro Browser is the next build path.</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="h-7 gap-1 px-2 text-[10px]"
-                        disabled={selectedBrowserProposalId == null || recordBrowserSandboxFrameFallback.isPending}
-                        title="Open this URL outside CereBro by request."
-                        onClick={() => {
-                          if (selectedBrowserProposalId == null) return;
-                          recordBrowserSandboxFrameFallback.mutate({
-                            proposalId: selectedBrowserProposalId,
-                            reason: "Site did not render inside the protected page view.",
-                          });
-                        }}
-                      >
-                        <ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" />
-                        {recordBrowserSandboxFrameFallback.isPending ? "Opening" : "Open Outside"}
-                      </Button>
-                    </div>
+                    {nativePageActive ? (
+                      <div
+                        aria-label="Native page viewport"
+                        className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
+                        style={{ background: "rgba(2, 6, 6, 0.01)", border: "1px solid rgba(244, 239, 227, 0.08)" }}
+                      />
+                    ) : (
+                      <>
+                        <iframe
+                          key={`${sandboxFrameProposalId ?? "frame"}-${sandboxFrameReloadKey}`}
+                          title="CereBro page view"
+                          src={sandboxFrameTarget}
+                          sandbox="allow-scripts allow-forms"
+                          referrerPolicy="no-referrer"
+                          className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
+                          style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
+                        />
+                        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 rounded px-1.5 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                          <span>This site needs the desktop Browser for the best page view.</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 px-2 text-[10px]"
+                            disabled={selectedBrowserProposalId == null || recordBrowserSandboxFrameFallback.isPending}
+                            title="Open this URL outside CereBro by request."
+                            onClick={() => {
+                              if (selectedBrowserProposalId == null) return;
+                              recordBrowserSandboxFrameFallback.mutate({
+                                proposalId: selectedBrowserProposalId,
+                                reason: "Site did not render inside the protected page view.",
+                              });
+                            }}
+                          >
+                            <ExternalLink size={12} strokeWidth={1.8} aria-hidden="true" />
+                            {recordBrowserSandboxFrameFallback.isPending ? "Opening" : "Open Outside"}
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ) : (
