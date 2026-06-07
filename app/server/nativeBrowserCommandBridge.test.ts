@@ -44,6 +44,8 @@ describe("native browser command bridge", () => {
     expect(preloadSource).toContain("nativeBrowserGoBackPageChannel");
     expect(preloadSource).toContain("nativeBrowserForwardPageChannel");
     expect(preloadSource).toContain("nativeBrowserPageEventChannel");
+    expect(preloadSource).toContain("cerebroNativeVpn");
+    expect(preloadSource).toContain("nativeVpnStatusChannel");
     expect(preloadSource).toContain("onPageEvent");
     expect(preloadSource).toContain("reloadPage");
     expect(preloadSource).toContain("goBack");
@@ -57,6 +59,7 @@ describe("native browser command bridge", () => {
     expect(bridgeSource).toContain("canGoBack");
     expect(bridgeSource).toContain("canGoForward");
     expect(mainSource).toContain("installNativeBrowserCommandBridge");
+    expect(mainSource).toContain("installNativeVpnBridge");
     expect(mainSource).toContain("webContents.send");
     expect(packageSource).toContain("electron/preload.ts");
   });

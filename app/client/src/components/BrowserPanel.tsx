@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
+import { nativeVpnUnknownStatus, type NativeVpnStatusResult } from "../../../shared/nativeVpn";
 import {
   workbenchBrowserActionPreviewModel,
   workbenchBrowserDraftModel,
@@ -30,7 +31,7 @@ const browserFrame = {
   shadow: "0 24px 70px rgba(0, 0, 0, 0.52)",
 };
 
-type BrowserRoute = "approvals" | "workbench" | "sources" | "security";
+type BrowserRoute = "approvals" | "workbench" | "sources" | "security" | "basement";
 
 type BrowserDraftTab = {
   id: number;
@@ -83,6 +84,35 @@ function watchShelfInitial(title: string | null, targetUrl: string) {
   return (value[0] ?? "W").toUpperCase();
 }
 
+function vpnStatusTone(status: NativeVpnStatusResult | null) {
+  if (status?.state === "on") return C.success;
+  if (status?.state === "checking") return C.gold;
+  if (status?.state === "needs_setup" || status?.state === "error") return C.warning;
+  return C.textMuted;
+}
+
+const vpnSurfaceLabels = {
+  on: "VPN On",
+  off: "VPN Off",
+  checking: "Checking",
+  needs_setup: "Needs Setup",
+  unknown: "Unknown",
+  error: "Unknown",
+} satisfies Record<NativeVpnStatusResult["state"], string>;
+
+function vpnStatusLabel(status: NativeVpnStatusResult | null, isBusy: boolean) {
+  if (isBusy) return "Checking";
+  return status ? vpnSurfaceLabels[status.state] : "Unknown";
+}
+
+function vpnPrimaryActionLabel(status: NativeVpnStatusResult | null, isBusy: boolean) {
+  if (isBusy) return "Checking";
+  if (!status || status.state === "unknown" || status.state === "error") return "Check";
+  if (status?.state === "on") return "Turn Off";
+  if (status?.state === "needs_setup") return "Set Up";
+  return "Turn On";
+}
+
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
@@ -95,6 +125,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [sandboxFrameProposalId, setSandboxFrameProposalId] = useState<number | null>(null);
   const [sandboxFrameReloadKey, setSandboxFrameReloadKey] = useState(0);
   const [nativePageActive, setNativePageActive] = useState(false);
+  const [vpnStatus, setVpnStatus] = useState<NativeVpnStatusResult | null>(null);
+  const [vpnBusy, setVpnBusy] = useState(false);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const utils = trpc.useUtils();
@@ -428,6 +460,47 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     }
     setBrowserNotice("Returned to Browser.");
   };
+  const checkVpnStatus = async () => {
+    setVpnBusy(true);
+    try {
+      const status = await window.cerebroNativeVpn?.check();
+      if (status) {
+        setVpnStatus(status);
+        return status;
+      }
+      setVpnStatus(nativeVpnUnknownStatus());
+      return null;
+    } catch {
+      setBrowserNotice("VPN check failed.");
+      return null;
+    } finally {
+      setVpnBusy(false);
+    }
+  };
+  const toggleVpn = async () => {
+    setVpnBusy(true);
+    try {
+      const bridge = window.cerebroNativeVpn;
+      if (!bridge) {
+        setBrowserNotice("VPN setup is not available in this window.");
+        return;
+      }
+      const result =
+        vpnStatus?.state === "on"
+          ? await bridge.disconnect()
+          : vpnStatus?.state === "needs_setup"
+            ? await bridge.openSettings()
+            : vpnStatus?.state === "off"
+              ? await bridge.connect()
+              : { ok: true, action: "status" as const, status: await bridge.check(), message: "VPN checked." };
+      setVpnStatus(result.status);
+      setBrowserNotice(result.message);
+    } catch {
+      setBrowserNotice("VPN action failed.");
+    } finally {
+      setVpnBusy(false);
+    }
+  };
   const isPreparingBrowserDraft =
     createBrowserActionProposal.isPending ||
     createBrowserTabSessionDraft.isPending ||
@@ -480,6 +553,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       recordNativeBrowserPageEvent.mutate(event);
     });
   }, [recordNativeBrowserPageEvent]);
+
+  useEffect(() => {
+    void checkVpnStatus();
+  }, []);
 
   return (
     <div
@@ -689,15 +766,98 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               >
                 {browserPrimaryAction.label}
               </Button>
-              <Button type="button" size="sm" variant="ghost" className="h-9 w-9 px-0" disabled aria-label="Browser quiet shield">
-                <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" />
-              </Button>
+              <details className="relative">
+                <summary
+                  className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  aria-label="VPN shield"
+                  style={{
+                    border: `1px solid ${vpnStatusTone(vpnStatus)}66`,
+                    color: vpnStatusTone(vpnStatus),
+                    background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))",
+                    boxShadow: `${browserFrame.bevel}, inset 0 0 18px ${vpnStatusTone(vpnStatus)}12`,
+                    ["--tw-ring-color" as string]: C.accent,
+                  }}
+                >
+                  <ShieldCheck size={14} strokeWidth={1.9} aria-hidden="true" />
+                  <span className="hidden sm:inline">{vpnStatusLabel(vpnStatus, vpnBusy)}</span>
+                  <span className="sr-only">{vpnStatusLabel(vpnStatus, vpnBusy)}</span>
+                </summary>
+                <div
+                  className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug"
+                  role="menu"
+                  style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>VPN Shield</div>
+                      <div className="mt-1 text-[12px] font-semibold" style={{ color: vpnStatusTone(vpnStatus) }}>
+                        {vpnStatusLabel(vpnStatus, vpnBusy)}
+                      </div>
+                    </div>
+                    <span className="mt-0.5 h-2.5 w-2.5 rounded-full" aria-hidden="true" style={{ background: vpnStatusTone(vpnStatus), boxShadow: `0 0 18px ${vpnStatusTone(vpnStatus)}66` }} />
+                  </div>
+                  <div className="mt-2" style={{ color: C.textSecondary }}>
+                    {vpnStatus?.state === "on"
+                      ? "VPN is on."
+                      : vpnStatus?.state === "needs_setup"
+                        ? "Finish setup once, then the shield can check it."
+                        : "Turn it on before private browsing."}
+                  </div>
+                  <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-8 justify-center px-2 text-[11px]"
+                      disabled={vpnBusy}
+                      role="menuitem"
+                      onClick={() => void toggleVpn()}
+                    >
+                      {vpnPrimaryActionLabel(vpnStatus, vpnBusy)}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2 text-[11px]"
+                      disabled={vpnBusy}
+                      role="menuitem"
+                      onClick={() => void checkVpnStatus()}
+                    >
+                      Check
+                    </Button>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="mt-1 h-7 w-full justify-start px-1.5 text-[10px]"
+                    role="menuitem"
+                    onClick={() => onNavigate?.("basement")}
+                  >
+                    VPN Settings
+                  </Button>
+                </div>
+              </details>
               <details className="relative">
                 <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 </summary>
                 <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                    role="menuitem"
+                    onClick={() => onNavigate?.("basement")}
+                  >
+                    <span className="block">
+                      <span className="block text-[11px] font-semibold">VPN Settings</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Shield setup and status.</span>
+                    </span>
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"

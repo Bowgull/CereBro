@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Castle, Compass, Hammer, ScrollText, Settings } from "lucide-react";
+import { Castle, Compass, Hammer, ScrollText, Settings, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import KeepScene from "@/components/KeepScene";
 import KeepFortressBlueprint from "@/components/KeepFortressBlueprint";
@@ -51,6 +51,7 @@ import { FLOORS, cerebroColors as C, cerebroTheme as T, type FloorId, type Agent
 import { ledgerGitWriteRunnerCopy, ledgerKindLabel, ledgerNavCopy, ledgerOverviewCopy, ledgerReceiptSummary, ledgerRouteText } from "@/lib/ledgerCopyModel";
 import { routeActionModel, routeExecutionReadinessProofModel, routePreviewActionModel, routePreviewProofModel, routeReceiptContractProofModel, type RouteAction } from "@/lib/routeActionModel";
 import { trpc } from "@/lib/trpc";
+import type { NativeVpnStatusResult } from "../../../shared/nativeVpn";
 
 // ── Canonical shell nav ─────────────────────────────────────────────────────
 // Per CEREBRO_TRUTH_RECONCILIATION §9: castle is a creative LAYER, the
@@ -2573,6 +2574,8 @@ function RouteActionButton({ action, onClick }: { action: RouteAction; onClick: 
 }
 
 function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const [vpnStatus, setVpnStatus] = useState<NativeVpnStatusResult | null>(null);
+  const [vpnBusy, setVpnBusy] = useState(false);
   const connection = trpc.agents.connectionStatus.useQuery(undefined, {
     staleTime: 30_000,
     refetchOnWindowFocus: false,
@@ -2598,6 +2601,31 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   const riskyReceipts = securityRows.filter((item) => item.riskLevel === "high" || item.riskLevel === "blocked").length;
   const latestRisk = securityRows[0]?.riskLevel ?? "none";
   const ollamaSetup = modelPolicy.data?.ollamaSetupPlan;
+  const vpnTone = vpnStatus?.state === "on" ? C.success : vpnStatus?.state === "needs_setup" ? C.warning : C.textMuted;
+
+  const checkVpnStatus = async () => {
+    setVpnBusy(true);
+    try {
+      const next = await window.cerebroNativeVpn?.check();
+      if (next) setVpnStatus(next);
+    } finally {
+      setVpnBusy(false);
+    }
+  };
+
+  const openVpnSettings = async () => {
+    setVpnBusy(true);
+    try {
+      const result = await window.cerebroNativeVpn?.openSettings();
+      if (result?.status) setVpnStatus(result.status);
+    } finally {
+      setVpnBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    void checkVpnStatus();
+  }, []);
 
   const cards = [
     {
@@ -2613,6 +2641,13 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
       meta: "Capability registry",
       target: "model_tools" as NavId,
       tone: C.accent,
+    },
+    {
+      label: "VPN",
+      value: vpnStatus?.label ?? "Unknown",
+      meta: "Browser shield",
+      target: "basement" as NavId,
+      tone: vpnTone,
     },
     {
       label: "Surfer",
@@ -2656,7 +2691,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
           </div>
         </section>
 
-        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-5" aria-label="Basement configuration map">
+        <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-6" aria-label="Basement configuration map">
           {cards.map((card) => (
             <Button
               key={card.label}
@@ -2683,6 +2718,51 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               </span>
             </Button>
           ))}
+        </section>
+
+        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }} aria-label="VPN settings">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={14} strokeWidth={1.8} aria-hidden="true" style={{ color: vpnTone }} />
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
+                  VPN Shield
+                </h3>
+              </div>
+              <p className="mt-1 max-w-2xl text-[10px] leading-snug" style={{ color: C.textMuted }}>
+                Browser shows one shield. Setup, provider status, and diagnostics stay here.
+              </p>
+            </div>
+            <Badge variant="secondary" className="px-2 py-0.5" style={{ color: vpnTone, background: C.surfaceMuted, border: `1px solid ${C.borderSoft}` }}>
+              {vpnBusy ? "Checking" : vpnStatus?.label ?? "Unknown"}
+            </Badge>
+          </div>
+          <div className="mt-2 grid gap-1.5 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div className="rounded p-2 text-[11px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textSecondary }}>
+              {vpnStatus?.state === "on"
+                ? "VPN is active. The Browser shield can verify it."
+                : vpnStatus?.state === "needs_setup"
+                  ? "Finish setup once in the VPN app. CereBro keeps the Browser surface simple."
+                  : "VPN is off or unknown. Check status before private browsing."}
+            </div>
+            <Button type="button" size="sm" variant="outline" className="h-9 px-3" disabled={vpnBusy} onClick={() => void checkVpnStatus()}>
+              Check
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="h-9 px-3" disabled={vpnBusy} onClick={() => void openVpnSettings()}>
+              Open VPN
+            </Button>
+          </div>
+          <details className="mt-2 rounded p-2 text-[10px] leading-snug" style={{ background: C.surfaceMuted, border: `1px solid ${C.borderSoft}`, color: C.textMuted }}>
+            <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest" style={{ color: C.textSecondary }}>
+              Diagnostics
+            </summary>
+            <div className="mt-2 grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
+              <LedgerRule title="App" body={vpnStatus?.detail.appInstalled ? "Installed" : "Not found"} tone={vpnStatus?.detail.appInstalled ? C.success : C.warning} />
+              <LedgerRule title="Service" body={vpnStatus?.detail.serviceName ?? "None"} tone={vpnStatus?.detail.serviceName ? C.accent : C.textMuted} />
+              <LedgerRule title="Interface" body={vpnStatus?.detail.routeInterface ?? "Unknown"} tone={vpnStatus?.detail.routeInterface ? C.gold : C.textMuted} />
+              <LedgerRule title="Tunnel" body={vpnStatus?.detail.tunnelAddress ?? "Unknown"} tone={vpnStatus?.detail.tunnelAddress ? C.success : C.textMuted} />
+            </div>
+          </details>
         </section>
 
         {ollamaSetup && (

@@ -15,6 +15,8 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("goBack");
     expect(browserPanelSource).toContain("goForward");
     expect(browserPanelSource).toContain("onPageEvent");
+    expect(browserPanelSource).toContain("cerebroNativeVpn");
+    expect(browserPanelSource).toContain("VPN Shield");
     expect(browserPanelSource).toContain("recordNativeBrowserPageEvent");
     expect(browserPanelSource).toContain("nativePageActive");
     expect(browserPanelSource).toContain("Native page viewport");
@@ -30,5 +32,18 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).not.toContain("desktop Browser for the best page view");
     expect(browserPanelSource).toContain("Fallback");
     expect(browserPanelSource).toContain("System Browser");
+  });
+
+  it("keeps VPN machinery out of the Browser surface", async () => {
+    const browserPanelSource = await readFile(resolve(appRoot, "client/src/components/BrowserPanel.tsx"), "utf8");
+
+    expect(browserPanelSource).not.toContain("ProtonVPN");
+    expect(browserPanelSource).not.toContain("WireGuard");
+    expect(browserPanelSource).not.toContain("PrivateKey");
+    expect(browserPanelSource).not.toContain("utun");
+    expect(browserPanelSource).not.toContain("scutil");
+    expect(browserPanelSource).toContain("VPN On");
+    expect(browserPanelSource).toContain("VPN Off");
+    expect(browserPanelSource).toContain("Needs Setup");
   });
 });

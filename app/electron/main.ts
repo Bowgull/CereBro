@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
 import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
+import { installNativeVpnBridge } from "./vpnBridge";
 
 const defaultStartUrl = "http://localhost:3000";
 const electronDirname = dirname(fileURLToPath(import.meta.url));
@@ -35,6 +36,7 @@ function createMainWindow() {
   });
   layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
   installNativeBrowserCommandBridge(mainWindow, pageView);
+  installNativeVpnBridge();
   void mainWindow.loadURL(getStartUrl());
 
   return mainWindow;

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-04 0722 NDT
+Last updated: 2026-06-07 1709 ADT
 
 ## Current North Star
 
@@ -20,6 +20,45 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-07 1709 ADT - VPN Shield V1
+
+### What Changed
+- Added a native VPN bridge for Electron.
+- Added macOS ProtonVPN status detection through system VPN state, default route, and tunnel address checks.
+- Added Browser one-shield UI with plain states: `VPN On`, `VPN Off`, `Checking`, `Needs Setup`, and `Unknown`.
+- Added Browser `VPN Settings` entry in the page menu.
+- Added Basement VPN Shield settings with collapsed diagnostics.
+- Kept provider, protocol, tunnel, route, key, and command wording out of the main Browser surface.
+- Verified ProtonVPN app is installed and the free config path works.
+- Tested direct connect through the native bridge. It can request connection, but ProtonVPN/macOS still requires app confirmation, so one-click control is not marked complete.
+
+### Files Touched
+- `app/shared/nativeVpn.ts`
+- `app/electron/vpnStatus.ts`
+- `app/electron/vpnBridge.ts`
+- `app/electron/preload.ts`
+- `app/electron/main.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/server/nativeVpnContract.test.ts`
+- `app/server/nativeBrowserCommandBridge.test.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/nativeVpnContract.test.ts server/nativeBrowserCommandBridge.test.ts server/browserNativeBridgeSurface.test.ts`
+- `pnpm --dir app check`
+- `pnpm --dir app desktop:build`
+- `pnpm --dir app build`
+- Browser visual check at `http://localhost:3000/`
+- Native VPN status reader check.
+- Direct native connect check. Result: needs app confirmation.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/shared/nativeVpn.ts, app/electron/vpnStatus.ts, app/electron/vpnBridge.ts, app/client/src/components/BrowserPanel.tsx, app/client/src/pages/Home.tsx, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Branch codex/raven-airlock has VPN Shield V1 implemented. Next critical path is either direct VPN control proof through WireGuard/native macOS APIs, or the next Browser-first slice: password manager with encrypted storage. Keep the Browser shield one-button and hide provider/protocol/tunnel/route/key/command wording from the main Browser surface. Do not fake protected status. Do not surface Raven.
+```
 
 ## 2026-06-04 0722 NDT - VPN Critical Path Decision
 

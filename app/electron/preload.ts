@@ -10,6 +10,14 @@ import {
   type NativeBrowserOpenRequest,
   type NativeBrowserPageEvent,
 } from "../shared/nativeBrowser";
+import {
+  nativeVpnCheckChannel,
+  nativeVpnConnectChannel,
+  nativeVpnDisconnectChannel,
+  nativeVpnOpenSettingsChannel,
+  nativeVpnStatusChannel,
+  type NativeVpnBridge,
+} from "../shared/nativeVpn";
 
 const nativeBrowserBridge: NativeBrowserBridge = {
   openPage: (request: NativeBrowserOpenRequest) => ipcRenderer.invoke(nativeBrowserOpenPageChannel, request),
@@ -25,3 +33,13 @@ const nativeBrowserBridge: NativeBrowserBridge = {
 };
 
 contextBridge.exposeInMainWorld("cerebroNativeBrowser", nativeBrowserBridge);
+
+const nativeVpnBridge: NativeVpnBridge = {
+  status: () => ipcRenderer.invoke(nativeVpnStatusChannel),
+  check: () => ipcRenderer.invoke(nativeVpnCheckChannel),
+  connect: () => ipcRenderer.invoke(nativeVpnConnectChannel),
+  disconnect: () => ipcRenderer.invoke(nativeVpnDisconnectChannel),
+  openSettings: () => ipcRenderer.invoke(nativeVpnOpenSettingsChannel),
+};
+
+contextBridge.exposeInMainWorld("cerebroNativeVpn", nativeVpnBridge);
