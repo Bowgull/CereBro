@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-07 1840 ADT
+Last updated: 2026-06-08 1133 ADT
 
 ## Current North Star
 
@@ -33,6 +33,34 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-08 1133 ADT - Browser UX Security And Multi-Window Planning
+
+### What Changed
+- Updated the canonical Obsidian finish path with Browser V1 UX and safety rules.
+- Locked the clean Browser toolbar model: back, forward, reload, URL/search, bookmark, shield, popup only when blocked, downloads only when active/recent, and Tools.
+- Moved copy/paste URL behavior to normal browser places: URL bar, tab/menu context, and right-click link actions.
+- Defined Tools as useful browser powers, not machinery: annotate, highlight, save to notes, save GitHub repo, add to Watch, screenshot, ask Aang, send to Workshop, find in page, and reader mode.
+- Defined downloads behavior: default to `Downloads`, allow user-clicked downloads, block automatic downloads, ask on multiple/risky downloads, and show a simple downloads tray.
+- Defined security scope: CereBro should do browser safety, not antivirus.
+- Defined autofill V1: Keychain-backed passwords only, no payment cards, no automatic fill on page load, domain match required, and no credential text in Ledger, Obsidian, logs, screenshots, or Aang messages.
+- Added future CereBro multi-window workspace plan: real detachable macOS Browser, tab, Workshop, Notes, and Council windows controlled by Aang; drag-to-detach is planned after stable window commands.
+- Marked local `CereBro.app` packaging proof, app icon, `/Applications` install, and Dock pin done in the Obsidian roadmap.
+
+### Files Touched
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+- Obsidian: `90_Archive/CereBro Session History/snapshots/2026-06-08 1133 CereBro Session Handoff - browser-ux-security-multi-window.md`
+- Obsidian: `90_Archive/CereBro Session History/CereBro Session History.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+### Checks Run
+- `git status --short --branch`
+- Obsidian roadmap and snapshot readback for Browser, security, tools, downloads, and multi-window sections.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, app/electron/main.ts, app/electron/browserPermissions.ts, app/electron/browserBridge.ts, app/server/nativeBrowserDesktopBootstrap.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro.app is installed in /Applications and pinned to the Dock on this Mac, but the package is still a local proof and depends on repo symlinks. Browser V1 UX rules are now locked: clean toolbar, shield always visible, popup/download icons only when useful, copy/paste in context menus, Tools as human browser powers, downloads to Downloads, automatic downloads blocked, autofill passwords only through Keychain, and no antivirus scope. Multi-window is planned as real detachable macOS windows controlled by Aang, with drag-to-detach later. Next critical path is Browser V1 toolbar and safety model or portable app packaging. Do not surface Raven.
+```
 
 ## 2026-06-07 1840 ADT - Whole-App Browser Placement And Normality Pass
 
