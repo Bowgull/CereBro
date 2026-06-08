@@ -61,6 +61,9 @@ describe("native browser command bridge", () => {
     expect(mainSource).toContain("installNativeBrowserCommandBridge");
     expect(mainSource).toContain("installNativeVpnBridge");
     expect(mainSource).toContain("installApplicationMenu");
+    expect(mainSource).toContain("const appName = \"CereBro\"");
+    expect(mainSource).toContain("app.setName(appName)");
+    expect(mainSource).toContain("cerebro-app-icon.icns");
     expect(mainSource).toContain("New Tab");
     expect(mainSource).toContain("Settings");
     expect(mainSource).toContain("togglefullscreen");

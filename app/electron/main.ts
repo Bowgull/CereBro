@@ -8,6 +8,10 @@ import { installNativeVpnBridge } from "./vpnBridge";
 
 const defaultStartUrl = "http://localhost:3000";
 const electronDirname = dirname(fileURLToPath(import.meta.url));
+const appName = "CereBro";
+const appIconPath = join(electronDirname, "../electron/assets/cerebro-app-icon.icns");
+
+app.setName(appName);
 
 function getStartUrl() {
   const value = process.env.ELECTRON_START_URL?.trim();
@@ -95,7 +99,8 @@ function createMainWindow() {
     minWidth: 1100,
     minHeight: 720,
     backgroundColor: "#020606",
-    title: "CereBro",
+    title: appName,
+    icon: appIconPath,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
