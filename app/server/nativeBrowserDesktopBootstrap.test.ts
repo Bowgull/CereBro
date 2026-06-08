@@ -23,12 +23,20 @@ describe("native browser desktop bootstrap", () => {
     );
   });
 
-  it("opens the local CereBro app without creating native page views", async () => {
+  it("uses the dev URL for desktop dev and starts CereBro locally for normal desktop launch", async () => {
     const mainSource = await readFile(resolve(appRoot, "electron/main.ts"), "utf8");
+    const serverSource = await readFile(resolve(appRoot, "server/_core/index.ts"), "utf8");
+    const staticSource = await readFile(resolve(appRoot, "server/_core/vite.ts"), "utf8");
 
     expect(mainSource).toContain("ELECTRON_START_URL");
-    expect(mainSource).toContain("http://localhost:3000");
+    expect(mainSource).toContain("CEREBRO_SERVER_AUTOSTART");
+    expect(mainSource).toContain("CEREBRO_STATIC_DIR");
+    expect(mainSource).toContain("startServer");
+    expect(mainSource).toContain("embeddedServer");
     expect(mainSource).toContain("BrowserWindow");
     expect(mainSource).not.toContain("WebContentsView");
+    expect(serverSource).toContain("export async function startServer");
+    expect(serverSource).toContain("CEREBRO_SERVER_AUTOSTART");
+    expect(staticSource).toContain("CEREBRO_STATIC_DIR");
   });
 });

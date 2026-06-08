@@ -5,17 +5,30 @@ import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
 import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 import { installNativeVpnBridge } from "./vpnBridge";
+import type { StartedCereBroServer } from "../server/_core/index";
 
-const defaultStartUrl = "http://localhost:3000";
 const electronDirname = dirname(fileURLToPath(import.meta.url));
 const appName = "CereBro";
 const appIconPath = join(electronDirname, "../electron/assets/cerebro-app-icon.icns");
+const bundledStaticDir = join(electronDirname, "../dist/public");
+let embeddedServer: StartedCereBroServer | null = null;
 
 app.setName(appName);
 
-function getStartUrl() {
-  const value = process.env.ELECTRON_START_URL?.trim();
-  return value || defaultStartUrl;
+async function getEmbeddedStartUrl() {
+  process.env.CEREBRO_SERVER_AUTOSTART = "false";
+  process.env.CEREBRO_STATIC_DIR = process.env.CEREBRO_STATIC_DIR || bundledStaticDir;
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+
+  const { startServer } = await import("../server/_core/index");
+  embeddedServer = await startServer({ startInboxPoll: true });
+  return embeddedServer.url;
+}
+
+async function resolveStartUrl() {
+  const explicitStartUrl = process.env.ELECTRON_START_URL?.trim();
+  if (explicitStartUrl) return explicitStartUrl;
+  return getEmbeddedStartUrl();
 }
 
 function installApplicationMenu(mainWindow: BrowserWindow) {
@@ -92,7 +105,7 @@ function installApplicationMenu(mainWindow: BrowserWindow) {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-function createMainWindow() {
+async function createMainWindow() {
   const mainWindow = new BrowserWindow({
     width: 1320,
     height: 860,
@@ -117,17 +130,21 @@ function createMainWindow() {
   installNativeBrowserCommandBridge(mainWindow, pageView);
   installNativeVpnBridge();
   installApplicationMenu(mainWindow);
-  void mainWindow.loadURL(getStartUrl());
+  void mainWindow.loadURL(await resolveStartUrl());
 
   return mainWindow;
 }
 
 app.whenReady().then(() => {
-  createMainWindow();
+  void createMainWindow();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+    if (BrowserWindow.getAllWindows().length === 0) void createMainWindow();
   });
+});
+
+app.on("before-quit", () => {
+  void embeddedServer?.close();
 });
 
 app.on("window-all-closed", () => {
