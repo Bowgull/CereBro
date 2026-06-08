@@ -159,7 +159,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const createBrowserTabSessionDraft = trpc.workbench.createBrowserTabSessionDraft.useMutation({
     onSuccess: (result) => {
       setSelectedBrowserProposalId(result.tab.proposalId);
-      setBrowserNotice(`Draft tab ${result.tab.tabId} staged. No page opened.`);
+      setBrowserNotice(`Tab ready: ${result.tab.tabId}.`);
       utils.workbench.browserTabSessionStorageContract.invalidate();
       utils.ledger.overview.invalidate();
     },
@@ -193,7 +193,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setPreparedApprovalId(result.approval?.id ?? null);
       setBrowserNotice(
         result.approval
-          ? `Page approval #${result.approval.id} is ready. No page opened yet.`
+          ? `Page approval #${result.approval.id} is ready.`
           : "Page approval was not created.",
       );
       if (typeof result.approval?.targetId === "number") {
@@ -206,7 +206,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   });
   const runBrowserLiveRunnerBlocked = trpc.workbench.runBrowserLiveRunnerBlocked.useMutation({
     onSuccess: (result) => {
-      setBrowserNotice(`Page check blocked this open. No page opened.`);
+      setBrowserNotice("Page check blocked this open.");
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
       utils.workbench.browserLiveRunnerLaunchGate.invalidate({ proposalId: result.proposal.id });
       utils.ledger.overview.invalidate();
@@ -216,8 +216,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     onSuccess: (result) => {
       setBrowserNotice(
         result.ok
-          ? `Browser tab ${result.tab.tabId} is ready. No page opened yet.`
-          : `Page is not ready: ${result.missingGates[0] ?? "approval needed"}. No page opened.`,
+          ? `Browser tab ${result.tab.tabId} is ready.`
+          : `Page is not ready: ${result.missingGates[0] ?? "approval needed"}.`,
       );
       utils.workbench.browserTabSessionStorageContract.invalidate();
       utils.workbench.browserLiveRunnerPreflight.invalidate({ proposalId: result.proposal.id });
@@ -537,14 +537,14 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       if (typeof focus.query === "string") setBrowserAddressDraft(focus.query);
       if (typeof focus.proposalId === "number") setSelectedBrowserProposalId(focus.proposalId);
       setBrowserSurface("page");
-      setBrowserNotice(focus.notice ?? "Page focused. No page opened.");
+      setBrowserNotice(focus.notice ?? "Page focused.");
       setPreparedApprovalId(null);
       setSandboxFrameTarget(null);
       setSandboxFrameProposalId(null);
       setSandboxFrameReloadKey(0);
       setNativePageActive(false);
     } catch {
-      setBrowserNotice("Browser focus could not be read. No page opened.");
+      setBrowserNotice("Browser focus could not be read.");
     }
   }, []);
 
@@ -574,7 +574,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-[12px] font-bold uppercase tracking-widest">{browserShell.title}</h2>
-            <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Manual browsing. Aang handles search intent.</p>
+            <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Search, browse, save, and ask Aang.</p>
           </div>
           <div className="flex flex-wrap items-center gap-1">
             <Chip label={browserShell.status} tone={C.success} />
@@ -622,7 +622,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   variant={active ? "secondary" : "outline"}
                   className="h-6 max-w-[150px] shrink-0 rounded-b-none px-2 text-[10px]"
                   aria-pressed={active}
-                  title={`${tab.targetUrl}. Draft tab only. No page opens.`}
+                  title={tab.targetUrl}
                   onClick={() => {
                     setBrowserSurface("page");
                     setBrowserAddressDraft(tab.targetUrl);
@@ -631,7 +631,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       setSandboxFrameTarget(null);
                       setNativePageActive(false);
                     }
-                    setBrowserNotice(`${tab.state === "open" ? "Open" : "Draft"} tab ${tab.tabId} selected. No page opened.`);
+                    setBrowserNotice(`${tab.state === "open" ? "Open" : "Ready"} tab selected.`);
                   }}
                   style={{
                     background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
@@ -662,7 +662,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Watch Shelf
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab planned">
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab">
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
           </div>
@@ -756,7 +756,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       reason: "Prepare Browser open permission after the local page package is staged. This does not open the page.",
                     });
                     setBrowserNotice(
-                      `Page is ready for review. Approval #${approvalPreview.approval?.id ?? "pending"} is waiting. No page opened.`,
+                      `Page is ready for review. Approval #${approvalPreview.approval?.id ?? "pending"} is waiting.`,
                     );
                   } catch {
                     setBrowserNotice(browserPrimaryAction.failureNotice);
@@ -855,7 +855,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   >
                     <span className="block">
                       <span className="block text-[11px] font-semibold">VPN Settings</span>
-                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Shield setup and status.</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Open VPN settings.</span>
                     </span>
                   </Button>
                   <Button
@@ -864,7 +864,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     size="sm"
                     className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
                     disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createBrowserBookmarkFromOpenTab.isPending}
-                    title={hasOpenSandboxFrame ? "Save this open page as a local bookmark. No page fetch or source save." : "Open a page before saving a bookmark."}
+                    title={hasOpenSandboxFrame ? "Save this page as a bookmark." : "Open a page before saving a bookmark."}
                     role="menuitem"
                     onClick={() => {
                       if (selectedBrowserProposalId == null) return;
@@ -873,7 +873,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   >
                     <span className="block">
                       <span className="block text-[11px] font-semibold">{createBrowserBookmarkFromOpenTab.isPending ? "Saving Bookmark" : "Bookmark Page"}</span>
-                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Local bookmark only.</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Save this page.</span>
                     </span>
                   </Button>
                   {browserShell.actions.map((action) => (
@@ -887,10 +887,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       role="menuitem"
                       onClick={() => setBrowserActionLabel(action.label)}
                     >
-                      <span className="block">
-                        <span className="block text-[11px] font-semibold">{action.label}</span>
-                        <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
-                      </span>
+                      <span className="block text-[11px] font-semibold">{action.label}</span>
                     </Button>
                   ))}
                 </div>
@@ -917,7 +914,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           status: "pending",
                           origin: "browser",
                           query: browserDraft.raw,
-                          notice: "Page approval focused. No page opens from this handoff.",
+                          notice: "Page approval focused.",
                         }),
                       );
                     } catch {
@@ -941,8 +938,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   size="sm"
                   variant="ghost"
                   className="h-7 shrink-0 gap-1 px-2 text-[10px]"
-                  title={`${pin.target}. Local project pin only. No browser page opens.`}
-                  onClick={() => setBrowserNotice(`${pin.label} project pin selected. No page opened.`)}
+                  title={pin.target}
+                  onClick={() => setBrowserNotice(`${pin.label} selected.`)}
                 >
                   <Folder size={12} strokeWidth={1.8} aria-hidden="true" />
                   <span className="max-w-[130px] truncate">Project: {pin.label}</span>
@@ -955,7 +952,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   size="sm"
                   variant="ghost"
                   className="h-7 shrink-0 gap-1 px-2 text-[10px]"
-                  title={`${bookmark.targetUrl}. Loads the address field only. No page opens.`}
+                  title={bookmark.targetUrl}
                   onClick={() => {
                     setBrowserSurface("page");
                     setBrowserAddressDraft(bookmark.targetUrl);
@@ -963,7 +960,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     setSandboxFrameTarget(null);
                     setSandboxFrameProposalId(null);
                     setNativePageActive(false);
-                    setBrowserNotice("Bookmark loaded into the address bar. Open it when ready.");
+                    setBrowserNotice("Bookmark loaded.");
                   }}
                 >
                   <Bookmark size={12} strokeWidth={1.8} aria-hidden="true" />
@@ -1006,7 +1003,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                 size="sm"
                                 variant="ghost"
                                 className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left"
-                                title={`${bookmark.targetUrl}. Loads the address field only. No page opens.`}
+                                title={bookmark.targetUrl}
                                 onClick={() => {
                                   setBrowserSurface("page");
                                   setBrowserAddressDraft(bookmark.targetUrl);
@@ -1014,7 +1011,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                   setSandboxFrameTarget(null);
                                   setSandboxFrameProposalId(null);
                                   setNativePageActive(false);
-                                  setBrowserNotice("Bookmark loaded into the address bar. Open it when ready.");
+                                  setBrowserNotice("Bookmark loaded.");
                                 }}
                               >
                                 <span className="min-w-0">
@@ -1059,7 +1056,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                         );
                       })}
                     </div>
-                    <div className="mt-1">Local rows only. No cookies, page cache, source save, or external write.</div>
+                    <div className="mt-1">Saved on this device.</div>
                   </div>
                 </details>
               )}
@@ -1103,7 +1100,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                             className="h-7 justify-start px-1.5 text-[11px]"
                             disabled={createBrowserBookmarkFromOpenTab.isPending || selectedBrowserProposalId == null}
                             role="menuitem"
-                            title="Save this open page as a local bookmark. No page fetch or source save."
+                            title="Save this page as a bookmark."
                             onClick={() => {
                               if (selectedBrowserProposalId == null) return;
                               createBrowserBookmarkFromOpenTab.mutate({ proposalId: selectedBrowserProposalId });
@@ -1118,7 +1115,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                             className="h-7 justify-start px-1.5 text-[11px]"
                             disabled={createWatchShelfItemFromOpenTab.isPending || selectedBrowserProposalId == null}
                             role="menuitem"
-                            title="Save this open page to Watch Shelf. No progress, thumbnail, source save, or external write."
+                            title="Save this page to Watch Shelf."
                             onClick={() => {
                               if (selectedBrowserProposalId == null) return;
                               createWatchShelfItemFromOpenTab.mutate({
@@ -1141,9 +1138,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                   size="sm"
                                   variant="ghost"
                                   className="h-6 w-full justify-between px-1.5 text-[10px]"
-                                  title={`${pin.target}. Local project pin only. No browser page opens.`}
+                                  title={pin.target}
                                   role="menuitem"
-                                  onClick={() => setBrowserNotice(`${pin.label} project pin selected. No page opened.`)}
+                                  onClick={() => setBrowserNotice(`${pin.label} selected.`)}
                                 >
                                   <span className="truncate">{pin.label}</span>
                                   <span className="shrink-0 uppercase" style={{ color: pin.statusLabel === "clean" ? C.success : C.gold }}>
@@ -1267,7 +1264,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <div className="rounded p-3 text-[11px] leading-snug" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                     <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Page State</div>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      <Chip label="draft staged" tone={C.accent} />
+                      <Chip label="ready" tone={C.accent} />
                       <Chip label="local" tone={C.gold} />
                     </div>
                     <div className="mt-2" style={{ color: C.textMuted }}>
@@ -1369,7 +1366,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 )}
                   <details className="rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.56)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
-                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Details</summary>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>More</summary>
                     <div className="mt-1">{browserDraft.noActionText}</div>
                   </details>
                 </div>
@@ -1382,7 +1379,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               <div className="flex flex-wrap items-start justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>{watchShelf.title}</div>
-                  <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved pages. Local rows only.</div>
+                  <div className="mt-0.5 text-[11px]" style={{ color: C.textMuted }}>Saved pages.</div>
                 </div>
                 <Button
                   type="button"
@@ -1431,7 +1428,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 <div className="mt-1 break-all" style={{ color: C.textMuted }}>{hasOpenSandboxFrame ? sandboxFrameTarget : watchShelfDraft.candidateTarget}</div>
                 <div className="mt-1" style={{ color: C.textMuted }}>
                   {hasOpenSandboxFrame
-                    ? "This saves a local shelf row only. It does not track progress or save media."
+                    ? "Save this page for later."
                     : browserDraft.kind === "empty"
                       ? watchShelf.emptyBody
                       : "This is only a local shelf readback. It cannot save until a real page is open."}
@@ -1485,7 +1482,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 )}
               </div>
                   <details className="text-[11px] leading-snug" style={{ color: C.textMuted }}>
-                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>Details</summary>
+                    <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>More</summary>
                     <div className="mt-1">{watchShelfDraft.noActionText}</div>
                   </details>
                 </div>

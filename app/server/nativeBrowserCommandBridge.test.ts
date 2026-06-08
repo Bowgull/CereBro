@@ -60,6 +60,10 @@ describe("native browser command bridge", () => {
     expect(bridgeSource).toContain("canGoForward");
     expect(mainSource).toContain("installNativeBrowserCommandBridge");
     expect(mainSource).toContain("installNativeVpnBridge");
+    expect(mainSource).toContain("installApplicationMenu");
+    expect(mainSource).toContain("New Tab");
+    expect(mainSource).toContain("Settings");
+    expect(mainSource).toContain("togglefullscreen");
     expect(mainSource).toContain("webContents.send");
     expect(packageSource).toContain("electron/preload.ts");
   });

@@ -241,21 +241,21 @@ export function workbenchBrowserOpenGateCopy(input: {
 export function workbenchBrowserShellModel() {
   return {
     title: "Browser",
-    status: "Manual browsing",
+    status: "Ready",
     addressPlaceholder: "Search or enter address.",
-    safetyLabel: "quiet shield",
+    safetyLabel: "Shield",
     tabs: [
       { label: "Tab 1", active: true },
       { label: "New Tab", active: false },
     ] satisfies WorkbenchBrowserTab[],
     actions: [
-      { label: "Add to Watch", enabled: false, plannedReason: "Planned until Watch Shelf storage exists." },
-      { label: "Save to Sources", enabled: false, plannedReason: "Planned until source capture contract exists." },
-      { label: "Attach to Workbench", enabled: false, plannedReason: "Planned until page capture contract exists." },
-      { label: "Annotate", enabled: false, plannedReason: "Planned until browser annotation contract exists." },
-      { label: "Pin to Project", enabled: false, plannedReason: "Planned until project pin storage exists." },
-      { label: "Explain with Aang", enabled: false, plannedReason: "Planned until page context can route safely." },
-      { label: "Copy Link", enabled: false, plannedReason: "Planned until a real page is open." },
+      { label: "Add to Watch", enabled: false, plannedReason: "Open a page first." },
+      { label: "Save Page", enabled: false, plannedReason: "Open a page first." },
+      { label: "Attach", enabled: false, plannedReason: "Open a page first." },
+      { label: "Annotate", enabled: false, plannedReason: "Open a page first." },
+      { label: "Pin", enabled: false, plannedReason: "Open a page first." },
+      { label: "Explain", enabled: false, plannedReason: "Open a page first." },
+      { label: "Copy Link", enabled: false, plannedReason: "Open a page first." },
     ] satisfies WorkbenchBrowserAction[],
     emptyTitle: "Open a page.",
     emptyBody: "Use the address bar to open a page.",
@@ -280,7 +280,7 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
     tabSummary:
       draft.kind === "empty"
         ? "Tab 1 is the active page."
-        : "Draft tab is staged beside Tab 1. No page is open.",
+        : "New page is ready to open.",
     noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
   };
 }

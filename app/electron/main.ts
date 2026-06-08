@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from "electron";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
@@ -12,6 +12,80 @@ const electronDirname = dirname(fileURLToPath(import.meta.url));
 function getStartUrl() {
   const value = process.env.ELECTRON_START_URL?.trim();
   return value || defaultStartUrl;
+}
+
+function installApplicationMenu(mainWindow: BrowserWindow) {
+  const isMac = process.platform === "darwin";
+  const template: MenuItemConstructorOptions[] = [
+    ...(isMac
+      ? [{
+          label: app.name,
+          submenu: [
+            { role: "about" as const },
+            {
+              label: "Settings",
+              accelerator: "CmdOrCtrl+,",
+              click: () => mainWindow.webContents.send("cerebro:menu:settings"),
+            },
+            { type: "separator" as const },
+            { role: "quit" as const },
+          ],
+        }]
+      : []),
+    {
+      label: "File",
+      submenu: [
+        ...(!isMac
+          ? [{
+              label: "Settings",
+              accelerator: "CmdOrCtrl+,",
+              click: () => mainWindow.webContents.send("cerebro:menu:settings"),
+            }, { type: "separator" as const }]
+          : []),
+        {
+          label: "New Tab",
+          accelerator: "CmdOrCtrl+T",
+          click: () => mainWindow.webContents.send("cerebro:menu:new-tab"),
+        },
+        { type: "separator" },
+        isMac ? { role: "close" } : { role: "quit" },
+      ],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "forceReload" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    {
+      label: "Window",
+      submenu: [
+        { role: "minimize" },
+        { role: "close" },
+      ],
+    },
+  ];
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 function createMainWindow() {
@@ -37,6 +111,7 @@ function createMainWindow() {
   layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
   installNativeBrowserCommandBridge(mainWindow, pageView);
   installNativeVpnBridge();
+  installApplicationMenu(mainWindow);
   void mainWindow.loadURL(getStartUrl());
 
   return mainWindow;

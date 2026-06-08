@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-07 1709 ADT
+Last updated: 2026-06-07 1840 ADT
 
 ## Current North Star
 
@@ -11,6 +11,19 @@ learning, portfolio growth, and freelance work.
 The Keep is now the product spine. The Workshop is the dense work surface.
 System machinery stays below the floor until it is needed.
 
+Current whole-app spine:
+
+- Keep understands.
+- Browser browses.
+- Workshop does serious work.
+- Ledger proves.
+- Basement configures.
+
+Browser remains a top-level daily tab because it must feel like a normal
+browser. Product architecture still treats Browser as the Browse work mode
+inside the larger Workshop system. The user should not need to understand that
+distinction.
+
 The Mac is the workbench, not the warehouse. Turso/libSQL cloud is the intended
 structured brain, Google Drive is the durable file vault, Obsidian is the
 readable Markdown knowledge layer, and cloud vector retrieval is the intended
@@ -20,6 +33,41 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-07 1840 ADT - Whole-App Browser Placement And Normality Pass
+
+### What Changed
+- Locked Browser as a top-level tab in the visible shell.
+- Reconciled the product model: Keep-first personal AI OS, with Browser as a first-class daily surface and Browse mode inside Workshop architecture.
+- Cleaned Browser surface copy so it reads more like a normal browser.
+- Removed visible `Manual web surface`, `Spock gates`, `Planned until`, and `New browser tab planned` wording from BrowserPanel and the Browser copy model.
+- Added a minimal Electron app menu for normal desktop behavior: Settings, New Tab, standard edit actions, reload, zoom, full screen, window controls, and quit.
+- Kept VPN as one shield button with provider and diagnostic machinery in Basement.
+- Left the SSD out of this pass. No storage move was needed.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/client/src/pages/Home.tsx`
+- `app/client/src/lib/homeShellCopyModel.ts`
+- `app/electron/main.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- `app/server/nativeBrowserCommandBridge.test.ts`
+- `app/server/homeShellCopyModel.test.ts`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/browserNativeBridgeSurface.test.ts server/nativeBrowserCommandBridge.test.ts server/homeShellCopyModel.test.ts server/nativeVpnContract.test.ts`
+- `pnpm --dir app check`
+- `pnpm --dir app desktop:build`
+- `pnpm --dir app build`
+- Browser visual text check at `http://localhost:3000/`: Browser remains top-level and visible text did not include `Manual web surface`, `Spock gates`, `Planned until`, `New browser tab planned`, `Spock medium`, `Spock clear`, or `Gates stay closed`.
+- Raven app-code boundary scan: no matches in `app/client`, `app/server`, `app/electron`, or `app/shared` outside tests.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, app/client/src/lib/workbenchBrowserModel.ts, app/electron/main.ts, docs/superpowers/plans/2026-06-03-cerebro-native-browser-shell.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser is intentionally a top-level tab. Keep Browser copy normal and hide machinery. Next critical path is to finish Browser V1 utility wiring in order: popup blocking, default download/permission blocking, ad/tracker blocker, cookie controls, VPN direct-control proof or WireGuard-direct decision, then Keychain-backed password manager. Do not surface Raven.
+```
 
 ## 2026-06-07 1709 ADT - VPN Shield V1
 

@@ -46,4 +46,17 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("VPN Off");
     expect(browserPanelSource).toContain("Needs Setup");
   });
+
+  it("keeps the Browser tab in normal browser language", async () => {
+    const browserPanelSource = await readFile(resolve(appRoot, "client/src/components/BrowserPanel.tsx"), "utf8");
+    const browserCopyModelSource = await readFile(resolve(appRoot, "client/src/lib/workbenchBrowserModel.ts"), "utf8");
+    const combinedSource = `${browserPanelSource}\n${browserCopyModelSource}`;
+
+    expect(combinedSource).not.toContain("Manual web surface");
+    expect(combinedSource).not.toContain("Spock gates");
+    expect(combinedSource).not.toContain("Planned until");
+    expect(combinedSource).not.toContain("New browser tab planned");
+    expect(browserCopyModelSource).toContain("status: \"Ready\"");
+    expect(browserCopyModelSource).toContain("safetyLabel: \"Shield\"");
+  });
 });

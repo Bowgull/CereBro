@@ -114,7 +114,7 @@ const ZONE_SURFACES: Record<ZoneId, ZoneSurface[]> = {
   ],
   browser: [
     { id: "browser", label: "Browser", meta: shellCopy.surfaceMeta.browser },
-    { id: "security", label: "Shield", meta: "Spock gates" },
+    { id: "security", label: "Shield", meta: "Site safety" },
   ],
   workshop: [
     { id: "workbench", label: "Workbench", meta: shellCopy.surfaceMeta.workbench },
@@ -3616,21 +3616,21 @@ function CommandBar({
           ))}
         </div>
         <div className="text-[10px] leading-none mt-1" style={{ color: C.warning }}>
-          Preview only. Gates stay closed.
+          Council preview.
         </div>
       </div>
 
       <Button
         type="button"
         onClick={() => onNavigate("security")}
-        aria-label="Open latest Spock safety check"
+        aria-label="Open latest safety check"
         variant="outline"
         size="sm"
         className="hidden h-8 shrink-0 px-2 lg:block"
         style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: latestRiskTone, background: "rgba(5, 11, 10, 0.72)", boxShadow: mockupShell.bevel }}
         title={latestReceipt ? latestReceipt.targetUri : "No safety checks recorded"}
       >
-        {latestReceipt ? `Spock ${latestReceipt.riskLevel}` : "Spock clear"}
+        {latestReceipt ? `Safety ${latestReceipt.riskLevel}` : "Safety clear"}
       </Button>
 
       <Button
