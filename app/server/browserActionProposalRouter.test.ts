@@ -1583,6 +1583,69 @@ describe("Workbench Browser action proposal preview route", () => {
     expect(await countRows("browser_watch_shelf_items")).toBe(before.watchShelfItems);
   });
 
+  it("records native Browser safety events without replacing the current tab URL", async () => {
+    const caller = createCaller();
+    const created = await caller.workbench.createBrowserActionProposal({
+      actionLabel: "Open Page",
+      target: "https://example.com/current-page",
+      draftKind: "url",
+    });
+    const preview = await caller.workbench.createBrowserActionApprovalPreview({ proposalId: created.proposal.id });
+    await caller.approvals.decide({
+      id: preview.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test Browser review approval only.",
+    });
+    await caller.workbench.createBrowserActionWorkbenchBody({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserActionSpockGate({ proposalId: created.proposal.id });
+    const draft = await caller.workbench.createBrowserTabSessionDraft({ proposalId: created.proposal.id });
+    await caller.workbench.createBrowserResultRecoveryScaffold({ proposalId: created.proposal.id });
+    const liveApproval = await caller.workbench.createBrowserLiveRunnerApprovalPreview({
+      proposalId: created.proposal.id,
+    });
+    await caller.approvals.decide({
+      id: liveApproval.approval?.id ?? 0,
+      decision: "approved",
+      reason: "Test live-runner approval only.",
+    });
+    await caller.workbench.prepareBrowserLiveRunnerOpenReadiness({
+      proposalId: created.proposal.id,
+    });
+    await caller.workbench.recordBrowserSandboxFrameOpen({
+      proposalId: created.proposal.id,
+    });
+
+    const writeback = await caller.workbench.recordNativeBrowserPageEvent({
+      type: "popup-blocked",
+      tabId: draft.tab.tabId,
+      url: "https://ads.example.com/popup",
+      at: "2026-06-08T15:30:00.000Z",
+    });
+    const db = await getCerebroDb();
+    const tab = await db.execute({
+      sql: "SELECT target_url, last_error FROM browser_tab_sessions WHERE proposal_id = ? ORDER BY id DESC LIMIT 1",
+      args: [created.proposal.id],
+    });
+    const history = await db.execute({
+      sql: `
+        SELECT target_url, event_type, source_label
+        FROM browser_tab_history_items
+        WHERE proposal_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      args: [created.proposal.id],
+    });
+
+    expect(writeback.ok).toBe(true);
+    expect(writeback.historyItem?.eventType).toBe("native_popup_blocked");
+    expect(tab.rows[0]?.target_url).toBe("https://example.com/current-page");
+    expect(String(tab.rows[0]?.last_error)).toContain("Popup blocked");
+    expect(history.rows[0]?.target_url).toBe("https://ads.example.com/popup");
+    expect(history.rows[0]?.event_type).toBe("native_popup_blocked");
+    expect(history.rows[0]?.source_label).toBe("native_browser");
+  });
+
   it("records sandbox frame external fallback without backend fetch or content saves", async () => {
     const caller = createCaller();
     const created = await caller.workbench.createBrowserActionProposal({

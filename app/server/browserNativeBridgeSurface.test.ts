@@ -20,6 +20,10 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("recordNativeBrowserPageEvent");
     expect(browserPanelSource).toContain("nativePageActive");
     expect(browserPanelSource).toContain("Native page viewport");
+    expect(browserPanelSource).toContain("popupBlockedCount");
+    expect(browserPanelSource).toContain("downloadActivity");
+    expect(browserPanelSource).toContain("Downloads");
+    expect(browserPanelSource).toContain("Popup blocked");
     expect(browserPanelSource).toContain("userInitiated: true");
     expect(browserPanelSource).toContain("Return");
   });

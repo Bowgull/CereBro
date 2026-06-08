@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 1133 ADT
+Last updated: 2026-06-08 1201 ADT
 
 ## Current North Star
 
@@ -33,6 +33,53 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-08 1201 ADT - Browser Replacement Gate Popup And Download Safety
+
+### What Changed
+- Added native Browser popup and download events.
+- Added a native download policy:
+  - user-clicked safe downloads save to macOS `Downloads`.
+  - automatic downloads are blocked.
+  - risky file types are blocked before saving.
+  - burst downloads are blocked after the first recent download.
+- Popups are denied and reported back to the Browser surface.
+- Browser toolbar now shows `Popup blocked` only after a popup is blocked.
+- Browser toolbar now shows `Downloads` only after a download starts, finishes, or is blocked.
+- Server writeback records native popup/download history without replacing the current tab URL.
+- Browser visible text check stayed clean of forbidden machinery language.
+
+### Files Touched
+- `app/shared/nativeBrowser.ts`
+- `app/electron/browserDownloadPolicy.ts`
+- `app/electron/browserEvents.ts`
+- `app/electron/browserPermissions.ts`
+- `app/electron/browserViews.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/routers/workbench.ts`
+- `app/server/nativeBrowserContract.test.ts`
+- `app/server/nativeBrowserDownloadPolicy.test.ts`
+- `app/server/nativeBrowserWebContentsView.test.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- `app/server/browserActionProposalRouter.test.ts`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+- Obsidian: `90_Archive/CereBro Session History/snapshots/2026-06-08 1201 CereBro Session Handoff - browser-popup-download-safety.md`
+- Obsidian: `90_Archive/CereBro Session History/CereBro Session History.md`
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/nativeBrowserContract.test.ts server/nativeBrowserDownloadPolicy.test.ts server/nativeBrowserWebContentsView.test.ts`
+- `pnpm --dir app exec vitest run server/browserNativeBridgeSurface.test.ts server/nativeBrowserContract.test.ts server/nativeBrowserDownloadPolicy.test.ts server/nativeBrowserWebContentsView.test.ts`
+- `pnpm --dir app exec vitest run server/browserActionProposalRouter.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- `git diff --check`
+- Playwright visual check against `http://localhost:3000/` using installed Chrome. Browser tab rendered, no forbidden machinery terms appeared, and popup/download indicators stayed hidden before any event.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, app/shared/nativeBrowser.ts, app/electron/browserDownloadPolicy.ts, app/electron/browserPermissions.ts, app/electron/browserViews.ts, app/server/routers/workbench.ts, app/server/browserActionProposalRouter.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Branch codex/raven-airlock has started Browser Replacement Gate. Native Browser now allows safe user-clicked downloads to macOS Downloads, blocks automatic/risky/burst downloads, blocks popups, emits plain popup/download events, and shows Browser toolbar indicators only after events. Next critical path is real-site open proof inside CereBro.app: Google, GitHub, YouTube/video, login-page render, tabs/history/bookmarks, and no visible machinery. Do not surface Raven.
+```
 
 ## 2026-06-08 1133 ADT - Browser UX Security And Multi-Window Planning
 

@@ -62,6 +62,37 @@ const nativeBrowserPageEventSchema = z.discriminatedUnion("type", [
     title: z.string(),
     at: z.string().min(1),
   }),
+  z.object({
+    type: z.literal("popup-blocked"),
+    tabId: z.string().min(1),
+    url: z.string().url(),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("download-started"),
+    tabId: z.string().min(1),
+    filename: z.string().min(1),
+    url: z.string().url(),
+    savePath: z.string().min(1),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("download-finished"),
+    tabId: z.string().min(1),
+    filename: z.string().min(1),
+    url: z.string().url(),
+    savePath: z.string().min(1),
+    state: z.enum(["completed", "cancelled", "interrupted"]),
+    at: z.string().min(1),
+  }),
+  z.object({
+    type: z.literal("download-blocked"),
+    tabId: z.string().min(1),
+    filename: z.string().min(1),
+    url: z.string().url(),
+    reason: z.enum(["automatic_download", "multiple_download", "risky_file"]),
+    at: z.string().min(1),
+  }),
 ]);
 const browserProposalNoActionTaken = [
   "No browser opened.",
@@ -249,11 +280,22 @@ function nativeBrowserHistoryEventType(event: NativeBrowserPageEvent) {
   if (event.type === "navigation-started") return "native_navigation_started";
   if (event.type === "navigation-finished") return "native_navigation_finished";
   if (event.type === "navigation-failed") return "native_navigation_failed";
+  if (event.type === "popup-blocked") return "native_popup_blocked";
+  if (event.type === "download-started") return "native_download_started";
+  if (event.type === "download-finished") return "native_download_finished";
+  if (event.type === "download-blocked") return "native_download_blocked";
   return null;
 }
 
 function nativeBrowserEventUrl(event: NativeBrowserPageEvent, fallbackUrl: string) {
   return "url" in event ? event.url : fallbackUrl;
+}
+
+function nativeBrowserTabTargetUrl(event: NativeBrowserPageEvent, fallbackUrl: string) {
+  if (event.type === "navigation-started" || event.type === "navigation-finished" || event.type === "navigation-failed") {
+    return nativeBrowserEventUrl(event, fallbackUrl);
+  }
+  return fallbackUrl;
 }
 
 function nativeBrowserEventTitle(event: NativeBrowserPageEvent, fallbackTitle: string | null, fallbackUrl: string) {
@@ -1969,10 +2011,14 @@ export const workbenchRouter = router({
       }
 
       const tab = rowToBrowserTabSession(tabRow);
-      const targetUrl = nativeBrowserEventUrl(event, tab.targetUrl);
+      const targetUrl = nativeBrowserTabTargetUrl(event, tab.targetUrl);
       const title = nativeBrowserEventTitle(event, tab.title, tab.targetUrl);
       const lastError = event.type === "navigation-failed"
         ? `${event.errorCode}: ${event.errorDescription}`.slice(0, 240)
+        : event.type === "popup-blocked"
+          ? `Popup blocked: ${event.url}`.slice(0, 240)
+          : event.type === "download-blocked"
+            ? `Download blocked: ${event.reason}`.slice(0, 240)
         : null;
       const updated = await db.execute({
         sql: `
@@ -2004,7 +2050,7 @@ export const workbenchRouter = router({
             args: [
               tab.id,
               tab.proposalId,
-              targetUrl,
+              nativeBrowserEventUrl(event, tab.targetUrl),
               title,
               historyEventType,
             ],

@@ -10,6 +10,10 @@ export const nativeBrowserPageEventTypes = [
   "navigation-finished",
   "navigation-failed",
   "title-updated",
+  "popup-blocked",
+  "download-started",
+  "download-finished",
+  "download-blocked",
 ] as const;
 
 export const nativeBrowserBlockedReasons = [
@@ -62,7 +66,11 @@ export type NativeBrowserPageEvent =
   | { type: "navigation-started"; tabId: string; url: string; at: string }
   | { type: "navigation-finished"; tabId: string; url: string; title: string | null; at: string }
   | { type: "navigation-failed"; tabId: string; url: string; errorCode: number; errorDescription: string; at: string }
-  | { type: "title-updated"; tabId: string; title: string; at: string };
+  | { type: "title-updated"; tabId: string; title: string; at: string }
+  | { type: "popup-blocked"; tabId: string; url: string; at: string }
+  | { type: "download-started"; tabId: string; filename: string; url: string; savePath: string; at: string }
+  | { type: "download-finished"; tabId: string; filename: string; url: string; savePath: string; state: "completed" | "cancelled" | "interrupted"; at: string }
+  | { type: "download-blocked"; tabId: string; filename: string; url: string; reason: "automatic_download" | "multiple_download" | "risky_file"; at: string };
 
 declare global {
   interface Window {

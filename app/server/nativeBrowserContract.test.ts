@@ -45,11 +45,35 @@ describe("native browser contract", () => {
       "navigation-finished",
       "navigation-failed",
       "title-updated",
+      "popup-blocked",
+      "download-started",
+      "download-finished",
+      "download-blocked",
     ]);
     expect(nativeBrowserBlockedReasons).toEqual([
       "permission",
       "invalid_url",
       "navigation_failed",
     ]);
+  });
+
+  it("keeps native browser safety events narrow", () => {
+    const popupEvent: NativeBrowserPageEvent = {
+      type: "popup-blocked",
+      tabId: "tab_1",
+      url: "https://ads.example.com",
+      at: "2026-06-08T15:00:00.000Z",
+    };
+    const downloadEvent: NativeBrowserPageEvent = {
+      type: "download-started",
+      tabId: "tab_1",
+      filename: "cerebro.pdf",
+      url: "https://example.com/cerebro.pdf",
+      savePath: "/Users/lindsaybell/Downloads/cerebro.pdf",
+      at: "2026-06-08T15:00:01.000Z",
+    };
+
+    expect(Object.keys(popupEvent).sort()).toEqual(["at", "tabId", "type", "url"]);
+    expect(Object.keys(downloadEvent).sort()).toEqual(["at", "filename", "savePath", "tabId", "type", "url"]);
   });
 });

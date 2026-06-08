@@ -5,6 +5,7 @@ import {
   mapNativeNavigationFailed,
   mapNativeNavigationFinished,
   mapNativeNavigationStarted,
+  mapNativePopupBlocked,
   mapNativeTitleUpdated,
 } from "./browserEvents";
 import { nativeBrowserSessionWebPreferences } from "./browserSession";
@@ -25,8 +26,11 @@ export function createNativeBrowserPageView(
     webPreferences: nativeBrowserSessionWebPreferences(),
   });
 
-  installNativeBrowserPermissionPolicy(view.webContents.session);
-  view.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  installNativeBrowserPermissionPolicy(view.webContents.session, { tabId, emitPageEvent });
+  view.webContents.setWindowOpenHandler((details) => {
+    emitPageEvent(mapNativePopupBlocked(tabId, details.url));
+    return { action: "deny" };
+  });
   view.webContents.on("did-start-navigation", (_event, url) => {
     emitPageEvent(mapNativeNavigationStarted(tabId, url));
   });

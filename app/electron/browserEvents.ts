@@ -38,3 +38,59 @@ export function mapNativeTitleUpdated(tabId: string, title: string, at = new Dat
     at,
   };
 }
+
+export function mapNativePopupBlocked(tabId: string, url: string, at = new Date().toISOString()): NativeBrowserPageEvent {
+  return {
+    type: "popup-blocked",
+    tabId,
+    url,
+    at,
+  };
+}
+
+export function mapNativeDownloadStarted(tabId: string, filename: string, url: string, savePath: string, at = new Date().toISOString()): NativeBrowserPageEvent {
+  return {
+    type: "download-started",
+    tabId,
+    filename,
+    url,
+    savePath,
+    at,
+  };
+}
+
+export function mapNativeDownloadFinished(
+  tabId: string,
+  filename: string,
+  url: string,
+  savePath: string,
+  state: "completed" | "cancelled" | "interrupted",
+  at = new Date().toISOString(),
+): NativeBrowserPageEvent {
+  return {
+    type: "download-finished",
+    tabId,
+    filename,
+    url,
+    savePath,
+    state,
+    at,
+  };
+}
+
+export function mapNativeDownloadBlocked(
+  tabId: string,
+  filename: string,
+  url: string,
+  reason: "automatic_download" | "multiple_download" | "risky_file",
+  at = new Date().toISOString(),
+): NativeBrowserPageEvent {
+  return {
+    type: "download-blocked",
+    tabId,
+    filename,
+    url,
+    reason,
+    at,
+  };
+}

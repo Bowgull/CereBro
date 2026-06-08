@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, ExternalLink, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Download, ExternalLink, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
+import type { NativeBrowserPageEvent } from "../../../shared/nativeBrowser";
 import { nativeVpnUnknownStatus, type NativeVpnStatusResult } from "../../../shared/nativeVpn";
 import {
   workbenchBrowserActionPreviewModel,
@@ -39,6 +40,12 @@ type BrowserDraftTab = {
   targetUrl: string;
   title: string | null;
   proposalId: number | null;
+};
+
+type BrowserDownloadActivity = {
+  filename: string;
+  state: "active" | "finished" | "blocked";
+  message: string;
 };
 
 function browserDraftTabLabel(tab: BrowserDraftTab) {
@@ -113,6 +120,12 @@ function vpnPrimaryActionLabel(status: NativeVpnStatusResult | null, isBusy: boo
   return "Turn On";
 }
 
+function downloadBlockedMessage(reason: Extract<NativeBrowserPageEvent, { type: "download-blocked" }>["reason"]) {
+  if (reason === "automatic_download") return "Download blocked";
+  if (reason === "multiple_download") return "Multiple downloads blocked";
+  return "Download needs review";
+}
+
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
@@ -127,6 +140,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [nativePageActive, setNativePageActive] = useState(false);
   const [vpnStatus, setVpnStatus] = useState<NativeVpnStatusResult | null>(null);
   const [vpnBusy, setVpnBusy] = useState(false);
+  const [popupBlockedCount, setPopupBlockedCount] = useState(0);
+  const [downloadActivity, setDownloadActivity] = useState<BrowserDownloadActivity | null>(null);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const utils = trpc.useUtils();
@@ -550,6 +565,35 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
   useEffect(() => {
     return window.cerebroNativeBrowser?.onPageEvent((event) => {
+      if (event.type === "popup-blocked") {
+        setPopupBlockedCount((count) => count + 1);
+        setBrowserNotice("Popup blocked.");
+      }
+      if (event.type === "download-started") {
+        setDownloadActivity({
+          filename: event.filename,
+          state: "active",
+          message: "Downloading",
+        });
+        setBrowserNotice(`Downloading ${event.filename}.`);
+      }
+      if (event.type === "download-finished") {
+        setDownloadActivity({
+          filename: event.filename,
+          state: event.state === "completed" ? "finished" : "blocked",
+          message: event.state === "completed" ? "Download finished" : "Download stopped",
+        });
+        setBrowserNotice(event.state === "completed" ? `Downloaded ${event.filename}.` : `Download stopped: ${event.filename}.`);
+      }
+      if (event.type === "download-blocked") {
+        const message = downloadBlockedMessage(event.reason);
+        setDownloadActivity({
+          filename: event.filename,
+          state: "blocked",
+          message,
+        });
+        setBrowserNotice(`${message}: ${event.filename}.`);
+      }
       recordNativeBrowserPageEvent.mutate(event);
     });
   }, [recordNativeBrowserPageEvent]);
@@ -839,6 +883,38 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </Button>
                 </div>
               </details>
+              {popupBlockedCount > 0 && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 gap-1.5 px-2"
+                  aria-label={`${popupBlockedCount} popup blocked`}
+                  title={`${popupBlockedCount} popup${popupBlockedCount === 1 ? "" : "s"} blocked.`}
+                  onClick={() => setBrowserNotice(`${popupBlockedCount} popup${popupBlockedCount === 1 ? "" : "s"} blocked.`)}
+                >
+                  <SquareX size={14} strokeWidth={1.8} aria-hidden="true" />
+                  <span className="hidden text-[11px] font-semibold sm:inline">Popup blocked</span>
+                </Button>
+              )}
+              {downloadActivity && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 gap-1.5 px-2"
+                  aria-label={`Downloads: ${downloadActivity.message}`}
+                  title={`${downloadActivity.message}: ${downloadActivity.filename}`}
+                  onClick={() => setBrowserNotice(`${downloadActivity.message}: ${downloadActivity.filename}`)}
+                  style={{
+                    borderColor: downloadActivity.state === "blocked" ? `${C.warning}88` : `${browserFrame.lineSoft}`,
+                    color: downloadActivity.state === "blocked" ? C.warning : C.textSecondary,
+                  }}
+                >
+                  <Download size={14} strokeWidth={1.8} aria-hidden="true" />
+                  <span className="hidden text-[11px] font-semibold sm:inline">Downloads</span>
+                </Button>
+              )}
               <details className="relative">
                 <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
