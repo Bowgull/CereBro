@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 1201 ADT
+Last updated: 2026-06-08 1228 ADT
 
 ## Current North Star
 
@@ -33,6 +33,49 @@ are cache/fallback lanes unless the user approves the storage cost.
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
 ## Current Session Goal
+
+## 2026-06-08 1228 ADT - Omnibox Normality
+
+### What Changed
+- Added CereBro omnibox routing in the Browser model.
+- Normal text searches Brave by default.
+- URL-looking text opens as a page.
+- Added power shortcuts:
+  - `!g` Google.
+  - `!s` Startpage.
+  - `!d` DuckDuckGo.
+  - `!gh` GitHub.
+  - `!r` Reddit.
+  - `!yt` YouTube.
+  - `!docs` official-docs-oriented Brave search.
+  - `!deep` Brave-backed deep-search entry point for now.
+- Kept `!k` disabled with `Kagi is not set up.`
+- Browser and Workshop now refuse to stage disabled/null search targets.
+- Browser surface keeps provider names out of the visible chrome.
+
+### Files Touched
+- `app/client/src/lib/workbenchBrowserModel.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/components/WorkbenchPanel.tsx`
+- `app/server/workbenchBrowserModel.test.ts`
+- `app/server/browserNativeBridgeSurface.test.ts`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+- Obsidian: `90_Archive/CereBro Session History/snapshots/2026-06-08 1228 CereBro Session Handoff - omnibox-normality.md`
+- Obsidian: `90_Archive/CereBro Session History/CereBro Session History.md`
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/workbenchBrowserModel.test.ts`
+- `pnpm --dir app exec vitest run server/workbenchBrowserModel.test.ts server/browserNativeBridgeSurface.test.ts`
+- `pnpm --dir app exec vitest run server/workbenchBrowserModel.test.ts server/browserNativeBridgeSurface.test.ts server/browserActionProposalRouter.test.ts`
+- `pnpm --dir app run check`
+- `pnpm --dir app run desktop:build`
+- `pnpm --dir app run build`
+- Playwright visual check against `http://localhost:3000/` using installed Chrome. Search query rendered as a plain Search Draft, provider names stayed off the Browser surface.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/lib/workbenchBrowserModel.ts, app/client/src/components/BrowserPanel.tsx, app/client/src/components/WorkbenchPanel.tsx, app/server/workbenchBrowserModel.test.ts, app/server/browserNativeBridgeSurface.test.ts, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Branch codex/raven-airlock has Omnibox Normality implemented. Normal text searches Brave, URL-looking text opens as a page, shortcuts route one-off searches, and Kagi stays disabled until configured. Next critical path is real-site open proof inside CereBro.app: Google, GitHub, YouTube/video, login-page render, tabs/history/bookmarks, and no visible machinery. Do not surface Raven.
+```
 
 ## 2026-06-08 1201 ADT - Browser Replacement Gate Popup And Download Safety
 

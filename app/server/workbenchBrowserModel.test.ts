@@ -21,19 +21,19 @@ describe("workbenchBrowserModel", () => {
     const combined = JSON.stringify(shell).toLowerCase();
 
     expect(shell.title).toBe("Browser");
-    expect(shell.status).toBe("Manual browsing");
+    expect(shell.status).toBe("Ready");
     expect(shell.tabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(shell.actions.map((action) => action.label)).toEqual([
       "Add to Watch",
-      "Save to Sources",
-      "Attach to Workbench",
+      "Save Page",
+      "Attach",
       "Annotate",
-      "Pin to Project",
-      "Explain with Aang",
+      "Pin",
+      "Explain",
       "Copy Link",
     ]);
     expect(shell.actions.every((action) => action.enabled === false)).toBe(true);
-    expect(shell.safetyLabel).toBe("quiet shield");
+    expect(shell.safetyLabel).toBe("Shield");
     expect(shell.emptyTitle).toBe("Open a page.");
     expect(shell.noActionText).toContain("No browser automation");
     expect(combined).not.toContain("manual browser button");
@@ -75,7 +75,7 @@ describe("workbenchBrowserModel", () => {
 
     expect(searchDraft.kind).toBe("search");
     expect(searchDraft.displayTarget).toBe("best dub anime sources");
-    expect(searchDraft.targetUrl).toBe("https://www.google.com/search?q=best+dub+anime+sources");
+    expect(searchDraft.targetUrl).toBe("https://search.brave.com/search?q=best+dub+anime+sources");
     expect(searchDraft.tabLabel).toBe("Search Draft");
     expect(searchDraft.canOpen).toBe(false);
 
@@ -83,6 +83,26 @@ describe("workbenchBrowserModel", () => {
     expect(emptyDraft.displayTarget).toBe("No page draft.");
     expect(emptyDraft.targetUrl).toBeNull();
     expect(emptyDraft.tabLabel).toBe("Tab 1");
+  });
+
+  it("routes omnibox search shortcuts without requiring visible engine controls", () => {
+    expect(workbenchBrowserDraftModel("!g weird exact error").targetUrl).toBe("https://www.google.com/search?q=weird+exact+error");
+    expect(workbenchBrowserDraftModel("!s best hotels near me").targetUrl).toBe("https://www.startpage.com/sp/search?query=best+hotels+near+me");
+    expect(workbenchBrowserDraftModel("!d privacy friendly vpn mac").targetUrl).toBe("https://duckduckgo.com/?q=privacy+friendly+vpn+mac");
+    expect(workbenchBrowserDraftModel("!gh electron adblock browser").targetUrl).toBe("https://github.com/search?q=electron+adblock+browser&type=repositories");
+    expect(workbenchBrowserDraftModel("!r best brave search alternative").targetUrl).toBe("https://www.reddit.com/search/?q=best+brave+search+alternative");
+    expect(workbenchBrowserDraftModel("!yt electron browser tutorial").targetUrl).toBe("https://www.youtube.com/results?search_query=electron+browser+tutorial");
+    expect(workbenchBrowserDraftModel("!docs electron will-download").targetUrl).toBe("https://search.brave.com/search?q=electron+will-download+official+docs");
+    expect(workbenchBrowserDraftModel("!deep best electron browser architecture").targetUrl).toBe("https://search.brave.com/search?q=best+electron+browser+architecture");
+  });
+
+  it("keeps Kagi disabled until the user configures it", () => {
+    const draft = workbenchBrowserDraftModel("!k electron webcontentsview downloads");
+
+    expect(draft.kind).toBe("search");
+    expect(draft.targetUrl).toBeNull();
+    expect(draft.displayTarget).toBe("Kagi is not set up.");
+    expect(draft.canOpen).toBe(false);
   });
 
   it("normalizes bare domains into openable https targets", () => {
@@ -190,7 +210,7 @@ describe("workbenchBrowserModel", () => {
     expect(urlTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab", "Page Draft"]);
     expect(urlTabs.visibleTabs.at(-1)?.state).toBe("draft");
     expect(urlTabs.canCreateTab).toBe(false);
-    expect(urlTabs.tabSummary).toContain("Draft tab is staged");
+    expect(urlTabs.tabSummary).toContain("New page is ready to open.");
     expect(urlTabs.noActionText).toContain("No browser tab");
 
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
@@ -283,7 +303,7 @@ describe("workbenchBrowserModel", () => {
     expect(watchPreview.routeLabel).toBe("Needs page permission.");
     expect(watchPreview.noActionText).toContain("No page action");
 
-    expect(emptyPreview.label).toBe("Save to Sources");
+    expect(emptyPreview.label).toBe("Save Page");
     expect(emptyPreview.targetLabel).toBe("No page draft.");
     expect(emptyPreview.statusLabel).toBe("no page");
     expect(emptyPreview.canPropose).toBe(false);

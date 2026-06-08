@@ -772,16 +772,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 size="sm"
                 variant="outline"
                 className="h-9 px-3"
-                disabled={browserPrimaryAction.disabled}
+                disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
                 title={browserPrimaryAction.title}
                 aria-label={browserPrimaryAction.ariaLabel}
                 onClick={async () => {
-                  if (browserDraft.kind === "empty" || isPreparingBrowserDraft) return;
+                  if (browserDraft.kind === "empty" || browserDraft.targetUrl == null || isPreparingBrowserDraft) return;
                   setBrowserNotice(browserPrimaryAction.pendingNotice);
                   try {
                     const result = await createBrowserActionProposal.mutateAsync({
                       actionLabel: "Open Page",
-                      target: browserDraft.targetUrl ?? browserDraft.raw,
+                      target: browserDraft.targetUrl,
                       draftKind: browserDraft.kind,
                     });
                     const proposalId = result.proposal.id;

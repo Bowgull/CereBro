@@ -1120,14 +1120,16 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     size="sm"
                     variant="outline"
                     className="h-8 px-2"
-                    disabled={browserDraft.kind === "empty" || createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending}
+                    disabled={browserDraft.kind === "empty" || browserDraft.targetUrl == null || createBrowserActionProposal.isPending || createBrowserTabSessionDraft.isPending}
                     title="Stage a local Browser proposal and draft tab row. This does not open, fetch, search, save, or capture."
                     aria-label="Stage browser page draft"
                     onClick={() => {
+                      const targetUrl = browserDraft.targetUrl;
+                      if (browserDraft.kind === "empty" || targetUrl == null) return;
                       createBrowserActionProposal.mutate(
                         {
                           actionLabel: browserActionPreview.label,
-                          target: browserDraft.targetUrl ?? browserDraft.raw,
+                          target: targetUrl,
                           draftKind: browserDraft.kind,
                         },
                         {
@@ -1202,13 +1204,15 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                               size="sm"
                               variant="outline"
                               className="h-6 px-2 text-[10px]"
-                              disabled={createBrowserActionProposal.isPending}
+                              disabled={browserDraft.kind === "empty" || browserDraft.targetUrl == null || createBrowserActionProposal.isPending}
                               title="Create a durable local Browser action proposal. This does not approve or run it."
                               onClick={() => {
+                                const targetUrl = browserDraft.targetUrl;
+                                if (browserDraft.kind === "empty" || targetUrl == null) return;
                                 createBrowserActionProposal.mutate(
                                   {
                                     actionLabel: browserActionPreview.label,
-                                    target: browserDraft.targetUrl ?? browserDraft.raw,
+                                    target: targetUrl,
                                     draftKind: browserDraft.kind,
                                   },
                                   {

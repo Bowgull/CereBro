@@ -140,17 +140,45 @@ type BrowserProjectPinInput = {
   } | null;
 };
 
+type BrowserSearchShortcut = "!g" | "!s" | "!d" | "!k" | "!gh" | "!r" | "!yt" | "!docs" | "!deep";
+
 function looksLikeUrl(value: string) {
-  return /^https?:\/\//i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
+  return /^https?:\/\//i.test(value) || /^localhost(:\d+)?([/:?#].*)?$/i.test(value) || /^[a-z0-9.-]+\.[a-z]{2,}([/:?#].*)?$/i.test(value);
 }
 
-function normalizedBrowserTarget(kind: "url" | "search", raw: string) {
-  if (kind === "search") {
-    return `https://www.google.com/search?q=${encodeURIComponent(raw).replace(/%20/g, "+")}`;
-  }
+function encodeSearchQuery(query: string) {
+  return encodeURIComponent(query.trim()).replace(/%20/g, "+");
+}
 
+function normalizedUrlTarget(raw: string) {
   if (/^https?:\/\//i.test(raw)) return raw;
   return `https://${raw}`;
+}
+
+function splitSearchShortcut(raw: string): { shortcut: BrowserSearchShortcut | null; query: string } {
+  const match = raw.match(/^(![a-z]+)\s+(.+)$/i);
+  if (!match) return { shortcut: null, query: raw };
+  const shortcut = match[1].toLowerCase();
+  if (!isBrowserSearchShortcut(shortcut)) return { shortcut: null, query: raw };
+  return { shortcut, query: match[2].trim() };
+}
+
+function isBrowserSearchShortcut(value: string): value is BrowserSearchShortcut {
+  return ["!g", "!s", "!d", "!k", "!gh", "!r", "!yt", "!docs", "!deep"].includes(value);
+}
+
+function browserSearchTarget(shortcut: BrowserSearchShortcut | null, query: string) {
+  const encoded = encodeSearchQuery(query);
+  if (!encoded) return null;
+  if (shortcut === "!g") return `https://www.google.com/search?q=${encoded}`;
+  if (shortcut === "!s") return `https://www.startpage.com/sp/search?query=${encoded}`;
+  if (shortcut === "!d") return `https://duckduckgo.com/?q=${encoded}`;
+  if (shortcut === "!k") return null;
+  if (shortcut === "!gh") return `https://github.com/search?q=${encoded}&type=repositories`;
+  if (shortcut === "!r") return `https://www.reddit.com/search/?q=${encoded}`;
+  if (shortcut === "!yt") return `https://www.youtube.com/results?search_query=${encoded}`;
+  if (shortcut === "!docs") return `https://search.brave.com/search?q=${encodeSearchQuery(`${query} official docs`)}`;
+  return `https://search.brave.com/search?q=${encoded}`;
 }
 
 export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft {
@@ -168,11 +196,14 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
   }
 
   const kind = looksLikeUrl(raw) ? "url" : "search";
+  const search = kind === "search" ? splitSearchShortcut(raw) : null;
+  const searchTargetUrl = search ? browserSearchTarget(search.shortcut, search.query) : null;
+  const searchDisplayTarget = search?.shortcut === "!k" && !searchTargetUrl ? "Kagi is not set up." : (search?.query ?? raw);
   return {
     kind,
     raw,
-    displayTarget: raw,
-    targetUrl: normalizedBrowserTarget(kind, raw),
+    displayTarget: kind === "url" ? raw : searchDisplayTarget,
+    targetUrl: kind === "url" ? normalizedUrlTarget(raw) : searchTargetUrl,
     tabLabel: kind === "url" ? "Page Draft" : "Search Draft",
     canOpen: false,
     noActionText: "No browser automation, page fetch, search request, credential action, file transfer, source save, Workbench capture, or external write runs from this draft.",

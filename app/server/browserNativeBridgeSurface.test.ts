@@ -63,4 +63,19 @@ describe("Browser native bridge surface", () => {
     expect(browserCopyModelSource).toContain("status: \"Ready\"");
     expect(browserCopyModelSource).toContain("safetyLabel: \"Shield\"");
   });
+
+  it("keeps omnibox power routing out of the visible Browser chrome", async () => {
+    const browserPanelSource = await readFile(resolve(appRoot, "client/src/components/BrowserPanel.tsx"), "utf8");
+    const browserCopyModelSource = await readFile(resolve(appRoot, "client/src/lib/workbenchBrowserModel.ts"), "utf8");
+
+    expect(browserCopyModelSource).toContain("Search or enter address.");
+    expect(browserCopyModelSource).toContain("https://search.brave.com/search");
+    expect(browserCopyModelSource).toContain("!gh");
+    expect(browserPanelSource).not.toContain("Brave Search");
+    expect(browserPanelSource).not.toContain("Startpage");
+    expect(browserPanelSource).not.toContain("DuckDuckGo");
+    expect(browserPanelSource).not.toContain("Kagi");
+    expect(browserPanelSource).not.toContain("provider");
+    expect(browserPanelSource).not.toContain("search engine");
+  });
 });
