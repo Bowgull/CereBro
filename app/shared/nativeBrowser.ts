@@ -4,6 +4,9 @@ export const nativeBrowserReloadPageChannel = "cerebro:native-browser:reload-pag
 export const nativeBrowserGoBackPageChannel = "cerebro:native-browser:go-back-page";
 export const nativeBrowserForwardPageChannel = "cerebro:native-browser:forward-page";
 export const nativeBrowserPageEventChannel = "cerebro:native-browser:page-event";
+export const nativeBrowserSiteSettingsChannel = "cerebro:native-browser:site-settings";
+export const nativeBrowserAllowPopupsHereChannel = "cerebro:native-browser:allow-popups-here";
+export const nativeBrowserSetBlockingForSiteChannel = "cerebro:native-browser:set-blocking-for-site";
 
 export const nativeBrowserPageEventTypes = [
   "navigation-started",
@@ -53,12 +56,27 @@ export type NativeBrowserNavigationResult = {
   title: string | null;
 };
 
+export type NativeBrowserSiteSettings = {
+  host: string | null;
+  popupPolicy: "block" | "allow";
+  blockingPolicy: "strict" | "off";
+  adBlockEngine: "ghostery" | "starting" | "unavailable";
+  passwordManager: "not_set_up";
+};
+
+export type NativeBrowserSetBlockingRequest = {
+  blockingPolicy: "strict" | "off";
+};
+
 export type NativeBrowserBridge = {
   openPage: (request: NativeBrowserOpenRequest) => Promise<NativeBrowserOpenResult>;
   closePage: () => Promise<NativeBrowserCloseResult>;
   reloadPage: () => Promise<NativeBrowserNavigationResult>;
   goBack: () => Promise<NativeBrowserNavigationResult>;
   goForward: () => Promise<NativeBrowserNavigationResult>;
+  siteSettings: () => Promise<NativeBrowserSiteSettings>;
+  allowPopupsHere: () => Promise<NativeBrowserSiteSettings>;
+  setBlockingForSite: (request: NativeBrowserSetBlockingRequest) => Promise<NativeBrowserSiteSettings>;
   onPageEvent: (callback: (event: NativeBrowserPageEvent) => void) => () => void;
 };
 

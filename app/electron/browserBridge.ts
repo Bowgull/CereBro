@@ -1,16 +1,27 @@
 import { ipcMain, type BrowserWindow, type Rectangle } from "electron";
 import {
   nativeBrowserClosePageChannel,
+  nativeBrowserAllowPopupsHereChannel,
   nativeBrowserForwardPageChannel,
   nativeBrowserGoBackPageChannel,
   nativeBrowserOpenPageChannel,
   nativeBrowserReloadPageChannel,
+  nativeBrowserSetBlockingForSiteChannel,
+  nativeBrowserSiteSettingsChannel,
   type NativeBrowserCloseResult,
   type NativeBrowserNavigationResult,
   type NativeBrowserOpenResult,
+  type NativeBrowserSetBlockingRequest,
+  type NativeBrowserSiteSettings,
 } from "../shared/nativeBrowser";
 import { nativeBrowserContentBounds, normalizeNativeBrowserOpenRequest } from "./browserRequest";
 import { layoutNativeBrowserPageView, type NativeBrowserPageView } from "./browserViews";
+import {
+  allowNativeBrowserPopupsForCurrentSite,
+  applyNativeBrowserBlockingForUrl,
+  nativeBrowserSiteSettingsForPage,
+  setNativeBrowserBlockingForCurrentSite,
+} from "./browserSiteSettings";
 
 function nativePageBounds(mainWindow: BrowserWindow): Rectangle {
   const bounds = mainWindow.getContentBounds();
@@ -40,6 +51,7 @@ export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pag
     }
 
     layoutNativeBrowserPageView(pageView, nativePageBounds(mainWindow));
+    applyNativeBrowserBlockingForUrl(pageView.view.webContents.session, request.targetUrl);
     pageView.view.setVisible(true);
     await pageView.load(request.targetUrl);
 
@@ -81,5 +93,17 @@ export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pag
     if (!pageView.view.webContents.canGoForward()) return nativeNavigationResult(pageView, false);
     pageView.view.webContents.goForward();
     return nativeNavigationResult(pageView);
+  });
+
+  ipcMain.handle(nativeBrowserSiteSettingsChannel, async (): Promise<NativeBrowserSiteSettings> => {
+    return nativeBrowserSiteSettingsForPage(pageView);
+  });
+
+  ipcMain.handle(nativeBrowserAllowPopupsHereChannel, async (): Promise<NativeBrowserSiteSettings> => {
+    return allowNativeBrowserPopupsForCurrentSite(pageView);
+  });
+
+  ipcMain.handle(nativeBrowserSetBlockingForSiteChannel, async (_event, input: NativeBrowserSetBlockingRequest): Promise<NativeBrowserSiteSettings> => {
+    return setNativeBrowserBlockingForCurrentSite(pageView, pageView.view.webContents.session, input.blockingPolicy);
   });
 }

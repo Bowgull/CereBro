@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   nativeBrowserClosePageChannel,
   nativeBrowserForwardPageChannel,
+  nativeBrowserAllowPopupsHereChannel,
   nativeBrowserGoBackPageChannel,
   nativeBrowserOpenPageChannel,
   nativeBrowserReloadPageChannel,
+  nativeBrowserSetBlockingForSiteChannel,
+  nativeBrowserSiteSettingsChannel,
   nativeBrowserBlockedReasons,
   nativeBrowserPageEventTypes,
   type NativeBrowserOpenRequest,
@@ -40,6 +43,9 @@ describe("native browser contract", () => {
     expect(nativeBrowserReloadPageChannel).toBe("cerebro:native-browser:reload-page");
     expect(nativeBrowserGoBackPageChannel).toBe("cerebro:native-browser:go-back-page");
     expect(nativeBrowserForwardPageChannel).toBe("cerebro:native-browser:forward-page");
+    expect(nativeBrowserSiteSettingsChannel).toBe("cerebro:native-browser:site-settings");
+    expect(nativeBrowserAllowPopupsHereChannel).toBe("cerebro:native-browser:allow-popups-here");
+    expect(nativeBrowserSetBlockingForSiteChannel).toBe("cerebro:native-browser:set-blocking-for-site");
     expect(nativeBrowserPageEventTypes).toEqual([
       "navigation-started",
       "navigation-finished",

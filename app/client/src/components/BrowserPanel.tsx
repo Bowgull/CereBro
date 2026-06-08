@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
-import type { NativeBrowserPageEvent } from "../../../shared/nativeBrowser";
+import type { NativeBrowserPageEvent, NativeBrowserSiteSettings } from "../../../shared/nativeBrowser";
 import { nativeVpnUnknownStatus, type NativeVpnStatusResult } from "../../../shared/nativeVpn";
 import {
   workbenchBrowserActionPreviewModel,
@@ -57,7 +57,7 @@ type BrowserDraftTab = {
 
 type BrowserDownloadActivity = {
   filename: string;
-  state: "active" | "finished" | "blocked";
+  state: "downloading" | "saved" | "blocked" | "needs_approval";
   message: string;
 };
 
@@ -134,9 +134,20 @@ function vpnPrimaryActionLabel(status: NativeVpnStatusResult | null, isBusy: boo
 }
 
 function downloadBlockedMessage(reason: Extract<NativeBrowserPageEvent, { type: "download-blocked" }>["reason"]) {
-  if (reason === "automatic_download") return "Download blocked";
-  if (reason === "multiple_download") return "Multiple downloads blocked";
-  return "Download needs review";
+  if (reason === "automatic_download") return "Blocked";
+  if (reason === "multiple_download") return "Blocked";
+  return "Needs Approval";
+}
+
+function downloadBlockedState(reason: Extract<NativeBrowserPageEvent, { type: "download-blocked" }>["reason"]): BrowserDownloadActivity["state"] {
+  return reason === "risky_file" ? "needs_approval" : "blocked";
+}
+
+function siteBlockingLabel(settings: NativeBrowserSiteSettings | null) {
+  if (settings?.blockingPolicy === "off") return "Blocking Off";
+  if (settings?.adBlockEngine === "starting") return "Blocking Starting";
+  if (settings?.adBlockEngine === "unavailable") return "Blocking Unavailable";
+  return "Blocking Strict";
 }
 
 function BrowserHomeStart({
@@ -292,6 +303,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [vpnBusy, setVpnBusy] = useState(false);
   const [popupBlockedCount, setPopupBlockedCount] = useState(0);
   const [downloadActivity, setDownloadActivity] = useState<BrowserDownloadActivity | null>(null);
+  const [siteSettings, setSiteSettings] = useState<NativeBrowserSiteSettings | null>(null);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
@@ -406,6 +418,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           }).then((nativeResult) => {
             if (nativeResult.ok) {
               setNativePageActive(true);
+              void refreshSiteSettings();
               setBrowserNotice("Page opened in CereBro.");
               return;
             }
@@ -667,6 +680,37 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setVpnBusy(false);
     }
   };
+  const refreshSiteSettings = async () => {
+    try {
+      const settings = await window.cerebroNativeBrowser?.siteSettings();
+      if (settings) setSiteSettings(settings);
+      return settings ?? null;
+    } catch {
+      return null;
+    }
+  };
+  const allowPopupsHere = async () => {
+    try {
+      const settings = await window.cerebroNativeBrowser?.allowPopupsHere();
+      if (settings) {
+        setSiteSettings(settings);
+        setBrowserNotice(settings.host ? `Popups allowed for ${settings.host}.` : "Open a page before allowing popups.");
+      }
+    } catch {
+      setBrowserNotice("Popup setting failed.");
+    }
+  };
+  const setBlockingForCurrentSite = async (blockingPolicy: NativeBrowserSiteSettings["blockingPolicy"]) => {
+    try {
+      const settings = await window.cerebroNativeBrowser?.setBlockingForSite({ blockingPolicy });
+      if (settings) {
+        setSiteSettings(settings);
+        setBrowserNotice(settings.host ? `${siteBlockingLabel(settings)} for ${settings.host}.` : "Open a page before changing blocking.");
+      }
+    } catch {
+      setBrowserNotice("Blocking setting failed.");
+    }
+  };
   const isPreparingBrowserDraft =
     createBrowserActionProposal.isPending ||
     createBrowserTabSessionDraft.isPending ||
@@ -720,10 +764,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         setPopupBlockedCount((count) => count + 1);
         setBrowserNotice("Popup blocked.");
       }
+      if (event.type === "navigation-finished") {
+        void refreshSiteSettings();
+      }
       if (event.type === "download-started") {
         setDownloadActivity({
           filename: event.filename,
-          state: "active",
+          state: "downloading",
           message: "Downloading",
         });
         setBrowserNotice(`Downloading ${event.filename}.`);
@@ -731,16 +778,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       if (event.type === "download-finished") {
         setDownloadActivity({
           filename: event.filename,
-          state: event.state === "completed" ? "finished" : "blocked",
-          message: event.state === "completed" ? "Download finished" : "Download stopped",
+          state: event.state === "completed" ? "saved" : "blocked",
+          message: event.state === "completed" ? "Saved" : "Blocked",
         });
-        setBrowserNotice(event.state === "completed" ? `Downloaded ${event.filename}.` : `Download stopped: ${event.filename}.`);
+        setBrowserNotice(event.state === "completed" ? `Saved ${event.filename}.` : `Blocked: ${event.filename}.`);
       }
       if (event.type === "download-blocked") {
         const message = downloadBlockedMessage(event.reason);
         setDownloadActivity({
           filename: event.filename,
-          state: "blocked",
+          state: downloadBlockedState(event.reason),
           message,
         });
         setBrowserNotice(`${message}: ${event.filename}.`);
@@ -751,6 +798,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
   useEffect(() => {
     void checkVpnStatus();
+    void refreshSiteSettings();
   }, []);
 
   return (
@@ -1058,8 +1106,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   title={`${downloadActivity.message}: ${downloadActivity.filename}`}
                   onClick={() => setBrowserNotice(`${downloadActivity.message}: ${downloadActivity.filename}`)}
                   style={{
-                    borderColor: downloadActivity.state === "blocked" ? `${C.warning}88` : `${browserFrame.lineSoft}`,
-                    color: downloadActivity.state === "blocked" ? C.warning : C.textSecondary,
+                    borderColor: downloadActivity.state === "blocked" || downloadActivity.state === "needs_approval" ? `${C.warning}88` : `${browserFrame.lineSoft}`,
+                    color: downloadActivity.state === "blocked" || downloadActivity.state === "needs_approval" ? C.warning : C.textSecondary,
                   }}
                 >
                   <Download size={14} strokeWidth={1.8} aria-hidden="true" />
@@ -1070,8 +1118,44 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 </summary>
-                <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                <div className="absolute right-0 z-20 mt-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+                  <div className="mb-1 rounded px-1.5 py-1.5 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold" style={{ color: C.textPrimary }}>Site settings</span>
+                      <span style={{ color: siteSettings?.blockingPolicy === "off" ? C.warning : C.success }}>{siteBlockingLabel(siteSettings)}</span>
+                    </div>
+                    <div className="mt-1 truncate">{siteSettings?.host ?? "No site open"}</div>
+                    <div className="mt-1">Password Manager: Not set up</div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                    disabled={!siteSettings?.host}
+                    role="menuitem"
+                    onClick={() => void allowPopupsHere()}
+                  >
+                    <span className="block">
+                      <span className="block text-[11px] font-semibold">Allow popups here</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{siteSettings?.popupPolicy === "allow" ? "Allowed for this site." : "Blocked by default."}</span>
+                    </span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                    disabled={!siteSettings?.host}
+                    role="menuitem"
+                    onClick={() => void setBlockingForCurrentSite(siteSettings?.blockingPolicy === "off" ? "strict" : "off")}
+                  >
+                    <span className="block">
+                      <span className="block text-[11px] font-semibold">{siteSettings?.blockingPolicy === "off" ? "Turn blocking on for this site" : "Turn blocking off for this site"}</span>
+                      <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Ad and popup blocking stay strict elsewhere.</span>
+                    </span>
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"

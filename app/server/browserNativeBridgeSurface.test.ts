@@ -24,6 +24,11 @@ describe("Browser native bridge surface", () => {
     expect(browserPanelSource).toContain("downloadActivity");
     expect(browserPanelSource).toContain("Downloads");
     expect(browserPanelSource).toContain("Popup blocked");
+    expect(browserPanelSource).toContain("Blocking Strict");
+    expect(browserPanelSource).toContain("Allow popups here");
+    expect(browserPanelSource).toContain("Turn blocking off for this site");
+    expect(browserPanelSource).toContain("Site settings");
+    expect(browserPanelSource).toContain("Password Manager: Not set up");
     expect(browserPanelSource).toContain("userInitiated: true");
     expect(browserPanelSource).toContain("Return");
   });

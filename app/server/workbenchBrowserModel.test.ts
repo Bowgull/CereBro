@@ -35,7 +35,7 @@ describe("workbenchBrowserModel", () => {
     expect(shell.actions.every((action) => action.enabled === false)).toBe(true);
     expect(shell.safetyLabel).toBe("Shield");
     expect(shell.emptyTitle).toBe("Open a page.");
-    expect(shell.noActionText).toContain("No browser automation");
+    expect(shell.noActionText).toBe("No page is open.");
     expect(combined).not.toContain("manual browser button");
     expect(combined).not.toContain("profile");
     expect(combined).not.toContain("search tab");
@@ -71,7 +71,7 @@ describe("workbenchBrowserModel", () => {
     expect(urlDraft.targetUrl).toBe("https://example.com/path?q=1");
     expect(urlDraft.tabLabel).toBe("Page Draft");
     expect(urlDraft.canOpen).toBe(false);
-    expect(urlDraft.noActionText).toContain("No browser automation");
+    expect(urlDraft.noActionText).toBe("Open this page in CereBro.");
 
     expect(searchDraft.kind).toBe("search");
     expect(searchDraft.displayTarget).toBe("best dub anime sources");
@@ -211,7 +211,7 @@ describe("workbenchBrowserModel", () => {
     expect(urlTabs.visibleTabs.at(-1)?.state).toBe("draft");
     expect(urlTabs.canCreateTab).toBe(false);
     expect(urlTabs.tabSummary).toContain("New page is ready to open.");
-    expect(urlTabs.noActionText).toContain("No browser tab");
+    expect(urlTabs.noActionText).toBe("No tab is open.");
 
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(emptyTabs.tabSummary).toBe("Tab 1 is the active page.");
@@ -283,7 +283,7 @@ describe("workbenchBrowserModel", () => {
         statusLabel: "dirty",
       },
     ]);
-    expect(pins.noActionText).toContain("No bookmark defaults");
+    expect(pins.noActionText).toBe("Project pins are local shortcuts.");
     expect(JSON.stringify(pins).toLowerCase()).not.toContain("youtube");
     expect(JSON.stringify(pins).toLowerCase()).not.toContain("reddit");
   });
@@ -301,7 +301,7 @@ describe("workbenchBrowserModel", () => {
     expect(watchPreview.canPropose).toBe(false);
     expect(watchPreview.statusLabel).toBe("blocked");
     expect(watchPreview.routeLabel).toBe("Needs page permission.");
-    expect(watchPreview.noActionText).toContain("No page action");
+    expect(watchPreview.noActionText).toBe("Choose a page action.");
 
     expect(emptyPreview.label).toBe("Save Page");
     expect(emptyPreview.targetLabel).toBe("No page draft.");
@@ -325,7 +325,7 @@ describe("workbenchBrowserModel", () => {
       "Safety check",
       "Page record",
     ]);
-    expect(urlReadiness.noActionText).toContain("No browser automation");
+    expect(urlReadiness.noActionText).toBe("Open a page first.");
 
     expect(emptyReadiness.pageStateLabel).toBe("no page");
     expect(emptyReadiness.canOpen).toBe(false);

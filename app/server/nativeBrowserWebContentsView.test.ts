@@ -61,6 +61,7 @@ describe("native browser web contents view", () => {
     expect(permissionsSource).toContain("will-download");
     expect(permissionsSource).toContain("event.preventDefault()");
     expect(viewsSource).toContain("setWindowOpenHandler");
+    expect(viewsSource).toContain("isNativeBrowserPopupAllowedForUrl");
     expect(viewsSource).toContain("action: \"deny\"");
   });
 });

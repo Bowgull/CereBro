@@ -191,7 +191,7 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
       targetUrl: null,
       tabLabel: "Tab 1",
       canOpen: false,
-      noActionText: "No browser automation, page fetch, search, source save, Workbench capture, or external write runs from an empty draft.",
+      noActionText: "Enter a site or search to open a page.",
     };
   }
 
@@ -206,7 +206,7 @@ export function workbenchBrowserDraftModel(value: string): WorkbenchBrowserDraft
     targetUrl: kind === "url" ? normalizedUrlTarget(raw) : searchTargetUrl,
     tabLabel: kind === "url" ? "Page Draft" : "Search Draft",
     canOpen: false,
-    noActionText: "No browser automation, page fetch, search request, credential action, file transfer, source save, Workbench capture, or external write runs from this draft.",
+    noActionText: "Open this page in CereBro.",
   };
 }
 
@@ -290,7 +290,7 @@ export function workbenchBrowserShellModel() {
     ] satisfies WorkbenchBrowserAction[],
     emptyTitle: "Open a page.",
     emptyBody: "Use the address bar to open a page.",
-    noActionText: "No browser automation, page fetch, credential action, file transfer, source save, Workbench capture, or external write runs from this shell.",
+    noActionText: "No page is open.",
   };
 }
 
@@ -312,7 +312,7 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
       draft.kind === "empty"
         ? "Tab 1 is the active page."
         : "New page is ready to open.",
-    noActionText: "No browser tab, page session, history entry, bookmark, source record, service state, or external browser action is created from this tab rail.",
+    noActionText: "No tab is open.",
   };
 }
 
@@ -363,7 +363,7 @@ export function workbenchBrowserProjectPinsModel(projects: BrowserProjectPinInpu
         target: project.localPath,
         statusLabel: project.git?.statusText ?? "unread",
       })),
-    noActionText: "No bookmark defaults, browser opens, source saves, project writes, or external actions run from project pins.",
+    noActionText: "Project pins are local shortcuts.",
   };
 }
 
@@ -377,7 +377,7 @@ export function workbenchBrowserActionPreviewModel(
     canPropose: false,
     statusLabel: draft.kind === "empty" ? "no page" : "blocked",
     routeLabel: draft.kind === "empty" ? "Open a page first." : "Needs page permission.",
-    noActionText: "No page action, browser automation, page fetch, source save, Workbench capture, shelf save, project pin, explanation route, clipboard write, or external write runs from this preview.",
+    noActionText: "Choose a page action.",
   };
 }
 
@@ -388,7 +388,7 @@ export function workbenchBrowserReadinessModel(draft: WorkbenchBrowserDraft): Wo
     canOpen: false,
     canRunAutomation: false,
     requiredGates: ["Page permission", "Safety check", "Page record"],
-    noActionText: "No browser automation, page fetch, credential action, source save, Workbench capture, download, or outside write is available from this check.",
+    noActionText: "Open a page first.",
   };
 }
 

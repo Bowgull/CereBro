@@ -1,14 +1,18 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
   nativeBrowserClosePageChannel,
+  nativeBrowserAllowPopupsHereChannel,
   nativeBrowserForwardPageChannel,
   nativeBrowserGoBackPageChannel,
   nativeBrowserOpenPageChannel,
   nativeBrowserPageEventChannel,
   nativeBrowserReloadPageChannel,
+  nativeBrowserSetBlockingForSiteChannel,
+  nativeBrowserSiteSettingsChannel,
   type NativeBrowserBridge,
   type NativeBrowserOpenRequest,
   type NativeBrowserPageEvent,
+  type NativeBrowserSetBlockingRequest,
 } from "../shared/nativeBrowser";
 import {
   nativeVpnCheckChannel,
@@ -25,6 +29,9 @@ const nativeBrowserBridge: NativeBrowserBridge = {
   reloadPage: () => ipcRenderer.invoke(nativeBrowserReloadPageChannel),
   goBack: () => ipcRenderer.invoke(nativeBrowserGoBackPageChannel),
   goForward: () => ipcRenderer.invoke(nativeBrowserForwardPageChannel),
+  siteSettings: () => ipcRenderer.invoke(nativeBrowserSiteSettingsChannel),
+  allowPopupsHere: () => ipcRenderer.invoke(nativeBrowserAllowPopupsHereChannel),
+  setBlockingForSite: (request: NativeBrowserSetBlockingRequest) => ipcRenderer.invoke(nativeBrowserSetBlockingForSiteChannel, request),
   onPageEvent: (callback: (event: NativeBrowserPageEvent) => void) => {
     const listener = (_event: Electron.IpcRendererEvent, pageEvent: NativeBrowserPageEvent) => callback(pageEvent);
     ipcRenderer.on(nativeBrowserPageEventChannel, listener);

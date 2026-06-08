@@ -9,6 +9,7 @@ import {
   mapNativeTitleUpdated,
 } from "./browserEvents";
 import { nativeBrowserSessionWebPreferences } from "./browserSession";
+import { isNativeBrowserPopupAllowedForUrl } from "./browserSiteSettings";
 
 export type NativeBrowserPageView = {
   tabId: string;
@@ -28,6 +29,9 @@ export function createNativeBrowserPageView(
 
   installNativeBrowserPermissionPolicy(view.webContents.session, { tabId, emitPageEvent });
   view.webContents.setWindowOpenHandler((details) => {
+    if (isNativeBrowserPopupAllowedForUrl(view.webContents.getURL())) {
+      return { action: "allow" };
+    }
     emitPageEvent(mapNativePopupBlocked(tabId, details.url));
     return { action: "deny" };
   });

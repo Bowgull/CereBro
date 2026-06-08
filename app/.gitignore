@@ -6,7 +6,9 @@
 dist/
 dist-electron/
 build/
+playwright-report/
 release/
+test-results/
 *.dist
 
 # Environment variables

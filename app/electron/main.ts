@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from "elect
 import { appendFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
+import { installNativeBrowserAdBlocker } from "./browserAdBlock";
 import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 import { installNativeVpnBridge } from "./vpnBridge";
@@ -140,6 +141,7 @@ async function createMainWindow() {
   const pageView = createNativeBrowserPageView(mainWindow, "native_tab_1", (event) => {
     mainWindow.webContents.send(nativeBrowserPageEventChannel, event);
   });
+  void installNativeBrowserAdBlocker(pageView.view.webContents.session, desktopLog);
   layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
   installNativeBrowserCommandBridge(mainWindow, pageView);
   installNativeVpnBridge();
