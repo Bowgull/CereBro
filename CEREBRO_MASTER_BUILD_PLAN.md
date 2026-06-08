@@ -109,12 +109,20 @@ Current build-session plugin rule:
 4. Treat installed plugins as build aids and future reference lanes, not
    automatic CereBro features.
 5. Defer OpenClaw/ShibaClaw/OpenCode installs. Study them as references only.
+   Hermes and OpenClaw/OpenClaw-style computer-use systems remain relevant to
+   future agent capability, but they do not bypass capability intake. Use them
+   as architecture references first. Install, run, or wire them only after
+   license, security, storage, privacy, and product-fit review.
 
 Current front-end build path:
 
 0. **Redesign contract and shell foundation.** Lock the theme, anatomy, hidden
    machinery rules, and screenshot-proof rollout before touching execution
    controls. Do not replace the Phaser Keep or add rooms.
+   The active visual direction is Keep-tech: RPG fantasy future tech with
+   native-browser familiarity. Do not ship styled wireframes as final UI.
+   Browser visual targets start as finished visual comps, then translate into
+   React/CSS/SVG only after approval.
 1. **Keep-first UX spine.** The Keep remains the product spine. The first read
    should answer what CereBro thinks the user is doing, who owns it, what proof
    exists, and what needs approval.
@@ -129,6 +137,21 @@ Current front-end build path:
    Watch/resume flows, source capture, Workbench attach, and Send to Aang.
    This is user-controlled browsing. Agent browsing still routes through
    Surfer and Spock.
+   Browser Home is a real new-tab surface, not a Keep dashboard. It has one
+   browser search/address field in the top URL bar, no duplicate center search,
+   no Quick Actions block, real pinned-site favicons, compact bookmark
+   medallions under the URL bar, and Watch Shelf closed by default behind a
+   right-edge drawer handle.
+   The left Keep rail must be collapsible. Its collapse/expand behavior should
+   mirror the Watch Shelf right drawer for symmetry: same edge handle, same
+   directional arrow, same motion timing, and same hit target size.
+   Aang remains in the bottom dock as the only Aang input. Replace letter
+   placeholders with an Aang portrait/sprite once the asset exists. If a new
+   asset is needed, make Aang recognizable with an airbending staff.
+   The Aang dock must accept typed text plus drag/drop and pasted image input
+   so screenshots, page captures, and visual references can be sent to Aang.
+   Do not add mystery icon clusters to the Aang dock. It should show Aang, one
+   input, attach/image, and send.
 5. **Workbench as visual proof.** Localhost preview, browser views,
    screenshots, images, annotations, before/after, and validation evidence live
    in Workbench.
@@ -243,6 +266,13 @@ Core defaults:
 - Aang is the human bridge. The user speaks to Aang first. Aang interprets the
   request and reports to Cortana. Cortana routes the agent layer. The UI must
   show that chain instead of making the user speak directly to the router.
+- Aang must be smart in the product sense: able to inspect current CereBro
+  context, receive screenshots/images, route through Cortana, trigger approved
+  Browser/Workshop/Ledger/Basement actions, and explain what happened without
+  exposing machinery. Smart does not mean ungated hidden automation.
+- Browser protection language must stay concrete. Prefer `Shield On`,
+  `Shield Off`, `VPN On`, `VPN Off`, `Checking`, `Setup Needed`, or `Unknown`.
+  Do not use generic security copy such as `Protected` as the primary label.
 - CereBro must infer the user's mode from context before asking. Aang should
   show the read, ask only when confidence is low or risk changes, remember
   corrections, and route through Cortana with a visible receipt.
@@ -1152,6 +1182,9 @@ Do:
   - `Send To Agent` action that routes the marked evidence to Cortana, Tony,
     Gojo, Spock, Aang, or Surfer with the annotation coordinates attached.
   - `Compare` mode for before/after screenshots or asset variants.
+  - `mockups/compare` as the canonical source folder for approved, candidate,
+    and rejected visual targets. Compare should use plain labels from the
+    manifest and hide filenames from normal users.
   - `Evidence Ledger` showing what CereBro inspected before it changed code or
     created output.
 - Localhost is a core V1 workflow. CereBro should be able to run approved local

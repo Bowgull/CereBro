@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Download, ExternalLink, Folder, MoreHorizontal, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cerebroColors as C } from "@/lib/keepConfig";
@@ -31,6 +31,19 @@ const browserFrame = {
   bevel: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.58)",
   shadow: "0 24px 70px rgba(0, 0, 0, 0.52)",
 };
+
+const browserHomePins = [
+  { label: "GitHub", target: "https://github.com", domain: "github.com", fallback: "GH" },
+  { label: "Obsidian", target: "https://obsidian.md", domain: "obsidian.md", fallback: "O" },
+  { label: "YouTube", target: "https://youtube.com", domain: "youtube.com", fallback: "YT" },
+  { label: "X", target: "https://x.com", domain: "x.com", fallback: "X" },
+  { label: "Reddit", target: "https://reddit.com", domain: "reddit.com", fallback: "R" },
+  { label: "Hacker News", target: "https://news.ycombinator.com", domain: "news.ycombinator.com", fallback: "HN" },
+];
+
+function faviconUrl(domain: string, size = 64) {
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`;
+}
 
 type BrowserRoute = "approvals" | "workbench" | "sources" | "security" | "basement";
 
@@ -126,6 +139,143 @@ function downloadBlockedMessage(reason: Extract<NativeBrowserPageEvent, { type: 
   return "Download needs review";
 }
 
+function BrowserHomeStart({
+  chatOpen,
+  onToggleChat,
+  onSelectTarget,
+}: {
+  chatOpen: boolean;
+  onToggleChat: () => void;
+  onSelectTarget: (target: string) => void;
+}) {
+  return (
+    <div className="relative min-h-[clamp(520px,68dvh,760px)] overflow-hidden rounded" style={{ background: "radial-gradient(circle at 50% 30%, rgba(214, 158, 67, 0.16), transparent 11%), radial-gradient(circle at 50% 24%, rgba(198, 155, 85, 0.12), transparent 28%), radial-gradient(circle at 88% 12%, rgba(77, 170, 154, 0.08), transparent 28%), linear-gradient(180deg, rgba(7, 13, 12, 0.98), rgba(2, 5, 5, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 44px rgba(0, 0, 0, 0.56)" }}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-70" aria-hidden="true" style={{ background: "repeating-radial-gradient(circle at 50% 58%, rgba(198, 155, 85, 0.26) 0 1px, transparent 1px 46px)" }} />
+      <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+
+      <div className="relative z-10 flex flex-col px-4 pb-28 pt-8 sm:px-6 sm:pt-10">
+        <div className="mx-auto flex max-w-lg flex-col items-center text-center">
+          <div className="mb-4 h-px w-64 max-w-full" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 0 30px rgba(214, 158, 67, 0.22)` }}>
+            <ShieldCheck size={18} strokeWidth={1.7} style={{ color: C.gold }} />
+          </div>
+          <div className="mt-4 text-[28px] font-semibold leading-none sm:text-[34px]" style={{ color: C.textPrimary, fontFamily: "Georgia, serif" }}>
+            Where to next?
+          </div>
+          <div className="mt-2 text-[13px]" style={{ color: C.textSecondary }}>
+            Search the web or ask CereBro anything.
+          </div>
+        </div>
+
+        <div className="mx-auto mt-10 grid w-full max-w-6xl gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[14px] font-semibold" style={{ color: C.gold }}>Pinned</div>
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => onSelectTarget("https://github.com")}>
+              Edit Pinned
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
+            {browserHomePins.map((pin) => (
+              <button
+                key={pin.label}
+                type="button"
+                className="group relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                onClick={() => onSelectTarget(pin.target)}
+                style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
+              >
+                <span className="pointer-events-none absolute left-1.5 top-1.5 h-2.5 w-2.5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+                <img
+                  src={faviconUrl(pin.domain, 96)}
+                  alt=""
+                  className="h-10 w-10 rounded"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+                <span className="mt-2 max-w-full truncate text-[12px] font-semibold" style={{ color: C.textPrimary }}>{pin.label}</span>
+                <span className="absolute bottom-[-5px] h-2.5 w-2.5 rounded-full" aria-hidden="true" style={{ background: C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 12px ${C.success}66` }} />
+              </button>
+            ))}
+            <button
+              type="button"
+              className="relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              onClick={() => onSelectTarget("https://github.com")}
+              style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
+            >
+              <Plus size={28} strokeWidth={1.6} aria-hidden="true" style={{ color: C.gold }} />
+              <span className="mt-2 text-[12px] font-semibold" style={{ color: C.textPrimary }}>Add</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-7 grid w-full max-w-6xl gap-3 lg:grid-cols-3">
+          {[
+            ["Continue browsing", "electron / electron", "CereBro Shell", "MDN Web Docs"],
+            ["Recent", "Awesome Lists", "Design Systems", "Deep Work"],
+            ["Downloads", "CereBro-Setup.dmg", "project-brief.pdf", "notes.zip"],
+          ].map(([title, a, b, c]) => (
+            <div key={title} className="rounded p-3" style={{ background: "rgba(5, 10, 10, 0.68)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="text-[14px] font-semibold" style={{ color: C.gold }}>{title}</div>
+                <Button type="button" size="sm" variant="outline" className="h-6 px-2 text-[10px]">View all</Button>
+              </div>
+              {[a, b, c].map((item) => (
+                <button key={item} type="button" className="grid w-full grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded px-1 py-1.5 text-left" onClick={() => onSelectTarget(item === "MDN Web Docs" ? "https://developer.mozilla.org" : "https://github.com")}>
+                  <span className="flex h-8 w-8 items-center justify-center rounded text-[10px] font-bold" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, color: C.gold }}>{item.slice(0, 2).toUpperCase()}</span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>{item}</span>
+                    <span className="block truncate text-[10px]" style={{ color: C.textMuted }}>Local browser memory</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute inset-x-3 bottom-3 z-20 rounded-t-2xl px-3 py-3" style={{ background: "linear-gradient(180deg, rgba(4, 8, 8, 0.9), rgba(2, 5, 5, 0.98))", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: "0 -18px 46px rgba(0, 0, 0, 0.5)" }}>
+        <div className={chatOpen ? "grid grid-cols-[74px_minmax(0,1fr)_auto_auto] items-center gap-3" : "grid grid-cols-[74px_minmax(0,1fr)] items-center gap-3"}>
+          <button
+            type="button"
+            aria-label={chatOpen ? "Close Aang chat" : "Open Aang chat"}
+            onClick={onToggleChat}
+            className="group relative h-[74px] w-[74px] rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
+          >
+            <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="absolute bottom-1 left-1/2 h-[86px] max-w-none -translate-x-1/2 object-contain" />
+            <span className="absolute -bottom-2 left-1/2 flex h-5 w-12 -translate-x-1/2 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, color: C.gold }}>
+              {chatOpen ? <ChevronDown size={13} strokeWidth={2} /> : <ChevronUp size={13} strokeWidth={2} />}
+            </span>
+          </button>
+          {chatOpen ? (
+            <>
+              <Input
+                aria-label="Ask Aang from Browser Home"
+                placeholder="Ask Aang anything or run a command..."
+                className="h-12 min-w-0 text-[12px]"
+                style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
+              />
+              <Button type="button" size="sm" variant="outline" className="h-12 w-12 px-0" aria-label="Attach image for Aang">
+                <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
+              </Button>
+              <Button type="button" size="sm" variant="outline" className="h-12 w-12 px-0" aria-label="Send to Aang">
+                <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
+              </Button>
+            </>
+          ) : (
+            <button type="button" onClick={onToggleChat} className="h-12 rounded px-4 text-left text-[12px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ background: "rgba(3, 8, 7, 0.56)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, ["--tw-ring-color" as string]: C.accent }}>
+              Ask Aang
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
@@ -144,6 +294,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [downloadActivity, setDownloadActivity] = useState<BrowserDownloadActivity | null>(null);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
+  const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
@@ -1308,34 +1459,42 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 </div>
               ) : (
-              <div className={browserDraft.kind === "empty" ? "grid items-center gap-4" : "grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_320px]"} style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
+              browserDraft.kind === "empty" ? (
+                <BrowserHomeStart
+                  chatOpen={browserHomeChatOpen}
+                  onToggleChat={() => setBrowserHomeChatOpen((open) => !open)}
+                  onSelectTarget={(target) => {
+                    setBrowserAddressDraft(target);
+                    setPreparedApprovalId(null);
+                    setBrowserNotice(null);
+                  }}
+                />
+              ) : (
+              <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>
                 <div className="relative overflow-hidden rounded p-4" style={{ background: "radial-gradient(circle at 50% 18%, rgba(77, 170, 154, 0.11), transparent 34%), linear-gradient(180deg, rgba(8, 16, 15, 0.86), rgba(2, 6, 6, 0.94))", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: "inset 0 1px 40px rgba(0, 0, 0, 0.44)" }}>
                   <div className="pointer-events-none absolute left-3 top-3 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
                   <div className="pointer-events-none absolute right-3 top-3 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
                   <div className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
                   <div className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
                   <div className="mx-auto flex max-w-xl flex-col items-center justify-center text-center" style={{ minHeight: "clamp(300px, 46dvh, 520px)" }}>
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserDraft.kind === "empty" ? browserFrame.lineSoft : C.gold}`, boxShadow: `${browserFrame.bevel}, 0 0 32px rgba(77, 170, 154, 0.12)` }}>
+                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${C.gold}`, boxShadow: `${browserFrame.bevel}, 0 0 32px rgba(77, 170, 154, 0.12)` }}>
                       <ShieldCheck size={18} strokeWidth={1.7} />
                     </div>
                     <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.gold }}>
-                      {browserDraft.kind === "empty" ? "Current Page" : browserDraft.kind}
+                      {browserDraft.kind}
                     </div>
                     <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: C.textPrimary }}>
-                      {browserDraft.kind === "empty" ? "Enter a site or search." : browserDraft.tabLabel}
+                      {browserDraft.tabLabel}
                     </div>
-                    <div className="mt-2 max-w-md break-words text-[12px] leading-snug" style={{ color: browserDraft.kind === "empty" ? C.textMuted : C.textSecondary }}>
-                      {browserDraft.kind === "empty" ? "Use the address bar. CereBro will ask before anything risky runs." : browserDraft.displayTarget}
+                    <div className="mt-2 max-w-md break-words text-[12px] leading-snug" style={{ color: C.textSecondary }}>
+                      {browserDraft.displayTarget}
                     </div>
-                    {browserDraft.kind !== "empty" && (
-                      <div className="mt-3 flex justify-center gap-1">
-                        <Chip label={browserDraft.kind} tone={C.accent} />
-                        <Chip label={browserDraft.canOpen ? "ready" : "approval gated"} tone={browserDraft.canOpen ? C.success : C.warning} />
-                      </div>
-                    )}
+                    <div className="mt-3 flex justify-center gap-1">
+                      <Chip label={browserDraft.kind} tone={C.accent} />
+                      <Chip label={browserDraft.canOpen ? "ready" : "approval gated"} tone={browserDraft.canOpen ? C.success : C.warning} />
+                    </div>
                   </div>
                 </div>
-                {browserDraft.kind !== "empty" && (
                 <div className="grid gap-2">
                   <div className="rounded p-3 text-[11px] leading-snug" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
                     <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Page State</div>
@@ -1446,8 +1605,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     <div className="mt-1">{browserDraft.noActionText}</div>
                   </details>
                 </div>
-                )}
               </div>
+              )
               )}
             </section>
           ) : (

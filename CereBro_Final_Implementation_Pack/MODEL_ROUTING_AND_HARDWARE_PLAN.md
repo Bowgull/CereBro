@@ -27,6 +27,19 @@ Use local/Ollama models when possible.
 Escalate to stronger external/cloud models only when needed and approved.
 ```
 
+Current 8 GB MacBook local-model stance:
+
+- `gemma3:4b` is the dependable first local default candidate.
+- `qwen3.5:4b` is the challenger for reasoning and agent-like work.
+- `qwen3.5:9b` is a benchmark-only stretch lane, not a default.
+- `qwen2.5-coder:3b` remains a small local coding-helper lane.
+- `llama3.2:3b` stays as the installed fallback/control model.
+- 12B+ local models are research-only on this machine unless a new hardware
+  receipt proves they are practical.
+
+The Samsung T7 Shield can store model files and caches, but it does not raise
+the RAM ceiling.
+
 ## 3. Model Classes
 
 ### 3.1 `lightweight_formatter`
@@ -85,6 +98,22 @@ Use for:
 Privacy:
 
 - Local preferred if hardware supports it
+
+### 3.4a `local_vision_helper`
+
+Use for:
+
+- Image intake from Aang drag/drop.
+- Screenshot summaries.
+- Page capture review.
+- UI/mockup notes.
+- Lightweight visual comparison before escalating.
+
+Privacy:
+
+- Local preferred.
+- If the image contains private work, credentials, Raven content, or sensitive
+  personal context, external escalation requires approval.
 
 ### 3.5 `strong_reasoning_external`
 
@@ -147,10 +176,19 @@ Default:
 
 - `lightweight_formatter`
 - `local_summary`
+- `local_vision_helper` when the user drops or pastes images into the Aang dock
 
 Escalate to:
 
 - `local_reasoner` for complicated guidance
+- `strong_reasoning_external` only when the user approves stronger help for
+  complex plans or important decisions
+
+Product requirement:
+
+- Aang is not only chat. Aang must understand the active CereBro surface,
+  receive text and image input, route through Cortana, and trigger approved
+  Browser, Workshop, Ledger, and Basement actions without exposing machinery.
 
 ### Cortana
 
@@ -185,12 +223,18 @@ Escalate to:
 - `strong_coding_external`
 - `long_context_external`
 
+Local candidate:
+
+- `qwen2.5-coder:3b` for small local code explanations, patch summaries, and
+  file-structure help.
+
 ### Gojo
 
 Default:
 
 - `local_reasoner`
 - `lightweight_formatter`
+- `local_vision_helper` for UI screenshots, mockups, and visual critique
 
 Escalate to:
 

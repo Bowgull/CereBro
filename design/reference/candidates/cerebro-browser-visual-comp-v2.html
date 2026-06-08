@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CereBro Browser Visual Comp V2</title>
+  <style>
+    :root {
+      --bg: #070807;
+      --panel: #10120f;
+      --panel-2: #161914;
+      --line: rgba(237, 225, 202, 0.12);
+      --line-2: rgba(203, 158, 80, 0.36);
+      --text: #efe4cf;
+      --muted: #9f9586;
+      --quiet: #716a60;
+      --gold: #cda45b;
+      --gold-2: #f0c66c;
+      --green: #0d3224;
+      --green-2: #1f6547;
+      --danger: #b94f49;
+      --shadow: rgba(0, 0, 0, 0.58);
+      font-family: "Aptos", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(205, 164, 91, 0.16), transparent 38%),
+        radial-gradient(circle at 12% 25%, rgba(31, 101, 71, 0.22), transparent 30%),
+        radial-gradient(circle at 92% 12%, rgba(205, 164, 91, 0.08), transparent 28%),
+        #030403;
+      color: var(--text);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.28;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(circle at 50% 38%, black 0 45%, transparent 72%);
+    }
+
+    .desktop {
+      width: 1440px;
+      height: 900px;
+      padding: 20px;
+    }
+
+    .app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid rgba(205, 164, 91, 0.28);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01) 18%, transparent 100%),
+        #090b09;
+      box-shadow:
+        0 34px 110px var(--shadow),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.045);
+    }
+
+    .top {
+      height: 102px;
+      display: grid;
+      grid-template-rows: 44px 58px;
+      border-bottom: 1px solid rgba(205, 164, 91, 0.18);
+      background:
+        linear-gradient(90deg, rgba(13, 50, 36, 0.48), transparent 32%),
+        rgba(14, 16, 14, 0.96);
+    }
+
+    .traffic {
+      height: 44px;
+      display: grid;
+      grid-template-columns: 76px 1fr auto;
+      align-items: center;
+      padding: 0 14px;
+      gap: 16px;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .red { background: #d95b53; }
+    .yellow { background: #c69836; }
+    .green-dot { background: #3aa866; }
+
+    .identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .app-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(205,164,91,0.42);
+      object-fit: cover;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.38);
+    }
+
+    .identity strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .identity span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .status-pill {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border: 1px solid rgba(115, 197, 136, 0.28);
+      background: rgba(12, 41, 29, 0.84);
+      color: var(--text);
+    }
+
+    .status-pill i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #8ed99a;
+      box-shadow: 0 0 14px rgba(142,217,154,0.6);
+    }
+
+    .chrome {
+      display: grid;
+      grid-template-columns: 88px 38px 38px 38px minmax(0, 1fr) 46px 46px 46px;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 14px 13px;
+    }
+
+    .section-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 820;
+    }
+
+    .icon-btn, .tool-btn {
+      height: 36px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), transparent),
+        #0a0c0a;
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 860;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .addr {
+      height: 38px;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border: 1px solid rgba(205,164,91,0.31);
+      background:
+        radial-gradient(circle at 0% 50%, rgba(205,164,91,0.08), transparent 28%),
+        #050706;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    .addr .sigil {
+      width: 12px;
+      height: 12px;
+      border: 1px solid rgba(205,164,91,0.86);
+      transform: rotate(45deg);
+      background: rgba(18, 56, 40, 0.72);
+    }
+
+    .addr strong {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 13px;
+      font-weight: 780;
+    }
+
+    .addr span {
+      color: var(--quiet);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .tool-btn.shield {
+      border-color: rgba(115, 197, 136, 0.34);
+      background:
+        linear-gradient(180deg, rgba(45, 128, 82, 0.34), rgba(7, 20, 14, 0.9)),
+        #092015;
+    }
+
+    .tool-btn.clip {
+      border-color: rgba(205,164,91,0.43);
+      background:
+        linear-gradient(180deg, rgba(205,164,91,0.17), rgba(15,13,9,0.94)),
+        #151208;
+    }
+
+    .layout {
+      height: calc(100% - 102px - 66px);
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .rail {
+      border-right: 1px solid rgba(205,164,91,0.22);
+      background:
+        linear-gradient(180deg, rgba(13, 50, 36, 0.94), rgba(4, 15, 11, 0.98));
+      padding: 14px 10px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    .rail-nav {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .rail-item {
+      height: 48px;
+      display: grid;
+      place-items: center;
+      color: rgba(239,228,207,0.62);
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 860;
+    }
+
+    .rail-item.active {
+      color: var(--text);
+      border-color: rgba(205,164,91,0.48);
+      background:
+        linear-gradient(180deg, rgba(205,164,91,0.12), rgba(14, 42, 31, 0.64));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .rail-meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .mini {
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(239,228,207,0.1);
+      color: rgba(239,228,207,0.67);
+      font-size: 10px;
+      font-weight: 820;
+      background: rgba(5,7,6,0.34);
+    }
+
+    .browser {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 42px minmax(0, 1fr);
+      position: relative;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: end;
+      gap: 6px;
+      padding: 0 14px;
+      border-bottom: 1px solid rgba(239,228,207,0.1);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.018), transparent),
+        #0b0d0b;
+    }
+
+    .tab {
+      height: 33px;
+      min-width: 152px;
+      padding: 0 10px;
+      border: 1px solid rgba(239,228,207,0.1);
+      border-bottom: 0;
+      background: #111310;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .tab.active {
+      min-width: 184px;
+      color: var(--text);
+      border-color: rgba(205,164,91,0.38);
+      background:
+        linear-gradient(180deg, rgba(205,164,91,0.12), rgba(18,22,18,0.98)),
+        #151812;
+    }
+
+    .tab .x {
+      margin-left: auto;
+      color: var(--quiet);
+    }
+
+    .plus {
+      min-width: 36px;
+      justify-content: center;
+      font-size: 17px;
+    }
+
+    .content {
+      min-height: 0;
+      position: relative;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 58% 12%, rgba(205,164,91,0.065), transparent 34%),
+        #060806;
+    }
+
+    .page {
+      height: 100%;
+      margin-right: 300px;
+      border: 1px solid rgba(239,228,207,0.12);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 14%),
+        #111410;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr);
+      box-shadow: 0 18px 70px rgba(0,0,0,0.34);
+    }
+
+    .repo-head {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(239,228,207,0.09);
+      background: rgba(18,21,18,0.96);
+    }
+
+    .gh {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid rgba(239,228,207,0.17);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .repo-head strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 870;
+    }
+
+    .repo-head span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .repo-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .repo-actions button {
+      height: 30px;
+      padding: 0 11px;
+      border: 1px solid rgba(239,228,207,0.12);
+      background: #0a0c0a;
+      color: var(--muted);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .repo-body {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 270px;
+      gap: 22px;
+      padding: 24px 22px;
+    }
+
+    .readme {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: 34px;
+      line-height: 0.95;
+      font-weight: 920;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: 0 0 12px;
+      max-width: 64ch;
+      color: #d5cbb9;
+      font-size: 15px;
+      line-height: 1.48;
+    }
+
+    .code {
+      margin-top: 18px;
+      border: 1px solid rgba(239,228,207,0.11);
+      background: #070a08;
+      padding: 14px;
+      color: #c8d8c1;
+      font: 12px/1.72 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .repo-cards {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .repo-card {
+      min-height: 108px;
+      padding: 13px;
+      border: 1px solid rgba(239,228,207,0.1);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.024), transparent),
+        rgba(7,9,8,0.64);
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+    }
+
+    .repo-card strong {
+      font-size: 13px;
+      font-weight: 880;
+    }
+
+    .repo-card span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .lines {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .lines i {
+      height: 9px;
+      background: rgba(239,228,207,0.1);
+    }
+
+    .lines i:nth-child(1) { width: 92%; }
+    .lines i:nth-child(2) { width: 68%; }
+    .lines i:nth-child(3) { width: 82%; }
+    .lines i:nth-child(4) { width: 56%; }
+
+    .page-side {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .info-panel {
+      border: 1px solid rgba(239,228,207,0.1);
+      background: rgba(7,9,8,0.56);
+      padding: 14px;
+    }
+
+    .info-panel h3 {
+      margin: 0 0 11px;
+      font-size: 13px;
+      font-weight: 880;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tag {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border: 1px solid rgba(239,228,207,0.11);
+      color: #d2c6b3;
+      font-size: 11px;
+      font-weight: 760;
+    }
+
+    .watch {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      bottom: 16px;
+      width: 280px;
+      border: 1px solid rgba(205,164,91,0.28);
+      background:
+        linear-gradient(180deg, rgba(20, 49, 36, 0.7), rgba(9,11,9,0.96) 34%),
+        #090b09;
+      box-shadow:
+        -18px 0 80px rgba(0,0,0,0.38),
+        inset 0 1px 0 rgba(255,255,255,0.045);
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    .watch-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .watch-top h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .watch-top span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .count {
+      min-width: 30px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(205,164,91,0.28);
+      color: var(--gold-2);
+      font-size: 12px;
+      font-weight: 880;
+    }
+
+    .watch-segments {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .watch-segments div {
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(239,228,207,0.1);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 830;
+      background: rgba(7,9,8,0.48);
+    }
+
+    .watch-segments .active {
+      color: var(--text);
+      border-color: rgba(205,164,91,0.34);
+      background: rgba(205,164,91,0.08);
+    }
+
+    .watch-list {
+      min-height: 0;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .watch-card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid rgba(239,228,207,0.1);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent),
+        rgba(15,18,15,0.82);
+    }
+
+    .thumb {
+      height: 44px;
+      border: 1px solid rgba(205,164,91,0.2);
+      background:
+        radial-gradient(circle at 72% 26%, rgba(205,164,91,0.22), transparent 32%),
+        linear-gradient(135deg, #18221a, #050706);
+    }
+
+    .watch-card strong {
+      display: block;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .watch-card span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.24;
+    }
+
+    .add-page {
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(205,164,91,0.36);
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(205,164,91,0.14), rgba(14,12,8,0.96));
+      font-size: 12px;
+      font-weight: 880;
+    }
+
+    .clip-menu {
+      position: absolute;
+      top: 92px;
+      right: 98px;
+      width: 306px;
+      z-index: 4;
+      border: 1px solid rgba(205,164,91,0.36);
+      background:
+        linear-gradient(180deg, rgba(28,31,24,0.98), rgba(8,9,8,0.98));
+      box-shadow:
+        0 28px 84px rgba(0,0,0,0.58),
+        inset 0 1px 0 rgba(255,255,255,0.055);
+      padding: 10px;
+    }
+
+    .clip-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2px 2px 10px;
+    }
+
+    .clip-title strong {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .clip-title span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 720;
+    }
+
+    .clip-items {
+      display: grid;
+      gap: 7px;
+    }
+
+    .clip-item {
+      height: 40px;
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 0 9px;
+      border: 1px solid rgba(239,228,207,0.1);
+      background: rgba(6,8,7,0.6);
+      color: #d8cfbd;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .clip-item.active {
+      border-color: rgba(205,164,91,0.38);
+      background: rgba(205,164,91,0.08);
+      color: var(--text);
+    }
+
+    .clip-item .glyph {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(205,164,91,0.28);
+      color: var(--gold-2);
+      font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 900;
+    }
+
+    .clip-item small {
+      color: var(--quiet);
+      font-size: 10px;
+      font-weight: 760;
+    }
+
+    .aang {
+      height: 66px;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 88px;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-top: 1px solid rgba(205,164,91,0.24);
+      background:
+        linear-gradient(90deg, rgba(13, 50, 36, 0.48), transparent 36%),
+        #070907;
+    }
+
+    .aang-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(205,164,91,0.46);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(205,164,91,0.28), transparent 38%),
+        #0d2d22;
+      font-size: 15px;
+      font-weight: 950;
+    }
+
+    .command {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      border: 1px solid rgba(239,228,207,0.13);
+      background: #080b09;
+      color: #d7cdbb;
+      font-size: 13px;
+      font-weight: 680;
+      min-width: 0;
+    }
+
+    .browse {
+      height: 42px;
+      border: 1px solid rgba(239,228,207,0.13);
+      background: #0d100d;
+      color: var(--muted);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 850;
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop">
+    <section class="app">
+      <header class="top">
+        <div class="traffic">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green-dot"></span>
+          </div>
+          <div class="identity">
+            <img class="app-icon" src="../../../app/electron/assets/cerebro-app-icon.png" alt="">
+            <div>
+              <strong>CereBro</strong>
+              <span>Browser</span>
+            </div>
+          </div>
+          <div class="status">
+            <div class="status-pill"><i></i>Protected</div>
+            <span>Daily browsing</span>
+          </div>
+        </div>
+        <nav class="chrome">
+          <div class="section-label">Browser</div>
+          <div class="icon-btn">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/></svg>
+          </div>
+          <div class="icon-btn">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/></svg>
+          </div>
+          <div class="icon-btn">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7a7 7 0 1 0 1.5 7.5M17 7v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></svg>
+          </div>
+          <div class="addr">
+            <span class="sigil"></span>
+            <strong>github.com/electron/electron</strong>
+            <span>Search or enter address</span>
+          </div>
+          <div class="tool-btn shield">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.2-2.7 7.7-7 10-4.3-2.3-7-5.8-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="miter"/><path d="M9 12l2 2 4-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg>
+          </div>
+          <div class="tool-btn clip">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v16H7z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 8h6M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>
+          </div>
+          <div class="tool-btn">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+          </div>
+        </nav>
+      </header>
+
+      <main class="layout">
+        <aside class="rail">
+          <div class="rail-nav">
+            <div class="rail-item">Keep</div>
+            <div class="rail-item active">Browser</div>
+            <div class="rail-item">Workshop</div>
+            <div class="rail-item">Ledger</div>
+            <div class="rail-item">Basement</div>
+          </div>
+          <div class="rail-meta">
+            <div class="mini">VPN On</div>
+            <div class="mini">Quiet</div>
+          </div>
+        </aside>
+
+        <section class="browser">
+          <div class="tabs">
+            <div class="tab active">Electron docs <span class="x">x</span></div>
+            <div class="tab">GitHub trend <span class="x">x</span></div>
+            <div class="tab">Anime watch <span class="x">x</span></div>
+            <div class="tab plus">+</div>
+          </div>
+
+          <div class="content">
+            <article class="page">
+              <header class="repo-head">
+                <div class="gh">GH</div>
+                <div>
+                  <strong>electron / electron</strong>
+                  <span>Build cross-platform desktop apps with JavaScript, HTML, and CSS.</span>
+                </div>
+                <div class="repo-actions">
+                  <button>Watch</button>
+                  <button>Star 118k</button>
+                </div>
+              </header>
+
+              <div class="repo-body">
+                <section class="readme">
+                  <h1>Electron</h1>
+                  <p>Build desktop software with native operating system features while keeping the interface in web technologies.</p>
+                  <p>Use Chromium and Node.js in one runtime, then ship native desktop apps across macOS, Windows, and Linux.</p>
+                  <div class="code">npm create electron-app@latest cerebro-shell<br>cd cerebro-shell<br>npm run start</div>
+                  <div class="repo-cards">
+                    <div class="repo-card"><strong>Quick start</strong><span>Create a shell and open the first native window.</span></div>
+                    <div class="repo-card"><strong>Tabs</strong><span>Review page hosting and window behavior before building split views.</span></div>
+                    <div class="repo-card"><strong>Downloads</strong><span>Save files with native prompts and per-site permission.</span></div>
+                  </div>
+                  <div class="lines"><i></i><i></i><i></i><i></i></div>
+                </section>
+                <aside class="page-side">
+                  <div class="info-panel">
+                    <h3>About</h3>
+                    <div class="tags">
+                      <span class="tag">desktop</span>
+                      <span class="tag">browser shell</span>
+                      <span class="tag">native app</span>
+                    </div>
+                  </div>
+                  <div class="info-panel">
+                    <h3>Useful today</h3>
+                    <div class="tags">
+                      <span class="tag">Docs</span>
+                      <span class="tag">Issues</span>
+                      <span class="tag">Examples</span>
+                      <span class="tag">Releases</span>
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </article>
+
+            <aside class="watch">
+              <div class="watch-top">
+                <div><h2>Watch Shelf</h2><span>Saved from browsing</span></div>
+                <div class="count">12</div>
+              </div>
+              <div class="watch-segments">
+                <div class="active">Now</div>
+                <div>Want</div>
+                <div>Done</div>
+              </div>
+              <div class="watch-list">
+                <div class="watch-card"><div class="thumb"></div><div><strong>Electron WebContentsView</strong><span>Compare with the shell build.</span></div></div>
+                <div class="watch-card"><div class="thumb"></div><div><strong>Anime popup behavior</strong><span>Needs a site exception later.</span></div></div>
+                <div class="watch-card"><div class="thumb"></div><div><strong>GitHub browser examples</strong><span>Review before adding to Obsidian.</span></div></div>
+                <div class="watch-card"><div class="thumb"></div><div><strong>Adblock engine notes</strong><span>Keep useful. Hide the machinery.</span></div></div>
+              </div>
+              <div class="add-page">Add current page</div>
+            </aside>
+
+            <div class="clip-menu">
+              <div class="clip-title"><strong>Clip this page</strong><span>Current tab</span></div>
+              <div class="clip-items">
+                <div class="clip-item active"><span class="glyph">O</span><span>Add to Obsidian</span><small>note</small></div>
+                <div class="clip-item"><span class="glyph">B</span><span>Bookmark</span><small>save</small></div>
+                <div class="clip-item"><span class="glyph">W</span><span>Add to Watch</span><small>track</small></div>
+                <div class="clip-item"><span class="glyph">S</span><span>Screenshot to Aang</span><small>ask</small></div>
+                <div class="clip-item"><span class="glyph">A</span><span>Annotate</span><small>mark</small></div>
+                <div class="clip-item"><span class="glyph">C</span><span>Compare</span><small>split</small></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="aang">
+        <div class="aang-icon">A</div>
+        <div class="command">Ask Aang what to do with this page, screenshot, annotation, or comparison.</div>
+        <button class="browse">Browse</button>
+      </footer>
+    </section>
+  </div>
+</body>
+</html>

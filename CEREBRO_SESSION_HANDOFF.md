@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 1228 ADT
+Last updated: 2026-06-08 1915 ADT
 
 ## Current North Star
 
@@ -32,7 +32,162 @@ are cache/fallback lanes unless the user approves the storage cost.
 
 The canonical session plan lives in `CEREBRO_MASTER_BUILD_PLAN.md`.
 
+## Ritual Handoff Rule
+
+Every CereBro ritual handoff now includes the Mac app path.
+
+- Read this file, `CEREBRO_MASTER_BUILD_PLAN.md`, and the Obsidian finish path before choosing the next slice.
+- Run the debug checks that match the files changed.
+- If app code changed, run the app build before calling the slice done.
+- If the desktop app should be updated, package and reinstall `/Applications/CereBro.app`, then state whether it succeeded.
+- State whether the local dev server or installed Mac app is the current thing the user should open.
+- Update this handoff and the Obsidian finish path.
+- Append a dated progress entry.
+- State what is next and what is still not working.
+- Keep the Browser UI moving toward the approved `mockups/compare` targets.
+- Keep Raven sealed out of public CereBro.
+- Commit when asked. Push only when the user explicitly asks for remote update.
+
 ## Current Session Goal
+
+## 2026-06-08 1915 ADT - Mac App Update Rule And Reinstall
+
+### What Changed
+- Added the standing ritual handoff rule that CereBro handoffs now include the Mac app path.
+  - Read finish path before choosing the next slice.
+  - Run matching debug checks.
+  - Build app code changes before calling a slice done.
+  - Package and reinstall `/Applications/CereBro.app` when the desktop app should be updated.
+  - State whether the user should open the installed Mac app or local dev server.
+  - Push only when explicitly requested.
+- Updated the Obsidian finish path with the same handoff rule.
+- Packaged and reinstalled the desktop app into `/Applications/CereBro.app`.
+- Launched the installed app and verified the running process.
+
+### Checks Run
+- `pnpm --dir app check`
+- `pnpm --dir app desktop:package`
+- Verified `/Applications/CereBro.app/Contents/Info.plist` reports `CereBro`.
+- Verified the installed icon file hash matches `app/electron/assets/cerebro-app-icon.icns`.
+- Verified `/Applications/CereBro.app/Contents/MacOS/CereBro` is running.
+
+### Known Gaps
+- The installed app bundle is still large, roughly 1.3 GB.
+- The installed app still uses Electron's internal icon filename, `electron.icns`, even though the contents match the CereBro icon.
+- Browser Home is still not a finished 1:1 visual match. It is the first live pass.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro ritual handoffs now include debug, build, desktop package, and reinstall status for `/Applications/CereBro.app` when app code changes. The installed Mac app was updated and launched on 2026-06-08. Continue with Browser live function plus 1:1 UI: tighten Browser Home to the approved compare targets, make pinned/bookmark tiles real, wire Aang input to the app route, and then build Watch Shelf/Compare from `mockups/compare`. Do not surface Raven.
+```
+
+## 2026-06-08 1843 ADT - Browser Home Live Pass And Compare Folder
+
+### What Changed
+- Added the first live Browser Home implementation pass in `BrowserPanel`.
+  - Empty Browser page now uses the Keep-tech Browser Home direction.
+  - Pinned site tiles use real favicon sources.
+  - Aang appears as the Browser Home chat launcher.
+  - Chat can open and close from Aang.
+  - Collapsed chat hides the input and keeps Aang visible.
+  - Existing page draft, open-page, local tabs, downloads, VPN shield, popup, and Watch Shelf logic stayed intact.
+- Added app-usable Aang dock asset:
+  - `app/public/assets/aang/aang-chat-dock-waist-v1.png`
+- Added canonical Compare mockup source folder:
+  - `mockups/compare/README.md`
+  - `mockups/compare/manifest.json`
+  - `mockups/compare/approved/...`
+  - `mockups/compare/rejected/...`
+- Updated the finish path so Compare pulls from `mockups/compare` later instead of guessing from loose design files.
+
+### Files Touched
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/public/assets/aang/aang-chat-dock-waist-v1.png`
+- `app/public/assets/aang/aang-chat-dock-waist-source-v1.png`
+- `mockups/compare/README.md`
+- `mockups/compare/manifest.json`
+- `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png`
+- `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png`
+- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
+- `mockups/compare/rejected/browser-home/browser-home-chat-expanded-bottom-handle-v1.png`
+- `mockups/compare/rejected/browser-home/browser-home-chat-collapsed-bottom-handle-v1.png`
+- `mockups/compare/rejected/browser-home/browser-home-aang-standing-companion-target-v1.png`
+- `design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md`
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- `pnpm --dir app check`
+- `pnpm --dir app build`
+- Verified the local dev server starts at `http://localhost:3000/`.
+- Verified compare manifest and approved mockup files exist.
+
+### Known Gaps
+- The live Browser Home is a first implementation pass, not a perfect 1:1 match yet.
+- Browser Home pinned cards are still static defaults, not user-editable storage.
+- Aang input on Browser Home is visual only in this slice. It does not yet submit to the global Aang route.
+- Compare has a source folder and manifest, but the in-app Compare picker is not wired yet.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, mockups/compare/README.md, mockups/compare/manifest.json, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser Home now has a first live Keep-tech pass with Aang launcher chat open/closed behavior. Continue making the live Browser match `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png` and `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png` while preserving real browser function. Next critical options: wire Browser Home Aang input to the existing Aang route, make pinned tiles/local bookmarks real, or build the Compare picker from `mockups/compare/manifest.json`. Do not surface Raven.
+```
+
+## 2026-06-08 1619 ADT - Keep-Tech Browser Visual Direction
+
+### What Changed
+- Locked the Browser Home product logic:
+  - Top URL bar is the only browser search/address field.
+  - Bottom Aang dock is the only Aang input.
+  - No duplicate center search bar.
+  - No Quick Actions block on Browser Home.
+  - Pinned sites and bookmark charms use real favicons/logos.
+  - Bookmark charms are small medallions under the URL bar, not large feature tiles.
+  - Watch Shelf is closed by default and opens as a right-side drawer.
+  - Left Keep rail should collapse/expand with the same UX logic as the right drawer, including a visible edge arrow.
+  - Browser protection copy should use concrete shield states such as `Shield On`, `Shield Off`, `VPN On`, `VPN Off`, `Checking`, `Setup Needed`, or `Unknown`, not generic `Protected` copy.
+  - The lighter app icon is now the current visual source reference at `design/reference/assets/cerebro-app-icon-light-2026-06-08.png`.
+- Locked the Keep-tech visual direction:
+  - RPG fantasy future tech.
+  - Native-browser familiarity.
+  - Astral Keep layout clarity plus Keep-native object weight.
+  - No styled wireframes presented as high fidelity.
+  - Loaded-website Browser visual target exists at `design/reference/candidates/rendered/browser-loaded-website-target-v1.png`.
+- Added Aang dock requirements:
+  - Aang uses a portrait/sprite instead of an `A` placeholder once the asset exists.
+  - If a new Aang asset is needed, use a recognizable Aang sprite or portrait with his airbending staff.
+  - Aang input must accept text, pasted images, and drag/drop images.
+  - Aang dock should not show mystery icon clusters. It should be Aang, one input, attach/image, and send.
+  - Aang should be smart by acting inside CereBro through approved Browser, Workshop, Ledger, and Basement actions, routed by Cortana.
+- Added model routing notes from the attached model discussion:
+  - `gemma3:4b` as dependable local default candidate.
+  - `qwen3.5:4b` as local challenger.
+  - `qwen3.5:9b` as benchmark-only stretch.
+  - `qwen2.5-coder:3b` as small code-helper lane.
+  - `llama3.2:3b` as installed fallback/control.
+  - 12B+ local models stay research-only on this 8 GB Mac unless hardware proof changes.
+- Reaffirmed Hermes/OpenClaw-style systems as architecture references only until capability intake clears license, security, storage, privacy, and product fit.
+
+### Files Touched
+- `CEREBRO_MASTER_BUILD_PLAN.md`
+- `CEREBRO_SESSION_HANDOFF.md`
+- `CereBro_Final_Implementation_Pack/MODEL_ROUTING_AND_HARDWARE_PLAN.md`
+- `design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md`
+- `design/reference/assets/cerebro-app-icon-light-2026-06-08.png`
+- `design/reference/candidates/rendered/browser-loaded-website-target-v1.png`
+- Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
+
+### Checks Run
+- Read attached model notes.
+- Read current master plan, session handoff, Obsidian finish path, and model routing plan.
+- Generated and saved a high-fidelity loaded-website Browser visual target.
+- No app code was touched.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, CereBro_Final_Implementation_Pack/MODEL_ROUTING_AND_HARDWARE_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Current design target is Keep-tech Browser: RPG fantasy future tech with native-browser familiarity, using `design/reference/assets/cerebro-app-icon-light-2026-06-08.png` as the current app-icon source. Loaded-website Browser target exists at `design/reference/candidates/rendered/browser-loaded-website-target-v1.png`. Do not show styled wireframes. Browser Home rules are locked: one URL/search bar at top, Aang only in the bottom dock, no center duplicate search, no Quick Actions, real favicons, small bookmark medallions under the URL bar, Watch Shelf as right drawer, left rail collapsible with the same edge-arrow UX as the right drawer, Aang dock accepts text plus pasted/dragged images, Aang placeholder becomes a sprite/portrait with airbending staff, and protection copy uses concrete shield states rather than generic `Protected`. Next visual target is Watch Shelf open, then Clip menu, Shield popover, Annotate, and Compare. Do not surface Raven.
+```
 
 ## 2026-06-08 1228 ADT - Omnibox Normality
 

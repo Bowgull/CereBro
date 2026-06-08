@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CereBro Browser Watch Shelf Candidate</title>
+  <style>
+    :root {
+      --bg: #050706;
+      --marble: #111614;
+      --marble-2: #1b211e;
+      --green: #123428;
+      --green-2: #1f4b3a;
+      --gold: #c69b55;
+      --gold-soft: rgba(198, 155, 85, 0.42);
+      --ivory: #e8dcc2;
+      --muted: #9b927f;
+      --line: rgba(232, 220, 194, 0.16);
+      --line-2: rgba(198, 155, 85, 0.24);
+      --panel: rgba(11, 15, 14, 0.92);
+      --panel-2: rgba(17, 23, 21, 0.96);
+      --danger: #d07366;
+      --ok: #77b98a;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(55, 70, 58, 0.32), transparent 30%),
+        linear-gradient(135deg, #020303, #0a0d0c 42%, #030404);
+      color: var(--ivory);
+    }
+
+    .frame {
+      width: 1440px;
+      height: 900px;
+      margin: 0 auto;
+      padding: 18px;
+      background:
+        linear-gradient(145deg, rgba(39, 43, 39, 0.92), rgba(9, 11, 10, 0.96)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 7px);
+      border: 1px solid rgba(232, 220, 194, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -18px 40px rgba(0,0,0,0.46);
+      overflow: hidden;
+    }
+
+    .shell {
+      position: relative;
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      grid-template-rows: 58px 1fr 78px;
+      gap: 12px;
+      height: 100%;
+      padding: 14px;
+      border: 1px solid rgba(198, 155, 85, 0.35);
+      background:
+        linear-gradient(180deg, rgba(9, 14, 13, 0.94), rgba(4, 7, 6, 0.96)),
+        linear-gradient(90deg, transparent, rgba(198, 155, 85, 0.04), transparent);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        inset 0 0 80px rgba(0,0,0,0.48);
+    }
+
+    .topbar {
+      grid-column: 1 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      background: rgba(5, 8, 7, 0.84);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 52%, #f1cb72 0 16%, #6d4b1c 18% 21%, transparent 23%),
+        conic-gradient(from 45deg, #1b2d24, #3c5a47, #111614, #6d4b1c, #1b2d24);
+      border: 1px solid var(--gold-soft);
+      box-shadow: 0 0 16px rgba(198, 155, 85, 0.18);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status b {
+      color: var(--ok);
+      font-weight: 560;
+    }
+
+    .rail {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(19, 35, 29, 0.82), rgba(8, 13, 12, 0.94));
+    }
+
+    .rail button {
+      height: 54px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 620;
+      cursor: default;
+    }
+
+    .rail button.active {
+      color: var(--ivory);
+      border-color: var(--gold-soft);
+      background: linear-gradient(180deg, rgba(198, 155, 85, 0.13), rgba(23, 31, 27, 0.9));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .browser {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(198, 155, 85, 0.31);
+      background:
+        linear-gradient(180deg, rgba(14, 19, 17, 0.94), rgba(6, 9, 8, 0.97));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .chrome {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .nav {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      background: rgba(8, 12, 11, 0.9);
+      color: var(--ivory);
+      font-size: 15px;
+    }
+
+    .address {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid rgba(232, 220, 194, 0.18);
+      background: #070a09;
+      box-shadow: inset 0 1px 10px rgba(0,0,0,0.6);
+      color: #d8ceb8;
+      font-size: 13px;
+    }
+
+    .address span:first-child {
+      color: var(--ok);
+    }
+
+    .tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .shield {
+      width: 92px;
+      height: 34px;
+      border: 1px solid rgba(119, 185, 138, 0.28);
+      background: rgba(13, 36, 27, 0.78);
+      color: #b7d6bf;
+      font-size: 12px;
+      font-weight: 610;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      align-items: end;
+      border-bottom: 1px solid rgba(232, 220, 194, 0.12);
+      padding-left: 4px;
+    }
+
+    .tab {
+      min-width: 132px;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: rgba(9, 13, 12, 0.88);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .tab.active {
+      height: 38px;
+      color: var(--ivory);
+      border-color: var(--gold-soft);
+      background: linear-gradient(180deg, rgba(30, 49, 40, 0.92), rgba(12, 17, 15, 0.98));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .tab.add {
+      min-width: 42px;
+      justify-content: center;
+      color: var(--gold);
+    }
+
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 12px;
+    }
+
+    .page {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      border: 1px solid rgba(232, 220, 194, 0.14);
+      background:
+        linear-gradient(180deg, rgba(13, 18, 17, 0.98), rgba(6, 9, 8, 0.98));
+      overflow: hidden;
+    }
+
+    .page-start {
+      display: grid;
+      place-items: center;
+      padding: 32px;
+    }
+
+    .start-card {
+      width: min(560px, 80%);
+      border: 1px solid var(--line-2);
+      background: linear-gradient(180deg, rgba(18, 28, 24, 0.92), rgba(8, 12, 11, 0.96));
+      padding: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 44px rgba(0,0,0,0.34);
+    }
+
+    .start-card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .start-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .quick {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .quick div {
+      border: 1px solid var(--line);
+      background: rgba(6, 10, 9, 0.84);
+      padding: 10px;
+      font-size: 12px;
+      color: #c8bda8;
+    }
+
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid rgba(232, 220, 194, 0.11);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .shelf {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      border: 1px solid rgba(198, 155, 85, 0.28);
+      background:
+        linear-gradient(180deg, rgba(19, 35, 29, 0.86), rgba(8, 12, 11, 0.96));
+      min-width: 0;
+    }
+
+    .shelf-head {
+      padding: 14px;
+      border-bottom: 1px solid rgba(232, 220, 194, 0.13);
+    }
+
+    .shelf-head h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .shelf-head span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(232, 220, 194, 0.11);
+    }
+
+    .filters button {
+      height: 28px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      background: rgba(7, 11, 10, 0.74);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .filters button.active {
+      color: var(--ivory);
+      border-color: var(--gold-soft);
+      background: rgba(198, 155, 85, 0.12);
+    }
+
+    .shelf-body {
+      padding: 12px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(232, 220, 194, 0.13);
+      background: rgba(5, 8, 7, 0.7);
+    }
+
+    .item h3 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 620;
+    }
+
+    .item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .item button {
+      align-self: center;
+      height: 30px;
+      padding: 0 12px;
+      border: 1px solid var(--gold-soft);
+      background: rgba(198, 155, 85, 0.1);
+      color: var(--ivory);
+      font-size: 11px;
+    }
+
+    .ask {
+      grid-column: 1 / 3;
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: rgba(5, 8, 7, 0.9);
+    }
+
+    .aang {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(119, 185, 138, 0.3);
+      background: rgba(12, 36, 28, 0.82);
+      color: #cce3d0;
+      font-weight: 760;
+    }
+
+    .askbox {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      border: 1px solid rgba(232, 220, 194, 0.16);
+      background: #070a09;
+      color: #d8ceb8;
+      font-size: 13px;
+    }
+
+    .mode {
+      height: 34px;
+      border: 1px solid var(--line);
+      background: rgba(17, 23, 21, 0.9);
+      color: var(--muted);
+      padding: 0 12px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <section class="shell" aria-label="CereBro Browser candidate mockup">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div>
+            <h1>CereBro</h1>
+            <span>Browser</span>
+          </div>
+        </div>
+        <div class="status"><b>Online</b><span>Manual browsing</span></div>
+      </header>
+
+      <nav class="rail" aria-label="Primary">
+        <button>Keep</button>
+        <button class="active">Browser</button>
+        <button>Work</button>
+        <button>Sources</button>
+        <button>Ledger</button>
+        <button>Basement</button>
+      </nav>
+
+      <section class="browser">
+        <div class="chrome">
+          <div class="nav">
+            <button class="icon">‹</button>
+            <button class="icon">›</button>
+            <button class="icon">↻</button>
+          </div>
+          <div class="address"><span>◇</span><span>Search or enter address</span></div>
+          <div class="tools">
+            <button class="shield">VPN Off</button>
+            <button class="icon">☆</button>
+            <button class="icon">▤</button>
+            <button class="icon">⋯</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active"><span>Tab 1</span><span>×</span></div>
+          <div class="tab"><span>Tab 2</span><span>×</span></div>
+          <div class="tab add">+</div>
+        </div>
+
+        <div class="content">
+          <section class="page">
+            <div class="page-start">
+              <div class="start-card">
+                <h2>Start browsing</h2>
+                <p>Type a site or search. Add pages to the shelf, save sources, attach evidence, or ask Aang from the page menu.</p>
+                <div class="quick">
+                  <div>Bookmarks</div>
+                  <div>History</div>
+                  <div>Downloads</div>
+                </div>
+              </div>
+            </div>
+            <div class="page-footer">
+              <span>Popups blocked by default</span>
+              <span>No page open</span>
+            </div>
+          </section>
+
+          <aside class="shelf" aria-label="Watch Shelf drawer">
+            <div class="shelf-head">
+              <h2>Watch Shelf</h2>
+              <span>Saved pages for later</span>
+            </div>
+            <div class="filters">
+              <button class="active">Watching</button>
+              <button>Want</button>
+              <button>YouTube</button>
+              <button>Twitch</button>
+              <button>Anime</button>
+              <button>Finished</button>
+            </div>
+            <div class="shelf-body">
+              <article class="item">
+                <div>
+                  <h3>No saved page yet</h3>
+                  <p>Open a page, then use the page menu or ask Aang to add it.</p>
+                </div>
+                <button disabled>Open</button>
+              </article>
+              <article class="item">
+                <div>
+                  <h3>Preference memory</h3>
+                  <p>Optional chips like Dub Only appear only after you save them.</p>
+                </div>
+                <button disabled>Open</button>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <footer class="ask">
+        <div class="aang">A</div>
+        <div class="askbox">Ask Aang</div>
+        <button class="mode">Browse</button>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
