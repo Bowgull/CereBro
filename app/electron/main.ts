@@ -1,13 +1,13 @@
 import { app, BrowserWindow, Menu, type MenuItemConstructorOptions } from "electron";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { nativeBrowserPageEventChannel } from "../shared/nativeBrowser";
 import { installNativeBrowserCommandBridge } from "./browserBridge";
 import { createNativeBrowserPageView, layoutNativeBrowserPageView } from "./browserViews";
 import { installNativeVpnBridge } from "./vpnBridge";
 import type { StartedCereBroServer } from "../server/_core/index";
 
-const electronDirname = dirname(fileURLToPath(import.meta.url));
+const electronDirname = __dirname;
 const appName = "CereBro";
 const appIconPath = join(electronDirname, "../electron/assets/cerebro-app-icon.icns");
 const bundledStaticDir = join(electronDirname, "../dist/public");
@@ -15,13 +15,26 @@ let embeddedServer: StartedCereBroServer | null = null;
 
 app.setName(appName);
 
+function desktopLog(message: string, error?: unknown) {
+  try {
+    const logDir = app.getPath("userData");
+    mkdirSync(logDir, { recursive: true });
+    const detail = error instanceof Error ? `\n${error.stack ?? error.message}` : error == null ? "" : `\n${String(error)}`;
+    appendFileSync(join(logDir, "desktop-startup.log"), `[${new Date().toISOString()}] ${message}${detail}\n`);
+  } catch {
+    // Logging must never block app startup.
+  }
+}
+
 async function getEmbeddedStartUrl() {
+  desktopLog("starting embedded CereBro server");
   process.env.CEREBRO_SERVER_AUTOSTART = "false";
   process.env.CEREBRO_STATIC_DIR = process.env.CEREBRO_STATIC_DIR || bundledStaticDir;
   process.env.NODE_ENV = process.env.NODE_ENV || "production";
 
   const { startServer } = await import("../server/_core/index");
   embeddedServer = await startServer({ startInboxPoll: true });
+  desktopLog(`embedded CereBro server listening at ${embeddedServer.url}`);
   return embeddedServer.url;
 }
 
@@ -106,6 +119,7 @@ function installApplicationMenu(mainWindow: BrowserWindow) {
 }
 
 async function createMainWindow() {
+  desktopLog("creating main window");
   const mainWindow = new BrowserWindow({
     width: 1320,
     height: 860,
@@ -130,16 +144,24 @@ async function createMainWindow() {
   installNativeBrowserCommandBridge(mainWindow, pageView);
   installNativeVpnBridge();
   installApplicationMenu(mainWindow);
-  void mainWindow.loadURL(await resolveStartUrl());
+  const startUrl = await resolveStartUrl();
+  desktopLog(`loading ${startUrl}`);
+  void mainWindow.loadURL(startUrl);
 
   return mainWindow;
 }
 
+function openMainWindow() {
+  void createMainWindow().catch((error) => {
+    desktopLog("failed to create main window", error);
+  });
+}
+
 app.whenReady().then(() => {
-  void createMainWindow();
+  openMainWindow();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) void createMainWindow();
+    if (BrowserWindow.getAllWindows().length === 0) openMainWindow();
   });
 });
 

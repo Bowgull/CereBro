@@ -1,12 +1,13 @@
 import "dotenv/config";
 import express from "express";
+import fs from "fs";
 import { createServer, type Server } from "http";
 import net from "net";
+import path from "path";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
 import { initializeWebSocket, getBroadcastCallbacks } from "../websocket";
 import { createBridgeRouter } from "../bridge";
 import { startInboxAutoPoll } from "../integrations/notion";
@@ -28,6 +29,19 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
     }
   }
   throw new Error(`No available port found starting from ${startPort}`);
+}
+
+function serveStatic(app: express.Express) {
+  const configuredDistPath = process.env.CEREBRO_STATIC_DIR?.trim();
+  const distPath = configuredDistPath || path.resolve(__dirname, "public");
+  if (!fs.existsSync(distPath)) {
+    console.error(`Could not find the build directory: ${distPath}, make sure to build the client first`);
+  }
+
+  app.use(express.static(distPath));
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
+  });
 }
 
 export type StartedCereBroServer = {
@@ -65,6 +79,7 @@ export async function startServer(options: StartCereBroServerOptions = {}): Prom
   app.use("/api/bridge", createBridgeRouter(onHeroUpdate, onHeroNew, onHeroesBatch, onHeroClear));
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
     serveStatic(app);
