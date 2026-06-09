@@ -4,6 +4,7 @@ export const nativeBrowserReloadPageChannel = "cerebro:native-browser:reload-pag
 export const nativeBrowserGoBackPageChannel = "cerebro:native-browser:go-back-page";
 export const nativeBrowserForwardPageChannel = "cerebro:native-browser:forward-page";
 export const nativeBrowserSetBoundsChannel = "cerebro:native-browser:set-bounds";
+export const nativeBrowserSetChromeOverlayChannel = "cerebro:native-browser:set-chrome-overlay";
 export const nativeBrowserPageEventChannel = "cerebro:native-browser:page-event";
 export const nativeBrowserSiteSettingsChannel = "cerebro:native-browser:site-settings";
 export const nativeBrowserAllowPopupsHereChannel = "cerebro:native-browser:allow-popups-here";
@@ -55,6 +56,16 @@ export type NativeBrowserBoundsResult = {
   bounds: NativeBrowserBounds;
 };
 
+export type NativeBrowserChromeOverlayRequest = {
+  active: boolean;
+};
+
+export type NativeBrowserChromeOverlayResult = {
+  ok: boolean;
+  active: boolean;
+  screenshotDataUrl: string | null;
+};
+
 export type NativeBrowserCloseResult = {
   ok: true;
   tabId: string;
@@ -88,6 +99,7 @@ export type NativeBrowserBridge = {
   goBack: () => Promise<NativeBrowserNavigationResult>;
   goForward: () => Promise<NativeBrowserNavigationResult>;
   setBounds: (bounds: NativeBrowserBounds) => Promise<NativeBrowserBoundsResult>;
+  setChromeOverlay: (request: NativeBrowserChromeOverlayRequest) => Promise<NativeBrowserChromeOverlayResult>;
   siteSettings: () => Promise<NativeBrowserSiteSettings>;
   allowPopupsHere: () => Promise<NativeBrowserSiteSettings>;
   setBlockingForSite: (request: NativeBrowserSetBlockingRequest) => Promise<NativeBrowserSiteSettings>;
