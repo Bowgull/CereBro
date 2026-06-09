@@ -171,24 +171,31 @@ async function waitFor(client: CdpClient, expression: string, timeoutMs = 15_000
   throw new Error(`Timed out waiting for installed app UI state "${label}". Last value: ${JSON.stringify(lastValue)}`);
 }
 
-async function clickButtonByName(client: CdpClient, name: string) {
-  const result = (await evaluate(
-    client,
-    `(() => {
-      const labelFor = (element) => (element.getAttribute("aria-label") || element.textContent || "").trim();
-      const buttons = Array.from(document.querySelectorAll("button,[role='button']"));
-      const target = buttons.find((element) => labelFor(element).includes(${JSON.stringify(name)}));
-      if (!target) {
-        return { ok: false, labels: buttons.map(labelFor).filter(Boolean).slice(0, 40) };
-      }
-      target.click();
-      return { ok: true, label: labelFor(target) };
-    })()`,
-  )) as { ok?: boolean; labels?: string[]; label?: string } | undefined;
+async function clickButtonByName(client: CdpClient, name: string, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastLabels: string[] = [];
 
-  if (!result?.ok) {
-    throw new Error(`Button "${name}" was not found in installed app. Visible button labels: ${JSON.stringify(result?.labels ?? [])}`);
+  while (Date.now() < deadline) {
+    const result = (await evaluate(
+      client,
+      `(() => {
+        const labelFor = (element) => (element.getAttribute("aria-label") || element.textContent || "").trim();
+        const buttons = Array.from(document.querySelectorAll("button,[role='button']"));
+        const target = buttons.find((element) => labelFor(element).includes(${JSON.stringify(name)}));
+        if (!target) {
+          return { ok: false, labels: buttons.map(labelFor).filter(Boolean).slice(0, 40) };
+        }
+        target.click();
+        return { ok: true, label: labelFor(target) };
+      })()`,
+    )) as { ok?: boolean; labels?: string[]; label?: string } | undefined;
+
+    if (result?.ok) return;
+    lastLabels = result?.labels ?? [];
+    await sleep(250);
   }
+
+  throw new Error(`Button "${name}" was not found in installed app. Visible button labels: ${JSON.stringify(lastLabels)}`);
 }
 
 async function fillInputByLabel(client: CdpClient, label: string, value: string) {
