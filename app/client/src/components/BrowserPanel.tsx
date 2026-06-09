@@ -36,7 +36,6 @@ const browserHomePins = [
   { label: "GitHub", target: "https://github.com", domain: "github.com", fallback: "GH" },
   { label: "Obsidian", target: "https://obsidian.md", domain: "obsidian.md", fallback: "O" },
   { label: "YouTube", target: "https://youtube.com", domain: "youtube.com", fallback: "YT" },
-  { label: "X", target: "https://x.com", domain: "x.com", fallback: "X" },
   { label: "Reddit", target: "https://reddit.com", domain: "reddit.com", fallback: "R" },
   { label: "Hacker News", target: "https://news.ycombinator.com", domain: "news.ycombinator.com", fallback: "HN" },
 ];
