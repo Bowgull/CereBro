@@ -17,6 +17,7 @@
     "format": "prettier --write .",
     "mcp": "tsx mcp/server.ts",
     "test": "vitest run",
+    "test:desktop": "CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"

@@ -79,6 +79,12 @@ export function browserStatus() {
     feature("vpn_shield", "VPN shield", browserPanel.includes("VPN Shield") && fileExists("electron/vpnBridge.ts"), "BrowserPanel + vpnBridge"),
     feature("password_manager_state", "Password manager state", browserPanel.includes("Password Manager: Not set up"), "BrowserPanel honest state"),
     feature("playwright", "Playwright browser proof", Boolean(pkg.devDependencies?.["@playwright/test"]) && fileExists("playwright.config.ts"), "Playwright config and dependency"),
+    feature(
+      "installed_desktop_qa",
+      "Installed app desktop QA",
+      Boolean(pkg.scripts?.["test:desktop"]) && fileExists("scripts/desktopInstalledSmoke.ts"),
+      "test:desktop installed app smoke",
+    ),
   ];
 
   return {
@@ -87,6 +93,7 @@ export function browserStatus() {
     features,
     testCommands: [
       "pnpm --dir app run check",
+      "pnpm --dir app run test:desktop",
       "pnpm --dir app run test:e2e",
       "pnpm --dir app exec vitest run server/browserNativeBridgeSurface.test.ts server/nativeBrowserContract.test.ts server/nativeBrowserCommandBridge.test.ts server/nativeBrowserDownloadPolicy.test.ts server/workbenchBrowserModel.test.ts",
     ],
@@ -206,6 +213,7 @@ export async function cerebroStatus() {
     scripts: {
       check: pkg.scripts?.check ?? null,
       test: pkg.scripts?.test ?? null,
+      desktop: pkg.scripts?.["test:desktop"] ?? null,
       e2e: pkg.scripts?.["test:e2e"] ?? null,
       cli: pkg.scripts?.cerebro ?? null,
       mcp: pkg.scripts?.mcp ?? null,

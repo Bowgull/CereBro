@@ -16,7 +16,9 @@ describe("CereBro CLI and MCP status layer", () => {
     expect(featureIds).toContain("ad_blocking");
     expect(featureIds).toContain("popup_blocking");
     expect(featureIds).toContain("playwright");
+    expect(featureIds).toContain("installed_desktop_qa");
     expect(status.features.find((feature) => feature.id === "ad_blocking")?.status).toBe("present");
+    expect(status.testCommands.join("\n")).toContain("test:desktop");
     expect(status.testCommands.join("\n")).toContain("test:e2e");
   });
 
@@ -26,6 +28,7 @@ describe("CereBro CLI and MCP status layer", () => {
     expect(status.app).toBe("CereBro");
     expect(status.scripts.cli).toBe("tsx cli/cerebro.ts");
     expect(status.scripts.mcp).toBe("tsx mcp/server.ts");
+    expect(status.scripts.desktop).toBe("CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts");
     expect(agentStatus().map((agent) => agent.id)).toContain("cortana");
     expect(modelStatus().map((model) => model.modelClass)).toContain("local_reasoner");
     expect(Array.isArray(handoffStatus())).toBe(true);
@@ -38,6 +41,7 @@ describe("CereBro CLI and MCP status layer", () => {
 
     expect(packageSource).toContain("\"cerebro\": \"tsx cli/cerebro.ts\"");
     expect(packageSource).toContain("\"mcp\": \"tsx mcp/server.ts\"");
+    expect(packageSource).toContain("\"test:desktop\": \"CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts\"");
     expect(cliSource).toContain("All commands in this slice are read-only.");
     expect(cliSource).toContain("arg === \"--\"");
     expect(mcpSource).toContain("tools/list");
