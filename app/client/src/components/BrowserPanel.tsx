@@ -161,12 +161,18 @@ function BrowserHomeStart({
   onToggleChat,
   onOpenTarget,
   onAddBookmark,
+  aangDraft,
+  onAangDraftChange,
+  onSubmitAang,
   savedBookmarks,
 }: {
   chatOpen: boolean;
   onToggleChat: () => void;
   onOpenTarget: (target: string) => void;
   onAddBookmark: () => void;
+  aangDraft: string;
+  onAangDraftChange: (value: string) => void;
+  onSubmitAang: () => void;
   savedBookmarks: { id: number; targetUrl: string; title: string | null }[];
 }) {
   const pinnedTargets = new Set(savedBookmarks.map((bookmark) => bookmark.targetUrl));
@@ -307,14 +313,21 @@ function BrowserHomeStart({
             <>
               <Input
                 aria-label="Ask Aang from Browser Home"
-                placeholder="Ask Aang anything or run a command..."
+                value={aangDraft}
+                onChange={(event) => onAangDraftChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  onSubmitAang();
+                }}
+                placeholder="Ask Aang about this browser session..."
                 className="h-12 min-w-0 text-[12px]"
                 style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
               />
               <Button type="button" size="sm" variant="outline" className="h-12 w-12 px-0" aria-label="Attach image for Aang">
                 <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
               </Button>
-              <Button type="button" size="sm" variant="outline" className="h-12 w-12 px-0" aria-label="Send to Aang">
+              <Button type="button" size="sm" variant="outline" className="h-12 w-12 px-0" aria-label="Send to Aang" onClick={onSubmitAang}>
                 <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
               </Button>
             </>
@@ -353,6 +366,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
+  const [browserAangDraft, setBrowserAangDraft] = useState("");
   const [nativeViewportHeight, setNativeViewportHeight] = useState(360);
   const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
@@ -375,6 +389,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+  });
+  const browserAangRoutePreview = trpc.runtime.previewRoute.useMutation({
+    onSuccess: () => {
+      setBrowserNotice("Aang read staged.");
+      utils.ledger.overview.invalidate();
+    },
   });
   const createBrowserActionProposal = trpc.workbench.createBrowserActionProposal.useMutation({
     onSuccess: () => {
@@ -649,6 +669,28 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       .filter((pin) => !browserBookmarkItems.some((bookmark) => bookmark.targetUrl === pin.target))
       .map((pin) => ({ key: `default-${pin.label}`, label: pin.label, target: pin.target, domain: pin.domain, saved: false })),
   ].slice(0, 8);
+  const currentPageTarget = sandboxFrameTarget ?? selectedDailyBrowserTab?.targetUrl ?? browserDraft.targetUrl ?? null;
+  const submitBrowserAangDraft = () => {
+    const text = browserAangDraft.trim();
+    if (!text || browserAangRoutePreview.isPending) return;
+    browserAangRoutePreview.mutate({ text, mode: "quick" });
+  };
+  const stageCurrentPageAangAction = (kind: "explain" | "note" | "workshop") => {
+    if (!currentPageTarget) {
+      setBrowserNotice("Open a page before asking Aang about it.");
+      return;
+    }
+    const title = selectedDailyBrowserTab?.title ?? browserOriginLabel(currentPageTarget);
+    const prompt =
+      kind === "explain"
+        ? `Explain this page for me: ${title} (${currentPageTarget})`
+        : kind === "note"
+          ? `Turn this page into a short local note: ${title} (${currentPageTarget})`
+          : `Send this page to Workshop with context: ${title} (${currentPageTarget})`;
+    setBrowserAangDraft(prompt);
+    setBrowserHomeChatOpen(true);
+    browserAangRoutePreview.mutate({ text: prompt, mode: kind === "workshop" ? "build" : "quick" });
+  };
   const navigateBrowserLocalHistory = (target: typeof browserLocalNavigation.backTarget) => {
     if (!target || target.proposalId == null) {
       setBrowserNotice("No real local Browser history target is available.");
@@ -1246,41 +1288,105 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
-          <div className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1" aria-label="Browser bookmark medallions" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-            {browserMedallions.map((pin) => (
-              <button
-                key={pin.key}
-                type="button"
-                aria-label={`Open bookmark ${pin.label}`}
-                title={pin.target}
-                className="group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                onClick={() => void openDailyBrowserTarget(pin.target)}
-                style={{ background: browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.08)`, ["--tw-ring-color" as string]: C.accent }}
-              >
-                <img
-                  src={faviconUrl(pin.domain, 64)}
-                  alt=""
-                  className="h-5 w-5 rounded"
-                  onError={(event) => {
-                    event.currentTarget.style.display = "none";
-                  }}
-                />
-                <span className="sr-only">{pin.label}</span>
-                <span className="pointer-events-none absolute -bottom-1 h-2 w-2 rounded-full" aria-hidden="true" style={{ background: pin.saved ? C.gold : C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 10px ${(pin.saved ? C.gold : C.success)}66` }} />
-              </button>
-            ))}
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="h-11 w-11 shrink-0 rounded-full px-0"
-              aria-label="Add current page bookmark"
-              title="Save the current page as a local bookmark."
-              disabled={createBrowserBookmark.isPending}
-              onClick={saveCurrentBrowserBookmark}
-            >
-              <Plus size={15} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded px-2 py-1" aria-label="Browser bookmark medallions" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.92), rgba(4, 9, 9, 0.96))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
+            <div className="hidden items-center gap-1 sm:flex">
+              <div className="h-px w-8" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line})` }} />
+              <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" style={{ color: C.gold }} />
+            </div>
+            <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+              {browserMedallions.map((pin) => (
+                <button
+                  key={pin.key}
+                  type="button"
+                  aria-label={`Open bookmark ${pin.label}`}
+                  title={pin.target}
+                  className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  onClick={() => void openDailyBrowserTarget(pin.target)}
+                  style={{ background: browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.08)`, ["--tw-ring-color" as string]: C.accent }}
+                >
+                  <img
+                    src={faviconUrl(pin.domain, 64)}
+                    alt=""
+                    className="h-5 w-5 rounded"
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <span className="sr-only">{pin.label}</span>
+                  <span className="pointer-events-none absolute -bottom-0.5 h-1.5 w-1.5 rounded-full" aria-hidden="true" style={{ background: pin.saved ? C.gold : C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 10px ${(pin.saved ? C.gold : C.success)}66` }} />
+                </button>
+              ))}
+            </div>
+            <details className="relative justify-self-end">
+              <summary className="flex h-9 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Bookmarks" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.76)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" />
+                Bookmarks
+              </summary>
+              <div className="absolute right-0 z-20 mt-1 w-[min(360px,86vw)] rounded p-2 text-[10px] leading-snug" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Bookmarks</div>
+                    <div className="mt-0.5">Saved on this device.</div>
+                  </div>
+                  <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-[10px]" disabled={createBrowserBookmark.isPending} onClick={saveCurrentBrowserBookmark}>
+                    <Plus size={12} strokeWidth={1.8} aria-hidden="true" />
+                    Add Current
+                  </Button>
+                </div>
+                <div className="mt-2 grid gap-1">
+                  {browserBookmarkItems.length === 0 ? (
+                    <div className="rounded px-2 py-2" style={{ background: "rgba(5, 10, 10, 0.52)", border: `1px solid ${browserFrame.lineSoft}` }}>
+                      Open a page, then add it here.
+                    </div>
+                  ) : browserBookmarkItems.slice(0, 8).map((bookmark) => {
+                    const editing = editingBookmarkId === bookmark.id;
+                    return (
+                      <div key={bookmark.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 rounded" style={{ background: "rgba(5, 10, 10, 0.52)", border: `1px solid ${browserFrame.lineSoft}` }}>
+                        {editing ? (
+                          <Input
+                            value={bookmarkTitleDraft}
+                            onChange={(event) => setBookmarkTitleDraft(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") {
+                                setEditingBookmarkId(null);
+                                setBookmarkTitleDraft("");
+                              }
+                              if (event.key === "Enter" && bookmarkTitleDraft.trim()) {
+                                renameBrowserBookmark.mutate({ bookmarkId: bookmark.id, title: bookmarkTitleDraft.trim() });
+                              }
+                            }}
+                            aria-label={`Rename bookmark ${bookmark.title ?? bookmark.targetUrl}`}
+                            className="h-8 min-w-0 text-[11px]"
+                            style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}` }}
+                          />
+                        ) : (
+                          <Button type="button" size="sm" variant="ghost" className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left" title={bookmark.targetUrl} aria-label={`Open bookmark ${bookmark.title ?? browserOriginLabel(bookmark.targetUrl)}`} onClick={() => void openDailyBrowserTarget(bookmark.targetUrl)}>
+                            <span className="min-w-0">
+                              <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? browserOriginLabel(bookmark.targetUrl)}</span>
+                              <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                            </span>
+                          </Button>
+                        )}
+                        <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled={renameBrowserBookmark.isPending} aria-label={editing ? `Save bookmark ${bookmark.title ?? bookmark.targetUrl}` : `Rename bookmark ${bookmark.title ?? bookmark.targetUrl}`} title={editing ? "Save local bookmark title." : "Rename this bookmark."} onClick={() => {
+                          if (editing) {
+                            if (!bookmarkTitleDraft.trim()) return;
+                            renameBrowserBookmark.mutate({ bookmarkId: bookmark.id, title: bookmarkTitleDraft.trim() });
+                            return;
+                          }
+                          setEditingBookmarkId(bookmark.id);
+                          setBookmarkTitleDraft(bookmark.title ?? bookmark.targetUrl);
+                        }}>
+                          <Pencil size={12} strokeWidth={1.8} aria-hidden="true" />
+                        </Button>
+                        <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled={removeBrowserBookmark.isPending} aria-label={`Remove bookmark ${bookmark.title ?? bookmark.targetUrl}`} title="Remove this bookmark." onClick={() => removeBrowserBookmark.mutate({ bookmarkId: bookmark.id })}>
+                          <Trash2 size={12} strokeWidth={1.8} aria-hidden="true" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </details>
           </div>
 
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
@@ -1461,6 +1567,36 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <span className="hidden text-[11px] font-semibold sm:inline">Downloads</span>
                 </Button>
               )}
+              <details className="relative">
+                <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Aang page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.gold, background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                  <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="h-6 w-6 object-contain" />
+                  <span className="hidden sm:inline">Aang</span>
+                </summary>
+                <div className="absolute right-0 z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                  <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Current Page</div>
+                  <div className="mt-1 truncate">{currentPageTarget ?? "No page open"}</div>
+                  <div className="mt-2 grid gap-1">
+                    <Button type="button" variant="ghost" size="sm" className="h-auto justify-start px-1.5 py-1.5 text-left" disabled={!currentPageTarget || browserAangRoutePreview.isPending} role="menuitem" onClick={() => stageCurrentPageAangAction("explain")}>
+                      <span className="block">
+                        <span className="block text-[11px] font-semibold">Explain page</span>
+                        <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Stage a local Aang read.</span>
+                      </span>
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" className="h-auto justify-start px-1.5 py-1.5 text-left" disabled={!currentPageTarget || browserAangRoutePreview.isPending} role="menuitem" onClick={() => stageCurrentPageAangAction("note")}>
+                      <span className="block">
+                        <span className="block text-[11px] font-semibold">Make note</span>
+                        <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Prepare a note request.</span>
+                      </span>
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" className="h-auto justify-start px-1.5 py-1.5 text-left" disabled={!currentPageTarget || browserAangRoutePreview.isPending} role="menuitem" onClick={() => stageCurrentPageAangAction("workshop")}>
+                      <span className="block">
+                        <span className="block text-[11px] font-semibold">Send to Workshop</span>
+                        <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Stage a build route.</span>
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </details>
               <details className="relative">
                 <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
@@ -1771,6 +1907,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   onToggleChat={() => setBrowserHomeChatOpen((open) => !open)}
                   onOpenTarget={(target) => void openDailyBrowserTarget(target)}
                   onAddBookmark={saveCurrentBrowserBookmark}
+                  aangDraft={browserAangDraft}
+                  onAangDraftChange={setBrowserAangDraft}
+                  onSubmitAang={submitBrowserAangDraft}
                   savedBookmarks={browserBookmarkItems}
                 />
               ) : (
@@ -2036,7 +2175,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         aria-label="Browser Aang command bar"
         onSubmit={(event) => {
           event.preventDefault();
-          void openDailyBrowserPage();
+          submitBrowserAangDraft();
         }}
       >
         <button
@@ -2050,22 +2189,37 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         </button>
         <Input
           aria-label="Ask Aang or search from Browser"
-          value={browserAddressDraft}
+          value={browserAangDraft}
           onChange={(event) => {
-            setBrowserAddressDraft(event.target.value);
+            setBrowserAangDraft(event.target.value);
             setBrowserNotice(null);
           }}
-          placeholder="Ask Aang or search the web"
+          placeholder={currentPageTarget ? "Ask Aang about the current page" : "Ask Aang from Browser"}
           className="h-11 min-w-0 text-[13px]"
           style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
         />
         <Button type="button" size="sm" variant="outline" className="h-11 w-11 px-0" aria-label="Attach image for Aang" disabled title="Not set up">
           <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
         </Button>
-        <Button type="submit" size="sm" variant="secondary" className="h-11 w-12 px-0" aria-label="Open page or search from Browser">
+        <Button type="submit" size="sm" variant="secondary" className="h-11 w-12 px-0" aria-label="Send to Aang" disabled={!browserAangDraft.trim() || browserAangRoutePreview.isPending}>
           <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
         </Button>
       </form>
+      {browserAangRoutePreview.data && (
+        <div className="mx-2 mb-2 rounded px-2 py-1.5 text-[10px] leading-snug" role="status" aria-label="Aang route preview" style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, boxShadow: browserFrame.bevel }}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0">
+              <span className="font-semibold" style={{ color: C.gold }}>Aang read:</span>{" "}
+              <span>{browserAangRoutePreview.data.aangRead}</span>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Chip label={browserAangRoutePreview.data.ownerAgent} tone={C.accent} />
+              <Chip label="local preview" tone={C.success} />
+            </div>
+          </div>
+          <div className="mt-1 truncate">{browserAangRoutePreview.data.receipt.summary}</div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 2231 ADT
+Last updated: 2026-06-08 2249 ADT
 
 ## Current North Star
 
@@ -49,6 +49,41 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-08 2249 ADT - Browser Chrome And Aang Page Actions
+
+### What Changed
+- Made bookmark management obvious in the Browser chrome with a visible `Bookmarks` control.
+- The `Bookmarks` control now exposes add current, open, rename, and delete in one place.
+- Tightened the bookmark medallion rail into an intentional chrome band with a brass left marker and smaller medallions.
+- Added an `Aang` current-page menu in Browser chrome.
+- Added current-page Aang actions:
+  - `Explain page`
+  - `Make note`
+  - `Send to Workshop`
+- Separated the bottom Browser Aang draft from the URL/search draft.
+- Bottom Aang submit now stages a local Aang/Cortana route preview instead of opening a page.
+- Added a visible local route-preview receipt under the Browser Aang bar.
+- Expanded installed desktop smoke to click an Aang current-page action and verify the local route preview renders.
+- Rebuilt and reinstalled `/Applications/CereBro.app`, then reopened the installed app.
+
+### Checks Run
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app run desktop:package`
+- Reinstalled `/Applications/CereBro.app`
+- `pnpm --dir app run test:desktop`
+- Screenshot QA:
+  `/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-raven-airlock/app/output/qa/cerebro-installed-browser-smoke.png`
+
+### Known Gaps
+- The Browser chrome is improved but still not fully 1:1 with the approved loaded-page mockup.
+- Aang current-page actions stage local route previews. They do not yet create durable notes or Workshop receipts from the Browser action itself.
+- Bookmark drag reorder and custom bookmark icons are not built.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser chrome now has a visible Bookmarks manager with add current, open, rename, and delete; a tighter medallion rail; and an Aang current-page menu. Aang actions stage local route previews through `runtime.previewRoute`: Explain page, Make note, Send to Workshop. The bottom Browser Aang bar no longer drives URL/search. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, screenshot-checked, and reopened on 2026-06-08 2249 ADT. Continue with 1:1 Browser chrome fidelity or promote Aang page actions into durable note/Workshop receipt creation. Do not route daily browsing to System Browser by default. Do not surface Raven.
+```
 
 ## 2026-06-08 2231 ADT - Browser Bookmark Medallions
 

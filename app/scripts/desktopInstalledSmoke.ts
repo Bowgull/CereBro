@@ -245,6 +245,32 @@ async function clickButtonByTitle(client: CdpClient, title: string, timeoutMs = 
   throw new Error(`Button title "${title}" was not found in installed app. Visible button titles: ${JSON.stringify(lastTitles)}`);
 }
 
+async function clickElementByAriaLabel(client: CdpClient, label: string, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastLabels: string[] = [];
+
+  while (Date.now() < deadline) {
+    const result = (await evaluate(
+      client,
+      `(() => {
+        const elements = Array.from(document.querySelectorAll("[aria-label]"));
+        const target = elements.find((element) => (element.getAttribute("aria-label") || "").trim() === ${JSON.stringify(label)});
+        if (!target) {
+          return { ok: false, labels: elements.map((element) => (element.getAttribute("aria-label") || "").trim()).filter(Boolean).slice(0, 60) };
+        }
+        target.click();
+        return { ok: true, label: target.getAttribute("aria-label") };
+      })()`,
+    )) as { ok?: boolean; labels?: string[]; label?: string } | undefined;
+
+    if (result?.ok) return;
+    lastLabels = result?.labels ?? [];
+    await sleep(250);
+  }
+
+  throw new Error(`Element "${label}" was not found in installed app. Visible aria labels: ${JSON.stringify(lastLabels)}`);
+}
+
 async function fillInputByLabel(client: CdpClient, label: string, value: string) {
   const result = (await evaluate(
     client,
@@ -360,11 +386,14 @@ async function run() {
       }
       await sleep(1_000);
       const screenshot = await captureDesktopScreenshot();
-      await clickButtonByName(client, "Add current page bookmark");
+      await clickButtonByName(client, "Add Current");
       await waitFor(client, hasButtonLabelExpression("Open bookmark"), 10_000, "bookmark medallion");
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
+      await clickElementByAriaLabel(client, "Aang page actions");
+      await clickButtonByName(client, "Explain page");
+      await waitFor(client, "document.querySelector('[aria-label=\"Aang route preview\"]') instanceof HTMLElement", 10_000, "Aang current-page route preview");
       await clickButtonByName(client, "New browser tab");
       await waitFor(
         client,
@@ -408,7 +437,7 @@ async function run() {
             remoteDebuggingPort: port,
             pageUrl: target.url,
             screenshot,
-            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, opened that bookmark from a new tab, created another tab, and routed a search query.",
+            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, staged an Aang current-page route preview, opened that bookmark from a new tab, created another tab, and routed a search query.",
           },
           null,
           2,
