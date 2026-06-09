@@ -219,6 +219,32 @@ async function clickButtonByName(client: CdpClient, name: string, timeoutMs = 15
   throw new Error(`Button "${name}" was not found in installed app. Visible button labels: ${JSON.stringify(lastLabels)}`);
 }
 
+async function clickButtonByTitle(client: CdpClient, title: string, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastTitles: string[] = [];
+
+  while (Date.now() < deadline) {
+    const result = (await evaluate(
+      client,
+      `(() => {
+        const buttons = Array.from(document.querySelectorAll("button,[role='button']"));
+        const target = buttons.find((element) => (element.getAttribute("title") || "").trim() === ${JSON.stringify(title)});
+        if (!target) {
+          return { ok: false, titles: buttons.map((element) => (element.getAttribute("title") || "").trim()).filter(Boolean).slice(0, 40) };
+        }
+        target.click();
+        return { ok: true, title: target.getAttribute("title") };
+      })()`,
+    )) as { ok?: boolean; titles?: string[]; title?: string } | undefined;
+
+    if (result?.ok) return;
+    lastTitles = result?.titles ?? [];
+    await sleep(250);
+  }
+
+  throw new Error(`Button title "${title}" was not found in installed app. Visible button titles: ${JSON.stringify(lastTitles)}`);
+}
+
 async function fillInputByLabel(client: CdpClient, label: string, value: string) {
   const result = (await evaluate(
     client,
@@ -334,6 +360,8 @@ async function run() {
       }
       await sleep(1_000);
       const screenshot = await captureDesktopScreenshot();
+      await clickButtonByName(client, "Add current page bookmark");
+      await waitFor(client, hasButtonLabelExpression("Open bookmark"), 10_000, "bookmark medallion");
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
@@ -346,6 +374,18 @@ async function run() {
         })()`,
         10_000,
         "new tab blank omnibox",
+      );
+      await clickButtonByTitle(client, "https://example.com/");
+      await waitForNativePageTarget("https://example.com");
+      await clickButtonByName(client, "New browser tab");
+      await waitFor(
+        client,
+        `(() => {
+          const input = document.querySelector('[aria-label="Browser address and search field"]');
+          return input instanceof HTMLInputElement && input.value === "";
+        })()`,
+        10_000,
+        "second new tab blank omnibox",
       );
       await fillInputByLabel(client, "Browser address and search field", "cerebro browser smoke");
       await clickButtonByName(client, "Open page in CereBro");
@@ -368,7 +408,7 @@ async function run() {
             remoteDebuggingPort: port,
             pageUrl: target.url,
             screenshot,
-            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, created a tab, and routed a search query.",
+            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, opened that bookmark from a new tab, created another tab, and routed a search query.",
           },
           null,
           2,

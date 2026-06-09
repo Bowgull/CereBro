@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 1915 ADT
+Last updated: 2026-06-08 2231 ADT
 
 ## Current North Star
 
@@ -49,6 +49,34 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-08 2231 ADT - Browser Bookmark Medallions
+
+### What Changed
+- Made Browser Home pinned bookmarks open directly inside CereBro instead of only filling the URL field.
+- Added saved local bookmarks to Browser Home before the default pinned medallions.
+- Added a bookmark medallion rail under the Browser tab strip.
+- Added `Add Current` bookmark actions on Browser Home and the Browser chrome.
+- Added a direct daily-browser bookmark mutation for normal tabs. The old proposal-only bookmark path stays available but is no longer required for everyday browsing.
+- Made saved row bookmarks, project pins, and the manage-bookmarks list open directly in CereBro.
+- Expanded installed-app smoke coverage for save-bookmark, open-new-tab, click-bookmark, and search routing.
+- Rebuilt and reinstalled `/Applications/CereBro.app`, then reopened the installed app.
+
+### Checks Run
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app run desktop:package`
+- Reinstalled `/Applications/CereBro.app`
+- `pnpm --dir app run test:desktop`
+
+### Known Gaps
+- The Browser visual chrome is closer but still not a full 1:1 match to the approved mockup.
+- Bookmark ordering is simple: saved local bookmarks first, then default pins.
+- There is no drag reorder or custom icon picker yet.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser bookmarks are now real daily-browser actions: Browser Home pins, saved bookmark rows, manage-list entries, project pins, and the top medallion rail open directly inside CereBro. `Add Current` saves a local bookmark from a normal daily Browser tab through `workbench.createBrowserBookmark`. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, and reopened on 2026-06-08 2231 ADT. Continue with the 1:1 Browser chrome polish: ornate top rail, tighter medallion styling, better tab affordance, and stronger loaded-page framing. Do not route daily browsing to System Browser by default. Do not surface Raven.
+```
 
 ## 2026-06-08 1915 ADT - Mac App Update Rule And Reinstall
 

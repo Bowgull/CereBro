@@ -160,12 +160,30 @@ function siteBlockingLabel(settings: NativeBrowserSiteSettings | null) {
 function BrowserHomeStart({
   chatOpen,
   onToggleChat,
-  onSelectTarget,
+  onOpenTarget,
+  onAddBookmark,
+  savedBookmarks,
 }: {
   chatOpen: boolean;
   onToggleChat: () => void;
-  onSelectTarget: (target: string) => void;
+  onOpenTarget: (target: string) => void;
+  onAddBookmark: () => void;
+  savedBookmarks: { id: number; targetUrl: string; title: string | null }[];
 }) {
+  const pinnedTargets = new Set(savedBookmarks.map((bookmark) => bookmark.targetUrl));
+  const homePins = [
+    ...savedBookmarks.slice(0, 4).map((bookmark) => ({
+      key: `bookmark-${bookmark.id}`,
+      label: bookmark.title ?? browserOriginLabel(bookmark.targetUrl),
+      target: bookmark.targetUrl,
+      domain: browserOriginLabel(bookmark.targetUrl),
+      saved: true,
+    })),
+    ...browserHomePins
+      .filter((pin) => !pinnedTargets.has(pin.target))
+      .map((pin) => ({ key: `default-${pin.label}`, ...pin, saved: false })),
+  ].slice(0, 7);
+
   return (
     <div className="relative min-h-[clamp(520px,68dvh,760px)] overflow-hidden rounded" style={{ background: "radial-gradient(circle at 50% 30%, rgba(214, 158, 67, 0.16), transparent 11%), radial-gradient(circle at 50% 24%, rgba(198, 155, 85, 0.12), transparent 28%), radial-gradient(circle at 88% 12%, rgba(77, 170, 154, 0.08), transparent 28%), linear-gradient(180deg, rgba(7, 13, 12, 0.98), rgba(2, 5, 5, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 44px rgba(0, 0, 0, 0.56)" }}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-70" aria-hidden="true" style={{ background: "repeating-radial-gradient(circle at 50% 58%, rgba(198, 155, 85, 0.26) 0 1px, transparent 1px 46px)" }} />
@@ -191,17 +209,19 @@ function BrowserHomeStart({
         <div className="mx-auto mt-10 grid w-full max-w-6xl gap-3">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[14px] font-semibold" style={{ color: C.gold }}>Pinned</div>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => onSelectTarget("https://github.com")}>
-              Edit Pinned
+            <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onAddBookmark}>
+              Add Current
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
-            {browserHomePins.map((pin) => (
+            {homePins.map((pin) => (
               <button
-                key={pin.label}
+                key={pin.key}
                 type="button"
+                aria-label={`Open bookmark ${pin.label}`}
+                title={pin.target}
                 className="group relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                onClick={() => onSelectTarget(pin.target)}
+                onClick={() => onOpenTarget(pin.target)}
                 style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
               >
                 <span className="pointer-events-none absolute left-1.5 top-1.5 h-2.5 w-2.5 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
@@ -214,13 +234,15 @@ function BrowserHomeStart({
                   }}
                 />
                 <span className="mt-2 max-w-full truncate text-[12px] font-semibold" style={{ color: C.textPrimary }}>{pin.label}</span>
+                {pin.saved && <span className="mt-1 text-[9px] font-semibold uppercase tracking-widest" style={{ color: C.gold }}>Saved</span>}
                 <span className="absolute bottom-[-5px] h-2.5 w-2.5 rounded-full" aria-hidden="true" style={{ background: C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 12px ${C.success}66` }} />
               </button>
             ))}
             <button
               type="button"
+              aria-label="Add current page bookmark"
               className="relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              onClick={() => onSelectTarget("https://github.com")}
+              onClick={onAddBookmark}
               style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
             >
               <Plus size={28} strokeWidth={1.6} aria-hidden="true" style={{ color: C.gold }} />
@@ -240,15 +262,29 @@ function BrowserHomeStart({
                 <div className="text-[14px] font-semibold" style={{ color: C.gold }}>{title}</div>
                 <Button type="button" size="sm" variant="outline" className="h-6 px-2 text-[10px]">View all</Button>
               </div>
-              {[a, b, c].map((item) => (
-                <button key={item} type="button" className="grid w-full grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded px-1 py-1.5 text-left" onClick={() => onSelectTarget(item === "MDN Web Docs" ? "https://developer.mozilla.org" : "https://github.com")}>
-                  <span className="flex h-8 w-8 items-center justify-center rounded text-[10px] font-bold" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, color: C.gold }}>{item.slice(0, 2).toUpperCase()}</span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>{item}</span>
-                    <span className="block truncate text-[10px]" style={{ color: C.textMuted }}>Local browser memory</span>
-                  </span>
-                </button>
-              ))}
+              {[a, b, c].map((item) => {
+                const target =
+                  item === "MDN Web Docs"
+                    ? "https://developer.mozilla.org"
+                    : item === "electron / electron"
+                      ? "https://github.com/electron/electron"
+                      : item === "Awesome Lists"
+                        ? "https://github.com/sindresorhus/awesome"
+                        : item === "Design Systems"
+                          ? "https://www.designsystems.com"
+                          : item === "Deep Work"
+                            ? "https://en.wikipedia.org/wiki/Deep_Work"
+                            : null;
+                return (
+                  <button key={item} type="button" className="grid w-full grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded px-1 py-1.5 text-left disabled:cursor-default disabled:opacity-70" disabled={!target} onClick={() => target && onOpenTarget(target)}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded text-[10px] font-bold" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, color: C.gold }}>{item.slice(0, 2).toUpperCase()}</span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>{item}</span>
+                      <span className="block truncate text-[10px]" style={{ color: C.textMuted }}>Local browser memory</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -491,6 +527,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       utils.ledger.overview.invalidate();
     },
   });
+  const createBrowserBookmark = trpc.workbench.createBrowserBookmark.useMutation({
+    onSuccess: (result) => {
+      setBrowserNotice(
+        result.ok
+          ? `Bookmarked: ${result.bookmark?.title ?? result.bookmark?.targetUrl ?? "current page"}.`
+          : "Bookmark blocked. Open a page first.",
+      );
+      utils.workbench.browserBookmarkStorageContract.invalidate();
+      utils.ledger.overview.invalidate();
+    },
+  });
   const removeBrowserBookmark = trpc.workbench.removeBrowserBookmark.useMutation({
     onSuccess: (result) => {
       setBrowserNotice(
@@ -590,6 +637,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserBookmarkItems = (browserBookmarkStorageContract.data?.items ?? []).filter(
     (item, index, items) => items.findIndex((candidate) => candidate.targetUrl === item.targetUrl) === index,
   );
+  const selectedDailyBrowserTab = dailyBrowserTabs.find((tab) => tab.id === selectedDailyBrowserTabId) ?? dailyBrowserTabs[0] ?? null;
+  const browserMedallions = [
+    ...browserBookmarkItems.slice(0, 5).map((bookmark) => ({
+      key: `bookmark-${bookmark.id}`,
+      label: bookmark.title ?? browserOriginLabel(bookmark.targetUrl),
+      target: bookmark.targetUrl,
+      domain: browserOriginLabel(bookmark.targetUrl),
+      saved: true,
+    })),
+    ...browserHomePins
+      .filter((pin) => !browserBookmarkItems.some((bookmark) => bookmark.targetUrl === pin.target))
+      .map((pin) => ({ key: `default-${pin.label}`, label: pin.label, target: pin.target, domain: pin.domain, saved: false })),
+  ].slice(0, 8);
   const navigateBrowserLocalHistory = (target: typeof browserLocalNavigation.backTarget) => {
     if (!target || target.proposalId == null) {
       setBrowserNotice("No real local Browser history target is available.");
@@ -660,8 +720,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       height,
     });
   }, []);
-  const openDailyBrowserPage = async () => {
-    if (browserDraft.kind === "empty" || browserDraft.targetUrl == null) {
+  const openDailyBrowserTarget = async (rawTarget: string) => {
+    const draft = workbenchBrowserDraftModel(rawTarget);
+    if (draft.kind === "empty" || draft.targetUrl == null) {
       setBrowserNotice("Enter a site or search.");
       return;
     }
@@ -671,7 +732,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       return;
     }
 
-    const targetUrl = browserDraft.targetUrl;
+    const targetUrl = draft.targetUrl;
     setBrowserNotice("Opening page.");
     setBrowserSurface("page");
     setSelectedBrowserProposalId(null);
@@ -682,10 +743,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     setDailyBrowserTabs((tabs) =>
       tabs.map((tab) =>
         tab.id === selectedDailyBrowserTabId
-          ? { ...tab, targetUrl, addressDraft: browserAddressDraft, title: browserOriginLabel(targetUrl) }
+          ? { ...tab, targetUrl, addressDraft: rawTarget, title: browserOriginLabel(targetUrl) }
           : tab,
       ),
     );
+    setBrowserAddressDraft(targetUrl);
 
     try {
       window.requestAnimationFrame(() => {
@@ -723,6 +785,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setNativePageActive(false);
       setBrowserNotice("Page failed to open.");
     }
+  };
+  const openDailyBrowserPage = () => openDailyBrowserTarget(browserAddressDraft);
+  const saveCurrentBrowserBookmark = () => {
+    const targetUrl = sandboxFrameTarget ?? selectedDailyBrowserTab?.targetUrl ?? browserDraft.targetUrl;
+    if (!targetUrl) {
+      setBrowserNotice("Open a page before adding a bookmark.");
+      return;
+    }
+    createBrowserBookmark.mutate({
+      targetUrl,
+      title: selectedDailyBrowserTab?.title ?? browserOriginLabel(targetUrl),
+    });
   };
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
@@ -963,6 +1037,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     recordBrowserSandboxFrameFallback.isPending ||
     createWatchShelfItemFromOpenTab.isPending ||
     createBrowserBookmarkFromOpenTab.isPending ||
+    createBrowserBookmark.isPending ||
     removeBrowserBookmark.isPending ||
     renameBrowserBookmark.isPending ||
     recordBrowserSandboxFrameReload.isPending;
@@ -1066,7 +1141,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       }}
     >
       <main className="flex-1 overflow-hidden p-1.5" aria-label="Browser workspace">
-        <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-1.5">
+        <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1.5">
           <div
             className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1.5"
             aria-label="Browser page tabs"
@@ -1170,6 +1245,43 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               <Chip label={browserShell.safetyLabel} tone={C.accent} />
               <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onClose}>Keep</Button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1" aria-label="Browser bookmark medallions" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+            {browserMedallions.map((pin) => (
+              <button
+                key={pin.key}
+                type="button"
+                aria-label={`Open bookmark ${pin.label}`}
+                title={pin.target}
+                className="group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                onClick={() => void openDailyBrowserTarget(pin.target)}
+                style={{ background: browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.08)`, ["--tw-ring-color" as string]: C.accent }}
+              >
+                <img
+                  src={faviconUrl(pin.domain, 64)}
+                  alt=""
+                  className="h-5 w-5 rounded"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+                <span className="sr-only">{pin.label}</span>
+                <span className="pointer-events-none absolute -bottom-1 h-2 w-2 rounded-full" aria-hidden="true" style={{ background: pin.saved ? C.gold : C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 10px ${(pin.saved ? C.gold : C.success)}66` }} />
+              </button>
+            ))}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-11 w-11 shrink-0 rounded-full px-0"
+              aria-label="Add current page bookmark"
+              title="Save the current page as a local bookmark."
+              disabled={createBrowserBookmark.isPending}
+              onClick={saveCurrentBrowserBookmark}
+            >
+              <Plus size={15} strokeWidth={1.8} aria-hidden="true" />
+            </Button>
           </div>
 
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
@@ -1410,16 +1522,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     variant="ghost"
                     size="sm"
                     className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
-                    disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createBrowserBookmarkFromOpenTab.isPending}
-                    title={hasOpenSandboxFrame ? "Save this page as a bookmark." : "Open a page before saving a bookmark."}
+                    disabled={(!sandboxFrameTarget && !selectedDailyBrowserTab?.targetUrl && browserDraft.targetUrl == null) || createBrowserBookmark.isPending}
+                    title={sandboxFrameTarget || selectedDailyBrowserTab?.targetUrl ? "Save this page as a bookmark." : "Open a page before saving a bookmark."}
                     role="menuitem"
-                    onClick={() => {
-                      if (selectedBrowserProposalId == null) return;
-                      createBrowserBookmarkFromOpenTab.mutate({ proposalId: selectedBrowserProposalId });
-                    }}
+                    onClick={saveCurrentBrowserBookmark}
                   >
                     <span className="block">
-                      <span className="block text-[11px] font-semibold">{createBrowserBookmarkFromOpenTab.isPending ? "Saving Bookmark" : "Bookmark Page"}</span>
+                      <span className="block text-[11px] font-semibold">{createBrowserBookmark.isPending ? "Saving Bookmark" : "Bookmark Page"}</span>
                       <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Save this page.</span>
                     </span>
                   </Button>
@@ -1486,7 +1595,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   variant="ghost"
                   className="h-7 shrink-0 gap-1 px-2 text-[10px]"
                   title={pin.target}
-                  onClick={() => setBrowserNotice(`${pin.label} selected.`)}
+                  onClick={() => void openDailyBrowserTarget(pin.target)}
                 >
                   <Folder size={12} strokeWidth={1.8} aria-hidden="true" />
                   <span className="max-w-[130px] truncate">Project: {pin.label}</span>
@@ -1500,15 +1609,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   variant="ghost"
                   className="h-7 shrink-0 gap-1 px-2 text-[10px]"
                   title={bookmark.targetUrl}
-                  onClick={() => {
-                    setBrowserSurface("page");
-                    setBrowserAddressDraft(bookmark.targetUrl);
-                    setSelectedBrowserProposalId(null);
-                    setSandboxFrameTarget(null);
-                    setSandboxFrameProposalId(null);
-                    setNativePageActive(false);
-                    setBrowserNotice("Bookmark loaded.");
-                  }}
+                  aria-label={`Open bookmark ${bookmark.title ?? browserOriginLabel(bookmark.targetUrl)}`}
+                  onClick={() => void openDailyBrowserTarget(bookmark.targetUrl)}
                 >
                   <Bookmark size={12} strokeWidth={1.8} aria-hidden="true" />
                   <span className="max-w-[150px] truncate">{bookmark.title ?? browserOriginLabel(bookmark.targetUrl)}</span>
@@ -1551,15 +1653,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                                 variant="ghost"
                                 className="h-auto min-w-0 justify-start px-1.5 py-1.5 text-left"
                                 title={bookmark.targetUrl}
-                                onClick={() => {
-                                  setBrowserSurface("page");
-                                  setBrowserAddressDraft(bookmark.targetUrl);
-                                  setSelectedBrowserProposalId(null);
-                                  setSandboxFrameTarget(null);
-                                  setSandboxFrameProposalId(null);
-                                  setNativePageActive(false);
-                                  setBrowserNotice("Bookmark loaded.");
-                                }}
+                                aria-label={`Open bookmark ${bookmark.title ?? browserOriginLabel(bookmark.targetUrl)}`}
+                                onClick={() => void openDailyBrowserTarget(bookmark.targetUrl)}
                               >
                                 <span className="min-w-0">
                                   <span className="block truncate text-[11px] font-semibold">{bookmark.title ?? bookmark.targetUrl}</span>
@@ -1675,11 +1770,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 <BrowserHomeStart
                   chatOpen={browserHomeChatOpen}
                   onToggleChat={() => setBrowserHomeChatOpen((open) => !open)}
-                  onSelectTarget={(target) => {
-                    setBrowserAddressDraft(target);
-                    setPreparedApprovalId(null);
-                    setBrowserNotice(null);
-                  }}
+                  onOpenTarget={(target) => void openDailyBrowserTarget(target)}
+                  onAddBookmark={saveCurrentBrowserBookmark}
+                  savedBookmarks={browserBookmarkItems}
                 />
               ) : (
               <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" style={{ minHeight: "clamp(360px, 54dvh, 600px)" }}>

@@ -2405,6 +2405,99 @@ export const workbenchRouter = router({
       };
     }),
 
+  createBrowserBookmark: publicProcedure
+    .input(
+      z.object({
+        targetUrl: z.string().trim().min(1).max(2000),
+        title: z.string().trim().min(1).max(120).optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      let parsed: URL;
+      try {
+        parsed = new URL(input.targetUrl);
+      } catch {
+        return {
+          ok: false as const,
+          mode: "browser_bookmark_save_invalid_url" as const,
+          bookmark: null,
+          canSaveBookmark: false,
+          writesExternal: false,
+          gates: [
+            "Bookmark save remains blocked.",
+            "A real URL is required before saving a bookmark.",
+            "No bookmark saved, source saved, backend page fetch run, cookie persisted, or external write ran.",
+          ],
+          noActionTaken: [
+            "No bookmark saved.",
+            "No backend page fetch ran.",
+            "No cookies or credentials persisted.",
+            "No source saved.",
+            "No external write ran.",
+          ],
+        };
+      }
+
+      const db = await getCerebroDb();
+      const targetUrl = parsed.toString();
+      const title = input.title ?? browserDraftTabLabelForServer(targetUrl);
+      const existing = await db.execute({
+        sql: `
+          SELECT id, browser_tab_session_id, proposal_id, target_url, title,
+                 state, project_id, source_id, workbench_evidence_id,
+                 created_at, updated_at
+          FROM browser_bookmarks
+          WHERE target_url = ?
+          ORDER BY created_at DESC, id DESC
+          LIMIT 1
+        `,
+        args: [targetUrl],
+      });
+      let bookmark = existing.rows[0] as Record<string, unknown> | undefined;
+
+      if (!bookmark) {
+        const created = await db.execute({
+          sql: `
+            INSERT INTO browser_bookmarks (
+              browser_tab_session_id, proposal_id, target_url, title, state,
+              project_id, source_id, workbench_evidence_id
+            )
+            VALUES (NULL, NULL, ?, ?, 'saved', NULL, NULL, NULL)
+            RETURNING id, browser_tab_session_id, proposal_id, target_url, title,
+                      state, project_id, source_id, workbench_evidence_id,
+                      created_at, updated_at
+          `,
+          args: [targetUrl, title],
+        });
+        bookmark = created.rows[0] as Record<string, unknown> | undefined;
+      }
+
+      if (!bookmark) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Browser bookmark could not be saved.",
+        });
+      }
+
+      return {
+        ok: true as const,
+        mode: "browser_bookmark_saved" as const,
+        bookmark: rowToBrowserBookmark(bookmark),
+        canSaveBookmark: true,
+        writesExternal: false,
+        gates: [
+          "Saved one local Browser bookmark from the current daily Browser page.",
+          "No cookies, credentials, page content, source discovery, backend page fetch, or external write ran.",
+        ],
+        noActionTaken: [
+          "No backend page fetch ran.",
+          "No cookies or credentials persisted.",
+          "No source saved.",
+          "No external write ran.",
+        ],
+      };
+    }),
+
   removeBrowserBookmark: publicProcedure
     .input(
       z.object({
