@@ -13,6 +13,8 @@
     "desktop:dev": "pnpm run desktop:build && ELECTRON_START_URL=http://localhost:3000 electron dist-electron/main.cjs",
     "desktop:package": "pnpm run build && pnpm run desktop:build && electron-packager . CereBro --platform=darwin --arch=arm64 --overwrite --out=release --icon=electron/assets/cerebro-app-icon.icns --asar=false --no-prune --no-deref-symlinks --ignore='^/release($|/)' --ignore='^/server($|/)' --ignore='^/client($|/)' --ignore='^/electron($|/)' --ignore='^/vite.config.ts$' --ignore='^/tsconfig.json$' --ignore='^/drizzle.config.ts$'",
     "desktop:backup": "tsx scripts/desktopAppSafety.ts backup",
+    "desktop:stage": "tsx scripts/desktopAppSafety.ts stage",
+    "desktop:stage-smoke": "tsx scripts/desktopAppSafety.ts stage-smoke",
     "desktop:install": "tsx scripts/desktopAppSafety.ts install",
     "desktop:restore": "tsx scripts/desktopAppSafety.ts restore",
     "start": "NODE_ENV=production node dist/index.js",

@@ -67,6 +67,16 @@ type BrowserDownloadActivity = {
   message: string;
 };
 
+type BrowserChromeMenu = "bookmarks" | "shield" | "aang" | "pageActions" | "savedBookmarks" | null;
+
+type BrowserAangRoutePreview = {
+  aangRead: string;
+  ownerAgent: string;
+  receipt: {
+    summary: string;
+  };
+};
+
 function browserDraftTabLabel(tab: BrowserDraftTab) {
   const title = tab.title?.trim();
   if (title && !/^open page draft$/i.test(title)) return title;
@@ -367,6 +377,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
   const [browserAangDraft, setBrowserAangDraft] = useState("");
+  const [localAangRoutePreview, setLocalAangRoutePreview] = useState<BrowserAangRoutePreview | null>(null);
+  const [activeBrowserChromeMenu, setActiveBrowserChromeMenu] = useState<BrowserChromeMenu>(null);
   const [nativeViewportHeight, setNativeViewportHeight] = useState(360);
   const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
@@ -391,7 +403,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     refetchOnReconnect: false,
   });
   const browserAangRoutePreview = trpc.runtime.previewRoute.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
+      setLocalAangRoutePreview(result);
       setBrowserNotice("Aang read staged.");
       utils.ledger.overview.invalidate();
     },
@@ -670,9 +683,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       .map((pin) => ({ key: `default-${pin.label}`, label: pin.label, target: pin.target, domain: pin.domain, saved: false })),
   ].slice(0, 8);
   const currentPageTarget = sandboxFrameTarget ?? selectedDailyBrowserTab?.targetUrl ?? browserDraft.targetUrl ?? null;
+  const aangRoutePreview = browserAangRoutePreview.data ?? localAangRoutePreview;
+  const nativeMenuReserveTop = activeBrowserChromeMenu && hasOpenSandboxFrame ? 320 : 0;
+  const toggleBrowserChromeMenu = (menu: Exclude<BrowserChromeMenu, null>) => {
+    setActiveBrowserChromeMenu((active) => (active === menu ? null : menu));
+  };
   const submitBrowserAangDraft = () => {
     const text = browserAangDraft.trim();
     if (!text || browserAangRoutePreview.isPending) return;
+    setLocalAangRoutePreview({
+      aangRead: text,
+      ownerAgent: "Aang",
+      receipt: { summary: "Aang route staged from Browser." },
+    });
     browserAangRoutePreview.mutate({ text, mode: "quick" });
   };
   const stageCurrentPageAangAction = (kind: "explain" | "note" | "workshop") => {
@@ -689,6 +712,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           : `Send this page to Workshop with context: ${title} (${currentPageTarget})`;
     setBrowserAangDraft(prompt);
     setBrowserHomeChatOpen(true);
+    setLocalAangRoutePreview({
+      aangRead: prompt,
+      ownerAgent: kind === "workshop" ? "Tony Stark" : "Aang",
+      receipt: { summary: `${title} staged from the current Browser page.` },
+    });
     browserAangRoutePreview.mutate({ text: prompt, mode: kind === "workshop" ? "build" : "quick" });
   };
   const navigateBrowserLocalHistory = (target: typeof browserLocalNavigation.backTarget) => {
@@ -753,14 +781,16 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     const bottomLimit = Math.max(top + 1, window.innerHeight - 16);
     const bottom = Math.min(bottomLimit, rect.bottom);
     const height = Math.max(1, bottom - top);
-    setNativeViewportHeight(Math.round(height));
+    const reservedTop = Math.min(nativeMenuReserveTop, Math.max(0, height - 180));
+    const clippedHeight = Math.max(1, height - reservedTop);
+    setNativeViewportHeight(Math.round(clippedHeight));
     await nativeBridge.setBounds({
       x: left,
-      y: top,
+      y: top + reservedTop,
       width: Math.max(1, right - left),
-      height,
+      height: clippedHeight,
     });
-  }, []);
+  }, [nativeMenuReserveTop]);
   const openDailyBrowserTarget = async (rawTarget: string) => {
     const draft = workbenchBrowserDraftModel(rawTarget);
     if (draft.kind === "empty" || draft.targetUrl == null) {
@@ -1124,7 +1154,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       window.removeEventListener("resize", handleResize);
       window.clearInterval(interval);
     };
-  }, [nativePageActive, sandboxFrameTarget, browserSurface, syncNativeBrowserBounds]);
+  }, [nativePageActive, sandboxFrameTarget, browserSurface, activeBrowserChromeMenu, syncNativeBrowserBounds]);
 
   useEffect(() => {
     return window.cerebroNativeBrowser?.onPageEvent((event) => {
@@ -1317,8 +1347,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </button>
               ))}
             </div>
-            <details className="relative justify-self-end">
-              <summary className="flex h-9 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Bookmarks" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.76)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+            <details className="relative justify-self-end" open={activeBrowserChromeMenu === "bookmarks"}>
+              <summary className="flex h-9 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Bookmarks" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("bookmarks"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.76)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                 <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" />
                 Bookmarks
               </summary>
@@ -1462,10 +1492,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               >
                 Open
               </Button>
-              <details className="relative">
+              <details className="relative" open={activeBrowserChromeMenu === "shield"}>
                 <summary
                   className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   aria-label="VPN shield"
+                  onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("shield"); }}
                   style={{
                     border: `1px solid ${vpnStatusTone(vpnStatus)}66`,
                     color: vpnStatusTone(vpnStatus),
@@ -1479,7 +1510,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <span className="sr-only">{vpnStatusLabel(vpnStatus, vpnBusy)}</span>
                 </summary>
                 <div
-                  className="absolute bottom-full right-0 z-20 mb-1 w-72 rounded p-2 text-[10px] leading-snug"
+                  className="absolute right-0 top-full z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug"
                   role="menu"
                   style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}
                 >
@@ -1567,12 +1598,12 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <span className="hidden text-[11px] font-semibold sm:inline">Downloads</span>
                 </Button>
               )}
-              <details className="relative">
-                <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Aang page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.gold, background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+              <details className="relative" open={activeBrowserChromeMenu === "aang"}>
+                <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Aang page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("aang"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.gold, background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="h-6 w-6 object-contain" />
                   <span className="hidden sm:inline">Aang</span>
                 </summary>
-                <div className="absolute bottom-full right-0 z-20 mb-1 w-72 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                <div className="absolute right-0 top-full z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Current Page</div>
                   <div className="mt-1 truncate">{currentPageTarget ?? "No page open"}</div>
                   <div className="mt-2 grid gap-1">
@@ -1597,11 +1628,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 </div>
               </details>
-              <details className="relative">
-                <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+              <details className="relative" open={activeBrowserChromeMenu === "pageActions"}>
+                <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("pageActions"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 </summary>
-                <div className="absolute bottom-full right-0 z-20 mb-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+                <div className="absolute right-0 top-full z-20 mt-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                   <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
                   <div className="mb-1 rounded px-1.5 py-1.5 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
                     <div className="flex items-center justify-between gap-2">
@@ -1752,8 +1783,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </Button>
               ))}
               {browserBookmarkItems.length > 0 && (
-                <details className="relative ml-auto shrink-0">
-                  <summary className="flex h-7 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Manage Browser bookmarks" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                <details className="relative ml-auto shrink-0" open={activeBrowserChromeMenu === "savedBookmarks"}>
+                  <summary className="flex h-7 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Manage Browser bookmarks" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("savedBookmarks"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                     <MoreHorizontal size={13} strokeWidth={1.8} aria-hidden="true" />
                     Manage
                   </summary>
@@ -1857,6 +1888,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                       <div
                         ref={nativeViewportRef}
                         aria-label="Native page viewport"
+                        data-native-menu-reserve-top={nativeMenuReserveTop}
                         className="w-full flex-1 rounded-sm"
                         style={{ height: "100%", minHeight: 0, background: "rgba(2, 6, 6, 0.01)" }}
                       />
@@ -2205,19 +2237,19 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
         </Button>
       </form>
-      {browserAangRoutePreview.data && (
+      {aangRoutePreview && (
         <div className="mx-2 mb-2 rounded px-2 py-1.5 text-[10px] leading-snug" role="status" aria-label="Aang route preview" style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, boxShadow: browserFrame.bevel }}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0">
               <span className="font-semibold" style={{ color: C.gold }}>Aang read:</span>{" "}
-              <span>{browserAangRoutePreview.data.aangRead}</span>
+              <span>{aangRoutePreview.aangRead}</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <Chip label={browserAangRoutePreview.data.ownerAgent} tone={C.accent} />
+              <Chip label={aangRoutePreview.ownerAgent} tone={C.accent} />
               <Chip label="local preview" tone={C.success} />
             </div>
           </div>
-          <div className="mt-1 truncate">{browserAangRoutePreview.data.receipt.summary}</div>
+          <div className="mt-1 truncate">{aangRoutePreview.receipt.summary}</div>
         </div>
       )}
     </div>

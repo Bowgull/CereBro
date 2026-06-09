@@ -1,4 +1,4 @@
-import { execFile, execFileSync, spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -8,11 +8,11 @@ import WebSocket from "ws";
 const execFileAsync = promisify(execFile);
 
 const appPath = process.env.CEREBRO_DESKTOP_APP_PATH ?? "/Applications/CereBro.app";
-const appName = process.env.CEREBRO_DESKTOP_APP_NAME ?? "CereBro";
 const binaryPath = `${appPath}/Contents/MacOS/CereBro`;
 const port = Number(process.env.CEREBRO_DESKTOP_QA_PORT ?? "9333");
 const closeExisting = process.env.CEREBRO_DESKTOP_QA_CLOSE_EXISTING === "1";
 const reopenExisting = process.env.CEREBRO_DESKTOP_QA_REOPEN_EXISTING !== "0";
+const qaMode = process.env.CEREBRO_DESKTOP_QA_MODE ?? "browser";
 const screenshotPath = resolve(process.cwd(), "output/qa/cerebro-installed-browser-smoke.png");
 
 function sleep(ms: number) {
@@ -41,7 +41,7 @@ async function waitForNoMainProcess(timeoutMs = 8_000) {
 }
 
 async function quitExistingApp() {
-  await execFileAsync("osascript", ["-e", `quit app "${appName}"`]).catch(() => undefined);
+  await execFileAsync("pkill", ["-f", binaryPath]).catch(() => undefined);
   await waitForNoMainProcess();
 }
 
@@ -75,7 +75,36 @@ type AppPageTarget = DebugTarget & {
   webSocketDebuggerUrl: string;
 };
 
-async function waitForAppPageTarget(child: ChildProcessWithoutNullStreams) {
+function appIsRunning() {
+  return mainProcessPids().length > 0;
+}
+
+async function waitForLaunchedPid(timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const pids = mainProcessPids();
+    if (pids[0]) return Number(pids[0]);
+    await sleep(250);
+  }
+  return null;
+}
+
+async function waitForStableMainProcess(timeoutMs = 10_000, stableMs = 4_000) {
+  const deadline = Date.now() + timeoutMs;
+  let stableSince: number | null = null;
+  while (Date.now() < deadline) {
+    if (mainProcessPids().length > 0) {
+      stableSince ??= Date.now();
+      if (Date.now() - stableSince >= stableMs) return true;
+    } else {
+      stableSince = null;
+    }
+    await sleep(250);
+  }
+  return false;
+}
+
+async function waitForAppPageTarget() {
   await waitForCdpEndpoint();
   const targetsUrl = `http://127.0.0.1:${port}/json/list`;
   const deadline = Date.now() + 30_000;
@@ -93,11 +122,28 @@ async function waitForAppPageTarget(child: ChildProcessWithoutNullStreams) {
       if (target?.webSocketDebuggerUrl) return target as AppPageTarget;
     }
 
-    if (child.exitCode !== null) throw new Error(`CereBro exited before opening a debuggable page, code ${child.exitCode}`);
+    if (!appIsRunning()) throw new Error("CereBro exited before opening a debuggable page");
     await sleep(250);
   }
 
   throw new Error("CereBro opened, but no app page target was visible over remote debugging");
+}
+
+async function waitForLocalAppHttp(targetUrl: string, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastStatus: number | null = null;
+  let lastError: unknown = null;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(targetUrl);
+      lastStatus = response.status;
+      if (response.ok) return { ok: true, status: response.status, url: targetUrl };
+    } catch (error) {
+      lastError = error;
+    }
+    await sleep(250);
+  }
+  throw new Error(`Local app HTTP did not answer at ${targetUrl}: ${lastStatus ?? (lastError instanceof Error ? lastError.message : String(lastError))}`);
 }
 
 async function waitForNativePageTarget(targetUrlPrefix: string, timeoutMs = 20_000) {
@@ -147,9 +193,16 @@ class CdpClient {
 
   static connect(url: string) {
     return new Promise<CdpClient>((resolvePromise, reject) => {
+      console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-cdp-connect-start", url }, null, 2));
       const socket = new WebSocket(url);
-      socket.once("open", () => resolvePromise(new CdpClient(socket)));
-      socket.once("error", (error) => reject(error));
+      socket.once("open", () => {
+        console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-cdp-connect-open" }, null, 2));
+        resolvePromise(new CdpClient(socket));
+      });
+      socket.once("error", (error) => {
+        console.error(JSON.stringify({ ok: false, mode: "desktop-smoke-cdp-connect-error", message: error.message }, null, 2));
+        reject(error);
+      });
     });
   }
 
@@ -157,7 +210,20 @@ class CdpClient {
     const id = this.nextId++;
     this.socket.send(JSON.stringify({ id, method, params }));
     return new Promise<unknown>((resolvePromise, reject) => {
-      this.pending.set(id, { resolve: resolvePromise, reject });
+      const timeout = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`CDP command timed out: ${method}`));
+      }, 10_000);
+      this.pending.set(id, {
+        resolve: (value) => {
+          clearTimeout(timeout);
+          resolvePromise(value);
+        },
+        reject: (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        },
+      });
     });
   }
 
@@ -327,9 +393,14 @@ async function pressEnterInInputByLabel(client: CdpClient, label: string) {
   }
 }
 
-async function captureDesktopScreenshot() {
+async function captureDesktopScreenshot(pid: number | undefined) {
   await mkdir(resolve(process.cwd(), "output/qa"), { recursive: true });
-  await execFileAsync("osascript", ["-e", `tell application "${appName}" to activate`]).catch(() => undefined);
+  if (typeof pid === "number") {
+    await execFileAsync("osascript", [
+      "-e",
+      `tell application "System Events" to set frontmost of first process whose unix id is ${pid} to true`,
+    ]).catch(() => undefined);
+  }
   await sleep(750);
   await execFileAsync("screencapture", ["-x", screenshotPath]);
   return screenshotPath;
@@ -340,31 +411,65 @@ function hasButtonLabelExpression(label: string) {
 }
 
 async function run() {
+  console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-start", appPath, binaryPath, port, qaMode }, null, 2));
   if (!existsSync(binaryPath)) {
     throw new Error(`Installed CereBro binary not found at ${binaryPath}`);
   }
 
   const existingPids = mainProcessPids();
   const hadExistingApp = existingPids.length > 0;
+  console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-existing", hadExistingApp, existingPids }, null, 2));
   if (hadExistingApp && !closeExisting) {
     throw new Error(`CereBro is already running from ${binaryPath}. Set CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 to test one installed app instance.`);
   }
 
   if (hadExistingApp) {
     await quitExistingApp();
+    console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-quit-existing" }, null, 2));
   }
 
-  const child = spawn(binaryPath, [`--remote-debugging-port=${port}`], {
+  await execFileAsync("open", ["-n", appPath, "--args", `--remote-debugging-port=${port}`], {
     env: {
       ...process.env,
       NODE_ENV: "production",
     },
-    stdio: "pipe",
   });
+  const launchedPid = await waitForLaunchedPid();
+  console.log(JSON.stringify({ ok: launchedPid != null, mode: "desktop-smoke-launched", pid: launchedPid }, null, 2));
 
   try {
-    const target = await waitForAppPageTarget(child);
+    const target = await waitForAppPageTarget();
+    console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-target", title: target.title, url: target.url }, null, 2));
+    if (qaMode === "launch") {
+      const httpProof = await waitForLocalAppHttp(target.url);
+      const screenshot = await captureDesktopScreenshot(launchedPid ?? undefined);
+      const stable = await waitForStableMainProcess();
+      if (!stable) throw new Error("CereBro exposed an app page but did not remain running after launch.");
+      console.log(
+        JSON.stringify(
+          {
+            ok: true,
+            appPath,
+            binaryPath,
+            remoteDebuggingPort: port,
+            pageUrl: target.url,
+            screenshot,
+            launchProof: {
+              pid: launchedPid,
+              targetUrl: target.url,
+              httpStatus: httpProof.status,
+              stableMs: 4_000,
+            },
+            proof: "Installed CereBro launched through the .app bundle, exposed a debuggable app page, answered local app HTTP, and produced a desktop screenshot.",
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
     const client = await CdpClient.connect(target.webSocketDebuggerUrl);
+    console.log(JSON.stringify({ ok: true, mode: "desktop-smoke-cdp-ready" }, null, 2));
     try {
       await client.send("Runtime.enable");
       await waitFor(client, "document.readyState === 'interactive' || document.readyState === 'complete'");
@@ -406,16 +511,39 @@ async function run() {
         throw new Error(`Native Browser viewport is not using the Browser mockup canvas: ${JSON.stringify(viewportBounds)}`);
       }
       await sleep(1_000);
-      const screenshot = await captureDesktopScreenshot();
+      await clickElementByAriaLabel(client, "VPN shield");
+      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "VPN shield menu open");
+      const menuLayerProof = await evaluate(
+        client,
+        `(() => {
+          const shield = document.querySelector('[aria-label="VPN shield"]')?.closest('details');
+          const menu = shield?.querySelector('[role="menu"]');
+          const viewport = document.querySelector('[aria-label="Native page viewport"]');
+          if (!(shield instanceof HTMLDetailsElement) || !(menu instanceof HTMLElement) || !(viewport instanceof HTMLElement)) return null;
+          const summary = shield.querySelector("summary");
+          const summaryRect = summary instanceof HTMLElement ? summary.getBoundingClientRect() : null;
+          const menuRect = menu.getBoundingClientRect();
+          return {
+            open: shield.open,
+            reserveTop: Number(viewport.dataset.nativeMenuReserveTop || "0"),
+            opensDownward: summaryRect ? menuRect.top >= summaryRect.bottom - 2 : false,
+            menuTop: menuRect.top,
+            menuBottom: menuRect.bottom,
+            viewportTop: viewport.getBoundingClientRect().top
+          };
+        })()`,
+      ) as { open: boolean; reserveTop: number; opensDownward: boolean; menuTop: number; menuBottom: number; viewportTop: number } | null;
+      if (!menuLayerProof?.open || !menuLayerProof.opensDownward || menuLayerProof.reserveTop < 280) {
+        throw new Error(`Browser chrome menu did not reserve native page space: ${JSON.stringify(menuLayerProof)}`);
+      }
+      const screenshot = await captureDesktopScreenshot(launchedPid ?? undefined);
+      await clickElementByAriaLabel(client, "VPN shield");
+      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === false", 10_000, "VPN shield menu closed");
       await clickButtonByName(client, "Add Current");
       await waitFor(client, hasButtonLabelExpression("Open bookmark"), 10_000, "bookmark medallion");
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
-      await clickElementByAriaLabel(client, "VPN shield");
-      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "VPN shield menu open");
-      await clickElementByAriaLabel(client, "VPN shield");
-      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === false", 10_000, "VPN shield menu closed");
       await clearAndFillInputByLabel(client, "Browser address and search field", "example.com");
       await clickElementByAriaLabel(client, "Aang page actions");
       await clickButtonByName(client, "Explain page");
@@ -463,7 +591,8 @@ async function run() {
             remoteDebuggingPort: port,
             pageUrl: target.url,
             screenshot,
-            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, opened and closed the VPN Shield menu, proved the URL bar still accepts input, staged an Aang current-page route preview, opened that bookmark from a new tab, created another tab, and routed a search query.",
+            menuLayerProof,
+            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, opened the VPN Shield menu downward over a real native page while reserving native page bounds, saved the current page as a bookmark, closed the VPN Shield menu, proved the URL bar still accepts input, staged an Aang current-page route preview, opened that bookmark from a new tab, created another tab, and routed a search query.",
           },
           null,
           2,
@@ -473,7 +602,7 @@ async function run() {
       client.close();
     }
   } finally {
-    child.kill();
+    await execFileAsync("pkill", ["-f", binaryPath]).catch(() => undefined);
     await waitForNoMainProcess().catch(() => undefined);
     if (hadExistingApp && reopenExisting) {
       await execFileAsync("open", [appPath]).catch(() => undefined);

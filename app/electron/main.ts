@@ -13,8 +13,13 @@ const appName = "CereBro";
 const appIconPath = join(electronDirname, "../electron/assets/cerebro-app-icon.icns");
 const bundledStaticDir = join(electronDirname, "../dist/public");
 let embeddedServer: StartedCereBroServer | null = null;
+let mainWindowRef: BrowserWindow | null = null;
 
 app.setName(appName);
+
+const disablePreload = process.env.CEREBRO_DISABLE_PRELOAD === "1";
+const disableNativeBrowser = process.env.CEREBRO_DISABLE_NATIVE_BROWSER === "1";
+const disableAdBlock = process.env.CEREBRO_DISABLE_ADBLOCK === "1";
 
 function desktopLog(message: string, error?: unknown) {
   try {
@@ -132,18 +137,45 @@ async function createMainWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      preload: join(electronDirname, "preload.cjs"),
+      ...(disablePreload ? {} : { preload: join(electronDirname, "preload.cjs") }),
       sandbox: true,
     },
   });
+  mainWindowRef = mainWindow;
+  mainWindow.on("close", () => desktopLog("main window close requested"));
+  mainWindow.on("closed", () => {
+    desktopLog("main window closed");
+    if (mainWindowRef === mainWindow) mainWindowRef = null;
+  });
+  mainWindow.webContents.on("render-process-gone", (_event, details) => {
+    desktopLog(`renderer gone: ${details.reason} ${details.exitCode}`);
+  });
+  mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
+    desktopLog(`main window failed load ${validatedURL}: ${errorCode} ${errorDescription}`);
+  });
+  mainWindow.webContents.on("did-finish-load", () => {
+    desktopLog(`main window finished load ${mainWindow.webContents.getURL()}`);
+  });
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  const pageView = createNativeBrowserPageView(mainWindow, "native_tab_1", (event) => {
-    mainWindow.webContents.send(nativeBrowserPageEventChannel, event);
-  });
-  void installNativeBrowserAdBlocker(pageView.view.webContents.session, desktopLog);
-  layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
-  installNativeBrowserCommandBridge(mainWindow, pageView);
+  if (!disableNativeBrowser) {
+    const pageView = createNativeBrowserPageView(mainWindow, "native_tab_1", (event) => {
+      mainWindow.webContents.send(nativeBrowserPageEventChannel, event);
+    });
+    layoutNativeBrowserPageView(pageView, { x: 0, y: 0, width: 1, height: 1 });
+    installNativeBrowserCommandBridge(mainWindow, pageView);
+    if (!disableAdBlock) {
+      mainWindow.webContents.once("did-finish-load", () => {
+        setTimeout(() => {
+          void installNativeBrowserAdBlocker(pageView.view.webContents.session, desktopLog);
+        }, 1000);
+      });
+    } else {
+      desktopLog("native browser ad blocking disabled by env");
+    }
+  } else {
+    desktopLog("native browser view disabled by env");
+  }
   installNativeVpnBridge();
   installApplicationMenu(mainWindow);
   const startUrl = await resolveStartUrl();
@@ -168,9 +200,19 @@ app.whenReady().then(() => {
 });
 
 app.on("before-quit", () => {
+  desktopLog("before quit");
   void embeddedServer?.close();
 });
 
 app.on("window-all-closed", () => {
+  desktopLog("window all closed");
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("will-quit", () => {
+  desktopLog("will quit");
+});
+
+app.on("quit", (_event, exitCode) => {
+  desktopLog(`quit ${exitCode}`);
 });
