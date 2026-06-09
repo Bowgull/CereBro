@@ -290,6 +290,27 @@ async function fillInputByLabel(client: CdpClient, label: string, value: string)
   }
 }
 
+async function clearAndFillInputByLabel(client: CdpClient, label: string, value: string) {
+  const result = (await evaluate(
+    client,
+    `(() => {
+      const input = document.querySelector(${JSON.stringify(`[aria-label="${label}"]`)});
+      if (!(input instanceof HTMLInputElement)) return { ok: false, labels: Array.from(document.querySelectorAll("input")).map((item) => item.getAttribute("aria-label") || item.placeholder || "").filter(Boolean) };
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(input, "");
+      input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "deleteContentBackward", data: null }));
+      setter?.call(input, ${JSON.stringify(value)});
+      input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: ${JSON.stringify(value)} }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      return { ok: input.value === ${JSON.stringify(value)}, value: input.value };
+    })()`,
+  )) as { ok?: boolean; labels?: string[]; value?: string } | undefined;
+
+  if (!result?.ok) {
+    throw new Error(`Input "${label}" was not found or could not be refilled. Visible inputs: ${JSON.stringify(result?.labels ?? [])}`);
+  }
+}
+
 async function pressEnterInInputByLabel(client: CdpClient, label: string) {
   const result = (await evaluate(
     client,
@@ -391,6 +412,11 @@ async function run() {
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
+      await clickElementByAriaLabel(client, "VPN shield");
+      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "VPN shield menu open");
+      await clickElementByAriaLabel(client, "VPN shield");
+      await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === false", 10_000, "VPN shield menu closed");
+      await clearAndFillInputByLabel(client, "Browser address and search field", "example.com");
       await clickElementByAriaLabel(client, "Aang page actions");
       await clickButtonByName(client, "Explain page");
       await waitFor(client, "document.querySelector('[aria-label=\"Aang route preview\"]') instanceof HTMLElement", 10_000, "Aang current-page route preview");
@@ -437,7 +463,7 @@ async function run() {
             remoteDebuggingPort: port,
             pageUrl: target.url,
             screenshot,
-            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, staged an Aang current-page route preview, opened that bookmark from a new tab, created another tab, and routed a search query.",
+            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, saved the current page as a bookmark, opened and closed the VPN Shield menu, proved the URL bar still accepts input, staged an Aang current-page route preview, opened that bookmark from a new tab, created another tab, and routed a search query.",
           },
           null,
           2,

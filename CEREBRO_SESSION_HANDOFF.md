@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-08 2249 ADT
+Last updated: 2026-06-09 0435 ADT
 
 ## Current North Star
 
@@ -40,6 +40,10 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Run the debug checks that match the files changed.
 - If app code changed, run the app build before calling the slice done.
 - If the desktop app should be updated, package and reinstall `/Applications/CereBro.app`, then state whether it succeeded.
+- Before replacing `/Applications/CereBro.app`, run `pnpm --dir app run desktop:backup`.
+- Prefer `pnpm --dir app run desktop:install` over manual copy. It backs up the current app, replaces it with `app/release/CereBro-darwin-arm64/CereBro.app`, clears quarantine, and reopens CereBro.
+- If the installed app wedges or regresses, run `pnpm --dir app run desktop:restore` to restore `/Applications/CereBro-known-good.app`.
+- Any native-layer change must pass an installed smoke that opens and closes Browser chrome menus, then proves the URL bar still accepts input.
 - State whether the local dev server or installed Mac app is the current thing the user should open.
 - Update this handoff and the Obsidian finish path.
 - Append a dated progress entry.
@@ -49,6 +53,35 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-09 0435 ADT - Desktop Install Safety Gate
+
+### What Changed
+- Added a minimal desktop app safety script:
+  - `pnpm --dir app run desktop:backup`
+  - `pnpm --dir app run desktop:install`
+  - `pnpm --dir app run desktop:restore`
+- Backup target is `/Applications/CereBro-known-good.app`.
+- Install target remains `/Applications/CereBro.app`.
+- `desktop:install` backs up the current installed app before replacing it from `app/release/CereBro-darwin-arm64/CereBro.app`.
+- `desktop:restore` quits CereBro, restores the known-good backup, clears quarantine, and reopens the app.
+- Installed desktop smoke now opens and closes the VPN Shield menu, then refills the Browser URL bar to prove the app is still interactive after a chrome menu.
+- Native-layer changes now require this smoke gate before treating `/Applications/CereBro.app` as daily-safe.
+
+### Checks Run
+- Pending in current slice:
+  - `pnpm --dir app exec tsc --noEmit`
+  - `pnpm --dir app run desktop:backup`
+  - `pnpm --dir app run test:desktop`
+
+### Known Gaps
+- This is a seatbelt, not the final menu-over-native-page architecture.
+- The real native menu layering fix still needs a staged design and manual hold before it touches the daily app.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/scripts/desktopAppSafety.ts, app/scripts/desktopInstalledSmoke.ts, and app/client/src/components/BrowserPanel.tsx first. Desktop install safety is now required before replacing `/Applications/CereBro.app`: run `pnpm --dir app run desktop:backup`, package, then use `pnpm --dir app run desktop:install`; if the app wedges, run `pnpm --dir app run desktop:restore`. Native-layer changes must pass installed smoke that opens/closes Browser chrome menus and proves the URL bar is still interactive. Continue Browser work only after preserving a known-good daily app. Do not surface Raven.
+```
 
 ## 2026-06-08 2249 ADT - Browser Chrome And Aang Page Actions
 
