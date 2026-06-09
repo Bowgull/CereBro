@@ -323,10 +323,11 @@ async function run() {
       ) as { x: number; y: number; width: number; height: number; innerWidth: number; innerHeight: number } | null;
       if (
         !viewportBounds ||
-        viewportBounds.y < 320 ||
+        viewportBounds.y < 220 ||
         viewportBounds.x < 80 ||
-        viewportBounds.width > viewportBounds.innerWidth - 120 ||
-        viewportBounds.height > viewportBounds.innerHeight - viewportBounds.y
+        viewportBounds.width > viewportBounds.innerWidth - 88 ||
+        viewportBounds.height > viewportBounds.innerHeight - viewportBounds.y ||
+        viewportBounds.y + viewportBounds.height > viewportBounds.innerHeight - 120
       ) {
         throw new Error(`Native Browser viewport is outside the CereBro shell: ${JSON.stringify(viewportBounds)}`);
       }

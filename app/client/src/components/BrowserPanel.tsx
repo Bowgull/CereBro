@@ -318,6 +318,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
+  const [nativeViewportHeight, setNativeViewportHeight] = useState(360);
   const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
@@ -650,12 +651,15 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     const left = Math.max(0, rect.left);
     const top = Math.max(0, rect.top);
     const right = Math.min(window.innerWidth, rect.right);
-    const bottom = Math.min(window.innerHeight, rect.bottom);
+    const bottomLimit = Math.max(top + 1, window.innerHeight - 128);
+    const bottom = Math.min(bottomLimit, rect.bottom);
+    const height = Math.max(1, bottom - top);
+    setNativeViewportHeight(Math.round(height));
     await nativeBridge.setBounds({
       x: left,
       y: top,
       width: Math.max(1, right - left),
-      height: Math.max(1, bottom - top),
+      height,
     });
   }, []);
   const openDailyBrowserPage = async () => {
@@ -1377,7 +1381,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
-          {browserNotice && (
+          {browserNotice && !hasOpenSandboxFrame && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1 text-[10px] leading-snug" role="status" style={{ background: "rgba(8, 14, 13, 0.84)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
               <span>{browserNotice}</span>
               {preparedApprovalId != null && (
@@ -1546,132 +1550,24 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           )}
 
           {browserSurface === "page" ? (
-            <section className="rounded p-3 sm:p-4" aria-label="Browser current page" style={{ background: browserFrame.page, border: `1px solid ${browserFrame.lineSoft}`, minHeight: "clamp(430px, 62dvh, 680px)", boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)" }}>
+            <section
+              className={hasOpenSandboxFrame ? "rounded p-1" : "rounded p-3 sm:p-4"}
+              aria-label="Browser current page"
+              style={{
+                background: browserFrame.page,
+                border: `1px solid ${browserFrame.lineSoft}`,
+                minHeight: hasOpenSandboxFrame ? 0 : "clamp(430px, 62dvh, 680px)",
+                boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)",
+              }}
+            >
               {hasOpenSandboxFrame ? (
-                <div className="grid gap-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded px-2 py-1.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-                    <div className="min-w-0 flex-1 basis-full sm:basis-auto">
-                      <div className="truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>
-                        {selectedBrowserTab ? browserDraftTabLabel(selectedBrowserTab) : "Open page"}
-                      </div>
-                      <div className="truncate text-[10px]" style={{ color: C.textMuted }}>
-                        {sandboxFrameTarget}
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2 text-[10px]"
-                      title="Return to the Browser start view."
-                      onClick={() => void closeNativeBrowserPage()}
-                    >
-                      Return
-                    </Button>
-                    <details className="relative w-full sm:w-auto sm:shrink-0">
-                      <summary className="ml-auto flex h-7 w-8 cursor-pointer list-none items-center justify-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Open page actions" style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                        <MoreHorizontal size={14} strokeWidth={1.8} aria-hidden="true" />
-                      </summary>
-                      <div className="absolute right-0 z-20 mt-1 w-80 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
-                        <div className="font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>Page Actions</div>
-                        <div className="mt-1 grid gap-1">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 justify-start px-1.5 text-[11px]"
-                            disabled={createBrowserBookmarkFromOpenTab.isPending || selectedBrowserProposalId == null}
-                            role="menuitem"
-                            title="Save this page as a bookmark."
-                            onClick={() => {
-                              if (selectedBrowserProposalId == null) return;
-                              createBrowserBookmarkFromOpenTab.mutate({ proposalId: selectedBrowserProposalId });
-                            }}
-                          >
-                            {createBrowserBookmarkFromOpenTab.isPending ? "Saving bookmark" : "Bookmark page"}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 justify-start px-1.5 text-[11px]"
-                            disabled={createWatchShelfItemFromOpenTab.isPending || selectedBrowserProposalId == null}
-                            role="menuitem"
-                            title="Save this page to Watch Shelf."
-                            onClick={() => {
-                              if (selectedBrowserProposalId == null) return;
-                              createWatchShelfItemFromOpenTab.mutate({
-                                proposalId: selectedBrowserProposalId,
-                                category: watchShelfCategory as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
-                              });
-                            }}
-                          >
-                            {createWatchShelfItemFromOpenTab.isPending ? "Saving to Watch Shelf" : "Save to Watch Shelf"}
-                          </Button>
-                        </div>
-                        {browserProjectPins.items.length > 0 && (
-                          <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
-                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>{browserProjectPins.title}</div>
-                            <div className="mt-1 grid gap-1">
-                              {browserProjectPins.items.map((pin) => (
-                                <Button
-                                  key={`${pin.label}-${pin.target}`}
-                                  type="button"
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 w-full justify-between px-1.5 text-[10px]"
-                                  title={pin.target}
-                                  role="menuitem"
-                                  onClick={() => setBrowserNotice(`${pin.label} selected.`)}
-                                >
-                                  <span className="truncate">{pin.label}</span>
-                                  <span className="shrink-0 uppercase" style={{ color: pin.statusLabel === "clean" ? C.success : C.gold }}>
-                                    {pin.statusLabel}
-                                  </span>
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {selectedBrowserHistoryItems.length > 0 && (
-                          <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
-                            <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Local History</div>
-                            <div className="mt-1 grid gap-1">
-                              {selectedBrowserHistoryItems.map((item) => (
-                                <div key={item.id} className="rounded px-1.5 py-1" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}` }}>
-                                  <div className="truncate font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</div>
-                                  <div className="truncate" style={{ color: C.textMuted }}>{item.eventType.replace(/_/g, " ")}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <div className="mt-2 border-t pt-2" style={{ borderColor: browserFrame.lineSoft }}>
-                          <div className="font-bold uppercase tracking-widest" style={{ color: C.textSecondary }}>Safety</div>
-                          <div className="mt-1">Protected page view. CereBro did not save page content, downloads, popups, or credentials.</div>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            <Chip label="protected" tone={C.accent} />
-                            <Chip label="local" tone={C.gold} />
-                          </div>
-                        </div>
-                      </div>
-                    </details>
-                  </div>
-                  <div className="relative overflow-hidden rounded p-1.5" style={{ background: "linear-gradient(180deg, rgba(13, 23, 20, 0.98), rgba(2, 6, 6, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5), 0 16px 36px rgba(0, 0, 0, 0.32)" }}>
-                    <div className="mb-1.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded px-1.5 py-1" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
-                      <ShieldCheck size={12} strokeWidth={1.8} aria-hidden="true" style={{ color: C.accent }} />
-                      <div className="min-w-0">
-                        <div className="truncate text-[10px] font-semibold" style={{ color: C.textPrimary }}>{browserOriginLabel(sandboxFrameTarget)}</div>
-                        <div className="truncate text-[9px] font-mono" style={{ color: C.textMuted }}>{sandboxFrameTarget}</div>
-                      </div>
-                      <span className="rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider" style={{ color: C.gold, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)" }}>open</span>
-                    </div>
+                <div className="relative overflow-hidden rounded" style={{ background: "rgba(2, 6, 6, 0.99)", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
                     {nativePageActive ? (
                       <div
                         ref={nativeViewportRef}
                         aria-label="Native page viewport"
-                        className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
-                        style={{ background: "rgba(2, 6, 6, 0.01)", border: "1px solid rgba(244, 239, 227, 0.08)" }}
+                        className="w-full rounded-sm"
+                        style={{ height: nativeViewportHeight, background: "rgba(2, 6, 6, 0.01)" }}
                       />
                     ) : (
                       <>
@@ -1681,8 +1577,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                           src={sandboxFrameTarget}
                           sandbox="allow-scripts allow-forms"
                           referrerPolicy="no-referrer"
-                          className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
-                          style={{ background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
+                          className="w-full rounded-sm"
+                          style={{ height: nativeViewportHeight, background: "#fff", border: "1px solid rgba(244, 239, 227, 0.18)", boxShadow: "0 18px 36px rgba(0, 0, 0, 0.36)" }}
                         />
                         <details className="mt-1.5 rounded px-1.5 py-1 text-[10px] leading-snug" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
                           <summary className="cursor-pointer list-none font-semibold uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ color: C.textSecondary, ["--tw-ring-color" as string]: C.accent }}>
@@ -1712,7 +1608,6 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                         </details>
                       </>
                     )}
-                  </div>
                 </div>
               ) : (
               browserDraft.kind === "empty" ? (
