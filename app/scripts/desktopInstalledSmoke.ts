@@ -252,10 +252,22 @@ async function run() {
       await waitFor(client, "document.readyState === 'interactive' || document.readyState === 'complete'");
       await clickButtonByName(client, "Browser");
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
-      await fillInputByLabel(client, "Browser address and search field", "example.com");
+      await fillInputByLabel(client, "Browser address and search field", "https://example.com");
+      await clickButtonByName(client, "Open page in CereBro");
+      await waitFor(client, "document.querySelector('[aria-label=\"Native page viewport\"]') instanceof HTMLElement", 20_000, "native page viewport");
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
+      await clickButtonByName(client, "New browser tab");
+      await waitFor(
+        client,
+        `(() => {
+          const input = document.querySelector('[aria-label="Browser address and search field"]');
+          return input instanceof HTMLInputElement && input.value === "";
+        })()`,
+        10_000,
+        "new tab blank omnibox",
+      );
 
       console.log(
         JSON.stringify(
@@ -265,7 +277,7 @@ async function run() {
             binaryPath,
             remoteDebuggingPort: port,
             pageUrl: target.url,
-            proof: "Installed /Applications/CereBro.app exposed Browser chrome over DevTools Protocol.",
+            proof: "Installed /Applications/CereBro.app opened a native Browser page and created a new tab over DevTools Protocol.",
           },
           null,
           2,

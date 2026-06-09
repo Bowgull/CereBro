@@ -55,6 +55,13 @@ type BrowserDraftTab = {
   proposalId: number | null;
 };
 
+type DailyBrowserTab = {
+  id: string;
+  title: string | null;
+  targetUrl: string | null;
+  addressDraft: string;
+};
+
 type BrowserDownloadActivity = {
   filename: string;
   state: "downloading" | "saved" | "blocked" | "needs_approval";
@@ -290,6 +297,10 @@ function BrowserHomeStart({
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
+  const [dailyBrowserTabs, setDailyBrowserTabs] = useState<DailyBrowserTab[]>([
+    { id: "daily-tab-1", title: "Current Page", targetUrl: null, addressDraft: "" },
+  ]);
+  const [selectedDailyBrowserTabId, setSelectedDailyBrowserTabId] = useState("daily-tab-1");
   const [browserActionLabel, setBrowserActionLabel] = useState("Add to Watch");
   const [watchShelfCategory, setWatchShelfCategory] = useState("Watching");
   const [selectedBrowserProposalId, setSelectedBrowserProposalId] = useState<number | null>(null);
@@ -526,6 +537,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
   const browserTabState = workbenchBrowserTabStateModel(browserDraft);
+  const selectedDailyBrowserTab =
+    dailyBrowserTabs.find((tab) => tab.id === selectedDailyBrowserTabId) ?? dailyBrowserTabs[0];
   const browserAction =
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
@@ -542,8 +555,8 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const canOpenSandboxFrame = selectedBrowserTab?.state === "open_ready" || selectedBrowserTab?.state === "open";
   const hasOpenSandboxFrame =
     sandboxFrameTarget != null &&
-    sandboxFrameProposalId != null &&
-    sandboxFrameProposalId === selectedBrowserProposalId;
+    nativePageActive &&
+    (selectedBrowserProposalId == null || sandboxFrameProposalId === selectedBrowserProposalId);
   const browserLiveRunnerPreflight = trpc.workbench.browserLiveRunnerPreflight.useQuery(
     { proposalId: selectedBrowserProposalId ?? 0 },
     {
@@ -628,6 +641,66 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     if (selectedBrowserProposalId == null) return;
     recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
   };
+  const openDailyBrowserPage = async () => {
+    if (browserDraft.kind === "empty" || browserDraft.targetUrl == null) {
+      setBrowserNotice("Enter a site or search.");
+      return;
+    }
+    const nativeBridge = window.cerebroNativeBrowser;
+    if (!nativeBridge) {
+      setBrowserNotice("CereBro Browser is not available in this window.");
+      return;
+    }
+
+    const targetUrl = browserDraft.targetUrl;
+    setBrowserNotice("Opening page.");
+    setBrowserSurface("page");
+    setSelectedBrowserProposalId(null);
+    setPreparedApprovalId(null);
+    setSandboxFrameTarget(targetUrl);
+    setSandboxFrameProposalId(null);
+    setNativePageActive(false);
+    setDailyBrowserTabs((tabs) =>
+      tabs.map((tab) =>
+        tab.id === selectedDailyBrowserTabId
+          ? { ...tab, targetUrl, addressDraft: browserAddressDraft, title: browserOriginLabel(targetUrl) }
+          : tab,
+      ),
+    );
+
+    try {
+      const result = await nativeBridge.openPage({
+        tabId: selectedDailyBrowserTabId,
+        targetUrl,
+        userInitiated: true,
+      });
+      if (!result.ok) {
+        setNativePageActive(false);
+        setBrowserNotice("Page blocked.");
+        return;
+      }
+      setNativePageActive(true);
+      setSandboxFrameTarget(result.currentUrl ?? targetUrl);
+      setDailyBrowserTabs((tabs) =>
+        tabs.map((tab) =>
+          tab.id === selectedDailyBrowserTabId
+            ? {
+                ...tab,
+                targetUrl: result.currentUrl ?? targetUrl,
+                addressDraft: result.currentUrl ?? targetUrl,
+                title: result.title ?? browserOriginLabel(result.currentUrl ?? targetUrl),
+              }
+            : tab,
+        ),
+      );
+      if (result.currentUrl) setBrowserAddressDraft(result.currentUrl);
+      await refreshSiteSettings();
+      setBrowserNotice("Page opened in CereBro.");
+    } catch {
+      setNativePageActive(false);
+      setBrowserNotice("Page failed to open.");
+    }
+  };
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
     setSandboxFrameProposalId(null);
@@ -638,6 +711,65 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       // The web fallback has no native page view to close.
     }
     setBrowserNotice("Returned to Browser.");
+  };
+  const createDailyBrowserTab = () => {
+    const nextTab: DailyBrowserTab = {
+      id: `daily-tab-${Date.now()}`,
+      title: "New Tab",
+      targetUrl: null,
+      addressDraft: "",
+    };
+    setDailyBrowserTabs((tabs) =>
+      tabs.map((tab) =>
+        tab.id === selectedDailyBrowserTabId
+          ? { ...tab, addressDraft: browserAddressDraft, targetUrl: sandboxFrameTarget ?? tab.targetUrl }
+          : tab,
+      ).concat(nextTab),
+    );
+    setSelectedDailyBrowserTabId(nextTab.id);
+    setSelectedBrowserProposalId(null);
+    setPreparedApprovalId(null);
+    setSandboxFrameTarget(null);
+    setSandboxFrameProposalId(null);
+    setNativePageActive(false);
+    setBrowserAddressDraft("");
+    setBrowserSurface("page");
+    setBrowserNotice("New tab.");
+  };
+  const selectDailyBrowserTab = async (tab: DailyBrowserTab) => {
+    setDailyBrowserTabs((tabs) =>
+      tabs.map((item) =>
+        item.id === selectedDailyBrowserTabId
+          ? { ...item, addressDraft: browserAddressDraft, targetUrl: sandboxFrameTarget ?? item.targetUrl }
+          : item,
+      ),
+    );
+    setSelectedDailyBrowserTabId(tab.id);
+    setSelectedBrowserProposalId(null);
+    setPreparedApprovalId(null);
+    setBrowserAddressDraft(tab.addressDraft || tab.targetUrl || "");
+    setBrowserSurface("page");
+    setSandboxFrameProposalId(null);
+    if (!tab.targetUrl) {
+      setSandboxFrameTarget(null);
+      setNativePageActive(false);
+      setBrowserNotice("New tab selected.");
+      return;
+    }
+    setSandboxFrameTarget(tab.targetUrl);
+    try {
+      const result = await window.cerebroNativeBrowser?.openPage({
+        tabId: tab.id,
+        targetUrl: tab.targetUrl,
+        userInitiated: true,
+      });
+      setNativePageActive(Boolean(result?.ok));
+      await refreshSiteSettings();
+      setBrowserNotice("Tab selected.");
+    } catch {
+      setNativePageActive(false);
+      setBrowserNotice("Tab selected.");
+    }
   };
   const checkVpnStatus = async () => {
     setVpnBusy(true);
@@ -844,6 +976,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 setBrowserSurface("page");
                 setSelectedBrowserProposalId(null);
                 setBrowserNotice(null);
+                if (selectedDailyBrowserTab) void selectDailyBrowserTab(selectedDailyBrowserTab);
               }}
               style={{
                 background: browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
@@ -855,6 +988,30 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Current Page
             </Button>
+            {dailyBrowserTabs.map((tab) => {
+              const active = browserSurface === "page" && selectedBrowserProposalId == null && selectedDailyBrowserTabId === tab.id;
+              return (
+                <Button
+                  key={tab.id}
+                  type="button"
+                  size="sm"
+                  variant={active ? "secondary" : "outline"}
+                  className="h-6 max-w-[150px] shrink-0 rounded-b-none px-2 text-[10px]"
+                  aria-pressed={active}
+                  title={tab.targetUrl ?? "New tab"}
+                  onClick={() => void selectDailyBrowserTab(tab)}
+                  style={{
+                    background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
+                    border: `1px solid ${active ? browserFrame.line : browserFrame.lineSoft}`,
+                    borderBottomColor: active ? C.gold : "transparent",
+                    color: active ? C.textPrimary : C.textMuted,
+                    boxShadow: browserFrame.bevel,
+                  }}
+                >
+                  <span className="truncate">{tab.title ?? browserOriginLabel(tab.targetUrl)}</span>
+                </Button>
+              );
+            })}
             {browserVisibleTabs.map((tab) => {
               const active = browserSurface === "page" && selectedBrowserProposalId === tab.proposalId;
               return (
@@ -905,7 +1062,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Watch Shelf
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab">
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab" onClick={createDailyBrowserTab}>
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
           </div>
@@ -941,7 +1098,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 size="sm"
                 variant="ghost"
                 className="h-8 w-8 px-0"
-                disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || recordBrowserSandboxFrameReload.isPending}
+                disabled={!hasOpenSandboxFrame || recordBrowserSandboxFrameReload.isPending}
                 aria-label="Reload page"
                 title={hasOpenSandboxFrame ? "Reload the page." : "Open a page before reload."}
                 onClick={() => void reloadPage()}
@@ -972,42 +1129,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 variant="outline"
                 className="h-9 px-3"
                 disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
-                title={browserPrimaryAction.title}
-                aria-label={browserPrimaryAction.ariaLabel}
-                onClick={async () => {
-                  if (browserDraft.kind === "empty" || browserDraft.targetUrl == null || isPreparingBrowserDraft) return;
-                  setBrowserNotice(browserPrimaryAction.pendingNotice);
-                  try {
-                    const result = await createBrowserActionProposal.mutateAsync({
-                      actionLabel: "Open Page",
-                      target: browserDraft.targetUrl,
-                      draftKind: browserDraft.kind,
-                    });
-                    const proposalId = result.proposal.id;
-                    setSelectedBrowserProposalId(proposalId);
-                    await createBrowserTabSessionDraft.mutateAsync({ proposalId });
-                    const approvalPreview = await createBrowserActionApprovalPreview.mutateAsync({
-                      proposalId,
-                      reason: "Prepare Browser page open for user approval. This does not open the page.",
-                    });
-                    setPreparedApprovalId(approvalPreview.approval?.id ?? null);
-                    await createBrowserActionWorkbenchBody.mutateAsync({ proposalId });
-                    await createBrowserActionSpockGate.mutateAsync({ proposalId });
-                    await createBrowserResultRecoveryScaffold.mutateAsync({ proposalId });
-                    const liveApprovalPreview = await createBrowserLiveRunnerApprovalPreview.mutateAsync({
-                      proposalId,
-                      reason: "Prepare Browser open permission after the local page package is staged. This does not open the page.",
-                    });
-                    setBrowserNotice(
-                      `Page is ready for review. Approval #${approvalPreview.approval?.id ?? "pending"} is waiting.`,
-                    );
-                  } catch {
-                    setBrowserNotice(browserPrimaryAction.failureNotice);
-                    setPreparedApprovalId(null);
-                  }
-                }}
+                title="Open this page in CereBro."
+                aria-label="Open page in CereBro"
+                onClick={() => void openDailyBrowserPage()}
               >
-                {browserPrimaryAction.label}
+                Open
               </Button>
               <details className="relative">
                 <summary

@@ -17,5 +17,8 @@ describe("installed desktop app QA script", () => {
     expect(scriptSource).toContain("Runtime.evaluate");
     expect(scriptSource).toContain("CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1");
     expect(scriptSource).toContain("Browser address and search field");
+    expect(scriptSource).toContain("Open page in CereBro");
+    expect(scriptSource).toContain("Native page viewport");
+    expect(scriptSource).toContain("New browser tab");
   });
 });
