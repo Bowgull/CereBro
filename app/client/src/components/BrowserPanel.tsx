@@ -1211,10 +1211,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}`,
       }}
     >
-      <main className="flex-1 overflow-hidden p-1.5" aria-label="Browser workspace">
-        <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1.5">
+      <main className="flex-1 overflow-hidden p-1" aria-label="Browser workspace">
+        <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1">
           <div
-            className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1.5"
+            className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1"
             aria-label="Browser page tabs"
             style={{ background: "rgba(4, 8, 8, 0.96)", border: `1px solid ${browserFrame.lineSoft}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)" }}
           >
@@ -1223,7 +1223,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               return (
                 <div
                   key={tab.id}
-                  className="flex max-w-[190px] shrink-0 overflow-hidden rounded-t"
+                  className="flex h-8 min-w-[178px] max-w-[240px] shrink-0 overflow-hidden rounded-t"
                   style={{
                     background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                     border: `1px solid ${active ? browserFrame.line : browserFrame.lineSoft}`,
@@ -1235,25 +1235,32 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     type="button"
                     size="sm"
                     variant="ghost"
-                    className="h-7 min-w-0 flex-1 rounded-none px-2 text-[11px]"
+                    className="h-full min-w-0 flex-1 rounded-none px-2 text-[11px]"
                     aria-pressed={active}
                     title={tab.targetUrl ?? "New tab"}
                     onClick={() => void selectDailyBrowserTab(tab)}
                     style={{ color: active ? C.textPrimary : C.textMuted }}
                   >
-                    <span className="truncate">{tab.title ?? browserOriginLabel(tab.targetUrl)}</span>
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full" aria-hidden="true" style={{ background: active ? C.gold : browserFrame.lineSoft, boxShadow: active ? `0 0 10px ${C.gold}55` : "none" }} />
+                      <span className="truncate">{tab.title ?? browserOriginLabel(tab.targetUrl)}</span>
+                    </span>
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
-                    className="h-7 w-7 shrink-0 rounded-none px-0"
+                    className="h-full w-8 shrink-0 rounded-none px-0 transition-colors"
                     aria-label={`Close tab ${tab.title ?? browserOriginLabel(tab.targetUrl)}`}
                     title="Close tab"
                     onClick={(event) => void closeDailyBrowserTab(tab.id, event)}
-                    style={{ color: active ? C.gold : C.textMuted, borderLeft: `1px solid ${browserFrame.lineSoft}` }}
+                    style={{
+                      color: active ? C.warning : C.textMuted,
+                      background: active ? "rgba(246, 193, 119, 0.08)" : "rgba(4, 8, 8, 0.24)",
+                      borderLeft: `1px solid ${browserFrame.lineSoft}`,
+                    }}
                   >
-                    <SquareX size={12} strokeWidth={1.8} aria-hidden="true" />
+                    <SquareX size={14} strokeWidth={1.9} aria-hidden="true" />
                   </Button>
                 </div>
               );
@@ -1266,7 +1273,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   size="sm"
                   variant={active ? "secondary" : "outline"}
-                  className="h-6 max-w-[150px] shrink-0 rounded-b-none px-2 text-[10px]"
+                  className="h-7 max-w-[168px] shrink-0 rounded-b-none px-2 text-[10px]"
                   aria-pressed={active}
                   title={tab.targetUrl}
                   onClick={() => {
@@ -1295,7 +1302,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "watch" ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2 text-[11px]"
+              className="h-7 shrink-0 rounded-b-none px-2 text-[10px]"
               aria-pressed={browserSurface === "watch"}
               onClick={() => setBrowserSurface("watch")}
               style={{
@@ -1308,7 +1315,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Watch Shelf
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" onClick={createDailyBrowserTab}>
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" title="New tab" onClick={createDailyBrowserTab}>
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
             <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
@@ -1318,7 +1325,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded px-2 py-1" aria-label="Browser bookmark medallions" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.92), rgba(4, 9, 9, 0.96))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded px-2 py-0.5" aria-label="Browser bookmark medallions" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.92), rgba(4, 9, 9, 0.96))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
             <div className="hidden items-center gap-1 sm:flex">
               <div className="h-px w-8" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line})` }} />
               <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" style={{ color: C.gold }} />
@@ -1330,14 +1337,14 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   aria-label={`Open bookmark ${pin.label}`}
                   title={pin.target}
-                  className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   onClick={() => void openDailyBrowserTarget(pin.target)}
                   style={{ background: browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.08)`, ["--tw-ring-color" as string]: C.accent }}
                 >
                   <img
                     src={faviconUrl(pin.domain, 64)}
                     alt=""
-                    className="h-5 w-5 rounded"
+                    className="h-4 w-4 rounded"
                     onError={(event) => {
                       event.currentTarget.style.display = "none";
                     }}
@@ -1348,7 +1355,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               ))}
             </div>
             <details className="relative justify-self-end" open={activeBrowserChromeMenu === "bookmarks"}>
-              <summary className="flex h-9 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Bookmarks" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("bookmarks"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.76)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+              <summary className="flex h-8 cursor-pointer list-none items-center gap-1 rounded px-2 text-[10px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Bookmarks" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("bookmarks"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.76)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                 <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" />
                 Bookmarks
               </summary>
@@ -1419,7 +1426,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </details>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
             <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <Button
                 type="button"
