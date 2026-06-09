@@ -134,8 +134,8 @@ describe("workbenchBrowserModel", () => {
     expect(idle.disabled).toBe(false);
     expect(pending.disabled).toBe(true);
     expect(empty.disabled).toBe(true);
-    expect(idle.ariaLabel).toBe("Prepare browser page open");
-    expect(idle.title).toBe("Check this page before opening it.");
+    expect(idle.ariaLabel).toBe("Open page in CereBro");
+    expect(idle.title).toBe("Open this page in CereBro.");
     expect(combined).not.toContain("stage");
     expect(combined).not.toContain("receipt");
   });
@@ -199,7 +199,7 @@ describe("workbenchBrowserModel", () => {
     expect(emptyShelf.canSave).toBe(false);
   });
 
-  it("reads tab state without creating or opening browser tabs", () => {
+  it("reads tab state and allows local tab creation without side effects", () => {
     const urlDraft = workbenchBrowserDraftModel("https://example.com/path");
     const emptyDraft = workbenchBrowserDraftModel("");
 
@@ -209,13 +209,13 @@ describe("workbenchBrowserModel", () => {
     expect(urlTabs.activeLabel).toBe("Tab 1");
     expect(urlTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab", "Page Draft"]);
     expect(urlTabs.visibleTabs.at(-1)?.state).toBe("draft");
-    expect(urlTabs.canCreateTab).toBe(false);
+    expect(urlTabs.canCreateTab).toBe(true);
     expect(urlTabs.tabSummary).toContain("New page is ready to open.");
     expect(urlTabs.noActionText).toBe("No tab is open.");
 
     expect(emptyTabs.visibleTabs.map((tab) => tab.label)).toEqual(["Tab 1", "New Tab"]);
     expect(emptyTabs.tabSummary).toBe("Tab 1 is the active page.");
-    expect(emptyTabs.canCreateTab).toBe(false);
+    expect(emptyTabs.canCreateTab).toBe(true);
   });
 
   it("finds real local browser history targets without pretending duplicate rows are navigation", () => {

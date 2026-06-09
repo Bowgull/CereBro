@@ -1112,6 +1112,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 setBrowserAddressDraft(event.target.value);
                 setPreparedApprovalId(null);
               }}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") return;
+                event.preventDefault();
+                void openDailyBrowserPage();
+              }}
               placeholder={browserShell.addressPlaceholder}
               aria-label="Browser address and search field"
               className="h-9 min-w-0 font-mono text-[12px]"

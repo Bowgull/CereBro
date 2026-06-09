@@ -217,10 +217,10 @@ export function workbenchBrowserPrimaryActionCopy(input: {
   return {
     label: input.isPreparing ? "Opening" : "Open",
     disabled: input.draftKind === "empty" || input.isPreparing,
-    ariaLabel: "Prepare browser page open",
-    title: "Check this page before opening it.",
-    pendingNotice: "Checking this page before it opens.",
-    failureNotice: "Browser open preparation failed before any page opened.",
+    ariaLabel: "Open page in CereBro",
+    title: "Open this page in CereBro.",
+    pendingNotice: "Opening page.",
+    failureNotice: "Page failed to open.",
   };
 }
 
@@ -307,7 +307,7 @@ export function workbenchBrowserTabStateModel(draft: WorkbenchBrowserDraft): Wor
   return {
     activeLabel: "Tab 1",
     visibleTabs,
-    canCreateTab: false,
+    canCreateTab: true,
     tabSummary:
       draft.kind === "empty"
         ? "Tab 1 is the active page."

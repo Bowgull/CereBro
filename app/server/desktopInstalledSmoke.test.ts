@@ -20,5 +20,7 @@ describe("installed desktop app QA script", () => {
     expect(scriptSource).toContain("Open page in CereBro");
     expect(scriptSource).toContain("Native page viewport");
     expect(scriptSource).toContain("New browser tab");
+    expect(scriptSource).toContain("pressEnterInInputByLabel");
+    expect(scriptSource).toContain("search.brave.com");
   });
 });

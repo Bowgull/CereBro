@@ -217,6 +217,22 @@ async function fillInputByLabel(client: CdpClient, label: string, value: string)
   }
 }
 
+async function pressEnterInInputByLabel(client: CdpClient, label: string) {
+  const result = (await evaluate(
+    client,
+    `(() => {
+      const input = document.querySelector(${JSON.stringify(`[aria-label="${label}"]`)});
+      if (!(input instanceof HTMLInputElement)) return { ok: false };
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true, cancelable: true }));
+      return { ok: true };
+    })()`,
+  )) as { ok?: boolean } | undefined;
+
+  if (!result?.ok) {
+    throw new Error(`Input "${label}" was not found for Enter.`);
+  }
+}
+
 function hasButtonLabelExpression(label: string) {
   return `Array.from(document.querySelectorAll("button,[role='button']")).some((element) => ((element.getAttribute("aria-label") || element.textContent || "").trim()).includes(${JSON.stringify(label)}))`;
 }
@@ -252,8 +268,8 @@ async function run() {
       await waitFor(client, "document.readyState === 'interactive' || document.readyState === 'complete'");
       await clickButtonByName(client, "Browser");
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
-      await fillInputByLabel(client, "Browser address and search field", "https://example.com");
-      await clickButtonByName(client, "Open page in CereBro");
+      await fillInputByLabel(client, "Browser address and search field", "example.com");
+      await pressEnterInInputByLabel(client, "Browser address and search field");
       await waitFor(client, "document.querySelector('[aria-label=\"Native page viewport\"]') instanceof HTMLElement", 20_000, "native page viewport");
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
@@ -268,6 +284,17 @@ async function run() {
         10_000,
         "new tab blank omnibox",
       );
+      await fillInputByLabel(client, "Browser address and search field", "cerebro browser smoke");
+      await clickButtonByName(client, "Open page in CereBro");
+      await waitFor(
+        client,
+        `(() => {
+          const input = document.querySelector('[aria-label="Browser address and search field"]');
+          return input instanceof HTMLInputElement && input.value.includes("search.brave.com");
+        })()`,
+        20_000,
+        "default search route",
+      );
 
       console.log(
         JSON.stringify(
@@ -277,7 +304,7 @@ async function run() {
             binaryPath,
             remoteDebuggingPort: port,
             pageUrl: target.url,
-            proof: "Installed /Applications/CereBro.app opened a native Browser page and created a new tab over DevTools Protocol.",
+            proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, created a tab, and routed a search query.",
           },
           null,
           2,
