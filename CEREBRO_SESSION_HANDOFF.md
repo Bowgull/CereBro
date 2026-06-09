@@ -38462,6 +38462,25 @@ Mockup fidelity: target used, screenshot path, matched elements, deviations, nex
 - Next fidelity gap: make the Browser chrome itself match the approved mockup,
   not only the layout proportions.
 
+Follow-up research note:
+
+- Add a dedicated CereBro/Codex verification harness research slice after the
+  current Browser chrome pass. The target is not random automation. It is a
+  small local safety layer that makes agents less likely to skip proof.
+- Research candidates: local `cerebro verify`, optional Git `pre-push` hook,
+  targeted changed-file tests, format check or controlled Prettier pass,
+  installed-app Browser smoke, Codex turn-ended notifications, Spock/security
+  gate checks before clone/install/run/download/browser work, and MCP/CLI
+  status for context recovery.
+- Do not start with a heavy pre-commit hook. Pre-commit is likely too noisy
+  while Browser UI is moving fast. Start with manual `cerebro verify`, then
+  promote to pre-push only when stable.
+- Open questions for research: which checks are cheap enough to run every time,
+  how to detect Electron/browser-impacting file changes, whether formatting
+  should be check-only or write mode, how to surface notifications without
+  spam, and how CereBro MCP should expose the current verification contract to
+  Codex, Claude, and future agents.
+
 Next-session starter prompt:
 
 ```text
