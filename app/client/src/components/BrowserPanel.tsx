@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -318,6 +318,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
+  const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
   const projects = trpc.projectIntelligence.overview.useQuery(undefined, {
     staleTime: 30_000,
@@ -641,6 +642,22 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     if (selectedBrowserProposalId == null) return;
     recordBrowserSandboxFrameReload.mutate({ proposalId: selectedBrowserProposalId });
   };
+  const syncNativeBrowserBounds = useCallback(async () => {
+    const element = nativeViewportRef.current;
+    const nativeBridge = window.cerebroNativeBrowser;
+    if (!element || !nativeBridge) return;
+    const rect = element.getBoundingClientRect();
+    const left = Math.max(0, rect.left);
+    const top = Math.max(0, rect.top);
+    const right = Math.min(window.innerWidth, rect.right);
+    const bottom = Math.min(window.innerHeight, rect.bottom);
+    await nativeBridge.setBounds({
+      x: left,
+      y: top,
+      width: Math.max(1, right - left),
+      height: Math.max(1, bottom - top),
+    });
+  }, []);
   const openDailyBrowserPage = async () => {
     if (browserDraft.kind === "empty" || browserDraft.targetUrl == null) {
       setBrowserNotice("Enter a site or search.");
@@ -659,7 +676,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     setPreparedApprovalId(null);
     setSandboxFrameTarget(targetUrl);
     setSandboxFrameProposalId(null);
-    setNativePageActive(false);
+    setNativePageActive(true);
     setDailyBrowserTabs((tabs) =>
       tabs.map((tab) =>
         tab.id === selectedDailyBrowserTabId
@@ -669,6 +686,9 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     );
 
     try {
+      window.requestAnimationFrame(() => {
+        void syncNativeBrowserBounds();
+      });
       const result = await nativeBridge.openPage({
         tabId: selectedDailyBrowserTabId,
         targetUrl,
@@ -695,6 +715,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       );
       if (result.currentUrl) setBrowserAddressDraft(result.currentUrl);
       await refreshSiteSettings();
+      await syncNativeBrowserBounds();
       setBrowserNotice("Page opened in CereBro.");
     } catch {
       setNativePageActive(false);
@@ -758,12 +779,17 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     }
     setSandboxFrameTarget(tab.targetUrl);
     try {
+      setNativePageActive(true);
+      window.requestAnimationFrame(() => {
+        void syncNativeBrowserBounds();
+      });
       const result = await window.cerebroNativeBrowser?.openPage({
         tabId: tab.id,
         targetUrl: tab.targetUrl,
         userInitiated: true,
       });
       setNativePageActive(Boolean(result?.ok));
+      await syncNativeBrowserBounds();
       await refreshSiteSettings();
       setBrowserNotice("Tab selected.");
     } catch {
@@ -889,6 +915,20 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       setBrowserNotice("Browser focus could not be read.");
     }
   }, []);
+
+  useEffect(() => {
+    if (!nativePageActive) return;
+    void syncNativeBrowserBounds();
+    const handleResize = () => {
+      void syncNativeBrowserBounds();
+    };
+    window.addEventListener("resize", handleResize);
+    const interval = window.setInterval(handleResize, 500);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.clearInterval(interval);
+    };
+  }, [nativePageActive, sandboxFrameTarget, browserSurface, syncNativeBrowserBounds]);
 
   useEffect(() => {
     return window.cerebroNativeBrowser?.onPageEvent((event) => {
@@ -1628,6 +1668,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                     </div>
                     {nativePageActive ? (
                       <div
+                        ref={nativeViewportRef}
                         aria-label="Native page viewport"
                         className="h-[clamp(320px,55dvh,640px)] w-full rounded-sm sm:h-[clamp(370px,58dvh,660px)]"
                         style={{ background: "rgba(2, 6, 6, 0.01)", border: "1px solid rgba(244, 239, 227, 0.08)" }}

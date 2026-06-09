@@ -1,5 +1,7 @@
 import { execFile, execFileSync, spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
 import { promisify } from "node:util";
 import WebSocket from "ws";
 
@@ -11,6 +13,7 @@ const binaryPath = `${appPath}/Contents/MacOS/CereBro`;
 const port = Number(process.env.CEREBRO_DESKTOP_QA_PORT ?? "9333");
 const closeExisting = process.env.CEREBRO_DESKTOP_QA_CLOSE_EXISTING === "1";
 const reopenExisting = process.env.CEREBRO_DESKTOP_QA_REOPEN_EXISTING !== "0";
+const screenshotPath = resolve(process.cwd(), "output/qa/cerebro-installed-browser-smoke.png");
 
 function sleep(ms: number) {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
@@ -95,6 +98,24 @@ async function waitForAppPageTarget(child: ChildProcessWithoutNullStreams) {
   }
 
   throw new Error("CereBro opened, but no app page target was visible over remote debugging");
+}
+
+async function waitForNativePageTarget(targetUrlPrefix: string, timeoutMs = 20_000) {
+  const targetsUrl = `http://127.0.0.1:${port}/json/list`;
+  const deadline = Date.now() + timeoutMs;
+  let latestTargets: DebugTarget[] = [];
+
+  while (Date.now() < deadline) {
+    const response = await fetch(targetsUrl);
+    if (response.ok) {
+      latestTargets = (await response.json()) as DebugTarget[];
+      const target = latestTargets.find((candidate) => candidate.type === "page" && candidate.url.startsWith(targetUrlPrefix));
+      if (target) return target;
+    }
+    await sleep(250);
+  }
+
+  throw new Error(`Native Browser page target did not load ${targetUrlPrefix}. Targets: ${JSON.stringify(latestTargets.map((target) => target.url))}`);
 }
 
 type CdpResponse = {
@@ -233,6 +254,14 @@ async function pressEnterInInputByLabel(client: CdpClient, label: string) {
   }
 }
 
+async function captureDesktopScreenshot() {
+  await mkdir(resolve(process.cwd(), "output/qa"), { recursive: true });
+  await execFileAsync("osascript", ["-e", `tell application "${appName}" to activate`]).catch(() => undefined);
+  await sleep(750);
+  await execFileAsync("screencapture", ["-x", screenshotPath]);
+  return screenshotPath;
+}
+
 function hasButtonLabelExpression(label: string) {
   return `Array.from(document.querySelectorAll("button,[role='button']")).some((element) => ((element.getAttribute("aria-label") || element.textContent || "").trim()).includes(${JSON.stringify(label)}))`;
 }
@@ -271,6 +300,38 @@ async function run() {
       await fillInputByLabel(client, "Browser address and search field", "example.com");
       await pressEnterInInputByLabel(client, "Browser address and search field");
       await waitFor(client, "document.querySelector('[aria-label=\"Native page viewport\"]') instanceof HTMLElement", 20_000, "native page viewport");
+      await waitForNativePageTarget("https://example.com");
+      const viewportBounds = await evaluate(
+        client,
+        `(() => {
+          const viewport = document.querySelector('[aria-label="Native page viewport"]');
+          if (!(viewport instanceof HTMLElement)) return null;
+          const rect = viewport.getBoundingClientRect();
+          const x = Math.max(0, rect.x);
+          const y = Math.max(0, rect.y);
+          const width = Math.max(1, Math.min(window.innerWidth, rect.right) - x);
+          const height = Math.max(1, Math.min(window.innerHeight, rect.bottom) - y);
+          return {
+            x,
+            y,
+            width,
+            height,
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight
+          };
+        })()`,
+      ) as { x: number; y: number; width: number; height: number; innerWidth: number; innerHeight: number } | null;
+      if (
+        !viewportBounds ||
+        viewportBounds.y < 320 ||
+        viewportBounds.x < 80 ||
+        viewportBounds.width > viewportBounds.innerWidth - 120 ||
+        viewportBounds.height > viewportBounds.innerHeight - viewportBounds.y
+      ) {
+        throw new Error(`Native Browser viewport is outside the CereBro shell: ${JSON.stringify(viewportBounds)}`);
+      }
+      await sleep(1_000);
+      const screenshot = await captureDesktopScreenshot();
       await waitFor(client, hasButtonLabelExpression("Allow popups here"), 10_000, "popup exception control");
       await waitFor(client, hasButtonLabelExpression("Turn blocking off for this site"), 10_000, "blocking exception control");
       await waitFor(client, hasButtonLabelExpression("VPN Settings"), 10_000, "VPN settings control");
@@ -304,6 +365,7 @@ async function run() {
             binaryPath,
             remoteDebuggingPort: port,
             pageUrl: target.url,
+            screenshot,
             proof: "Installed /Applications/CereBro.app opened a typed URL with Enter, created a tab, and routed a search query.",
           },
           null,

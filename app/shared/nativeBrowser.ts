@@ -3,6 +3,7 @@ export const nativeBrowserClosePageChannel = "cerebro:native-browser:close-page"
 export const nativeBrowserReloadPageChannel = "cerebro:native-browser:reload-page";
 export const nativeBrowserGoBackPageChannel = "cerebro:native-browser:go-back-page";
 export const nativeBrowserForwardPageChannel = "cerebro:native-browser:forward-page";
+export const nativeBrowserSetBoundsChannel = "cerebro:native-browser:set-bounds";
 export const nativeBrowserPageEventChannel = "cerebro:native-browser:page-event";
 export const nativeBrowserSiteSettingsChannel = "cerebro:native-browser:site-settings";
 export const nativeBrowserAllowPopupsHereChannel = "cerebro:native-browser:allow-popups-here";
@@ -42,6 +43,18 @@ export type NativeBrowserOpenResult = {
   blockedReason: NativeBrowserBlockedReason | null;
 };
 
+export type NativeBrowserBounds = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type NativeBrowserBoundsResult = {
+  ok: boolean;
+  bounds: NativeBrowserBounds;
+};
+
 export type NativeBrowserCloseResult = {
   ok: true;
   tabId: string;
@@ -74,6 +87,7 @@ export type NativeBrowserBridge = {
   reloadPage: () => Promise<NativeBrowserNavigationResult>;
   goBack: () => Promise<NativeBrowserNavigationResult>;
   goForward: () => Promise<NativeBrowserNavigationResult>;
+  setBounds: (bounds: NativeBrowserBounds) => Promise<NativeBrowserBoundsResult>;
   siteSettings: () => Promise<NativeBrowserSiteSettings>;
   allowPopupsHere: () => Promise<NativeBrowserSiteSettings>;
   setBlockingForSite: (request: NativeBrowserSetBlockingRequest) => Promise<NativeBrowserSiteSettings>;

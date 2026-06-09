@@ -19,6 +19,11 @@ describe("installed desktop app QA script", () => {
     expect(scriptSource).toContain("Browser address and search field");
     expect(scriptSource).toContain("Open page in CereBro");
     expect(scriptSource).toContain("Native page viewport");
+    expect(scriptSource).toContain("screencapture");
+    expect(scriptSource).toContain("cerebro-installed-browser-smoke.png");
+    expect(scriptSource).toContain("Native Browser viewport is outside the CereBro shell");
+    expect(scriptSource).toContain("waitForNativePageTarget");
+    expect(scriptSource).toContain("https://example.com");
     expect(scriptSource).toContain("New browser tab");
     expect(scriptSource).toContain("pressEnterInInputByLabel");
     expect(scriptSource).toContain("search.brave.com");

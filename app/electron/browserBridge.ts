@@ -6,15 +6,18 @@ import {
   nativeBrowserGoBackPageChannel,
   nativeBrowserOpenPageChannel,
   nativeBrowserReloadPageChannel,
+  nativeBrowserSetBoundsChannel,
   nativeBrowserSetBlockingForSiteChannel,
   nativeBrowserSiteSettingsChannel,
+  type NativeBrowserBounds,
+  type NativeBrowserBoundsResult,
   type NativeBrowserCloseResult,
   type NativeBrowserNavigationResult,
   type NativeBrowserOpenResult,
   type NativeBrowserSetBlockingRequest,
   type NativeBrowserSiteSettings,
 } from "../shared/nativeBrowser";
-import { nativeBrowserContentBounds, normalizeNativeBrowserOpenRequest } from "./browserRequest";
+import { normalizeNativeBrowserOpenRequest } from "./browserRequest";
 import { layoutNativeBrowserPageView, type NativeBrowserPageView } from "./browserViews";
 import {
   allowNativeBrowserPopupsForCurrentSite,
@@ -22,11 +25,6 @@ import {
   nativeBrowserSiteSettingsForPage,
   setNativeBrowserBlockingForCurrentSite,
 } from "./browserSiteSettings";
-
-function nativePageBounds(mainWindow: BrowserWindow): Rectangle {
-  const bounds = mainWindow.getContentBounds();
-  return nativeBrowserContentBounds(bounds);
-}
 
 function nativeNavigationResult(pageView: NativeBrowserPageView, ok = true): NativeBrowserNavigationResult {
   return {
@@ -37,7 +35,32 @@ function nativeNavigationResult(pageView: NativeBrowserPageView, ok = true): Nat
   };
 }
 
-export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pageView: NativeBrowserPageView) {
+function normalizeBounds(input: unknown): NativeBrowserBounds | null {
+  const bounds = input as Partial<NativeBrowserBounds> | null;
+  const x = Number(bounds?.x);
+  const y = Number(bounds?.y);
+  const width = Number(bounds?.width);
+  const height = Number(bounds?.height);
+  if (![x, y, width, height].every(Number.isFinite)) return null;
+  return {
+    x: Math.max(0, Math.round(x)),
+    y: Math.max(0, Math.round(y)),
+    width: Math.max(1, Math.round(width)),
+    height: Math.max(1, Math.round(height)),
+  };
+}
+
+export function installNativeBrowserCommandBridge(_mainWindow: BrowserWindow, pageView: NativeBrowserPageView) {
+  let lastBounds: Rectangle = { x: 0, y: 0, width: 1, height: 1 };
+
+  ipcMain.handle(nativeBrowserSetBoundsChannel, async (_event, input: unknown): Promise<NativeBrowserBoundsResult> => {
+    const bounds = normalizeBounds(input);
+    if (!bounds) return { ok: false, bounds: lastBounds };
+    lastBounds = bounds;
+    layoutNativeBrowserPageView(pageView, bounds);
+    return { ok: true, bounds };
+  });
+
   ipcMain.handle(nativeBrowserOpenPageChannel, async (_event, input: unknown): Promise<NativeBrowserOpenResult> => {
     const request = normalizeNativeBrowserOpenRequest(input);
     if (!request.ok) {
@@ -50,7 +73,7 @@ export function installNativeBrowserCommandBridge(mainWindow: BrowserWindow, pag
       };
     }
 
-    layoutNativeBrowserPageView(pageView, nativePageBounds(mainWindow));
+    layoutNativeBrowserPageView(pageView, lastBounds);
     applyNativeBrowserBlockingForUrl(pageView.view.webContents.session, request.targetUrl);
     pageView.view.setVisible(true);
     await pageView.load(request.targetUrl);
