@@ -7,13 +7,10 @@ import {
   nativeBrowserOpenPageChannel,
   nativeBrowserReloadPageChannel,
   nativeBrowserSetBoundsChannel,
-  nativeBrowserSetChromeOverlayChannel,
   nativeBrowserSetBlockingForSiteChannel,
   nativeBrowserSiteSettingsChannel,
   type NativeBrowserBounds,
   type NativeBrowserBoundsResult,
-  type NativeBrowserChromeOverlayRequest,
-  type NativeBrowserChromeOverlayResult,
   type NativeBrowserCloseResult,
   type NativeBrowserNavigationResult,
   type NativeBrowserOpenResult,
@@ -62,25 +59,6 @@ export function installNativeBrowserCommandBridge(_mainWindow: BrowserWindow, pa
     lastBounds = bounds;
     layoutNativeBrowserPageView(pageView, bounds);
     return { ok: true, bounds };
-  });
-
-  ipcMain.handle(nativeBrowserSetChromeOverlayChannel, async (_event, input: NativeBrowserChromeOverlayRequest): Promise<NativeBrowserChromeOverlayResult> => {
-    const active = Boolean(input?.active);
-    if (!active) {
-      pageView.view.setVisible(true);
-      layoutNativeBrowserPageView(pageView, lastBounds);
-      return { ok: true, active: false, screenshotDataUrl: null };
-    }
-
-    let screenshotDataUrl: string | null = null;
-    try {
-      const image = await pageView.view.webContents.capturePage();
-      screenshotDataUrl = image.isEmpty() ? null : image.toDataURL();
-    } catch {
-      screenshotDataUrl = null;
-    }
-    pageView.view.setVisible(false);
-    return { ok: true, active: true, screenshotDataUrl };
   });
 
   ipcMain.handle(nativeBrowserOpenPageChannel, async (_event, input: unknown): Promise<NativeBrowserOpenResult> => {
