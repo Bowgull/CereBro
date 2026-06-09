@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,7 +298,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const [dailyBrowserTabs, setDailyBrowserTabs] = useState<DailyBrowserTab[]>([
-    { id: "daily-tab-1", title: "Current Page", targetUrl: null, addressDraft: "" },
+    { id: "daily-tab-1", title: "New Tab", targetUrl: null, addressDraft: "" },
   ]);
   const [selectedDailyBrowserTabId, setSelectedDailyBrowserTabId] = useState("daily-tab-1");
   const [browserActionLabel, setBrowserActionLabel] = useState("Add to Watch");
@@ -539,8 +539,6 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const browserShell = workbenchBrowserShellModel();
   const browserDraft = workbenchBrowserDraftModel(browserAddressDraft);
   const browserTabState = workbenchBrowserTabStateModel(browserDraft);
-  const selectedDailyBrowserTab =
-    dailyBrowserTabs.find((tab) => tab.id === selectedDailyBrowserTabId) ?? dailyBrowserTabs[0];
   const browserAction =
     browserShell.actions.find((action) => action.label === browserActionLabel) ?? browserShell.actions[0];
   const browserActionPreview = workbenchBrowserActionPreviewModel(browserAction, browserDraft);
@@ -651,7 +649,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     const left = Math.max(0, rect.left);
     const top = Math.max(0, rect.top);
     const right = Math.min(window.innerWidth, rect.right);
-    const bottomLimit = Math.max(top + 1, window.innerHeight - 128);
+    const bottomLimit = Math.max(top + 1, window.innerHeight - 16);
     const bottom = Math.min(bottomLimit, rect.bottom);
     const height = Math.max(1, bottom - top);
     setNativeViewportHeight(Math.round(height));
@@ -799,6 +797,84 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
     } catch {
       setNativePageActive(false);
       setBrowserNotice("Tab selected.");
+    }
+  };
+  const closeDailyBrowserTab = async (tabId: string, event?: MouseEvent<HTMLButtonElement>) => {
+    event?.stopPropagation();
+    const closingIndex = dailyBrowserTabs.findIndex((tab) => tab.id === tabId);
+    if (closingIndex < 0) return;
+
+    const closingActive = selectedDailyBrowserTabId === tabId;
+    const remainingTabs = dailyBrowserTabs.filter((tab) => tab.id !== tabId);
+    if (!closingActive) {
+      setDailyBrowserTabs(remainingTabs);
+      setBrowserNotice("Tab closed.");
+      return;
+    }
+
+    const nextTab = remainingTabs[Math.max(0, closingIndex - 1)] ?? remainingTabs[0] ?? null;
+    if (!nextTab) {
+      const blankTab: DailyBrowserTab = {
+        id: `daily-tab-${Date.now()}`,
+        title: "New Tab",
+        targetUrl: null,
+        addressDraft: "",
+      };
+      setDailyBrowserTabs([blankTab]);
+      setSelectedDailyBrowserTabId(blankTab.id);
+      setSelectedBrowserProposalId(null);
+      setPreparedApprovalId(null);
+      setBrowserAddressDraft("");
+      setBrowserSurface("page");
+      setSandboxFrameTarget(null);
+      setSandboxFrameProposalId(null);
+      setNativePageActive(false);
+      try {
+        await window.cerebroNativeBrowser?.closePage();
+      } catch {
+        // The web fallback has no native page view to close.
+      }
+      setBrowserNotice("Tab closed.");
+      return;
+    }
+
+    setDailyBrowserTabs(remainingTabs);
+    setSelectedDailyBrowserTabId(nextTab.id);
+    setSelectedBrowserProposalId(null);
+    setPreparedApprovalId(null);
+    setBrowserAddressDraft(nextTab.addressDraft || nextTab.targetUrl || "");
+    setBrowserSurface("page");
+    setSandboxFrameProposalId(null);
+    if (!nextTab.targetUrl) {
+      setSandboxFrameTarget(null);
+      setNativePageActive(false);
+      try {
+        await window.cerebroNativeBrowser?.closePage();
+      } catch {
+        // The web fallback has no native page view to close.
+      }
+      setBrowserNotice("Tab closed.");
+      return;
+    }
+
+    setSandboxFrameTarget(nextTab.targetUrl);
+    try {
+      setNativePageActive(true);
+      window.requestAnimationFrame(() => {
+        void syncNativeBrowserBounds();
+      });
+      const result = await window.cerebroNativeBrowser?.openPage({
+        tabId: nextTab.id,
+        targetUrl: nextTab.targetUrl,
+        userInitiated: true,
+      });
+      setNativePageActive(Boolean(result?.ok));
+      await syncNativeBrowserBounds();
+      await refreshSiteSettings();
+      setBrowserNotice("Tab closed.");
+    } catch {
+      setNativePageActive(false);
+      setBrowserNotice("Tab closed.");
     }
   };
   const checkVpnStatus = async () => {
@@ -989,71 +1065,51 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
         boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}`,
       }}
     >
-      <header className="shrink-0 px-2.5 py-2" style={{ background: browserFrame.rail, borderBottom: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h2 className="text-[12px] font-bold uppercase tracking-widest">{browserShell.title}</h2>
-            <p className="mt-0.5 text-[10px]" style={{ color: C.textMuted }}>Search, browse, save, and ask Aang.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-1">
-            <Chip label={browserShell.status} tone={C.success} />
-            <Chip label={browserShell.safetyLabel} tone={C.accent} />
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={onClose}>Close</Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto p-2" aria-label="Browser workspace">
-        <div className="grid gap-1.5">
+      <main className="flex-1 overflow-hidden p-1.5" aria-label="Browser workspace">
+        <div className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-1.5">
           <div
             className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1.5"
             aria-label="Browser page tabs"
             style={{ background: "rgba(4, 8, 8, 0.96)", border: `1px solid ${browserFrame.lineSoft}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)" }}
           >
-            <Button
-              type="button"
-              size="sm"
-              variant={browserSurface === "page" && selectedBrowserProposalId == null ? "secondary" : "outline"}
-              className="h-6 shrink-0 rounded-b-none px-2 text-[10px]"
-              aria-pressed={browserSurface === "page" && selectedBrowserProposalId == null}
-              onClick={() => {
-                setBrowserSurface("page");
-                setSelectedBrowserProposalId(null);
-                setBrowserNotice(null);
-                if (selectedDailyBrowserTab) void selectDailyBrowserTab(selectedDailyBrowserTab);
-              }}
-              style={{
-                background: browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
-                border: `1px solid ${browserSurface === "page" && selectedBrowserProposalId == null ? browserFrame.line : browserFrame.lineSoft}`,
-                borderBottomColor: browserSurface === "page" && selectedBrowserProposalId == null ? C.gold : "transparent",
-                color: browserSurface === "page" && selectedBrowserProposalId == null ? C.textPrimary : C.textMuted,
-                boxShadow: browserFrame.bevel,
-              }}
-            >
-              Current Page
-            </Button>
             {dailyBrowserTabs.map((tab) => {
               const active = browserSurface === "page" && selectedBrowserProposalId == null && selectedDailyBrowserTabId === tab.id;
               return (
-                <Button
+                <div
                   key={tab.id}
-                  type="button"
-                  size="sm"
-                  variant={active ? "secondary" : "outline"}
-                  className="h-6 max-w-[150px] shrink-0 rounded-b-none px-2 text-[10px]"
-                  aria-pressed={active}
-                  title={tab.targetUrl ?? "New tab"}
-                  onClick={() => void selectDailyBrowserTab(tab)}
+                  className="flex max-w-[190px] shrink-0 overflow-hidden rounded-t"
                   style={{
                     background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                     border: `1px solid ${active ? browserFrame.line : browserFrame.lineSoft}`,
                     borderBottomColor: active ? C.gold : "transparent",
-                    color: active ? C.textPrimary : C.textMuted,
                     boxShadow: browserFrame.bevel,
                   }}
                 >
-                  <span className="truncate">{tab.title ?? browserOriginLabel(tab.targetUrl)}</span>
-                </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 min-w-0 flex-1 rounded-none px-2 text-[11px]"
+                    aria-pressed={active}
+                    title={tab.targetUrl ?? "New tab"}
+                    onClick={() => void selectDailyBrowserTab(tab)}
+                    style={{ color: active ? C.textPrimary : C.textMuted }}
+                  >
+                    <span className="truncate">{tab.title ?? browserOriginLabel(tab.targetUrl)}</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 shrink-0 rounded-none px-0"
+                    aria-label={`Close tab ${tab.title ?? browserOriginLabel(tab.targetUrl)}`}
+                    title="Close tab"
+                    onClick={(event) => void closeDailyBrowserTab(tab.id, event)}
+                    style={{ color: active ? C.gold : C.textMuted, borderLeft: `1px solid ${browserFrame.lineSoft}` }}
+                  >
+                    <SquareX size={12} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                </div>
               );
             })}
             {browserVisibleTabs.map((tab) => {
@@ -1093,7 +1149,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               type="button"
               size="sm"
               variant={browserSurface === "watch" ? "secondary" : "outline"}
-              className="h-6 shrink-0 rounded-b-none px-2 text-[10px]"
+              className="h-7 shrink-0 rounded-b-none px-2 text-[11px]"
               aria-pressed={browserSurface === "watch"}
               onClick={() => setBrowserSurface("watch")}
               style={{
@@ -1106,9 +1162,14 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             >
               Watch Shelf
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-6 w-6 shrink-0 px-0" aria-label="New browser tab" onClick={createDailyBrowserTab}>
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" onClick={createDailyBrowserTab}>
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
+            <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
+              <Chip label={browserShell.status} tone={C.success} />
+              <Chip label={browserShell.safetyLabel} tone={C.accent} />
+              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onClose}>Keep</Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1.5" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
@@ -1551,7 +1612,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
           {browserSurface === "page" ? (
             <section
-              className={hasOpenSandboxFrame ? "rounded p-1" : "rounded p-3 sm:p-4"}
+              className={hasOpenSandboxFrame ? "flex min-h-0 flex-col rounded p-1" : "overflow-y-auto rounded p-3 sm:p-4"}
               aria-label="Browser current page"
               style={{
                 background: browserFrame.page,
@@ -1561,13 +1622,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               }}
             >
               {hasOpenSandboxFrame ? (
-                <div className="relative overflow-hidden rounded" style={{ background: "rgba(2, 6, 6, 0.99)", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
+                <div className="relative flex min-h-0 flex-1 overflow-hidden rounded" style={{ background: "rgba(2, 6, 6, 0.99)", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
                     {nativePageActive ? (
                       <div
                         ref={nativeViewportRef}
                         aria-label="Native page viewport"
-                        className="w-full rounded-sm"
-                        style={{ height: nativeViewportHeight, background: "rgba(2, 6, 6, 0.01)" }}
+                        className="w-full flex-1 rounded-sm"
+                        style={{ height: "100%", minHeight: 0, background: "rgba(2, 6, 6, 0.01)" }}
                       />
                     ) : (
                       <>
@@ -1878,6 +1939,41 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
         </div>
       </main>
+      <form
+        className="grid shrink-0 grid-cols-[58px_minmax(0,1fr)_auto_auto] items-center gap-2 px-2 pb-2"
+        aria-label="Browser Aang command bar"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void openDailyBrowserPage();
+        }}
+      >
+        <button
+          type="button"
+          aria-label={browserHomeChatOpen ? "Close Aang chat" : "Open Aang chat"}
+          onClick={() => setBrowserHomeChatOpen((open) => !open)}
+          className="relative h-[58px] w-[58px] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
+        >
+          <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="absolute bottom-0 left-1/2 h-[68px] max-w-none -translate-x-1/2 object-contain" />
+        </button>
+        <Input
+          aria-label="Ask Aang or search from Browser"
+          value={browserAddressDraft}
+          onChange={(event) => {
+            setBrowserAddressDraft(event.target.value);
+            setBrowserNotice(null);
+          }}
+          placeholder="Ask Aang or search the web"
+          className="h-11 min-w-0 text-[13px]"
+          style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
+        />
+        <Button type="button" size="sm" variant="outline" className="h-11 w-11 px-0" aria-label="Attach image for Aang" disabled title="Not set up">
+          <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
+        </Button>
+        <Button type="submit" size="sm" variant="secondary" className="h-11 w-12 px-0" aria-label="Open page or search from Browser">
+          <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
+        </Button>
+      </form>
     </div>
   );
 }

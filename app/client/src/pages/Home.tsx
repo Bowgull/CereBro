@@ -211,6 +211,7 @@ export default function Home() {
   const [showClearGate, setShowClearGate] = useState(false);
   const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
   const isWorkbenchFocus = nav === "workbench";
+  const isBrowserRoute = nav === "browser";
 
   const selectedHero = useMemo(
     () => heroes.find((h) => h.id === selectedHeroId) || null,
@@ -295,6 +296,7 @@ export default function Home() {
       <EstablishingShot />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
+      {!isBrowserRoute && (
       <header
         className="relative flex items-center justify-between gap-1.5 overflow-hidden px-2.5 py-1.5 shrink-0 rounded"
         aria-label="Keep header"
@@ -424,6 +426,7 @@ export default function Home() {
           </DropdownMenu>
         </div>
       </header>
+      )}
 
       {/* ── Main: left rail + center + right context panel ─────────────── */}
       <div
@@ -507,8 +510,8 @@ export default function Home() {
         </nav>
 
         {/* Center workspace */}
-        <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: "rgba(6, 10, 10, 0.96)" }}>
-          <ZoneHeader nav={nav} onNavigate={setNav} />
+          <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: "rgba(6, 10, 10, 0.96)" }}>
+          {!isBrowserRoute && <ZoneHeader nav={nav} onNavigate={setNav} />}
 
           <div className="flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
             {nav === "home" && (
@@ -580,7 +583,7 @@ export default function Home() {
         </main>
 
         {/* Right context panel — quiet route context only */}
-        {isContextPanelOpen && (
+        {isContextPanelOpen && !isBrowserRoute && (
           <aside
             className={`${isWorkbenchFocus ? "w-[184px]" : "w-[250px]"} relative shrink-0 flex flex-col overflow-hidden transition-[width] duration-200`}
             aria-label="Context panel"
@@ -613,7 +616,7 @@ export default function Home() {
       </div>
 
       {/* ── Bottom command bar — "Ask Aang…" ──────────────────────────── */}
-      {routePreview.data && (
+      {routePreview.data && !isBrowserRoute && (
         <RuntimeRouteReceipt
           result={routePreview.data}
           onDismiss={() => {
@@ -650,6 +653,7 @@ export default function Home() {
           }}
         />
       )}
+      {!isBrowserRoute && (
       <CommandBar
         value={askInput}
         onChange={setAskInput}
@@ -665,6 +669,7 @@ export default function Home() {
           routePreview.mutate({ text, mode });
         }}
       />
+      )}
 
       {/* Skills Manager modal (kept as-is) */}
       {showSkillsManager && (

@@ -323,13 +323,14 @@ async function run() {
       ) as { x: number; y: number; width: number; height: number; innerWidth: number; innerHeight: number } | null;
       if (
         !viewportBounds ||
-        viewportBounds.y < 220 ||
-        viewportBounds.x < 80 ||
-        viewportBounds.width > viewportBounds.innerWidth - 88 ||
+        viewportBounds.y > 190 ||
+        viewportBounds.x < 70 ||
+        viewportBounds.width < viewportBounds.innerWidth - 180 ||
         viewportBounds.height > viewportBounds.innerHeight - viewportBounds.y ||
-        viewportBounds.y + viewportBounds.height > viewportBounds.innerHeight - 120
+        viewportBounds.height < viewportBounds.innerHeight * 0.58 ||
+        viewportBounds.y + viewportBounds.height > viewportBounds.innerHeight - 72
       ) {
-        throw new Error(`Native Browser viewport is outside the CereBro shell: ${JSON.stringify(viewportBounds)}`);
+        throw new Error(`Native Browser viewport is not using the Browser mockup canvas: ${JSON.stringify(viewportBounds)}`);
       }
       await sleep(1_000);
       const screenshot = await captureDesktopScreenshot();

@@ -38406,3 +38406,64 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_BUILD_QUEUE.md, CEREBRO_SESSION_HANDOFF.md, and Obsidian 10_Projects/CereBro/CereBro Finish Path.md first. Continue in CereBro Prime mode on branch codex/raven-airlock. Browser frame-failure fallback is complete. Next slice should be Browser manual open copy reduction unless the user redirects. Keep Browser as command browser. Keep Surfer/Cloak machinery in Basement. Keep Cortana Council as the active agent coordination surface. Do not add stealth, CAPTCHA bypass, login bypass, scraping abuse, proxy rotation, hidden automation, installs, paid services, credentials, fake browser success, or Raven paths.
 ```
+
+## 2026-06-08 2212 NDT - Browser Mockup Layout Recovery
+
+Completion:
+
+- Overall: Browser route layout recovered toward the approved Browser mockup.
+- Frontend visible loop: Browser is no longer nested under the global Keep
+  header, Zone header, right context panel, or global command bar.
+- Native browser loop: Electron page view now stretches to the Browser canvas
+  instead of staying capped at 360px.
+- Installed app: `/Applications/CereBro.app` rebuilt, installed, signed, and
+  smoke-tested.
+
+What changed:
+
+- Browser route now presents one primary Browser shell.
+- Daily tabs now have visible close buttons.
+- Removed the duplicate `Current Page` tab from the tab strip.
+- Added a Browser-local Aang command rail at the bottom of the Browser shell.
+- Moved the approved Aang browser dock asset into `app/client/public` so it
+  ships in the renderer build.
+- Updated installed desktop smoke assertions so QA fails if the native page view
+  falls back to the small old panel canvas.
+
+Files touched in this slice:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/scripts/desktopInstalledSmoke.ts`
+- `app/client/public/assets/aang/aang-chat-dock-waist-v1.png`
+- `app/client/public/assets/aang/aang-chat-dock-waist-source-v1.png`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk and
+  Electron icon warnings remain.
+- Reinstalled `/Applications/CereBro.app`.
+- `pnpm --dir app run test:desktop` passed against the installed app.
+- Screenshot proof:
+  `app/output/qa/cerebro-installed-browser-smoke.png`
+
+Mockup fidelity: target used, screenshot path, matched elements, deviations, next fidelity gap.
+
+- Target used: approved Browser loaded-page mockup,
+  `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`.
+- Screenshot path: `app/output/qa/cerebro-installed-browser-smoke.png`.
+- Matched elements: compact left Browser rail, top tab strip, one URL/search
+  bar, large contained page canvas, bottom Aang command rail, visible tab close.
+- Deviations: top browser chrome is still simpler than the mockup, pinned site
+  medallions are not yet in the loaded-page top rail, and the ornate outer
+  frame still needs a dedicated visual pass.
+- Next fidelity gap: make the Browser chrome itself match the approved mockup,
+  not only the layout proportions.
+
+Next-session starter prompt:
+
+```text
+Read AGENTS.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, and CEREBRO_SESSION_HANDOFF.md first. Continue on branch codex/daily-browser-finish. The Browser route is live in /Applications/CereBro.app and now owns the center shell instead of being nested under the global Keep chrome. Continue Browser mockup fidelity from the approved loaded-page target. Next gap is Browser chrome fidelity: ornate top rail, pinned site medallions, tighter mockup-matched controls, and no duplicate browser machinery. Keep the native Electron page view inside CereBro. Do not add fake browser, fake watch, fake login, stealth, CAPTCHA bypass, proxy rotation, paid services, or Raven paths.
+```
