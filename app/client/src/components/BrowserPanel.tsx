@@ -20,16 +20,18 @@ import {
 } from "@/lib/workbenchBrowserModel";
 
 const browserFrame = {
-  shell: "linear-gradient(145deg, rgba(7, 13, 12, 0.99), rgba(3, 7, 7, 0.99))",
-  rail: "linear-gradient(180deg, rgba(20, 35, 31, 0.98), rgba(6, 13, 12, 0.99))",
-  plaque: "linear-gradient(180deg, rgba(28, 45, 38, 0.96), rgba(8, 18, 16, 0.98))",
-  plaqueActive: "linear-gradient(180deg, rgba(42, 66, 55, 0.98), rgba(12, 30, 26, 0.98))",
+  shell: "radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.16), transparent 20%), linear-gradient(145deg, rgba(12, 15, 14, 0.99), rgba(3, 7, 7, 0.99))",
+  rail: "linear-gradient(180deg, rgba(35, 31, 25, 0.98), rgba(8, 15, 13, 0.99))",
+  plaque: "linear-gradient(180deg, rgba(42, 46, 38, 0.96), rgba(8, 18, 16, 0.98))",
+  plaqueActive: "linear-gradient(180deg, rgba(48, 71, 59, 0.98), rgba(12, 30, 26, 0.98))",
   address: "linear-gradient(180deg, rgba(2, 7, 7, 0.98), rgba(8, 15, 14, 0.98))",
-  page: "radial-gradient(circle at 50% 0%, rgba(77, 170, 154, 0.08), transparent 32%), linear-gradient(180deg, rgba(6, 10, 11, 0.99), rgba(2, 5, 6, 0.99))",
-  line: "rgba(198, 155, 85, 0.32)",
-  lineSoft: "rgba(77, 170, 154, 0.2)",
-  bevel: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.58)",
+  page: "radial-gradient(circle at 50% 0%, rgba(77, 170, 154, 0.08), transparent 32%), repeating-linear-gradient(0deg, rgba(244, 239, 227, 0.018) 0 1px, transparent 1px 4px), linear-gradient(180deg, rgba(6, 10, 11, 0.99), rgba(2, 5, 6, 0.99))",
+  line: "rgba(198, 155, 85, 0.42)",
+  lineSoft: "rgba(77, 170, 154, 0.24)",
+  bevel: "inset 0 1px 0 rgba(244, 239, 227, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.68)",
   shadow: "0 24px 70px rgba(0, 0, 0, 0.52)",
+  stone: "repeating-linear-gradient(90deg, rgba(244, 239, 227, 0.035) 0 1px, transparent 1px 36px), linear-gradient(180deg, rgba(33, 34, 30, 0.88), rgba(6, 11, 10, 0.96))",
+  greenPlaque: "linear-gradient(180deg, rgba(75, 117, 96, 0.92), rgba(13, 45, 37, 0.96))",
 };
 
 const browserHomePins = [
@@ -105,6 +107,28 @@ function Chip({ label, tone }: { label: string; tone: string }) {
     <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)", boxShadow: browserFrame.bevel }}>
       {label}
     </span>
+  );
+}
+
+function BrowserFrameAccent({ position }: { position: "top" | "bottom" }) {
+  const isTop = position === "top";
+  return (
+    <div
+      className={`pointer-events-none absolute left-1/2 z-10 hidden h-10 w-24 -translate-x-1/2 items-center justify-center border-x sm:flex ${isTop ? "-top-1 rounded-b" : "-bottom-1 rounded-t"}`}
+      aria-hidden="true"
+      style={{
+        background: browserFrame.greenPlaque,
+        borderColor: browserFrame.line,
+        boxShadow: `${browserFrame.bevel}, 0 0 22px rgba(77, 170, 154, 0.16)`,
+      }}
+    >
+      <span className="relative h-6 w-4">
+        <span className="absolute left-1/2 top-0 h-6 w-px -translate-x-1/2" style={{ background: "rgba(198, 155, 85, 0.84)" }} />
+        {[5, 11, 17].map((top) => (
+          <span key={top} className="absolute left-1/2 h-px w-4 -translate-x-1/2" style={{ top, background: "rgba(198, 155, 85, 0.74)" }} />
+        ))}
+      </span>
+    </div>
   );
 }
 
@@ -1201,23 +1225,31 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden rounded"
+      className="relative flex h-full flex-col overflow-hidden rounded"
       role="region"
       aria-label="Browser"
       style={{
         background: browserFrame.shell,
         border: `1px solid ${browserFrame.line}`,
         color: C.textPrimary,
-        boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}`,
+        boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}, inset 0 0 0 3px rgba(198, 155, 85, 0.08), inset 0 0 0 6px rgba(77, 170, 154, 0.05)`,
       }}
     >
+      <BrowserFrameAccent position="top" />
+      <BrowserFrameAccent position="bottom" />
+      <div className="pointer-events-none absolute inset-1 rounded opacity-80" aria-hidden="true" style={{ border: `1px solid ${browserFrame.lineSoft}` }} />
+      <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
+      <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <main className="flex-1 overflow-hidden p-1" aria-label="Browser workspace">
         <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1">
           <div
-            className="flex items-end gap-0.5 overflow-x-auto rounded-t px-1.5 pt-1"
+            className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-2"
             aria-label="Browser page tabs"
-            style={{ background: "rgba(4, 8, 8, 0.96)", border: `1px solid ${browserFrame.lineSoft}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05)" }}
+            style={{ background: browserFrame.stone, border: `1px solid ${browserFrame.line}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -14px 20px rgba(0, 0, 0, 0.2)" }}
           >
+            <div className="pointer-events-none absolute inset-x-2 top-1 h-px" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
             {dailyBrowserTabs.map((tab) => {
               const active = browserSurface === "page" && selectedBrowserProposalId == null && selectedDailyBrowserTabId === tab.id;
               return (
@@ -1325,26 +1357,27 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded px-2 py-0.5" aria-label="Browser bookmark medallions" style={{ background: "linear-gradient(180deg, rgba(10, 18, 16, 0.92), rgba(4, 9, 9, 0.96))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
+          <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 overflow-hidden rounded px-2 py-1" aria-label="Browser bookmark medallions" style={{ background: "radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.16), transparent 38%), linear-gradient(180deg, rgba(10, 18, 16, 0.94), rgba(4, 9, 9, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, inset 0 0 0 1px rgba(244, 239, 227, 0.025)` }}>
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-[52%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-35" aria-hidden="true" style={{ border: `1px solid ${browserFrame.line}`, boxShadow: `inset 0 0 0 1px ${browserFrame.lineSoft}` }} />
             <div className="hidden items-center gap-1 sm:flex">
               <div className="h-px w-8" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line})` }} />
               <Bookmark size={13} strokeWidth={1.8} aria-hidden="true" style={{ color: C.gold }} />
             </div>
-            <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+            <div className="relative flex min-w-0 items-center gap-1.5 overflow-x-auto">
               {browserMedallions.map((pin) => (
                 <button
                   key={pin.key}
                   type="button"
                   aria-label={`Open bookmark ${pin.label}`}
                   title={pin.target}
-                  className="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   onClick={() => void openDailyBrowserTarget(pin.target)}
-                  style={{ background: browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.08)`, ["--tw-ring-color" as string]: C.accent }}
+                  style={{ background: pin.saved ? browserFrame.greenPlaque : browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, inset 0 0 16px rgba(214, 158, 67, 0.12), 0 5px 12px rgba(0, 0, 0, 0.26)`, ["--tw-ring-color" as string]: C.accent }}
                 >
                   <img
                     src={faviconUrl(pin.domain, 64)}
                     alt=""
-                    className="h-4 w-4 rounded"
+                    className="h-[18px] w-[18px] rounded"
                     onError={(event) => {
                       event.currentTarget.style.display = "none";
                     }}
@@ -1426,7 +1459,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </details>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1" style={{ background: "rgba(6, 11, 11, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1" style={{ background: "linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
             <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <Button
                 type="button"
@@ -1880,17 +1913,18 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
           {browserSurface === "page" ? (
             <section
-              className={hasOpenSandboxFrame ? "flex min-h-0 flex-col rounded p-1" : "overflow-y-auto rounded p-3 sm:p-4"}
+              className={hasOpenSandboxFrame ? "relative flex min-h-0 flex-col overflow-hidden rounded p-1" : "relative overflow-y-auto rounded p-3 sm:p-4"}
               aria-label="Browser current page"
               style={{
                 background: browserFrame.page,
-                border: `1px solid ${browserFrame.lineSoft}`,
+                border: `1px solid ${browserFrame.line}`,
                 minHeight: hasOpenSandboxFrame ? 0 : "clamp(430px, 62dvh, 680px)",
-                boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.02)",
+                boxShadow: "inset 0 1px 28px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(244, 239, 227, 0.03), inset 0 0 0 4px rgba(198, 155, 85, 0.04)",
               }}
             >
+              <div className="pointer-events-none absolute left-1/2 top-0 h-28 w-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-35" aria-hidden="true" style={{ border: `1px solid ${browserFrame.line}`, boxShadow: `inset 0 0 0 1px ${browserFrame.lineSoft}` }} />
               {hasOpenSandboxFrame ? (
-                <div className="relative flex min-h-0 flex-1 overflow-hidden rounded" style={{ background: "rgba(2, 6, 6, 0.99)", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5)" }}>
+                <div className="relative flex min-h-0 flex-1 overflow-hidden rounded" style={{ background: "rgba(2, 6, 6, 0.99)", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 34px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(77, 170, 154, 0.08)" }}>
                     {nativePageActive ? (
                       <div
                         ref={nativeViewportRef}
