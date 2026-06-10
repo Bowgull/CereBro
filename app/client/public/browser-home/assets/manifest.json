@@ -1,0 +1,287 @@
+{
+  "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+  "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "rule": "Use these as component assets. Do not paste the full mockup as the UI.",
+  "assets": [
+    {
+      "name": "rail-full.png",
+      "box": {
+        "left": 0,
+        "top": 60,
+        "width": 145,
+        "height": 932
+      },
+      "role": "Full left rail texture and frame."
+    },
+    {
+      "name": "rail-keep.png",
+      "box": {
+        "left": 16,
+        "top": 70,
+        "width": 118,
+        "height": 185
+      },
+      "role": "Keep rail button asset."
+    },
+    {
+      "name": "rail-browser-active.png",
+      "box": {
+        "left": 16,
+        "top": 262,
+        "width": 118,
+        "height": 83
+      },
+      "role": "Active Browser rail button asset."
+    },
+    {
+      "name": "rail-workshop.png",
+      "box": {
+        "left": 17,
+        "top": 367,
+        "width": 116,
+        "height": 80
+      },
+      "role": "Workshop rail button asset."
+    },
+    {
+      "name": "rail-ledger.png",
+      "box": {
+        "left": 17,
+        "top": 467,
+        "width": 116,
+        "height": 80
+      },
+      "role": "Ledger rail button asset."
+    },
+    {
+      "name": "rail-basement.png",
+      "box": {
+        "left": 17,
+        "top": 565,
+        "width": 116,
+        "height": 91
+      },
+      "role": "Basement rail button asset."
+    },
+    {
+      "name": "top-title-tabs.png",
+      "box": {
+        "left": 0,
+        "top": 0,
+        "width": 1585,
+        "height": 61
+      },
+      "role": "Top title and tab strip frame."
+    },
+    {
+      "name": "top-url-row.png",
+      "box": {
+        "left": 145,
+        "top": 61,
+        "width": 1440,
+        "height": 65
+      },
+      "role": "URL/search row with action controls."
+    },
+    {
+      "name": "medallion-github.png",
+      "box": {
+        "left": 654,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned GitHub medallion."
+    },
+    {
+      "name": "medallion-obsidian.png",
+      "box": {
+        "left": 715,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Obsidian medallion."
+    },
+    {
+      "name": "medallion-youtube.png",
+      "box": {
+        "left": 779,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned YouTube medallion."
+    },
+    {
+      "name": "medallion-x.png",
+      "box": {
+        "left": 844,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned X medallion."
+    },
+    {
+      "name": "medallion-reddit.png",
+      "box": {
+        "left": 908,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Reddit medallion."
+    },
+    {
+      "name": "medallion-hn.png",
+      "box": {
+        "left": 971,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Hacker News medallion."
+    },
+    {
+      "name": "medallion-add.png",
+      "box": {
+        "left": 1035,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Add medallion."
+    },
+    {
+      "name": "bookmark-card-frame.png",
+      "box": {
+        "left": 230,
+        "top": 458,
+        "width": 180,
+        "height": 116
+      },
+      "role": "Bookmark card frame."
+    },
+    {
+      "name": "bookmark-card-github.png",
+      "box": {
+        "left": 230,
+        "top": 458,
+        "width": 180,
+        "height": 116
+      },
+      "role": "GitHub bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-obsidian.png",
+      "box": {
+        "left": 425,
+        "top": 458,
+        "width": 170,
+        "height": 116
+      },
+      "role": "Obsidian bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-youtube.png",
+      "box": {
+        "left": 609,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "role": "YouTube bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-x.png",
+      "box": {
+        "left": 775,
+        "top": 458,
+        "width": 147,
+        "height": 116
+      },
+      "role": "X bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-reddit.png",
+      "box": {
+        "left": 969,
+        "top": 458,
+        "width": 116,
+        "height": 116
+      },
+      "role": "Reddit bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-hn.png",
+      "box": {
+        "left": 1100,
+        "top": 458,
+        "width": 147,
+        "height": 116
+      },
+      "role": "Hacker News bookmark card asset."
+    },
+    {
+      "name": "bookmark-card-add.png",
+      "box": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "role": "Add bookmark card asset."
+    },
+    {
+      "name": "panel-continue.png",
+      "box": {
+        "left": 230,
+        "top": 604,
+        "width": 384,
+        "height": 224
+      },
+      "role": "Continue browsing panel frame."
+    },
+    {
+      "name": "panel-recent.png",
+      "box": {
+        "left": 636,
+        "top": 604,
+        "width": 392,
+        "height": 224
+      },
+      "role": "Recent panel frame."
+    },
+    {
+      "name": "panel-downloads.png",
+      "box": {
+        "left": 1051,
+        "top": 604,
+        "width": 368,
+        "height": 224
+      },
+      "role": "Downloads panel frame."
+    },
+    {
+      "name": "aang-dock.png",
+      "box": {
+        "left": 158,
+        "top": 846,
+        "width": 1397,
+        "height": 119
+      },
+      "role": "Bottom Aang dock frame."
+    },
+    {
+      "name": "aang-avatar-medallion.png",
+      "box": {
+        "left": 162,
+        "top": 849,
+        "width": 108,
+        "height": 108
+      },
+      "role": "Aang avatar medallion from dock."
+    }
+  ]
+}
