@@ -187,14 +187,20 @@ function originForApproval(input: {
   targetType: string | null;
   requestedByAgent: string | null;
 }) {
-  if (input.requestedByAgent === "hedwig") return "hedwig";
-  if (input.targetType === "browser_action_proposal" || input.actionType.includes("browser")) return "browser";
-  if (input.requestedByAgent === "surfer" || input.targetType === "surfer_browser_adapter_receipt" || input.actionType.startsWith("surfer_")) return "surfer";
-  if (input.targetType === "runtime_route_record" || input.actionType.startsWith("runtime_")) return "runtime";
-  if (input.targetType === "command_observation" || input.actionType.startsWith("terminal_")) return "terminal";
-  if (input.targetType === "source_event" || input.actionType.includes("source")) return "source";
-  if (input.targetType === "model_tool_capability" || input.targetType === "model_tool_ollama_status_check" || input.actionType.includes("model") || input.actionType.includes("ollama")) return "model_tools";
+  if (input.targetType === "browser_action_proposal") return "browser";
+  if (input.targetType === "runtime_route_record") return "runtime";
+  if (input.targetType === "surfer_browser_adapter_receipt") return "surfer";
+  if (input.targetType === "command_observation") return "terminal";
+  if (input.targetType === "source_event") return "source";
+  if (input.targetType === "model_tool_capability" || input.targetType === "model_tool_ollama_status_check") return "model_tools";
   if (input.targetType === "task" || input.targetType === "project") return "project_lab";
+  if (input.requestedByAgent === "hedwig") return "hedwig";
+  if (input.actionType.startsWith("runtime_")) return "runtime";
+  if (input.requestedByAgent === "surfer" || input.actionType.startsWith("surfer_")) return "surfer";
+  if (input.actionType.startsWith("terminal_")) return "terminal";
+  if (input.actionType.includes("source")) return "source";
+  if (input.actionType.includes("model") || input.actionType.includes("ollama")) return "model_tools";
+  if (input.targetType === "browser_action_proposal" || input.actionType.includes("browser")) return "browser";
   return "other";
 }
 
@@ -268,10 +274,20 @@ function applyOriginWhere(origin: (typeof originOptions)[number], where: string[
     where.push(`
       (a.requested_by_agent = 'surfer' OR a.target_type = 'surfer_browser_adapter_receipt' OR a.action_type LIKE 'surfer_%')
       AND COALESCE(a.target_type, '') != 'browser_action_proposal'
-      AND a.action_type NOT LIKE '%browser%'
     `);
   } else if (origin === "browser") {
-    where.push("(a.target_type = 'browser_action_proposal' OR (a.action_type LIKE '%browser%' AND a.action_type NOT LIKE 'surfer_%'))");
+    where.push(`
+      (
+        a.target_type = 'browser_action_proposal'
+        OR (
+          a.action_type LIKE '%browser%'
+          AND a.action_type NOT LIKE 'runtime_%'
+          AND a.action_type NOT LIKE 'surfer_%'
+          AND COALESCE(a.target_type, '') != 'runtime_route_record'
+          AND COALESCE(a.target_type, '') != 'surfer_browser_adapter_receipt'
+        )
+      )
+    `);
   } else if (origin === "model_tools") {
     where.push("(a.target_type IN ('model_tool_capability', 'model_tool_ollama_status_check') OR a.action_type LIKE '%model%' OR a.action_type LIKE '%ollama%')");
   } else if (origin === "project_lab") {

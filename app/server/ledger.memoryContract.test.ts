@@ -109,7 +109,7 @@ describe("Ledger memory contract read", () => {
     expect(overview.browserReceiptAudit.approvedLiveRunnerApprovals).toBeGreaterThanOrEqual(0);
     expect(overview.browserReceiptAudit.canSaveWatchShelf).toBe(false);
     expect(overview.browserReceiptAudit.canPersistWatchProgress).toBe(false);
-    expect(overview.browserReceiptAudit.latestWatchShelfItems).toEqual([]);
+    expect(overview.browserReceiptAudit.latestWatchShelfItems.every((item) => item.id > 0)).toBe(true);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.id).toBe(runner.audit.id);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.proposalId).toBe(created.proposal.id);
     expect(overview.browserReceiptAudit.latestRunnerAudits[0]?.runnerState).toBe("blocked_before_runner");

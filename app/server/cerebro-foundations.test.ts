@@ -3600,8 +3600,9 @@ describe("Terminal Lab planning", () => {
     });
     const portRows = await caller.terminalLab.observations({ limit: 10 });
     const portRow = portRows.find((item) => item.id === portPreview.observationId);
-    expect(portRow?.diagnosticDrafts.map((item) => item.command)).toContain("lsof -nP -iTCP:3002 -sTCP:LISTEN");
-    expect(portRow?.diagnosticDrafts.find((item) => item.command.includes("3002"))?.expectedSignal).toContain("PID");
+    expect(portRow?.diagnosticDrafts.map((item) => item.command)).toContain("rg -n \"3002\" .");
+    expect(portRow?.diagnosticDrafts.some((item) => item.command.startsWith("lsof "))).toBe(false);
+    expect(portRow?.diagnosticDrafts.find((item) => item.command.includes("3002"))?.expectedSignal).toContain("config");
   });
 });
 

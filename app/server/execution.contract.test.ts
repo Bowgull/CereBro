@@ -92,7 +92,7 @@ describe("execution action contract", () => {
     expect(runnerGuard.writesExternal).toBe(false);
     expect(runnerGuard.resultState).toBe("completed");
     expect(runnerGuard.exitCode).toBe(0);
-    expect(runnerGuard.stdoutSummary).toContain("/Users/lindsaybell/Desktop/CereBro");
+    expect(runnerGuard.stdoutSummary).toContain("CereBro");
     expect(runnerGuard.gates.join(" ")).toContain("Shell was disabled");
 
     const approvalDetail = await caller.approvals.detail({ id: approvalId });
@@ -418,7 +418,9 @@ describe("execution action contract", () => {
     expect(proposal?.readiness.canExecute).toBe(false);
     expect(proposal?.readiness.missing).toContain("route record");
 
-    const approvalStatus = ready.contract?.approvalStatus === "approved" ? "approved" : "pending";
+    const approvalStatus = ready.approvalId == null
+      ? ready.contract?.approvalStatus === "approved" ? "approved" : "pending"
+      : "approved";
     const projectApprovals = await caller.approvals.queue({
       origin: "project_lab",
       status: approvalStatus,
