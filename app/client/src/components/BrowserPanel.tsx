@@ -43,6 +43,31 @@ const browserHomePins = [
   { label: "Hacker News", target: "https://news.ycombinator.com", domain: "news.ycombinator.com", fallback: "HN" },
 ];
 
+const browserHomeAssetSource = { width: 1440, height: 992 };
+
+const browserHomeLayerAssets = [
+  { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
+  { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
+  { name: "medallion-github.png", left: 509, top: 145, width: 48, height: 48 },
+  { name: "medallion-obsidian.png", left: 570, top: 145, width: 48, height: 48 },
+  { name: "medallion-youtube.png", left: 634, top: 145, width: 48, height: 48 },
+  { name: "medallion-x.png", left: 699, top: 145, width: 48, height: 48 },
+  { name: "medallion-reddit.png", left: 763, top: 145, width: 48, height: 48 },
+  { name: "medallion-hn.png", left: 826, top: 145, width: 48, height: 48 },
+  { name: "medallion-add.png", left: 890, top: 145, width: 48, height: 48 },
+  { name: "bookmark-card-github.png", left: 85, top: 458, width: 180, height: 116 },
+  { name: "bookmark-card-obsidian.png", left: 280, top: 458, width: 170, height: 116 },
+  { name: "bookmark-card-youtube.png", left: 464, top: 458, width: 152, height: 116 },
+  { name: "bookmark-card-x.png", left: 630, top: 458, width: 147, height: 116 },
+  { name: "bookmark-card-reddit.png", left: 824, top: 458, width: 116, height: 116 },
+  { name: "bookmark-card-hn.png", left: 955, top: 458, width: 147, height: 116 },
+  { name: "bookmark-card-add.png", left: 1115, top: 458, width: 152, height: 116 },
+  { name: "panel-continue.png", left: 85, top: 604, width: 384, height: 224 },
+  { name: "panel-recent.png", left: 491, top: 604, width: 392, height: 224 },
+  { name: "panel-downloads.png", left: 906, top: 604, width: 368, height: 224 },
+  { name: "aang-dock.png", left: 13, top: 846, width: 1397, height: 119 },
+];
+
 function faviconUrl(domain: string, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`;
 }
@@ -494,6 +519,70 @@ function BrowserHomeClickMap({
           ["--tw-ring-color" as string]: C.accent,
         }}
       />
+    </div>
+  );
+}
+
+function BrowserHomeAssetStage() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 51.8% 47.4%, rgba(236, 184, 75, 0.34) 0 0.55%, rgba(236, 184, 75, 0.14) 0.55% 1.2%, transparent 1.25%), radial-gradient(circle at 54% 34%, rgba(214, 158, 67, 0.12), transparent 26%), radial-gradient(circle at 53% 36%, transparent 0 17%, rgba(198, 155, 85, 0.11) 17.2% 17.35%, transparent 17.5% 28%, rgba(198, 155, 85, 0.08) 28.2% 28.35%, transparent 28.5%), repeating-radial-gradient(circle at 53% 36%, rgba(198, 155, 85, 0.1) 0 1px, transparent 1px 42px), linear-gradient(180deg, rgba(9, 14, 13, 0.99), rgba(2, 5, 5, 1))",
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-[126px] bottom-[34px]"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(198, 155, 85, 0.18), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.16)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.025) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.018) 0 1px, transparent 1px 34px)",
+          border: `1px solid ${browserFrame.lineSoft}`,
+          boxShadow: "inset 0 0 80px rgba(0, 0, 0, 0.72), inset 0 0 0 2px rgba(198, 155, 85, 0.08)",
+        }}
+      />
+      <div className="absolute left-[5.9%] right-[2.2%] top-[42.9%] h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(198, 155, 85, 0.34), transparent)" }} />
+      <div className="absolute left-[51.8%] top-[20%] bottom-[13.4%] w-px" style={{ background: "linear-gradient(180deg, transparent, rgba(198, 155, 85, 0.28), transparent)" }} />
+      <div className="absolute left-[5.9%] top-[20%] right-[2.2%] bottom-[13.4%]" style={{ boxShadow: "inset 0 0 0 1px rgba(198, 155, 85, 0.18), inset 0 0 0 3px rgba(0, 0, 0, 0.32)" }} />
+      <div className="absolute left-1/2 top-[19.8%] h-11 w-11 -translate-x-1/2 rounded-full" style={{ border: "1px solid rgba(198, 155, 85, 0.55)", boxShadow: "0 0 26px rgba(214, 158, 67, 0.28), inset 0 0 18px rgba(214, 158, 67, 0.18)" }}>
+        <span className="absolute left-1/2 top-[-12px] h-[68px] w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, transparent, rgba(229, 180, 90, 0.9), transparent)" }} />
+        <span className="absolute left-[-12px] top-1/2 h-px w-[68px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(229, 180, 90, 0.9), transparent)" }} />
+        <span className="absolute inset-[11px] rotate-45" style={{ border: "1px solid rgba(229, 180, 90, 0.8)", boxShadow: "0 0 12px rgba(214, 158, 67, 0.4)" }} />
+      </div>
+      <div className="absolute left-1/2 top-[25.4%] -translate-x-1/2 text-center">
+        <div className="text-[32px] leading-none" style={{ color: "#f0ca84", fontFamily: "Georgia, serif", textShadow: "0 0 14px rgba(214, 158, 67, 0.28)" }}>
+          Where to next?
+        </div>
+        <div className="mt-1 text-[16px] leading-none" style={{ color: "#d2aa69", fontFamily: "Georgia, serif" }}>
+          Search the web or ask CereBro anything.
+        </div>
+      </div>
+      <div className="absolute left-1/2 top-[41.4%] h-16 w-16 -translate-x-1/2 rounded-full" style={{ background: "radial-gradient(circle, rgba(255, 206, 88, 0.95) 0 8%, rgba(238, 171, 47, 0.45) 8% 21%, transparent 22%)", filter: "drop-shadow(0 0 18px rgba(236, 184, 75, 0.55))" }}>
+        <span className="absolute left-1/2 top-[-9px] h-[82px] w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, transparent, rgba(255, 213, 113, 0.8), transparent)" }} />
+        <span className="absolute left-[-9px] top-1/2 h-px w-[82px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255, 213, 113, 0.8), transparent)" }} />
+      </div>
+      <div className="absolute left-[5.9%] top-[42.5%] text-[16px]" style={{ color: "#e6c284", fontFamily: "Georgia, serif" }}>
+        Pinned
+      </div>
+      <div className="absolute left-[78.2%] top-[42.4%] rounded px-3 py-1 text-[12px]" style={{ color: "#e6c284", border: "1px solid rgba(198, 155, 85, 0.42)", background: "rgba(7, 11, 10, 0.78)", fontFamily: "Georgia, serif" }}>
+        Edit Pinned
+      </div>
+      {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={{
+            left: `${(asset.left / browserHomeAssetSource.width) * 100}%`,
+            top: `${(asset.top / browserHomeAssetSource.height) * 100}%`,
+            width: `${(asset.width / browserHomeAssetSource.width) * 100}%`,
+            height: `${(asset.height / browserHomeAssetSource.height) * 100}%`,
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -1353,7 +1442,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       aria-label="Browser"
       style={{
         background: isBrowserHome
-          ? "url('/browser-home/browser-home-reference-panel.png') center / 100% 100% no-repeat"
+          ? "linear-gradient(180deg, rgba(9, 14, 13, 0.99), rgba(2, 5, 5, 1))"
           : browserFrame.shell,
         border: isBrowserHome ? "1px solid rgba(198, 155, 85, 0.18)" : `1px solid ${browserFrame.line}`,
         color: C.textPrimary,
@@ -1369,6 +1458,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       {!isBrowserHome && <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
       {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
       {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {isBrowserHome && <BrowserHomeAssetStage />}
       {isBrowserHome && (
         <BrowserHomeClickMap
           pins={browserMedallions}

@@ -74,6 +74,16 @@
       "role": "Top title and tab strip frame."
     },
     {
+      "name": "top-title-tabs-panel.png",
+      "box": {
+        "left": 145,
+        "top": 0,
+        "width": 1440,
+        "height": 61
+      },
+      "role": "Top title and tab strip frame in Browser panel coordinates."
+    },
+    {
       "name": "top-url-row.png",
       "box": {
         "left": 145,

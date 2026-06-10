@@ -19,8 +19,8 @@ Do not use a full-screen mockup image as the interactive UI. Browser controls, b
 ## First Replacement Targets
 
 - `rail-*.png` for real left rail buttons.
+- `top-title-tabs-panel.png` and `top-url-row.png` for the Browser Home top chrome.
 - `medallion-*.png` for real pinned medallion buttons.
 - `bookmark-card-*.png` for real bookmark card buttons.
 - `panel-*.png` for real Home panels.
 - `aang-dock.png` and `aang-avatar-medallion.png` for the bottom Aang dock.
-
