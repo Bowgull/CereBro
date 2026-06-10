@@ -10,6 +10,7 @@ import type { StartedCereBroServer } from "../server/_core/index";
 
 const electronDirname = __dirname;
 const appName = "CereBro";
+const mainWindowTitle = "CereBro Browser";
 const appIconPath = join(electronDirname, "../electron/assets/cerebro-app-icon.icns");
 const bundledStaticDir = join(electronDirname, "../dist/public");
 let embeddedServer: StartedCereBroServer | null = null;
@@ -132,7 +133,7 @@ async function createMainWindow() {
     minWidth: 1100,
     minHeight: 720,
     backgroundColor: "#020606",
-    title: appName,
+    title: mainWindowTitle,
     icon: appIconPath,
     webPreferences: {
       contextIsolation: true,
