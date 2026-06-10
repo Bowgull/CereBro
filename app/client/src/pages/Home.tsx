@@ -82,6 +82,14 @@ type NavId =
 
 type ZoneId = "keep" | "browser" | "workshop" | "ledger" | "basement";
 
+const browserRailAssets: Record<ZoneId, { src: string; top: string; height: string }> = {
+  keep: { src: "/browser-home/assets/rail-keep.png", top: "1.1%", height: "19.8%" },
+  browser: { src: "/browser-home/assets/rail-browser-active.png", top: "21.7%", height: "8.9%" },
+  workshop: { src: "/browser-home/assets/rail-workshop.png", top: "32.9%", height: "8.6%" },
+  ledger: { src: "/browser-home/assets/rail-ledger.png", top: "43.7%", height: "8.6%" },
+  basement: { src: "/browser-home/assets/rail-basement.png", top: "54.2%", height: "9.8%" },
+};
+
 interface ZoneNavItem {
   zone: ZoneId;
   id: NavId;
@@ -449,7 +457,7 @@ export default function Home() {
           aria-label="CereBro zones"
           style={{
             background: isBrowserRoute
-              ? "url('/browser-home/browser-home-reference-rail.png') center / 100% 100% no-repeat"
+              ? "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat"
               : "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
             borderRight: isBrowserRoute ? 0 : `1px solid ${mockupShell.marbleLine}`,
             boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
@@ -458,28 +466,22 @@ export default function Home() {
           {isBrowserRoute ? (
             <div className="absolute inset-0 z-10">
               {ZONE_NAV_ITEMS.map((item) => {
-                const railButtonBounds: Record<ZoneId, { top: string; height: string }> = {
-                  keep: { top: "7.2%", height: "20.6%" },
-                  browser: { top: "27.8%", height: "12.5%" },
-                  workshop: { top: "42.2%", height: "11.8%" },
-                  ledger: { top: "56.4%", height: "11.8%" },
-                  basement: { top: "70.7%", height: "13.2%" },
-                };
-                const bounds = railButtonBounds[item.zone];
+                const asset = browserRailAssets[item.zone];
                 return (
                   <button
-                    key={`browser-rail-hit-${item.zone}`}
+                    key={`browser-rail-button-${item.zone}`}
                     type="button"
                     onClick={() => setNav(item.id)}
                     aria-label={`Open ${item.label}`}
                     aria-current={NAV_TO_ZONE[nav] === item.zone ? "page" : undefined}
-                    className="absolute left-[9%] w-[82%] rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     style={{
-                      top: bounds.top,
-                      height: bounds.height,
+                      top: asset.top,
+                      height: asset.height,
                       ["--tw-ring-color" as string]: C.accent,
                     }}
                   >
+                    <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
                     <span className="sr-only">{item.label}</span>
                   </button>
                 );
