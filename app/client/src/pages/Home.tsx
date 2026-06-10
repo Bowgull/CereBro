@@ -448,9 +448,11 @@ export default function Home() {
           className="w-[68px] flex flex-col shrink-0 overflow-hidden"
           aria-label="CereBro zones"
           style={{
-            background: "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
-            borderRight: `1px solid ${mockupShell.marbleLine}`,
-            boxShadow: "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
+            background: isBrowserRoute
+              ? "url('/browser-home/browser-home-reference-rail.png') center / 100% 100% no-repeat"
+              : "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
+            borderRight: isBrowserRoute ? 0 : `1px solid ${mockupShell.marbleLine}`,
+            boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
           }}
         >
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
@@ -464,7 +466,7 @@ export default function Home() {
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center"
+                  className={`relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center ${isBrowserRoute ? "opacity-0" : ""}`}
                   variant="ghost"
                   style={{
                     background: isActive
@@ -501,7 +503,7 @@ export default function Home() {
             })}
           </div>
           <div
-            className="mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider"
+            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "opacity-0" : ""}`}
             style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
           >
             <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
