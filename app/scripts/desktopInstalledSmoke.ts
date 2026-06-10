@@ -1,6 +1,6 @@
 import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import WebSocket from "ws";
@@ -428,6 +428,22 @@ async function captureDesktopScreenshot(pid: number | undefined) {
   return screenshotPath;
 }
 
+type CdpScreenshotResult = {
+  data?: string;
+};
+
+async function captureCdpScreenshot(client: CdpClient) {
+  await mkdir(resolve(process.cwd(), "output/qa"), { recursive: true });
+  await client.send("Page.enable");
+  const result = (await client.send("Page.captureScreenshot", {
+    format: "png",
+    captureBeyondViewport: true,
+  })) as CdpScreenshotResult;
+  if (!result.data) throw new Error("CDP screenshot did not return image data");
+  await writeFile(screenshotPath, Buffer.from(result.data, "base64"));
+  return screenshotPath;
+}
+
 function hasButtonLabelExpression(label: string) {
   return `Array.from(document.querySelectorAll("button,[role='button']")).some((element) => ((element.getAttribute("aria-label") || element.textContent || "").trim()).includes(${JSON.stringify(label)}))`;
 }
@@ -499,7 +515,7 @@ async function run() {
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
       if (qaMode === "browser-home") {
         await waitFor(client, "document.querySelector('[aria-label=\"Browser Home medallions\"]') instanceof HTMLElement", 15_000, "browser home medallions");
-        const screenshot = await captureDesktopScreenshot(launchedPid ?? undefined);
+        const screenshot = await captureCdpScreenshot(client);
         console.log(
           JSON.stringify(
             {
@@ -509,7 +525,7 @@ async function run() {
               remoteDebuggingPort: port,
               pageUrl: target.url,
               screenshot,
-              proof: "Installed /Applications/CereBro.app opened the Browser Home surface and produced a screenshot for the locked 1:1 reference comparison.",
+              proof: "Installed /Applications/CereBro.app opened the Browser Home surface and produced a renderer screenshot for the locked 1:1 reference comparison.",
             },
             null,
             2,

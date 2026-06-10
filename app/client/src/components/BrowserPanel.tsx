@@ -1271,20 +1271,24 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       role="region"
       aria-label="Browser"
       style={{
-        background: browserFrame.shell,
-        border: `1px solid ${browserFrame.line}`,
+        background: isBrowserHome
+          ? "url('/browser-home/browser-home-reference-panel.png') center / 100% 100% no-repeat"
+          : browserFrame.shell,
+        border: isBrowserHome ? "1px solid rgba(198, 155, 85, 0.18)" : `1px solid ${browserFrame.line}`,
         color: C.textPrimary,
-        boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}, inset 0 0 0 3px rgba(198, 155, 85, 0.08), inset 0 0 0 6px rgba(77, 170, 154, 0.05)`,
+        boxShadow: isBrowserHome
+          ? browserFrame.shadow
+          : `${browserFrame.shadow}, ${browserFrame.bevel}, inset 0 0 0 3px rgba(198, 155, 85, 0.08), inset 0 0 0 6px rgba(77, 170, 154, 0.05)`,
       }}
     >
-      <BrowserFrameAccent position="top" />
-      <BrowserFrameAccent position="bottom" />
-      <div className="pointer-events-none absolute inset-1 rounded opacity-80" aria-hidden="true" style={{ border: `1px solid ${browserFrame.lineSoft}` }} />
-      <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <main className="flex-1 overflow-hidden p-1" aria-label="Browser workspace">
+      {!isBrowserHome && <BrowserFrameAccent position="top" />}
+      {!isBrowserHome && <BrowserFrameAccent position="bottom" />}
+      {!isBrowserHome && <div className="pointer-events-none absolute inset-1 rounded opacity-80" aria-hidden="true" style={{ border: `1px solid ${browserFrame.lineSoft}` }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      <main className={isBrowserHome ? "flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
         <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-1.5"
