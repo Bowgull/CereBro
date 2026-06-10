@@ -1356,30 +1356,41 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </Button>
               );
             })}
-            <Button
-              type="button"
-              size="sm"
-              variant={browserSurface === "watch" ? "secondary" : "outline"}
-              className="h-7 shrink-0 rounded-b-none px-2 text-[10px]"
-              aria-pressed={browserSurface === "watch"}
-              onClick={() => setBrowserSurface("watch")}
-              style={{
-                background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
-                border: `1px solid ${browserSurface === "watch" ? browserFrame.line : browserFrame.lineSoft}`,
-                borderBottomColor: browserSurface === "watch" ? C.gold : "transparent",
-                color: browserSurface === "watch" ? C.textPrimary : C.textMuted,
-                boxShadow: browserFrame.bevel,
-              }}
-            >
-              Watch Shelf
-            </Button>
+            {!isBrowserHome && (
+              <Button
+                type="button"
+                size="sm"
+                variant={browserSurface === "watch" ? "secondary" : "outline"}
+                className="h-7 shrink-0 rounded-b-none px-2 text-[10px]"
+                aria-pressed={browserSurface === "watch"}
+                onClick={() => setBrowserSurface("watch")}
+                style={{
+                  background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
+                  border: `1px solid ${browserSurface === "watch" ? browserFrame.line : browserFrame.lineSoft}`,
+                  borderBottomColor: browserSurface === "watch" ? C.gold : "transparent",
+                  color: browserSurface === "watch" ? C.textPrimary : C.textMuted,
+                  boxShadow: browserFrame.bevel,
+                }}
+              >
+                Watch Shelf
+              </Button>
+            )}
             <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" title="New tab" onClick={createDailyBrowserTab}>
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
             <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
-              <Chip label={browserShell.status} tone={C.success} />
-              <Chip label={browserShell.safetyLabel} tone={C.accent} />
-              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onClose}>Keep</Button>
+              {isBrowserHome ? (
+                <span className="flex h-7 items-center gap-1.5 rounded px-2.5 text-[11px] font-semibold" aria-label="Browser protection status" style={{ color: C.textSecondary, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)", boxShadow: browserFrame.bevel }}>
+                  <span className="h-2 w-2 rounded-full" aria-hidden="true" style={{ background: C.success, boxShadow: `0 0 10px ${C.success}88` }} />
+                  Protected
+                </span>
+              ) : (
+                <>
+                  <Chip label={browserShell.status} tone={C.success} />
+                  <Chip label={browserShell.safetyLabel} tone={C.accent} />
+                  <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onClose}>Keep</Button>
+                </>
+              )}
             </div>
           </div>
 
