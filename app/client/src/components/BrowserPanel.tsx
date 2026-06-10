@@ -363,7 +363,7 @@ function BrowserHomeStart({
             className="group relative h-[74px] w-[74px] rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
           >
-            <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="absolute bottom-1 left-1/2 h-[86px] max-w-none -translate-x-1/2 object-contain" />
+            <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-2 left-1/2 h-[62px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
             <span className="absolute -bottom-2 left-1/2 flex h-5 w-12 -translate-x-1/2 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, color: C.gold }}>
               {chatOpen ? <ChevronDown size={13} strokeWidth={2} /> : <ChevronUp size={13} strokeWidth={2} />}
             </span>
@@ -1695,7 +1695,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               {!isBrowserHome && (
               <details className="relative" open={activeBrowserChromeMenu === "aang"}>
                 <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Aang page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("aang"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.gold, background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
-                  <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="h-6 w-6 object-contain" />
+                  <img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-6 w-6 object-contain [image-rendering:pixelated]" />
                   <span className="hidden sm:inline">Aang</span>
                 </summary>
                 <div className="absolute right-0 top-full z-20 mt-1 w-72 rounded p-2 text-[10px] leading-snug" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}>
@@ -2314,7 +2314,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           className="relative h-[58px] w-[58px] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
         >
-          <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="absolute bottom-0 left-1/2 h-[68px] max-w-none -translate-x-1/2 object-contain" />
+          <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-1 left-1/2 h-[50px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
         </button>
         <Input
           aria-label="Ask Aang or search from Browser"

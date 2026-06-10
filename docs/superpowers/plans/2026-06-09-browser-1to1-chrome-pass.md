@@ -1,7 +1,10 @@
 # Browser 1:1 Chrome Pass
 
 Source mockup:
-`/Users/lindsaybell/Downloads/ChatGPT Image Jun 8, 2026, 04_43_52 PM.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-raven-airlock/mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+
+Note:
+The app icon image is not a Browser UI reference. Browser Home work must compare against the locked Browser Home mockup first.
 
 Installed QA screenshot:
 `/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-raven-airlock/app/output/qa/cerebro-installed-browser-smoke.png`
