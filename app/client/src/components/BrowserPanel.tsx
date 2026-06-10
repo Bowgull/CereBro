@@ -417,6 +417,87 @@ function BrowserHomeStart({
   );
 }
 
+function BrowserHomeClickMap({
+  pins,
+  onOpenTarget,
+  onAddBookmark,
+}: {
+  pins: { key: string; label: string; target: string; domain: string; saved: boolean }[];
+  onOpenTarget: (target: string) => void;
+  onAddBookmark: () => void;
+}) {
+  const medallionLefts = ["36.9%", "41.0%", "45.0%", "49.1%", "53.3%", "57.3%"];
+  const cardLefts = ["5.9%", "19.4%", "32.2%", "45.1%", "58.6%", "72.1%"];
+  const visiblePins = pins.slice(0, 6);
+
+  return (
+    <div className="absolute inset-0 z-20" aria-label="Browser Home click targets">
+      {visiblePins.map((pin, index) => (
+        <button
+          key={`browser-home-medallion-hit-${pin.key}`}
+          type="button"
+          aria-label={`Open bookmark ${pin.label}`}
+          title={pin.target}
+          onClick={() => onOpenTarget(pin.target)}
+          className="absolute -translate-x-1/2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          style={{
+            left: medallionLefts[index],
+            top: "13.6%",
+            width: "4.1%",
+            height: "6.1%",
+            ["--tw-ring-color" as string]: C.accent,
+          }}
+        />
+      ))}
+      {visiblePins.map((pin, index) => (
+        <button
+          key={`browser-home-card-hit-${pin.key}`}
+          type="button"
+          aria-label={`Open pinned bookmark ${pin.label}`}
+          title={pin.target}
+          onClick={() => onOpenTarget(pin.target)}
+          className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          style={{
+            left: cardLefts[index],
+            top: "46.4%",
+            width: "12.4%",
+            height: "11.4%",
+            ["--tw-ring-color" as string]: C.accent,
+          }}
+        />
+      ))}
+      <button
+        type="button"
+        aria-label="Add pinned bookmark"
+        title="Add pinned bookmark"
+        onClick={onAddBookmark}
+        className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        style={{
+          left: "85.5%",
+          top: "46.4%",
+          width: "12.4%",
+          height: "11.4%",
+          ["--tw-ring-color" as string]: C.accent,
+        }}
+      />
+      <button
+        type="button"
+        aria-label="Edit pinned bookmarks"
+        title="Edit pinned bookmarks"
+        onClick={onAddBookmark}
+        className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        style={{
+          left: "78.2%",
+          top: "42.6%",
+          width: "9.1%",
+          height: "3.4%",
+          ["--tw-ring-color" as string]: C.accent,
+        }}
+      />
+    </div>
+  );
+}
+
 export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
@@ -1288,6 +1369,13 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       {!isBrowserHome && <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
       {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
       {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {isBrowserHome && (
+        <BrowserHomeClickMap
+          pins={browserMedallions}
+          onOpenTarget={(target) => void openDailyBrowserTarget(target)}
+          onAddBookmark={saveCurrentBrowserBookmark}
+        />
+      )}
       <main className={isBrowserHome ? "flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
         <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div

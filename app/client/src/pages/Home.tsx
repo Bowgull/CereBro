@@ -445,7 +445,7 @@ export default function Home() {
 
         {/* Left rail — four-zone OS dock */}
         <nav
-          className="w-[68px] flex flex-col shrink-0 overflow-hidden"
+          className={`${isBrowserRoute ? "w-[122px]" : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden`}
           aria-label="CereBro zones"
           style={{
             background: isBrowserRoute
@@ -455,6 +455,37 @@ export default function Home() {
             boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
           }}
         >
+          {isBrowserRoute ? (
+            <div className="absolute inset-0 z-10">
+              {ZONE_NAV_ITEMS.map((item) => {
+                const railButtonBounds: Record<ZoneId, { top: string; height: string }> = {
+                  keep: { top: "7.2%", height: "20.6%" },
+                  browser: { top: "27.8%", height: "12.5%" },
+                  workshop: { top: "42.2%", height: "11.8%" },
+                  ledger: { top: "56.4%", height: "11.8%" },
+                  basement: { top: "70.7%", height: "13.2%" },
+                };
+                const bounds = railButtonBounds[item.zone];
+                return (
+                  <button
+                    key={`browser-rail-hit-${item.zone}`}
+                    type="button"
+                    onClick={() => setNav(item.id)}
+                    aria-label={`Open ${item.label}`}
+                    aria-current={NAV_TO_ZONE[nav] === item.zone ? "page" : undefined}
+                    className="absolute left-[9%] w-[82%] rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    style={{
+                      top: bounds.top,
+                      height: bounds.height,
+                      ["--tw-ring-color" as string]: C.accent,
+                    }}
+                  >
+                    <span className="sr-only">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
               const isActive = NAV_TO_ZONE[nav] === item.zone;
@@ -502,8 +533,9 @@ export default function Home() {
               );
             })}
           </div>
+          )}
           <div
-            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "opacity-0" : ""}`}
+            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "pointer-events-none opacity-0" : ""}`}
             style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
           >
             <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
