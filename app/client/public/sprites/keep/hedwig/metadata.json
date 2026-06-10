@@ -1,0 +1,29 @@
+{
+  "name": "Hedwig",
+  "role": "Messenger owl for Hedwig's V1 capture chamber",
+  "status": "pixellab-static-first-pass-scaled-for-keep",
+  "pixellabObjectId": "1cea6825-714b-44bf-adea-0c50cf902391",
+  "sourceFullSize": "rotations/south_pixellab_full.png",
+  "liveCanvas": {
+    "width": 92,
+    "height": 92,
+    "visibleTrimApprox": "30x41",
+    "notes": "PixelLab generated a full character-scale owl. The live rotations are repacked on the same transparent canvas with a smaller visible bird silhouette so Hedwig reads as an owl beside the other chamber agents."
+  },
+  "rotations": {
+    "south": "rotations/south.png",
+    "west": "rotations/west.png",
+    "east": "rotations/east.png",
+    "north": "rotations/north.png"
+  },
+  "animations": {
+    "idle-flutter": {
+      "pixellabAnimationId": "f9603efc-be76-4f97-aa2d-d31be88ef5f5",
+      "status": "completed-in-pixellab",
+      "frameCount": 9,
+      "localFramesStatus": "not-downloaded",
+      "notes": "get_object reports the animation as completed, but available MCP/download endpoints returned only the static PNG or 404 for guessed animation-frame downloads."
+    }
+  },
+  "notes": "South rotation is a scaled/repacked version of the PixelLab generated owl. East/west/north are temporary static derivatives until a full directional character/object pass is generated."
+}

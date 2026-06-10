@@ -1,6 +1,6 @@
 # CereBro — repo guide for Claude Code
 
-CereBro V1 is a local-first, harness-first personal AI operating layer with a pixel-art castle UI ("the Keep"). Backend will eventually be the harness (tasks, sessions, projects, memory pipeline, validation, output library, source library, model router, tool adapters). Frontend is the Keep — three floors of agent chambers.
+CereBro V1 is a cloud-backed, local-controlled, harness-first personal AI operating layer with a pixel-art castle UI ("the Keep"). Backend will eventually be the harness (tasks, sessions, projects, memory pipeline, validation, output library, source library, model router, tool adapters). Frontend is the Keep — three floors of agent chambers.
 
 ## Where things live
 
@@ -40,9 +40,34 @@ Harness DB is libSQL via `@libsql/client`. Default `file:./cerebro.db`. Set `CER
 These live in auto-memory but are repeated here so any Claude reading the repo cold sees them:
 
 - Castle aesthetic per `CereBro_Claude_Code_Repo_Starter_Pack/design-systems/cerebro-castle-ui.md`. Dark cinematic, premium, NOT fake-fantasy. Use `cerebroColors` tokens.
+- Root `DESIGN.md` is active. Read it before UI, motion, prototype, deck,
+  asset, or product-copy work.
+- External references such as Impeccable, Awesome DESIGN.md, Huashu Design, UI
+  UX Pro Max, React Bits, Uncodixfy, Google Stitch, v0.app, Ruflo, Docling,
+  Addy Osmani Agent Skills, AIDLC, Archon, Hermes, Multica, GenericAgent,
+  LobeHub, local-deep-research, ppt-master, Pixelle-Video, VoxCPM, Maigret,
+  CloakBrowser, Awesome Codex Skills, and AirLLM are source material. Use
+  `CEREBRO_EXTERNAL_REFERENCE_INTEGRATION_PLAN.md` and
+  `CereBro_Final_Implementation_Pack/LICENSE_REVIEW_MATRIX.md` before copying
+  code or assets.
+- Public GitHub is not automatic clearance. Do not clone, install, run scripts,
+  run Docker, start daemons, download model weights, authenticate services, or
+  paste code until license, security, maintenance, install surface, storage,
+  privacy, and product fit are recorded.
+- Uncodixfy, Google Stitch, and v0.app are important frontend inputs, but none
+  of them outrank `DESIGN.md`, the castle spec, the active renderer, or
+  screenshot proof. Use Uncodixfy as a standing anti-generic review rule. Use
+  Stitch for high-fidelity UI exploration. Use v0 for disposable React/Tailwind
+  component sketches. Rebuild the chosen result in CereBro's own system.
+- Docling is an important document-intelligence candidate. Prefer it for local
+  document conversion, source-library intake, layout-aware PDF parsing, table
+  extraction, transcript processing, and RAG-ready exports once the adapter
+  exists. Parsed output is evidence, not truth. Keep source path, page,
+  coordinate, checksum, parser version, extraction settings, and validation
+  status visible.
 - All 10 agents in V1: Cortana, Tony Stark, Gojo, Silver Surfer, C-3PO (Ground); Aang, Batman, Professor Oak, Spock (Upper Spires); Piccolo (Crypts).
 - Wizard-of-Oz: user is hidden. Cortana is the visible center. A glowing orb in Cortana's Hub represents the user. Cortana faces the orb to "speak to you." No "you" sprite anywhere.
-- Storage tiers: Turso (libSQL cloud, free) for brain. Google Drive synced folder for vault and outputs. Local for heavy regenerable stuff. All paths env-configurable.
+- Storage tiers: Turso (libSQL cloud, free) for brain. Cloud vector retrieval for RAG once selected. Google Drive synced folder for vault and outputs. Local for active workspace/cache only. All paths env-configurable.
 - No money. No paid services, no trials.
 - Notion: inbox/outbox pattern, free tier.
 - External Claude Code calls confirm individually. No auto-batching. Eats existing Claude Code session quota, not a separate API bill.

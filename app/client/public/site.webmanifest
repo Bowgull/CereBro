@@ -1,0 +1,23 @@
+{
+  "name": "CereBro",
+  "short_name": "CereBro",
+  "description": "CereBro local AI command center.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050b10",
+  "theme_color": "#050b10",
+  "icons": [
+    {
+      "src": "/icons/cerebro-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/cerebro-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

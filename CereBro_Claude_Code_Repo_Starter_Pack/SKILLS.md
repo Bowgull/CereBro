@@ -26,6 +26,7 @@ Located in `/skills`:
 - `remotion-video.skill.md`
 - `video-editing.skill.md`
 - `ui-motion.skill.md`
+- `aang-learning.skill.md`
 
 ## Skill Format
 
@@ -72,3 +73,11 @@ Every skill uses:
 Claude Code must load skills from files.
 
 Do not hardcode all skill behavior into agent prompts.
+
+## Design Rule
+
+Frontend and visual skills must read root `DESIGN.md` before UI work.
+
+Anti-slop review is required before delivering material UI, motion, prototype,
+deck, or product-copy changes. The review must name exact violations and patch
+them when possible.

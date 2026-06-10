@@ -1,11 +1,6 @@
-/**
- * PixelOffice Component
- * Renders the main pixel art office scene with animated agents
- * Design: Retro pixel punk with neon colors and grid-based layout
- */
-
-import React, { useEffect, useRef } from 'react';
-import { PixelEngine, AgentState } from '@/lib/pixelEngine';
+import React, { useEffect, useRef } from "react";
+import { cerebroColors as C } from "@/lib/keepConfig";
+import { PixelEngine, AgentState } from "@/lib/pixelEngine";
 
 interface PixelOfficeProps {
   agents: AgentState[];
@@ -33,8 +28,8 @@ export const PixelOffice: React.FC<PixelOfficeProps> = ({
     const engine = new PixelEngine(canvasRef.current, {
       width,
       height,
-      backgroundColor: '#0A0E27',
-      gridColor: '#00FF41',
+      backgroundColor: C.background,
+      gridColor: C.borderSoft,
       showGrid,
     });
 
@@ -104,15 +99,17 @@ export const PixelOffice: React.FC<PixelOfficeProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-background">
+    <div className="relative flex h-full w-full items-center justify-center" style={{ background: C.background }}>
       <canvas
         ref={canvasRef}
         width={width}
         height={height}
         onClick={handleCanvasClick}
-        className="pixel-panel cursor-pointer hover:shadow-lg transition-shadow"
+        className="cursor-pointer rounded-md transition-shadow"
         style={{
-          imageRendering: 'crisp-edges',
+          background: C.surface,
+          border: `1px solid ${C.borderSoft}`,
+          imageRendering: "crisp-edges",
         } as React.CSSProperties}
       />
     </div>

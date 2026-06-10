@@ -1,0 +1,26 @@
+export function taskQueueCopy() {
+  return {
+    title: "Work Queue",
+    subtitle: "Local tasks. Status changes stay visible in the audit trail.",
+    inputPlaceholder: "New task. Enter to add.",
+    runLinkAria: "Link new task to run",
+    runLinkPlaceholder: "Run link",
+    noRunLink: "No run link",
+    addTitleEmpty: "Enter a task title before adding a local task.",
+    addTitleReady: "Add a local task to the work queue.",
+    addAria: "Add local task",
+    allRunsLabel: "All Runs",
+    loadingText: "Reading work queue.",
+    emptyText: "No tasks yet. Add one above.",
+    showingLabel: (shown: number, total: number) => `Showing ${shown} of ${total}`,
+    focusedPinnedText: "Focused task pinned",
+    advanceTitle: (current: string, next: string) => `Move local task from ${current} to ${next}.`,
+    advanceAria: (title: string) => `Move task ${title} to next status`,
+    deleteTitle: "Open the hard-gate confirmation before deleting this local task.",
+    deleteDialogTitle: "Delete Task",
+    deleteDialogDescription: "This removes a local task from the work queue. Cancel keeps the record visible.",
+    cancelDeleteTitle: "Keep the task visible.",
+    confirmDeleteAria: "Confirm delete task",
+    confirmDeleteTitle: "Permanently delete this local task after confirmation.",
+  };
+}

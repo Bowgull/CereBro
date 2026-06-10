@@ -11,7 +11,7 @@ function Label({
     <LabelPrimitive.Root
       data-slot="label"
       className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        "flex items-center gap-2 text-[12px] font-medium leading-none text-[#F4EFE3] select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:text-[#7E8898] group-data-[disabled=true]:opacity-70 peer-disabled:cursor-not-allowed peer-disabled:text-[#7E8898] peer-disabled:opacity-70",
         className
       )}
       {...props}

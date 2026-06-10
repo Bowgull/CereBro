@@ -1,0 +1,268 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getCerebroDb } from "./cerebroDb";
+import { appRouter } from "./routers";
+
+function createCaller() {
+  return appRouter.createCaller({
+    user: null,
+    req: {} as never,
+    res: {} as never,
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+async function countRows(table: string) {
+  const db = await getCerebroDb();
+  const result = await db.execute(`SELECT COUNT(*) AS count FROM ${table}`);
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+describe("Surfer Source Library route", () => {
+  it("shows source and GitHub knowledge routes without durable writes", async () => {
+    const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+    await db.execute({
+      sql: `
+        INSERT INTO sources (
+          kind, uri, title, summary, source_type, trust_level,
+          freshness_status, sensitive_data_flag, trust_notes
+        )
+        VALUES
+          ('url', ?, 'Trusted source receipt fixture', 'Trusted source summary.', 'official_docs', 'official', 'fresh', 0, 'fixture'),
+          ('url', ?, 'Unknown source receipt fixture', 'Unknown source summary.', 'public_url', 'unknown', 'stale', 1, 'fixture')
+      `,
+      args: [
+        `https://docs.example.com/cerebro-source-${stamp}`,
+        `https://example.com/cerebro-source-${stamp}`,
+      ],
+    });
+    const before = {
+      artifacts: await countRows("artifacts"),
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+    };
+
+    const panel = await caller.surfer.panel();
+
+    expect(panel.sourceLibraryRoute.mode).toBe("read_only");
+    expect(panel.sourceLibraryRoute.sourceNoteLane).toBe("20_Knowledge");
+    expect(panel.sourceLibraryRoute.githubRepositorySourcePath).toBe(
+      "20_Knowledge/Sources/GitHub/<Project> Repository Source.md",
+    );
+    expect(panel.sourceLibraryRoute.githubProjectMapPath).toBe("00_Atlas/GitHub Project Map.md");
+    expect(panel.sourceLibraryRoute.githubSourcesIndexPath).toBe("20_Knowledge/Sources/GitHub/GitHub Sources.md");
+    expect(panel.sourceLibraryRoute.archiveRetrieval).toBe("archive_only");
+    expect(panel.sourceLibraryRoute.retrievalMetadataFields).toContain("canonical_status");
+    expect(panel.sourceLibraryRoute.writesExternalSystems).toBe(false);
+    expect(panel.sourceLibraryRoute.approvalGate).toContain("explicit approval");
+    expect(panel.sourceLibraryReceipt.mode).toBe("local_read");
+    expect(panel.sourceLibraryReceipt.totalSources).toBeGreaterThanOrEqual(2);
+    expect(panel.sourceLibraryReceipt.trustedSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.needsReview).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.needsScrub).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.staleSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceLibraryReceipt.routeDefaultsChanged).toBe(false);
+    expect(panel.sourceLibraryReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(panel.sourceLibraryReceipt.noActionTaken.join(" ")).toContain("No browser");
+    expect(panel.sourceResearchLoopAudit.mode).toBe("read_only");
+    expect(panel.sourceResearchLoopAudit.ownerAgent).toBe("surfer");
+    expect(panel.sourceResearchLoopAudit.totalSources).toBeGreaterThanOrEqual(2);
+    expect(panel.sourceResearchLoopAudit.trustedSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.reviewSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.staleSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.sensitiveSources).toBeGreaterThanOrEqual(1);
+    expect(panel.sourceResearchLoopAudit.canBrowseFromAudit).toBe(false);
+    expect(panel.sourceResearchLoopAudit.canWriteMemoryFromAudit).toBe(false);
+    expect(panel.sourceResearchLoopAudit.retrievalAutomationEnabled).toBe(false);
+    expect(panel.sourceResearchLoopAudit.gates.join(" ")).toContain("does not browse");
+    expect(panel.browserAdapterContract.mode).toBe("read_only_contract");
+    expect(panel.browserAdapterContract.ownerAgent).toBe("surfer");
+    expect(panel.browserAdapterContract.defaultAdapter).toBe("public_fetch");
+    expect(panel.browserAdapterContract.adapters.map((adapter) => adapter.id)).toContain("cloak_browser");
+    expect(panel.browserAdapterContract.adapters.find((adapter) => adapter.id === "cloak_browser")?.status).toBe("candidate");
+    expect(panel.browserAdapterContract.cloakPolicy.allowed.join(" ")).toContain("Approved public-source research");
+    expect(panel.browserAdapterContract.cloakPolicy.blocked.join(" ")).toContain("Auth bypass");
+    expect(panel.browserAdapterContract.canRunNow).toBe(false);
+    expect(panel.browserAdapterContract.installConfigured).toBe(false);
+    expect(panel.browserAdapterContract.opensBrowserFromContract).toBe(false);
+    expect(panel.browserAdapterContract.writesMemoryFromContract).toBe(false);
+    expect(panel.browserAdapterContract.writesExternalSystems).toBe(false);
+    expect(panel.browserAdapterContract.noActionTaken.join(" ")).toContain("No CloakBrowser install ran");
+
+    expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
+
+  it("returns a source save receipt after an approved public URL ingest", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      "<html><head><title>CereBro Source Fixture</title><meta name=\"description\" content=\"Fixture source description.\"></head><body>Fixture body.</body></html>",
+      {
+        status: 200,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      },
+    )));
+    const caller = createCaller();
+    const before = {
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+    };
+
+    const saved = await caller.surfer.ingestPublicUrl({
+      url: `https://docs.example.com/cerebro-save-receipt-${Date.now()}`,
+      approved: true,
+    });
+
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) throw new Error("Expected source ingest to succeed.");
+    expect(saved.sourceSaveReceipt.mode).toBe("approved_public_url_ingest");
+    expect(saved.sourceSaveReceipt.fetchRan).toBe(true);
+    expect(saved.sourceSaveReceipt.browserOpened).toBe(false);
+    expect(saved.sourceSaveReceipt.searchRan).toBe(false);
+    expect(saved.sourceSaveReceipt.writesExternalSystems).toBe(false);
+    expect(saved.sourceSaveReceipt.writesLocalRecords).toBe(true);
+    expect(saved.sourceSaveReceipt.sourceId).toBe(saved.source.id);
+    expect(saved.sourceSaveReceipt.artifactId).toBe(saved.artifactId);
+    expect(saved.sourceSaveReceipt.sourceEventId).toBe(saved.sourceEventId);
+    expect(saved.sourceSaveReceipt.routeDefaultsChanged).toBe(false);
+    expect(saved.sourceSaveReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(saved.sourceSaveReceipt.noActionTaken.join(" ")).toContain("No browser");
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
+
+  it("records local source validation without browsing or external writes", async () => {
+    const caller = createCaller();
+    const db = await getCerebroDb();
+    const stamp = Date.now();
+    const inserted = await db.execute({
+      sql: `
+        INSERT INTO sources (
+          kind, uri, title, summary, source_type, trust_level,
+          freshness_status, sensitive_data_flag, trust_notes
+        )
+        VALUES ('url', ?, 'Validation source fixture', 'Validation source summary.', 'public_url', 'unknown', 'fresh', 0, 'fixture')
+        RETURNING id
+      `,
+      args: [`https://example.com/cerebro-validation-${stamp}`],
+    });
+    const sourceId = Number(inserted.rows[0]?.id);
+    const before = {
+      artifacts: await countRows("artifacts"),
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+    };
+
+    const result = await caller.surfer.validateSource({
+      sourceId,
+      decision: "trusted",
+      reviewer: "oak",
+      note: "Official docs matched the claim in this fixture.",
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected source validation to succeed.");
+    expect(result.source.trustLevel).toBe("high");
+    expect(result.sourceValidationReceipt.mode).toBe("local_source_validation");
+    expect(result.sourceValidationReceipt.decision).toBe("trusted");
+    expect(result.sourceValidationReceipt.reviewer).toBe("oak");
+    expect(result.sourceValidationReceipt.browserOpened).toBe(false);
+    expect(result.sourceValidationReceipt.searchRan).toBe(false);
+    expect(result.sourceValidationReceipt.fetchRan).toBe(false);
+    expect(result.sourceValidationReceipt.writesExternalSystems).toBe(false);
+    expect(result.sourceValidationReceipt.writesMemory).toBe(false);
+    expect(result.sourceValidationReceipt.retrievalAutomationEnabled).toBe(false);
+    expect(result.sourceValidationReceipt.noActionTaken.join(" ")).toContain("No browser");
+
+    const panel = await caller.surfer.panel();
+    expect(panel.sourceResearchLoopAudit.validationEvents).toBeGreaterThanOrEqual(1);
+
+    const events = await db.execute({
+      sql: `
+        SELECT event_type, owner_agent, source_label, trust_level, trust_notes
+        FROM source_events
+        WHERE source_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+      `,
+      args: [sourceId],
+    });
+    expect(events.rows[0]?.event_type).toBe("source_validation");
+    expect(events.rows[0]?.owner_agent).toBe("oak");
+    expect(events.rows[0]?.source_label).toBe("oak_trusted");
+    expect(events.rows[0]?.trust_level).toBe("high");
+    expect(String(events.rows[0]?.trust_notes ?? "")).toContain("Official docs matched");
+    expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("approvals")).toBe(before.approvals);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
+
+  it("stages a Cloak browser adapter approval preview without installing or opening a browser", async () => {
+    const caller = createCaller();
+    const before = {
+      artifacts: await countRows("artifacts"),
+      approvals: await countRows("approvals"),
+      memoryEntries: await countRows("memory_entries"),
+      receipts: await countRows("surfer_browser_adapter_receipts"),
+    };
+
+    const result = await caller.surfer.createBrowserAdapterApprovalPreview({
+      adapter: "cloak_browser",
+      targetUrl: `https://docs.example.com/surfer-cloak-${Date.now()}`,
+      purpose: "Approved public-source research reliability test.",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.mode).toBe("surfer_browser_adapter_approval_preview");
+    expect(result.receipt.adapter).toBe("cloak_browser");
+    expect(result.receipt.ownerAgent).toBe("surfer");
+    expect(result.receipt.status).toBe("approval_preview");
+    expect(result.receipt.approvalId).toBe(result.approvalId);
+    expect(result.receipt.canRun).toBe(false);
+    expect(result.receipt.installConfigured).toBe(false);
+    expect(result.receipt.opensBrowser).toBe(false);
+    expect(result.receipt.writesMemory).toBe(false);
+    expect(result.receipt.writesExternalSystems).toBe(false);
+    expect(result.receipt.allowedActions.join(" ")).toContain("Approved public-source research");
+    expect(result.receipt.blockedActions.join(" ")).toContain("Auth bypass");
+    expect(result.noActionTaken.join(" ")).toContain("No CloakBrowser install ran");
+    expect(result.gates.join(" ")).toContain("does not install");
+
+    const panel = await caller.surfer.panel();
+    expect(panel.browserAdapterReceipts.map((receipt) => receipt.id)).toContain(result.receipt.id);
+    const approvals = await caller.approvals.queue({
+      origin: "surfer",
+      status: "pending",
+      query: "cloak",
+      limit: 10,
+    });
+    expect(approvals.summary.surfer).toBeGreaterThanOrEqual(1);
+    expect(approvals.items.find((item) => item.id === result.approvalId)?.origin).toBe("surfer");
+    expect(approvals.items.find((item) => item.id === result.approvalId)?.targetLabel ?? "").toContain("cloak_browser");
+
+    await caller.approvals.decide({
+      id: result.approvalId,
+      decision: "approved",
+      reason: "Adapter planning approved. Do not run until implementation exists.",
+    });
+    const approvedPanel = await caller.surfer.panel();
+    const approvedReceipt = approvedPanel.browserAdapterReceipts.find((receipt) => receipt.id === result.receipt.id);
+    expect(approvedReceipt?.approvalStatus).toBe("approved");
+    expect(approvedReceipt?.status).toBe("approved_adapter_not_built");
+    expect(approvedReceipt?.readinessLabel).toBe("Approved. Adapter implementation missing.");
+    expect(approvedReceipt?.implementationPresent).toBe(false);
+    expect(approvedReceipt?.canRun).toBe(false);
+    expect(approvedReceipt?.opensBrowser).toBe(false);
+    expect(approvedReceipt?.writesMemory).toBe(false);
+    expect(approvedReceipt?.writesExternalSystems).toBe(false);
+
+    expect(await countRows("surfer_browser_adapter_receipts")).toBe(before.receipts + 1);
+    expect(await countRows("approvals")).toBe(before.approvals + 1);
+    expect(await countRows("artifacts")).toBe(before.artifacts);
+    expect(await countRows("memory_entries")).toBe(before.memoryEntries);
+  });
+});

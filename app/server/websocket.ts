@@ -187,7 +187,7 @@ function createHero(agentId: number, transcriptPath: string, projectRealPath: st
     projectPath: projectRealPath,
     sessionFile: transcriptPath,
   };
-  // No random offset - frontend DungeonMap handles positioning via BFS pathfinding
+  // Keep deterministic positions so the live Keep scene can map activity.
   heroes.set(agentId, hero);
   persistHeroes();
   return hero;
@@ -196,7 +196,7 @@ function createHero(agentId: number, transcriptPath: string, projectRealPath: st
 function updateHeroState(hero: Hero, state: HeroState, room: DungeonRoom) {
   hero.state = state;
   hero.room = room;
-  // Use exact room center position - frontend DungeonMap handles smooth movement via BFS
+  // Use exact room centers for stable bridge payloads.
   hero.position = { ...ROOM_POSITIONS[room] };
 }
 

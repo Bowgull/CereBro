@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "updated": "2026-06-08",
+  "root": "mockups/compare",
+  "lockedPrimaryBrowserHomeReference": "approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+  "lockedPrimaryBrowserHomeSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "browserReferenceRule": "Browser UI 1:1 work must compare against the locked Browser Home mockup. The app icon is not a Browser UI reference.",
+  "items": [
+    {
+      "id": "browser-home-symmetric-rails-v1",
+      "label": "Browser Home",
+      "status": "approved",
+      "surface": "browser",
+      "state": "home",
+      "lockedPrimary": true,
+      "path": "approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "notes": "Locked exact 1:1 Browser Home reference. Do not substitute app icon, loaded-page mockup, or material inspiration for this target."
+    },
+    {
+      "id": "browser-home-chat-expanded-aang-launcher-v1",
+      "label": "Browser Home, chat open",
+      "status": "approved",
+      "surface": "browser",
+      "state": "home_chat_open",
+      "path": "approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png",
+      "notes": "Aang launcher model with chat input visible."
+    },
+    {
+      "id": "browser-home-chat-collapsed-aang-launcher-v2",
+      "label": "Browser Home, chat closed",
+      "status": "approved",
+      "surface": "browser",
+      "state": "home_chat_closed",
+      "path": "approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png",
+      "notes": "Chat bar hidden. Aang remains as launcher."
+    },
+    {
+      "id": "browser-loaded-website-v1",
+      "label": "Browser loaded page",
+      "status": "approved",
+      "surface": "browser",
+      "state": "loaded_page",
+      "path": "approved/browser-loaded/browser-loaded-website-target-v1.png",
+      "notes": "Loaded website target with real browsing as the main surface."
+    },
+    {
+      "id": "browser-home-bottom-handle-expanded-v1",
+      "label": "Rejected chat handle, open",
+      "status": "rejected",
+      "surface": "browser",
+      "state": "home_chat_open",
+      "path": "rejected/browser-home/browser-home-chat-expanded-bottom-handle-v1.png",
+      "notes": "Rejected. Bottom handle felt like a pasted badge."
+    },
+    {
+      "id": "browser-home-bottom-handle-collapsed-v1",
+      "label": "Rejected chat handle, closed",
+      "status": "rejected",
+      "surface": "browser",
+      "state": "home_chat_closed",
+      "path": "rejected/browser-home/browser-home-chat-collapsed-bottom-handle-v1.png",
+      "notes": "Rejected. Ghost input and bottom drawer did not work."
+    },
+    {
+      "id": "browser-home-standing-companion-v1",
+      "label": "Rejected standing Aang",
+      "status": "rejected",
+      "surface": "browser",
+      "state": "home_chat_open",
+      "path": "rejected/browser-home/browser-home-aang-standing-companion-target-v1.png",
+      "notes": "Rejected. Full-body Aang did not fit the dock."
+    }
+  ]
+}
