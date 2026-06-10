@@ -408,6 +408,22 @@ async function captureDesktopScreenshot(pid: number | undefined) {
     ]).catch(() => undefined);
   }
   await sleep(750);
+  if (typeof pid === "number") {
+    const bounds = await execFileAsync("osascript", [
+      "-e",
+      `tell application "System Events" to tell first process whose unix id is ${pid} to get {position, size} of front window`,
+    ]).catch(() => null);
+    const region = bounds?.stdout
+      .trim()
+      .split(",")
+      .map((part) => Number(part.trim()))
+      .filter((part) => Number.isFinite(part));
+
+    if (region?.length === 4 && region[2] > 0 && region[3] > 0) {
+      await execFileAsync("screencapture", ["-x", `-R${region.join(",")}`, screenshotPath]);
+      return screenshotPath;
+    }
+  }
   await execFileAsync("screencapture", ["-x", screenshotPath]);
   return screenshotPath;
 }
