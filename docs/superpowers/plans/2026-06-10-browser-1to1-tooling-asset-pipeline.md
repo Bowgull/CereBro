@@ -8,6 +8,12 @@
 
 **Tech Stack:** Electron, React, Tailwind, Playwright screenshots, local image diff tooling, existing Keep sprites, Piskel or LibreSprite for pixel edits, PixelLab only if already available without new spend.
 
+**Brand-system escalation:** This plan is now paired with
+`docs/superpowers/plans/2026-06-10-cerebro-brand-ai-outsourcing-plan.md`.
+The Browser mockup is the CereBro brand source, not a background image. If Codex
+cannot reliably translate it to real components, use free/no-card external
+visual AI to extract structure and assets before coding more UI by hand.
+
 ---
 
 ## Non-Negotiables
@@ -53,7 +59,7 @@
 - **GIMP or Krita:** free raster cleanup, crop, transparency, palette cleanup, and slicing.
 - **sharp:** already available in the app dependency tree. Use for deterministic local resizing, cropping, contact sheets, and PNG processing.
 
-### Disabled Unless Explicitly Approved
+### Allowed Only Through Free / No-Card Access Or User-Provided Output
 
 - Gemini Flash Image / Nano Banana.
 - OpenAI image generation or image editing APIs.
@@ -61,6 +67,10 @@
 - v0, Magic Patterns, or paid screenshot-to-code services.
 - Aseprite purchase.
 - Paid stock assets, paid icon packs, paid texture packs.
+
+These are blocked if they require money, a card, or a trial. They are allowed as
+manual research or asset helpers when the user provides free outputs or the tool
+has a free/no-card path.
 
 ### Research-Only Or Optional
 
