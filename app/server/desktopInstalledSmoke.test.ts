@@ -8,7 +8,13 @@ describe("installed desktop app QA script", () => {
   it("tests the installed app instead of the dev server", async () => {
     const packageSource = await readFile(resolve(appRoot, "package.json"), "utf8");
     const scriptSource = await readFile(resolve(appRoot, "scripts/desktopInstalledSmoke.ts"), "utf8");
+    const browserHomeDiffSource = await readFile(resolve(appRoot, "scripts/browserHomeVisualDiff.ts"), "utf8");
     const safetySource = await readFile(resolve(appRoot, "scripts/desktopAppSafety.ts"), "utf8");
+    const mockupManifest = JSON.parse(await readFile(resolve(appRoot, "../mockups/compare/manifest.json"), "utf8")) as {
+      lockedPrimaryBrowserHomeReference: string;
+      lockedPrimaryBrowserHomeSha256: string;
+    };
+    const browserHomeLockSource = await readFile(resolve(appRoot, "../mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md"), "utf8");
 
     expect(packageSource).toContain("\"test:desktop\": \"CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts\"");
     expect(packageSource).toContain("\"desktop:stage-smoke\": \"tsx scripts/desktopAppSafety.ts stage-smoke\"");
@@ -33,6 +39,11 @@ describe("installed desktop app QA script", () => {
     expect(scriptSource).toContain("New browser tab");
     expect(scriptSource).toContain("pressEnterInInputByLabel");
     expect(scriptSource).toContain("search.brave.com");
+    expect(mockupManifest.lockedPrimaryBrowserHomeReference).toBe("approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+    expect(mockupManifest.lockedPrimaryBrowserHomeSha256).toBe("f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c");
+    expect(browserHomeLockSource).toContain("Do not substitute the loaded-page mockup for Browser Home work.");
+    expect(browserHomeDiffSource).toContain("Browser Home visual diff cannot use the loaded-page mockup.");
+    expect(browserHomeDiffSource).not.toContain("approved/browser-loaded/browser-loaded-website-target-v1.png");
     expect(safetySource).toContain("/Applications/CereBro-QA.app");
     expect(safetySource).toContain("stage-smoke");
     expect(safetySource).toContain("validateAppBundle");
