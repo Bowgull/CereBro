@@ -1459,8 +1459,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </details>
           </div>
 
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 rounded-b px-1.5 py-1" style={{ background: "linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
-            <div className="flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+          <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 overflow-visible rounded-b px-2 py-1.5" style={{ background: "radial-gradient(circle at 50% -30%, rgba(198, 155, 85, 0.16), transparent 42%), linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
+            <div className="pointer-events-none absolute inset-x-3 top-1 h-px" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25" aria-hidden="true" style={{ border: `1px solid ${browserFrame.line}`, boxShadow: `inset 0 0 0 1px ${browserFrame.lineSoft}` }} />
+            <div className="relative flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <Button
                 type="button"
                 size="sm"
@@ -1498,37 +1500,57 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 <RotateCw size={13} strokeWidth={1.8} aria-hidden="true" />
               </Button>
             </div>
-            <Input
-              value={browserAddressDraft}
-              onChange={(event) => {
-                setBrowserAddressDraft(event.target.value);
-                setPreparedApprovalId(null);
-              }}
-              onKeyDown={(event) => {
-                if (event.key !== "Enter") return;
-                event.preventDefault();
-                void openDailyBrowserPage();
-              }}
-              placeholder={browserShell.addressPlaceholder}
-              aria-label="Browser address and search field"
-              className="h-9 min-w-0 font-mono text-[12px]"
-              title="Enter a site or search."
+            <div
+              className="relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center overflow-hidden rounded"
               style={{
-                background: browserFrame.address,
+                background: "linear-gradient(180deg, rgba(3, 8, 8, 0.98), rgba(11, 16, 14, 0.98))",
                 border: `1px solid ${browserFrame.line}`,
-                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.05), inset 0 -10px 20px rgba(0, 0, 0, 0.18)",
+                boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -14px 24px rgba(0, 0, 0, 0.2), 0 7px 16px rgba(0, 0, 0, 0.2)",
               }}
-            />
-            <div className="flex items-center justify-self-end gap-1">
+            >
+              <div className="flex h-9 w-9 items-center justify-center border-r" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: C.gold }}>
+                <span className="h-2 w-2 rounded-full" style={{ background: currentPageTarget ? C.success : C.gold, boxShadow: `0 0 12px ${(currentPageTarget ? C.success : C.gold)}77` }} />
+              </div>
+              <Input
+                value={browserAddressDraft}
+                onChange={(event) => {
+                  setBrowserAddressDraft(event.target.value);
+                  setPreparedApprovalId(null);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") return;
+                  event.preventDefault();
+                  void openDailyBrowserPage();
+                }}
+                placeholder={browserShell.addressPlaceholder}
+                aria-label="Browser address and search field"
+                className="h-9 min-w-0 border-0 bg-transparent font-mono text-[12px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                title="Enter a site or search."
+                style={{
+                  background: "transparent",
+                  boxShadow: "none",
+                }}
+              />
+              <div className="hidden h-9 items-center border-l px-2 text-[10px] font-semibold uppercase tracking-widest sm:flex" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: currentPageTarget ? C.success : C.textMuted }}>
+                {currentPageTarget ? "Live" : "Ready"}
+              </div>
+            </div>
+            <div className="relative flex items-center justify-self-end gap-1">
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                className="h-9 px-3"
+                className="h-9 px-3 text-[11px] font-semibold"
                 disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
                 title="Open this page in CereBro."
                 aria-label="Open page in CereBro"
                 onClick={() => void openDailyBrowserPage()}
+                style={{
+                  borderColor: browserFrame.line,
+                  background: browserFrame.greenPlaque,
+                  color: C.textPrimary,
+                  boxShadow: `${browserFrame.bevel}, inset 0 0 18px rgba(214, 158, 67, 0.08)`,
+                }}
               >
                 Open
               </Button>
