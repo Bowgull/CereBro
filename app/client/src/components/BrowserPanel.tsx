@@ -231,13 +231,37 @@ function BrowserHomeStart({
       <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
 
-      <div className="relative z-10 flex flex-col px-4 pb-28 pt-8 sm:px-6 sm:pt-10">
+      <div className="relative z-10 flex flex-col px-4 pb-28 pt-5 sm:px-6 sm:pt-6">
         <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-          <div className="mb-4 h-px w-64 max-w-full" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
+          <div className="mb-2 flex items-start justify-center gap-2" aria-label="Browser Home medallions">
+            {homePins.slice(0, 7).map((pin) => (
+              <button
+                key={`home-medallion-${pin.key}`}
+                type="button"
+                aria-label={`Open bookmark ${pin.label}`}
+                title={pin.target}
+                className="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                onClick={() => onOpenTarget(pin.target)}
+                style={{ background: pin.saved ? browserFrame.greenPlaque : browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, 0 8px 18px rgba(0,0,0,0.35)`, ["--tw-ring-color" as string]: C.accent }}
+              >
+                <img
+                  src={faviconUrl(pin.domain, 64)}
+                  alt=""
+                  className="h-[18px] w-[18px] rounded"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+                <span className="sr-only">{pin.label}</span>
+                <span className="pointer-events-none absolute -bottom-1 h-2 w-2 rounded-full" aria-hidden="true" style={{ background: pin.saved ? C.gold : C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 12px ${(pin.saved ? C.gold : C.success)}77` }} />
+              </button>
+            ))}
+          </div>
+          <div className="mb-2 h-px w-64 max-w-full" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
           <div className="flex h-12 w-12 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 0 30px rgba(214, 158, 67, 0.22)` }}>
             <ShieldCheck size={18} strokeWidth={1.7} style={{ color: C.gold }} />
           </div>
-          <div className="mt-4 text-[28px] font-semibold leading-none sm:text-[34px]" style={{ color: C.textPrimary, fontFamily: "Georgia, serif" }}>
+          <div className="mt-3 text-[28px] font-semibold leading-none sm:text-[34px]" style={{ color: C.textPrimary, fontFamily: "Georgia, serif" }}>
             Where to next?
           </div>
           <div className="mt-2 text-[13px]" style={{ color: C.textSecondary }}>
@@ -248,8 +272,9 @@ function BrowserHomeStart({
         <div className="mx-auto mt-10 grid w-full max-w-6xl gap-3">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[14px] font-semibold" style={{ color: C.gold }}>Pinned</div>
-            <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={onAddBookmark}>
-              Add Current
+            <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-[10px]" onClick={onAddBookmark}>
+              <Pencil size={11} strokeWidth={1.8} aria-hidden="true" />
+              Edit Pinned
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
@@ -399,7 +424,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [siteSettings, setSiteSettings] = useState<NativeBrowserSiteSettings | null>(null);
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
-  const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(false);
+  const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(true);
   const [browserAangDraft, setBrowserAangDraft] = useState("");
   const [localAangRoutePreview, setLocalAangRoutePreview] = useState<BrowserAangRoutePreview | null>(null);
   const [activeBrowserChromeMenu, setActiveBrowserChromeMenu] = useState<BrowserChromeMenu>(null);
@@ -709,6 +734,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const currentPageTarget = sandboxFrameTarget ?? selectedDailyBrowserTab?.targetUrl ?? browserDraft.targetUrl ?? null;
   const aangRoutePreview = browserAangRoutePreview.data ?? localAangRoutePreview;
   const nativeMenuReserveTop = activeBrowserChromeMenu && hasOpenSandboxFrame ? 320 : 0;
+  const isBrowserHome = browserSurface === "page" && !hasOpenSandboxFrame && browserDraft.kind === "empty";
   const toggleBrowserChromeMenu = (menu: Exclude<BrowserChromeMenu, null>) => {
     setActiveBrowserChromeMenu((active) => (active === menu ? null : menu));
   };
@@ -1243,7 +1269,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <main className="flex-1 overflow-hidden p-1" aria-label="Browser workspace">
-        <div className="grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1">
+        <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-2"
             aria-label="Browser page tabs"
@@ -1357,6 +1383,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           </div>
 
+          {!isBrowserHome && (
           <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 overflow-hidden rounded px-2 py-1" aria-label="Browser bookmark medallions" style={{ background: "radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.16), transparent 38%), linear-gradient(180deg, rgba(10, 18, 16, 0.94), rgba(4, 9, 9, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, inset 0 0 0 1px rgba(244, 239, 227, 0.025)` }}>
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-[52%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-35" aria-hidden="true" style={{ border: `1px solid ${browserFrame.line}`, boxShadow: `inset 0 0 0 1px ${browserFrame.lineSoft}` }} />
             <div className="hidden items-center gap-1 sm:flex">
@@ -1458,6 +1485,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               </div>
             </details>
           </div>
+          )}
 
           <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 overflow-visible rounded-b px-2 py-1.5" style={{ background: "radial-gradient(circle at 50% -30%, rgba(198, 155, 85, 0.16), transparent 42%), linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
             <div className="pointer-events-none absolute inset-x-3 top-1 h-px" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
@@ -1531,29 +1559,33 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   boxShadow: "none",
                 }}
               />
-              <div className="hidden h-9 items-center border-l px-2 text-[10px] font-semibold uppercase tracking-widest sm:flex" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: currentPageTarget ? C.success : C.textMuted }}>
-                {currentPageTarget ? "Live" : "Ready"}
-              </div>
+              {!isBrowserHome && (
+                <div className="hidden h-9 items-center border-l px-2 text-[10px] font-semibold uppercase tracking-widest sm:flex" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: currentPageTarget ? C.success : C.textMuted }}>
+                  {currentPageTarget ? "Live" : "Ready"}
+                </div>
+              )}
             </div>
             <div className="relative flex items-center justify-self-end gap-1">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="h-9 px-3 text-[11px] font-semibold"
-                disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
-                title="Open this page in CereBro."
-                aria-label="Open page in CereBro"
-                onClick={() => void openDailyBrowserPage()}
-                style={{
-                  borderColor: browserFrame.line,
-                  background: browserFrame.greenPlaque,
-                  color: C.textPrimary,
-                  boxShadow: `${browserFrame.bevel}, inset 0 0 18px rgba(214, 158, 67, 0.08)`,
-                }}
-              >
-                Open
-              </Button>
+              {!isBrowserHome && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-3 text-[11px] font-semibold"
+                  disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
+                  title="Open this page in CereBro."
+                  aria-label="Open page in CereBro"
+                  onClick={() => void openDailyBrowserPage()}
+                  style={{
+                    borderColor: browserFrame.line,
+                    background: browserFrame.greenPlaque,
+                    color: C.textPrimary,
+                    boxShadow: `${browserFrame.bevel}, inset 0 0 18px rgba(214, 158, 67, 0.08)`,
+                  }}
+                >
+                  Open
+                </Button>
+              )}
               <details className="relative" open={activeBrowserChromeMenu === "shield"}>
                 <summary
                   className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -1660,6 +1692,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   <span className="hidden text-[11px] font-semibold sm:inline">Downloads</span>
                 </Button>
               )}
+              {!isBrowserHome && (
               <details className="relative" open={activeBrowserChromeMenu === "aang"}>
                 <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Aang page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("aang"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.gold, background: "linear-gradient(180deg, rgba(9, 18, 16, 0.92), rgba(3, 8, 8, 0.96))", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="h-6 w-6 object-contain" />
@@ -1690,6 +1723,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   </div>
                 </div>
               </details>
+              )}
               <details className="relative" open={activeBrowserChromeMenu === "pageActions"}>
                 <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("pageActions"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />

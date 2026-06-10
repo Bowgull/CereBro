@@ -13,7 +13,13 @@ const port = Number(process.env.CEREBRO_DESKTOP_QA_PORT ?? "9333");
 const closeExisting = process.env.CEREBRO_DESKTOP_QA_CLOSE_EXISTING === "1";
 const reopenExisting = process.env.CEREBRO_DESKTOP_QA_REOPEN_EXISTING !== "0";
 const qaMode = process.env.CEREBRO_DESKTOP_QA_MODE ?? "browser";
-const screenshotPath = resolve(process.cwd(), "output/qa/cerebro-installed-browser-smoke.png");
+const screenshotFile =
+  qaMode === "browser-home"
+    ? "cerebro-installed-browser-home-smoke.png"
+    : qaMode === "launch"
+      ? "cerebro-installed-launch-smoke.png"
+      : "cerebro-installed-browser-smoke.png";
+const screenshotPath = resolve(process.cwd(), "output/qa", screenshotFile);
 
 function sleep(ms: number) {
   return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
@@ -475,6 +481,26 @@ async function run() {
       await waitFor(client, "document.readyState === 'interactive' || document.readyState === 'complete'");
       await clickButtonByName(client, "Browser");
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
+      if (qaMode === "browser-home") {
+        await waitFor(client, "document.querySelector('[aria-label=\"Browser Home medallions\"]') instanceof HTMLElement", 15_000, "browser home medallions");
+        const screenshot = await captureDesktopScreenshot(launchedPid ?? undefined);
+        console.log(
+          JSON.stringify(
+            {
+              ok: true,
+              appPath,
+              binaryPath,
+              remoteDebuggingPort: port,
+              pageUrl: target.url,
+              screenshot,
+              proof: "Installed /Applications/CereBro.app opened the Browser Home surface and produced a screenshot for the locked 1:1 reference comparison.",
+            },
+            null,
+            2,
+          ),
+        );
+        return;
+      }
       await fillInputByLabel(client, "Browser address and search field", "example.com");
       await pressEnterInInputByLabel(client, "Browser address and search field");
       await waitFor(client, "document.querySelector('[aria-label=\"Native page viewport\"]') instanceof HTMLElement", 20_000, "native page viewport");
