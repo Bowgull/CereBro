@@ -3,6 +3,19 @@ import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, Exte
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CereBroButton, CereBroCard, CereBroDock, CereBroMedallion, CereBroPanel } from "@/components/cerebro-ui";
+import {
+  browserHomeAddCardBox,
+  browserHomeAddMedallionBox,
+  browserHomeCardBoxes,
+  browserHomeDockBox,
+  browserHomeEditPinnedBox,
+  browserHomeLayerAssets,
+  browserHomeMedallionAssetByDomain,
+  browserHomeMedallionBoxes,
+  browserHomePanelBoxes,
+  browserHomeToPercentBox,
+  type BrowserHomeMeasuredBox,
+} from "@/lib/browserHomeBrandLayout";
 import { cerebroBrand as B } from "@/lib/cerebroTheme";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
@@ -44,46 +57,6 @@ const browserHomePins = [
   { label: "Reddit", target: "https://reddit.com", domain: "reddit.com", fallback: "R" },
   { label: "Hacker News", target: "https://news.ycombinator.com", domain: "news.ycombinator.com", fallback: "HN" },
 ];
-
-const browserHomeAssetSource = { width: 1440, height: 992 };
-
-const browserHomeLayerAssets = [
-  { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
-  { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
-];
-
-const browserHomeMedallionBoxes = [
-  { left: 509, top: 145, width: 48, height: 48 },
-  { left: 570, top: 145, width: 48, height: 48 },
-  { left: 634, top: 145, width: 48, height: 48 },
-  { left: 699, top: 145, width: 48, height: 48 },
-  { left: 763, top: 145, width: 48, height: 48 },
-  { left: 826, top: 145, width: 48, height: 48 },
-];
-
-const browserHomeCardBoxes = [
-  { left: 85, top: 458, width: 180, height: 116 },
-  { left: 280, top: 458, width: 170, height: 116 },
-  { left: 464, top: 458, width: 152, height: 116 },
-  { left: 630, top: 458, width: 147, height: 116 },
-  { left: 824, top: 458, width: 116, height: 116 },
-  { left: 955, top: 458, width: 147, height: 116 },
-];
-
-const browserHomePanelBoxes = [
-  { title: "Continue browsing", left: 85, top: 604, width: 384, height: 224 },
-  { title: "Recent", left: 491, top: 604, width: 392, height: 224 },
-  { title: "Downloads", left: 906, top: 604, width: 368, height: 224 },
-];
-
-const browserHomeMedallionAssetByDomain: Record<string, string> = {
-  "github.com": "/browser-home/assets/medallion-github.png",
-  "obsidian.md": "/browser-home/assets/medallion-obsidian.png",
-  "youtube.com": "/browser-home/assets/medallion-youtube.png",
-  "x.com": "/browser-home/assets/medallion-x.png",
-  "reddit.com": "/browser-home/assets/medallion-reddit.png",
-  "news.ycombinator.com": "/browser-home/assets/medallion-hn.png",
-};
 
 function faviconUrl(domain: string, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`;
@@ -459,87 +432,6 @@ function BrowserHomeStart({
   );
 }
 
-function BrowserHomeClickMap({
-  pins,
-  onOpenTarget,
-  onAddBookmark,
-}: {
-  pins: { key: string; label: string; target: string; domain: string; saved: boolean }[];
-  onOpenTarget: (target: string) => void;
-  onAddBookmark: () => void;
-}) {
-  const medallionLefts = ["36.9%", "41.0%", "45.0%", "49.1%", "53.3%", "57.3%"];
-  const cardLefts = ["5.9%", "19.4%", "32.2%", "45.1%", "58.6%", "72.1%"];
-  const visiblePins = pins.slice(0, 6);
-
-  return (
-    <div className="absolute inset-0 z-20" aria-label="Browser Home click targets">
-      {visiblePins.map((pin, index) => (
-        <button
-          key={`browser-home-medallion-hit-${pin.key}`}
-          type="button"
-          aria-label={`Open bookmark ${pin.label}`}
-          title={pin.target}
-          onClick={() => onOpenTarget(pin.target)}
-          className="absolute -translate-x-1/2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          style={{
-            left: medallionLefts[index],
-            top: "13.6%",
-            width: "4.1%",
-            height: "6.1%",
-            ["--tw-ring-color" as string]: C.accent,
-          }}
-        />
-      ))}
-      {visiblePins.map((pin, index) => (
-        <button
-          key={`browser-home-card-hit-${pin.key}`}
-          type="button"
-          aria-label={`Open pinned bookmark ${pin.label}`}
-          title={pin.target}
-          onClick={() => onOpenTarget(pin.target)}
-          className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          style={{
-            left: cardLefts[index],
-            top: "46.4%",
-            width: "12.4%",
-            height: "11.4%",
-            ["--tw-ring-color" as string]: C.accent,
-          }}
-        />
-      ))}
-      <button
-        type="button"
-        aria-label="Add pinned bookmark"
-        title="Add pinned bookmark"
-        onClick={onAddBookmark}
-        className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-        style={{
-          left: "85.5%",
-          top: "46.4%",
-          width: "12.4%",
-          height: "11.4%",
-          ["--tw-ring-color" as string]: C.accent,
-        }}
-      />
-      <button
-        type="button"
-        aria-label="Edit pinned bookmarks"
-        title="Edit pinned bookmarks"
-        onClick={onAddBookmark}
-        className="absolute rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-        style={{
-          left: "78.2%",
-          top: "42.6%",
-          width: "9.1%",
-          height: "3.4%",
-          ["--tw-ring-color" as string]: C.accent,
-        }}
-      />
-    </div>
-  );
-}
-
 function BrowserHomeAssetStage() {
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
@@ -589,26 +481,15 @@ function BrowserHomeAssetStage() {
           alt=""
           draggable={false}
           className="absolute select-none"
-          style={{
-            left: `${(asset.left / browserHomeAssetSource.width) * 100}%`,
-            top: `${(asset.top / browserHomeAssetSource.height) * 100}%`,
-            width: `${(asset.width / browserHomeAssetSource.width) * 100}%`,
-            height: `${(asset.height / browserHomeAssetSource.height) * 100}%`,
-          }}
+          style={browserHomeToPercentBox(asset)}
         />
       ))}
     </div>
   );
 }
 
-function browserHomeBoxStyle(box: { left: number; top: number; width: number; height: number }) {
-  return {
-    position: "absolute" as const,
-    left: `${(box.left / browserHomeAssetSource.width) * 100}%`,
-    top: `${(box.top / browserHomeAssetSource.height) * 100}%`,
-    width: `${(box.width / browserHomeAssetSource.width) * 100}%`,
-    height: `${(box.height / browserHomeAssetSource.height) * 100}%`,
-  };
+function browserHomeBoxStyle(box: BrowserHomeMeasuredBox) {
+  return browserHomeToPercentBox(box);
 }
 
 function BrowserHomePrimitiveOverlay({
@@ -677,7 +558,7 @@ function BrowserHomePrimitiveOverlay({
         imageSrc="/browser-home/assets/medallion-add.png"
         onClick={onAddBookmark}
         className="absolute"
-        style={browserHomeBoxStyle({ left: 890, top: 145, width: 48, height: 48 })}
+        style={browserHomeBoxStyle(browserHomeAddMedallionBox)}
       />
 
       {visiblePins.map((pin, index) => {
@@ -703,7 +584,7 @@ function BrowserHomePrimitiveOverlay({
         icon={<Plus size={28} strokeWidth={1.6} aria-hidden="true" />}
         onClick={onAddBookmark}
         className="absolute"
-        style={browserHomeBoxStyle({ left: 1115, top: 458, width: 152, height: 116 })}
+        style={browserHomeBoxStyle(browserHomeAddCardBox)}
       />
 
       <CereBroButton
@@ -712,7 +593,7 @@ function BrowserHomePrimitiveOverlay({
         icon={<Pencil size={12} strokeWidth={1.8} aria-hidden="true" />}
         onClick={onAddBookmark}
         className="absolute h-auto min-h-0 px-3 py-1"
-        style={browserHomeBoxStyle({ left: 1126, top: 421, width: 112, height: 31 })}
+        style={browserHomeBoxStyle(browserHomeEditPinnedBox)}
       >
         Edit Pinned
       </CereBroButton>
@@ -753,7 +634,7 @@ function BrowserHomePrimitiveOverlay({
 
       <CereBroDock
         className="absolute"
-        style={browserHomeBoxStyle({ left: 13, top: 846, width: 1397, height: 119 })}
+        style={browserHomeBoxStyle(browserHomeDockBox)}
         avatar={<img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-[58px] max-w-none object-contain [image-rendering:pixelated]" draggable={false} />}
         actions={
           <>
