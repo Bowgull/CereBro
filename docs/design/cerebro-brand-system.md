@@ -14,6 +14,22 @@ Use raster assets only for texture and illustration.
 
 No paid tools. No card-backed trials. No paid asset services. No paid fallback.
 
+## Anti-Invention Rule
+
+Do not create new visual symbols, ornaments, icons, frames, rails, medallions,
+panels, compass marks, SVG flourishes, or decorative geometry by taste.
+
+Every new visual primitive must come from one of these sources:
+
+- measured CSS/React reconstruction of the locked mockup
+- traced SVG from the locked mockup
+- extracted asset from the locked mockup
+- free/no-card external AI output that was prompted with the locked mockup and
+  accepted under `docs/design/external-ai/evaluation-rubric.md`
+
+If a primitive cannot prove that source chain, quarantine it outside production.
+Do not install it into `/Applications/CereBro.app`.
+
 ## Materials
 
 - Obsidian stone: dark green-black field with low contrast radial etching.
