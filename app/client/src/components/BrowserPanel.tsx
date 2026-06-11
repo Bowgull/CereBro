@@ -546,6 +546,7 @@ function BrowserHomePrimitiveOverlay({
             key={`browser-home-medallion-${pin.key}`}
             label={`Open bookmark ${pin.label}`}
             imageSrc={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 64)}
+            variant="asset"
             active={pin.saved}
             onClick={() => onOpenTarget(pin.target)}
             className="absolute"
@@ -556,6 +557,7 @@ function BrowserHomePrimitiveOverlay({
       <CereBroMedallion
         label="Add pinned bookmark"
         imageSrc="/browser-home/assets/medallion-add.png"
+        variant="asset"
         onClick={onAddBookmark}
         className="absolute"
         style={browserHomeBoxStyle(browserHomeAddMedallionBox)}

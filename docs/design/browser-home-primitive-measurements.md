@@ -40,7 +40,7 @@ Implementation contract:
 
 ## Current Gaps
 
-- Medallion primitive still nests full medallion art inside a medallion shell. That is not final.
+- Medallion primitive now supports asset-backed rendering. It still needs exact asset alignment and status-dot tuning.
 - Cards are real DOM, but the material is flatter than the mockup.
 - Panels are real DOM, but need tighter texture, type, row density, and ornament tuning.
 - Aang dock is real DOM, but the avatar scale and input frame need another measured pass.
