@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-11 0748 ADT
+Last updated: 2026-06-09 0435 ADT
 
 ## Current North Star
 
@@ -53,57 +53,6 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
-
-## 2026-06-11 0748 ADT - CereBro Global Brand Shell Primitives
-
-### What Changed
-- Started the whole-app UI/UX overhaul around the approved Browser Home mockup.
-- Added real CereBro UI primitives:
-  - `CereBroShell`
-  - `CereBroWorkspaceFrame`
-  - `CereBroChrome`
-  - `CereBroRail`
-  - `CereBroMenuSurface`
-  - `CereBroList`
-  - `CereBroFormField`
-  - `CereBroEmptyState`
-- Moved app background, rail surface, and active rail surface into `cerebroBrand`.
-- Replaced the Browser-only stretched rail cutout with a shared React/CSS rail component across Browser and non-Browser routes.
-- Browser Home bookmark card icons now use visible favicon rendering.
-- Browser Home medallions have stronger component-side contrast.
-- Browser Home Aang dock now uses the extracted Aang medallion asset instead of the black-background pixel sprite.
-- Updated `docs/design/cerebro-brand-rollout.md` with the structural shell slice.
-- Installed the updated app into `/Applications/CereBro.app`.
-
-### Checks Run
-- `pnpm --dir app exec tsc --noEmit`
-- `pnpm --dir app exec vitest run server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
-- `pnpm --dir app run desktop:backup`
-- `pnpm --dir app run desktop:package`
-- `pnpm --dir app run desktop:install`
-- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9450 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
-- `pnpm --dir app run qa:browser-home-diff`
-- `pnpm --dir app run test:desktop`
-
-### Visual QA
-- Installed Browser Home screenshot:
-  `/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/app/output/qa/cerebro-installed-browser-home-smoke.png`
-- Latest Browser Home diff ratio:
-  `0.09886282690546454`
-- The diff is worse than the previous body-only pass because the rail is now real CSS/React instead of the old cutout.
-- The visual direction is still not 1:1. The rail proportions, top chrome, medallion spacing, backplate depth, panel density, and dock proportions all need measured passes against the locked mockup.
-
-### Known Gaps
-- Not 1:1 locked.
-- The new `CereBroRail` is real and clickable, but not yet visually exact to the mockup rail.
-- The loaded browser page still needs the same chrome/rail/frame treatment.
-- Keep, Workshop, Ledger, Basement, and Settings still need internal primitive replacement.
-- The app still prints the known Electron packaging warnings for chunk size, `import.meta`, `asar=false`, and icon format.
-
-### Next-session Starter Prompt
-```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, docs/design/cerebro-brand-system.md, docs/design/cerebro-brand-rollout.md, app/client/src/components/cerebro-ui, app/client/src/pages/Home.tsx, app/client/src/components/BrowserPanel.tsx, and the locked mockup at mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png first. The global shell now uses real primitives: CereBroShell, CereBroWorkspaceFrame, CereBroChrome, and CereBroRail. The Browser-only rail cutout was removed from the shell path. Installed QA passes, but Browser Home visual diff is 0.09886282690546454 and the screen is not 1:1. Next slice: measure and tune the real rail plus BrowserPanel content coordinate system so Browser Home matches the mockup with real components, not pasted full-screen layout. Keep no-money/no-card rules active. Do not surface Raven.
-```
 
 ## 2026-06-09 0435 ADT - Desktop Install Safety Gate
 

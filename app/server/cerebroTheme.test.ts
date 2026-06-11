@@ -10,10 +10,7 @@ describe("cerebroBrand", () => {
   });
 
   it("defines core surface treatments for app primitives", () => {
-    expect(cerebroBrand.surface.app).toContain("radial-gradient");
     expect(cerebroBrand.surface.shell).toContain("radial-gradient");
-    expect(cerebroBrand.surface.rail).toContain("linear-gradient");
-    expect(cerebroBrand.surface.railActive).toContain("radial-gradient");
     expect(cerebroBrand.surface.address).toContain("linear-gradient");
     expect(cerebroBrand.shadow.bevel).toContain("inset");
   });

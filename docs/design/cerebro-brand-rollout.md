@@ -12,9 +12,9 @@
 
 | Surface | Status | Notes |
 | --- | --- | --- |
-| Global theme tokens | primitive-backed | Root CSS variables, shared buttons, dropdowns, app shell, rail, and chrome use CereBro ink/brass/green. Needs full form/table sweep. |
-| Global shell rail | primitive-backed | `CereBroRail` owns the real React/CSS zone rail across Browser and non-Browser routes. Needs exact icon art and proportional lock against the mockup. |
-| Hosted panel frame | primitive-backed | PanelHost wraps app panels in CereBroFrame. Main workspace now uses CereBroWorkspaceFrame. Internal panel surfaces still need route-by-route cleanup. |
+| Global theme tokens | primitive-backed | Root CSS variables, shared buttons, and dropdowns use CereBro ink/brass/green. Needs full form/table sweep. |
+| Global shell rail | primitive-backed | Uses rail assets. Needs SVG/CSS rail variant and better proportional lock. |
+| Hosted panel frame | primitive-backed | PanelHost wraps app panels in CereBroFrame. Internal panel surfaces still need route-by-route cleanup. |
 | Browser Home | primitive-backed | Uses composed assets and real DOM. Needs backplate and medallion rail pass. |
 | Loaded browser chrome | not-started | Must stop reverting to old language. |
 | Aang dock | primitive-backed | Uses raster dock. Needs dock primitive. |
@@ -25,13 +25,6 @@
 | Basement | tokenized | Inherits root controls. Needs safety panel primitives. |
 | Settings | tokenized | Inherits root controls. Needs form primitives. |
 | Empty/error/loading states | not-started | Must be branded, not shadcn defaults. |
-
-## 2026-06-11 Global Shell Slice
-
-- Added real shell primitives: `CereBroShell`, `CereBroWorkspaceFrame`, `CereBroChrome`, `CereBroRail`, `CereBroMenuSurface`, `CereBroList`, `CereBroFormField`, and `CereBroEmptyState`.
-- Replaced the Browser-only left rail image layout with the shared React/CSS rail component.
-- Moved the app background, rail surface, and active rail surface into `cerebroBrand`.
-- Kept Browser Home as the source of truth. This slice is structural. It is not a 1:1 lock yet.
 
 ## Current Locked Reference
 

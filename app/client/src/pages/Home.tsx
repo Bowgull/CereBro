@@ -42,7 +42,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
-import { CereBroChrome, CereBroChromeMark, CereBroFrame, CereBroRail, CereBroShell, CereBroWorkspaceFrame } from "@/components/cerebro-ui";
+import { CereBroFrame } from "@/components/cerebro-ui";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
@@ -82,6 +82,14 @@ type NavId =
   | "settings";
 
 type ZoneId = "keep" | "browser" | "workshop" | "ledger" | "basement";
+
+const browserRailAssets: Record<ZoneId, { src: string; top: string; height: string }> = {
+  keep: { src: "/browser-home/assets/rail-keep.png", top: "1.1%", height: "19.8%" },
+  browser: { src: "/browser-home/assets/rail-browser-active.png", top: "21.7%", height: "8.9%" },
+  workshop: { src: "/browser-home/assets/rail-workshop.png", top: "32.9%", height: "8.6%" },
+  ledger: { src: "/browser-home/assets/rail-ledger.png", top: "43.7%", height: "8.6%" },
+  basement: { src: "/browser-home/assets/rail-basement.png", top: "54.2%", height: "9.8%" },
+};
 
 interface ZoneNavItem {
   zone: ZoneId;
@@ -189,6 +197,14 @@ const mockupShell = {
   bevel: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.55)",
   outerShadow: "0 28px 80px rgba(0, 0, 0, 0.7)",
 };
+const marbleBackground = `
+  radial-gradient(circle at 82% 8%, rgba(198, 155, 85, 0.16), transparent 24%),
+  radial-gradient(circle at 18% 12%, rgba(77, 170, 154, 0.14), transparent 28%),
+  linear-gradient(138deg, rgba(244, 239, 227, 0.04) 0 1px, transparent 1px 38px),
+  linear-gradient(42deg, rgba(77, 170, 154, 0.05) 0 1px, transparent 1px 54px),
+  #050806
+`;
+
 export default function Home() {
   const { heroes, mode: connMode, connected, log, startDemo, startLive, clearHeroes } =
     useHeroSocket();
@@ -278,14 +294,51 @@ export default function Home() {
   }, [heroes]);
 
   return (
-    <CereBroShell>
+    <div
+      className="h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden gap-1.5 p-1.5 sm:p-2"
+      style={{
+        background: marbleBackground,
+        color: C.textPrimary,
+        fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      }}
+    >
       <EstablishingShot />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       {!isBrowserRoute && (
-      <CereBroChrome
-        brand={<CereBroChromeMark title="CereBro" subtitle="The Keep" />}
-        center={
+      <header
+        className="relative flex items-center justify-between gap-1.5 overflow-hidden px-2.5 py-1.5 shrink-0 rounded"
+        aria-label="Keep header"
+        style={{
+          background: `
+            radial-gradient(circle at 8% 0%, rgba(198, 155, 85, 0.12), transparent 28%),
+            radial-gradient(circle at 88% 12%, rgba(77, 170, 154, 0.1), transparent 30%),
+            ${mockupShell.plaque}
+          `,
+          border: `1px solid ${mockupShell.marbleLine}`,
+          boxShadow: `0 14px 38px rgba(0, 0, 0, 0.36), ${mockupShell.bevel}`,
+        }}
+      >
+        <div className="pointer-events-none absolute left-2 top-1.5 h-3 w-3 border-l border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+        <div className="pointer-events-none absolute right-2 top-1.5 h-3 w-3 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLineSoft }} />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div
+            className="w-7 h-7 flex items-center justify-center rounded"
+            style={{ background: "linear-gradient(180deg, rgba(32, 53, 45, 0.98), rgba(8, 18, 16, 0.98))", border: `1px solid ${shellFrame.brassSoft}`, color: shellFrame.brass, boxShadow: `${mockupShell.bevel}, 0 0 22px rgba(198, 155, 85, 0.1)` }}
+          >
+            <span className="text-sm leading-none">◆</span>
+          </div>
+          <div>
+            <h1 className="text-[12px] font-bold uppercase tracking-widest leading-none" style={{ color: C.textPrimary }}>
+              CereBro
+            </h1>
+            <p className="text-[10px] leading-none mt-0.5" style={{ color: C.textMuted }}>
+              The Keep
+            </p>
+          </div>
+        </div>
+
+        <div className="hidden md:flex flex-1 min-w-0 items-center justify-center">
           <div
             className="flex min-w-0 items-center gap-1.5 rounded px-2 py-1"
             style={{ background: "rgba(5, 10, 9, 0.74)", border: `1px solid ${mockupShell.marbleLineSoft}`, boxShadow: mockupShell.bevel }}
@@ -298,9 +351,9 @@ export default function Home() {
               <span style={{ color: C.gold }}>Aang</span> reads. <span style={{ color: C.accentViolet }}>Cortana</span> routes. Ledger records.
             </span>
           </div>
-        }
-        actions={
-          <>
+        </div>
+
+        <div className="flex items-center gap-1 min-w-0">
           <PermissionModeControl />
 
           <div
@@ -380,20 +433,118 @@ export default function Home() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          </>
-        }
-      />
+        </div>
+      </header>
       )}
 
       {/* ── Main: left rail + center + right context panel ─────────────── */}
-      <CereBroWorkspaceFrame>
-        <CereBroRail
-          items={ZONE_NAV_ITEMS}
-          activeZone={NAV_TO_ZONE[nav]}
-          onNavigate={setNav}
-          compact={!isBrowserRoute}
-          footer={connMode === "live" ? "Live node" : "Demo node"}
-        />
+      <div
+        className="relative flex flex-1 overflow-hidden rounded"
+        style={{
+          minHeight: 0,
+          background: mockupShell.marble,
+          border: `1px solid ${mockupShell.marbleLine}`,
+          boxShadow: `${mockupShell.outerShadow}, ${mockupShell.bevel}`,
+        }}
+      >
+        <div className="pointer-events-none absolute left-2 top-2 z-10 h-5 w-5 border-l border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute right-2 top-2 z-10 h-5 w-5 border-r border-t" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute bottom-2 left-2 z-10 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+        <div className="pointer-events-none absolute bottom-2 right-2 z-10 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
+
+        {/* Left rail — four-zone OS dock */}
+        <nav
+          className={`${isBrowserRoute ? "w-[122px]" : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden`}
+          aria-label="CereBro zones"
+          style={{
+            background: isBrowserRoute
+              ? "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat"
+              : "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
+            borderRight: isBrowserRoute ? 0 : `1px solid ${mockupShell.marbleLine}`,
+            boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
+          }}
+        >
+          {isBrowserRoute ? (
+            <div className="absolute inset-0 z-10">
+              {ZONE_NAV_ITEMS.map((item) => {
+                const asset = browserRailAssets[item.zone];
+                return (
+                  <button
+                    key={`browser-rail-button-${item.zone}`}
+                    type="button"
+                    onClick={() => setNav(item.id)}
+                    aria-label={`Open ${item.label}`}
+                    aria-current={NAV_TO_ZONE[nav] === item.zone ? "page" : undefined}
+                    className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    style={{
+                      top: asset.top,
+                      height: asset.height,
+                      ["--tw-ring-color" as string]: C.accent,
+                    }}
+                  >
+                    <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
+                    <span className="sr-only">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+          <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
+            {ZONE_NAV_ITEMS.map((item) => {
+              const isActive = NAV_TO_ZONE[nav] === item.zone;
+              const ZoneIcon = item.Icon;
+              return (
+                <Button
+                  key={item.zone}
+                  type="button"
+                  onClick={() => setNav(item.id)}
+                  aria-label={`Open ${item.label}`}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center ${isBrowserRoute ? "opacity-0" : ""}`}
+                  variant="ghost"
+                  style={{
+                    background: isActive
+                      ? "linear-gradient(180deg, rgba(58, 79, 63, 0.98), rgba(13, 30, 26, 0.98))"
+                      : "linear-gradient(180deg, rgba(18, 31, 28, 0.92), rgba(6, 13, 12, 0.98))",
+                    border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
+                    color: isActive ? C.textPrimary : C.textSecondary,
+                    boxShadow: isActive
+                      ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, inset 0 1px 0 rgba(244, 239, 227, 0.13), inset 0 -12px 20px rgba(0, 0, 0, 0.3), 0 0 18px rgba(198, 155, 85, 0.1)`
+                      : "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -8px 16px rgba(0, 0, 0, 0.26)",
+                  }}
+                >
+                  <span
+                    className="pointer-events-none absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-r"
+                    aria-hidden="true"
+                    style={{ background: isActive ? shellFrame.brass : "transparent" }}
+                  />
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[12px]"
+                    style={{
+                      background: isActive ? "rgba(198, 155, 85, 0.14)" : "rgba(244, 239, 227, 0.035)",
+                      color: isActive ? shellFrame.brass : C.textMuted,
+                      border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
+                      boxShadow: mockupShell.bevel,
+                    }}
+                  >
+                    <ZoneIcon size={13} strokeWidth={1.7} aria-hidden="true" />
+                  </span>
+                  <span className="block min-w-0">
+                    <span className="block text-[9px] uppercase tracking-wider font-semibold leading-none">{item.label}</span>
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+          )}
+          <div
+            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "pointer-events-none opacity-0" : ""}`}
+            style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
+          >
+            <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
+            <div className="mt-1 text-[8px] leading-none">{connMode === "live" ? "Live node" : "Demo node"}</div>
+          </div>
+        </nav>
 
         {/* Center workspace */}
           <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: "rgba(6, 10, 10, 0.96)" }}>
@@ -499,7 +650,7 @@ export default function Home() {
             />
           </aside>
         )}
-      </CereBroWorkspaceFrame>
+      </div>
 
       {/* ── Bottom command bar — "Ask Aang…" ──────────────────────────── */}
       {routePreview.data && !isBrowserRoute && (
@@ -607,7 +758,7 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-    </CereBroShell>
+    </div>
   );
 }
 
