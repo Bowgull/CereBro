@@ -572,7 +572,7 @@ function BrowserHomePrimitiveOverlay({
             key={`browser-home-card-${pin.key}`}
             aria-label={`Open pinned bookmark ${pin.label}`}
             title={pin.label}
-            icon={<img src={faviconUrl(pin.domain, 96)} alt="" className="h-9 w-9 rounded object-contain" draggable={false} />}
+            icon={<img src={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 96)} alt="" className="h-11 w-11 rounded-full object-contain" draggable={false} />}
             active={pin.saved}
             onClick={() => onOpenTarget(pin.target)}
             className="absolute"
@@ -611,21 +611,21 @@ function BrowserHomePrimitiveOverlay({
             className="absolute"
             style={browserHomeBoxStyle(box)}
           >
-            <div className="grid gap-1">
+            <div className="grid gap-0.5">
               {group.rows.map((row) => (
                 <button
                   key={row.label}
                   type="button"
                   disabled={!row.target}
                   onClick={() => row.target && onOpenTarget(row.target)}
-                  className="grid grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded-sm px-1 py-1.5 text-left disabled:cursor-default"
+                  className="grid grid-cols-[31px_minmax(0,1fr)] items-center gap-2 rounded-sm px-1 py-1 text-left disabled:cursor-default"
                 >
-                  <span className="grid h-8 w-8 place-items-center rounded text-[10px] font-bold" style={{ background: B.surface.address, border: `1px solid ${B.line.brassSoft}`, color: B.color.gold300 }}>
+                  <span className="grid h-[29px] w-[29px] place-items-center rounded text-[9px] font-bold" style={{ background: B.surface.address, border: `1px solid ${B.line.brassSoft}`, color: B.color.gold300 }}>
                     {row.icon}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-[11px] font-semibold" style={{ color: B.color.parchment100 }}>{row.label}</span>
-                    <span className="block truncate text-[10px]" style={{ color: B.color.muted500 }}>{row.meta}</span>
+                    <span className="block truncate text-[10px] font-semibold leading-tight" style={{ color: B.color.parchment100 }}>{row.label}</span>
+                    <span className="block truncate text-[9px] leading-tight" style={{ color: B.color.muted500 }}>{row.meta}</span>
                   </span>
                 </button>
               ))}
