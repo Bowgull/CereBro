@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CereBroButton, CereBroCard, CereBroDock, CereBroMedallion, CereBroPanel } from "@/components/cerebro-ui";
+import { CereBroButton, CereBroCard, CereBroDock, CereBroPanel } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
@@ -436,45 +436,15 @@ function BrowserHomeStart({
 function BrowserHomeAssetStage() {
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+      <div className="absolute inset-0" style={{ background: "#020505" }} />
       <div
-        className="absolute inset-0"
+        className="absolute inset-x-0 bottom-[34px] top-[458px]"
         style={{
           background:
-            "radial-gradient(circle at 51.8% 47.4%, rgba(236, 184, 75, 0.34) 0 0.55%, rgba(236, 184, 75, 0.14) 0.55% 1.2%, transparent 1.25%), radial-gradient(circle at 54% 34%, rgba(214, 158, 67, 0.12), transparent 26%), radial-gradient(circle at 53% 36%, transparent 0 17%, rgba(198, 155, 85, 0.11) 17.2% 17.35%, transparent 17.5% 28%, rgba(198, 155, 85, 0.08) 28.2% 28.35%, transparent 28.5%), repeating-radial-gradient(circle at 53% 36%, rgba(198, 155, 85, 0.1) 0 1px, transparent 1px 42px), linear-gradient(180deg, rgba(9, 14, 13, 0.99), rgba(2, 5, 5, 1))",
+            "linear-gradient(90deg, rgba(198, 155, 85, 0.12), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.1)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.02) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.014) 0 1px, transparent 1px 34px)",
+          boxShadow: "inset 0 0 70px rgba(0, 0, 0, 0.72)",
         }}
       />
-      <div
-        className="absolute inset-x-0 top-[126px] bottom-[34px]"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(198, 155, 85, 0.18), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.16)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.025) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.018) 0 1px, transparent 1px 34px)",
-          border: `1px solid ${browserFrame.lineSoft}`,
-          boxShadow: "inset 0 0 80px rgba(0, 0, 0, 0.72), inset 0 0 0 2px rgba(198, 155, 85, 0.08)",
-        }}
-      />
-      <div className="absolute left-[5.9%] right-[2.2%] top-[42.9%] h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(198, 155, 85, 0.34), transparent)" }} />
-      <div className="absolute left-[51.8%] top-[20%] bottom-[13.4%] w-px" style={{ background: "linear-gradient(180deg, transparent, rgba(198, 155, 85, 0.28), transparent)" }} />
-      <div className="absolute left-[5.9%] top-[20%] right-[2.2%] bottom-[13.4%]" style={{ boxShadow: "inset 0 0 0 1px rgba(198, 155, 85, 0.18), inset 0 0 0 3px rgba(0, 0, 0, 0.32)" }} />
-      <div className="absolute left-1/2 top-[19.8%] h-11 w-11 -translate-x-1/2 rounded-full" style={{ border: "1px solid rgba(198, 155, 85, 0.55)", boxShadow: "0 0 26px rgba(214, 158, 67, 0.28), inset 0 0 18px rgba(214, 158, 67, 0.18)" }}>
-        <span className="absolute left-1/2 top-[-12px] h-[68px] w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, transparent, rgba(229, 180, 90, 0.9), transparent)" }} />
-        <span className="absolute left-[-12px] top-1/2 h-px w-[68px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(229, 180, 90, 0.9), transparent)" }} />
-        <span className="absolute inset-[11px] rotate-45" style={{ border: "1px solid rgba(229, 180, 90, 0.8)", boxShadow: "0 0 12px rgba(214, 158, 67, 0.4)" }} />
-      </div>
-      <div className="absolute left-1/2 top-[25.4%] -translate-x-1/2 text-center">
-        <div className="text-[32px] leading-none" style={{ color: "#f0ca84", fontFamily: "Georgia, serif", textShadow: "0 0 14px rgba(214, 158, 67, 0.28)" }}>
-          Where to next?
-        </div>
-        <div className="mt-1 text-[16px] leading-none" style={{ color: "#d2aa69", fontFamily: "Georgia, serif" }}>
-          Search the web or ask CereBro anything.
-        </div>
-      </div>
-      <div className="absolute left-1/2 top-[41.4%] h-16 w-16 -translate-x-1/2 rounded-full" style={{ background: "radial-gradient(circle, rgba(255, 206, 88, 0.95) 0 8%, rgba(238, 171, 47, 0.45) 8% 21%, transparent 22%)", filter: "drop-shadow(0 0 18px rgba(236, 184, 75, 0.55))" }}>
-        <span className="absolute left-1/2 top-[-9px] h-[82px] w-px -translate-x-1/2" style={{ background: "linear-gradient(180deg, transparent, rgba(255, 213, 113, 0.8), transparent)" }} />
-        <span className="absolute left-[-9px] top-1/2 h-px w-[82px] -translate-y-1/2" style={{ background: "linear-gradient(90deg, transparent, rgba(255, 213, 113, 0.8), transparent)" }} />
-      </div>
-      <div className="absolute left-[5.9%] top-[42.5%] text-[16px]" style={{ color: "#e6c284", fontFamily: "Georgia, serif" }}>
-        Pinned
-      </div>
       {browserHomeLayerAssets.map((asset) => (
         <img
           key={asset.name}
@@ -701,25 +671,18 @@ function BrowserHomePrimitiveOverlay({
         if (!box) return null;
 
         return (
-          <CereBroMedallion
+          <BrowserHomeChromeHitButton
             key={`browser-home-medallion-${pin.key}`}
+            box={box}
             label={`Open bookmark ${pin.label}`}
-            imageSrc={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 64)}
-            variant="asset"
-            active={pin.saved}
             onClick={() => onOpenTarget(pin.target)}
-            className="absolute"
-            style={browserHomeBoxStyle(box)}
           />
         );
       })}
-      <CereBroMedallion
+      <BrowserHomeChromeHitButton
         label="Add pinned bookmark"
-        imageSrc="/browser-home/assets/medallion-add.png"
-        variant="asset"
+        box={browserHomeAddMedallionBox}
         onClick={onAddBookmark}
-        className="absolute"
-        style={browserHomeBoxStyle(browserHomeAddMedallionBox)}
       />
 
       {visiblePins.map((pin, index) => {
@@ -748,16 +711,11 @@ function BrowserHomePrimitiveOverlay({
         style={browserHomeBoxStyle(browserHomeAddCardBox)}
       />
 
-      <CereBroButton
-        type="button"
-        variant="ghost"
-        icon={<Pencil size={12} strokeWidth={1.8} aria-hidden="true" />}
+      <BrowserHomeChromeHitButton
+        label="Edit pinned bookmarks"
         onClick={onAddBookmark}
-        className="absolute h-auto min-h-0 px-3 py-1"
-        style={browserHomeBoxStyle(browserHomeEditPinnedBox)}
-      >
-        Edit Pinned
-      </CereBroButton>
+        box={browserHomeEditPinnedBox}
+      />
 
       {browserHomePanelBoxes.map((box, index) => {
         const group = panelRows[index];

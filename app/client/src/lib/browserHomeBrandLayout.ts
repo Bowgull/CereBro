@@ -120,6 +120,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-tabs.png", { left: 0, top: 0, width: 1585, height: 61 }, "Top title and tab strip frame."),
   rasterProvenance("top-title-tabs-panel.png", { left: 145, top: 0, width: 1440, height: 61 }, "Top title and tab strip frame in Browser panel coordinates."),
   rasterProvenance("top-url-row.png", { left: 145, top: 61, width: 1440, height: 65 }, "URL/search row with action controls."),
+  rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
   measuredCssProvenance("top-chrome-hitbox-tab-close", browserHomeTopChromeHitBoxes.tabClose, "Measured active tab close target."),
   measuredCssProvenance("top-chrome-hitbox-new-tab", browserHomeTopChromeHitBoxes.newTab, "Measured new tab click target."),
@@ -157,6 +158,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
 export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
   { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
   { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
+  { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
 ];
 
 export const browserHomeMedallionBoxes: BrowserHomeMeasuredBox[] = [
