@@ -20,16 +20,13 @@ type CereBroRailProps<Id extends string = string, Zone extends string = string> 
   style?: CSSProperties;
 };
 
-function CompassGlyph() {
-  return (
-    <span className="relative block h-14 w-14 rounded-full" aria-hidden="true" style={{ border: `1px solid ${B.line.brass}`, boxShadow: `0 0 24px rgba(198, 155, 85, 0.16), ${B.shadow.bevel}` }}>
-      <span className="absolute left-1/2 top-1/2 h-12 w-px -translate-x-1/2 -translate-y-1/2" style={{ background: B.color.gold300 }} />
-      <span className="absolute left-1/2 top-1/2 h-px w-12 -translate-x-1/2 -translate-y-1/2" style={{ background: B.color.gold300 }} />
-      <span className="absolute inset-3 rotate-45" style={{ border: `1px solid ${B.color.gold700}` }} />
-      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: B.color.gold300, boxShadow: "0 0 14px rgba(230, 194, 132, 0.5)" }} />
-    </span>
-  );
-}
+const mockupRailAssets: Record<string, { src: string; top: string; height: string }> = {
+  keep: { src: "/browser-home/assets/rail-keep.png", top: "1.1%", height: "19.8%" },
+  browser: { src: "/browser-home/assets/rail-browser-active.png", top: "21.7%", height: "8.9%" },
+  workshop: { src: "/browser-home/assets/rail-workshop.png", top: "32.9%", height: "8.6%" },
+  ledger: { src: "/browser-home/assets/rail-ledger.png", top: "43.7%", height: "8.6%" },
+  basement: { src: "/browser-home/assets/rail-basement.png", top: "54.2%", height: "9.8%" },
+};
 
 export function CereBroRail<Id extends string = string, Zone extends string = string>({
   items,
@@ -57,19 +54,47 @@ export function CereBroRail<Id extends string = string, Zone extends string = st
       <CereBroCorner position="top-left" size={30} />
       <CereBroCorner position="bottom-left" size={30} />
 
-      <div className={`relative z-[1] grid place-items-center ${compact ? "h-24" : "h-40"}`}>
-        <CompassGlyph />
-        {!compact ? (
-          <div className="mt-2 text-[15px] leading-none" style={{ color: B.color.gold300, fontFamily: B.font.display }}>
-            Keep
-          </div>
-        ) : null}
-      </div>
+      {!compact ? (
+        <div className="absolute inset-0 z-[1]" aria-hidden="true">
+          <img src="/browser-home/assets/rail-full.png" alt="" className="h-full w-full object-fill" draggable={false} />
+          {Object.entries(mockupRailAssets).map(([zone, asset]) => (
+            <img
+              key={`rail-approved-asset-${zone}`}
+              src={asset.src}
+              alt=""
+              className="absolute left-[11%] w-[81%] object-fill"
+              style={{ top: asset.top, height: asset.height }}
+              draggable={false}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="relative z-[1] grid h-24 place-items-center">
+          <img src="/browser-home/assets/rail-keep.png" alt="" className="h-[88px] w-[62px] object-cover object-top" draggable={false} />
+        </div>
+      )}
 
-      <div className="relative z-[1] flex flex-1 flex-col gap-4 px-3 py-2">
+      <div className={`relative z-[2] flex flex-1 flex-col ${compact ? "gap-4 px-3 py-2" : "px-0 py-0"}`}>
         {items.map((item) => {
           const isActive = activeZone === item.zone;
           const Icon = item.Icon;
+          const asset = mockupRailAssets[String(item.zone)];
+
+          if (!compact && asset) {
+            return (
+              <button
+                key={item.zone}
+                type="button"
+                onClick={() => onNavigate(item.id)}
+                aria-label={`Open ${item.label}`}
+                aria-current={isActive ? "page" : undefined}
+                className="absolute left-[11%] w-[81%] rounded-sm transition duration-150 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                style={{ top: asset.top, height: asset.height }}
+              >
+                <span className="sr-only">{item.label}</span>
+              </button>
+            );
+          }
 
           return (
             <button
