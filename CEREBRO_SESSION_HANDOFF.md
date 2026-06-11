@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-09 0435 ADT
+Last updated: 2026-06-11 0845 ADT
 
 ## Current North Star
 
@@ -53,6 +53,65 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-11 0845 ADT - Browser Home Provenance Gate
+
+### What Changed
+- Added a Browser Home mockup provenance gate before the next 1:1 visual slice.
+- Locked production Browser Home visual media to:
+  - `raster`
+  - `measured-css`
+  - `traced-svg`
+  - `external-ai-reference`
+- Expanded `app/client/public/browser-home/assets/manifest.json` so every extracted Browser Home asset carries:
+  - locked source path
+  - locked SHA-256
+  - measured box
+  - role
+  - medium
+  - `productionAllowed`
+- Added typed Browser Home provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Added `app/scripts/browserHomeProvenanceAudit.ts`.
+  - Verifies the locked mockup SHA.
+  - Verifies extracted asset dimensions against manifest boxes.
+  - Fails on unlisted Browser Home asset files.
+  - Fails on static Browser Home asset imports that are not in the manifest.
+- Added an external-AI status packet:
+  - `docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md`
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9450 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.09367685967233133`.
+
+### Known Gaps
+- This slice does not claim Browser Home is visually 1:1.
+- The known visual deltas remain:
+  - Browser Home is still too spread and scaled in several areas.
+  - Medallion positions and lower panels still differ from the locked mockup.
+  - The Aang dock still does not match the approved mockup asset style.
+  - Some older Browser Home CSS decoration remains and must be removed only as measured slices replace it.
+- No external AI generated output was accepted in this slice. No free/no-card callable integration was available in the local build environment.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, docs/design/cerebro-brand-system.md, docs/design/external-ai/README.md, docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, app/client/src/components/BrowserPanel.tsx, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. The next Browser Home visual slice must start from the locked mockup, pass `pnpm --dir app run qa:browser-home-provenance`, and use only measured CSS, traced SVG, extracted raster, or accepted free external-AI reference output. Do not create invented rail marks, compass marks, icons, frames, gradients, ornaments, or medallions. Start with Slice 1: rail and top chrome only. Compare installed screenshot to `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png` before and after.
+```
 
 ## 2026-06-09 0435 ADT - Desktop Install Safety Gate
 

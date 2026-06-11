@@ -1,7 +1,13 @@
 {
   "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
   "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
-  "rule": "Use these as component assets. Do not paste the full mockup as the UI.",
+  "rule": "Use these as component assets. Do not paste the full mockup as the UI. Every production asset must carry source provenance and an allowed medium.",
+  "allowedMedia": [
+    "raster",
+    "measured-css",
+    "traced-svg",
+    "external-ai-reference"
+  ],
   "assets": [
     {
       "name": "rail-full.png",
@@ -11,7 +17,11 @@
         "width": 145,
         "height": 932
       },
-      "role": "Full left rail texture and frame."
+      "role": "Full left rail texture and frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "rail-keep.png",
@@ -21,7 +31,11 @@
         "width": 118,
         "height": 185
       },
-      "role": "Keep rail button asset."
+      "role": "Keep rail button asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "rail-browser-active.png",
@@ -31,7 +45,11 @@
         "width": 118,
         "height": 83
       },
-      "role": "Active Browser rail button asset."
+      "role": "Active Browser rail button asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "rail-workshop.png",
@@ -41,7 +59,11 @@
         "width": 116,
         "height": 80
       },
-      "role": "Workshop rail button asset."
+      "role": "Workshop rail button asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "rail-ledger.png",
@@ -51,7 +73,11 @@
         "width": 116,
         "height": 80
       },
-      "role": "Ledger rail button asset."
+      "role": "Ledger rail button asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "rail-basement.png",
@@ -61,7 +87,11 @@
         "width": 116,
         "height": 91
       },
-      "role": "Basement rail button asset."
+      "role": "Basement rail button asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "top-title-tabs.png",
@@ -71,7 +101,11 @@
         "width": 1585,
         "height": 61
       },
-      "role": "Top title and tab strip frame."
+      "role": "Top title and tab strip frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "top-title-tabs-panel.png",
@@ -81,7 +115,11 @@
         "width": 1440,
         "height": 61
       },
-      "role": "Top title and tab strip frame in Browser panel coordinates."
+      "role": "Top title and tab strip frame in Browser panel coordinates.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "top-url-row.png",
@@ -91,7 +129,11 @@
         "width": 1440,
         "height": 65
       },
-      "role": "URL/search row with action controls."
+      "role": "URL/search row with action controls.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-github.png",
@@ -101,7 +143,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned GitHub medallion."
+      "role": "Pinned GitHub medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-obsidian.png",
@@ -111,7 +157,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned Obsidian medallion."
+      "role": "Pinned Obsidian medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-youtube.png",
@@ -121,7 +171,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned YouTube medallion."
+      "role": "Pinned YouTube medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-x.png",
@@ -131,7 +185,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned X medallion."
+      "role": "Pinned X medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-reddit.png",
@@ -141,7 +199,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned Reddit medallion."
+      "role": "Pinned Reddit medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-hn.png",
@@ -151,7 +213,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Pinned Hacker News medallion."
+      "role": "Pinned Hacker News medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "medallion-add.png",
@@ -161,7 +227,11 @@
         "width": 48,
         "height": 48
       },
-      "role": "Add medallion."
+      "role": "Add medallion.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-frame.png",
@@ -171,7 +241,11 @@
         "width": 180,
         "height": 116
       },
-      "role": "Bookmark card frame."
+      "role": "Bookmark card frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-github.png",
@@ -181,7 +255,11 @@
         "width": 180,
         "height": 116
       },
-      "role": "GitHub bookmark card asset."
+      "role": "GitHub bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-obsidian.png",
@@ -191,7 +269,11 @@
         "width": 170,
         "height": 116
       },
-      "role": "Obsidian bookmark card asset."
+      "role": "Obsidian bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-youtube.png",
@@ -201,7 +283,11 @@
         "width": 152,
         "height": 116
       },
-      "role": "YouTube bookmark card asset."
+      "role": "YouTube bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-x.png",
@@ -211,7 +297,11 @@
         "width": 147,
         "height": 116
       },
-      "role": "X bookmark card asset."
+      "role": "X bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-reddit.png",
@@ -221,7 +311,11 @@
         "width": 116,
         "height": 116
       },
-      "role": "Reddit bookmark card asset."
+      "role": "Reddit bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-hn.png",
@@ -231,7 +325,11 @@
         "width": 147,
         "height": 116
       },
-      "role": "Hacker News bookmark card asset."
+      "role": "Hacker News bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "bookmark-card-add.png",
@@ -241,7 +339,11 @@
         "width": 152,
         "height": 116
       },
-      "role": "Add bookmark card asset."
+      "role": "Add bookmark card asset.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "panel-continue.png",
@@ -251,7 +353,11 @@
         "width": 384,
         "height": 224
       },
-      "role": "Continue browsing panel frame."
+      "role": "Continue browsing panel frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "panel-recent.png",
@@ -261,7 +367,11 @@
         "width": 392,
         "height": 224
       },
-      "role": "Recent panel frame."
+      "role": "Recent panel frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "panel-downloads.png",
@@ -271,7 +381,11 @@
         "width": 368,
         "height": 224
       },
-      "role": "Downloads panel frame."
+      "role": "Downloads panel frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "aang-dock.png",
@@ -281,7 +395,11 @@
         "width": 1397,
         "height": 119
       },
-      "role": "Bottom Aang dock frame."
+      "role": "Bottom Aang dock frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     },
     {
       "name": "aang-avatar-medallion.png",
@@ -291,7 +409,17 @@
         "width": 108,
         "height": 108
       },
-      "role": "Aang avatar medallion from dock."
+      "role": "Aang avatar medallion from dock.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
     }
+  ],
+  "allowedMedia": [
+    "raster",
+    "measured-css",
+    "traced-svg",
+    "external-ai-reference"
   ]
 }

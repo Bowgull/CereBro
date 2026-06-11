@@ -2,14 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
+  browserHomeAllowedProvenanceMedia,
   browserHomeCardBoxes,
   browserHomeDockBox,
   browserHomeEditPinnedBox,
+  browserHomeFullMockupSource,
   browserHomeLayerAssets,
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
   browserHomePanelBoxes,
   browserHomeToPercentBox,
+  browserHomeVisualProvenance,
 } from "@/lib/browserHomeBrandLayout";
 
 describe("browserHomeBrandLayout", () => {
@@ -20,6 +23,37 @@ describe("browserHomeBrandLayout", () => {
       width: 1440,
       height: 992,
     });
+    expect(browserHomeFullMockupSource).toEqual({
+      path: "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      sha256: "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      width: 1585,
+      height: 992,
+    });
+  });
+
+  it("locks Browser Home production provenance to mockup-derived media", () => {
+    expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
+    expect(browserHomeVisualProvenance).toHaveLength(29);
+
+    const names = new Set<string>();
+    for (const entry of browserHomeVisualProvenance) {
+      expect(names.has(entry.name)).toBe(false);
+      names.add(entry.name);
+      expect(entry.source).toBe(browserHomeFullMockupSource.path);
+      expect(entry.sourceSha256).toBe(browserHomeFullMockupSource.sha256);
+      expect(browserHomeAllowedProvenanceMedia).toContain(entry.medium);
+      expect(entry.productionAllowed).toBe(true);
+      expect(entry.box.width).toBeGreaterThan(0);
+      expect(entry.box.height).toBeGreaterThan(0);
+      expect(entry.role.trim().length).toBeGreaterThan(0);
+    }
+
+    expect(names).toContain("rail-full.png");
+    expect(names).toContain("top-url-row.png");
+    expect(names).toContain("aang-dock.png");
+    for (const asset of browserHomeLayerAssets) {
+      expect(names).toContain(asset.name);
+    }
   });
 
   it("keeps the top chrome asset slices measured against the mockup", () => {

@@ -24,6 +24,7 @@
     "test": "vitest run",
     "test:desktop": "CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts",
     "qa:browser-home-diff": "tsx scripts/browserHomeVisualDiff.ts",
+    "qa:browser-home-provenance": "tsx scripts/browserHomeProvenanceAudit.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
