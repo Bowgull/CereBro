@@ -515,6 +515,7 @@ async function run() {
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
       if (qaMode === "browser-home") {
         await waitFor(client, "document.querySelector('[aria-label=\"Browser Home medallions\"]') instanceof HTMLElement", 15_000, "browser home medallions");
+        await waitFor(client, "document.querySelector('[aria-label=\"Browser Home top chrome controls\"]') instanceof HTMLElement", 15_000, "browser home top chrome controls");
         const screenshot = await captureCdpScreenshot(client);
         console.log(
           JSON.stringify(

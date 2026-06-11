@@ -13,6 +13,7 @@ import {
   browserHomeMedallionAssetByDomain,
   browserHomeMedallionBoxes,
   browserHomePanelBoxes,
+  browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   type BrowserHomeMeasuredBox,
 } from "@/lib/browserHomeBrandLayout";
@@ -490,6 +491,164 @@ function BrowserHomeAssetStage() {
 
 function browserHomeBoxStyle(box: BrowserHomeMeasuredBox) {
   return browserHomeToPercentBox(box);
+}
+
+function BrowserHomeChromeHitButton({
+  box,
+  label,
+  onClick,
+}: {
+  box: BrowserHomeMeasuredBox;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className="pointer-events-auto absolute rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      style={browserHomeBoxStyle(box)}
+      onClick={onClick}
+    />
+  );
+}
+
+function BrowserHomeChromeOverlay({
+  addressDraft,
+  onAddressDraftChange,
+  onSubmitAddress,
+  onBack,
+  onForward,
+  onReload,
+  onNewTab,
+  onCloseTab,
+  onProtected,
+  onLibrary,
+  onStats,
+  activeMenu,
+  toggleMenu,
+  vpnStatus,
+  vpnBusy,
+  onToggleVpn,
+  onCheckVpn,
+  onOpenVpnSettings,
+}: {
+  addressDraft: string;
+  onAddressDraftChange: (value: string) => void;
+  onSubmitAddress: () => void;
+  onBack: () => void;
+  onForward: () => void;
+  onReload: () => void;
+  onNewTab: () => void;
+  onCloseTab: () => void;
+  onProtected: () => void;
+  onLibrary: () => void;
+  onStats: () => void;
+  activeMenu: BrowserChromeMenu;
+  toggleMenu: (menu: Exclude<BrowserChromeMenu, null>) => void;
+  vpnStatus: NativeVpnStatusResult | null;
+  vpnBusy: boolean;
+  onToggleVpn: () => void;
+  onCheckVpn: () => void;
+  onOpenVpnSettings: () => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30" aria-label="Browser Home top chrome controls">
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.activeTab} label="Select active tab" onClick={() => undefined} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.tabClose} label="Close current tab" onClick={onCloseTab} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.newTab} label="New tab" onClick={onNewTab} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.protectedBadge} label="Protection status" onClick={onProtected} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.back} label="Go back" onClick={onBack} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.forward} label="Go forward" onClick={onForward} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.reload} label="Reload page" onClick={onReload} />
+      <label className="pointer-events-auto absolute rounded-sm" style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.omnibox)}>
+        <span className="sr-only">Browser address and search field</span>
+        <input
+          value={addressDraft}
+          onChange={(event) => onAddressDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            onSubmitAddress();
+          }}
+          className="h-full w-full bg-transparent text-[13px] outline-none"
+          placeholder=""
+          style={{
+            color: B.color.parchment100,
+            caretColor: B.color.gold300,
+            paddingLeft: "48px",
+            paddingRight: "18px",
+            fontFamily: B.font.ui,
+          }}
+        />
+      </label>
+      <details className="pointer-events-auto absolute" open={activeMenu === "shield"} style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.shield)}>
+        <summary
+          className="h-full w-full cursor-pointer list-none rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="VPN shield"
+          onClick={(event) => {
+            event.preventDefault();
+            toggleMenu("shield");
+          }}
+        />
+        <div
+          className="absolute right-0 top-full z-40 mt-1 w-72 rounded p-2 text-[10px] leading-snug"
+          role="menu"
+          style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>VPN Shield</div>
+              <div className="mt-1 text-[12px] font-semibold" style={{ color: vpnStatusTone(vpnStatus) }}>
+                {vpnStatusLabel(vpnStatus, vpnBusy)}
+              </div>
+            </div>
+            <span className="mt-0.5 h-2.5 w-2.5 rounded-full" aria-hidden="true" style={{ background: vpnStatusTone(vpnStatus), boxShadow: `0 0 18px ${vpnStatusTone(vpnStatus)}66` }} />
+          </div>
+          <div className="mt-2" style={{ color: C.textSecondary }}>
+            {vpnStatus?.state === "on"
+              ? "VPN is on."
+              : vpnStatus?.state === "needs_setup"
+                ? "Finish setup once, then the shield can check it."
+                : "Turn it on before private browsing."}
+          </div>
+          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-8 justify-center px-2 text-[11px]" disabled={vpnBusy} role="menuitem" onClick={onToggleVpn}>
+              {vpnPrimaryActionLabel(vpnStatus, vpnBusy)}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-8 px-2 text-[11px]" disabled={vpnBusy} role="menuitem" onClick={onCheckVpn}>
+              Check
+            </Button>
+          </div>
+          <Button type="button" size="sm" variant="ghost" className="mt-1 h-7 w-full justify-start px-1.5 text-[10px]" role="menuitem" onClick={onOpenVpnSettings}>
+            VPN Settings
+          </Button>
+        </div>
+      </details>
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.library} label="Open bookmarks" onClick={onLibrary} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.stats} label="Open browser stats" onClick={onStats} />
+      <details className="pointer-events-auto absolute" open={activeMenu === "pageActions"} style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.pageActions)}>
+        <summary
+          className="h-full w-full cursor-pointer list-none rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="Browser page actions"
+          onClick={(event) => {
+            event.preventDefault();
+            toggleMenu("pageActions");
+          }}
+        />
+        <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+          <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+          <Button type="button" variant="ghost" size="sm" className="h-auto w-full justify-start px-1.5 py-1.5 text-left" role="menuitem" onClick={onOpenVpnSettings}>
+            <span className="block">
+              <span className="block text-[11px] font-semibold">VPN Settings</span>
+              <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Open security setup.</span>
+            </span>
+          </Button>
+        </div>
+      </details>
+    </div>
+  );
 }
 
 function BrowserHomePrimitiveOverlay({
@@ -1549,7 +1708,32 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           onAddBookmark={saveCurrentBrowserBookmark}
         />
       )}
-      <main className={isBrowserHome ? "flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
+      {isBrowserHome && (
+        <BrowserHomeChromeOverlay
+          addressDraft={browserAddressDraft}
+          onAddressDraftChange={(value) => {
+            setBrowserAddressDraft(value);
+            setPreparedApprovalId(null);
+          }}
+          onSubmitAddress={() => void openDailyBrowserPage()}
+          onBack={() => void goBack()}
+          onForward={() => void goForward()}
+          onReload={() => void reloadPage()}
+          onNewTab={createDailyBrowserTab}
+          onCloseTab={() => void closeDailyBrowserTab(selectedDailyBrowserTabId)}
+          onProtected={() => setBrowserNotice("Shield is on. Open shield for details.")}
+          onLibrary={() => setBrowserNotice("Use Edit Pinned to manage Browser Home bookmarks.")}
+          onStats={() => setBrowserNotice("Browser stats are not open on Home yet.")}
+          activeMenu={activeBrowserChromeMenu}
+          toggleMenu={toggleBrowserChromeMenu}
+          vpnStatus={vpnStatus}
+          vpnBusy={vpnBusy}
+          onToggleVpn={() => void toggleVpn()}
+          onCheckVpn={() => void checkVpnStatus()}
+          onOpenVpnSettings={() => onNavigate?.("basement")}
+        />
+      )}
+      <main className={isBrowserHome ? "pointer-events-none flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
         <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-1.5"

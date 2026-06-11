@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-11 0845 ADT
+Last updated: 2026-06-11 1515 ADT
 
 ## Current North Star
 
@@ -53,6 +53,62 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-11 1515 ADT - Browser Home Slice 1 Top Chrome Hitboxes
+
+### What Changed
+- Kept Browser Home visual source restricted to the locked mockup.
+- Added measured Browser Home top-chrome hitboxes in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Added measured-css provenance entries for:
+  - active tab
+  - tab close
+  - new tab
+  - protected badge
+  - back
+  - forward
+  - reload
+  - omnibox
+  - shield
+  - library
+  - stats
+  - page actions
+- Added a `BrowserHomeChromeOverlay` in `app/client/src/components/BrowserPanel.tsx`.
+  - The visible top chrome remains the extracted mockup slice.
+  - The real controls sit in measured transparent hitboxes over the extracted slice.
+  - The old hidden Browser workspace is now `pointer-events-none` on Browser Home so it cannot steal clicks.
+- Updated installed Browser Home smoke to assert the top chrome overlay is mounted.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9463 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup remains `0.09367685967233133`.
+
+### Known Gaps
+- This slice does not visually improve Browser Home. It makes the top chrome interaction layer measured and proven.
+- A direct one-off CDP fill test opened `https://example.com/`, but it hit the older Browser input path in that run. The installed smoke now explicitly checks the new overlay marker so this does not stay ambiguous.
+- The next visual slice should still be measured and narrow:
+  - remove or replace the remaining invented Browser Home center-field CSS with extracted mockup-derived assets or measured CSS.
+  - do not touch panels, Aang dock, or whole-app branding until that slice passes.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, app/scripts/browserHomeProvenanceAudit.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home Slice 1 added measured top-chrome hitboxes over the extracted mockup chrome and disabled the old hidden workspace pointer events on Home. The installed smoke now asserts `[aria-label="Browser Home top chrome controls"]`. Current diff ratio is still `0.09367685967233133`, so do not claim visual 1:1. Next slice should replace the center field/title/star-map area from the locked mockup without invented CSS decoration.
+```
 
 ## 2026-06-11 0845 ADT - Browser Home Provenance Gate
 

@@ -13,6 +13,20 @@ export type BrowserHomePanelBox = BrowserHomeMeasuredBox & {
   title: string;
 };
 
+export type BrowserHomeTopChromeHitBoxName =
+  | "activeTab"
+  | "tabClose"
+  | "newTab"
+  | "protectedBadge"
+  | "back"
+  | "forward"
+  | "reload"
+  | "omnibox"
+  | "shield"
+  | "library"
+  | "stats"
+  | "pageActions";
+
 export type BrowserHomeProvenanceMedium = "raster" | "measured-css" | "traced-svg" | "external-ai-reference";
 
 export type BrowserHomeVisualProvenance = {
@@ -69,6 +83,33 @@ function rasterProvenance(name: string, box: BrowserHomeMeasuredBox, role: strin
   };
 }
 
+function measuredCssProvenance(name: string, box: BrowserHomeMeasuredBox, role: string): BrowserHomeVisualProvenance {
+  return {
+    name,
+    source: lockedSource,
+    sourceSha256: lockedSourceSha256,
+    box,
+    role,
+    medium: "measured-css",
+    productionAllowed: true,
+  };
+}
+
+export const browserHomeTopChromeHitBoxes: Record<BrowserHomeTopChromeHitBoxName, BrowserHomeMeasuredBox> = {
+  activeTab: { left: 205, top: 14, width: 203, height: 47 },
+  tabClose: { left: 367, top: 22, width: 28, height: 28 },
+  newTab: { left: 419, top: 16, width: 48, height: 42 },
+  protectedBadge: { left: 1290, top: 18, width: 104, height: 38 },
+  back: { left: 50, top: 76, width: 42, height: 42 },
+  forward: { left: 99, top: 76, width: 42, height: 42 },
+  reload: { left: 148, top: 76, width: 42, height: 42 },
+  omnibox: { left: 194, top: 70, width: 948, height: 44 },
+  shield: { left: 1164, top: 70, width: 50, height: 50 },
+  library: { left: 1228, top: 72, width: 48, height: 48 },
+  stats: { left: 1292, top: 72, width: 48, height: 48 },
+  pageActions: { left: 1356, top: 72, width: 48, height: 48 },
+};
+
 export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("rail-full.png", { left: 0, top: 60, width: 145, height: 932 }, "Full left rail texture and frame."),
   rasterProvenance("rail-keep.png", { left: 16, top: 70, width: 118, height: 185 }, "Keep rail button asset."),
@@ -79,6 +120,18 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-tabs.png", { left: 0, top: 0, width: 1585, height: 61 }, "Top title and tab strip frame."),
   rasterProvenance("top-title-tabs-panel.png", { left: 145, top: 0, width: 1440, height: 61 }, "Top title and tab strip frame in Browser panel coordinates."),
   rasterProvenance("top-url-row.png", { left: 145, top: 61, width: 1440, height: 65 }, "URL/search row with action controls."),
+  measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
+  measuredCssProvenance("top-chrome-hitbox-tab-close", browserHomeTopChromeHitBoxes.tabClose, "Measured active tab close target."),
+  measuredCssProvenance("top-chrome-hitbox-new-tab", browserHomeTopChromeHitBoxes.newTab, "Measured new tab click target."),
+  measuredCssProvenance("top-chrome-hitbox-protected-badge", browserHomeTopChromeHitBoxes.protectedBadge, "Measured protection status target."),
+  measuredCssProvenance("top-chrome-hitbox-back", browserHomeTopChromeHitBoxes.back, "Measured back navigation target."),
+  measuredCssProvenance("top-chrome-hitbox-forward", browserHomeTopChromeHitBoxes.forward, "Measured forward navigation target."),
+  measuredCssProvenance("top-chrome-hitbox-reload", browserHomeTopChromeHitBoxes.reload, "Measured reload target."),
+  measuredCssProvenance("top-chrome-hitbox-omnibox", browserHomeTopChromeHitBoxes.omnibox, "Measured address and search input target."),
+  measuredCssProvenance("top-chrome-hitbox-shield", browserHomeTopChromeHitBoxes.shield, "Measured shield menu target."),
+  measuredCssProvenance("top-chrome-hitbox-library", browserHomeTopChromeHitBoxes.library, "Measured library action target."),
+  measuredCssProvenance("top-chrome-hitbox-stats", browserHomeTopChromeHitBoxes.stats, "Measured browser stats action target."),
+  measuredCssProvenance("top-chrome-hitbox-page-actions", browserHomeTopChromeHitBoxes.pageActions, "Measured page actions menu target."),
   rasterProvenance("medallion-github.png", { left: 654, top: 145, width: 48, height: 48 }, "Pinned GitHub medallion."),
   rasterProvenance("medallion-obsidian.png", { left: 715, top: 145, width: 48, height: 48 }, "Pinned Obsidian medallion."),
   rasterProvenance("medallion-youtube.png", { left: 779, top: 145, width: 48, height: 48 }, "Pinned YouTube medallion."),

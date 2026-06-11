@@ -11,6 +11,7 @@ import {
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
   browserHomePanelBoxes,
+  browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   browserHomeVisualProvenance,
 } from "@/lib/browserHomeBrandLayout";
@@ -33,7 +34,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(29);
+    expect(browserHomeVisualProvenance).toHaveLength(29 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -50,6 +51,8 @@ describe("browserHomeBrandLayout", () => {
 
     expect(names).toContain("rail-full.png");
     expect(names).toContain("top-url-row.png");
+    expect(names).toContain("top-chrome-hitbox-omnibox");
+    expect(names).toContain("top-chrome-hitbox-shield");
     expect(names).toContain("aang-dock.png");
     for (const asset of browserHomeLayerAssets) {
       expect(names).toContain(asset.name);
@@ -61,6 +64,23 @@ describe("browserHomeBrandLayout", () => {
       { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
       { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
     ]);
+  });
+
+  it("locks the Browser Home top chrome interactive hitboxes", () => {
+    expect(browserHomeTopChromeHitBoxes).toEqual({
+      activeTab: { left: 205, top: 14, width: 203, height: 47 },
+      tabClose: { left: 367, top: 22, width: 28, height: 28 },
+      newTab: { left: 419, top: 16, width: 48, height: 42 },
+      protectedBadge: { left: 1290, top: 18, width: 104, height: 38 },
+      back: { left: 50, top: 76, width: 42, height: 42 },
+      forward: { left: 99, top: 76, width: 42, height: 42 },
+      reload: { left: 148, top: 76, width: 42, height: 42 },
+      omnibox: { left: 194, top: 70, width: 948, height: 44 },
+      shield: { left: 1164, top: 70, width: 50, height: 50 },
+      library: { left: 1228, top: 72, width: 48, height: 48 },
+      stats: { left: 1292, top: 72, width: 48, height: 48 },
+      pageActions: { left: 1356, top: 72, width: 48, height: 48 },
+    });
   });
 
   it("locks the pinned medallion rail and add medallion coordinates", () => {
