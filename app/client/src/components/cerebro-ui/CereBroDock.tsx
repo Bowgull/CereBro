@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { cerebroBrand as B } from "@/lib/cerebroTheme";
 
 type CereBroDockProps = {
@@ -6,9 +6,10 @@ type CereBroDockProps = {
   children: ReactNode;
   actions?: ReactNode;
   className?: string;
+  style?: CSSProperties;
 };
 
-export function CereBroDock({ avatar, children, actions, className = "" }: CereBroDockProps) {
+export function CereBroDock({ avatar, children, actions, className = "", style }: CereBroDockProps) {
   return (
     <div
       className={`grid min-h-[86px] grid-cols-[72px_minmax(0,1fr)_auto] items-center gap-3 rounded-[var(--cb-radius-frame)] px-3 py-2 ${className}`}
@@ -17,6 +18,7 @@ export function CereBroDock({ avatar, children, actions, className = "" }: CereB
         border: `1px solid ${B.line.brassSoft}`,
         boxShadow: "0 -18px 46px rgba(0, 0, 0, 0.5)",
         color: B.color.parchment100,
+        ...style,
       }}
     >
       <div

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CereBroButton, CereBroCard, CereBroDock, CereBroMedallion, CereBroPanel } from "@/components/cerebro-ui";
+import { cerebroBrand as B } from "@/lib/cerebroTheme";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
 import type { NativeBrowserPageEvent, NativeBrowserSiteSettings } from "../../../shared/nativeBrowser";
@@ -48,25 +50,40 @@ const browserHomeAssetSource = { width: 1440, height: 992 };
 const browserHomeLayerAssets = [
   { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
   { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
-  { name: "medallion-github.png", left: 509, top: 145, width: 48, height: 48 },
-  { name: "medallion-obsidian.png", left: 570, top: 145, width: 48, height: 48 },
-  { name: "medallion-youtube.png", left: 634, top: 145, width: 48, height: 48 },
-  { name: "medallion-x.png", left: 699, top: 145, width: 48, height: 48 },
-  { name: "medallion-reddit.png", left: 763, top: 145, width: 48, height: 48 },
-  { name: "medallion-hn.png", left: 826, top: 145, width: 48, height: 48 },
-  { name: "medallion-add.png", left: 890, top: 145, width: 48, height: 48 },
-  { name: "bookmark-card-github.png", left: 85, top: 458, width: 180, height: 116 },
-  { name: "bookmark-card-obsidian.png", left: 280, top: 458, width: 170, height: 116 },
-  { name: "bookmark-card-youtube.png", left: 464, top: 458, width: 152, height: 116 },
-  { name: "bookmark-card-x.png", left: 630, top: 458, width: 147, height: 116 },
-  { name: "bookmark-card-reddit.png", left: 824, top: 458, width: 116, height: 116 },
-  { name: "bookmark-card-hn.png", left: 955, top: 458, width: 147, height: 116 },
-  { name: "bookmark-card-add.png", left: 1115, top: 458, width: 152, height: 116 },
-  { name: "panel-continue.png", left: 85, top: 604, width: 384, height: 224 },
-  { name: "panel-recent.png", left: 491, top: 604, width: 392, height: 224 },
-  { name: "panel-downloads.png", left: 906, top: 604, width: 368, height: 224 },
-  { name: "aang-dock.png", left: 13, top: 846, width: 1397, height: 119 },
 ];
+
+const browserHomeMedallionBoxes = [
+  { left: 509, top: 145, width: 48, height: 48 },
+  { left: 570, top: 145, width: 48, height: 48 },
+  { left: 634, top: 145, width: 48, height: 48 },
+  { left: 699, top: 145, width: 48, height: 48 },
+  { left: 763, top: 145, width: 48, height: 48 },
+  { left: 826, top: 145, width: 48, height: 48 },
+];
+
+const browserHomeCardBoxes = [
+  { left: 85, top: 458, width: 180, height: 116 },
+  { left: 280, top: 458, width: 170, height: 116 },
+  { left: 464, top: 458, width: 152, height: 116 },
+  { left: 630, top: 458, width: 147, height: 116 },
+  { left: 824, top: 458, width: 116, height: 116 },
+  { left: 955, top: 458, width: 147, height: 116 },
+];
+
+const browserHomePanelBoxes = [
+  { title: "Continue browsing", left: 85, top: 604, width: 384, height: 224 },
+  { title: "Recent", left: 491, top: 604, width: 392, height: 224 },
+  { title: "Downloads", left: 906, top: 604, width: 368, height: 224 },
+];
+
+const browserHomeMedallionAssetByDomain: Record<string, string> = {
+  "github.com": "/browser-home/assets/medallion-github.png",
+  "obsidian.md": "/browser-home/assets/medallion-obsidian.png",
+  "youtube.com": "/browser-home/assets/medallion-youtube.png",
+  "x.com": "/browser-home/assets/medallion-x.png",
+  "reddit.com": "/browser-home/assets/medallion-reddit.png",
+  "news.ycombinator.com": "/browser-home/assets/medallion-hn.png",
+};
 
 function faviconUrl(domain: string, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=${size}`;
@@ -565,9 +582,6 @@ function BrowserHomeAssetStage() {
       <div className="absolute left-[5.9%] top-[42.5%] text-[16px]" style={{ color: "#e6c284", fontFamily: "Georgia, serif" }}>
         Pinned
       </div>
-      <div className="absolute left-[78.2%] top-[42.4%] rounded px-3 py-1 text-[12px]" style={{ color: "#e6c284", border: "1px solid rgba(198, 155, 85, 0.42)", background: "rgba(7, 11, 10, 0.78)", fontFamily: "Georgia, serif" }}>
-        Edit Pinned
-      </div>
       {browserHomeLayerAssets.map((asset) => (
         <img
           key={asset.name}
@@ -583,6 +597,189 @@ function BrowserHomeAssetStage() {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function browserHomeBoxStyle(box: { left: number; top: number; width: number; height: number }) {
+  return {
+    position: "absolute" as const,
+    left: `${(box.left / browserHomeAssetSource.width) * 100}%`,
+    top: `${(box.top / browserHomeAssetSource.height) * 100}%`,
+    width: `${(box.width / browserHomeAssetSource.width) * 100}%`,
+    height: `${(box.height / browserHomeAssetSource.height) * 100}%`,
+  };
+}
+
+function BrowserHomePrimitiveOverlay({
+  pins,
+  aangDraft,
+  onAangDraftChange,
+  onSubmitAang,
+  onOpenTarget,
+  onAddBookmark,
+}: {
+  pins: { key: string; label: string; target: string; domain: string; saved: boolean }[];
+  aangDraft: string;
+  onAangDraftChange: (value: string) => void;
+  onSubmitAang: () => void;
+  onOpenTarget: (target: string) => void;
+  onAddBookmark: () => void;
+}) {
+  const visiblePins = pins.slice(0, 6);
+  const panelRows = [
+    {
+      title: "Continue browsing",
+      rows: [
+        { label: "electron / electron", meta: "github.com  ·  2m ago", target: "https://github.com/electron/electron", icon: "GH" },
+        { label: "CereBro Shell", meta: "docs.cerebro.app  ·  18m ago", target: "https://docs.cerebro.app", icon: "CB" },
+        { label: "MDN Web Docs", meta: "developer.mozilla.org  ·  1h ago", target: "https://developer.mozilla.org", icon: "MDN" },
+      ],
+    },
+    {
+      title: "Recent",
+      rows: [
+        { label: "Awesome Lists", meta: "github.com  ·  2h ago", target: "https://github.com/sindresorhus/awesome", icon: "GH" },
+        { label: "Design Systems", meta: "designsystems.com  ·  3h ago", target: "https://www.designsystems.com", icon: "DS" },
+        { label: "Deep Work", meta: "calnewport.com  ·  Yesterday", target: "https://en.wikipedia.org/wiki/Deep_Work", icon: "DW" },
+      ],
+    },
+    {
+      title: "Downloads",
+      rows: [
+        { label: "CereBro-Setup.dmg", meta: "120 MB  ·  Done", target: null, icon: "DMG" },
+        { label: "project-brief.pdf", meta: "2.4 MB  ·  1h ago", target: null, icon: "PDF" },
+        { label: "notes.zip", meta: "8.7 MB  ·  Yesterday", target: null, icon: "ZIP" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="absolute inset-0 z-20 overflow-hidden" aria-label="Browser Home controls">
+      {visiblePins.map((pin, index) => {
+        const box = browserHomeMedallionBoxes[index];
+        if (!box) return null;
+
+        return (
+          <CereBroMedallion
+            key={`browser-home-medallion-${pin.key}`}
+            label={`Open bookmark ${pin.label}`}
+            imageSrc={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 64)}
+            active={pin.saved}
+            onClick={() => onOpenTarget(pin.target)}
+            className="absolute"
+            style={browserHomeBoxStyle(box)}
+          />
+        );
+      })}
+      <CereBroMedallion
+        label="Add pinned bookmark"
+        imageSrc="/browser-home/assets/medallion-add.png"
+        onClick={onAddBookmark}
+        className="absolute"
+        style={browserHomeBoxStyle({ left: 890, top: 145, width: 48, height: 48 })}
+      />
+
+      {visiblePins.map((pin, index) => {
+        const box = browserHomeCardBoxes[index];
+        if (!box) return null;
+
+        return (
+          <CereBroCard
+            key={`browser-home-card-${pin.key}`}
+            aria-label={`Open pinned bookmark ${pin.label}`}
+            title={pin.label}
+            icon={<img src={faviconUrl(pin.domain, 96)} alt="" className="h-9 w-9 rounded object-contain" draggable={false} />}
+            active={pin.saved}
+            onClick={() => onOpenTarget(pin.target)}
+            className="absolute"
+            style={browserHomeBoxStyle(box)}
+          />
+        );
+      })}
+      <CereBroCard
+        aria-label="Add current page bookmark"
+        title="Add"
+        icon={<Plus size={28} strokeWidth={1.6} aria-hidden="true" />}
+        onClick={onAddBookmark}
+        className="absolute"
+        style={browserHomeBoxStyle({ left: 1115, top: 458, width: 152, height: 116 })}
+      />
+
+      <CereBroButton
+        type="button"
+        variant="ghost"
+        icon={<Pencil size={12} strokeWidth={1.8} aria-hidden="true" />}
+        onClick={onAddBookmark}
+        className="absolute h-auto min-h-0 px-3 py-1"
+        style={browserHomeBoxStyle({ left: 1126, top: 421, width: 112, height: 31 })}
+      >
+        Edit Pinned
+      </CereBroButton>
+
+      {browserHomePanelBoxes.map((box, index) => {
+        const group = panelRows[index];
+
+        return (
+          <CereBroPanel
+            key={`browser-home-panel-${box.title}`}
+            title={group.title}
+            action={<CereBroButton type="button" variant="ghost" className="h-6 min-h-0 px-2 text-[10px]">View all</CereBroButton>}
+            className="absolute"
+            style={browserHomeBoxStyle(box)}
+          >
+            <div className="grid gap-1">
+              {group.rows.map((row) => (
+                <button
+                  key={row.label}
+                  type="button"
+                  disabled={!row.target}
+                  onClick={() => row.target && onOpenTarget(row.target)}
+                  className="grid grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded-sm px-1 py-1.5 text-left disabled:cursor-default"
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded text-[10px] font-bold" style={{ background: B.surface.address, border: `1px solid ${B.line.brassSoft}`, color: B.color.gold300 }}>
+                    {row.icon}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] font-semibold" style={{ color: B.color.parchment100 }}>{row.label}</span>
+                    <span className="block truncate text-[10px]" style={{ color: B.color.muted500 }}>{row.meta}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </CereBroPanel>
+        );
+      })}
+
+      <CereBroDock
+        className="absolute"
+        style={browserHomeBoxStyle({ left: 13, top: 846, width: 1397, height: 119 })}
+        avatar={<img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-[58px] max-w-none object-contain [image-rendering:pixelated]" draggable={false} />}
+        actions={
+          <>
+            <CereBroButton type="button" variant="ghost" aria-label="Attach image for Aang" className="h-12 w-12 px-0">
+              <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
+            </CereBroButton>
+            <CereBroButton type="button" variant="active" aria-label="Send to Aang" className="h-12 w-12 px-0" onClick={onSubmitAang}>
+              <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
+            </CereBroButton>
+          </>
+        }
+      >
+        <Input
+          aria-label="Ask Aang from Browser Home"
+          value={aangDraft}
+          onChange={(event) => onAangDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            onSubmitAang();
+          }}
+          placeholder="Ask Aang anything or run a command..."
+          className="h-12 min-w-0 text-[12px]"
+          style={{ background: B.surface.address, border: `1px solid ${B.line.brass}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
+        />
+      </CereBroDock>
     </div>
   );
 }
@@ -1460,8 +1657,11 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
       {isBrowserHome && <BrowserHomeAssetStage />}
       {isBrowserHome && (
-        <BrowserHomeClickMap
+        <BrowserHomePrimitiveOverlay
           pins={browserMedallions}
+          aangDraft={browserAangDraft}
+          onAangDraftChange={setBrowserAangDraft}
+          onSubmitAang={submitBrowserAangDraft}
           onOpenTarget={(target) => void openDailyBrowserTarget(target)}
           onAddBookmark={saveCurrentBrowserBookmark}
         />

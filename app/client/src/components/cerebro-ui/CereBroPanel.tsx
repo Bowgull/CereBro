@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { cerebroBrand as B } from "@/lib/cerebroTheme";
 import { CereBroCorners } from "./CereBroOrnaments";
 
@@ -7,9 +7,10 @@ type CereBroPanelProps = {
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 };
 
-export function CereBroPanel({ title, action, children, className = "" }: CereBroPanelProps) {
+export function CereBroPanel({ title, action, children, className = "", style }: CereBroPanelProps) {
   return (
     <section
       className={`relative overflow-hidden rounded-[var(--cb-radius-frame)] p-3 ${className}`}
@@ -18,6 +19,7 @@ export function CereBroPanel({ title, action, children, className = "" }: CereBr
         border: `1px solid ${B.line.brassSoft}`,
         boxShadow: B.shadow.bevel,
         color: B.color.parchment100,
+        ...style,
       }}
     >
       <CereBroCorners />
