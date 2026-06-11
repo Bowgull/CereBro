@@ -1,0 +1,50 @@
+:root {
+  --cb-ink-950: #020505;
+  --cb-ink-900: #050908;
+  --cb-ink-850: #07100e;
+  --cb-ink-800: #0a1714;
+  --cb-green-950: #03120f;
+  --cb-green-900: #08241d;
+  --cb-green-800: #103b2f;
+  --cb-green-700: #1c5545;
+  --cb-green-600: #6cae74;
+  --cb-gold-800: #5f4120;
+  --cb-gold-700: #8f6330;
+  --cb-gold-500: #c69b55;
+  --cb-gold-300: #e6c284;
+  --cb-parchment-100: #f4efe3;
+  --cb-parchment-200: #ead7ad;
+  --cb-parchment-300: #d2aa69;
+  --cb-muted-500: #8c8a7e;
+  --cb-muted-600: #6f726b;
+  --cb-danger-500: #d56b52;
+  --cb-line-brass: rgba(198, 155, 85, 0.42);
+  --cb-line-brass-soft: rgba(198, 155, 85, 0.22);
+  --cb-line-green-soft: rgba(77, 170, 154, 0.24);
+  --cb-shadow-shell: 0 24px 70px rgba(0, 0, 0, 0.52);
+  --cb-shadow-bevel: inset 0 1px 0 rgba(244, 239, 227, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.68);
+  --cb-shadow-inset-deep: inset 0 1px 44px rgba(0, 0, 0, 0.56);
+  --cb-radius-frame: 4px;
+  --cb-radius-control: 6px;
+  --cb-radius-medallion: 999px;
+  --cb-font-display: Georgia, "Times New Roman", serif;
+  --cb-font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --cb-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.cerebro-brand-root {
+  color: var(--cb-parchment-100);
+  background: var(--cb-ink-950);
+}
+
+.cerebro-stone-field {
+  background:
+    radial-gradient(circle at 52% 36%, rgba(214, 158, 67, 0.12), transparent 26%),
+    repeating-radial-gradient(circle at 53% 36%, rgba(198, 155, 85, 0.1) 0 1px, transparent 1px 42px),
+    linear-gradient(180deg, var(--cb-ink-850), var(--cb-ink-950));
+}
+
+.cerebro-brass-bevel {
+  border: 1px solid var(--cb-line-brass);
+  box-shadow: var(--cb-shadow-bevel);
+}

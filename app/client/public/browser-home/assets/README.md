@@ -16,6 +16,8 @@ Use these files as component assets.
 
 Do not use a full-screen mockup image as the interactive UI. Browser controls, bookmarks, tabs, rail buttons, panels, and Aang dock controls need real DOM elements with these assets as their visual materials.
 
+Long term, these cutouts are reference material and texture/art sources. CSS, SVG, and React primitives own layout and structure.
+
 ## First Replacement Targets
 
 - `rail-*.png` for real left rail buttons.

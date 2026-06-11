@@ -5,34 +5,36 @@
 // user-orb on the dais. Every other chamber is character-coded with its own
 // vibe, accent color, and themed objects.
 
+import { cerebroBrand } from "./cerebroTheme";
+
 export const cerebroColors = {
-  background: "#0E1116",
-  backgroundSoft: "#131821",
-  surface: "#181F2A",
-  surfaceRaised: "#202A38",
-  surfaceMuted: "#151A23",
-  border: "#334155",
-  borderSoft: "#253041",
-  textPrimary: "#F4EFE3",
-  textSecondary: "#B8C0CC",
-  textMuted: "#7E8898",
-  accent: "#6BA6FF",
-  accentSoft: "#2D5B8F",
+  background: cerebroBrand.color.ink950,
+  backgroundSoft: cerebroBrand.color.ink900,
+  surface: cerebroBrand.color.ink850,
+  surfaceRaised: cerebroBrand.color.ink800,
+  surfaceMuted: cerebroBrand.color.green950,
+  border: cerebroBrand.color.gold800,
+  borderSoft: cerebroBrand.color.green800,
+  textPrimary: cerebroBrand.color.parchment100,
+  textSecondary: cerebroBrand.color.parchment200,
+  textMuted: cerebroBrand.color.muted500,
+  accent: cerebroBrand.color.green600,
+  accentSoft: cerebroBrand.color.green800,
   accentViolet: "#8B5CF6",
   glowViolet: "#A78BFA",
-  success: "#9FD2B7",
-  warning: "#F6C177",
-  danger: "#EF6F6C",
+  success: cerebroBrand.color.green600,
+  warning: cerebroBrand.color.gold300,
+  danger: cerebroBrand.color.danger500,
   blocked: "#7F1D1D",
-  gold: "#D9B56A",
+  gold: cerebroBrand.color.gold500,
   stone: "#6B7280",
 
   // Castle stone palette
-  stoneWall:    "#1A1F2A",
-  stoneWallHi:  "#252C3B",
-  stoneWallLo:  "#10131B",
-  stoneMortar:  "#2A3340",
-  parapet:      "#1F2632",
+  stoneWall:    cerebroBrand.color.ink850,
+  stoneWallHi:  cerebroBrand.color.ink800,
+  stoneWallLo:  cerebroBrand.color.ink950,
+  stoneMortar:  cerebroBrand.color.green800,
+  parapet:      cerebroBrand.color.ink900,
 } as const;
 
 export const cerebroTheme = {
