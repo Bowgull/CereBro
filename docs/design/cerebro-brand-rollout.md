@@ -12,16 +12,18 @@
 
 | Surface | Status | Notes |
 | --- | --- | --- |
-| Global shell rail | primitive-backed | Uses rail assets. Needs SVG/CSS rail variant. |
+| Global theme tokens | primitive-backed | Root CSS variables, shared buttons, and dropdowns use CereBro ink/brass/green. Needs full form/table sweep. |
+| Global shell rail | primitive-backed | Uses rail assets. Needs SVG/CSS rail variant and better proportional lock. |
+| Hosted panel frame | primitive-backed | PanelHost wraps app panels in CereBroFrame. Internal panel surfaces still need route-by-route cleanup. |
 | Browser Home | primitive-backed | Uses composed assets and real DOM. Needs backplate and medallion rail pass. |
 | Loaded browser chrome | not-started | Must stop reverting to old language. |
 | Aang dock | primitive-backed | Uses raster dock. Needs dock primitive. |
-| Workbench | not-started | High priority. |
-| Keep | not-started | Must inherit rail and frame. |
-| Workshop | not-started | Must inherit panel/card primitives. |
-| Ledger | not-started | Must inherit table/list primitives. |
-| Basement | not-started | Must inherit safety panel primitives. |
-| Settings | not-started | Must inherit form primitives. |
+| Workbench | tokenized | Inherits root controls and hosted frame. Needs internal panel/card/table primitives. |
+| Keep | tokenized | Inherits root controls. Needs measured rail/frame pass. |
+| Workshop | tokenized | Inherits root controls and hosted frame. Needs panel/card primitives. |
+| Ledger | tokenized | Inherits root controls. Needs table/list primitives. |
+| Basement | tokenized | Inherits root controls. Needs safety panel primitives. |
+| Settings | tokenized | Inherits root controls. Needs form primitives. |
 | Empty/error/loading states | not-started | Must be branded, not shadcn defaults. |
 
 ## Current Locked Reference

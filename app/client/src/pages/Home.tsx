@@ -42,6 +42,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
+import { CereBroFrame } from "@/components/cerebro-ui";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
@@ -1029,9 +1030,19 @@ function StubView({ title, phase }: { title: string; phase: string }) {
 //    children render in the workspace area instead of overlaying the castle.
 function PanelHost({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full w-full relative overflow-hidden" style={{ background: C.background }}>
-      {children}
-    </div>
+    <CereBroFrame
+      variant="panel"
+      className="h-full w-full"
+      style={{
+        borderRadius: 0,
+        border: 0,
+        boxShadow: "inset 0 0 0 1px rgba(198, 155, 85, 0.18), inset 0 0 80px rgba(0, 0, 0, 0.48)",
+      }}
+    >
+      <div className="relative h-full w-full overflow-hidden">
+        {children}
+      </div>
+    </CereBroFrame>
   );
 }
 

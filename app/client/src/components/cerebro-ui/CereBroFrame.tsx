@@ -30,7 +30,7 @@ export function CereBroFrame({ children, variant = "shell", className = "", styl
       }}
     >
       <CereBroCorners />
-      <div className="relative z-[1]">{children}</div>
+      <div className="relative z-[1] h-full min-h-0">{children}</div>
     </section>
   );
 }

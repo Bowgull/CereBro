@@ -5,23 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex min-w-0 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border text-[11px] font-medium leading-none transition-[background-color,border-color,color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-[#253041] disabled:bg-[#151A23] disabled:text-[#7E8898] disabled:opacity-70 disabled:shadow-none aria-busy:pointer-events-none aria-invalid:border-[#EF6F6C] aria-invalid:ring-2 aria-invalid:ring-[#EF6F6C]/30 aria-invalid:ring-offset-1 aria-invalid:ring-offset-[#0E1116] focus-visible:border-[#6BA6FF] focus-visible:ring-2 focus-visible:ring-[#6BA6FF]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#0E1116] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
+  "inline-flex min-w-0 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded border text-[11px] font-medium leading-none transition-[background-color,border-color,color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:border-[rgba(198,155,85,0.16)] disabled:bg-[#050908] disabled:text-[#6f726b] disabled:opacity-70 disabled:shadow-none aria-busy:pointer-events-none aria-invalid:border-[#d56b52] aria-invalid:ring-2 aria-invalid:ring-[#d56b52]/30 aria-invalid:ring-offset-1 aria-invalid:ring-offset-[#020505] focus-visible:border-[#c69b55] focus-visible:ring-2 focus-visible:ring-[#c69b55]/45 focus-visible:ring-offset-1 focus-visible:ring-offset-[#020505] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
         default:
-          "border-[#6BA6FF] bg-[#6BA6FF] text-[#0E1116] hover:bg-[#6BA6FF]/85",
+          "border-[#c69b55] bg-[#c69b55] text-[#020505] hover:bg-[#e6c284]",
         destructive:
-          "border-[#EF6F6C] bg-[#7F1D1D] text-[#F4EFE3] hover:bg-[#EF6F6C] hover:text-[#0E1116] focus-visible:border-[#EF6F6C] focus-visible:ring-[#EF6F6C]/35",
+          "border-[#d56b52] bg-[#7F1D1D] text-[#F4EFE3] hover:bg-[#d56b52] hover:text-[#020505] focus-visible:border-[#d56b52] focus-visible:ring-[#d56b52]/35",
         risk:
-          "border-[#F6C177] bg-[#F6C177]/10 text-[#F6C177] hover:bg-[#F6C177] hover:text-[#0E1116] focus-visible:border-[#F6C177] focus-visible:ring-[#F6C177]/35",
+          "border-[#e6c284] bg-[#e6c284]/10 text-[#e6c284] hover:bg-[#e6c284] hover:text-[#020505] focus-visible:border-[#e6c284] focus-visible:ring-[#e6c284]/35",
         outline:
-          "border-[#334155] bg-[#151A23] text-[#F4EFE3] hover:border-[#6BA6FF] hover:bg-[#202A38]",
+          "border-[rgba(198,155,85,0.42)] bg-[#050908] text-[#F4EFE3] hover:border-[#c69b55] hover:bg-[#0a1714]",
         secondary:
-          "border-[#334155] bg-[#202A38] text-[#F4EFE3] hover:border-[#D9B56A] hover:bg-[#151A23]",
+          "border-[rgba(198,155,85,0.32)] bg-[#0a1714] text-[#F4EFE3] hover:border-[#c69b55] hover:bg-[#07100e]",
         ghost:
-          "border-transparent bg-transparent text-[#B8C0CC] hover:border-[#253041] hover:bg-[#151A23] hover:text-[#F4EFE3]",
-        link: "border-transparent bg-transparent px-0 text-[#6BA6FF] underline-offset-4 hover:text-[#F4EFE3] hover:underline",
+          "border-transparent bg-transparent text-[#8c8a7e] hover:border-[rgba(198,155,85,0.22)] hover:bg-[#050908] hover:text-[#F4EFE3]",
+        link: "border-transparent bg-transparent px-0 text-[#e6c284] underline-offset-4 hover:text-[#F4EFE3] hover:underline",
       },
       size: {
         default: "h-7 px-2.5 py-1 has-[>svg]:px-2",
