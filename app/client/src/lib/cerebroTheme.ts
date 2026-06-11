@@ -26,10 +26,19 @@ export const cerebroBrand = {
     greenSoft: "rgba(77, 170, 154, 0.24)",
   },
   surface: {
+    app: `
+      radial-gradient(circle at 82% 8%, rgba(198, 155, 85, 0.16), transparent 24%),
+      radial-gradient(circle at 18% 12%, rgba(77, 170, 154, 0.14), transparent 28%),
+      linear-gradient(138deg, rgba(244, 239, 227, 0.04) 0 1px, transparent 1px 38px),
+      linear-gradient(42deg, rgba(77, 170, 154, 0.05) 0 1px, transparent 1px 54px),
+      #050806
+    `,
     shell: "radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.16), transparent 20%), linear-gradient(145deg, rgba(12, 15, 14, 0.99), rgba(3, 7, 7, 0.99))",
     address: "linear-gradient(180deg, rgba(2, 7, 7, 0.98), rgba(8, 15, 14, 0.98))",
     plaque: "linear-gradient(180deg, rgba(42, 46, 38, 0.96), rgba(8, 18, 16, 0.98))",
     plaqueActive: "linear-gradient(180deg, rgba(48, 71, 59, 0.98), rgba(12, 30, 26, 0.98))",
+    rail: "linear-gradient(180deg, rgba(2, 25, 20, 0.98), rgba(3, 15, 13, 0.99) 44%, rgba(2, 8, 8, 0.99))",
+    railActive: "radial-gradient(circle at 10% 50%, rgba(108, 174, 116, 0.3), transparent 34%), linear-gradient(180deg, rgba(24, 61, 47, 0.98), rgba(8, 35, 29, 0.98))",
     page: "radial-gradient(circle at 50% 0%, rgba(77, 170, 154, 0.08), transparent 32%), repeating-linear-gradient(0deg, rgba(244, 239, 227, 0.018) 0 1px, transparent 1px 4px), linear-gradient(180deg, rgba(6, 10, 11, 0.99), rgba(2, 5, 6, 0.99))",
     stoneField: "radial-gradient(circle at 52% 36%, rgba(214, 158, 67, 0.12), transparent 26%), repeating-radial-gradient(circle at 53% 36%, rgba(198, 155, 85, 0.1) 0 1px, transparent 1px 42px), linear-gradient(180deg, #07100e, #020505)",
   },

@@ -572,7 +572,16 @@ function BrowserHomePrimitiveOverlay({
             key={`browser-home-card-${pin.key}`}
             aria-label={`Open pinned bookmark ${pin.label}`}
             title={pin.label}
-            icon={<img src={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 96)} alt="" className="h-11 w-11 rounded-full object-contain" draggable={false} />}
+            icon={
+              <span className="relative grid h-11 w-11 place-items-center rounded-full" style={{ background: "radial-gradient(circle, rgba(230, 194, 132, 0.14), rgba(2, 5, 5, 0.02) 70%)" }}>
+                <img
+                  src={faviconUrl(pin.domain, 96)}
+                  alt=""
+                  className="relative z-[1] h-8 w-8 rounded object-contain"
+                  draggable={false}
+                />
+              </span>
+            }
             active={pin.saved}
             onClick={() => onOpenTarget(pin.target)}
             className="absolute"
@@ -637,7 +646,7 @@ function BrowserHomePrimitiveOverlay({
       <CereBroDock
         className="absolute"
         style={browserHomeBoxStyle(browserHomeDockBox)}
-        avatar={<img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-[58px] max-w-none object-contain [image-rendering:pixelated]" draggable={false} />}
+        avatar={<img src="/browser-home/assets/aang-avatar-medallion.png" alt="" className="h-[66px] w-[66px] max-w-none rounded-full object-contain" draggable={false} />}
         actions={
           <>
             <CereBroButton type="button" variant="ghost" aria-label="Attach image for Aang" className="h-12 w-12 px-0">
