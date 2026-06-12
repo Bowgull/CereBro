@@ -22,6 +22,7 @@ import {
   browserHomePinnedRowBackplateBox,
   browserHomeProtectedBadgeBox,
   browserHomeSideToggleHitBoxes,
+  browserHomeTitleIdentityBox,
   browserHomeTopChromeHitBoxes,
   browserHomeTopTitleAssets,
   browserHomeTopTitleBackplateBox,
@@ -514,6 +515,43 @@ function BrowserHomeAssetStage() {
           style={browserHomeToPercentBox(asset)}
         />
       ))}
+      <div
+        className="absolute flex items-center"
+        style={{
+          ...browserHomeBoxStyle(browserHomeTitleIdentityBox),
+          color: "rgba(244, 239, 227, 0.92)",
+          fontFamily: B.font.display,
+        }}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="absolute"
+          style={{
+            left: "-4px",
+            top: "20px",
+            width: "24px",
+            height: "27px",
+            color: "rgba(198, 155, 85, 0.74)",
+            filter: "drop-shadow(0 1px 0 rgba(0, 0, 0, 0.85))",
+          }}
+        >
+          <rect x="0.5" y="1.5" width="22" height="22" fill="rgba(4, 7, 7, 0.58)" stroke="currentColor" strokeWidth="1" />
+          <circle cx="11.5" cy="12.5" r="7.1" fill="none" stroke="currentColor" strokeWidth="0.85" />
+          <path d="M11.5 3.8v17.4M2.8 12.5h17.4M11.5 5.4l3.4 7.1-3.4 7.1-3.4-7.1z" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" />
+        </svg>
+        <span
+          className="absolute whitespace-nowrap text-[14px] leading-none"
+          style={{
+            left: "36px",
+            top: "23px",
+            color: "rgba(244, 239, 227, 0.94)",
+            textShadow: "0 1px 0 rgba(0, 0, 0, 0.86)",
+          }}
+        >
+          CereBro Browser
+        </span>
+      </div>
       <div
         className="absolute flex items-center justify-between rounded-t-[6px] px-[19px] text-[13px]"
         style={{

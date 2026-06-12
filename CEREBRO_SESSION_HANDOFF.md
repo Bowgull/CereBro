@@ -39510,3 +39510,42 @@ Next:
 - Resume measured conversion work with `top-title-identity.png`.
 - Do not touch center field, bottom dock, or rail decomposition without
   slice-seam proof first.
+
+## 2026-06-12 1410 ADT - Browser Home title identity primitive
+
+Completion:
+
+- Removed `top-title-identity.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-identity.png` as source-derived reference material.
+- Added measured CSS/SVG provenance for `browser-home-title-identity`.
+- Added `browserHomeTitleIdentityBox` at
+  `{ left: 0, top: 0, width: 200, height: 61 }`.
+- Rendered the title identity mark and `CereBro Browser` label as real
+  DOM/SVG/CSS.
+
+Verification:
+
+- First render attempt failed strict installed diff and was tuned instead of
+  kept.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests before install.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed after tuning: 12 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08358285845120586` to
+  `0.08349827007224993`.
+
+Next:
+
+- Active top-title crops are now gone. Remaining active Browser Home rasters
+  are `center-field-title-star-map.png`, `bottom-dock-row.png`, and the shell
+  rail texture path in `Home.tsx`.
+- Use slice-seam proof before decomposing center field, bottom dock, or rail.
