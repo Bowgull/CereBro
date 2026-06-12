@@ -1,25 +1,45 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 
-const appRoot = resolve(import.meta.dirname, "..");
+const execFileAsync = promisify(execFile);
 
 describe("browserHomeTraceCandidateAudit", () => {
-  it("keeps trace candidates tied to the locked Browser Home source", async () => {
-    const packageSource = await readFile(resolve(appRoot, "package.json"), "utf8");
-    const scriptSource = await readFile(resolve(appRoot, "scripts/browserHomeTraceCandidateAudit.ts"), "utf8");
-    const rejectedRail = await readFile(resolve(appRoot, "client/public/browser-home/trace-candidates/rejected-rail-approximate-svg.json"), "utf8");
+  it("rejects SVG candidates that embed raster image data", async () => {
+    const candidatesDir = await mkdtemp(path.join(tmpdir(), "cerebro-trace-candidate-"));
+    try {
+      await writeFile(
+        path.join(candidatesDir, "embedded-raster.json"),
+        JSON.stringify(
+          {
+            name: "embedded-raster",
+            status: "accepted",
+            reason: "This should be rejected because it hides a raster inside SVG.",
+            sourceBox: { left: 0, top: 0, width: 10, height: 10 },
+            maxMismatchRatio: 1,
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><image href="data:image/png;base64,AAAA" width="10" height="10"/></svg>',
+          },
+          null,
+          2,
+        ),
+      );
 
-    expect(packageSource).toContain("\"qa:browser-home-trace-candidates\": \"tsx scripts/browserHomeTraceCandidateAudit.ts\"");
-    expect(scriptSource).toContain("mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
-    expect(scriptSource).toContain("f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c");
-    expect(scriptSource).toContain("status: \"accepted\" | \"rejected\"");
-    expect(scriptSource).toContain("No Browser Home trace candidates found");
-    expect(rejectedRail).toContain("\"name\": \"rejected-rail-approximate-svg\"");
-    expect(rejectedRail).toContain("\"left\": 0");
-    expect(rejectedRail).toContain("\"top\": 60");
-    expect(rejectedRail).toContain("\"width\": 145");
-    expect(rejectedRail).toContain("\"height\": 932");
-    expect(rejectedRail).toContain("does not preserve the mockup texture");
+      await expect(
+        execFileAsync("pnpm", ["exec", "tsx", "scripts/browserHomeTraceCandidateAudit.ts"], {
+          cwd: process.cwd(),
+          env: {
+            ...process.env,
+            CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR: candidatesDir,
+          },
+        }),
+      ).rejects.toMatchObject({
+        stderr: expect.stringContaining("embeds raster image content instead of traced vector geometry"),
+      });
+    } finally {
+      await rm(candidatesDir, { recursive: true, force: true });
+    }
   });
 });

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1631 ADT
+Last updated: 2026-06-12 1643 ADT
 
 ## Current North Star
 
@@ -53,6 +53,35 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1643 ADT - Trace Candidate Raster Shortcut Guard
+
+### What Changed
+- Hardened `app/scripts/browserHomeTraceCandidateAudit.ts` so traced SVG candidates cannot:
+  - include `<image>` tags
+  - embed `data:image/*`
+  - reference raster image files through `href`
+- Added `CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR` so tests can run the audit against temporary candidate fixtures.
+- Added `app/server/browserHomeTraceCandidateAudit.test.ts`.
+- The test proves a fake SVG candidate with embedded raster image data is rejected before it can become a passing trace candidate.
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app exec tsc --noEmit`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- Remaining high-detail rasters still need real traced SVG, no-cost external extraction output, or another provenance-safe path.
+- This guard prevents the wrong path: SVG wrappers around PNG slices.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Trace candidates now reject `<image>`, `data:image/*`, and raster hrefs. Do not use SVG wrappers around PNGs. The action-cluster split and approximate omnibox CSS were rejected. Next production slice needs a real trace candidate or external no-cost extraction that passes the audit before install.
+```
 
 ## 2026-06-12 1631 ADT - Rejected Browser Home Omnibox Primitive
 

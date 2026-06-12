@@ -4,6 +4,12 @@
   "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
   "normalizedActualPath": "app/output/qa/browser-home-diff/browser-home-actual-normalized.png",
   "visualDiffPath": "app/output/qa/browser-home-diff/browser-home-diff.png",
+  "traceCandidateRules": [
+    "Trace candidates must be real vector geometry.",
+    "SVG candidates must not embed <image> elements.",
+    "SVG candidates must not embed data:image/* payloads.",
+    "SVG candidates must not reference raster image files through href."
+  ],
   "targets": [
     {
       "name": "rail-full",

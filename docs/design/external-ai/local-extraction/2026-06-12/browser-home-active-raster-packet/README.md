@@ -12,6 +12,8 @@ SHA-256:
 
 Use this packet for no-cost external extraction or local tracing only. Do not redesign the mockup. Do not use a full-screen screenshot as production UI. Production output must become React, CSS, SVG, or narrowly justified raster texture with provenance.
 
+Trace candidates must be real vector geometry. The audit rejects SVG candidates that embed `<image>`, `data:image/*`, or raster hrefs. Do not wrap PNG crops inside SVG.
+
 ## Active Raster Targets
 
 | Target | Role | Source box | Required next medium | Blocked approaches |

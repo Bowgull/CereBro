@@ -24,7 +24,9 @@ type TraceCandidate = {
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
 const sourcePath = path.join(repoRoot, "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
-const candidatesDir = path.join(appRoot, "client/public/browser-home/trace-candidates");
+const candidatesDir = process.env.CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR
+  ? path.resolve(appRoot, process.env.CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR)
+  : path.join(appRoot, "client/public/browser-home/trace-candidates");
 const outputDir = path.join(appRoot, "output/qa/browser-home-trace-candidates");
 const lockedBrowserHomeSha256 = "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c";
 
@@ -56,6 +58,11 @@ function readCandidate(filePath: string) {
   }
   const svg = Array.isArray(candidate.svg) ? candidate.svg.join("\n") : candidate.svg;
   if (!svg.includes("<svg") || !svg.includes("</svg>")) fail(`${candidate.name} has invalid svg`);
+  if (/<image\b/i.test(svg)) fail(`${candidate.name} embeds raster image content instead of traced vector geometry`);
+  if (/data:image\//i.test(svg)) fail(`${candidate.name} embeds a data image instead of traced vector geometry`);
+  if (/\bhref\s*=\s*["'][^"']+\.(png|jpe?g|webp|gif|avif|bmp|tiff?)/i.test(svg)) {
+    fail(`${candidate.name} references a raster image instead of traced vector geometry`);
+  }
   return { ...candidate, svg };
 }
 
