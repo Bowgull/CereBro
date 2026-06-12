@@ -15,6 +15,7 @@ import {
   browserHomeMockupSource,
   browserHomePanelBoxes,
   browserHomePanelHitBoxes,
+  browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   browserHomeVisualProvenance,
@@ -38,7 +39,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(35 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(37 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -61,6 +62,8 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("bottom-dock-row.png");
     expect(names).toContain("browser-home-base-backplate");
     expect(names).toContain("browser-home-lower-backplate");
+    expect(names).toContain("browser-home-left-rail-toggle-hitbox");
+    expect(names).toContain("browser-home-right-watch-shelf-toggle-hitbox");
     expect(names).toContain("top-chrome-hitbox-omnibox");
     expect(names).toContain("top-chrome-hitbox-shield");
     expect(names).toContain("aang-dock.png");
@@ -83,6 +86,13 @@ describe("browserHomeBrandLayout", () => {
   it("locks Browser Home measured backplate primitives", () => {
     expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
     expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
+  });
+
+  it("locks Browser Home side arrow toggle hitboxes", () => {
+    expect(browserHomeSideToggleHitBoxes).toEqual({
+      leftRail: { left: 0, top: 345, width: 45, height: 208 },
+      rightWatchShelf: { left: 1395, top: 345, width: 45, height: 208 },
+    });
   });
 
   it("locks the Browser Home top chrome interactive hitboxes", () => {

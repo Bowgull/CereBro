@@ -219,6 +219,7 @@ export default function Home() {
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
   const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
+  const [isBrowserRailCollapsed, setIsBrowserRailCollapsed] = useState(false);
   const isWorkbenchFocus = nav === "workbench";
   const isBrowserRoute = nav === "browser";
 
@@ -454,7 +455,7 @@ export default function Home() {
 
         {/* Left rail — four-zone OS dock */}
         <nav
-          className={`${isBrowserRoute ? "w-[122px]" : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden`}
+          className={`${isBrowserRoute ? (isBrowserRailCollapsed ? "w-0" : "w-[122px]") : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden transition-[width] duration-200`}
           aria-label="CereBro zones"
           style={{
             background: isBrowserRoute
@@ -569,7 +570,15 @@ export default function Home() {
             {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
             {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
-            {nav === "browser" && <PanelHost><BrowserPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
+            {nav === "browser" && (
+              <PanelHost>
+                <BrowserPanel
+                  onClose={() => setNav("home")}
+                  onNavigate={setNav}
+                  onToggleLeftRail={() => setIsBrowserRailCollapsed((collapsed) => !collapsed)}
+                />
+              </PanelHost>
+            )}
             {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}

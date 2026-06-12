@@ -15,6 +15,11 @@ const actualPath = path.join(appRoot, "output/qa/cerebro-installed-browser-home-
 const outputDir = path.join(appRoot, "output/qa/browser-home-diff");
 const normalizedActualPath = path.join(outputDir, "browser-home-actual-normalized.png");
 const diffPath = path.join(outputDir, "browser-home-diff.png");
+const acceptedBrowserHomeMismatchRatio = 0.08862190902615244;
+const strictMode = process.env.CEREBRO_BROWSER_HOME_DIFF_STRICT === "1";
+const maxMismatchRatio = Number.parseFloat(
+  process.env.CEREBRO_BROWSER_HOME_MAX_MISMATCH_RATIO ?? `${acceptedBrowserHomeMismatchRatio}`,
+);
 
 type MockupManifest = {
   lockedPrimaryBrowserHomeReference?: string;
@@ -24,6 +29,9 @@ type MockupManifest = {
 if (!fs.existsSync(manifestPath)) throw new Error(`Missing mockup manifest: ${manifestPath}`);
 if (!fs.existsSync(expectedPath)) throw new Error(`Missing expected mockup: ${expectedPath}`);
 if (!fs.existsSync(actualPath)) throw new Error(`Missing actual screenshot: ${actualPath}`);
+if (!Number.isFinite(maxMismatchRatio) || maxMismatchRatio <= 0) {
+  throw new Error(`Invalid Browser Home max mismatch ratio: ${process.env.CEREBRO_BROWSER_HOME_MAX_MISMATCH_RATIO}`);
+}
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as MockupManifest;
 if (manifest.lockedPrimaryBrowserHomeReference !== lockedBrowserHomeReference) {
@@ -74,6 +82,13 @@ const summary = {
   actualSourceSize: `${actualSource.width}x${actualSource.height}`,
   mismatchedPixels,
   mismatchRatio,
+  acceptedBrowserHomeMismatchRatio,
+  maxMismatchRatio,
+  strictMode,
 };
 
 console.log(JSON.stringify(summary, null, 2));
+
+if (strictMode && mismatchRatio > maxMismatchRatio) {
+  throw new Error(`Browser Home visual diff regressed: ${mismatchRatio} > ${maxMismatchRatio}`);
+}

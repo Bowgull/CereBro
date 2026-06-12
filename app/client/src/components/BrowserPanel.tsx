@@ -14,6 +14,7 @@ import {
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomePanelHitBoxes,
+  browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   type BrowserHomeMeasuredBox,
@@ -630,6 +631,8 @@ function BrowserHomePrimitiveOverlay({
   onSubmitAang,
   onOpenTarget,
   onAddBookmark,
+  onToggleLeftRail,
+  onToggleWatchShelf,
 }: {
   pins: { key: string; label: string; target: string; domain: string; saved: boolean }[];
   aangDraft: string;
@@ -637,6 +640,8 @@ function BrowserHomePrimitiveOverlay({
   onSubmitAang: () => void;
   onOpenTarget: (target: string) => void;
   onAddBookmark: () => void;
+  onToggleLeftRail?: () => void;
+  onToggleWatchShelf: () => void;
 }) {
   const visiblePins = pins.slice(0, 6);
   const panelRows = [
@@ -668,6 +673,18 @@ function BrowserHomePrimitiveOverlay({
 
   return (
     <div className="absolute inset-0 z-20 overflow-hidden" aria-label="Browser Home controls">
+      <BrowserHomeChromeHitButton
+        label="Collapse or open Browser navigation"
+        box={browserHomeSideToggleHitBoxes.leftRail}
+        onClick={() => {
+          onToggleLeftRail?.();
+        }}
+      />
+      <BrowserHomeChromeHitButton
+        label="Open Watch Shelf"
+        box={browserHomeSideToggleHitBoxes.rightWatchShelf}
+        onClick={onToggleWatchShelf}
+      />
       {visiblePins.map((pin, index) => {
         const box = browserHomeMedallionBoxes[index];
         if (!box) return null;
@@ -768,7 +785,15 @@ function BrowserHomePrimitiveOverlay({
   );
 }
 
-export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
+export default function BrowserPanel({
+  onClose,
+  onNavigate,
+  onToggleLeftRail,
+}: {
+  onClose: () => void;
+  onNavigate?: (route: BrowserRoute) => void;
+  onToggleLeftRail?: () => void;
+}) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const [dailyBrowserTabs, setDailyBrowserTabs] = useState<DailyBrowserTab[]>([
@@ -1648,6 +1673,23 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           onSubmitAang={submitBrowserAangDraft}
           onOpenTarget={(target) => void openDailyBrowserTarget(target)}
           onAddBookmark={saveCurrentBrowserBookmark}
+          onToggleLeftRail={onToggleLeftRail}
+          onToggleWatchShelf={() => {
+            setBrowserSurface("watch");
+            setBrowserNotice("Watch Shelf opened.");
+          }}
+        />
+      )}
+      {browserSurface === "watch" && (
+        <button
+          type="button"
+          aria-label="Close Watch Shelf"
+          title="Close Watch Shelf"
+          className="absolute right-0 top-[35%] z-30 h-[24%] w-11 bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          onClick={() => {
+            setBrowserSurface("page");
+            setBrowserNotice("Watch Shelf closed.");
+          }}
         />
       )}
       {isBrowserHome && (

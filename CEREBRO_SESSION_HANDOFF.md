@@ -38978,3 +38978,53 @@ Next slice:
 - Do not invent new ornaments, icons, compass geometry, gradients, or frame
   language. Every primitive needs measured, traced, extracted, or accepted
   external no-cost provenance before production.
+
+## 2026-06-12 0947 ADT - Browser Home side arrows and strict diff gate
+
+Completion:
+
+- Added a strict Browser Home visual diff gate. Future Browser Home slice work
+  can run `pnpm --dir app run qa:browser-home-diff:strict`; it fails if the
+  mismatch ratio is worse than the accepted baseline
+  `0.08862190902615244`.
+- Wired the Browser Home left side arrow to collapse and reopen the Browser nav
+  rail.
+- Wired the Browser Home right side arrow to open Watch Shelf, and added a
+  right-edge close hitbox for Watch Shelf.
+- Added measured provenance entries for both side-arrow hitboxes.
+- Extended installed Browser Home smoke to prove the side arrows at runtime.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/scripts/browserHomeVisualDiff.ts`
+- `app/scripts/desktopInstalledSmoke.ts`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/server/desktopInstalledSmoke.test.ts`
+- `app/package.json`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed. Runtime proof:
+  `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`,
+  `watchShelfClosed: true`.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Important note:
+
+- The top title/tab strip primitive attempt was rejected before commit because
+  installed visual diff regressed. Do not hand-rebuild that full strip again
+  without a smaller measured sub-slice or external no-cost extraction reference.

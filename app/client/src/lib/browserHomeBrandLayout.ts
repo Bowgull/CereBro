@@ -20,6 +20,8 @@ export type BrowserHomePanelHitBox = BrowserHomeMeasuredBox & {
 
 export type BrowserHomeDockHitBoxName = "input" | "attach" | "send";
 
+export type BrowserHomeSideToggleHitBoxName = "leftRail" | "rightWatchShelf";
+
 export type BrowserHomeTopChromeHitBoxName =
   | "activeTab"
   | "tabClose"
@@ -131,9 +133,16 @@ export const browserHomeLowerBackplateBox: BrowserHomeMeasuredBox = {
   height: 388,
 };
 
+export const browserHomeSideToggleHitBoxes: Record<BrowserHomeSideToggleHitBoxName, BrowserHomeMeasuredBox> = {
+  leftRail: { left: 0, top: 345, width: 45, height: 208 },
+  rightWatchShelf: { left: 1395, top: 345, width: 45, height: 208 },
+};
+
 export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   measuredCssProvenance("browser-home-base-backplate", browserHomeBaseBackplateBox, "Measured base Browser Home backplate behind source-derived slices."),
   measuredCssProvenance("browser-home-lower-backplate", browserHomeLowerBackplateBox, "Measured lower Browser Home backplate behind pinned and panel slices."),
+  measuredCssProvenance("browser-home-left-rail-toggle-hitbox", browserHomeSideToggleHitBoxes.leftRail, "Measured left sidebar arrow hitbox that collapses and opens the Browser nav rail."),
+  measuredCssProvenance("browser-home-right-watch-shelf-toggle-hitbox", browserHomeSideToggleHitBoxes.rightWatchShelf, "Measured right sidebar arrow hitbox that opens and closes Watch Shelf."),
   rasterProvenance("rail-full.png", { left: 0, top: 60, width: 145, height: 932 }, "Full left rail texture and frame."),
   rasterProvenance("rail-keep.png", { left: 16, top: 70, width: 118, height: 185 }, "Keep rail button asset."),
   rasterProvenance("rail-browser-active.png", { left: 16, top: 262, width: 118, height: 83 }, "Active Browser rail button asset."),

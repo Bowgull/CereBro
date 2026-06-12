@@ -556,6 +556,53 @@ async function run() {
           "browser home omnibox focus",
         );
         const omniboxFocused = await evaluate(client, "document.activeElement?.getAttribute('aria-label') === 'Browser address and search field'");
+        const railWidthBefore = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Collapse or open Browser navigation");
+        await waitFor(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement && Math.round(rail.getBoundingClientRect().width) <= 2;
+          })()`,
+          10_000,
+          "browser home left rail collapsed",
+        );
+        const railWidthCollapsed = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Collapse or open Browser navigation");
+        await waitFor(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement && Math.round(rail.getBoundingClientRect().width) >= 100;
+          })()`,
+          10_000,
+          "browser home left rail reopened",
+        );
+        const railWidthReopened = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Open Watch Shelf");
+        await waitFor(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement", 10_000, "watch shelf opened from right arrow");
+        const watchShelfOpen = await evaluate(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement");
+        await clickElementByAriaLabel(client, "Close Watch Shelf");
+        await waitFor(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement", 10_000, "watch shelf closed from right arrow");
+        const watchShelfClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement");
         await clickElementByAriaLabelInScope(client, "Browser Home top chrome controls", "VPN shield");
         await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "browser home shield menu open");
         await clickElementByAriaLabelInScope(client, "Browser Home controls", "Add current page bookmark");
@@ -570,7 +617,12 @@ async function run() {
             shieldOpen: document.querySelector('[aria-label="VPN shield"]')?.closest('details')?.open === true,
             addBookmarkNotice: document.body.textContent.includes('Open a page before adding a bookmark.'),
             aangValue: document.querySelector('[aria-label="Ask Aang from Browser Home"]')?.value ?? null,
-            sendButtonPresent: document.querySelector('[aria-label="Send to Aang"]') instanceof HTMLElement
+            sendButtonPresent: document.querySelector('[aria-label="Send to Aang"]') instanceof HTMLElement,
+            railWidthBefore: ${JSON.stringify(railWidthBefore)},
+            railWidthCollapsed: ${JSON.stringify(railWidthCollapsed)},
+            railWidthReopened: ${JSON.stringify(railWidthReopened)},
+            watchShelfOpen: ${JSON.stringify(watchShelfOpen)},
+            watchShelfClosed: ${JSON.stringify(watchShelfClosed)}
           }))()`,
         );
         console.log(
