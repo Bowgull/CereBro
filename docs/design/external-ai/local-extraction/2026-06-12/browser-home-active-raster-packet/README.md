@@ -31,6 +31,7 @@ Use this packet for no-cost external extraction or local tracing only. Do not re
 | Candidate | Source box | Reason |
 | --- | --- | --- |
 | rejected-bottom-dock-partition | 145,846,1440,146 | Source-derived bottom dock partition reproduced installed-app seam drift and must not replace the active full-width bottom-dock-row raster. |
+| rejected-center-field-no-overlap-partition | 145,126,1440,332 | Exact no-overlap center-field partition still reproduced installed-scale seam drift, so center-field source slicing is not safe as a production replacement. |
 | rejected-center-field-two-piece | 145,126,1440,332 | Source-derived two-piece center-field split reproduced installed-app seam drift and must not be promoted without a seam-safe renderer. |
 
 ## Acceptance Rule

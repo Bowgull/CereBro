@@ -39652,3 +39652,30 @@ Next:
   through `qa:browser-home-trace-candidates` before production.
 - Approximate hand-authored rail SVG is blocked unless it becomes materially
   closer to the locked crop.
+
+## 2026-06-12 1503 ADT - Rejected exact center-field partition
+
+Completion:
+
+- Tested an exact no-overlap center-field partition to see whether the earlier
+  center split failed only because of its two-pixel overlap.
+- The exact partition still failed installed-scale seam preflight.
+- Recorded the candidate as `rejected-center-field-no-overlap-partition`.
+- Regenerated the extraction packet so it carries all three current rejection
+  fixtures.
+
+Verification:
+
+- Initial accepted candidate failed `pnpm --dir app run qa:browser-home-slice-seams`
+  with `mismatchRatio: 0.000009032798089864297`.
+- Reclassified the candidate as rejected.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed with the new rejected
+  fixture.
+- `pnpm --dir app run qa:browser-home-extraction-packet` passed with
+  `rejectedCandidateCount: 3`.
+
+Next:
+
+- Center field should not be replaced by source-slice partitions.
+- It needs traced geometry, a single seam-safe texture strategy, or no-cost
+  external extraction.
