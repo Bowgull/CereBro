@@ -122,6 +122,62 @@
       "productionAllowed": true
     },
     {
+      "name": "top-title-identity.png",
+      "box": {
+        "left": 145,
+        "top": 0,
+        "width": 200,
+        "height": 61
+      },
+      "role": "Top title strip CereBro Browser identity area.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-active-tab.png",
+      "box": {
+        "left": 350,
+        "top": 0,
+        "width": 205,
+        "height": 61
+      },
+      "role": "Top title strip active tab area.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-new-tab.png",
+      "box": {
+        "left": 555,
+        "top": 0,
+        "width": 70,
+        "height": 61
+      },
+      "role": "Top title strip new-tab control area.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-protected.png",
+      "box": {
+        "left": 1420,
+        "top": 0,
+        "width": 135,
+        "height": 61
+      },
+      "role": "Top title strip protection badge area.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
       "name": "top-url-row.png",
       "box": {
         "left": 145,

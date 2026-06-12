@@ -39251,3 +39251,57 @@ Next slice:
 - Do not retry bottom dock without a better source-derived backplate.
 - Top title/tabs should be split into smaller source-derived components or
   extracted with no-cost tooling before another conversion attempt.
+
+## 2026-06-12 1140 ADT - Browser Home top title strip raster reduction
+
+Completion:
+
+- Removed the large active `top-title-tabs-panel.png` raster from the Browser
+  Home layer stack.
+- Added a measured CSS `browser-home-top-title-backplate` primitive.
+- Generated and rendered four source-derived component crops from the locked top
+  title/tab strip:
+  `top-title-identity.png`, `top-title-active-tab.png`,
+  `top-title-new-tab.png`, and `top-title-protected.png`.
+- Preserved the existing top-chrome controls and hitboxes.
+- Tightened the strict Browser Home diff gate from `0.08497188867406126` to
+  `0.08391485193853669` after fresh installed-app screenshot diff improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/public/browser-home/assets/manifest.json`
+- `app/client/public/browser-home/assets/top-title-identity.png`
+- `app/client/public/browser-home/assets/top-title-active-tab.png`
+- `app/client/public/browser-home/assets/top-title-new-tab.png`
+- `app/client/public/browser-home/assets/top-title-protected.png`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with hitbox proofs:
+  `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`, and
+  `watchShelfClosed: true`.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08391485193853669`.
+
+Next slice:
+
+- Remaining active large rasters are center field/title/star-map and bottom dock
+  row.
+- Bottom dock already regressed with a guessed CSS backplate; do not retry it
+  without a better source-derived backing layer.
+- Center field should be split only if source-derived sub-assets can preserve
+  the star-map/title/medallion alignment.

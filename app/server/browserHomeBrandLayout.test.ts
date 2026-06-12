@@ -21,6 +21,8 @@ import {
   browserHomePanelHitBoxes,
   browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
+  browserHomeTopTitleAssets,
+  browserHomeTopTitleBackplateBox,
   browserHomeTopUrlAssets,
   browserHomeTopUrlBackplateBox,
   browserHomeToPercentBox,
@@ -45,7 +47,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(40 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(45 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -61,6 +63,12 @@ describe("browserHomeBrandLayout", () => {
     }
 
     expect(names).toContain("rail-full.png");
+    expect(names).toContain("top-title-tabs-panel.png");
+    expect(names).toContain("browser-home-top-title-backplate");
+    expect(names).toContain("top-title-identity.png");
+    expect(names).toContain("top-title-active-tab.png");
+    expect(names).toContain("top-title-new-tab.png");
+    expect(names).toContain("top-title-protected.png");
     expect(names).not.toContain("top-url-row.png");
     expect(names).toContain("browser-home-top-url-backplate");
     expect(names).toContain("top-url-nav-controls.png");
@@ -86,9 +94,14 @@ describe("browserHomeBrandLayout", () => {
 
   it("keeps Browser Home visual asset slices measured against the mockup", () => {
     expect(browserHomeLayerAssets).toEqual([
-      { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
       { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
+    ]);
+    expect(browserHomeTopTitleAssets).toEqual([
+      { name: "top-title-identity.png", left: 0, top: 0, width: 200, height: 61 },
+      { name: "top-title-active-tab.png", left: 205, top: 0, width: 205, height: 61 },
+      { name: "top-title-new-tab.png", left: 410, top: 0, width: 70, height: 61 },
+      { name: "top-title-protected.png", left: 1275, top: 0, width: 135, height: 61 },
     ]);
     expect(browserHomeTopUrlAssets).toEqual([
       { name: "top-url-nav-controls.png", left: 42, top: 69, width: 151, height: 52 },
@@ -114,6 +127,7 @@ describe("browserHomeBrandLayout", () => {
   it("locks Browser Home measured backplate primitives", () => {
     expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
     expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
+    expect(browserHomeTopTitleBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 61 });
     expect(browserHomeTopUrlBackplateBox).toEqual({ left: 0, top: 61, width: 1440, height: 65 });
     expect(browserHomePinnedRowBackplateBox).toEqual({ left: 0, top: 421, width: 1440, height: 183 });
     expect(browserHomeLowerPanelsBackplateBox).toEqual({ left: 0, top: 604, width: 1440, height: 242 });

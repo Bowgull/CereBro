@@ -20,6 +20,8 @@ import {
   browserHomePinnedRowBackplateBox,
   browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
+  browserHomeTopTitleAssets,
+  browserHomeTopTitleBackplateBox,
   browserHomeTopUrlAssets,
   browserHomeTopUrlBackplateBox,
   browserHomeToPercentBox,
@@ -453,6 +455,14 @@ function BrowserHomeAssetStage() {
       <div style={{ ...browserHomeBoxStyle(browserHomeBaseBackplateBox), background: "#020505" }} />
       <div
         style={{
+          ...browserHomeBoxStyle(browserHomeTopTitleBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(4, 7, 7, 0.94), rgba(2, 5, 5, 0.98)), linear-gradient(90deg, rgba(198, 155, 85, 0.08), transparent 18%, transparent 82%, rgba(198, 155, 85, 0.08))",
+          boxShadow: "inset 0 -1px 0 rgba(198, 155, 85, 0.2)",
+        }}
+      />
+      <div
+        style={{
           ...browserHomeBoxStyle(browserHomeLowerBackplateBox),
           background:
             "linear-gradient(90deg, rgba(198, 155, 85, 0.12), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.1)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.02) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.014) 0 1px, transparent 1px 34px)",
@@ -482,6 +492,16 @@ function BrowserHomeAssetStage() {
         }}
       />
       {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomeTopTitleAssets.map((asset) => (
         <img
           key={asset.name}
           src={`/browser-home/assets/${asset.name}`}
