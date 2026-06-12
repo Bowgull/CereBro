@@ -82,6 +82,12 @@ type DailyBrowserTab = {
   addressDraft: string;
 };
 
+type BrowserHomeBookmarkItem = {
+  id: number;
+  title: string | null;
+  targetUrl: string;
+};
+
 type BrowserDownloadActivity = {
   filename: string;
   state: "downloading" | "saved" | "blocked" | "needs_approval";
@@ -631,6 +637,7 @@ function BrowserHomePrimitiveOverlay({
   onSubmitAang,
   onOpenTarget,
   onAddBookmark,
+  onEditPinned,
   onToggleLeftRail,
   onToggleWatchShelf,
 }: {
@@ -640,6 +647,7 @@ function BrowserHomePrimitiveOverlay({
   onSubmitAang: () => void;
   onOpenTarget: (target: string) => void;
   onAddBookmark: () => void;
+  onEditPinned: () => void;
   onToggleLeftRail?: () => void;
   onToggleWatchShelf: () => void;
 }) {
@@ -725,7 +733,7 @@ function BrowserHomePrimitiveOverlay({
 
       <BrowserHomeChromeHitButton
         label="Edit pinned bookmarks"
-        onClick={onAddBookmark}
+        onClick={onEditPinned}
         box={browserHomeEditPinnedBox}
       />
 
@@ -785,6 +793,130 @@ function BrowserHomePrimitiveOverlay({
   );
 }
 
+function BrowserHomePinnedManager({
+  bookmarks,
+  editingBookmarkId,
+  bookmarkTitleDraft,
+  isAdding,
+  isRenaming,
+  isRemoving,
+  onOpenTarget,
+  onAddCurrent,
+  onRenameStart,
+  onRenameDraftChange,
+  onRenameCancel,
+  onRenameSave,
+  onRemove,
+  onClose,
+}: {
+  bookmarks: BrowserHomeBookmarkItem[];
+  editingBookmarkId: number | null;
+  bookmarkTitleDraft: string;
+  isAdding: boolean;
+  isRenaming: boolean;
+  isRemoving: boolean;
+  onOpenTarget: (target: string) => void;
+  onAddCurrent: () => void;
+  onRenameStart: (bookmark: BrowserHomeBookmarkItem) => void;
+  onRenameDraftChange: (value: string) => void;
+  onRenameCancel: () => void;
+  onRenameSave: (bookmarkId: number) => void;
+  onRemove: (bookmarkId: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-40 flex items-center justify-center px-4 py-6" aria-label="Browser Home pinned bookmark manager">
+      <button type="button" aria-label="Close pinned bookmark manager" className="absolute inset-0 cursor-default bg-black/48" onClick={onClose} />
+      <section
+        className="relative w-[min(560px,88vw)] rounded-sm p-3 text-[11px]"
+        style={{
+          background: "linear-gradient(180deg, rgba(13, 18, 16, 0.99), rgba(4, 8, 8, 0.99))",
+          border: `1px solid ${browserFrame.line}`,
+          boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}`,
+          color: C.textPrimary,
+        }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="font-bold uppercase tracking-widest">Pinned Bookmarks</div>
+            <div className="mt-0.5" style={{ color: C.textMuted }}>Open, rename, remove, or add the current page.</div>
+          </div>
+          <div className="flex gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-[10px]" disabled={isAdding} onClick={onAddCurrent}>
+              <Plus size={12} strokeWidth={1.8} aria-hidden="true" />
+              Add Current
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" aria-label="Close pinned bookmark manager" onClick={onClose}>
+              <SquareX size={13} strokeWidth={1.8} aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-3 grid max-h-[min(420px,56vh)] gap-1 overflow-auto pr-1">
+          {bookmarks.length === 0 ? (
+            <div className="rounded-sm px-3 py-3" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+              Open a page, then add it here.
+            </div>
+          ) : (
+            bookmarks.map((bookmark) => {
+              const editing = editingBookmarkId === bookmark.id;
+              const label = bookmark.title ?? browserOriginLabel(bookmark.targetUrl);
+              return (
+                <div
+                  key={bookmark.id}
+                  className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 rounded-sm"
+                  style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}` }}
+                >
+                  {editing ? (
+                    <Input
+                      value={bookmarkTitleDraft}
+                      onChange={(event) => onRenameDraftChange(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") onRenameCancel();
+                        if (event.key === "Enter") onRenameSave(bookmark.id);
+                      }}
+                      aria-label={`Rename pinned bookmark ${label}`}
+                      className="h-9 min-w-0 text-[11px]"
+                      style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}` }}
+                    />
+                  ) : (
+                    <Button type="button" size="sm" variant="ghost" className="h-auto min-w-0 justify-start px-2 py-2 text-left" title={bookmark.targetUrl} aria-label={`Open pinned bookmark ${label}`} onClick={() => onOpenTarget(bookmark.targetUrl)}>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[11px] font-semibold">{label}</span>
+                        <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                      </span>
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 w-9 px-0"
+                    disabled={isRenaming}
+                    aria-label={editing ? `Save pinned bookmark ${label}` : `Rename pinned bookmark ${label}`}
+                    onClick={() => {
+                      if (editing) {
+                        onRenameSave(bookmark.id);
+                        return;
+                      }
+                      onRenameStart(bookmark);
+                    }}
+                  >
+                    <Pencil size={13} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-9 w-9 px-0" disabled={isRemoving} aria-label={`Remove pinned bookmark ${label}`} onClick={() => onRemove(bookmark.id)}>
+                    <Trash2 size={13} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function BrowserPanel({
   onClose,
   onNavigate,
@@ -817,6 +949,7 @@ export default function BrowserPanel({
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(true);
+  const [browserHomePinnedManagerOpen, setBrowserHomePinnedManagerOpen] = useState(false);
   const [browserAangDraft, setBrowserAangDraft] = useState("");
   const [localAangRoutePreview, setLocalAangRoutePreview] = useState<BrowserAangRoutePreview | null>(null);
   const [activeBrowserChromeMenu, setActiveBrowserChromeMenu] = useState<BrowserChromeMenu>(null);
@@ -1311,6 +1444,24 @@ export default function BrowserPanel({
       title: selectedDailyBrowserTab?.title ?? browserOriginLabel(targetUrl),
     });
   };
+  const openBrowserHomePinnedManager = () => {
+    setBrowserHomePinnedManagerOpen(true);
+    setBrowserNotice("Pinned bookmark manager opened.");
+  };
+  const closeBrowserHomePinnedManager = () => {
+    setBrowserHomePinnedManagerOpen(false);
+    setEditingBookmarkId(null);
+    setBookmarkTitleDraft("");
+  };
+  const openBrowserHomePinnedBookmark = (target: string) => {
+    closeBrowserHomePinnedManager();
+    void openDailyBrowserTarget(target);
+  };
+  const savePinnedBookmarkRename = (bookmarkId: number) => {
+    const title = bookmarkTitleDraft.trim();
+    if (!title) return;
+    renameBrowserBookmark.mutate({ bookmarkId, title });
+  };
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
     setSandboxFrameProposalId(null);
@@ -1673,11 +1824,36 @@ export default function BrowserPanel({
           onSubmitAang={submitBrowserAangDraft}
           onOpenTarget={(target) => void openDailyBrowserTarget(target)}
           onAddBookmark={saveCurrentBrowserBookmark}
+          onEditPinned={openBrowserHomePinnedManager}
           onToggleLeftRail={onToggleLeftRail}
           onToggleWatchShelf={() => {
             setBrowserSurface("watch");
             setBrowserNotice("Watch Shelf opened.");
           }}
+        />
+      )}
+      {isBrowserHome && browserHomePinnedManagerOpen && (
+        <BrowserHomePinnedManager
+          bookmarks={browserBookmarkItems}
+          editingBookmarkId={editingBookmarkId}
+          bookmarkTitleDraft={bookmarkTitleDraft}
+          isAdding={createBrowserBookmark.isPending}
+          isRenaming={renameBrowserBookmark.isPending}
+          isRemoving={removeBrowserBookmark.isPending}
+          onOpenTarget={openBrowserHomePinnedBookmark}
+          onAddCurrent={saveCurrentBrowserBookmark}
+          onRenameStart={(bookmark) => {
+            setEditingBookmarkId(bookmark.id);
+            setBookmarkTitleDraft(bookmark.title ?? browserOriginLabel(bookmark.targetUrl));
+          }}
+          onRenameDraftChange={setBookmarkTitleDraft}
+          onRenameCancel={() => {
+            setEditingBookmarkId(null);
+            setBookmarkTitleDraft("");
+          }}
+          onRenameSave={savePinnedBookmarkRename}
+          onRemove={(bookmarkId) => removeBrowserBookmark.mutate({ bookmarkId })}
+          onClose={closeBrowserHomePinnedManager}
         />
       )}
       {browserSurface === "watch" && (

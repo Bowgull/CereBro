@@ -54,6 +54,11 @@ describe("installed desktop app QA script", () => {
     expect(browserPanelSource).toContain("onToggleLeftRail");
     expect(browserPanelSource).toContain("setBrowserSurface(\"watch\")");
     expect(browserPanelSource).toContain("Close Watch Shelf");
+    expect(browserPanelSource).toContain("Browser Home pinned bookmark manager");
+    expect(browserPanelSource).toContain("Edit pinned bookmarks");
+    expect(browserPanelSource).toContain("Close pinned bookmark manager");
+    expect(scriptSource).toContain("pinnedManagerOpen");
+    expect(scriptSource).toContain("pinnedManagerClosed");
     expect(homeSource).toContain("isBrowserRailCollapsed");
     expect(homeSource).toContain("setIsBrowserRailCollapsed");
     expect(safetySource).toContain("/Applications/CereBro-QA.app");

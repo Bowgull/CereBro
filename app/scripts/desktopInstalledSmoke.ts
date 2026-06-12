@@ -603,6 +603,22 @@ async function run() {
         await clickElementByAriaLabel(client, "Close Watch Shelf");
         await waitFor(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement", 10_000, "watch shelf closed from right arrow");
         const watchShelfClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement");
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Edit pinned bookmarks");
+        await waitFor(
+          client,
+          "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') instanceof HTMLElement",
+          10_000,
+          "browser home pinned manager opened",
+        );
+        const pinnedManagerOpen = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') instanceof HTMLElement");
+        await clickElementByAriaLabel(client, "Close pinned bookmark manager");
+        await waitFor(
+          client,
+          "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') == null",
+          10_000,
+          "browser home pinned manager closed",
+        );
+        const pinnedManagerClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') == null");
         await clickElementByAriaLabelInScope(client, "Browser Home top chrome controls", "VPN shield");
         await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "browser home shield menu open");
         await clickElementByAriaLabelInScope(client, "Browser Home controls", "Add current page bookmark");
@@ -622,7 +638,9 @@ async function run() {
             railWidthCollapsed: ${JSON.stringify(railWidthCollapsed)},
             railWidthReopened: ${JSON.stringify(railWidthReopened)},
             watchShelfOpen: ${JSON.stringify(watchShelfOpen)},
-            watchShelfClosed: ${JSON.stringify(watchShelfClosed)}
+            watchShelfClosed: ${JSON.stringify(watchShelfClosed)},
+            pinnedManagerOpen: ${JSON.stringify(pinnedManagerOpen)},
+            pinnedManagerClosed: ${JSON.stringify(pinnedManagerClosed)}
           }))()`,
         );
         console.log(

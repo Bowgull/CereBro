@@ -39028,3 +39028,50 @@ Important note:
 - The top title/tab strip primitive attempt was rejected before commit because
   installed visual diff regressed. Do not hand-rebuild that full strip again
   without a smaller measured sub-slice or external no-cost extraction reference.
+
+## 2026-06-12 1014 ADT - Browser Home pinned manager wiring
+
+Completion:
+
+- Wired the measured Browser Home `Edit Pinned` hitbox to a real pinned bookmark
+  manager instead of the previous add-bookmark fallback.
+- Added a closed-by-default Browser Home manager layer with real bookmark
+  actions: add current page, open bookmark, rename bookmark, remove bookmark,
+  and close.
+- Reused the existing local bookmark mutations. No fake bookmark storage was
+  added.
+- Preserved the default Browser Home screenshot. The manager is hidden until the
+  measured `Edit Pinned` control is clicked.
+- Extended installed Browser Home smoke to prove the manager opens and closes.
+
+Files touched:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/scripts/desktopInstalledSmoke.ts`
+- `app/server/desktopInstalledSmoke.test.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed. Runtime proof:
+  `pinnedManagerOpen: true`, `pinnedManagerClosed: true`, plus the prior
+  omnibox, shield, add-bookmark notice, Aang dock, left rail, and Watch Shelf
+  proofs.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Next slice:
+
+- Continue one verified slice at a time.
+- Best next production slice is either a mockup-derived conversion of the
+  `Edit Pinned` visual button itself from raster to measured CSS, or a no-cost
+  external extraction pass for one small top-chrome sub-piece. Do not attempt
+  another full top-strip rebuild by hand.
