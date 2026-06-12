@@ -11,6 +11,7 @@ import {
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
   browserHomePanelBoxes,
+  browserHomePanelHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   browserHomeVisualProvenance,
@@ -34,7 +35,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(31 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(32 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -53,6 +54,7 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("top-url-row.png");
     expect(names).toContain("center-field-title-star-map.png");
     expect(names).toContain("pinned-bookmark-row.png");
+    expect(names).toContain("lower-panels-row.png");
     expect(names).toContain("top-chrome-hitbox-omnibox");
     expect(names).toContain("top-chrome-hitbox-shield");
     expect(names).toContain("aang-dock.png");
@@ -67,6 +69,7 @@ describe("browserHomeBrandLayout", () => {
       { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
       { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
+      { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
     ]);
   });
 
@@ -114,6 +117,23 @@ describe("browserHomeBrandLayout", () => {
       { title: "Downloads", left: 906, top: 604, width: 368, height: 224 },
     ]);
     expect(browserHomeDockBox).toEqual({ left: 13, top: 846, width: 1397, height: 119 });
+  });
+
+  it("locks lower-panel transparent hitboxes", () => {
+    expect(browserHomePanelHitBoxes).toEqual([
+      { panel: "continue", target: "view-all", left: 399, top: 617, width: 59, height: 29 },
+      { panel: "continue", target: "row-1", left: 105, top: 657, width: 333, height: 43 },
+      { panel: "continue", target: "row-2", left: 105, top: 706, width: 333, height: 43 },
+      { panel: "continue", target: "row-3", left: 105, top: 755, width: 333, height: 43 },
+      { panel: "recent", target: "view-all", left: 802, top: 617, width: 69, height: 29 },
+      { panel: "recent", target: "row-1", left: 511, top: 657, width: 342, height: 43 },
+      { panel: "recent", target: "row-2", left: 511, top: 706, width: 342, height: 43 },
+      { panel: "recent", target: "row-3", left: 511, top: 755, width: 342, height: 43 },
+      { panel: "downloads", target: "view-all", left: 1194, top: 617, width: 69, height: 29 },
+      { panel: "downloads", target: "row-1", left: 923, top: 657, width: 324, height: 43 },
+      { panel: "downloads", target: "row-2", left: 923, top: 706, width: 324, height: 43 },
+      { panel: "downloads", target: "row-3", left: 923, top: 755, width: 324, height: 43 },
+    ]);
   });
 
   it("converts measured mockup boxes into percent-positioned browser boxes", () => {

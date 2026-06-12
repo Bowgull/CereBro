@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CereBroButton, CereBroDock, CereBroPanel } from "@/components/cerebro-ui";
+import { CereBroButton, CereBroDock } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
@@ -10,9 +10,8 @@ import {
   browserHomeDockBox,
   browserHomeEditPinnedBox,
   browserHomeLayerAssets,
-  browserHomeMedallionAssetByDomain,
   browserHomeMedallionBoxes,
-  browserHomePanelBoxes,
+  browserHomePanelHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
   type BrowserHomeMeasuredBox,
@@ -710,37 +709,23 @@ function BrowserHomePrimitiveOverlay({
         box={browserHomeEditPinnedBox}
       />
 
-      {browserHomePanelBoxes.map((box, index) => {
-        const group = panelRows[index];
+      {browserHomePanelHitBoxes.map((box) => {
+        const groupIndex = box.panel === "continue" ? 0 : box.panel === "recent" ? 1 : 2;
+        const group = panelRows[groupIndex];
+        const rowIndex = box.target === "row-1" ? 0 : box.target === "row-2" ? 1 : box.target === "row-3" ? 2 : -1;
+        const row = rowIndex >= 0 ? group.rows[rowIndex] : null;
+        const label = row ? `Open ${row.label}` : `View all ${group.title}`;
+        const target = row?.target ?? null;
 
         return (
-          <CereBroPanel
-            key={`browser-home-panel-${box.title}`}
-            title={group.title}
-            action={<CereBroButton type="button" variant="ghost" className="h-6 min-h-0 px-2 text-[10px]">View all</CereBroButton>}
-            className="absolute"
-            style={browserHomeBoxStyle(box)}
-          >
-            <div className="grid gap-0.5">
-              {group.rows.map((row) => (
-                <button
-                  key={row.label}
-                  type="button"
-                  disabled={!row.target}
-                  onClick={() => row.target && onOpenTarget(row.target)}
-                  className="grid grid-cols-[31px_minmax(0,1fr)] items-center gap-2 rounded-sm px-1 py-1 text-left disabled:cursor-default"
-                >
-                  <span className="grid h-[29px] w-[29px] place-items-center rounded text-[9px] font-bold" style={{ background: B.surface.address, border: `1px solid ${B.line.brassSoft}`, color: B.color.gold300 }}>
-                    {row.icon}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[10px] font-semibold leading-tight" style={{ color: B.color.parchment100 }}>{row.label}</span>
-                    <span className="block truncate text-[9px] leading-tight" style={{ color: B.color.muted500 }}>{row.meta}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </CereBroPanel>
+          <BrowserHomeChromeHitButton
+            key={`browser-home-panel-hit-${box.panel}-${box.target}`}
+            box={box}
+            label={label}
+            onClick={() => {
+              if (target) onOpenTarget(target);
+            }}
+          />
         );
       })}
 

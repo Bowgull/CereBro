@@ -13,6 +13,11 @@ export type BrowserHomePanelBox = BrowserHomeMeasuredBox & {
   title: string;
 };
 
+export type BrowserHomePanelHitBox = BrowserHomeMeasuredBox & {
+  panel: "continue" | "recent" | "downloads";
+  target: "view-all" | "row-1" | "row-2" | "row-3";
+};
+
 export type BrowserHomeTopChromeHitBoxName =
   | "activeTab"
   | "tabClose"
@@ -122,6 +127,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-url-row.png", { left: 145, top: 61, width: 1440, height: 65 }, "URL/search row with action controls."),
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
   rasterProvenance("pinned-bookmark-row.png", { left: 145, top: 421, width: 1440, height: 183 }, "Pinned bookmark row background, cards, edit control, and row spacing."),
+  rasterProvenance("lower-panels-row.png", { left: 145, top: 604, width: 1440, height: 242 }, "Lower Browser Home panels row, panel frames, list content, and surrounding background."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
   measuredCssProvenance("top-chrome-hitbox-tab-close", browserHomeTopChromeHitBoxes.tabClose, "Measured active tab close target."),
   measuredCssProvenance("top-chrome-hitbox-new-tab", browserHomeTopChromeHitBoxes.newTab, "Measured new tab click target."),
@@ -161,6 +167,7 @@ export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
   { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
   { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
   { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
+  { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
 ];
 
 export const browserHomeMedallionBoxes: BrowserHomeMeasuredBox[] = [
@@ -206,6 +213,21 @@ export const browserHomePanelBoxes: BrowserHomePanelBox[] = [
   { title: "Continue browsing", left: 85, top: 604, width: 384, height: 224 },
   { title: "Recent", left: 491, top: 604, width: 392, height: 224 },
   { title: "Downloads", left: 906, top: 604, width: 368, height: 224 },
+];
+
+export const browserHomePanelHitBoxes: BrowserHomePanelHitBox[] = [
+  { panel: "continue", target: "view-all", left: 399, top: 617, width: 59, height: 29 },
+  { panel: "continue", target: "row-1", left: 105, top: 657, width: 333, height: 43 },
+  { panel: "continue", target: "row-2", left: 105, top: 706, width: 333, height: 43 },
+  { panel: "continue", target: "row-3", left: 105, top: 755, width: 333, height: 43 },
+  { panel: "recent", target: "view-all", left: 802, top: 617, width: 69, height: 29 },
+  { panel: "recent", target: "row-1", left: 511, top: 657, width: 342, height: 43 },
+  { panel: "recent", target: "row-2", left: 511, top: 706, width: 342, height: 43 },
+  { panel: "recent", target: "row-3", left: 511, top: 755, width: 342, height: 43 },
+  { panel: "downloads", target: "view-all", left: 1194, top: 617, width: 69, height: 29 },
+  { panel: "downloads", target: "row-1", left: 923, top: 657, width: 324, height: 43 },
+  { panel: "downloads", target: "row-2", left: 923, top: 706, width: 324, height: 43 },
+  { panel: "downloads", target: "row-3", left: 923, top: 755, width: 324, height: 43 },
 ];
 
 export const browserHomeDockBox: BrowserHomeMeasuredBox = {
