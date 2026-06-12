@@ -39574,3 +39574,24 @@ Next:
 - Bottom dock needs traced geometry, a seam-safe single texture strategy, or
   no-cost external extraction before production replacement.
 - Center field still needs seam-safe extraction before production replacement.
+
+## 2026-06-12 1438 ADT - Rejected CSS rail backplate
+
+Completion:
+
+- Tested replacing the active Browser rail `rail-full.png` background with a
+  measured CSS rail backplate while keeping the source-derived rail button
+  assets.
+- Installed Browser Home smoke still passed, but strict visual diff regressed.
+- Reverted the rail prototype. No production rail rendering changed.
+
+Verification:
+
+- Failed strict diff result was `0.08553475119568536` against the accepted gate
+  `0.08349827007224993`.
+
+Next:
+
+- Do not retry a guessed CSS rail backplate.
+- Rail replacement needs traced geometry or external extraction that preserves
+  texture, edge frame, compass, and negative space before production.
