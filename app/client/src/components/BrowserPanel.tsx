@@ -18,6 +18,7 @@ import {
   browserHomePanelHitBoxes,
   browserHomePinnedCardAssets,
   browserHomePinnedRowBackplateBox,
+  browserHomeProtectedBadgeBox,
   browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeTopTitleAssets,
@@ -511,6 +512,24 @@ function BrowserHomeAssetStage() {
           style={browserHomeToPercentBox(asset)}
         />
       ))}
+      <div
+        className="absolute flex items-center justify-center gap-[6px] rounded-[4px] text-[12px] font-medium"
+        style={{
+          ...browserHomeBoxStyle(browserHomeProtectedBadgeBox),
+          background: "rgba(4, 7, 7, 0.76)",
+          border: "1px solid rgba(198, 155, 85, 0.2)",
+          boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.58)",
+          color: "rgba(244, 239, 227, 0.9)",
+          fontFamily: B.font.ui,
+        }}
+      >
+        <span
+          className="block h-[10px] w-[10px] rounded-full"
+          style={{ background: "#20d34c", boxShadow: "0 0 9px rgba(32, 211, 76, 0.55)" }}
+          aria-hidden="true"
+        />
+        <span>Protected</span>
+      </div>
       {browserHomeTopUrlAssets.map((asset) => (
         <img
           key={asset.name}

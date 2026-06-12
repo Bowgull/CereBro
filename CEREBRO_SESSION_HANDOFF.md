@@ -39372,3 +39372,38 @@ Next:
   slice candidate JSON and run `qa:browser-home-slice-seams`.
 - A candidate can move toward production only if the seam audit passes as
   `accepted` and the installed-app strict diff does not regress.
+
+## 2026-06-12 1311 ADT - Browser Home protected badge primitive
+
+Completion:
+
+- Removed `top-title-protected.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-protected.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-protected-badge`.
+- Added `browserHomeProtectedBadgeBox` at
+  `{ left: 1290, top: 18, width: 104, height: 38 }`.
+- Rendered the `Protected` badge as real DOM/CSS text plus a status dot.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed and kept the
+  rejected center-field seam fixture active.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08391485193853669` to
+  `0.08385888368779892`.
+
+Next:
+
+- Continue with small non-seam targets first.
+- Large center-field, bottom-dock, and rail decompositions require
+  `qa:browser-home-slice-seams` candidate proof before production changes.
