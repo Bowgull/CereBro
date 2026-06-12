@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1723 ADT
+Last updated: 2026-06-12 1738 ADT
 
 ## Current North Star
 
@@ -53,6 +53,49 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1738 ADT - Browser Home Trace Sweep
+
+### What Changed
+- Added `app/scripts/browserHomeTraceSweep.ts`.
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-trace-sweep`
+- The sweep compares local ImageTracer presets against locked mockup crops and writes:
+  - committed summary: `docs/design/external-ai/local-extraction/2026-06-12/browser-home-trace-sweep/`
+  - uncommitted QA images: `app/output/qa/browser-home-trace-sweep/`
+
+### Sweep Results
+| Target | Best preset | Mismatch ratio | SVG length |
+| --- | --- | ---: | ---: |
+| `top-url-omnibox` | `very-high-color-fine` | `0.020283931082981717` | `2109532` |
+| `top-url-action-cluster` | `high-color-fine` | `0.045592948717948716` | `732597` |
+| `bookmark-card-add` | `high-color-fine` | `0.025068058076225044` | `1200010` |
+| `panel-continue` | `very-high-color-fine` | `0.036388578869047616` | `6540214` |
+| `panel-recent` | `very-high-color-fine` | `0.03503097667638484` | `6258015` |
+| `panel-downloads` | `very-high-color-fine` | `0.03305755046583851` | `5748530` |
+| `aang-dock-controls` | `high-color-fine` | `0.00562888198757764` | `4696227` |
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-sweep`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- Local ImageTracer can now rank options, but the best candidates are still too mismatched or too large to promote directly.
+- Do not replace active production PNG slices with these trace outputs until a candidate also passes candidate audit and installed strict visual diff.
+- The closest local result is `aang-dock-controls`, but its best SVG is still `4696227` characters and needs simplification before production.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local trace sweep exists and shows the best current target is `aang-dock-controls` at `0.00562888198757764`, but the SVG is huge. Next production work should either simplify the dock controls trace or use no-cost external extraction for a cleaner vector before replacing any active PNG slice.
+```
 
 ## 2026-06-12 1723 ADT - Omnibox ImageTracer Candidate Rejected
 

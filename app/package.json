@@ -29,6 +29,7 @@
     "qa:browser-home-generate-trace-candidate": "tsx scripts/browserHomeGenerateTraceCandidate.ts",
     "qa:browser-home-provenance": "tsx scripts/browserHomeProvenanceAudit.ts",
     "qa:browser-home-slice-seams": "tsx scripts/browserHomeSliceSeamAudit.ts",
+    "qa:browser-home-trace-sweep": "tsx scripts/browserHomeTraceSweep.ts",
     "qa:browser-home-trace-candidates": "tsx scripts/browserHomeTraceCandidateAudit.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
