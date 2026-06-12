@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 0007 ADT
+Last updated: 2026-06-12 1536 ADT
 
 ## Current North Star
 
@@ -53,6 +53,50 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1536 ADT - Browser Home URL Nav Controls Primitive
+
+### What Changed
+- Removed active use of the `top-url-nav-controls.png` visible raster from Browser Home.
+- Kept `top-url-nav-controls.png` as a source-derived reference in provenance.
+- Added measured production provenance for `browser-home-top-url-nav-controls`.
+- Rendered the top URL row back, forward, and reload controls as real measured DOM/CSS controls.
+- Preserved the installed Browser Home hitbox proof:
+  - omnibox focuses
+  - shield menu opens
+  - add-bookmark target works
+  - Aang input accepts text
+  - left rail arrow collapses and reopens the nav rail
+  - right side arrow opens and closes Watch Shelf
+  - pinned manager opens and closes
+- Tightened the strict Browser Home visual diff gate from `0.08349827007224993` to `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current strict diff ratio against the locked mockup is `0.08346456192123741`.
+- Previous accepted strict diff ratio was `0.08349827007224993`.
+
+### Known Gaps
+- Browser Home is still not fully 1:1.
+- Remaining active Browser Home rasters include center field/title/star-map, bottom dock row, rail, omnibox, action cluster, pinned cards, and lower panels.
+- Next measured slice should target a small top-chrome or rail area where a real primitive can improve or hold strict diff without invented ornament.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now renders title identity, active tab, protected badge, URL row backplate, URL nav controls, and side arrows as measured primitives while preserving installed hitbox proof. Current accepted strict diff ratio is `0.08346456192123741`. Continue one measured Browser Home slice at a time. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+```
 
 ## 2026-06-12 0007 ADT - Browser Home Edge Cleanup And Hitbox Proof
 

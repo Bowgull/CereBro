@@ -147,6 +147,12 @@ export const browserHomeTopUrlBackplateBox: BrowserHomeMeasuredBox = {
   height: 65,
 };
 
+export const browserHomeTopUrlNavControlVisualBoxes: BrowserHomeMeasuredBox[] = [
+  { left: 50, top: 76, width: 42, height: 42 },
+  { left: 99, top: 76, width: 42, height: 42 },
+  { left: 148, top: 76, width: 42, height: 42 },
+];
+
 export const browserHomeTopTitleBackplateBox: BrowserHomeMeasuredBox = {
   left: 0,
   top: 0,
@@ -203,6 +209,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   measuredCssProvenance("browser-home-new-tab-plus", browserHomeNewTabPlusBox, "Measured CSS new-tab plus replacing active top-title new-tab raster."),
   measuredCssProvenance("browser-home-protected-badge", browserHomeProtectedBadgeBox, "Measured CSS protection badge replacing active top-title protected raster."),
   measuredCssProvenance("browser-home-top-url-backplate", browserHomeTopUrlBackplateBox, "Measured URL row backplate replacing the former large row raster."),
+  measuredCssProvenance("browser-home-top-url-nav-controls", { left: 42, top: 69, width: 151, height: 52 }, "Measured CSS navigation controls replacing active top URL nav-control raster."),
   measuredCssProvenance("browser-home-pinned-row-backplate", browserHomePinnedRowBackplateBox, "Measured pinned bookmark row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-lower-panels-backplate", browserHomeLowerPanelsBackplateBox, "Measured lower panels row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-left-rail-toggle-hitbox", browserHomeSideToggleHitBoxes.leftRail, "Measured left sidebar arrow hitbox that collapses and opens the Browser nav rail."),
@@ -219,7 +226,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-active-tab.png", { left: 350, top: 0, width: 205, height: 61 }, "Top title strip active tab area retained as source-derived reference."),
   rasterProvenance("top-title-new-tab.png", { left: 555, top: 0, width: 70, height: 61 }, "Top title strip new-tab control area retained as source-derived reference."),
   rasterProvenance("top-title-protected.png", { left: 1420, top: 0, width: 135, height: 61 }, "Top title strip protection badge area retained as source-derived reference."),
-  rasterProvenance("top-url-nav-controls.png", { left: 187, top: 69, width: 151, height: 52 }, "Top URL row back, forward, and reload controls."),
+  rasterProvenance("top-url-nav-controls.png", { left: 187, top: 69, width: 151, height: 52 }, "Top URL row back, forward, and reload controls retained as source-derived reference."),
   rasterProvenance("top-url-omnibox.png", { left: 339, top: 69, width: 948, height: 48 }, "Top URL row omnibox frame."),
   rasterProvenance("top-url-action-cluster.png", { left: 1309, top: 69, width: 240, height: 52 }, "Top URL row shield, library, stats, and page actions cluster."),
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
@@ -266,7 +273,6 @@ export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
 export const browserHomeTopTitleAssets: BrowserHomeLayerAsset[] = [];
 
 export const browserHomeTopUrlAssets: BrowserHomeLayerAsset[] = [
-  { name: "top-url-nav-controls.png", left: 42, top: 69, width: 151, height: 52 },
   { name: "top-url-omnibox.png", left: 194, top: 69, width: 948, height: 48 },
   { name: "top-url-action-cluster.png", left: 1164, top: 69, width: 240, height: 52 },
 ];

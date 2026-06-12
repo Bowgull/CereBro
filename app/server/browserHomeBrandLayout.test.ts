@@ -29,6 +29,7 @@ import {
   browserHomeTopTitleBackplateBox,
   browserHomeTopUrlAssets,
   browserHomeTopUrlBackplateBox,
+  browserHomeTopUrlNavControlVisualBoxes,
   browserHomeToPercentBox,
   browserHomeVisualProvenance,
 } from "@/lib/browserHomeBrandLayout";
@@ -51,7 +52,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(49 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(50 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -80,6 +81,7 @@ describe("browserHomeBrandLayout", () => {
     expect(names).not.toContain("top-url-row.png");
     expect(names).toContain("browser-home-top-url-backplate");
     expect(names).toContain("top-url-nav-controls.png");
+    expect(names).toContain("browser-home-top-url-nav-controls");
     expect(names).toContain("top-url-omnibox.png");
     expect(names).toContain("top-url-action-cluster.png");
     expect(names).toContain("center-field-title-star-map.png");
@@ -107,9 +109,13 @@ describe("browserHomeBrandLayout", () => {
     ]);
     expect(browserHomeTopTitleAssets).toEqual([]);
     expect(browserHomeTopUrlAssets).toEqual([
-      { name: "top-url-nav-controls.png", left: 42, top: 69, width: 151, height: 52 },
       { name: "top-url-omnibox.png", left: 194, top: 69, width: 948, height: 48 },
       { name: "top-url-action-cluster.png", left: 1164, top: 69, width: 240, height: 52 },
+    ]);
+    expect(browserHomeTopUrlNavControlVisualBoxes).toEqual([
+      { left: 50, top: 76, width: 42, height: 42 },
+      { left: 99, top: 76, width: 42, height: 42 },
+      { left: 148, top: 76, width: 42, height: 42 },
     ]);
     expect(browserHomePinnedCardAssets).toEqual([
       { name: "bookmark-card-github.png", left: 85, top: 458, width: 180, height: 116 },

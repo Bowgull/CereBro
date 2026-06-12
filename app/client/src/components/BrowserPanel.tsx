@@ -28,6 +28,7 @@ import {
   browserHomeTopTitleBackplateBox,
   browserHomeTopUrlAssets,
   browserHomeTopUrlBackplateBox,
+  browserHomeTopUrlNavControlVisualBoxes,
   browserHomeToPercentBox,
   type BrowserHomeMeasuredBox,
 } from "@/lib/browserHomeBrandLayout";
@@ -598,6 +599,33 @@ function BrowserHomeAssetStage() {
         />
         <span>Protected</span>
       </div>
+      <div
+        className="absolute"
+        style={{
+          ...browserHomeBoxStyle({ left: 42, top: 69, width: 151, height: 52 }),
+          pointerEvents: "none",
+        }}
+      />
+      {browserHomeTopUrlNavControlVisualBoxes.map((box, index) => {
+        const Icon = index === 0 ? ArrowLeft : index === 1 ? ArrowRight : RotateCw;
+        const disabled = index < 2;
+        return (
+          <div
+            key={`browser-home-top-url-nav-control-${index}`}
+            className="absolute flex items-center justify-center"
+            style={{
+              ...browserHomeBoxStyle(box),
+              borderRadius: "5px",
+              border: "1px solid rgba(137, 99, 53, 0.14)",
+              background: "linear-gradient(180deg, rgba(12, 16, 16, 0.30), rgba(2, 5, 5, 0.22))",
+              boxShadow: "inset 0 1px 0 rgba(218, 178, 105, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.32)",
+              color: disabled ? "rgba(190, 143, 76, 0.46)" : "rgba(203, 157, 89, 0.94)",
+            }}
+          >
+            <Icon size={index === 2 ? 20 : 18} strokeWidth={1.55} aria-hidden="true" />
+          </div>
+        );
+      })}
       {browserHomeTopUrlAssets.map((asset) => (
         <img
           key={asset.name}

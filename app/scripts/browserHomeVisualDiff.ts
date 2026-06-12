@@ -15,7 +15,7 @@ const actualPath = path.join(appRoot, "output/qa/cerebro-installed-browser-home-
 const outputDir = path.join(appRoot, "output/qa/browser-home-diff");
 const normalizedActualPath = path.join(outputDir, "browser-home-actual-normalized.png");
 const diffPath = path.join(outputDir, "browser-home-diff.png");
-const acceptedBrowserHomeMismatchRatio = 0.08349827007224993;
+const acceptedBrowserHomeMismatchRatio = 0.08346456192123741;
 const strictMode = process.env.CEREBRO_BROWSER_HOME_DIFF_STRICT === "1";
 const maxMismatchRatio = Number.parseFloat(
   process.env.CEREBRO_BROWSER_HOME_MAX_MISMATCH_RATIO ?? `${acceptedBrowserHomeMismatchRatio}`,
