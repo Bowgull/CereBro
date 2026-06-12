@@ -39440,3 +39440,37 @@ Next:
 
 - Continue reducing small top-chrome/title-strip rasters before touching
   center field, bottom dock, or rail.
+
+## 2026-06-12 1331 ADT - Browser Home active tab primitive
+
+Completion:
+
+- Removed `top-title-active-tab.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-active-tab.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-active-title-tab`.
+- Added `browserHomeActiveTitleTabBox` at
+  `{ left: 205, top: 14, width: 203, height: 47 }`.
+- Rendered the active `New Tab` title tab as real DOM/CSS with a close mark.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08379846341711611` to
+  `0.08358285845120586`.
+
+Next:
+
+- The remaining active title-strip crop is `top-title-identity.png`.
+- Treat identity carefully because it includes the app mark; replace only if the
+  measured DOM/SVG result keeps strict diff passing.

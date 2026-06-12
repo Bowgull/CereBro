@@ -6,6 +6,7 @@ import { CereBroButton } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
+  browserHomeActiveTitleTabBox,
   browserHomeBaseBackplateBox,
   browserHomeCardBoxes,
   browserHomeDockHitBoxes,
@@ -513,6 +514,23 @@ function BrowserHomeAssetStage() {
           style={browserHomeToPercentBox(asset)}
         />
       ))}
+      <div
+        className="absolute flex items-center justify-between rounded-t-[6px] px-[19px] text-[13px]"
+        style={{
+          ...browserHomeBoxStyle(browserHomeActiveTitleTabBox),
+          background: "linear-gradient(180deg, rgba(17, 17, 16, 0.92), rgba(8, 10, 10, 0.98))",
+          border: "1px solid rgba(198, 155, 85, 0.42)",
+          borderBottomColor: "rgba(198, 155, 85, 0.18)",
+          boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -12px 22px rgba(0, 0, 0, 0.42)",
+          color: "rgba(244, 239, 227, 0.9)",
+          fontFamily: B.font.ui,
+        }}
+      >
+        <span>New Tab</span>
+        <span style={{ color: "rgba(198, 155, 85, 0.86)", fontSize: "20px", lineHeight: "1" }} aria-hidden="true">
+          x
+        </span>
+      </div>
       <div
         className="absolute flex items-center justify-center text-[24px] leading-none"
         style={{
