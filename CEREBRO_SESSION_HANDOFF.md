@@ -39305,3 +39305,39 @@ Next slice:
   without a better source-derived backing layer.
 - Center field should be split only if source-derived sub-assets can preserve
   the star-map/title/medallion alignment.
+
+## 2026-06-12 1239 ADT - Rejected center-field raster split
+
+Result:
+
+- Tried to replace active `center-field-title-star-map.png` with source-derived
+  center-field sub-slices.
+- First attempt used top band, medallion row pieces, and body/title slice.
+- Second attempt used a two-piece medallion/top slice and body/title slice with
+  overlap to reduce scaling seams.
+- Both attempts kept hitboxes working, but strict installed-app visual diff
+  regressed.
+
+Evidence:
+
+- Baseline strict diff gate before the attempt:
+  `0.08391485193853669`.
+- Three-piece split installed-app diff regressed to
+  `0.08392375597842679`.
+- Two-piece overlap split installed-app diff regressed to
+  `0.08393393202401547`.
+- Reverted all center-field experiment files and source edits.
+- Confirmed clean worktree afterward.
+- Confirmed passing checks after revert:
+  `pnpm --dir app run qa:browser-home-provenance`,
+  `pnpm --dir app exec tsc --noEmit`, and
+  `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts --maxWorkers=1 --no-file-parallelism`.
+
+Decision:
+
+- Do not retry center-field splitting with independently scaled DOM image slices.
+- Next center-field move needs a seam-safe renderer, traced/SVG extraction, or
+  no-cost external extraction output before production changes.
+- The current installed app was rebuilt during the rejected attempts, so before
+  committing a future accepted slice, rebuild/reinstall from the clean accepted
+  source and rerun Browser Home smoke plus strict diff.
