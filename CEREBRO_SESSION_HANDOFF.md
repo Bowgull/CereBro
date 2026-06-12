@@ -39595,3 +39595,33 @@ Next:
 - Do not retry a guessed CSS rail backplate.
 - Rail replacement needs traced geometry or external extraction that preserves
   texture, edge frame, compass, and negative space before production.
+
+## 2026-06-12 1443 ADT - Browser Home active raster extraction packet
+
+Completion:
+
+- Added `app/scripts/browserHomeExtractionPacket.ts`.
+- Added `pnpm --dir app run qa:browser-home-extraction-packet`.
+- Added a contract test for the packet script.
+- Generated the local extraction packet at
+  `docs/design/external-ai/local-extraction/2026-06-12/browser-home-active-raster-packet`.
+- Packet includes expected, actual, and diff crops for:
+  `rail-full`, `center-field-title-star-map`, and `bottom-dock-row`.
+- Packet records the rejected center and bottom-dock slice candidates so
+  external/no-cost extraction does not repeat failed paths.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-diff:strict` passed at
+  `0.08349827007224993` before packet generation.
+- `pnpm --dir app run qa:browser-home-extraction-packet` passed with
+  `targetCount: 3` and `rejectedCandidateCount: 2`.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeExtractionPacket.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 13 tests.
+
+Next:
+
+- Use the packet for no-cost external extraction or local tracing.
+- Do not promote an extracted replacement unless installed strict diff improves
+  or stays within the accepted gate.

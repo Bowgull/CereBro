@@ -25,6 +25,7 @@
     "test:desktop": "CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts",
     "qa:browser-home-diff": "tsx scripts/browserHomeVisualDiff.ts",
     "qa:browser-home-diff:strict": "CEREBRO_BROWSER_HOME_DIFF_STRICT=1 tsx scripts/browserHomeVisualDiff.ts",
+    "qa:browser-home-extraction-packet": "tsx scripts/browserHomeExtractionPacket.ts",
     "qa:browser-home-provenance": "tsx scripts/browserHomeProvenanceAudit.ts",
     "qa:browser-home-slice-seams": "tsx scripts/browserHomeSliceSeamAudit.ts",
     "test:e2e": "playwright test",
