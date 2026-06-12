@@ -23,7 +23,7 @@ type TraceTarget = {
   name: string;
   sourceBox: Box;
   reason: string;
-  engine: "imagetracer-posterized2" | "vtracer-fine-spline";
+  engine: "imagetracer-posterized2" | "imagetracer-high-color-fine" | "vtracer-fine-spline";
   maxMismatchRatio: number;
   status: "accepted" | "rejected";
   manualInstalledVisualReview?: {
@@ -81,6 +81,14 @@ const traceTargets: Record<string, TraceTarget> = {
     maxMismatchRatio: 0,
     status: "rejected",
   },
+  "top-url-action-cluster-high-color-fine": {
+    name: "top-url-action-cluster",
+    sourceBox: { left: 1309, top: 69, width: 240, height: 52 },
+    reason: "ImageTracer high-color-fine candidate for the top URL action cluster; rejected because local tracing is not production quality without installed visual review and strict diff proof.",
+    engine: "imagetracer-high-color-fine",
+    maxMismatchRatio: 0,
+    status: "rejected",
+  },
 };
 
 function fail(message: string): never {
@@ -108,10 +116,20 @@ async function main() {
   const crop = sharp(sourcePath).extract(target.sourceBox).ensureAlpha();
   const raw = await crop.clone().raw().toBuffer({ resolveWithObject: true });
 
-  const svg = target.engine === "imagetracer-posterized2"
+  const svg = target.engine === "imagetracer-posterized2" || target.engine === "imagetracer-high-color-fine"
     ? normalizeSvg(ImageTracer.imagedataToSVG(
       { width: raw.info.width, height: raw.info.height, data: raw.data },
-      "posterized2",
+      target.engine === "imagetracer-high-color-fine"
+        ? {
+          numberofcolors: 48,
+          colorsampling: 2,
+          colorquantcycles: 6,
+          ltres: 0.15,
+          qtres: 0.15,
+          pathomit: 0,
+          rightangleenhance: true,
+        }
+        : "posterized2",
     ))
     : normalizeSvg(await optimize(await vectorize(await crop.clone().png().toBuffer(), {
       colorMode: ColorMode.Color,

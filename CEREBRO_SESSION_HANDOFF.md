@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1918 ADT
+Last updated: 2026-06-12 1927 ADT
 
 ## Current North Star
 
@@ -53,6 +53,34 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1927 ADT - Action Cluster Trace Candidate Rejected
+
+### What Changed
+- Extended trace generation for the focused action cluster target:
+  - `CEREBRO_BROWSER_HOME_TRACE_TARGET=top-url-action-cluster-high-color-fine`
+- Generated rejected candidate:
+  - `app/client/public/browser-home/trace-candidates/rejected-top-url-action-cluster-high-color-fine.json`
+- Added rejection note:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/rejected-imagetracer-high-color-fine.md`
+
+### Result
+- Candidate stayed rejected.
+- Trace audit result:
+  - width `240`
+  - height `52`
+  - mismatched pixels `569`
+  - mismatch ratio `0.045592948717948716`
+- Manual review: broad structure is recognizable, but bevel, glow, brass edge detail, and stone texture are too degraded for 1:1 production.
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next Rule
+- Do not promote `rejected-top-url-action-cluster-high-color-fine`.
+- Action cluster still needs cleaner full-cluster vector extraction or no-cost external extraction before production.
 
 ## 2026-06-12 1918 ADT - Action Cluster Extraction Packet
 
