@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CereBroButton, CereBroCard, CereBroDock, CereBroPanel } from "@/components/cerebro-ui";
+import { CereBroButton, CereBroDock, CereBroPanel } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
@@ -690,25 +690,18 @@ function BrowserHomePrimitiveOverlay({
         if (!box) return null;
 
         return (
-          <CereBroCard
+          <BrowserHomeChromeHitButton
             key={`browser-home-card-${pin.key}`}
-            aria-label={`Open pinned bookmark ${pin.label}`}
-            title={pin.label}
-            icon={<img src={browserHomeMedallionAssetByDomain[pin.domain] ?? faviconUrl(pin.domain, 96)} alt="" className="h-11 w-11 rounded-full object-contain" draggable={false} />}
-            active={pin.saved}
+            label={`Open pinned bookmark ${pin.label}`}
             onClick={() => onOpenTarget(pin.target)}
-            className="absolute"
-            style={browserHomeBoxStyle(box)}
+            box={box}
           />
         );
       })}
-      <CereBroCard
-        aria-label="Add current page bookmark"
-        title="Add"
-        icon={<Plus size={28} strokeWidth={1.6} aria-hidden="true" />}
+      <BrowserHomeChromeHitButton
+        label="Add current page bookmark"
         onClick={onAddBookmark}
-        className="absolute"
-        style={browserHomeBoxStyle(browserHomeAddCardBox)}
+        box={browserHomeAddCardBox}
       />
 
       <BrowserHomeChromeHitButton
