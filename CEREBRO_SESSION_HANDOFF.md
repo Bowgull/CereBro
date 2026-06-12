@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1804 ADT
+Last updated: 2026-06-12 1839 ADT
 
 ## Current North Star
 
@@ -53,6 +53,46 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1839 ADT - Add Card Hybrid Candidate Rejected
+
+### What Changed
+- Tested a hybrid add-card candidate in QA output:
+  - VTracer frame and plus geometry
+  - masked label region
+  - measured vector `Add` text
+- Added rejected trace candidate:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-vtracer-hybrid-label.json`
+- Added rejection note:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-add-card-hybrid/README.md`
+
+### Result
+- `vtracer-fine-spline` crop mismatch: `0.023480036297640654`
+  - rejected because installed visual review rendered the label as `dd`
+- `vtracer-hybrid-label` crop mismatch: `0.03130671506352087`
+  - rejected because the label was readable but the traced card frame became flatter and chunkier than the locked mockup
+
+### Medallion Finding
+- The visible medallion rail is still part of `center-field-title-star-map.png`.
+- Standalone medallion assets are not the active visual layer for Browser Home.
+- Do not replace medallions one-by-one until the center field can be split without seam drift, or until a full center-field vector extraction exists.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Rejected add-card paths now include CSS primitive, ImageTracer, VTracer full-card, and VTracer hybrid-label. Do not retry add-card without a new extraction strategy. Medallions are still inside the center-field raster, so replacing one medallion alone is not the next safe production slice.
+```
 
 ## 2026-06-12 1804 ADT - Add Bookmark Card VTracer Candidate Rejected
 
