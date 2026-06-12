@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-11 2150 ADT
+Last updated: 2026-06-12 0007 ADT
 
 ## Current North Star
 
@@ -53,6 +53,52 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 0007 ADT - Browser Home Edge Cleanup And Hitbox Proof
+
+### What Changed
+- Replaced the narrower visible dock layer with a full-width mockup-derived bottom row:
+  - `app/client/public/browser-home/assets/bottom-dock-row.png`
+- Added `bottom-dock-row.png` to the Browser Home manifest with locked source path, SHA-256, measured box, role, medium, and `productionAllowed`.
+- Added the bottom row to typed provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Kept the existing `aang-dock.png` provenance as source material, but no longer uses it as the visible bottom layer.
+- Added an explicit `aria-label` to the measured Browser Home omnibox input.
+- Expanded installed Browser Home smoke to prove transparent hitboxes:
+  - omnibox focuses
+  - shield menu opens
+  - add-bookmark target produces the expected notice
+  - Aang input accepts text
+  - send target exists
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.08862190902615244`.
+- Previous Aang dock slice diff ratio was `0.08852142057596418`.
+- The visual diff stayed effectively flat, but the right-edge block was removed and Browser Home hitbox proof now exists.
+
+### Known Gaps
+- Browser Home is closer, but still not fully 1:1.
+- The old hidden Browser workspace still exists in the DOM under Browser Home for app state continuity, but installed smoke now scopes Browser Home interactions to the measured overlay.
+- Next major path is loaded browser page branding so opening a site does not visually fall back to the old UI language.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and full bottom dock row. Installed smoke proves core transparent hitboxes. Current installed diff ratio is `0.08862190902615244`. Next path should move from Browser Home to loaded browser page branding without inventing new UI.
+```
 
 ## 2026-06-11 2150 ADT - Browser Home Aang Dock Extraction
 

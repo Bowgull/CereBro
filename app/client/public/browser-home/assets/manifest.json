@@ -178,6 +178,20 @@
       "productionAllowed": true
     },
     {
+      "name": "bottom-dock-row.png",
+      "box": {
+        "left": 145,
+        "top": 846,
+        "width": 1440,
+        "height": 146
+      },
+      "role": "Full-width bottom dock row, Aang dock, bottom frame, and right edge.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
       "name": "medallion-github.png",
       "box": {
         "left": 654,

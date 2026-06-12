@@ -130,6 +130,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
   rasterProvenance("pinned-bookmark-row.png", { left: 145, top: 421, width: 1440, height: 183 }, "Pinned bookmark row background, cards, edit control, and row spacing."),
   rasterProvenance("lower-panels-row.png", { left: 145, top: 604, width: 1440, height: 242 }, "Lower Browser Home panels row, panel frames, list content, and surrounding background."),
+  rasterProvenance("bottom-dock-row.png", { left: 145, top: 846, width: 1440, height: 146 }, "Full-width bottom dock row, Aang dock, bottom frame, and right edge."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
   measuredCssProvenance("top-chrome-hitbox-tab-close", browserHomeTopChromeHitBoxes.tabClose, "Measured active tab close target."),
   measuredCssProvenance("top-chrome-hitbox-new-tab", browserHomeTopChromeHitBoxes.newTab, "Measured new tab click target."),
@@ -170,7 +171,7 @@ export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
   { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
   { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
   { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
-  { name: "aang-dock.png", left: 13, top: 846, width: 1397, height: 119 },
+  { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
 ];
 
 export const browserHomeMedallionBoxes: BrowserHomeMeasuredBox[] = [

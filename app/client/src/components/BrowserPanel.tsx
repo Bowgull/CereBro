@@ -534,6 +534,7 @@ function BrowserHomeChromeOverlay({
       <label className="pointer-events-auto absolute rounded-sm" style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.omnibox)}>
         <span className="sr-only">Browser address and search field</span>
         <input
+          aria-label="Browser address and search field"
           value={addressDraft}
           onChange={(event) => onAddressDraftChange(event.target.value)}
           onKeyDown={(event) => {

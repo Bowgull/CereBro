@@ -36,7 +36,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(32 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(33 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -56,6 +56,7 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("center-field-title-star-map.png");
     expect(names).toContain("pinned-bookmark-row.png");
     expect(names).toContain("lower-panels-row.png");
+    expect(names).toContain("bottom-dock-row.png");
     expect(names).toContain("top-chrome-hitbox-omnibox");
     expect(names).toContain("top-chrome-hitbox-shield");
     expect(names).toContain("aang-dock.png");
@@ -71,7 +72,7 @@ describe("browserHomeBrandLayout", () => {
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
       { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
       { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
-      { name: "aang-dock.png", left: 13, top: 846, width: 1397, height: 119 },
+      { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
     ]);
   });
 
