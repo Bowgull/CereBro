@@ -18,6 +18,12 @@ type TraceCandidate = {
   reason: string;
   sourceBox: Box;
   maxMismatchRatio: number;
+  manualInstalledVisualReview?: {
+    status: "passed" | "failed";
+    reviewer: string;
+    screenshotPath?: string;
+    notes: string;
+  };
   svg: string | string[];
 };
 
@@ -55,6 +61,16 @@ function readCandidate(filePath: string) {
   assertBox(`${candidate.name}.sourceBox`, candidate.sourceBox);
   if (!Number.isFinite(candidate.maxMismatchRatio) || candidate.maxMismatchRatio < 0) {
     fail(`${candidate.name} has invalid maxMismatchRatio`);
+  }
+  if (candidate.status === "accepted") {
+    const review = candidate.manualInstalledVisualReview;
+    if (!review) fail(`${candidate.name} is accepted but has no manualInstalledVisualReview`);
+    if (review.status !== "passed") fail(`${candidate.name} is accepted but manualInstalledVisualReview did not pass`);
+    if (!review.reviewer.trim()) fail(`${candidate.name} manualInstalledVisualReview is missing reviewer`);
+    if (!review.notes.trim()) fail(`${candidate.name} manualInstalledVisualReview is missing notes`);
+  }
+  if (candidate.status === "rejected" && candidate.manualInstalledVisualReview?.status === "passed") {
+    fail(`${candidate.name} is rejected but manualInstalledVisualReview is marked passed`);
   }
   const svg = Array.isArray(candidate.svg) ? candidate.svg.join("\n") : candidate.svg;
   if (!svg.includes("<svg") || !svg.includes("</svg>")) fail(`${candidate.name} has invalid svg`);

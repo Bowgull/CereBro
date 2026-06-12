@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1839 ADT
+Last updated: 2026-06-12 1849 ADT
 
 ## Current North Star
 
@@ -53,6 +53,43 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1849 ADT - Manual Review Gate For Trace Candidates
+
+### What Changed
+- Hardened `app/scripts/browserHomeTraceCandidateAudit.ts`.
+- Accepted trace candidates must now include `manualInstalledVisualReview` with:
+  - `status: "passed"`
+  - `reviewer`
+  - `notes`
+  - optional `screenshotPath`
+- Rejected candidates cannot claim a passed manual review.
+- Added regression test:
+  - `browserHomeTraceCandidateAudit rejects accepted trace candidates without installed visual review proof`
+- Regenerated `rejected-bookmark-card-add-vtracer-fine-spline.json` with failed installed-review metadata.
+
+### Why
+- The VTracer add-card attempt improved numeric diff but rendered `Add` as `dd`.
+- Pixel diff alone is not enough for 1:1 production acceptance.
+- Future accepted SVG candidates must carry installed visual-review evidence before they can pass the audit.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Accepted trace candidates now require manual installed visual-review metadata. Pixel diff alone is not enough. Do not retry add-card paths without a new extraction strategy.
+```
 
 ## 2026-06-12 1839 ADT - Add Card Hybrid Candidate Rejected
 

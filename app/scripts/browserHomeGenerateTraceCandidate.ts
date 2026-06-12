@@ -26,6 +26,12 @@ type TraceTarget = {
   engine: "imagetracer-posterized2" | "vtracer-fine-spline";
   maxMismatchRatio: number;
   status: "accepted" | "rejected";
+  manualInstalledVisualReview?: {
+    status: "passed" | "failed";
+    reviewer: string;
+    screenshotPath?: string;
+    notes: string;
+  };
 };
 
 type ImageTracerApi = {
@@ -60,6 +66,12 @@ const traceTargets: Record<string, TraceTarget> = {
     engine: "vtracer-fine-spline",
     maxMismatchRatio: 0,
     status: "rejected",
+    manualInstalledVisualReview: {
+      status: "failed",
+      reviewer: "codex",
+      screenshotPath: "app/output/qa/cerebro-installed-browser-home-smoke.png",
+      notes: "Installed screenshot review showed the visible Add label rendered incorrectly as dd.",
+    },
   },
   "top-url-omnibox": {
     name: "top-url-omnibox",
@@ -122,6 +134,7 @@ async function main() {
     reason: target.reason,
     sourceBox: target.sourceBox,
     maxMismatchRatio: target.maxMismatchRatio,
+    ...(target.manualInstalledVisualReview ? { manualInstalledVisualReview: target.manualInstalledVisualReview } : {}),
     svg,
   };
 
