@@ -10,6 +10,8 @@ import {
   browserHomeEditPinnedBox,
   browserHomeFullMockupSource,
   browserHomeLayerAssets,
+  browserHomeLowerPanelAssets,
+  browserHomeLowerPanelsBackplateBox,
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
@@ -61,7 +63,8 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("center-field-title-star-map.png");
     expect(names).not.toContain("pinned-bookmark-row.png");
     expect(names).toContain("browser-home-pinned-row-backplate");
-    expect(names).toContain("lower-panels-row.png");
+    expect(names).not.toContain("lower-panels-row.png");
+    expect(names).toContain("browser-home-lower-panels-backplate");
     expect(names).toContain("bottom-dock-row.png");
     expect(names).toContain("browser-home-base-backplate");
     expect(names).toContain("browser-home-lower-backplate");
@@ -80,7 +83,6 @@ describe("browserHomeBrandLayout", () => {
       { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
       { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
-      { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
       { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
     ]);
     expect(browserHomePinnedCardAssets).toEqual([
@@ -92,12 +94,18 @@ describe("browserHomeBrandLayout", () => {
       { name: "bookmark-card-hn.png", left: 955, top: 458, width: 147, height: 116 },
       { name: "bookmark-card-add.png", left: 1115, top: 458, width: 152, height: 116 },
     ]);
+    expect(browserHomeLowerPanelAssets).toEqual([
+      { name: "panel-continue.png", left: 85, top: 604, width: 384, height: 224 },
+      { name: "panel-recent.png", left: 491, top: 604, width: 392, height: 224 },
+      { name: "panel-downloads.png", left: 906, top: 604, width: 368, height: 224 },
+    ]);
   });
 
   it("locks Browser Home measured backplate primitives", () => {
     expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
     expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
     expect(browserHomePinnedRowBackplateBox).toEqual({ left: 0, top: 421, width: 1440, height: 183 });
+    expect(browserHomeLowerPanelsBackplateBox).toEqual({ left: 0, top: 604, width: 1440, height: 242 });
   });
 
   it("locks Browser Home side arrow toggle hitboxes", () => {

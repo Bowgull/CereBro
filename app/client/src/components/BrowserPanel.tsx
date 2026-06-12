@@ -11,6 +11,8 @@ import {
   browserHomeDockHitBoxes,
   browserHomeEditPinnedBox,
   browserHomeLayerAssets,
+  browserHomeLowerPanelAssets,
+  browserHomeLowerPanelsBackplateBox,
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomePanelHitBoxes,
@@ -462,7 +464,24 @@ function BrowserHomeAssetStage() {
             "linear-gradient(180deg, rgba(8, 11, 10, 0.34), rgba(3, 7, 7, 0.7)), radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.08), transparent 52%)",
         }}
       />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomeLowerPanelsBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(4, 8, 8, 0.42), rgba(3, 7, 7, 0.74)), radial-gradient(circle at 50% 10%, rgba(198, 155, 85, 0.06), transparent 58%)",
+        }}
+      />
       {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomeLowerPanelAssets.map((asset) => (
         <img
           key={asset.name}
           src={`/browser-home/assets/${asset.name}`}
