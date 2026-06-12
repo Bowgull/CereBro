@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1704 ADT
+Last updated: 2026-06-12 1716 ADT
 
 ## Current North Star
 
@@ -53,6 +53,42 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1716 ADT - Local Vector Trace Generator
+
+### What Changed
+- Added no-cost local vector tracing dependency:
+  - `imagetracerjs@1.2.6`
+- Added `app/scripts/browserHomeGenerateTraceCandidate.ts`.
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- Generated a real vector candidate for the add bookmark card:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-imagetracer-posterized2.json`
+- The candidate contains SVG path geometry, not embedded raster data.
+- Trace audit rejected it:
+  - mismatched pixels: `621`
+  - mismatch ratio: `0.03522005444646098`
+- This proves the local tracer path works, but the `posterized2` add-card candidate is not production quality.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- ImageTracer `posterized2` is useful as a local no-cost extraction candidate generator, but not accurate enough for the add-card production replacement.
+- Next trace attempt should try either:
+  - a different target with simpler geometry, or
+  - a higher-fidelity trace preset that still stays small enough to maintain, or
+  - no-cost external extraction output that produces cleaner vector geometry.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation now exists and generated `rejected-bookmark-card-add-imagetracer-posterized2` with mismatch ratio `0.03522005444646098`. Do not promote it. Next production change needs a trace candidate or external no-cost extraction that passes audit before install.
+```
 
 ## 2026-06-12 1704 ADT - Rejected Browser Home Add Card Primitive
 

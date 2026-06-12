@@ -14,6 +14,14 @@ Use this packet for no-cost external extraction or local tracing only. Do not re
 
 Trace candidates must be real vector geometry. The audit rejects SVG candidates that embed `<image>`, `data:image/*`, or raster hrefs. Do not wrap PNG crops inside SVG.
 
+Local candidate generation is available through:
+
+```bash
+pnpm --dir app run qa:browser-home-generate-trace-candidate
+```
+
+The current generator uses `imagetracerjs`. Its `posterized2` add-card candidate is rejected and must not be promoted.
+
 ## Active Raster Targets
 
 | Target | Role | Source box | Required next medium | Blocked approaches |
@@ -39,6 +47,7 @@ Trace candidates must be real vector geometry. The audit rejects SVG candidates 
 | rejected-center-field-two-piece | 145,126,1440,332 | Source-derived two-piece center-field split reproduced installed-app seam drift and must not be promoted without a seam-safe renderer. |
 | rejected-top-url-omnibox-css | 339,69,948,48 | Approximate DOM/CSS omnibox regressed installed strict diff to `0.0837552152233642` against accepted `0.08346456192123741`. |
 | rejected-bookmark-card-add-css | 1260,458,152,116 | Approximate DOM/CSS add bookmark card regressed installed strict diff to `0.08388623181031851` against accepted `0.08346456192123741`. |
+| rejected-bookmark-card-add-imagetracer-posterized2 | 1260,458,152,116 | Local ImageTracer `posterized2` candidate produced real SVG paths but missed 621 pixels, mismatch ratio `0.03522005444646098`. |
 
 ## Acceptance Rule
 

@@ -10,6 +10,12 @@
     "SVG candidates must not embed data:image/* payloads.",
     "SVG candidates must not reference raster image files through href."
   ],
+  "localTraceGenerator": {
+    "command": "pnpm --dir app run qa:browser-home-generate-trace-candidate",
+    "package": "imagetracerjs",
+    "status": "available",
+    "knownRejectedCandidate": "rejected-bookmark-card-add-imagetracer-posterized2"
+  },
   "targets": [
     {
       "name": "rail-full",
@@ -131,6 +137,16 @@
     {
       "name": "rejected-bookmark-card-add-css",
       "reason": "Approximate DOM/CSS add bookmark card regressed installed strict diff to 0.08388623181031851 against accepted 0.08346456192123741.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      }
+    },
+    {
+      "name": "rejected-bookmark-card-add-imagetracer-posterized2",
+      "reason": "Local ImageTracer posterized2 candidate produced real SVG paths but missed 621 pixels, mismatch ratio 0.03522005444646098.",
       "sourceBox": {
         "left": 1260,
         "top": 458,
