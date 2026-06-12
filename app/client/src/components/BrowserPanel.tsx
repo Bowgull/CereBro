@@ -816,7 +816,7 @@ function BrowserHomePrimitiveOverlay({
         }}
       />
       <BrowserHomeChromeHitButton
-        label="Open Watch Shelf"
+        label="Toggle Watch Shelf"
         box={browserHomeSideToggleHitBoxes.rightWatchShelf}
         onClick={onToggleWatchShelf}
       />
@@ -1984,11 +1984,9 @@ export default function BrowserPanel({
         />
       )}
       {browserSurface === "watch" && (
-        <button
-          type="button"
-          aria-label="Close Watch Shelf"
-          title="Close Watch Shelf"
-          className="absolute right-0 top-[35%] z-30 h-[24%] w-11 bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+        <BrowserHomeChromeHitButton
+          label="Toggle Watch Shelf"
+          box={browserHomeSideToggleHitBoxes.rightWatchShelf}
           onClick={() => {
             setBrowserSurface("page");
             setBrowserNotice("Watch Shelf closed.");

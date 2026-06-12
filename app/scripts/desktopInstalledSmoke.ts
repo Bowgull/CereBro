@@ -597,10 +597,10 @@ async function run() {
             return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
           })()`,
         );
-        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Open Watch Shelf");
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Toggle Watch Shelf");
         await waitFor(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement", 10_000, "watch shelf opened from right arrow");
         const watchShelfOpen = await evaluate(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement");
-        await clickElementByAriaLabel(client, "Close Watch Shelf");
+        await clickElementByAriaLabel(client, "Toggle Watch Shelf");
         await waitFor(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement", 10_000, "watch shelf closed from right arrow");
         const watchShelfClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement");
         await clickElementByAriaLabelInScope(client, "Browser Home controls", "Edit pinned bookmarks");

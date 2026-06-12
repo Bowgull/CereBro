@@ -39474,3 +39474,39 @@ Next:
 - The remaining active title-strip crop is `top-title-identity.png`.
 - Treat identity carefully because it includes the app mark; replace only if the
   measured DOM/SVG result keeps strict diff passing.
+
+## 2026-06-12 1346 ADT - Browser Home side-arrow semantics
+
+Completion:
+
+- Kept the measured left sidebar arrow hitbox wired to Browser nav rail
+  collapse/open.
+- Changed the measured right sidebar arrow hitbox into one toggle for Watch
+  Shelf open and close.
+- Removed the separate close-only Watch Shelf side button behavior from the
+  smoke contract.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+  Proof included `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`, and
+  `watchShelfClosed: true`.
+- Strict Browser Home diff stayed unchanged and passing at
+  `0.08358285845120586`.
+
+Next:
+
+- Resume measured conversion work with `top-title-identity.png`.
+- Do not touch center field, bottom dock, or rail decomposition without
+  slice-seam proof first.

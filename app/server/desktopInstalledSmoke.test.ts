@@ -53,7 +53,7 @@ describe("installed desktop app QA script", () => {
     expect(browserPanelSource).toContain("browserHomeSideToggleHitBoxes.rightWatchShelf");
     expect(browserPanelSource).toContain("onToggleLeftRail");
     expect(browserPanelSource).toContain("setBrowserSurface(\"watch\")");
-    expect(browserPanelSource).toContain("Close Watch Shelf");
+    expect(browserPanelSource).toContain("Toggle Watch Shelf");
     expect(browserPanelSource).toContain("Browser Home pinned bookmark manager");
     expect(browserPanelSource).toContain("Edit pinned bookmarks");
     expect(browserPanelSource).toContain("Close pinned bookmark manager");
