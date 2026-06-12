@@ -14,7 +14,10 @@
     "command": "pnpm --dir app run qa:browser-home-generate-trace-candidate",
     "package": "imagetracerjs",
     "status": "available",
-    "knownRejectedCandidate": "rejected-bookmark-card-add-imagetracer-posterized2"
+    "knownRejectedCandidates": [
+      "rejected-bookmark-card-add-imagetracer-posterized2",
+      "rejected-top-url-omnibox-imagetracer-posterized2"
+    ]
   },
   "targets": [
     {
@@ -152,6 +155,16 @@
         "top": 458,
         "width": 152,
         "height": 116
+      }
+    },
+    {
+      "name": "rejected-top-url-omnibox-imagetracer-posterized2",
+      "reason": "Local ImageTracer posterized2 candidate produced real SVG paths but missed 1620 pixels, mismatch ratio 0.03560126582278481.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
       }
     }
   ]

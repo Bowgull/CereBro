@@ -20,7 +20,7 @@ Local candidate generation is available through:
 pnpm --dir app run qa:browser-home-generate-trace-candidate
 ```
 
-The current generator uses `imagetracerjs`. Its `posterized2` add-card candidate is rejected and must not be promoted.
+The current generator uses `imagetracerjs`. Its `posterized2` add-card and omnibox candidates are rejected and must not be promoted.
 
 ## Active Raster Targets
 
@@ -48,6 +48,7 @@ The current generator uses `imagetracerjs`. Its `posterized2` add-card candidate
 | rejected-top-url-omnibox-css | 339,69,948,48 | Approximate DOM/CSS omnibox regressed installed strict diff to `0.0837552152233642` against accepted `0.08346456192123741`. |
 | rejected-bookmark-card-add-css | 1260,458,152,116 | Approximate DOM/CSS add bookmark card regressed installed strict diff to `0.08388623181031851` against accepted `0.08346456192123741`. |
 | rejected-bookmark-card-add-imagetracer-posterized2 | 1260,458,152,116 | Local ImageTracer `posterized2` candidate produced real SVG paths but missed 621 pixels, mismatch ratio `0.03522005444646098`. |
+| rejected-top-url-omnibox-imagetracer-posterized2 | 339,69,948,48 | Local ImageTracer `posterized2` candidate produced real SVG paths but missed 1620 pixels, mismatch ratio `0.03560126582278481`. |
 
 ## Acceptance Rule
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1716 ADT
+Last updated: 2026-06-12 1723 ADT
 
 ## Current North Star
 
@@ -53,6 +53,36 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1723 ADT - Omnibox ImageTracer Candidate Rejected
+
+### What Changed
+- Generated a real vector candidate for the top URL omnibox:
+  - `app/client/public/browser-home/trace-candidates/rejected-top-url-omnibox-imagetracer-posterized2.json`
+- The candidate contains SVG path geometry, not embedded raster data.
+- Trace audit rejected it:
+  - mismatched pixels: `1620`
+  - mismatch ratio: `0.03560126582278481`
+- This proves ImageTracer `posterized2` is not accurate enough for the omnibox either.
+
+### Checks Run
+- `CEREBRO_BROWSER_HOME_TRACE_TARGET=top-url-omnibox pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- ImageTracer `posterized2` is now rejected for both:
+  - `bookmark-card-add`
+  - `top-url-omnibox`
+- Next local extraction should use either a better option sweep or external no-cost extraction. Do not promote these candidates.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation exists, but `posterized2` candidates are rejected for add card (`0.03522005444646098`) and omnibox (`0.03560126582278481`). Next step should be an option sweep or external no-cost extraction, not production replacement.
+```
 
 ## 2026-06-12 1716 ADT - Local Vector Trace Generator
 
