@@ -5,6 +5,7 @@ import {
   browserHomeAllowedProvenanceMedia,
   browserHomeCardBoxes,
   browserHomeDockBox,
+  browserHomeDockHitBoxes,
   browserHomeEditPinnedBox,
   browserHomeFullMockupSource,
   browserHomeLayerAssets,
@@ -70,6 +71,7 @@ describe("browserHomeBrandLayout", () => {
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
       { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
       { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
+      { name: "aang-dock.png", left: 13, top: 846, width: 1397, height: 119 },
     ]);
   });
 
@@ -117,6 +119,11 @@ describe("browserHomeBrandLayout", () => {
       { title: "Downloads", left: 906, top: 604, width: 368, height: 224 },
     ]);
     expect(browserHomeDockBox).toEqual({ left: 13, top: 846, width: 1397, height: 119 });
+    expect(browserHomeDockHitBoxes).toEqual({
+      input: { left: 144, top: 878, width: 1104, height: 70 },
+      attach: { left: 1260, top: 886, width: 58, height: 54 },
+      send: { left: 1331, top: 886, width: 68, height: 54 },
+    });
   });
 
   it("locks lower-panel transparent hitboxes", () => {

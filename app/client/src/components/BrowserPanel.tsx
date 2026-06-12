@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CereBroButton, CereBroDock } from "@/components/cerebro-ui";
+import { CereBroButton } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
   browserHomeCardBoxes,
-  browserHomeDockBox,
+  browserHomeDockHitBoxes,
   browserHomeEditPinnedBox,
   browserHomeLayerAssets,
   browserHomeMedallionBoxes,
@@ -729,22 +729,9 @@ function BrowserHomePrimitiveOverlay({
         );
       })}
 
-      <CereBroDock
-        className="absolute"
-        style={browserHomeBoxStyle(browserHomeDockBox)}
-        avatar={<img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-[58px] max-w-none object-contain [image-rendering:pixelated]" draggable={false} />}
-        actions={
-          <>
-            <CereBroButton type="button" variant="ghost" aria-label="Attach image for Aang" className="h-12 w-12 px-0">
-              <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
-            </CereBroButton>
-            <CereBroButton type="button" variant="active" aria-label="Send to Aang" className="h-12 w-12 px-0" onClick={onSubmitAang}>
-              <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
-            </CereBroButton>
-          </>
-        }
-      >
-        <Input
+      <label className="pointer-events-auto absolute rounded-sm" style={browserHomeBoxStyle(browserHomeDockHitBoxes.input)}>
+        <span className="sr-only">Ask Aang from Browser Home</span>
+        <input
           aria-label="Ask Aang from Browser Home"
           value={aangDraft}
           onChange={(event) => onAangDraftChange(event.target.value)}
@@ -753,11 +740,27 @@ function BrowserHomePrimitiveOverlay({
             event.preventDefault();
             onSubmitAang();
           }}
-          placeholder="Ask Aang anything or run a command..."
-          className="h-12 min-w-0 text-[12px]"
-          style={{ background: B.surface.address, border: `1px solid ${B.line.brass}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
+          className="h-full w-full bg-transparent text-[13px] outline-none"
+          placeholder=""
+          style={{
+            color: B.color.parchment100,
+            caretColor: B.color.gold300,
+            paddingLeft: "18px",
+            paddingRight: "18px",
+            fontFamily: B.font.ui,
+          }}
         />
-      </CereBroDock>
+      </label>
+      <BrowserHomeChromeHitButton
+        label="Attach image for Aang"
+        box={browserHomeDockHitBoxes.attach}
+        onClick={() => undefined}
+      />
+      <BrowserHomeChromeHitButton
+        label="Send to Aang"
+        box={browserHomeDockHitBoxes.send}
+        onClick={onSubmitAang}
+      />
     </div>
   );
 }

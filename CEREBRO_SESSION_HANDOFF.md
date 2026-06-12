@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-11 2134 ADT
+Last updated: 2026-06-11 2150 ADT
 
 ## Current North Star
 
@@ -53,6 +53,50 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-11 2150 ADT - Browser Home Aang Dock Extraction
+
+### What Changed
+- Added the existing mockup-derived `aang-dock.png` asset to the visible Browser Home layer stack.
+- Removed the visible `CereBroDock` rendering from Browser Home.
+- Added measured transparent dock controls for:
+  - Aang input
+  - attach image
+  - send to Aang
+- Kept the Aang input real and keyboard-usable, but stopped drawing a new input frame over the mockup dock.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.08852142057596418`.
+- Previous lower-panel slice diff ratio was `0.0917109748651674`.
+- This is the best installed Browser Home diff so far.
+
+### Known Gaps
+- Browser Home is still not fully 1:1.
+- The right edge still shows a vertical dark frame/strip that needs cleanup.
+- Loaded browser pages and the rest of CereBro still need the same brand-system treatment after Browser Home is locked.
+- Next measured slice should remove or align the remaining legacy edge/backplate artifacts and then verify Browser Home click targets.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and Aang dock. Transparent measured hitboxes preserve browser, bookmark, lower-panel, and dock actions. Current installed diff ratio is `0.08852142057596418`. Next measured slice should clean up remaining edge/backplate artifacts and verify click targets. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+```
 
 ## 2026-06-11 2134 ADT - Browser Home Lower Panels Extraction
 
