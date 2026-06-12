@@ -39165,3 +39165,40 @@ Next slice:
   bottom dock row.
 - Do not hand-rebuild the full top strip. Use a smaller measured sub-slice or a
   no-cost external extraction reference first.
+
+## 2026-06-12 1103 ADT - Rejected bottom dock raster reduction
+
+Rejected attempt:
+
+- Tried replacing active `bottom-dock-row.png` with a measured CSS dock
+  backplate plus the existing extracted `aang-dock.png` asset.
+- Fast checks passed, and `/Applications/CereBro.app` was packaged and
+  installed for proof.
+- Installed Browser Home smoke passed, but strict visual diff regressed from
+  `0.08546797089650962` to `0.08549722702757709`.
+- The attempt was reverted. The strict gate was not loosened.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean
+  passing source after the revert.
+
+Checks after revert:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08546797089650962`.
+
+Next slice guidance:
+
+- Do not retry bottom dock as `aang-dock.png` plus a guessed CSS backplate.
+- Bottom dock needs either a smaller source-derived backplate asset, traced
+  geometry, or no-cost external extraction before another attempt.
+- Best next candidate is a no-cost external extraction pass or a smaller
+  measured sub-slice from top URL row or center field.
