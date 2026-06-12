@@ -70,6 +70,21 @@
       "blockedApproaches": [
         "approximate-dom-css-omnibox"
       ]
+    },
+    {
+      "name": "bookmark-card-add",
+      "role": "Add bookmark card frame, plus mark, label, and status dot.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "approximate-dom-css-add-card"
+      ]
     }
   ],
   "rejectedCandidates": [
@@ -111,6 +126,16 @@
         "top": 69,
         "width": 948,
         "height": 48
+      }
+    },
+    {
+      "name": "rejected-bookmark-card-add-css",
+      "reason": "Approximate DOM/CSS add bookmark card regressed installed strict diff to 0.08388623181031851 against accepted 0.08346456192123741.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
       }
     }
   ]
