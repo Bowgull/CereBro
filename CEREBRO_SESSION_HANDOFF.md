@@ -39549,3 +39549,28 @@ Next:
   are `center-field-title-star-map.png`, `bottom-dock-row.png`, and the shell
   rail texture path in `Home.tsx`.
 - Use slice-seam proof before decomposing center field, bottom dock, or rail.
+
+## 2026-06-12 1426 ADT - Rejected bottom dock partition
+
+Completion:
+
+- Added a seam-audit fixture for the obvious bottom-dock decomposition:
+  left edge, existing `aang-dock.png` area, right edge, and lower edge.
+- The candidate failed installed-scale seam preflight and was recorded as
+  `rejected-bottom-dock-partition`.
+- No production Browser Home rendering changed.
+
+Verification:
+
+- Initial accepted candidate failed `pnpm --dir app run qa:browser-home-slice-seams`
+  with `mismatchRatio: 0.0022679418641217406`.
+- Reclassified the candidate as rejected.
+- `pnpm --dir app run qa:browser-home-slice-seams` then passed, proving the
+  rejection fixture is stable.
+
+Next:
+
+- Do not retry the same bottom-dock source partition.
+- Bottom dock needs traced geometry, a seam-safe single texture strategy, or
+  no-cost external extraction before production replacement.
+- Center field still needs seam-safe extraction before production replacement.

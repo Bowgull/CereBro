@@ -1,0 +1,81 @@
+{
+  "name": "rejected-bottom-dock-partition",
+  "status": "rejected",
+  "reason": "Source-derived bottom dock partition reproduced installed-app seam drift and must not replace the active full-width bottom-dock-row raster.",
+  "sourceBox": {
+    "left": 145,
+    "top": 846,
+    "width": 1440,
+    "height": 146
+  },
+  "maxMismatchRatio": 0,
+  "renderScales": [
+    {
+      "name": "installed-browser-home-smoke-scale",
+      "scaleX": 1.665615141955836,
+      "scaleY": 1.6693548387096775
+    }
+  ],
+  "slices": [
+    {
+      "name": "bottom-dock-left-edge",
+      "sourceBox": {
+        "left": 145,
+        "top": 846,
+        "width": 13,
+        "height": 146
+      },
+      "targetBox": {
+        "left": 0,
+        "top": 0,
+        "width": 13,
+        "height": 146
+      }
+    },
+    {
+      "name": "bottom-dock-main",
+      "sourceBox": {
+        "left": 158,
+        "top": 846,
+        "width": 1397,
+        "height": 119
+      },
+      "targetBox": {
+        "left": 13,
+        "top": 0,
+        "width": 1397,
+        "height": 119
+      }
+    },
+    {
+      "name": "bottom-dock-right-edge",
+      "sourceBox": {
+        "left": 1555,
+        "top": 846,
+        "width": 30,
+        "height": 146
+      },
+      "targetBox": {
+        "left": 1410,
+        "top": 0,
+        "width": 30,
+        "height": 146
+      }
+    },
+    {
+      "name": "bottom-dock-lower-edge",
+      "sourceBox": {
+        "left": 158,
+        "top": 965,
+        "width": 1397,
+        "height": 27
+      },
+      "targetBox": {
+        "left": 13,
+        "top": 119,
+        "width": 1397,
+        "height": 27
+      }
+    }
+  ]
+}
