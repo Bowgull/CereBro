@@ -39625,3 +39625,30 @@ Next:
 - Use the packet for no-cost external extraction or local tracing.
 - Do not promote an extracted replacement unless installed strict diff improves
   or stays within the accepted gate.
+
+## 2026-06-12 1451 ADT - Browser Home trace candidate audit
+
+Completion:
+
+- Added `app/scripts/browserHomeTraceCandidateAudit.ts`.
+- Added `pnpm --dir app run qa:browser-home-trace-candidates`.
+- Added `app/server/browserHomeTraceCandidateAudit.test.ts`.
+- Added `rejected-rail-approximate-svg` under
+  `app/client/public/browser-home/trace-candidates`.
+- The trace audit renders SVG candidates to PNG, compares them against the
+  locked mockup crop, and enforces accepted/rejected status.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-trace-candidates` passed.
+- The rejected rail candidate measured `mismatchRatio: 0.10677815598638449`.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeExtractionPacket.test.ts server/browserHomeBrandLayout.test.ts --maxWorkers=1 --no-file-parallelism` passed: 13 tests.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+
+Next:
+
+- Future traced SVG candidates for rail, center field, or bottom dock must go
+  through `qa:browser-home-trace-candidates` before production.
+- Approximate hand-authored rail SVG is blocked unless it becomes materially
+  closer to the locked crop.

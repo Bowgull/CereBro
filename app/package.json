@@ -28,6 +28,7 @@
     "qa:browser-home-extraction-packet": "tsx scripts/browserHomeExtractionPacket.ts",
     "qa:browser-home-provenance": "tsx scripts/browserHomeProvenanceAudit.ts",
     "qa:browser-home-slice-seams": "tsx scripts/browserHomeSliceSeamAudit.ts",
+    "qa:browser-home-trace-candidates": "tsx scripts/browserHomeTraceCandidateAudit.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
