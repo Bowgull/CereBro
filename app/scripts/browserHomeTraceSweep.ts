@@ -5,6 +5,15 @@ import { createRequire } from "node:module";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import sharp from "sharp";
+import {
+  ColorMode,
+  Hierarchical,
+  OptimizePreset,
+  PathSimplifyMode,
+  optimize,
+  vectorize,
+  type Config as VTracerConfig,
+} from "@neplex/vectorizer";
 
 type Box = {
   left: number;
@@ -21,7 +30,8 @@ type TraceTarget = {
 
 type TracePreset = {
   name: string;
-  options: string | Record<string, unknown>;
+  engine: "imagetracer" | "vtracer";
+  options: string | Record<string, unknown> | VTracerConfig;
 };
 
 type ImageTracerApi = {
@@ -83,12 +93,13 @@ const traceTargets: TraceTarget[] = [
 ];
 
 const tracePresets: TracePreset[] = [
-  { name: "posterized2", options: "posterized2" },
-  { name: "posterized3", options: "posterized3" },
-  { name: "curvy", options: "curvy" },
-  { name: "sharp", options: "sharp" },
+  { name: "imagetracer-posterized2", engine: "imagetracer", options: "posterized2" },
+  { name: "imagetracer-posterized3", engine: "imagetracer", options: "posterized3" },
+  { name: "imagetracer-curvy", engine: "imagetracer", options: "curvy" },
+  { name: "imagetracer-sharp", engine: "imagetracer", options: "sharp" },
   {
-    name: "low-color-tight",
+    name: "imagetracer-low-color-tight",
+    engine: "imagetracer",
     options: {
       numberofcolors: 12,
       colorsampling: 2,
@@ -100,7 +111,8 @@ const tracePresets: TracePreset[] = [
     },
   },
   {
-    name: "mid-color-tight",
+    name: "imagetracer-mid-color-tight",
+    engine: "imagetracer",
     options: {
       numberofcolors: 24,
       colorsampling: 2,
@@ -112,7 +124,8 @@ const tracePresets: TracePreset[] = [
     },
   },
   {
-    name: "high-color-fine",
+    name: "imagetracer-high-color-fine",
+    engine: "imagetracer",
     options: {
       numberofcolors: 48,
       colorsampling: 2,
@@ -124,7 +137,8 @@ const tracePresets: TracePreset[] = [
     },
   },
   {
-    name: "very-high-color-fine",
+    name: "imagetracer-very-high-color-fine",
+    engine: "imagetracer",
     options: {
       numberofcolors: 64,
       colorsampling: 2,
@@ -133,6 +147,74 @@ const tracePresets: TracePreset[] = [
       qtres: 0.1,
       pathomit: 0,
       rightangleenhance: true,
+    },
+  },
+  {
+    name: "vtracer-poster-spline",
+    engine: "vtracer",
+    options: {
+      colorMode: ColorMode.Color,
+      colorPrecision: 6,
+      filterSpeckle: 4,
+      spliceThreshold: 45,
+      cornerThreshold: 60,
+      hierarchical: Hierarchical.Stacked,
+      mode: PathSimplifyMode.Spline,
+      layerDifference: 5,
+      lengthThreshold: 5,
+      maxIterations: 2,
+      pathPrecision: 4,
+    },
+  },
+  {
+    name: "vtracer-poster-polygon",
+    engine: "vtracer",
+    options: {
+      colorMode: ColorMode.Color,
+      colorPrecision: 6,
+      filterSpeckle: 4,
+      spliceThreshold: 45,
+      cornerThreshold: 60,
+      hierarchical: Hierarchical.Stacked,
+      mode: PathSimplifyMode.Polygon,
+      layerDifference: 5,
+      lengthThreshold: 5,
+      maxIterations: 2,
+      pathPrecision: 4,
+    },
+  },
+  {
+    name: "vtracer-low-layer-spline",
+    engine: "vtracer",
+    options: {
+      colorMode: ColorMode.Color,
+      colorPrecision: 5,
+      filterSpeckle: 6,
+      spliceThreshold: 45,
+      cornerThreshold: 60,
+      hierarchical: Hierarchical.Stacked,
+      mode: PathSimplifyMode.Spline,
+      layerDifference: 8,
+      lengthThreshold: 6,
+      maxIterations: 2,
+      pathPrecision: 3,
+    },
+  },
+  {
+    name: "vtracer-fine-spline",
+    engine: "vtracer",
+    options: {
+      colorMode: ColorMode.Color,
+      colorPrecision: 7,
+      filterSpeckle: 2,
+      spliceThreshold: 40,
+      cornerThreshold: 55,
+      hierarchical: Hierarchical.Stacked,
+      mode: PathSimplifyMode.Spline,
+      layerDifference: 4,
+      lengthThreshold: 4,
+      maxIterations: 3,
+      pathPrecision: 4,
     },
   },
 ];
@@ -163,6 +245,15 @@ async function cropTarget(target: TraceTarget) {
     },
     png,
   };
+}
+
+async function traceSvg(cropPng: Buffer, imageData: { width: number; height: number; data: Buffer }, preset: TracePreset) {
+  if (preset.engine === "imagetracer") {
+    return normalizeSvg(ImageTracer.imagedataToSVG(imageData, preset.options as string | Record<string, unknown>));
+  }
+
+  const rawSvg = await vectorize(cropPng, preset.options as VTracerConfig);
+  return normalizeSvg(await optimize(rawSvg, { preset: OptimizePreset.Safe, multipass: true, multipassIterations: 4 }));
 }
 
 async function compareSvgToCrop(svg: string, expectedBuffer: Buffer, box: Box) {
@@ -203,7 +294,7 @@ async function main() {
     const presetResults = [];
 
     for (const preset of tracePresets) {
-      const svg = normalizeSvg(ImageTracer.imagedataToSVG(crop.imageData, preset.options));
+      const svg = await traceSvg(crop.png, crop.imageData, preset);
       const comparison = await compareSvgToCrop(svg, crop.png, target.sourceBox);
 
       fs.writeFileSync(path.join(targetOutputDir, `${preset.name}.actual.png`), comparison.actualBuffer);
@@ -211,6 +302,7 @@ async function main() {
 
       presetResults.push({
         preset: preset.name,
+        engine: preset.engine,
         mismatchRatio: comparison.mismatchRatio,
         mismatchedPixels: comparison.mismatchedPixels,
         svgLength: svg.length,

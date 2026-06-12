@@ -3,6 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import sharp from "sharp";
+import {
+  ColorMode,
+  Hierarchical,
+  OptimizePreset,
+  PathSimplifyMode,
+  optimize,
+  vectorize,
+} from "@neplex/vectorizer";
 
 type Box = {
   left: number;
@@ -15,6 +23,9 @@ type TraceTarget = {
   name: string;
   sourceBox: Box;
   reason: string;
+  engine: "imagetracer-posterized2" | "vtracer-fine-spline";
+  maxMismatchRatio: number;
+  status: "accepted" | "rejected";
 };
 
 type ImageTracerApi = {
@@ -38,11 +49,25 @@ const traceTargets: Record<string, TraceTarget> = {
     name: "bookmark-card-add",
     sourceBox: { left: 1260, top: 458, width: 152, height: 116 },
     reason: "ImageTracer posterized2 candidate for add bookmark card; recorded as rejected unless it passes the trace audit threshold.",
+    engine: "imagetracer-posterized2",
+    maxMismatchRatio: 0,
+    status: "rejected",
+  },
+  "bookmark-card-add-vtracer-fine-spline": {
+    name: "bookmark-card-add",
+    sourceBox: { left: 1260, top: 458, width: 152, height: 116 },
+    reason: "VTracer fine spline candidate for add bookmark card; rejected after installed visual review because the Add label rendered incorrectly despite a low crop mismatch ratio.",
+    engine: "vtracer-fine-spline",
+    maxMismatchRatio: 0,
+    status: "rejected",
   },
   "top-url-omnibox": {
     name: "top-url-omnibox",
     sourceBox: { left: 339, top: 69, width: 948, height: 48 },
     reason: "ImageTracer posterized2 candidate for omnibox; recorded as rejected unless it passes the trace audit threshold.",
+    engine: "imagetracer-posterized2",
+    maxMismatchRatio: 0,
+    status: "rejected",
   },
 };
 
@@ -68,24 +93,35 @@ async function main() {
   const sourceSha = sha256(sourcePath);
   if (sourceSha !== lockedBrowserHomeSha256) fail(`Locked Browser Home source changed: ${sourceSha}`);
 
-  const raw = await sharp(sourcePath)
-    .extract(target.sourceBox)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const crop = sharp(sourcePath).extract(target.sourceBox).ensureAlpha();
+  const raw = await crop.clone().raw().toBuffer({ resolveWithObject: true });
 
-  const svg = normalizeSvg(ImageTracer.imagedataToSVG(
-    { width: raw.info.width, height: raw.info.height, data: raw.data },
-    "posterized2",
-  ));
+  const svg = target.engine === "imagetracer-posterized2"
+    ? normalizeSvg(ImageTracer.imagedataToSVG(
+      { width: raw.info.width, height: raw.info.height, data: raw.data },
+      "posterized2",
+    ))
+    : normalizeSvg(await optimize(await vectorize(await crop.clone().png().toBuffer(), {
+      colorMode: ColorMode.Color,
+      colorPrecision: 7,
+      filterSpeckle: 2,
+      spliceThreshold: 40,
+      cornerThreshold: 55,
+      hierarchical: Hierarchical.Stacked,
+      mode: PathSimplifyMode.Spline,
+      layerDifference: 4,
+      lengthThreshold: 4,
+      maxIterations: 3,
+      pathPrecision: 4,
+    }), { preset: OptimizePreset.Safe, multipass: true, multipassIterations: 4 }));
 
-  const candidateName = `rejected-${target.name}-imagetracer-posterized2`;
+  const candidateName = `${target.status}-${targetName}`;
   const candidate = {
     name: candidateName,
-    status: "rejected",
+    status: target.status,
     reason: target.reason,
     sourceBox: target.sourceBox,
-    maxMismatchRatio: 0,
+    maxMismatchRatio: target.maxMismatchRatio,
     svg,
   };
 

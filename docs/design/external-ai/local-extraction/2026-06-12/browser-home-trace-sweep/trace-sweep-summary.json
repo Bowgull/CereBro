@@ -1,7 +1,7 @@
 {
   "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
   "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
-  "generatedAt": "2026-06-12T20:35:41.011Z",
+  "generatedAt": "2026-06-12T20:51:16.192Z",
   "rule": "Trace sweep is evidence only. Do not promote a target into production unless a candidate passes trace audit and installed strict visual diff.",
   "promotionThreshold": "Must improve or preserve accepted strict Browser Home mismatch ratio and pass provenance audit.",
   "results": [
@@ -15,94 +15,147 @@
         "height": 48
       },
       "bestPreset": {
-        "preset": "very-high-color-fine",
+        "preset": "imagetracer-very-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.020283931082981717,
         "mismatchedPixels": 923,
         "svgLength": 2109532,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/very-high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/very-high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.020283931082981717,
           "mismatchedPixels": 923,
           "svgLength": 2109532,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.022195850914205343,
           "mismatchedPixels": 1010,
           "svgLength": 884973,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.0305028129395218,
           "mismatchedPixels": 1388,
           "svgLength": 1610195,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.030898382559774965,
           "mismatchedPixels": 1406,
           "svgLength": 1055492,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.031271976090014066,
+          "mismatchedPixels": 1423,
+          "svgLength": 4915,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03560126582278481,
           "mismatchedPixels": 1620,
           "svgLength": 40160,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.0438862517580872,
           "mismatchedPixels": 1997,
           "svgLength": 8469,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.05342387482419128,
+          "mismatchedPixels": 2431,
+          "svgLength": 3708,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.06412623066104078,
           "mismatchedPixels": 2918,
           "svgLength": 636293,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.06746659634317863,
+          "mismatchedPixels": 3070,
+          "svgLength": 2332,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.06770833333333333,
           "mismatchedPixels": 3081,
           "svgLength": 482921,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-sharp.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.07485056258790436,
+          "mismatchedPixels": 3406,
+          "svgLength": 1775,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/vtracer-low-layer-spline.diff.png"
           }
         }
       ]
@@ -117,94 +170,147 @@
         "height": 52
       },
       "bestPreset": {
-        "preset": "high-color-fine",
+        "preset": "imagetracer-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.045592948717948716,
         "mismatchedPixels": 569,
         "svgLength": 732597,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.045592948717948716,
           "mismatchedPixels": 569,
           "svgLength": 732597,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.04775641025641025,
           "mismatchedPixels": 596,
           "svgLength": 881579,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05048076923076923,
           "mismatchedPixels": 630,
           "svgLength": 519209,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.056971153846153845,
           "mismatchedPixels": 711,
           "svgLength": 369230,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.06995192307692308,
+          "mismatchedPixels": 873,
+          "svgLength": 18782,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.0719551282051282,
+          "mismatchedPixels": 898,
+          "svgLength": 3663,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.07524038461538461,
+          "mismatchedPixels": 939,
+          "svgLength": 7364,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.08325320512820512,
+          "mismatchedPixels": 1039,
+          "svgLength": 3410,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.08605769230769231,
           "mismatchedPixels": 1074,
           "svgLength": 37356,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.09503205128205128,
           "mismatchedPixels": 1186,
           "svgLength": 5372,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.12011217948717949,
           "mismatchedPixels": 1499,
           "svgLength": 169250,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.12059294871794872,
           "mismatchedPixels": 1505,
           "svgLength": 140797,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-sharp.diff.png"
           }
         }
       ]
@@ -219,94 +325,147 @@
         "height": 116
       },
       "bestPreset": {
-        "preset": "high-color-fine",
-        "mismatchRatio": 0.025068058076225044,
-        "mismatchedPixels": 442,
-        "svgLength": 1200010,
+        "preset": "vtracer-fine-spline",
+        "engine": "vtracer",
+        "mismatchRatio": 0.023480036297640654,
+        "mismatchedPixels": 414,
+        "svgLength": 10842,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "high-color-fine",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.023480036297640654,
+          "mismatchedPixels": 414,
+          "svgLength": 10842,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.025068058076225044,
           "mismatchedPixels": 442,
           "svgLength": 1200010,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.025465063520871144,
           "mismatchedPixels": 449,
           "svgLength": 798557,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "very-high-color-fine",
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.030399274047186932,
+          "mismatchedPixels": 536,
+          "svgLength": 2207,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.030852994555353903,
+          "mismatchedPixels": 544,
+          "svgLength": 3117,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.033008166969147004,
           "mismatchedPixels": 582,
           "svgLength": 1408783,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03522005444646098,
           "mismatchedPixels": 621,
           "svgLength": 36072,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.036637931034482756,
           "mismatchedPixels": 646,
           "svgLength": 686257,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.03998411978221415,
+          "mismatchedPixels": 705,
+          "svgLength": 2056,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05694192377495463,
           "mismatchedPixels": 1004,
           "svgLength": 2897,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.15108892921960074,
           "mismatchedPixels": 2664,
           "svgLength": 299093,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.1593693284936479,
           "mismatchedPixels": 2810,
           "svgLength": 273886,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/imagetracer-sharp.diff.png"
           }
         }
       ]
@@ -321,94 +480,147 @@
         "height": 224
       },
       "bestPreset": {
-        "preset": "very-high-color-fine",
+        "preset": "imagetracer-very-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.036388578869047616,
         "mismatchedPixels": 3130,
         "svgLength": 6540214,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/very-high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/very-high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-very-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-very-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.036388578869047616,
           "mismatchedPixels": 3130,
           "svgLength": 6540214,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.04138764880952381,
           "mismatchedPixels": 3560,
           "svgLength": 3773262,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.04338727678571429,
           "mismatchedPixels": 3732,
           "svgLength": 5455571,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.05038597470238095,
+          "mismatchedPixels": 4334,
+          "svgLength": 64446,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.05286225818452381,
+          "mismatchedPixels": 4547,
+          "svgLength": 10391,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.053385416666666664,
+          "mismatchedPixels": 4592,
+          "svgLength": 15511,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.056396484375,
           "mismatchedPixels": 4851,
           "svgLength": 2326081,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05954706101190476,
           "mismatchedPixels": 5122,
           "svgLength": 210425,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.06101190476190476,
           "mismatchedPixels": 5248,
           "svgLength": 39756,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.061953590029761904,
+          "mismatchedPixels": 5329,
+          "svgLength": 6752,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.11475771949404762,
           "mismatchedPixels": 9871,
           "svgLength": 1225946,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.12293061755952381,
           "mismatchedPixels": 10574,
           "svgLength": 1004519,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-continue/imagetracer-sharp.diff.png"
           }
         }
       ]
@@ -423,94 +635,147 @@
         "height": 224
       },
       "bestPreset": {
-        "preset": "very-high-color-fine",
+        "preset": "imagetracer-very-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.03503097667638484,
         "mismatchedPixels": 3076,
         "svgLength": 6258015,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/very-high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/very-high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-very-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-very-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03503097667638484,
           "mismatchedPixels": 3076,
           "svgLength": 6258015,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03700118440233236,
           "mismatchedPixels": 3249,
           "svgLength": 5609204,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03939276603498542,
           "mismatchedPixels": 3459,
           "svgLength": 2433664,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.039449708454810495,
           "mismatchedPixels": 3464,
           "svgLength": 3092724,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.042228498542274055,
+          "mismatchedPixels": 3708,
+          "svgLength": 9035,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.04279792274052478,
+          "mismatchedPixels": 3758,
+          "svgLength": 14610,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.043025692419825075,
+          "mismatchedPixels": 3778,
+          "svgLength": 44578,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.049574070699708456,
+          "mismatchedPixels": 4353,
+          "svgLength": 8596,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05105457361516035,
           "mismatchedPixels": 4483,
           "svgLength": 186390,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.052523688046647234,
           "mismatchedPixels": 4612,
           "svgLength": 33352,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.09485468294460642,
           "mismatchedPixels": 8329,
           "svgLength": 1167323,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.10183582361516035,
           "mismatchedPixels": 8942,
           "svgLength": 919821,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-recent/imagetracer-sharp.diff.png"
           }
         }
       ]
@@ -525,94 +790,147 @@
         "height": 224
       },
       "bestPreset": {
-        "preset": "very-high-color-fine",
+        "preset": "imagetracer-very-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.03305755046583851,
         "mismatchedPixels": 2725,
         "svgLength": 5748530,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/very-high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/very-high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-very-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-very-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.03305755046583851,
           "mismatchedPixels": 2725,
           "svgLength": 5748530,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.0363087150621118,
           "mismatchedPixels": 2993,
           "svgLength": 5705068,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.0413674301242236,
           "mismatchedPixels": 3410,
           "svgLength": 3376173,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.0453707298136646,
+          "mismatchedPixels": 3740,
+          "svgLength": 55050,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.04618352096273292,
+          "mismatchedPixels": 3807,
+          "svgLength": 8905,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.046693031832298136,
+          "mismatchedPixels": 3849,
+          "svgLength": 14003,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.050829774844720496,
+          "mismatchedPixels": 4190,
+          "svgLength": 7064,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.052661587732919256,
           "mismatchedPixels": 4341,
           "svgLength": 186673,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05813276397515528,
           "mismatchedPixels": 4792,
           "svgLength": 2985231,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.05856948757763975,
           "mismatchedPixels": 4828,
           "svgLength": 28745,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.11717536878881987,
           "mismatchedPixels": 9659,
           "svgLength": 1167555,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.12675902562111802,
           "mismatchedPixels": 10449,
           "svgLength": 971550,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/panel-downloads/imagetracer-sharp.diff.png"
           }
         }
       ]
@@ -627,94 +945,147 @@
         "height": 70
       },
       "bestPreset": {
-        "preset": "high-color-fine",
+        "preset": "imagetracer-high-color-fine",
+        "engine": "imagetracer",
         "mismatchRatio": 0.00562888198757764,
         "mismatchedPixels": 435,
         "svgLength": 4696227,
         "output": {
-          "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/high-color-fine.actual.png",
-          "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/high-color-fine.diff.png"
+          "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-high-color-fine.diff.png"
         }
       },
       "presets": [
         {
-          "preset": "high-color-fine",
+          "preset": "imagetracer-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.00562888198757764,
           "mismatchedPixels": 435,
           "svgLength": 4696227,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "mid-color-tight",
+          "preset": "imagetracer-mid-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.006586438923395445,
           "mismatchedPixels": 509,
           "svgLength": 3257687,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/mid-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/mid-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-mid-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-mid-color-tight.diff.png"
           }
         },
         {
-          "preset": "very-high-color-fine",
+          "preset": "imagetracer-very-high-color-fine",
+          "engine": "imagetracer",
           "mismatchRatio": 0.0068193581780538306,
           "mismatchedPixels": 527,
           "svgLength": 5301023,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/very-high-color-fine.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/very-high-color-fine.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-very-high-color-fine.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-very-high-color-fine.diff.png"
           }
         },
         {
-          "preset": "low-color-tight",
+          "preset": "vtracer-fine-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.007129917184265011,
+          "mismatchedPixels": 551,
+          "svgLength": 6234,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-fine-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-fine-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.00749223602484472,
+          "mismatchedPixels": 579,
+          "svgLength": 4673,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-poster-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-poster-spline.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-poster-polygon",
+          "engine": "vtracer",
+          "mismatchRatio": 0.007582815734989648,
+          "mismatchedPixels": 586,
+          "svgLength": 2946,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-poster-polygon.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-poster-polygon.diff.png"
+          }
+        },
+        {
+          "preset": "vtracer-low-layer-spline",
+          "engine": "vtracer",
+          "mismatchRatio": 0.010610766045548654,
+          "mismatchedPixels": 820,
+          "svgLength": 2232,
+          "output": {
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-low-layer-spline.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/vtracer-low-layer-spline.diff.png"
+          }
+        },
+        {
+          "preset": "imagetracer-low-color-tight",
+          "engine": "imagetracer",
           "mismatchRatio": 0.010908385093167702,
           "mismatchedPixels": 843,
           "svgLength": 1977327,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/low-color-tight.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/low-color-tight.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-low-color-tight.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-low-color-tight.diff.png"
           }
         },
         {
-          "preset": "posterized2",
+          "preset": "imagetracer-posterized2",
+          "engine": "imagetracer",
           "mismatchRatio": 0.01384575569358178,
           "mismatchedPixels": 1070,
           "svgLength": 94646,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/posterized2.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/posterized2.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-posterized2.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-posterized2.diff.png"
           }
         },
         {
-          "preset": "posterized3",
+          "preset": "imagetracer-posterized3",
+          "engine": "imagetracer",
           "mismatchRatio": 0.026099896480331262,
           "mismatchedPixels": 2017,
           "svgLength": 9214,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/posterized3.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/posterized3.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-posterized3.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-posterized3.diff.png"
           }
         },
         {
-          "preset": "curvy",
+          "preset": "imagetracer-curvy",
+          "engine": "imagetracer",
           "mismatchRatio": 0.10150103519668736,
           "mismatchedPixels": 7844,
           "svgLength": 1203940,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/curvy.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/curvy.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-curvy.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-curvy.diff.png"
           }
         },
         {
-          "preset": "sharp",
+          "preset": "imagetracer-sharp",
+          "engine": "imagetracer",
           "mismatchRatio": 0.10658643892339545,
           "mismatchedPixels": 8237,
           "svgLength": 1034474,
           "output": {
-            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/sharp.actual.png",
-            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/sharp.diff.png"
+            "actual": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-sharp.actual.png",
+            "diff": "app/output/qa/browser-home-trace-sweep/aang-dock-controls/imagetracer-sharp.diff.png"
           }
         }
       ]

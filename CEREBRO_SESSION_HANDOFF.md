@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1738 ADT
+Last updated: 2026-06-12 1804 ADT
 
 ## Current North Star
 
@@ -53,6 +53,68 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1804 ADT - Add Bookmark Card VTracer Candidate Rejected
+
+### What Changed
+- Added no-cost VTracer extraction through `@neplex/vectorizer`.
+- Extended `app/scripts/browserHomeTraceSweep.ts` to compare ImageTracer and VTracer presets.
+- Extended `app/scripts/browserHomeGenerateTraceCandidate.ts` to generate:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-vtracer-fine-spline.json`
+- Tested the VTracer candidate as the active add-card asset.
+- Rejected the production replacement after visual review because the visible label rendered as `dd` instead of `Add`.
+- Restored active `bookmark-card-add.png` in the Browser Home pinned-card row.
+- Hardened provenance audit so traced SVG assets must:
+  - exist in the manifest
+  - render at the locked box size
+  - not contain `<image>`
+  - not contain `data:image/*`
+  - not reference raster files
+
+### Checks Run
+- `CEREBRO_BROWSER_HOME_TRACE_TARGET=bookmark-card-add-vtracer-fine-spline pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup && pnpm --dir app run desktop:package && pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- The rejected SVG attempt was not kept.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the restored accepted source.
+- Installed Browser Home smoke passed after restore.
+- Hitbox proof still shows:
+  - omnibox focused
+  - shield menu opens
+  - add bookmark notice appears
+  - Aang input accepts text
+  - left rail collapses and reopens
+  - Watch Shelf opens and closes
+  - pinned manager opens and closes
+
+### Visual Diff
+- The attempted traced SVG improved numeric strict diff to `0.08341431769614328`, but failed visual review.
+- The accepted strict diff remains `0.08346456192123741`.
+- Numeric strict diff is not enough when text or visible brand details are wrong.
+
+### Known Gaps
+- Browser Home still is not fully 1:1.
+- The VTracer add-card path is blocked unless the `Add` label is preserved or rebuilt from measured source text.
+- Remaining active raster slices include high-detail pieces such as:
+  - `rail-full.png`
+  - `center-field-title-star-map.png`
+  - `bottom-dock-row.png`
+  - `top-url-omnibox.png`
+  - `top-url-action-cluster.png`
+  - lower panel/card rasters
+- VTracer is useful for extraction experiments, but every candidate still needs manual installed visual review, not just pixel diff.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The VTracer add-card candidate is rejected even though it improved numeric diff, because installed visual review showed the `Add` label rendered incorrectly. Continue one measured slice at a time. A candidate must pass trace/provenance audit, package/install, installed smoke, strict diff, and manual visual review before keeping.
+```
 
 ## 2026-06-12 1738 ADT - Browser Home Trace Sweep
 

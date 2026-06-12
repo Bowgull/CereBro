@@ -64,6 +64,15 @@ function browserHomeAssetImports() {
   return new Set(Array.from(matches, (match) => match[1]).filter((name) => !name.includes("${")));
 }
 
+function assertTracedSvg(name: string, svg: string) {
+  if (!svg.includes("<svg") || !svg.includes("</svg>")) fail(`${name} is not valid SVG content`);
+  if (/<image\b/i.test(svg)) fail(`${name} embeds raster image content instead of traced vector geometry`);
+  if (/data:image\//i.test(svg)) fail(`${name} embeds a data image instead of traced vector geometry`);
+  if (/\bhref\s*=\s*["'][^"']+\.(png|jpe?g|webp|gif|avif|bmp|tiff?)/i.test(svg)) {
+    fail(`${name} references a raster image instead of traced vector geometry`);
+  }
+}
+
 async function main() {
   if (!fs.existsSync(manifestPath)) fail(`Missing Browser Home asset manifest: ${manifestPath}`);
   if (!fs.existsSync(browserPanelPath)) fail(`Missing BrowserPanel source: ${browserPanelPath}`);
@@ -92,10 +101,18 @@ async function main() {
     if (!asset.role.trim()) fail(`${asset.name} is missing role`);
     assertBox(asset.name, asset.box);
 
+    const assetPath = path.join(assetDir, asset.name);
     if (asset.medium === "raster") {
-      const assetPath = path.join(assetDir, asset.name);
       if (!fs.existsSync(assetPath)) fail(`Missing Browser Home asset file: ${assetPath}`);
       const metadata = await sharp(assetPath).metadata();
+      if (metadata.width !== asset.box.width || metadata.height !== asset.box.height) {
+        fail(`${asset.name} dimensions ${metadata.width}x${metadata.height} do not match box ${asset.box.width}x${asset.box.height}`);
+      }
+    } else if (asset.medium === "traced-svg") {
+      if (!fs.existsSync(assetPath)) fail(`Missing Browser Home traced SVG asset file: ${assetPath}`);
+      const svg = fs.readFileSync(assetPath, "utf8");
+      assertTracedSvg(asset.name, svg);
+      const metadata = await sharp(Buffer.from(svg)).metadata();
       if (metadata.width !== asset.box.width || metadata.height !== asset.box.height) {
         fail(`${asset.name} dimensions ${metadata.width}x${metadata.height} do not match box ${asset.box.width}x${asset.box.height}`);
       }
@@ -107,7 +124,7 @@ async function main() {
     if (!names.has(imported)) fail(`BrowserPanel imports unproven Browser Home asset: ${imported}`);
   }
 
-  const files = fs.readdirSync(assetDir).filter((file) => file.endsWith(".png"));
+  const files = fs.readdirSync(assetDir).filter((file) => file.endsWith(".png") || file.endsWith(".svg"));
   for (const file of files) {
     if (!names.has(file)) fail(`Browser Home asset file is not listed in manifest: ${file}`);
   }
