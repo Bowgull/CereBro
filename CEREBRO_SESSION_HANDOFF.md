@@ -39341,3 +39341,34 @@ Decision:
 - The current installed app was rebuilt during the rejected attempts, so before
   committing a future accepted slice, rebuild/reinstall from the clean accepted
   source and rerun Browser Home smoke plus strict diff.
+
+## 2026-06-12 1257 ADT - Browser Home slice seam preflight
+
+Completion:
+
+- Added `app/scripts/browserHomeSliceSeamAudit.ts`.
+- Added `pnpm --dir app run qa:browser-home-slice-seams`.
+- Added a rejected fixture:
+  `app/client/public/browser-home/slice-candidates/rejected-center-field-two-piece.json`.
+- The fixture models the exact two-piece center-field split that failed strict
+  installed-app diff.
+- The audit renders candidate slices at the installed Browser Home screenshot
+  scale and compares them against the locked mockup source crop.
+
+Evidence:
+
+- `pnpm --dir app run qa:browser-home-slice-seams` passed and reproduced the
+  rejected center seam:
+  `mismatchedPixels: 6`, `mismatchRatio: 0.000004516399044932149`.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Fresh strict Browser Home diff passed at `0.08391485193853669`.
+
+Next:
+
+- Before retrying center field, bottom dock, or rail decomposition, create a
+  slice candidate JSON and run `qa:browser-home-slice-seams`.
+- A candidate can move toward production only if the seam audit passes as
+  `accepted` and the installed-app strict diff does not regress.
