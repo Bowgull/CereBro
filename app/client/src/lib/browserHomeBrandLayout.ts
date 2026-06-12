@@ -117,7 +117,23 @@ export const browserHomeTopChromeHitBoxes: Record<BrowserHomeTopChromeHitBoxName
   pageActions: { left: 1356, top: 72, width: 48, height: 48 },
 };
 
+export const browserHomeBaseBackplateBox: BrowserHomeMeasuredBox = {
+  left: 0,
+  top: 0,
+  width: 1440,
+  height: 992,
+};
+
+export const browserHomeLowerBackplateBox: BrowserHomeMeasuredBox = {
+  left: 0,
+  top: 458,
+  width: 1440,
+  height: 388,
+};
+
 export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
+  measuredCssProvenance("browser-home-base-backplate", browserHomeBaseBackplateBox, "Measured base Browser Home backplate behind source-derived slices."),
+  measuredCssProvenance("browser-home-lower-backplate", browserHomeLowerBackplateBox, "Measured lower Browser Home backplate behind pinned and panel slices."),
   rasterProvenance("rail-full.png", { left: 0, top: 60, width: 145, height: 932 }, "Full left rail texture and frame."),
   rasterProvenance("rail-keep.png", { left: 16, top: 70, width: 118, height: 185 }, "Keep rail button asset."),
   rasterProvenance("rail-browser-active.png", { left: 16, top: 262, width: 118, height: 83 }, "Active Browser rail button asset."),

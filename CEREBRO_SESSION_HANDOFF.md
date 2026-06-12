@@ -38922,3 +38922,59 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, and CEREBRO_SESSION_HANDOFF.md first. Continue on branch codex/daily-browser-finish. The Browser route is live in /Applications/CereBro.app and now owns the center shell instead of being nested under the global Keep chrome. Continue Browser mockup fidelity from the approved loaded-page target. Next gap is Browser chrome fidelity: ornate top rail, pinned site medallions, tighter mockup-matched controls, and no duplicate browser machinery. Keep the native Electron page view inside CereBro. Do not add fake browser, fake watch, fake login, stealth, CAPTCHA bypass, proxy rotation, paid services, or Raven paths.
 ```
+
+## 2026-06-12 0656 ADT - Browser Home measured backplate primitive
+
+Completion:
+
+- Browser Home backplate geometry moved out of unproven component-local
+  positioning and into the Browser Home provenance ledger.
+- Added measured CSS boxes for the base backplate and lower backplate.
+- Preserved the existing visible mockup slice stack and real hitboxes.
+- This slice did not remove a visible PNG layer. It removed unproven invented
+  background geometry first because it was the safest primitive conversion.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 15 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk and
+  Electron icon-format warnings remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with hitbox proof:
+  `omniboxFocused`, `shieldOpen`, `addBookmarkNotice`, `aangValue`, and
+  `sendButtonPresent`.
+- `pnpm --dir app run qa:browser-home-diff` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Current screenshot and diff:
+
+- Installed Browser Home screenshot:
+  `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Normalized actual:
+  `app/output/qa/browser-home-diff/browser-home-actual-normalized.png`
+- Diff image:
+  `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Locked reference:
+  `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- Locked reference SHA:
+  `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
+
+Next slice:
+
+- Continue one slice at a time.
+- Next best candidate is a visible raster replacement with low hitbox risk:
+  top title/tab strip frame or URL row frame.
+- Do not invent new ornaments, icons, compass geometry, gradients, or frame
+  language. Every primitive needs measured, traced, extracted, or accepted
+  external no-cost provenance before production.

@@ -6,10 +6,12 @@ import { CereBroButton } from "@/components/cerebro-ui";
 import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
+  browserHomeBaseBackplateBox,
   browserHomeCardBoxes,
   browserHomeDockHitBoxes,
   browserHomeEditPinnedBox,
   browserHomeLayerAssets,
+  browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomePanelHitBoxes,
   browserHomeTopChromeHitBoxes,
@@ -435,10 +437,10 @@ function BrowserHomeStart({
 function BrowserHomeAssetStage() {
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0" style={{ background: "#020505" }} />
+      <div style={{ ...browserHomeBoxStyle(browserHomeBaseBackplateBox), background: "#020505" }} />
       <div
-        className="absolute inset-x-0 bottom-[34px] top-[458px]"
         style={{
+          ...browserHomeBoxStyle(browserHomeLowerBackplateBox),
           background:
             "linear-gradient(90deg, rgba(198, 155, 85, 0.12), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.1)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.02) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.014) 0 1px, transparent 1px 34px)",
           boxShadow: "inset 0 0 70px rgba(0, 0, 0, 0.72)",

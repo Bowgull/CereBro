@@ -3,12 +3,14 @@ import {
   browserHomeAddCardBox,
   browserHomeAddMedallionBox,
   browserHomeAllowedProvenanceMedia,
+  browserHomeBaseBackplateBox,
   browserHomeCardBoxes,
   browserHomeDockBox,
   browserHomeDockHitBoxes,
   browserHomeEditPinnedBox,
   browserHomeFullMockupSource,
   browserHomeLayerAssets,
+  browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
   browserHomePanelBoxes,
@@ -36,7 +38,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(33 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(35 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -57,6 +59,8 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("pinned-bookmark-row.png");
     expect(names).toContain("lower-panels-row.png");
     expect(names).toContain("bottom-dock-row.png");
+    expect(names).toContain("browser-home-base-backplate");
+    expect(names).toContain("browser-home-lower-backplate");
     expect(names).toContain("top-chrome-hitbox-omnibox");
     expect(names).toContain("top-chrome-hitbox-shield");
     expect(names).toContain("aang-dock.png");
@@ -74,6 +78,11 @@ describe("browserHomeBrandLayout", () => {
       { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
       { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
     ]);
+  });
+
+  it("locks Browser Home measured backplate primitives", () => {
+    expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
+    expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
   });
 
   it("locks the Browser Home top chrome interactive hitboxes", () => {
