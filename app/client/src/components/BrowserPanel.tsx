@@ -20,6 +20,8 @@ import {
   browserHomePinnedRowBackplateBox,
   browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
+  browserHomeTopUrlAssets,
+  browserHomeTopUrlBackplateBox,
   browserHomeToPercentBox,
   type BrowserHomeMeasuredBox,
 } from "@/lib/browserHomeBrandLayout";
@@ -459,6 +461,14 @@ function BrowserHomeAssetStage() {
       />
       <div
         style={{
+          ...browserHomeBoxStyle(browserHomeTopUrlBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(5, 8, 8, 0.86), rgba(2, 5, 5, 0.92)), linear-gradient(90deg, rgba(198, 155, 85, 0.08), transparent 14%, transparent 86%, rgba(198, 155, 85, 0.08))",
+          boxShadow: "inset 0 1px 0 rgba(198, 155, 85, 0.16), inset 0 -1px 0 rgba(198, 155, 85, 0.2)",
+        }}
+      />
+      <div
+        style={{
           ...browserHomeBoxStyle(browserHomePinnedRowBackplateBox),
           background:
             "linear-gradient(180deg, rgba(8, 11, 10, 0.34), rgba(3, 7, 7, 0.7)), radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.08), transparent 52%)",
@@ -472,6 +482,16 @@ function BrowserHomeAssetStage() {
         }}
       />
       {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomeTopUrlAssets.map((asset) => (
         <img
           key={asset.name}
           src={`/browser-home/assets/${asset.name}`}

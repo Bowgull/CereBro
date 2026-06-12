@@ -39202,3 +39202,52 @@ Next slice guidance:
   geometry, or no-cost external extraction before another attempt.
 - Best next candidate is a no-cost external extraction pass or a smaller
   measured sub-slice from top URL row or center field.
+
+## 2026-06-12 1126 ADT - Browser Home top URL row raster reduction
+
+Completion:
+
+- Removed the large active `top-url-row.png` raster from the Browser Home layer
+  stack.
+- Added a measured CSS `browser-home-top-url-backplate` primitive.
+- Generated and rendered three source-derived component crops from the locked
+  top URL row:
+  `top-url-nav-controls.png`, `top-url-omnibox.png`, and
+  `top-url-action-cluster.png`.
+- Preserved the real existing top-chrome controls and hitboxes.
+- Tightened the strict Browser Home diff gate from `0.08546797089650962` to
+  `0.08497188867406126` after installed-app screenshot diff improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/public/browser-home/assets/manifest.json`
+- `app/client/public/browser-home/assets/top-url-nav-controls.png`
+- `app/client/public/browser-home/assets/top-url-omnibox.png`
+- `app/client/public/browser-home/assets/top-url-action-cluster.png`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with prior hitbox proofs.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08497188867406126`.
+
+Next slice:
+
+- Remaining active large rasters are top title/tabs, center field/title/star-map,
+  and bottom dock row.
+- Do not retry bottom dock without a better source-derived backplate.
+- Top title/tabs should be split into smaller source-derived components or
+  extracted with no-cost tooling before another conversion attempt.

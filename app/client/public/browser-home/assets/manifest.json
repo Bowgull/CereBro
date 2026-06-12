@@ -136,6 +136,48 @@
       "productionAllowed": true
     },
     {
+      "name": "top-url-nav-controls.png",
+      "box": {
+        "left": 187,
+        "top": 69,
+        "width": 151,
+        "height": 52
+      },
+      "role": "Top URL row back, forward, and reload controls.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-omnibox.png",
+      "box": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      },
+      "role": "Top URL row omnibox frame.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-action-cluster.png",
+      "box": {
+        "left": 1309,
+        "top": 69,
+        "width": 240,
+        "height": 52
+      },
+      "role": "Top URL row shield, library, stats, and page actions cluster.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
       "name": "center-field-title-star-map.png",
       "box": {
         "left": 145,
@@ -471,11 +513,5 @@
       "medium": "raster",
       "productionAllowed": true
     }
-  ],
-  "allowedMedia": [
-    "raster",
-    "measured-css",
-    "traced-svg",
-    "external-ai-reference"
   ]
 }

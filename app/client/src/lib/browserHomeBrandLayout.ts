@@ -140,6 +140,13 @@ export const browserHomePinnedRowBackplateBox: BrowserHomeMeasuredBox = {
   height: 183,
 };
 
+export const browserHomeTopUrlBackplateBox: BrowserHomeMeasuredBox = {
+  left: 0,
+  top: 61,
+  width: 1440,
+  height: 65,
+};
+
 export const browserHomeLowerPanelsBackplateBox: BrowserHomeMeasuredBox = {
   left: 0,
   top: 604,
@@ -155,6 +162,7 @@ export const browserHomeSideToggleHitBoxes: Record<BrowserHomeSideToggleHitBoxNa
 export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   measuredCssProvenance("browser-home-base-backplate", browserHomeBaseBackplateBox, "Measured base Browser Home backplate behind source-derived slices."),
   measuredCssProvenance("browser-home-lower-backplate", browserHomeLowerBackplateBox, "Measured lower Browser Home backplate behind pinned and panel slices."),
+  measuredCssProvenance("browser-home-top-url-backplate", browserHomeTopUrlBackplateBox, "Measured URL row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-pinned-row-backplate", browserHomePinnedRowBackplateBox, "Measured pinned bookmark row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-lower-panels-backplate", browserHomeLowerPanelsBackplateBox, "Measured lower panels row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-left-rail-toggle-hitbox", browserHomeSideToggleHitBoxes.leftRail, "Measured left sidebar arrow hitbox that collapses and opens the Browser nav rail."),
@@ -167,7 +175,9 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("rail-basement.png", { left: 17, top: 565, width: 116, height: 91 }, "Basement rail button asset."),
   rasterProvenance("top-title-tabs.png", { left: 0, top: 0, width: 1585, height: 61 }, "Top title and tab strip frame."),
   rasterProvenance("top-title-tabs-panel.png", { left: 145, top: 0, width: 1440, height: 61 }, "Top title and tab strip frame in Browser panel coordinates."),
-  rasterProvenance("top-url-row.png", { left: 145, top: 61, width: 1440, height: 65 }, "URL/search row with action controls."),
+  rasterProvenance("top-url-nav-controls.png", { left: 187, top: 69, width: 151, height: 52 }, "Top URL row back, forward, and reload controls."),
+  rasterProvenance("top-url-omnibox.png", { left: 339, top: 69, width: 948, height: 48 }, "Top URL row omnibox frame."),
+  rasterProvenance("top-url-action-cluster.png", { left: 1309, top: 69, width: 240, height: 52 }, "Top URL row shield, library, stats, and page actions cluster."),
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
   rasterProvenance("bottom-dock-row.png", { left: 145, top: 846, width: 1440, height: 146 }, "Full-width bottom dock row, Aang dock, bottom frame, and right edge."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
@@ -206,9 +216,14 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
 
 export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
   { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
-  { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
   { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
   { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
+];
+
+export const browserHomeTopUrlAssets: BrowserHomeLayerAsset[] = [
+  { name: "top-url-nav-controls.png", left: 42, top: 69, width: 151, height: 52 },
+  { name: "top-url-omnibox.png", left: 194, top: 69, width: 948, height: 48 },
+  { name: "top-url-action-cluster.png", left: 1164, top: 69, width: 240, height: 52 },
 ];
 
 export const browserHomePinnedCardAssets: BrowserHomeLayerAsset[] = [
