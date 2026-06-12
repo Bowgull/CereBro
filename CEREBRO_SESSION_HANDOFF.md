@@ -39407,3 +39407,36 @@ Next:
 - Continue with small non-seam targets first.
 - Large center-field, bottom-dock, and rail decompositions require
   `qa:browser-home-slice-seams` candidate proof before production changes.
+
+## 2026-06-12 1320 ADT - Browser Home new-tab plus primitive
+
+Completion:
+
+- Removed `top-title-new-tab.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-new-tab.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-new-tab-plus`.
+- Added `browserHomeNewTabPlusBox` at
+  `{ left: 419, top: 16, width: 48, height: 42 }`.
+- Rendered the top title `+` as real DOM/CSS text.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08385888368779892` to
+  `0.08379846341711611`.
+
+Next:
+
+- Continue reducing small top-chrome/title-strip rasters before touching
+  center field, bottom dock, or rail.

@@ -161,6 +161,13 @@ export const browserHomeProtectedBadgeBox: BrowserHomeMeasuredBox = {
   height: 38,
 };
 
+export const browserHomeNewTabPlusBox: BrowserHomeMeasuredBox = {
+  left: 419,
+  top: 16,
+  width: 48,
+  height: 42,
+};
+
 export const browserHomeLowerPanelsBackplateBox: BrowserHomeMeasuredBox = {
   left: 0,
   top: 604,
@@ -177,6 +184,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   measuredCssProvenance("browser-home-base-backplate", browserHomeBaseBackplateBox, "Measured base Browser Home backplate behind source-derived slices."),
   measuredCssProvenance("browser-home-lower-backplate", browserHomeLowerBackplateBox, "Measured lower Browser Home backplate behind pinned and panel slices."),
   measuredCssProvenance("browser-home-top-title-backplate", browserHomeTopTitleBackplateBox, "Measured top title and tab strip backplate replacing the former large panel raster."),
+  measuredCssProvenance("browser-home-new-tab-plus", browserHomeNewTabPlusBox, "Measured CSS new-tab plus replacing active top-title new-tab raster."),
   measuredCssProvenance("browser-home-protected-badge", browserHomeProtectedBadgeBox, "Measured CSS protection badge replacing active top-title protected raster."),
   measuredCssProvenance("browser-home-top-url-backplate", browserHomeTopUrlBackplateBox, "Measured URL row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-pinned-row-backplate", browserHomePinnedRowBackplateBox, "Measured pinned bookmark row backplate replacing the former large row raster."),
@@ -193,7 +201,7 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-tabs-panel.png", { left: 145, top: 0, width: 1440, height: 61 }, "Top title and tab strip frame in Browser panel coordinates retained as source-derived reference."),
   rasterProvenance("top-title-identity.png", { left: 145, top: 0, width: 200, height: 61 }, "Top title strip CereBro Browser identity area."),
   rasterProvenance("top-title-active-tab.png", { left: 350, top: 0, width: 205, height: 61 }, "Top title strip active tab area."),
-  rasterProvenance("top-title-new-tab.png", { left: 555, top: 0, width: 70, height: 61 }, "Top title strip new-tab control area."),
+  rasterProvenance("top-title-new-tab.png", { left: 555, top: 0, width: 70, height: 61 }, "Top title strip new-tab control area retained as source-derived reference."),
   rasterProvenance("top-title-protected.png", { left: 1420, top: 0, width: 135, height: 61 }, "Top title strip protection badge area retained as source-derived reference."),
   rasterProvenance("top-url-nav-controls.png", { left: 187, top: 69, width: 151, height: 52 }, "Top URL row back, forward, and reload controls."),
   rasterProvenance("top-url-omnibox.png", { left: 339, top: 69, width: 948, height: 48 }, "Top URL row omnibox frame."),
@@ -242,7 +250,6 @@ export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
 export const browserHomeTopTitleAssets: BrowserHomeLayerAsset[] = [
   { name: "top-title-identity.png", left: 0, top: 0, width: 200, height: 61 },
   { name: "top-title-active-tab.png", left: 205, top: 0, width: 205, height: 61 },
-  { name: "top-title-new-tab.png", left: 410, top: 0, width: 70, height: 61 },
 ];
 
 export const browserHomeTopUrlAssets: BrowserHomeLayerAsset[] = [

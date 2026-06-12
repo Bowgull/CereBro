@@ -15,6 +15,7 @@ import {
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
+  browserHomeNewTabPlusBox,
   browserHomePinnedCardAssets,
   browserHomePinnedRowBackplateBox,
   browserHomePanelBoxes,
@@ -48,7 +49,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(46 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(47 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -69,6 +70,7 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("top-title-identity.png");
     expect(names).toContain("top-title-active-tab.png");
     expect(names).toContain("top-title-new-tab.png");
+    expect(names).toContain("browser-home-new-tab-plus");
     expect(names).toContain("top-title-protected.png");
     expect(names).toContain("browser-home-protected-badge");
     expect(names).not.toContain("top-url-row.png");
@@ -102,7 +104,6 @@ describe("browserHomeBrandLayout", () => {
     expect(browserHomeTopTitleAssets).toEqual([
       { name: "top-title-identity.png", left: 0, top: 0, width: 200, height: 61 },
       { name: "top-title-active-tab.png", left: 205, top: 0, width: 205, height: 61 },
-      { name: "top-title-new-tab.png", left: 410, top: 0, width: 70, height: 61 },
     ]);
     expect(browserHomeTopUrlAssets).toEqual([
       { name: "top-url-nav-controls.png", left: 42, top: 69, width: 151, height: 52 },
@@ -129,6 +130,7 @@ describe("browserHomeBrandLayout", () => {
     expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
     expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
     expect(browserHomeTopTitleBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 61 });
+    expect(browserHomeNewTabPlusBox).toEqual({ left: 419, top: 16, width: 48, height: 42 });
     expect(browserHomeProtectedBadgeBox).toEqual({ left: 1290, top: 18, width: 104, height: 38 });
     expect(browserHomeTopUrlBackplateBox).toEqual({ left: 0, top: 61, width: 1440, height: 65 });
     expect(browserHomePinnedRowBackplateBox).toEqual({ left: 0, top: 421, width: 1440, height: 183 });

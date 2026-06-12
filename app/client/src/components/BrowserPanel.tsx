@@ -15,6 +15,7 @@ import {
   browserHomeLowerPanelsBackplateBox,
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
+  browserHomeNewTabPlusBox,
   browserHomePanelHitBoxes,
   browserHomePinnedCardAssets,
   browserHomePinnedRowBackplateBox,
@@ -512,6 +513,17 @@ function BrowserHomeAssetStage() {
           style={browserHomeToPercentBox(asset)}
         />
       ))}
+      <div
+        className="absolute flex items-center justify-center text-[24px] leading-none"
+        style={{
+          ...browserHomeBoxStyle(browserHomeNewTabPlusBox),
+          color: "rgba(198, 155, 85, 0.76)",
+          fontFamily: B.font.ui,
+          textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)",
+        }}
+      >
+        +
+      </div>
       <div
         className="absolute flex items-center justify-center gap-[6px] rounded-[4px] text-[12px] font-medium"
         style={{
