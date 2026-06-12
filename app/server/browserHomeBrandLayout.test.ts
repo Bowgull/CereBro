@@ -13,6 +13,8 @@ import {
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomeMockupSource,
+  browserHomePinnedCardAssets,
+  browserHomePinnedRowBackplateBox,
   browserHomePanelBoxes,
   browserHomePanelHitBoxes,
   browserHomeSideToggleHitBoxes,
@@ -57,7 +59,8 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("rail-full.png");
     expect(names).toContain("top-url-row.png");
     expect(names).toContain("center-field-title-star-map.png");
-    expect(names).toContain("pinned-bookmark-row.png");
+    expect(names).not.toContain("pinned-bookmark-row.png");
+    expect(names).toContain("browser-home-pinned-row-backplate");
     expect(names).toContain("lower-panels-row.png");
     expect(names).toContain("bottom-dock-row.png");
     expect(names).toContain("browser-home-base-backplate");
@@ -77,15 +80,24 @@ describe("browserHomeBrandLayout", () => {
       { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
       { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
       { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
-      { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
       { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
       { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
+    ]);
+    expect(browserHomePinnedCardAssets).toEqual([
+      { name: "bookmark-card-github.png", left: 85, top: 458, width: 180, height: 116 },
+      { name: "bookmark-card-obsidian.png", left: 280, top: 458, width: 170, height: 116 },
+      { name: "bookmark-card-youtube.png", left: 464, top: 458, width: 152, height: 116 },
+      { name: "bookmark-card-x.png", left: 630, top: 458, width: 147, height: 116 },
+      { name: "bookmark-card-reddit.png", left: 824, top: 458, width: 116, height: 116 },
+      { name: "bookmark-card-hn.png", left: 955, top: 458, width: 147, height: 116 },
+      { name: "bookmark-card-add.png", left: 1115, top: 458, width: 152, height: 116 },
     ]);
   });
 
   it("locks Browser Home measured backplate primitives", () => {
     expect(browserHomeBaseBackplateBox).toEqual({ left: 0, top: 0, width: 1440, height: 992 });
     expect(browserHomeLowerBackplateBox).toEqual({ left: 0, top: 458, width: 1440, height: 388 });
+    expect(browserHomePinnedRowBackplateBox).toEqual({ left: 0, top: 421, width: 1440, height: 183 });
   });
 
   it("locks Browser Home side arrow toggle hitboxes", () => {

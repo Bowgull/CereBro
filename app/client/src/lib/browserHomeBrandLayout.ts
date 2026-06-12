@@ -133,6 +133,13 @@ export const browserHomeLowerBackplateBox: BrowserHomeMeasuredBox = {
   height: 388,
 };
 
+export const browserHomePinnedRowBackplateBox: BrowserHomeMeasuredBox = {
+  left: 0,
+  top: 421,
+  width: 1440,
+  height: 183,
+};
+
 export const browserHomeSideToggleHitBoxes: Record<BrowserHomeSideToggleHitBoxName, BrowserHomeMeasuredBox> = {
   leftRail: { left: 0, top: 345, width: 45, height: 208 },
   rightWatchShelf: { left: 1395, top: 345, width: 45, height: 208 },
@@ -141,6 +148,7 @@ export const browserHomeSideToggleHitBoxes: Record<BrowserHomeSideToggleHitBoxNa
 export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   measuredCssProvenance("browser-home-base-backplate", browserHomeBaseBackplateBox, "Measured base Browser Home backplate behind source-derived slices."),
   measuredCssProvenance("browser-home-lower-backplate", browserHomeLowerBackplateBox, "Measured lower Browser Home backplate behind pinned and panel slices."),
+  measuredCssProvenance("browser-home-pinned-row-backplate", browserHomePinnedRowBackplateBox, "Measured pinned bookmark row backplate replacing the former large row raster."),
   measuredCssProvenance("browser-home-left-rail-toggle-hitbox", browserHomeSideToggleHitBoxes.leftRail, "Measured left sidebar arrow hitbox that collapses and opens the Browser nav rail."),
   measuredCssProvenance("browser-home-right-watch-shelf-toggle-hitbox", browserHomeSideToggleHitBoxes.rightWatchShelf, "Measured right sidebar arrow hitbox that opens and closes Watch Shelf."),
   rasterProvenance("rail-full.png", { left: 0, top: 60, width: 145, height: 932 }, "Full left rail texture and frame."),
@@ -153,7 +161,6 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-tabs-panel.png", { left: 145, top: 0, width: 1440, height: 61 }, "Top title and tab strip frame in Browser panel coordinates."),
   rasterProvenance("top-url-row.png", { left: 145, top: 61, width: 1440, height: 65 }, "URL/search row with action controls."),
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
-  rasterProvenance("pinned-bookmark-row.png", { left: 145, top: 421, width: 1440, height: 183 }, "Pinned bookmark row background, cards, edit control, and row spacing."),
   rasterProvenance("lower-panels-row.png", { left: 145, top: 604, width: 1440, height: 242 }, "Lower Browser Home panels row, panel frames, list content, and surrounding background."),
   rasterProvenance("bottom-dock-row.png", { left: 145, top: 846, width: 1440, height: 146 }, "Full-width bottom dock row, Aang dock, bottom frame, and right edge."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
@@ -194,9 +201,18 @@ export const browserHomeLayerAssets: BrowserHomeLayerAsset[] = [
   { name: "top-title-tabs-panel.png", left: 0, top: 0, width: 1440, height: 61 },
   { name: "top-url-row.png", left: 0, top: 61, width: 1440, height: 65 },
   { name: "center-field-title-star-map.png", left: 0, top: 126, width: 1440, height: 332 },
-  { name: "pinned-bookmark-row.png", left: 0, top: 421, width: 1440, height: 183 },
   { name: "lower-panels-row.png", left: 0, top: 604, width: 1440, height: 242 },
   { name: "bottom-dock-row.png", left: 0, top: 846, width: 1440, height: 146 },
+];
+
+export const browserHomePinnedCardAssets: BrowserHomeLayerAsset[] = [
+  { name: "bookmark-card-github.png", left: 85, top: 458, width: 180, height: 116 },
+  { name: "bookmark-card-obsidian.png", left: 280, top: 458, width: 170, height: 116 },
+  { name: "bookmark-card-youtube.png", left: 464, top: 458, width: 152, height: 116 },
+  { name: "bookmark-card-x.png", left: 630, top: 458, width: 147, height: 116 },
+  { name: "bookmark-card-reddit.png", left: 824, top: 458, width: 116, height: 116 },
+  { name: "bookmark-card-hn.png", left: 955, top: 458, width: 147, height: 116 },
+  { name: "bookmark-card-add.png", left: 1115, top: 458, width: 152, height: 116 },
 ];
 
 export const browserHomeMedallionBoxes: BrowserHomeMeasuredBox[] = [

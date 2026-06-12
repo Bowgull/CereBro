@@ -14,6 +14,8 @@ import {
   browserHomeLowerBackplateBox,
   browserHomeMedallionBoxes,
   browserHomePanelHitBoxes,
+  browserHomePinnedCardAssets,
+  browserHomePinnedRowBackplateBox,
   browserHomeSideToggleHitBoxes,
   browserHomeTopChromeHitBoxes,
   browserHomeToPercentBox,
@@ -453,7 +455,24 @@ function BrowserHomeAssetStage() {
           boxShadow: "inset 0 0 70px rgba(0, 0, 0, 0.72)",
         }}
       />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomePinnedRowBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(8, 11, 10, 0.34), rgba(3, 7, 7, 0.7)), radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.08), transparent 52%)",
+        }}
+      />
       {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomePinnedCardAssets.map((asset) => (
         <img
           key={asset.name}
           src={`/browser-home/assets/${asset.name}`}

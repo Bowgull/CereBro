@@ -39075,3 +39075,47 @@ Next slice:
   `Edit Pinned` visual button itself from raster to measured CSS, or a no-cost
   external extraction pass for one small top-chrome sub-piece. Do not attempt
   another full top-strip rebuild by hand.
+
+## 2026-06-12 1030 ADT - Browser Home pinned row raster reduction
+
+Completion:
+
+- Removed the large `pinned-bookmark-row.png` raster from the active Browser
+  Home layer stack.
+- Added a measured CSS `browser-home-pinned-row-backplate` primitive.
+- Rendered the existing mockup-derived bookmark card assets individually at
+  locked measured coordinates.
+- This is a real reduction of large PNG slice usage. It does not invent new
+  ornaments or change the bookmark controls.
+- Tightened the strict Browser Home diff gate from `0.08862190902615244` to
+  `0.08685763712221431` after the installed-app screenshot improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with prior hitbox proofs, including
+  side arrows and pinned manager.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08685763712221431`.
+
+Next slice:
+
+- Continue replacing one active large raster at a time only where measured
+  sub-assets or traced CSS can preserve or improve strict diff.
+- Good next candidates: lower panel row split into the existing panel assets,
+  or a no-cost external extraction pass for one top chrome sub-piece.
