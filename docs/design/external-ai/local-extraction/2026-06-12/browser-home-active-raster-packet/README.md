@@ -19,6 +19,7 @@ Use this packet for no-cost external extraction or local tracing only. Do not re
 | rail-full | Left navigation rail texture, frame, compass, labels, and negative space. | 0,60,145,932 | traced-svg | guessed-css-rail-backplate |
 | center-field-title-star-map | Center star-map, title copy, medallion rail, pinned label, edit control, and upper field geometry. | 145,126,1440,332 | traced-svg | center-field-two-piece-slice |
 | bottom-dock-row | Bottom Aang dock, input frame, attach/send controls, bottom frame, right edge, and lower texture. | 145,846,1440,146 | traced-svg | bottom-dock-edge-main-lower-partition |
+| top-url-omnibox | Top URL row omnibox frame, search icon, and placeholder text. | 339,69,948,48 | traced-svg | approximate-dom-css-omnibox |
 
 ## Crops
 
@@ -33,6 +34,7 @@ Use this packet for no-cost external extraction or local tracing only. Do not re
 | rejected-bottom-dock-partition | 145,846,1440,146 | Source-derived bottom dock partition reproduced installed-app seam drift and must not replace the active full-width bottom-dock-row raster. |
 | rejected-center-field-no-overlap-partition | 145,126,1440,332 | Exact no-overlap center-field partition still reproduced installed-scale seam drift, so center-field source slicing is not safe as a production replacement. |
 | rejected-center-field-two-piece | 145,126,1440,332 | Source-derived two-piece center-field split reproduced installed-app seam drift and must not be promoted without a seam-safe renderer. |
+| rejected-top-url-omnibox-css | 339,69,948,48 | Approximate DOM/CSS omnibox regressed installed strict diff to `0.0837552152233642` against accepted `0.08346456192123741`. |
 
 ## Acceptance Rule
 

@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-12 1612 ADT
+Last updated: 2026-06-12 1631 ADT
 
 ## Current North Star
 
@@ -53,6 +53,42 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1631 ADT - Rejected Browser Home Omnibox Primitive
+
+### What Changed
+- Tested replacing active `top-url-omnibox.png` with a measured DOM/CSS omnibox:
+  - frame
+  - search icon
+  - placeholder copy
+- The source change passed provenance, TypeScript, and targeted tests.
+- Installed Browser Home smoke still passed behavior.
+- Strict visual diff rejected the slice:
+  - accepted baseline: `0.08346456192123741`
+  - attempt: `0.0837552152233642`
+- The production changes were reverted.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean accepted source.
+- Installed Browser Home smoke and strict diff passed again at `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Known Gaps
+- The omnibox should not be replaced with approximate CSS.
+- Next omnibox conversion needs traced SVG geometry, exact source-measured typography, or no-cost external extraction before production.
+- The accepted installed baseline remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split was rejected at `0.08349381805230488` and `0.08348936603235982`. The approximate DOM/CSS omnibox was rejected at `0.0837552152233642`. The installed app is back on the accepted source. Do not use approximate CSS for the remaining high-detail URL row rasters; use traced/external extraction candidates first.
+```
 
 ## 2026-06-12 1612 ADT - Rejected Browser Home Action Cluster Split
 

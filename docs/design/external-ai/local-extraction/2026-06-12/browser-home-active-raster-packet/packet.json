@@ -49,6 +49,21 @@
       "blockedApproaches": [
         "bottom-dock-edge-main-lower-partition"
       ]
+    },
+    {
+      "name": "top-url-omnibox",
+      "role": "Top URL row omnibox frame, search icon, and placeholder text.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "approximate-dom-css-omnibox"
+      ]
     }
   ],
   "rejectedCandidates": [
@@ -80,6 +95,16 @@
         "top": 126,
         "width": 1440,
         "height": 332
+      }
+    },
+    {
+      "name": "rejected-top-url-omnibox-css",
+      "reason": "Approximate DOM/CSS omnibox regressed installed strict diff to 0.0837552152233642 against accepted 0.08346456192123741.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
       }
     }
   ]
