@@ -23,6 +23,7 @@
     "mcp": "tsx mcp/server.ts",
     "test": "vitest run",
     "test:desktop": "CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 tsx scripts/desktopInstalledSmoke.ts",
+    "qa:browser-home-active-raster-readiness": "tsx scripts/browserHomeActiveRasterReadiness.ts",
     "qa:browser-home-diff": "tsx scripts/browserHomeVisualDiff.ts",
     "qa:browser-home-diff:strict": "CEREBRO_BROWSER_HOME_DIFF_STRICT=1 tsx scripts/browserHomeVisualDiff.ts",
     "qa:browser-home-extraction-packet": "tsx scripts/browserHomeExtractionPacket.ts",

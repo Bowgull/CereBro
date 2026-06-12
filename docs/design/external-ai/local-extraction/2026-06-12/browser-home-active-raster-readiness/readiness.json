@@ -1,0 +1,140 @@
+{
+  "generatedAt": "2026-06-12T22:00:39.749Z",
+  "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+  "rule": "This readiness audit does not authorize production replacement. It ranks active raster targets for the next measured extraction attempt.",
+  "acceptedStrictDiff": 0.08346456192123741,
+  "recommendedNextTarget": "top-url-action-cluster",
+  "targets": [
+    {
+      "name": "top-url-action-cluster",
+      "active": true,
+      "textRisk": "none",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "source-crops-plus-css-dots regressed installed strict diff to 0.08348936603235982"
+      ],
+      "nextPath": "Best next small target, but only with a cleaner full-cluster vector extraction or no-cost external extraction. Do not split it again with approximate CSS dots.",
+      "traceSweepBest": {
+        "preset": "imagetracer-high-color-fine",
+        "engine": "imagetracer",
+        "mismatchRatio": 0.045592948717948716,
+        "mismatchedPixels": 569,
+        "svgLength": 732597,
+        "output": {
+          "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.diff.png"
+        }
+      },
+      "productionReady": false,
+      "disposition": "best-next-external-extraction-target"
+    },
+    {
+      "name": "top-url-omnibox",
+      "active": true,
+      "textRisk": "high",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "approximate DOM/CSS omnibox regressed installed strict diff to 0.0837552152233642",
+        "ImageTracer posterized2 rejected at 0.03560126582278481",
+        "trace sweep best was 0.020283931082981717 with 2109532 SVG characters"
+      ],
+      "nextPath": "Requires label-preserving extraction or a measured reconstruction that matches frame, search icon, and placeholder text under installed visual review.",
+      "traceSweepBest": {
+        "preset": "imagetracer-very-high-color-fine",
+        "engine": "imagetracer",
+        "mismatchRatio": 0.020283931082981717,
+        "mismatchedPixels": 923,
+        "svgLength": 2109532,
+        "output": {
+          "actual": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/top-url-omnibox/imagetracer-very-high-color-fine.diff.png"
+        }
+      },
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    },
+    {
+      "name": "bookmark-card-add",
+      "active": true,
+      "textRisk": "high",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "measured CSS primitive regressed installed strict diff to 0.08388623181031851",
+        "ImageTracer candidate rejected at 0.03522005444646098",
+        "VTracer fine spline rendered Add as dd during installed visual review",
+        "VTracer hybrid label kept text readable but worsened crop mismatch to 0.03130671506352087 and flattened the frame"
+      ],
+      "nextPath": "Do not retry without a new source-to-vector strategy or external extraction that preserves the Add label and frame.",
+      "traceSweepBest": {
+        "preset": "vtracer-fine-spline",
+        "engine": "vtracer",
+        "mismatchRatio": 0.023480036297640654,
+        "mismatchedPixels": 414,
+        "svgLength": 10842,
+        "output": {
+          "actual": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.actual.png",
+          "diff": "app/output/qa/browser-home-trace-sweep/bookmark-card-add/vtracer-fine-spline.diff.png"
+        }
+      },
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    },
+    {
+      "name": "center-field-title-star-map",
+      "active": true,
+      "textRisk": "high",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "two-piece source partition failed seam preflight",
+        "exact no-overlap partition failed seam preflight",
+        "visible medallion rail lives inside this raster"
+      ],
+      "nextPath": "Needs full center-field vector extraction or seam-safe renderer before replacing medallions, title, or star-map pieces.",
+      "traceSweepBest": null,
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    },
+    {
+      "name": "bottom-dock-row",
+      "active": true,
+      "textRisk": "low",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "bottom-dock partition failed installed-scale seam preflight",
+        "dock controls trace sweep was close at 0.00562888198757764 but 4696227 SVG characters and not a full active-raster replacement"
+      ],
+      "nextPath": "Promising only if the Aang dock controls can be simplified and the full bottom row can be split without seam drift.",
+      "traceSweepBest": null,
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    },
+    {
+      "name": "lower-panel-assets",
+      "active": true,
+      "textRisk": "high",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "trace sweep panel candidates were 5748530 to 6540214 SVG characters",
+        "panels contain multiple text rows and icons, so pixel diff alone is weak evidence"
+      ],
+      "nextPath": "Defer until text rendering and panel row primitives can be matched with installed visual review.",
+      "traceSweepBest": null,
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    },
+    {
+      "name": "rail-full",
+      "active": true,
+      "textRisk": "high",
+      "groupedInsideLargerRaster": false,
+      "blockedBy": [
+        "guessed CSS rail backplate regressed strict diff to 0.08553475119568536",
+        "approximate rail SVG rejected at 0.10677815598638449"
+      ],
+      "nextPath": "Needs external extraction or a measured full rail reconstruction. Do not invent compass or ornament geometry.",
+      "traceSweepBest": null,
+      "productionReady": false,
+      "disposition": "blocked-or-defer"
+    }
+  ]
+}
