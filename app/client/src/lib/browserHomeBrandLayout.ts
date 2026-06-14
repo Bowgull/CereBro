@@ -104,6 +104,18 @@ function measuredCssProvenance(name: string, box: BrowserHomeMeasuredBox, role: 
   };
 }
 
+function tracedSvgProvenance(name: string, box: BrowserHomeMeasuredBox, role: string): BrowserHomeVisualProvenance {
+  return {
+    name,
+    source: lockedSource,
+    sourceSha256: lockedSourceSha256,
+    box,
+    role,
+    medium: "traced-svg",
+    productionAllowed: true,
+  };
+}
+
 export const browserHomeTopChromeHitBoxes: Record<BrowserHomeTopChromeHitBoxName, BrowserHomeMeasuredBox> = {
   activeTab: { left: 205, top: 14, width: 203, height: 47 },
   tabClose: { left: 367, top: 22, width: 28, height: 28 },
@@ -228,7 +240,8 @@ export const browserHomeVisualProvenance: BrowserHomeVisualProvenance[] = [
   rasterProvenance("top-title-protected.png", { left: 1420, top: 0, width: 135, height: 61 }, "Top title strip protection badge area retained as source-derived reference."),
   rasterProvenance("top-url-nav-controls.png", { left: 187, top: 69, width: 151, height: 52 }, "Top URL row back, forward, and reload controls retained as source-derived reference."),
   rasterProvenance("top-url-omnibox.png", { left: 339, top: 69, width: 948, height: 48 }, "Top URL row omnibox frame."),
-  rasterProvenance("top-url-action-cluster.png", { left: 1309, top: 69, width: 240, height: 52 }, "Top URL row shield, library, stats, and page actions cluster."),
+  rasterProvenance("top-url-action-cluster.png", { left: 1309, top: 69, width: 240, height: 52 }, "Top URL row shield, library, stats, and page actions cluster retained as source-derived reference."),
+  tracedSvgProvenance("top-url-action-cluster.svg", { left: 1309, top: 69, width: 240, height: 52 }, "Source-derived traced SVG replacing active top URL action-cluster raster."),
   rasterProvenance("center-field-title-star-map.png", { left: 145, top: 126, width: 1440, height: 332 }, "Center star-map, title, medallion rail, pinned label, and edit control."),
   rasterProvenance("bottom-dock-row.png", { left: 145, top: 846, width: 1440, height: 146 }, "Full-width bottom dock row, Aang dock, bottom frame, and right edge."),
   measuredCssProvenance("top-chrome-hitbox-active-tab", browserHomeTopChromeHitBoxes.activeTab, "Measured active tab click target."),
@@ -274,7 +287,7 @@ export const browserHomeTopTitleAssets: BrowserHomeLayerAsset[] = [];
 
 export const browserHomeTopUrlAssets: BrowserHomeLayerAsset[] = [
   { name: "top-url-omnibox.png", left: 194, top: 69, width: 948, height: 48 },
-  { name: "top-url-action-cluster.png", left: 1164, top: 69, width: 240, height: 52 },
+  { name: "top-url-action-cluster.svg", left: 1164, top: 69, width: 240, height: 52 },
 ];
 
 export const browserHomePinnedCardAssets: BrowserHomeLayerAsset[] = [

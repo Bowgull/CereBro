@@ -28,6 +28,7 @@
     "qa:browser-home-diff": "tsx scripts/browserHomeVisualDiff.ts",
     "qa:browser-home-diff:strict": "CEREBRO_BROWSER_HOME_DIFF_STRICT=1 tsx scripts/browserHomeVisualDiff.ts",
     "qa:browser-home-extraction-packet": "tsx scripts/browserHomeExtractionPacket.ts",
+    "qa:browser-home-generate-pixel-svg-asset": "tsx scripts/browserHomeGeneratePixelSvgAsset.ts",
     "qa:browser-home-generate-trace-candidate": "tsx scripts/browserHomeGenerateTraceCandidate.ts",
     "qa:browser-home-provenance": "tsx scripts/browserHomeProvenanceAudit.ts",
     "qa:browser-home-slice-seams": "tsx scripts/browserHomeSliceSeamAudit.ts",

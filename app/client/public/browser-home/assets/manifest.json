@@ -234,6 +234,20 @@
       "productionAllowed": true
     },
     {
+      "name": "top-url-action-cluster.svg",
+      "box": {
+        "left": 1309,
+        "top": 69,
+        "width": 240,
+        "height": 52
+      },
+      "role": "Source-derived traced SVG replacing active top URL action-cluster raster.",
+      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "traced-svg",
+      "productionAllowed": true
+    },
+    {
       "name": "center-field-title-star-map.png",
       "box": {
         "left": 145,

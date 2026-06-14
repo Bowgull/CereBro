@@ -4,6 +4,8 @@
   "root": "mockups/compare",
   "lockedPrimaryBrowserHomeReference": "approved/browser-home/browser-home-symmetric-rails-target-v1.png",
   "lockedPrimaryBrowserHomeSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "lockedWatchShelfReference": "approved/watch-shelf/watch-shelf-overview-target-v1.png",
+  "lockedWatchShelfSha256": "2f127a5ae61bd0483179591d275f876ac0413ef4972e5e590b9e6413765c0c3d",
   "browserReferenceRule": "Browser UI 1:1 work must compare against the locked Browser Home mockup. The app icon is not a Browser UI reference.",
   "items": [
     {
@@ -42,6 +44,47 @@
       "state": "loaded_page",
       "path": "approved/browser-loaded/browser-loaded-website-target-v1.png",
       "notes": "Loaded website target with real browsing as the main surface."
+    },
+    {
+      "id": "watch-shelf-overview-v1",
+      "label": "Watch Shelf overview",
+      "status": "approved",
+      "surface": "browser",
+      "state": "watch_shelf_overview",
+      "lockedPrimary": true,
+      "path": "approved/watch-shelf/watch-shelf-overview-target-v1.png",
+      "sha256": "2f127a5ae61bd0483179591d275f876ac0413ef4972e5e590b9e6413765c0c3d",
+      "notes": "Approved right-rail Watch Shelf overlay. Original right rail remains untouched; drawer sits to the left of it."
+    },
+    {
+      "id": "watch-shelf-category-detail-v1",
+      "label": "Watch Shelf category detail",
+      "status": "approved",
+      "surface": "browser",
+      "state": "watch_shelf_category_detail",
+      "path": "approved/watch-shelf/watch-shelf-category-detail-target-v1.png",
+      "sha256": "de2621d9abeaa8afad98ecb4f75c117f51b11b1810a1aa90071636d5ffaa102a",
+      "notes": "Approved category detail state. Shelves are user categories; provider and watch progress are item metadata."
+    },
+    {
+      "id": "watch-shelf-save-current-page-v1",
+      "label": "Watch Shelf save current page",
+      "status": "approved",
+      "surface": "browser",
+      "state": "watch_shelf_save_current_page",
+      "path": "approved/watch-shelf/watch-shelf-save-current-page-target-v1.png",
+      "sha256": "c906e7b11377a33bbaaeb0f7a48f9c78155abb0347d01d1d76baa3c0694ae205",
+      "notes": "Approved save-current-page state with detected thumbnail, editable shelf, type, provider, and fallback thumbnail states."
+    },
+    {
+      "id": "watch-shelf-manage-shelves-v1",
+      "label": "Watch Shelf manage shelves",
+      "status": "approved",
+      "surface": "browser",
+      "state": "watch_shelf_manage_shelves",
+      "path": "approved/watch-shelf/watch-shelf-manage-shelves-target-v1.png",
+      "sha256": "b959cec25a8124b83daa9ac9305a111d9c55d05381c120ca43c6d38a014c6b95",
+      "notes": "Approved shelf management state with rename/hide, custom shelf empty state, and pinned drawer behavior."
     },
     {
       "id": "browser-home-bottom-handle-expanded-v1",

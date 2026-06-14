@@ -52,7 +52,7 @@ describe("browserHomeBrandLayout", () => {
 
   it("locks Browser Home production provenance to mockup-derived media", () => {
     expect(browserHomeAllowedProvenanceMedia).toEqual(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
-    expect(browserHomeVisualProvenance).toHaveLength(50 + Object.keys(browserHomeTopChromeHitBoxes).length);
+    expect(browserHomeVisualProvenance).toHaveLength(51 + Object.keys(browserHomeTopChromeHitBoxes).length);
 
     const names = new Set<string>();
     for (const entry of browserHomeVisualProvenance) {
@@ -84,6 +84,7 @@ describe("browserHomeBrandLayout", () => {
     expect(names).toContain("browser-home-top-url-nav-controls");
     expect(names).toContain("top-url-omnibox.png");
     expect(names).toContain("top-url-action-cluster.png");
+    expect(names).toContain("top-url-action-cluster.svg");
     expect(names).toContain("center-field-title-star-map.png");
     expect(names).not.toContain("pinned-bookmark-row.png");
     expect(names).toContain("browser-home-pinned-row-backplate");
@@ -110,7 +111,7 @@ describe("browserHomeBrandLayout", () => {
     expect(browserHomeTopTitleAssets).toEqual([]);
     expect(browserHomeTopUrlAssets).toEqual([
       { name: "top-url-omnibox.png", left: 194, top: 69, width: 948, height: 48 },
-      { name: "top-url-action-cluster.png", left: 1164, top: 69, width: 240, height: 52 },
+      { name: "top-url-action-cluster.svg", left: 1164, top: 69, width: 240, height: 52 },
     ]);
     expect(browserHomeTopUrlNavControlVisualBoxes).toEqual([
       { left: 50, top: 76, width: 42, height: 42 },

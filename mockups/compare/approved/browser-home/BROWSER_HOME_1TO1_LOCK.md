@@ -26,3 +26,18 @@ Primary visible targets:
 - Pinned bookmark cards with edit control.
 - Continue browsing, Recent, and Downloads panels.
 - Bottom Aang dock with input and action buttons.
+
+Related approved Browser states:
+
+- Watch Shelf right rail packet:
+  `mockups/compare/approved/watch-shelf/WATCH_SHELF_LOCK.md`
+
+Sidebar behavior:
+
+- Left rail is primary app navigation and may collapse.
+- Right rail opens Watch Shelf as a contextual drawer.
+- Watch Shelf defaults to overlay.
+- The original right rail remains untouched when Watch Shelf is open.
+- Do not paste a second rail strip over the Watch Shelf drawer.
+- Do not double-stack right-side brass rails, arrows, or ornaments.
+- Docked resize is not approved for V1.
