@@ -28,7 +28,7 @@ type RejectedCandidate = {
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const lockedSourceRelativePath = "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png";
+const lockedSourceRelativePath = "mockups/approved/browser-home-symmetric-rails-target-v1.png";
 const lockedSourceSha256 = "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c";
 const sourcePath = path.join(repoRoot, lockedSourceRelativePath);
 const normalizedActualPath = path.join(appRoot, "output/qa/browser-home-diff/browser-home-actual-normalized.png");

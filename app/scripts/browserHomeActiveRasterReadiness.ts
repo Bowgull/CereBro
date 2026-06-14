@@ -145,7 +145,7 @@ function main() {
 
   const summary = {
     generatedAt: new Date().toISOString(),
-    source: "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+    source: "mockups/approved/browser-home-symmetric-rails-target-v1.png",
     rule: "This readiness audit does not authorize production replacement. It ranks active raster targets for the next measured extraction attempt.",
     acceptedStrictDiff: 0.08346456192123741,
     recommendedNextTarget: recommended.name,

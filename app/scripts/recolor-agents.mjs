@@ -13,7 +13,7 @@ const PACK_DIRS = {
   dungeon: resolve(__dirname, "../client/public/sprites/cc0/kenney_tiny-dungeon/Tiles"),
   town:    resolve(__dirname, "../client/public/sprites/cc0/kenney_tiny-town/Tiles"),
 };
-const OUT_DIR   = resolve(__dirname, "../../mockups/assets/sprites");
+const OUT_DIR   = resolve(__dirname, "../generated/assets/sprites");
 
 const C = {
   yellow: "#FFD24A",

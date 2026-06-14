@@ -1,7 +1,7 @@
 # Browser 1:1 Chrome Pass
 
 Source mockup:
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-raven-airlock/mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-raven-airlock/mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Note:
 The app icon image is not a Browser UI reference. Browser Home work must compare against the locked Browser Home mockup first.

@@ -2,7 +2,7 @@
 
 Source of truth:
 
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - SHA-256: `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
 
 ## Rule

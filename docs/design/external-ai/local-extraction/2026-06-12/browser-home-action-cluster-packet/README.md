@@ -4,7 +4,7 @@ Generated: 2026-06-12T22:13:47.596Z
 
 Source of truth:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 SHA-256:
 

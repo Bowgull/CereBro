@@ -4,7 +4,7 @@ These assets are extracted from the locked Browser Home mockup.
 
 Source:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 SHA-256:
 

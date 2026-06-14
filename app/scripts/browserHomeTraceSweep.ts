@@ -46,7 +46,7 @@ const ImageTracer = require("imagetracerjs") as ImageTracerApi;
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const sourcePath = path.join(repoRoot, "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+const sourcePath = path.join(repoRoot, "mockups/approved/browser-home-symmetric-rails-target-v1.png");
 const outputDir = path.join(
   repoRoot,
   "docs/design/external-ai/local-extraction/2026-06-12/browser-home-trace-sweep",

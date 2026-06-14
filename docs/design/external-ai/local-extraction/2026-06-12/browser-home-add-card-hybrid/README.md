@@ -1,6 +1,6 @@
 # Browser Home Add Card Hybrid Rejection
 
-Source: `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+Source: `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 SHA-256: `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
 
 Target box: `{ left: 1260, top: 458, width: 152, height: 116 }`

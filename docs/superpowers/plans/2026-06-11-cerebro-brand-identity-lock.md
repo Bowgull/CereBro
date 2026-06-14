@@ -116,8 +116,8 @@ Modify:
 
 Use existing:
 
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
-- `mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/BROWSER_HOME_1TO1_LOCK.md`
 - `app/client/public/browser-home/assets/`
 - `app/output/qa/cerebro-installed-browser-home-smoke.png`
 - `app/output/qa/browser-home-diff/browser-home-diff.png`
@@ -161,7 +161,7 @@ Create `docs/design/cerebro-brand-system.md` with this structure:
 
 Source of truth:
 
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - SHA-256: `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
 
 ## Rule
@@ -240,7 +240,7 @@ Create `docs/design/cerebro-brand-rollout.md`:
 
 ## Current Locked Reference
 
-- Browser Home: `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- Browser Home: `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 ```
 
 - [ ] **Step 3: Run verification**

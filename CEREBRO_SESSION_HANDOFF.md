@@ -48,7 +48,7 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Update this handoff and the Obsidian finish path.
 - Append a dated progress entry.
 - State what is next and what is still not working.
-- Keep the Browser UI moving toward the approved `mockups/compare` targets.
+- Keep the Browser UI moving toward the approved `mockups/approved` targets only.
 - Keep Raven sealed out of public CereBro.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
@@ -126,7 +126,7 @@ Every CereBro ritual handoff now includes the Mac app path.
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeActionClusterExtractionPacket.ts, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeActionClusterExtractionPacket.test.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The next target is `top-url-action-cluster`, but only from the focused packet under `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/`. Do not retry source crops plus CSS dots. Accepted trace candidates require installed manual visual-review metadata.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeActionClusterExtractionPacket.ts, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeActionClusterExtractionPacket.test.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The next target is `top-url-action-cluster`, but only from the focused packet under `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/`. Do not retry source crops plus CSS dots. Accepted trace candidates require installed manual visual-review metadata.
 ```
 
 ## 2026-06-12 1901 ADT - Active Raster Readiness Audit
@@ -169,7 +169,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Run `pnpm --dir app run qa:browser-home-active-raster-readiness` before choosing the next slice. The recommended next target is `top-url-action-cluster`, but only with cleaner full-cluster vector extraction or no-cost external extraction. Accepted trace candidates require installed manual visual-review metadata.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Run `pnpm --dir app run qa:browser-home-active-raster-readiness` before choosing the next slice. The recommended next target is `top-url-action-cluster`, but only with cleaner full-cluster vector extraction or no-cost external extraction. Accepted trace candidates require installed manual visual-review metadata.
 ```
 
 ## 2026-06-12 1849 ADT - Manual Review Gate For Trace Candidates
@@ -206,7 +206,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Accepted trace candidates now require manual installed visual-review metadata. Pixel diff alone is not enough. Do not retry add-card paths without a new extraction strategy.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Accepted trace candidates now require manual installed visual-review metadata. Pixel diff alone is not enough. Do not retry add-card paths without a new extraction strategy.
 ```
 
 ## 2026-06-12 1839 ADT - Add Card Hybrid Candidate Rejected
@@ -246,7 +246,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Rejected add-card paths now include CSS primitive, ImageTracer, VTracer full-card, and VTracer hybrid-label. Do not retry add-card without a new extraction strategy. Medallions are still inside the center-field raster, so replacing one medallion alone is not the next safe production slice.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Rejected add-card paths now include CSS primitive, ImageTracer, VTracer full-card, and VTracer hybrid-label. Do not retry add-card without a new extraction strategy. Medallions are still inside the center-field raster, so replacing one medallion alone is not the next safe production slice.
 ```
 
 ## 2026-06-12 1804 ADT - Add Bookmark Card VTracer Candidate Rejected
@@ -308,7 +308,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The VTracer add-card candidate is rejected even though it improved numeric diff, because installed visual review showed the `Add` label rendered incorrectly. Continue one measured slice at a time. A candidate must pass trace/provenance audit, package/install, installed smoke, strict diff, and manual visual review before keeping.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The VTracer add-card candidate is rejected even though it improved numeric diff, because installed visual review showed the `Add` label rendered incorrectly. Continue one measured slice at a time. A candidate must pass trace/provenance audit, package/install, installed smoke, strict diff, and manual visual review before keeping.
 ```
 
 ## 2026-06-12 1738 ADT - Browser Home Trace Sweep
@@ -351,7 +351,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local trace sweep exists and shows the best current target is `aang-dock-controls` at `0.00562888198757764`, but the SVG is huge. Next production work should either simplify the dock controls trace or use no-cost external extraction for a cleaner vector before replacing any active PNG slice.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local trace sweep exists and shows the best current target is `aang-dock-controls` at `0.00562888198757764`, but the SVG is huge. Next production work should either simplify the dock controls trace or use no-cost external extraction for a cleaner vector before replacing any active PNG slice.
 ```
 
 ## 2026-06-12 1723 ADT - Omnibox ImageTracer Candidate Rejected
@@ -381,7 +381,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation exists, but `posterized2` candidates are rejected for add card (`0.03522005444646098`) and omnibox (`0.03560126582278481`). Next step should be an option sweep or external no-cost extraction, not production replacement.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation exists, but `posterized2` candidates are rejected for add card (`0.03522005444646098`) and omnibox (`0.03560126582278481`). Next step should be an option sweep or external no-cost extraction, not production replacement.
 ```
 
 ## 2026-06-12 1716 ADT - Local Vector Trace Generator
@@ -417,7 +417,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation now exists and generated `rejected-bookmark-card-add-imagetracer-posterized2` with mismatch ratio `0.03522005444646098`. Do not promote it. Next production change needs a trace candidate or external no-cost extraction that passes audit before install.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation now exists and generated `rejected-bookmark-card-add-imagetracer-posterized2` with mismatch ratio `0.03522005444646098`. Do not promote it. Next production change needs a trace candidate or external no-cost extraction that passes audit before install.
 ```
 
 ## 2026-06-12 1704 ADT - Rejected Browser Home Add Card Primitive
@@ -455,7 +455,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Rejected approximate CSS paths now include action cluster, omnibox, and add bookmark card. Do not use approximate CSS for remaining high-detail or framed rasters. Use a trace candidate or external no-cost extraction that passes audit before production.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Rejected approximate CSS paths now include action cluster, omnibox, and add bookmark card. Do not use approximate CSS for remaining high-detail or framed rasters. Use a trace candidate or external no-cost extraction that passes audit before production.
 ```
 
 ## 2026-06-12 1643 ADT - Trace Candidate Raster Shortcut Guard
@@ -484,7 +484,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Trace candidates now reject `<image>`, `data:image/*`, and raster hrefs. Do not use SVG wrappers around PNGs. The action-cluster split and approximate omnibox CSS were rejected. Next production slice needs a real trace candidate or external no-cost extraction that passes the audit before install.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Trace candidates now reject `<image>`, `data:image/*`, and raster hrefs. Do not use SVG wrappers around PNGs. The action-cluster split and approximate omnibox CSS were rejected. Next production slice needs a real trace candidate or external no-cost extraction that passes the audit before install.
 ```
 
 ## 2026-06-12 1631 ADT - Rejected Browser Home Omnibox Primitive
@@ -520,7 +520,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split was rejected at `0.08349381805230488` and `0.08348936603235982`. The approximate DOM/CSS omnibox was rejected at `0.0837552152233642`. The installed app is back on the accepted source. Do not use approximate CSS for the remaining high-detail URL row rasters; use traced/external extraction candidates first.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split was rejected at `0.08349381805230488` and `0.08348936603235982`. The approximate DOM/CSS omnibox was rejected at `0.0837552152233642`. The installed app is back on the accepted source. Do not use approximate CSS for the remaining high-detail URL row rasters; use traced/external extraction candidates first.
 ```
 
 ## 2026-06-12 1612 ADT - Rejected Browser Home Action Cluster Split
@@ -558,7 +558,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split with three source crops plus CSS page-actions dots was rejected because installed strict diff regressed to `0.08349381805230488` and `0.08348936603235982`. The installed app is back on the accepted source. Choose the next slice from a different measured target or produce a trace/external extraction candidate before production.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split with three source crops plus CSS page-actions dots was rejected because installed strict diff regressed to `0.08349381805230488` and `0.08348936603235982`. The installed app is back on the accepted source. Choose the next slice from a different measured target or produce a trace/external extraction candidate before production.
 ```
 
 ## 2026-06-12 1536 ADT - Browser Home URL Nav Controls Primitive
@@ -602,7 +602,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now renders title identity, active tab, protected badge, URL row backplate, URL nav controls, and side arrows as measured primitives while preserving installed hitbox proof. Current accepted strict diff ratio is `0.08346456192123741`. Continue one measured Browser Home slice at a time. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now renders title identity, active tab, protected badge, URL row backplate, URL nav controls, and side arrows as measured primitives while preserving installed hitbox proof. Current accepted strict diff ratio is `0.08346456192123741`. Continue one measured Browser Home slice at a time. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
 ```
 
 ## 2026-06-12 0007 ADT - Browser Home Edge Cleanup And Hitbox Proof
@@ -648,7 +648,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and full bottom dock row. Installed smoke proves core transparent hitboxes. Current installed diff ratio is `0.08862190902615244`. Next path should move from Browser Home to loaded browser page branding without inventing new UI.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and full bottom dock row. Installed smoke proves core transparent hitboxes. Current installed diff ratio is `0.08862190902615244`. Next path should move from Browser Home to loaded browser page branding without inventing new UI.
 ```
 
 ## 2026-06-11 2150 ADT - Browser Home Aang Dock Extraction
@@ -692,7 +692,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and Aang dock. Transparent measured hitboxes preserve browser, bookmark, lower-panel, and dock actions. Current installed diff ratio is `0.08852142057596418`. Next measured slice should clean up remaining edge/backplate artifacts and verify click targets. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and Aang dock. Transparent measured hitboxes preserve browser, bookmark, lower-panel, and dock actions. Current installed diff ratio is `0.08852142057596418`. Next measured slice should clean up remaining edge/backplate artifacts and verify click targets. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
 ```
 
 ## 2026-06-11 2134 ADT - Browser Home Lower Panels Extraction
@@ -741,7 +741,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, and lower panels row. Transparent measured hitboxes preserve browser, bookmark, and lower-panel actions. Current installed diff ratio is `0.0917109748651674`. Next measured slice should replace Aang dock with extracted dock assets and transparent input/action hitboxes. Do not invent new dock frames, icons, glows, gradients, ornaments, or spacing.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, and lower panels row. Transparent measured hitboxes preserve browser, bookmark, and lower-panel actions. Current installed diff ratio is `0.0917109748651674`. Next measured slice should replace Aang dock with extracted dock assets and transparent input/action hitboxes. Do not invent new dock frames, icons, glows, gradients, ornaments, or spacing.
 ```
 
 ## 2026-06-11 1735 ADT - Browser Home Pinned Row Extraction
@@ -784,7 +784,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, and pinned bookmark row. Transparent measured hitboxes preserve bookmark actions. Current installed diff ratio is `0.09095667548590618`. Next measured slice should replace lower panels with extracted panel assets and transparent hitboxes. Do not invent new panel frames, icons, glows, gradients, ornaments, or spacing.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, and pinned bookmark row. Transparent measured hitboxes preserve bookmark actions. Current installed diff ratio is `0.09095667548590618`. Next measured slice should replace lower panels with extracted panel assets and transparent hitboxes. Do not invent new panel frames, icons, glows, gradients, ornaments, or spacing.
 ```
 
 ## 2026-06-11 1630 ADT - Browser Home Center Field Extraction
@@ -827,7 +827,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses the extracted `center-field-title-star-map.png` asset for the center field/title/star-map region and transparent hitboxes for medallions/edit-pinned. Current diff ratio is `0.09287422407652386`. Next measured slice should replace pinned bookmark cards with their extracted mockup assets and transparent click targets. Do not invent new card frames, icons, glows, gradients, ornaments, or spacing.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses the extracted `center-field-title-star-map.png` asset for the center field/title/star-map region and transparent hitboxes for medallions/edit-pinned. Current diff ratio is `0.09287422407652386`. Next measured slice should replace pinned bookmark cards with their extracted mockup assets and transparent click targets. Do not invent new card frames, icons, glows, gradients, ornaments, or spacing.
 ```
 
 ## 2026-06-11 1515 ADT - Browser Home Slice 1 Top Chrome Hitboxes
@@ -883,7 +883,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, app/scripts/browserHomeProvenanceAudit.ts, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. Browser Home Slice 1 added measured top-chrome hitboxes over the extracted mockup chrome and disabled the old hidden workspace pointer events on Home. The installed smoke now asserts `[aria-label="Browser Home top chrome controls"]`. Current diff ratio is still `0.09367685967233133`, so do not claim visual 1:1. Next slice should replace the center field/title/star-map area from the locked mockup without invented CSS decoration.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, app/scripts/browserHomeProvenanceAudit.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home Slice 1 added measured top-chrome hitboxes over the extracted mockup chrome and disabled the old hidden workspace pointer events on Home. The installed smoke now asserts `[aria-label="Browser Home top chrome controls"]`. Current diff ratio is still `0.09367685967233133`, so do not claim visual 1:1. Next slice should replace the center field/title/star-map area from the locked mockup without invented CSS decoration.
 ```
 
 ## 2026-06-11 0845 ADT - Browser Home Provenance Gate
@@ -942,7 +942,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, docs/design/cerebro-brand-system.md, docs/design/external-ai/README.md, docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, app/client/src/components/BrowserPanel.tsx, and mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md first. The next Browser Home visual slice must start from the locked mockup, pass `pnpm --dir app run qa:browser-home-provenance`, and use only measured CSS, traced SVG, extracted raster, or accepted free external-AI reference output. Do not create invented rail marks, compass marks, icons, frames, gradients, ornaments, or medallions. Start with Slice 1: rail and top chrome only. Compare installed screenshot to `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png` before and after.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, docs/design/cerebro-brand-system.md, docs/design/external-ai/README.md, docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, app/client/src/components/BrowserPanel.tsx, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. The next Browser Home visual slice must start from the locked mockup, pass `pnpm --dir app run qa:browser-home-provenance`, and use only measured CSS, traced SVG, extracted raster, or accepted free external-AI reference output. Do not create invented rail marks, compass marks, icons, frames, gradients, ornaments, or medallions. Start with Slice 1: rail and top chrome only. Compare installed screenshot to `mockups/approved/browser-home-symmetric-rails-target-v1.png` before and after.
 ```
 
 ## 2026-06-09 0435 ADT - Desktop Install Safety Gate
@@ -1006,7 +1006,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/sc
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser chrome now has a visible Bookmarks manager with add current, open, rename, and delete; a tighter medallion rail; and an Aang current-page menu. Aang actions stage local route previews through `runtime.previewRoute`: Explain page, Make note, Send to Workshop. The bottom Browser Aang bar no longer drives URL/search. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, screenshot-checked, and reopened on 2026-06-08 2249 ADT. Continue with 1:1 Browser chrome fidelity or promote Aang page actions into durable note/Workshop receipt creation. Do not route daily browsing to System Browser by default. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser chrome now has a visible Bookmarks manager with add current, open, rename, and delete; a tighter medallion rail; and an Aang current-page menu. Aang actions stage local route previews through `runtime.previewRoute`: Explain page, Make note, Send to Workshop. The bottom Browser Aang bar no longer drives URL/search. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, screenshot-checked, and reopened on 2026-06-08 2249 ADT. Continue with 1:1 Browser chrome fidelity or promote Aang page actions into durable note/Workshop receipt creation. Do not route daily browsing to System Browser by default. Do not surface Raven.
 ```
 
 ## 2026-06-08 2231 ADT - Browser Bookmark Medallions
@@ -1034,7 +1034,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser bookmarks are now real daily-browser actions: Browser Home pins, saved bookmark rows, manage-list entries, project pins, and the top medallion rail open directly inside CereBro. `Add Current` saves a local bookmark from a normal daily Browser tab through `workbench.createBrowserBookmark`. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, and reopened on 2026-06-08 2231 ADT. Continue with the 1:1 Browser chrome polish: ornate top rail, tighter medallion styling, better tab affordance, and stronger loaded-page framing. Do not route daily browsing to System Browser by default. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser bookmarks are now real daily-browser actions: Browser Home pins, saved bookmark rows, manage-list entries, project pins, and the top medallion rail open directly inside CereBro. `Add Current` saves a local bookmark from a normal daily Browser tab through `workbench.createBrowserBookmark`. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, and reopened on 2026-06-08 2231 ADT. Continue with the 1:1 Browser chrome polish: ornate top rail, tighter medallion styling, better tab affordance, and stronger loaded-page framing. Do not route daily browsing to System Browser by default. Do not surface Raven.
 ```
 
 ## 2026-06-08 1915 ADT - Mac App Update Rule And Reinstall
@@ -1065,7 +1065,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro ritual handoffs now include debug, build, desktop package, and reinstall status for `/Applications/CereBro.app` when app code changes. The installed Mac app was updated and launched on 2026-06-08. Continue with Browser live function plus 1:1 UI: tighten Browser Home to the approved compare targets, make pinned/bookmark tiles real, wire Aang input to the app route, and then build Watch Shelf/Compare from `mockups/compare`. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro ritual handoffs now include debug, build, desktop package, and reinstall status for `/Applications/CereBro.app` when app code changes. The installed Mac app was updated and launched on 2026-06-08. Continue with Browser live function plus 1:1 UI: tighten Browser Home to the approved compare targets, make pinned/bookmark tiles real, wire Aang input to the app route, and then build Watch Shelf/Compare from `mockups/approved`. Do not surface Raven.
 ```
 
 ## 2026-06-08 1843 ADT - Browser Home Live Pass And Compare Folder
@@ -1080,26 +1080,24 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
   - Existing page draft, open-page, local tabs, downloads, VPN shield, popup, and Watch Shelf logic stayed intact.
 - Added app-usable Aang dock asset:
   - `app/public/assets/aang/aang-chat-dock-waist-v1.png`
-- Added canonical Compare mockup source folder:
-  - `mockups/compare/README.md`
-  - `mockups/compare/manifest.json`
-  - `mockups/compare/approved/...`
-  - `mockups/compare/rejected/...`
-- Updated the finish path so Compare pulls from `mockups/compare` later instead of guessing from loose design files.
+- Added legacy Compare mockup source folder. This is replaced by `mockups/approved`.
+  - `mockups/README.md`
+  - `mockups/approved/manifest.json`
+- Current source-of-truth mockups now live only in `mockups/approved`.
 
 ### Files Touched
 - `app/client/src/components/BrowserPanel.tsx`
 - `app/public/assets/aang/aang-chat-dock-waist-v1.png`
 - `app/public/assets/aang/aang-chat-dock-waist-source-v1.png`
-- `mockups/compare/README.md`
-- `mockups/compare/manifest.json`
-- `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png`
-- `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png`
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
-- `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-chat-expanded-bottom-handle-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-chat-collapsed-bottom-handle-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-aang-standing-companion-target-v1.png`
+- `mockups/README.md`
+- `mockups/approved/manifest.json`
+- `deleted legacy approved expanded chat mockup`
+- `deleted legacy approved collapsed chat mockup`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/browser-loaded-website-target-v1.png`
+- `deleted legacy rejected expanded chat mockup`
+- `deleted legacy rejected collapsed chat mockup`
+- `deleted legacy rejected browser-home Aang mockup`
 - `design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md`
 - `CEREBRO_MASTER_BUILD_PLAN.md`
 - Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
@@ -1118,7 +1116,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, mockups/compare/README.md, mockups/compare/manifest.json, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser Home now has a first live Keep-tech pass with Aang launcher chat open/closed behavior. Continue making the live Browser match `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png` and `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png` while preserving real browser function. Next critical options: wire Browser Home Aang input to the existing Aang route, make pinned tiles/local bookmarks real, or build the Compare picker from `mockups/compare/manifest.json`. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, mockups/README.md, mockups/approved/manifest.json, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser Home now has a first live Keep-tech pass with Aang launcher chat open/closed behavior. Continue making the live Browser match `deleted legacy approved expanded chat mockup` and `deleted legacy approved collapsed chat mockup` while preserving real browser function. Next critical options: wire Browser Home Aang input to the existing Aang route, make pinned tiles/local bookmarks real, or build the Compare picker from `mockups/approved/manifest.json`. Do not surface Raven.
 ```
 
 ## 2026-06-08 1619 ADT - Keep-Tech Browser Visual Direction
@@ -24929,8 +24927,8 @@ Design Review, and UI / UX surfaces against the new primitives.
   - Piccolo: undercroft watch crypt.
   - Hedwig: undercroft relay roost.
 - Added detailed mockups:
-  - `mockups/keep-fortress-wireframe.html` for the full residency massing.
-  - `mockups/keep-tile-blueprint.html` for the 64 by 34 tile planning grid.
+  - `deleted legacy keep fortress wireframe` for the full residency massing.
+  - `deleted legacy keep tile blueprint` for the 64 by 34 tile planning grid.
 - Added `CEREBRO_KEEP_TILE_BLUEPRINT.md` as the repo-readable blueprint
   reference with room coordinates, floor courses, stairs, path nodes, zoom
   bounds, prop zones, and PixelLab prompt rules.
@@ -24952,8 +24950,8 @@ Files touched in this slice:
 - `app/client/src/components/KeepFortressBlueprint.tsx`
 - `app/client/src/lib/keepFortressMap.ts`
 - `app/client/src/pages/Home.tsx`
-- `mockups/keep-fortress-wireframe.html`
-- `mockups/keep-tile-blueprint.html`
+- `deleted legacy keep fortress wireframe`
+- `deleted legacy keep tile blueprint`
 
 Checks run:
 
@@ -39439,7 +39437,7 @@ Checks run:
 Mockup fidelity: target used, screenshot path, matched elements, deviations, next fidelity gap.
 
 - Target used: approved Browser loaded-page mockup,
-  `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`.
+  `mockups/approved/browser-loaded-website-target-v1.png`.
 - Screenshot path: `app/output/qa/cerebro-installed-browser-smoke.png`.
 - Matched elements: compact left Browser rail, top tab strip, one URL/search
   bar, large contained page canvas, bottom Aang command rail, visible tab close.
@@ -39517,7 +39515,7 @@ Current screenshot and diff:
 - Diff image:
   `app/output/qa/browser-home-diff/browser-home-diff.png`
 - Locked reference:
-  `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+  `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - Locked reference SHA:
   `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
 

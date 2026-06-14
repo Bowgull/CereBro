@@ -23,7 +23,7 @@ visual AI to extract structure and assets before coding more UI by hand.
 - No paid fallback.
 - No paid image, design, model, or asset service unless the user explicitly overrides this rule in the current session.
 - The exact Browser Home reference is:
-  `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+  `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - Locked reference SHA-256:
   `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
 - Do not use the app icon as a Browser UI reference.
@@ -33,9 +33,9 @@ visual AI to extract structure and assets before coding more UI by hand.
 ## Current Inputs
 
 - Locked Browser Home mockup:
-  `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+  `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - Browser Home lock note:
-  `mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md`
+  `mockups/approved/BROWSER_HOME_1TO1_LOCK.md`
 - Current installed Browser Home screenshot:
   `app/output/qa/cerebro-installed-browser-home-smoke.png`
 - Current loaded Browser screenshot:
@@ -106,7 +106,7 @@ Progress is accepted only when all of these are true:
 Run:
 
 ```bash
-test -f mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png
+test -f mockups/approved/browser-home-symmetric-rails-target-v1.png
 ```
 
 Expected: exit code 0.
@@ -116,7 +116,7 @@ Expected: exit code 0.
 Run:
 
 ```bash
-shasum -a 256 mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png
+shasum -a 256 mockups/approved/browser-home-symmetric-rails-target-v1.png
 ```
 
 Expected output starts with:
@@ -176,7 +176,7 @@ import { PNG } from "pngjs";
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const expectedPath = path.join(repoRoot, "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+const expectedPath = path.join(repoRoot, "mockups/approved/browser-home-symmetric-rails-target-v1.png");
 const actualPath = path.join(appRoot, "output/qa/cerebro-installed-browser-home-smoke.png");
 const outputDir = path.join(appRoot, "output/qa/browser-home-diff");
 const diffPath = path.join(outputDir, "browser-home-diff.png");
@@ -306,12 +306,12 @@ git commit -m "test: capture fixed browser qa states"
 ### Task 4: Build The Free Asset Kit
 
 **Files:**
-- Create: `mockups/compare/approved/browser-home/assets/README.md`
-- Create later: `mockups/compare/approved/browser-home/assets/*.png`
+- Create: `app/client/public/browser-home/assets/README.md`
+- Create later: `app/client/public/browser-home/assets/*.png`
 
 - [ ] **Step 1: Create asset kit readme**
 
-Create `mockups/compare/approved/browser-home/assets/README.md`:
+Create `app/client/public/browser-home/assets/README.md`:
 
 ```md
 # Browser Home Asset Kit
@@ -322,7 +322,7 @@ No paid assets. No app-icon-derived Browser UI assets.
 
 Allowed sources:
 
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
 - `app/client/public/sprites/keep/*/rotations/*.png`
 - free local edits made in Piskel, LibreSprite, GIMP, Krita, or PixelLab if already available without new spend
 
@@ -351,7 +351,7 @@ app/output/qa/keep-agent-south-contact-sheet.png
 - [ ] **Step 3: Commit the asset kit manifest**
 
 ```bash
-git add mockups/compare/approved/browser-home/assets/README.md
+git add app/client/public/browser-home/assets/README.md
 git commit -m "docs: add browser home asset kit manifest"
 ```
 
@@ -360,14 +360,14 @@ git commit -m "docs: add browser home asset kit manifest"
 **Files:**
 - Modify per slice: `app/client/src/components/BrowserPanel.tsx`
 - Read every slice: `docs/superpowers/plans/2026-06-10-browser-1to1-tooling-asset-pipeline.md`
-- Read every slice: `mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md`
+- Read every slice: `mockups/approved/BROWSER_HOME_1TO1_LOCK.md`
 
 - [ ] **Step 1: Open the locked mockup**
 
 Use visual inspection before editing:
 
 ```bash
-open mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png
+open mockups/approved/browser-home-symmetric-rails-target-v1.png
 ```
 
 In Codex, also use the image viewer when available.

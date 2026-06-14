@@ -34,7 +34,7 @@ const repoRoot = path.resolve(appRoot, "..");
 const assetDir = path.join(appRoot, "client", "public", "browser-home", "assets");
 const manifestPath = path.join(assetDir, "manifest.json");
 const browserPanelPath = path.join(appRoot, "client", "src", "components", "BrowserPanel.tsx");
-const lockedBrowserHomeReference = "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png";
+const lockedBrowserHomeReference = "mockups/approved/browser-home-symmetric-rails-target-v1.png";
 const lockedBrowserHomeSha256 = "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c";
 const allowedMedia = new Set<BrowserHomeMedium>(["raster", "measured-css", "traced-svg", "external-ai-reference"]);
 

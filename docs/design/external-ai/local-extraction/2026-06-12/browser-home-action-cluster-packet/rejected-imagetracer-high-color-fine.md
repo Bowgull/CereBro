@@ -8,7 +8,7 @@ Candidate:
 
 Source:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Source box:
 

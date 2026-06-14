@@ -2,10 +2,10 @@
 
 This is the approved Watch Shelf source-of-truth packet:
 
-- `mockups/compare/approved/watch-shelf/watch-shelf-overview-target-v1.png`
-- `mockups/compare/approved/watch-shelf/watch-shelf-category-detail-target-v1.png`
-- `mockups/compare/approved/watch-shelf/watch-shelf-save-current-page-target-v1.png`
-- `mockups/compare/approved/watch-shelf/watch-shelf-manage-shelves-target-v1.png`
+- `mockups/approved/watch-shelf-overview-target-v1.png`
+- `mockups/approved/watch-shelf-category-detail-target-v1.png`
+- `mockups/approved/watch-shelf-save-current-page-target-v1.png`
+- `mockups/approved/watch-shelf-manage-shelves-target-v1.png`
 
 SHA-256:
 

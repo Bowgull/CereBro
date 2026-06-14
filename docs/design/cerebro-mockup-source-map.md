@@ -20,19 +20,19 @@ Use this as the global Browser Home source of truth:
 
 Repo path:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Local absolute path:
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Lock doc:
 
-`mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md`
+`mockups/approved/BROWSER_HOME_1TO1_LOCK.md`
 
 Local absolute path:
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/browser-home/BROWSER_HOME_1TO1_LOCK.md`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/BROWSER_HOME_1TO1_LOCK.md`
 
 SHA-256:
 
@@ -44,53 +44,53 @@ Use these as the approved Watch Shelf source-of-truth packet.
 
 Overview:
 
-`mockups/compare/approved/watch-shelf/watch-shelf-overview-target-v1.png`
+`mockups/approved/watch-shelf-overview-target-v1.png`
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/watch-shelf/watch-shelf-overview-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/watch-shelf-overview-target-v1.png`
 
 Category detail:
 
-`mockups/compare/approved/watch-shelf/watch-shelf-category-detail-target-v1.png`
+`mockups/approved/watch-shelf-category-detail-target-v1.png`
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/watch-shelf/watch-shelf-category-detail-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/watch-shelf-category-detail-target-v1.png`
 
 Save current page:
 
-`mockups/compare/approved/watch-shelf/watch-shelf-save-current-page-target-v1.png`
+`mockups/approved/watch-shelf-save-current-page-target-v1.png`
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/watch-shelf/watch-shelf-save-current-page-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/watch-shelf-save-current-page-target-v1.png`
 
 Manage shelves:
 
-`mockups/compare/approved/watch-shelf/watch-shelf-manage-shelves-target-v1.png`
+`mockups/approved/watch-shelf-manage-shelves-target-v1.png`
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/watch-shelf/watch-shelf-manage-shelves-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/watch-shelf-manage-shelves-target-v1.png`
 
 Lock doc:
 
-`mockups/compare/approved/watch-shelf/WATCH_SHELF_LOCK.md`
+`mockups/approved/WATCH_SHELF_LOCK.md`
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/watch-shelf/WATCH_SHELF_LOCK.md`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/WATCH_SHELF_LOCK.md`
 
 ## Approved Loaded Browser Page
 
 Repo path:
 
-`mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
+`mockups/approved/browser-loaded-website-target-v1.png`
 
 Local absolute path:
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/browser-loaded-website-target-v1.png`
 
 ## Manifest
 
 The central mockup manifest is:
 
-`mockups/compare/manifest.json`
+`mockups/approved/manifest.json`
 
 Local absolute path:
 
-`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/compare/manifest.json`
+`/Users/lindsaybell/SSD-Recovery/Repos/Desktop/CereBro-browser-1to1-polish/mockups/approved/manifest.json`
 
 Read this first when a build pass asks what visual target is approved.
 

@@ -24,7 +24,7 @@ The target is exact style, exact layout, exact image language, exact component f
 
 Primary source:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 SHA-256:
 
@@ -32,7 +32,7 @@ SHA-256:
 
 Secondary source for loaded-page behavior:
 
-`mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
+`mockups/approved/browser-loaded-website-target-v1.png`
 
 ## Current Failure
 

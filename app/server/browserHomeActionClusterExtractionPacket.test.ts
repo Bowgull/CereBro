@@ -10,7 +10,7 @@ describe("browserHomeActionClusterExtractionPacket", () => {
     const scriptSource = await readFile(resolve(appRoot, "scripts/browserHomeActionClusterExtractionPacket.ts"), "utf8");
 
     expect(packageSource).toContain("\"qa:browser-home-action-cluster-packet\": \"tsx scripts/browserHomeActionClusterExtractionPacket.ts\"");
-    expect(scriptSource).toContain("mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+    expect(scriptSource).toContain("mockups/approved/browser-home-symmetric-rails-target-v1.png");
     expect(scriptSource).toContain("f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c");
     expect(scriptSource).toContain("top-url-action-cluster.png");
     expect(scriptSource).toContain("sourceBox: Box = { left: 1309, top: 69, width: 240, height: 52 }");

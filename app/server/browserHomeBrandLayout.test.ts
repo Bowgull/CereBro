@@ -37,13 +37,13 @@ import {
 describe("browserHomeBrandLayout", () => {
   it("locks the approved Browser Home mockup source", () => {
     expect(browserHomeMockupSource).toEqual({
-      path: "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      path: "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       sha256: "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       width: 1440,
       height: 992,
     });
     expect(browserHomeFullMockupSource).toEqual({
-      path: "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      path: "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       sha256: "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       width: 1585,
       height: 992,

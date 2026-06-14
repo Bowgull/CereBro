@@ -2,7 +2,7 @@
 
 This is the exact Browser Home 1:1 reference:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 SHA-256:
 
@@ -30,7 +30,7 @@ Primary visible targets:
 Related approved Browser states:
 
 - Watch Shelf right rail packet:
-  `mockups/compare/approved/watch-shelf/WATCH_SHELF_LOCK.md`
+  `mockups/approved/WATCH_SHELF_LOCK.md`
 
 Sidebar behavior:
 

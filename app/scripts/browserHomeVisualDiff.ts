@@ -7,10 +7,10 @@ import sharp from "sharp";
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const manifestPath = path.join(repoRoot, "mockups/compare/manifest.json");
-const lockedBrowserHomeReference = "approved/browser-home/browser-home-symmetric-rails-target-v1.png";
+const manifestPath = path.join(repoRoot, "mockups/approved/manifest.json");
+const lockedBrowserHomeReference = "browser-home-symmetric-rails-target-v1.png";
 const lockedBrowserHomeSha256 = "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c";
-const expectedPath = path.join(repoRoot, "mockups/compare", lockedBrowserHomeReference);
+const expectedPath = path.join(repoRoot, "mockups/approved", lockedBrowserHomeReference);
 const actualPath = path.join(appRoot, "output/qa/cerebro-installed-browser-home-smoke.png");
 const outputDir = path.join(appRoot, "output/qa/browser-home-diff");
 const normalizedActualPath = path.join(outputDir, "browser-home-actual-normalized.png");

@@ -6,11 +6,11 @@ Use this folder when sending CereBro Browser visuals to a free/no-card external 
 
 Primary brand target:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Loaded-page target:
 
-`mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
+`mockups/approved/browser-loaded-website-target-v1.png`
 
 Current installed Browser Home screenshot:
 

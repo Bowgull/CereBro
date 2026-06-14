@@ -131,7 +131,7 @@ async function main() {
     .png()
     .toBuffer();
 
-  const outPath = resolve(APP, "../mockups/style-mix-test.png");
+  const outPath = resolve(APP, "generated/style-mix-test.png");
   await sharp(final).toFile(outPath);
   console.log("wrote", outPath);
 }

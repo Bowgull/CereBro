@@ -1,5 +1,5 @@
 {
-  "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+  "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
   "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
   "rule": "Use these as component assets. Do not paste the full mockup as the UI. Every production asset must carry source provenance and an allowed medium.",
   "allowedMedia": [
@@ -18,7 +18,7 @@
         "height": 932
       },
       "role": "Full left rail texture and frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -32,7 +32,7 @@
         "height": 185
       },
       "role": "Keep rail button asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -46,7 +46,7 @@
         "height": 83
       },
       "role": "Active Browser rail button asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -60,7 +60,7 @@
         "height": 80
       },
       "role": "Workshop rail button asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -74,7 +74,7 @@
         "height": 80
       },
       "role": "Ledger rail button asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -88,7 +88,7 @@
         "height": 91
       },
       "role": "Basement rail button asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -102,7 +102,7 @@
         "height": 61
       },
       "role": "Top title and tab strip frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -116,7 +116,7 @@
         "height": 61
       },
       "role": "Top title and tab strip frame in Browser panel coordinates.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -130,7 +130,7 @@
         "height": 61
       },
       "role": "Top title strip CereBro Browser identity area.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -144,7 +144,7 @@
         "height": 61
       },
       "role": "Top title strip active tab area.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -158,7 +158,7 @@
         "height": 61
       },
       "role": "Top title strip new-tab control area.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -172,7 +172,7 @@
         "height": 61
       },
       "role": "Top title strip protection badge area.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -186,7 +186,7 @@
         "height": 65
       },
       "role": "URL/search row with action controls.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -200,7 +200,7 @@
         "height": 52
       },
       "role": "Top URL row back, forward, and reload controls.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -214,7 +214,7 @@
         "height": 48
       },
       "role": "Top URL row omnibox frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -228,7 +228,7 @@
         "height": 52
       },
       "role": "Top URL row shield, library, stats, and page actions cluster.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -242,7 +242,7 @@
         "height": 52
       },
       "role": "Source-derived traced SVG replacing active top URL action-cluster raster.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "traced-svg",
       "productionAllowed": true
@@ -256,7 +256,7 @@
         "height": 332
       },
       "role": "Center star-map, title, medallion rail, pinned label, and edit control.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -270,7 +270,7 @@
         "height": 183
       },
       "role": "Pinned bookmark row background, cards, edit control, and row spacing.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -284,7 +284,7 @@
         "height": 242
       },
       "role": "Lower Browser Home panels row, panel frames, list content, and surrounding background.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -298,7 +298,7 @@
         "height": 146
       },
       "role": "Full-width bottom dock row, Aang dock, bottom frame, and right edge.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -312,7 +312,7 @@
         "height": 48
       },
       "role": "Pinned GitHub medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -326,7 +326,7 @@
         "height": 48
       },
       "role": "Pinned Obsidian medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -340,7 +340,7 @@
         "height": 48
       },
       "role": "Pinned YouTube medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -354,7 +354,7 @@
         "height": 48
       },
       "role": "Pinned X medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -368,7 +368,7 @@
         "height": 48
       },
       "role": "Pinned Reddit medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -382,7 +382,7 @@
         "height": 48
       },
       "role": "Pinned Hacker News medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -396,7 +396,7 @@
         "height": 48
       },
       "role": "Add medallion.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -410,7 +410,7 @@
         "height": 116
       },
       "role": "Bookmark card frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -424,7 +424,7 @@
         "height": 116
       },
       "role": "GitHub bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -438,7 +438,7 @@
         "height": 116
       },
       "role": "Obsidian bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -452,7 +452,7 @@
         "height": 116
       },
       "role": "YouTube bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -466,7 +466,7 @@
         "height": 116
       },
       "role": "X bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -480,7 +480,7 @@
         "height": 116
       },
       "role": "Reddit bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -494,7 +494,7 @@
         "height": 116
       },
       "role": "Hacker News bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -508,7 +508,7 @@
         "height": 116
       },
       "role": "Add bookmark card asset.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -522,7 +522,7 @@
         "height": 224
       },
       "role": "Continue browsing panel frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -536,7 +536,7 @@
         "height": 224
       },
       "role": "Recent panel frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -550,7 +550,7 @@
         "height": 224
       },
       "role": "Downloads panel frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -564,7 +564,7 @@
         "height": 119
       },
       "role": "Bottom Aang dock frame.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true
@@ -578,7 +578,7 @@
         "height": 108
       },
       "role": "Aang avatar medallion from dock.",
-      "source": "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
       "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
       "medium": "raster",
       "productionAllowed": true

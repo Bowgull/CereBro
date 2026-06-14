@@ -46,7 +46,7 @@ const ImageTracer = require("imagetracerjs") as ImageTracerApi;
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const sourcePath = path.join(repoRoot, "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+const sourcePath = path.join(repoRoot, "mockups/approved/browser-home-symmetric-rails-target-v1.png");
 const outputDir = path.join(appRoot, "client/public/browser-home/trace-candidates");
 const lockedBrowserHomeSha256 = "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c";
 

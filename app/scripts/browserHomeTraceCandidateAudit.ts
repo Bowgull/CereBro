@@ -29,7 +29,7 @@ type TraceCandidate = {
 
 const appRoot = process.cwd();
 const repoRoot = path.resolve(appRoot, "..");
-const sourcePath = path.join(repoRoot, "mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png");
+const sourcePath = path.join(repoRoot, "mockups/approved/browser-home-symmetric-rails-target-v1.png");
 const candidatesDir = process.env.CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR
   ? path.resolve(appRoot, process.env.CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR)
   : path.join(appRoot, "client/public/browser-home/trace-candidates");

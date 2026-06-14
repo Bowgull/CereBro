@@ -14,11 +14,11 @@ The approved Browser Home mockup is not decoration. It is the brand source of tr
 
 Primary Browser Home:
 
-`mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
+`mockups/approved/browser-home-symmetric-rails-target-v1.png`
 
 Watch Shelf:
 
-`mockups/compare/approved/watch-shelf/WATCH_SHELF_LOCK.md`
+`mockups/approved/WATCH_SHELF_LOCK.md`
 
 Mockup map:
 
@@ -26,7 +26,7 @@ Mockup map:
 
 Manifest:
 
-`mockups/compare/manifest.json`
+`mockups/approved/manifest.json`
 
 ## Visual Language
 
