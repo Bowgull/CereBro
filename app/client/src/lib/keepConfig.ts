@@ -35,6 +35,30 @@ export const cerebroColors = {
   parapet:      "#1F2632",
 } as const;
 
+// Shared brand-treatment layer — the ornate brass-on-black identity, extracted
+// once so every surface inherits the same finish instead of hand-rolling it.
+// Values lifted verbatim from BrowserPanel's former local `browserFrame` const
+// (the reference build). See CEREBRO_BRAND_SYSTEM_SPEC.md.
+export const cerebroBrand = {
+  // Surfaces
+  shell:        "radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.16), transparent 20%), linear-gradient(145deg, rgba(12, 15, 14, 0.99), rgba(3, 7, 7, 0.99))",
+  rail:         "linear-gradient(180deg, rgba(35, 31, 25, 0.98), rgba(8, 15, 13, 0.99))",
+  plaque:       "linear-gradient(180deg, rgba(42, 46, 38, 0.96), rgba(8, 18, 16, 0.98))",
+  plaqueActive: "linear-gradient(180deg, rgba(48, 71, 59, 0.98), rgba(12, 30, 26, 0.98))",
+  plaqueGreen:  "linear-gradient(180deg, rgba(75, 117, 96, 0.92), rgba(13, 45, 37, 0.96))",
+  address:      "linear-gradient(180deg, rgba(2, 7, 7, 0.98), rgba(8, 15, 14, 0.98))",
+  page:         "radial-gradient(circle at 50% 0%, rgba(77, 170, 154, 0.08), transparent 32%), repeating-linear-gradient(0deg, rgba(244, 239, 227, 0.018) 0 1px, transparent 1px 4px), linear-gradient(180deg, rgba(6, 10, 11, 0.99), rgba(2, 5, 6, 0.99))",
+  stone:        "repeating-linear-gradient(90deg, rgba(244, 239, 227, 0.035) 0 1px, transparent 1px 36px), linear-gradient(180deg, rgba(33, 34, 30, 0.88), rgba(6, 11, 10, 0.96))",
+  // Lines & depth
+  frameLine:     "rgba(198, 155, 85, 0.42)",
+  frameLineSoft: "rgba(77, 170, 154, 0.24)",
+  bevel:         "inset 0 1px 0 rgba(244, 239, 227, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.68)",
+  shadow:        "0 24px 70px rgba(0, 0, 0, 0.52)",
+  // Light — the gold bloom + star-chart backdrop for open/hero areas
+  goldGlow:       "radial-gradient(circle at 50% 30%, rgba(214, 158, 67, 0.16), transparent 11%), radial-gradient(circle at 50% 24%, rgba(198, 155, 85, 0.12), transparent 28%)",
+  astrolabeLines: "repeating-radial-gradient(circle at 50% 58%, rgba(198, 155, 85, 0.26) 0 1px, transparent 1px 46px)",
+} as const;
+
 export const cerebroTheme = {
   verdigrisIvory: {
     shell: "#071513",
