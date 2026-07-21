@@ -16,6 +16,16 @@ const bundledStaticDir = join(electronDirname, "../dist/public");
 let embeddedServer: StartedCereBroServer | null = null;
 let mainWindowRef: BrowserWindow | null = null;
 
+function installBrokenPipeGuard() {
+  const ignoreBrokenPipe = (error: NodeJS.ErrnoException) => {
+    if (error.code !== "EPIPE") throw error;
+  };
+
+  process.stdout.on("error", ignoreBrokenPipe);
+  process.stderr.on("error", ignoreBrokenPipe);
+}
+
+installBrokenPipeGuard();
 app.setName(appName);
 
 const disablePreload = process.env.CEREBRO_DISABLE_PRELOAD === "1";

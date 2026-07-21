@@ -1,0 +1,51 @@
+{
+  "name": "rejected-center-field-no-overlap-partition",
+  "status": "rejected",
+  "reason": "Exact no-overlap center-field partition still reproduced installed-scale seam drift, so center-field source slicing is not safe as a production replacement.",
+  "sourceBox": {
+    "left": 145,
+    "top": 126,
+    "width": 1440,
+    "height": 332
+  },
+  "maxMismatchRatio": 0,
+  "renderScales": [
+    {
+      "name": "installed-browser-home-smoke-scale",
+      "scaleX": 1.665615141955836,
+      "scaleY": 1.6693548387096775
+    }
+  ],
+  "slices": [
+    {
+      "name": "center-field-top",
+      "sourceBox": {
+        "left": 145,
+        "top": 126,
+        "width": 1440,
+        "height": 90
+      },
+      "targetBox": {
+        "left": 0,
+        "top": 0,
+        "width": 1440,
+        "height": 90
+      }
+    },
+    {
+      "name": "center-field-body",
+      "sourceBox": {
+        "left": 145,
+        "top": 216,
+        "width": 1440,
+        "height": 242
+      },
+      "targetBox": {
+        "left": 0,
+        "top": 90,
+        "width": 1440,
+        "height": 242
+      }
+    }
+  ]
+}

@@ -1182,9 +1182,10 @@ Do:
   - `Send To Agent` action that routes the marked evidence to Cortana, Tony,
     Gojo, Spock, Aang, or Surfer with the annotation coordinates attached.
   - `Compare` mode for before/after screenshots or asset variants.
-  - `mockups/compare` as the canonical source folder for approved, candidate,
-    and rejected visual targets. Compare should use plain labels from the
-    manifest and hide filenames from normal users.
+  - `mockups/approved` as the only canonical source folder for approved visual
+    targets. Candidates, rejected images, and experiments must stay elsewhere.
+    Compare should use plain labels from the manifest and hide filenames from
+    normal users.
   - `Evidence Ledger` showing what CereBro inspected before it changed code or
     created output.
 - Localhost is a core V1 workflow. CereBro should be able to run approved local

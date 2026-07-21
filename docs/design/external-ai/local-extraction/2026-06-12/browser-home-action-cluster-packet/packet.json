@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-06-12T22:13:47.596Z",
+  "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+  "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "target": "top-url-action-cluster",
+  "activeAsset": "app/client/public/browser-home/assets/top-url-action-cluster.png",
+  "sourceBox": {
+    "left": 1309,
+    "top": 69,
+    "width": 240,
+    "height": 52
+  },
+  "panelBox": {
+    "left": 1164,
+    "top": 69,
+    "width": 240,
+    "height": 52
+  },
+  "currentAssetSize": {
+    "width": 240,
+    "height": 52
+  },
+  "expectedCropSize": {
+    "width": 240,
+    "height": 52
+  },
+  "actualCropSize": {
+    "width": 240,
+    "height": 52
+  },
+  "diffCropSize": {
+    "width": 240,
+    "height": 52
+  },
+  "priorRejectedApproach": {
+    "name": "source-crops-plus-css-dots",
+    "strictDiffBefore": 0.08346456192123741,
+    "strictDiffRejectedFirst": 0.08349381805230488,
+    "strictDiffRejectedTuned": 0.08348936603235982,
+    "reason": "Regressed installed strict diff and relied on approximate CSS dots."
+  },
+  "bestLocalTrace": {
+    "preset": "imagetracer-high-color-fine",
+    "engine": "imagetracer",
+    "mismatchRatio": 0.045592948717948716,
+    "mismatchedPixels": 569,
+    "svgLength": 732597,
+    "output": {
+      "actual": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.actual.png",
+      "diff": "app/output/qa/browser-home-trace-sweep/top-url-action-cluster/imagetracer-high-color-fine.diff.png"
+    }
+  },
+  "requiredMedium": [
+    "traced-svg",
+    "external-ai-reference"
+  ],
+  "productionRule": "No production promotion without provenance, trace-candidate audit, installed visual review, and strict diff no worse than accepted baseline."
+}

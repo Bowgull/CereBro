@@ -11,7 +11,7 @@ import { mkdir } from "node:fs/promises";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SHEET = resolve(__dirname, "../client/public/sprites/cc0/kenney_roguelike-characters/Spritesheet/roguelikeChar_transparent.png");
 const OUT = resolve(__dirname, "../client/public/sprites/cc0/kenney_roguelike-characters/sliced");
-const CONTACT = resolve(__dirname, "../../mockups/assets/roguelike-contact-sheet.png");
+const CONTACT = resolve(__dirname, "../generated/assets/roguelike-contact-sheet.png");
 
 const TILE = 16;
 const STRIDE = 17;

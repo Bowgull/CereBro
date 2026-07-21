@@ -42,6 +42,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
+import { CereBroFrame } from "@/components/cerebro-ui";
 import { Input } from "@/components/ui/input";
 import { useHeroSocket } from "@/hooks/useHeroSocket";
 import { STATE_COLORS, STATE_LABELS } from "@/lib/dungeonConfig";
@@ -81,6 +82,14 @@ type NavId =
   | "settings";
 
 type ZoneId = "keep" | "browser" | "workshop" | "ledger" | "basement";
+
+const browserRailAssets: Record<ZoneId, { src: string; top: string; height: string }> = {
+  keep: { src: "/browser-home/assets/rail-keep.png", top: "1.1%", height: "19.8%" },
+  browser: { src: "/browser-home/assets/rail-browser-active.png", top: "21.7%", height: "8.9%" },
+  workshop: { src: "/browser-home/assets/rail-workshop.png", top: "32.9%", height: "8.6%" },
+  ledger: { src: "/browser-home/assets/rail-ledger.png", top: "43.7%", height: "8.6%" },
+  basement: { src: "/browser-home/assets/rail-basement.png", top: "54.2%", height: "9.8%" },
+};
 
 interface ZoneNavItem {
   zone: ZoneId;
@@ -221,6 +230,7 @@ export default function Home() {
   const [selectedHeroId, setSelectedHeroId] = useState<number | null>(null);
   const [showClearGate, setShowClearGate] = useState(false);
   const [lastRouteRequest, setLastRouteRequest] = useState<{ text: string; mode: Mode } | null>(null);
+  const [isBrowserRailCollapsed, setIsBrowserRailCollapsed] = useState(false);
   const isWorkbenchFocus = nav === "workbench";
   const isBrowserRoute = nav === "browser";
 
@@ -456,14 +466,41 @@ export default function Home() {
 
         {/* Left rail — four-zone OS dock */}
         <nav
-          className="w-[68px] flex flex-col shrink-0 overflow-hidden"
+          className={`${isBrowserRoute ? (isBrowserRailCollapsed ? "w-0" : "w-[122px]") : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden transition-[width] duration-200`}
           aria-label="CereBro zones"
           style={{
-            background: "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
-            borderRight: `1px solid ${mockupShell.marbleLine}`,
-            boxShadow: "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
+            background: isBrowserRoute
+              ? "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat"
+              : "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
+            borderRight: isBrowserRoute ? 0 : `1px solid ${mockupShell.marbleLine}`,
+            boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
           }}
         >
+          {isBrowserRoute ? (
+            <div className="absolute inset-0 z-10">
+              {ZONE_NAV_ITEMS.map((item) => {
+                const asset = browserRailAssets[item.zone];
+                return (
+                  <button
+                    key={`browser-rail-button-${item.zone}`}
+                    type="button"
+                    onClick={() => setNav(item.id)}
+                    aria-label={`Open ${item.label}`}
+                    aria-current={NAV_TO_ZONE[nav] === item.zone ? "page" : undefined}
+                    className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    style={{
+                      top: asset.top,
+                      height: asset.height,
+                      ["--tw-ring-color" as string]: C.accent,
+                    }}
+                  >
+                    <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
+                    <span className="sr-only">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
           <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
             {ZONE_NAV_ITEMS.map((item) => {
               const isActive = NAV_TO_ZONE[nav] === item.zone;
@@ -475,7 +512,7 @@ export default function Home() {
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className="relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center"
+                  className={`relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center ${isBrowserRoute ? "opacity-0" : ""}`}
                   variant="ghost"
                   style={{
                     background: isActive
@@ -511,8 +548,9 @@ export default function Home() {
               );
             })}
           </div>
+          )}
           <div
-            className="mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider"
+            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "pointer-events-none opacity-0" : ""}`}
             style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
           >
             <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
@@ -543,7 +581,15 @@ export default function Home() {
             {nav === "settings" && <ConfigPanel onClose={() => setNav("home")} />}
             {nav === "projects" && <PanelHost><ProjectLabPanel onClose={() => setNav("home")} /></PanelHost>}
             {nav === "inbox" && <PanelHost><HedwigInboxPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
-            {nav === "browser" && <PanelHost><BrowserPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
+            {nav === "browser" && (
+              <PanelHost>
+                <BrowserPanel
+                  onClose={() => setNav("home")}
+                  onNavigate={setNav}
+                  onToggleLeftRail={() => setIsBrowserRailCollapsed((collapsed) => !collapsed)}
+                />
+              </PanelHost>
+            )}
             {nav === "sources" && <PanelHost><SurferSourcesPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "terminal" && <PanelHost><TerminalLabPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
             {nav === "approvals" && <PanelHost><ApprovalDashboardPanel onClose={() => setNav("home")} onNavigate={setNav} /></PanelHost>}
@@ -1004,9 +1050,19 @@ function StubView({ title, phase }: { title: string; phase: string }) {
 //    children render in the workspace area instead of overlaying the castle.
 function PanelHost({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full w-full relative overflow-hidden" style={{ background: C.background }}>
-      {children}
-    </div>
+    <CereBroFrame
+      variant="panel"
+      className="h-full w-full"
+      style={{
+        borderRadius: 0,
+        border: 0,
+        boxShadow: "inset 0 0 0 1px rgba(198, 155, 85, 0.18), inset 0 0 80px rgba(0, 0, 0, 0.48)",
+      }}
+    >
+      <div className="relative h-full w-full overflow-hidden">
+        {children}
+      </div>
+    </CereBroFrame>
   );
 }
 

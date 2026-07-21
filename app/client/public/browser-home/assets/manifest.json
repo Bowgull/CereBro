@@ -1,0 +1,587 @@
+{
+  "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+  "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "rule": "Use these as component assets. Do not paste the full mockup as the UI. Every production asset must carry source provenance and an allowed medium.",
+  "allowedMedia": [
+    "raster",
+    "measured-css",
+    "traced-svg",
+    "external-ai-reference"
+  ],
+  "assets": [
+    {
+      "name": "rail-full.png",
+      "box": {
+        "left": 0,
+        "top": 60,
+        "width": 145,
+        "height": 932
+      },
+      "role": "Full left rail texture and frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "rail-keep.png",
+      "box": {
+        "left": 16,
+        "top": 70,
+        "width": 118,
+        "height": 185
+      },
+      "role": "Keep rail button asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "rail-browser-active.png",
+      "box": {
+        "left": 16,
+        "top": 262,
+        "width": 118,
+        "height": 83
+      },
+      "role": "Active Browser rail button asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "rail-workshop.png",
+      "box": {
+        "left": 17,
+        "top": 367,
+        "width": 116,
+        "height": 80
+      },
+      "role": "Workshop rail button asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "rail-ledger.png",
+      "box": {
+        "left": 17,
+        "top": 467,
+        "width": 116,
+        "height": 80
+      },
+      "role": "Ledger rail button asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "rail-basement.png",
+      "box": {
+        "left": 17,
+        "top": 565,
+        "width": 116,
+        "height": 91
+      },
+      "role": "Basement rail button asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-tabs.png",
+      "box": {
+        "left": 0,
+        "top": 0,
+        "width": 1585,
+        "height": 61
+      },
+      "role": "Top title and tab strip frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-tabs-panel.png",
+      "box": {
+        "left": 145,
+        "top": 0,
+        "width": 1440,
+        "height": 61
+      },
+      "role": "Top title and tab strip frame in Browser panel coordinates.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-identity.png",
+      "box": {
+        "left": 145,
+        "top": 0,
+        "width": 200,
+        "height": 61
+      },
+      "role": "Top title strip CereBro Browser identity area.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-active-tab.png",
+      "box": {
+        "left": 350,
+        "top": 0,
+        "width": 205,
+        "height": 61
+      },
+      "role": "Top title strip active tab area.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-new-tab.png",
+      "box": {
+        "left": 555,
+        "top": 0,
+        "width": 70,
+        "height": 61
+      },
+      "role": "Top title strip new-tab control area.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-title-protected.png",
+      "box": {
+        "left": 1420,
+        "top": 0,
+        "width": 135,
+        "height": 61
+      },
+      "role": "Top title strip protection badge area.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-row.png",
+      "box": {
+        "left": 145,
+        "top": 61,
+        "width": 1440,
+        "height": 65
+      },
+      "role": "URL/search row with action controls.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-nav-controls.png",
+      "box": {
+        "left": 187,
+        "top": 69,
+        "width": 151,
+        "height": 52
+      },
+      "role": "Top URL row back, forward, and reload controls.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-omnibox.png",
+      "box": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      },
+      "role": "Top URL row omnibox frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-action-cluster.png",
+      "box": {
+        "left": 1309,
+        "top": 69,
+        "width": 240,
+        "height": 52
+      },
+      "role": "Top URL row shield, library, stats, and page actions cluster.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "top-url-action-cluster.svg",
+      "box": {
+        "left": 1309,
+        "top": 69,
+        "width": 240,
+        "height": 52
+      },
+      "role": "Source-derived traced SVG replacing active top URL action-cluster raster.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "traced-svg",
+      "productionAllowed": true
+    },
+    {
+      "name": "center-field-title-star-map.png",
+      "box": {
+        "left": 145,
+        "top": 126,
+        "width": 1440,
+        "height": 332
+      },
+      "role": "Center star-map, title, medallion rail, pinned label, and edit control.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "pinned-bookmark-row.png",
+      "box": {
+        "left": 145,
+        "top": 421,
+        "width": 1440,
+        "height": 183
+      },
+      "role": "Pinned bookmark row background, cards, edit control, and row spacing.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "lower-panels-row.png",
+      "box": {
+        "left": 145,
+        "top": 604,
+        "width": 1440,
+        "height": 242
+      },
+      "role": "Lower Browser Home panels row, panel frames, list content, and surrounding background.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bottom-dock-row.png",
+      "box": {
+        "left": 145,
+        "top": 846,
+        "width": 1440,
+        "height": 146
+      },
+      "role": "Full-width bottom dock row, Aang dock, bottom frame, and right edge.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-github.png",
+      "box": {
+        "left": 654,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned GitHub medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-obsidian.png",
+      "box": {
+        "left": 715,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Obsidian medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-youtube.png",
+      "box": {
+        "left": 779,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned YouTube medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-x.png",
+      "box": {
+        "left": 844,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned X medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-reddit.png",
+      "box": {
+        "left": 908,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Reddit medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-hn.png",
+      "box": {
+        "left": 971,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Pinned Hacker News medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "medallion-add.png",
+      "box": {
+        "left": 1035,
+        "top": 145,
+        "width": 48,
+        "height": 48
+      },
+      "role": "Add medallion.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-frame.png",
+      "box": {
+        "left": 230,
+        "top": 458,
+        "width": 180,
+        "height": 116
+      },
+      "role": "Bookmark card frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-github.png",
+      "box": {
+        "left": 230,
+        "top": 458,
+        "width": 180,
+        "height": 116
+      },
+      "role": "GitHub bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-obsidian.png",
+      "box": {
+        "left": 425,
+        "top": 458,
+        "width": 170,
+        "height": 116
+      },
+      "role": "Obsidian bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-youtube.png",
+      "box": {
+        "left": 609,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "role": "YouTube bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-x.png",
+      "box": {
+        "left": 775,
+        "top": 458,
+        "width": 147,
+        "height": 116
+      },
+      "role": "X bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-reddit.png",
+      "box": {
+        "left": 969,
+        "top": 458,
+        "width": 116,
+        "height": 116
+      },
+      "role": "Reddit bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-hn.png",
+      "box": {
+        "left": 1100,
+        "top": 458,
+        "width": 147,
+        "height": 116
+      },
+      "role": "Hacker News bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "bookmark-card-add.png",
+      "box": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "role": "Add bookmark card asset.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "panel-continue.png",
+      "box": {
+        "left": 230,
+        "top": 604,
+        "width": 384,
+        "height": 224
+      },
+      "role": "Continue browsing panel frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "panel-recent.png",
+      "box": {
+        "left": 636,
+        "top": 604,
+        "width": 392,
+        "height": 224
+      },
+      "role": "Recent panel frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "panel-downloads.png",
+      "box": {
+        "left": 1051,
+        "top": 604,
+        "width": 368,
+        "height": 224
+      },
+      "role": "Downloads panel frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "aang-dock.png",
+      "box": {
+        "left": 158,
+        "top": 846,
+        "width": 1397,
+        "height": 119
+      },
+      "role": "Bottom Aang dock frame.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    },
+    {
+      "name": "aang-avatar-medallion.png",
+      "box": {
+        "left": 162,
+        "top": 849,
+        "width": 108,
+        "height": 108
+      },
+      "role": "Aang avatar medallion from dock.",
+      "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+      "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+      "medium": "raster",
+      "productionAllowed": true
+    }
+  ]
+}

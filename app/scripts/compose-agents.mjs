@@ -24,7 +24,7 @@ const SLICED = join(ROOT, "kenney_roguelike-characters/sliced");
 const TD_FRAMES = join(ROOT, "0x72_DungeonTilesetII_v1.7/frames");
 const TDUN_TILES = join(ROOT, "kenney_tiny-dungeon/Tiles");
 const TOWN_TILES = join(ROOT, "kenney_tiny-town/Tiles");
-const OUT_DIR = resolve(__dirname, "../../mockups/assets/sprites");
+const OUT_DIR = resolve(__dirname, "../generated/assets/sprites");
 
 const C = {
   yellow: "#FFD24A", gold: "#D9B56A", goldHi: "#FFE07A",

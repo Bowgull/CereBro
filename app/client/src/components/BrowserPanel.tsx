@@ -2,6 +2,37 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react
 import { ArrowLeft, ArrowRight, Bookmark, ChevronDown, ChevronUp, Download, ExternalLink, Folder, MoreHorizontal, Paperclip, Pencil, Plus, RotateCw, ShieldCheck, SquareX, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CereBroButton } from "@/components/cerebro-ui";
+import {
+  browserHomeAddCardBox,
+  browserHomeAddMedallionBox,
+  browserHomeActiveTitleTabBox,
+  browserHomeBaseBackplateBox,
+  browserHomeCardBoxes,
+  browserHomeDockHitBoxes,
+  browserHomeEditPinnedBox,
+  browserHomeLayerAssets,
+  browserHomeLowerPanelAssets,
+  browserHomeLowerPanelsBackplateBox,
+  browserHomeLowerBackplateBox,
+  browserHomeMedallionBoxes,
+  browserHomeNewTabPlusBox,
+  browserHomePanelHitBoxes,
+  browserHomePinnedCardAssets,
+  browserHomePinnedRowBackplateBox,
+  browserHomeProtectedBadgeBox,
+  browserHomeSideToggleHitBoxes,
+  browserHomeTitleIdentityBox,
+  browserHomeTopChromeHitBoxes,
+  browserHomeTopTitleAssets,
+  browserHomeTopTitleBackplateBox,
+  browserHomeTopUrlAssets,
+  browserHomeTopUrlBackplateBox,
+  browserHomeTopUrlNavControlVisualBoxes,
+  browserHomeToPercentBox,
+  type BrowserHomeMeasuredBox,
+} from "@/lib/browserHomeBrandLayout";
+import { cerebroBrand as B } from "@/lib/cerebroTheme";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { trpc } from "@/lib/trpc";
 import type { NativeBrowserPageEvent, NativeBrowserSiteSettings } from "../../../shared/nativeBrowser";
@@ -62,6 +93,12 @@ type DailyBrowserTab = {
   title: string | null;
   targetUrl: string | null;
   addressDraft: string;
+};
+
+type BrowserHomeBookmarkItem = {
+  id: number;
+  title: string | null;
+  targetUrl: string;
 };
 
 type BrowserDownloadActivity = {
@@ -222,33 +259,38 @@ function BrowserHomeStart({
     ...browserHomePins
       .filter((pin) => !pinnedTargets.has(pin.target))
       .map((pin) => ({ key: `default-${pin.label}`, ...pin, saved: false })),
-  ].slice(0, 7);
+  ].slice(0, 6);
 
   return (
-    <div className="relative min-h-[clamp(520px,68dvh,760px)] overflow-hidden rounded" style={{ background: "radial-gradient(circle at 50% 30%, rgba(214, 158, 67, 0.16), transparent 11%), radial-gradient(circle at 50% 24%, rgba(198, 155, 85, 0.12), transparent 28%), radial-gradient(circle at 88% 12%, rgba(77, 170, 154, 0.08), transparent 28%), linear-gradient(180deg, rgba(7, 13, 12, 0.98), rgba(2, 5, 5, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 44px rgba(0, 0, 0, 0.56)" }}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-52 opacity-70" aria-hidden="true" style={{ background: "repeating-radial-gradient(circle at 50% 58%, rgba(198, 155, 85, 0.26) 0 1px, transparent 1px 46px)" }} />
+    <div className="relative min-h-full overflow-hidden rounded-sm" style={{ background: "radial-gradient(circle at 50% 28%, rgba(214, 158, 67, 0.2), transparent 8%), radial-gradient(circle at 50% 18%, rgba(198, 155, 85, 0.15), transparent 30%), radial-gradient(circle at 50% 20%, rgba(77, 170, 154, 0.06), transparent 48%), linear-gradient(180deg, rgba(7, 13, 12, 0.98), rgba(2, 5, 5, 0.99))", border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 44px rgba(0, 0, 0, 0.56)" }}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[46%] opacity-80" aria-hidden="true" style={{ background: "repeating-radial-gradient(circle at 50% 62%, rgba(198, 155, 85, 0.28) 0 1px, transparent 1px 43px)" }} />
+      <div className="pointer-events-none absolute left-1/2 top-[24%] h-[54%] w-px -translate-x-1/2 opacity-70" aria-hidden="true" style={{ background: `linear-gradient(180deg, transparent, ${browserFrame.line}, transparent)` }} />
+      <div className="pointer-events-none absolute left-3 top-[23%] hidden h-[190px] w-8 rounded-sm border-y border-r lg:block" aria-hidden="true" style={{ borderColor: browserFrame.line, background: "linear-gradient(180deg, rgba(12, 16, 14, 0.65), rgba(5, 8, 8, 0.7))", boxShadow: browserFrame.bevel }} />
+      <div className="pointer-events-none absolute right-3 top-[23%] hidden h-[190px] w-8 rounded-sm border-y border-l lg:block" aria-hidden="true" style={{ borderColor: browserFrame.line, background: "linear-gradient(180deg, rgba(12, 16, 14, 0.65), rgba(5, 8, 8, 0.7))", boxShadow: browserFrame.bevel }} />
+      <div className="pointer-events-none absolute left-5 top-[33%] hidden text-[24px] lg:block" aria-hidden="true" style={{ color: C.gold }}>{"<"}</div>
+      <div className="pointer-events-none absolute right-5 top-[33%] hidden text-[24px] lg:block" aria-hidden="true" style={{ color: C.gold }}>{">"}</div>
       <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
 
-      <div className="relative z-10 flex flex-col px-4 pb-28 pt-5 sm:px-6 sm:pt-6">
+      <div className="relative z-10 flex min-h-[calc(100dvh-168px)] flex-col px-8 pb-[112px] pt-5 sm:px-12 lg:px-20">
         <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-          <div className="mb-2 flex items-start justify-center gap-2" aria-label="Browser Home medallions">
-            {homePins.slice(0, 7).map((pin) => (
+          <div className="mb-1 flex items-start justify-center gap-2" aria-label="Browser Home medallions">
+            {homePins.map((pin) => (
               <button
                 key={`home-medallion-${pin.key}`}
                 type="button"
                 aria-label={`Open bookmark ${pin.label}`}
                 title={pin.target}
-                className="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 onClick={() => onOpenTarget(pin.target)}
                 style={{ background: pin.saved ? browserFrame.greenPlaque : browserFrame.plaque, border: `1px solid ${pin.saved ? C.gold : browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, 0 8px 18px rgba(0,0,0,0.35)`, ["--tw-ring-color" as string]: C.accent }}
               >
                 <img
                   src={faviconUrl(pin.domain, 64)}
                   alt=""
-                  className="h-[18px] w-[18px] rounded"
+                  className="h-[17px] w-[17px] rounded"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                   }}
@@ -257,20 +299,30 @@ function BrowserHomeStart({
                 <span className="pointer-events-none absolute -bottom-1 h-2 w-2 rounded-full" aria-hidden="true" style={{ background: pin.saved ? C.gold : C.success, border: `1px solid ${browserFrame.line}`, boxShadow: `0 0 12px ${(pin.saved ? C.gold : C.success)}77` }} />
               </button>
             ))}
+            <button
+              type="button"
+              aria-label="Add pinned bookmark"
+              title="Add pinned bookmark"
+              className="group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              onClick={onAddBookmark}
+              style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: `${browserFrame.bevel}, 0 8px 18px rgba(0,0,0,0.35)`, ["--tw-ring-color" as string]: C.accent }}
+            >
+              <Plus size={17} strokeWidth={1.6} aria-hidden="true" style={{ color: C.gold }} />
+            </button>
           </div>
-          <div className="mb-2 h-px w-64 max-w-full" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
-          <div className="flex h-12 w-12 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 0 30px rgba(214, 158, 67, 0.22)` }}>
-            <ShieldCheck size={18} strokeWidth={1.7} style={{ color: C.gold }} />
+          <div className="mb-1 h-px w-72 max-w-full" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 0 30px rgba(214, 158, 67, 0.22)` }}>
+            <ShieldCheck size={17} strokeWidth={1.7} style={{ color: C.gold }} />
           </div>
-          <div className="mt-3 text-[28px] font-semibold leading-none sm:text-[34px]" style={{ color: C.textPrimary, fontFamily: "Georgia, serif" }}>
+          <div className="mt-3 text-[26px] font-semibold leading-none sm:text-[32px]" style={{ color: C.textPrimary, fontFamily: "Georgia, serif" }}>
             Where to next?
           </div>
-          <div className="mt-2 text-[13px]" style={{ color: C.textSecondary }}>
+          <div className="mt-1.5 text-[12px]" style={{ color: C.textSecondary }}>
             Search the web or ask CereBro anything.
           </div>
         </div>
 
-        <div className="mx-auto mt-10 grid w-full max-w-6xl gap-3">
+        <div className="mx-auto mt-11 grid w-full max-w-[1180px] gap-3">
           <div className="flex items-center justify-between gap-2">
             <div className="text-[14px] font-semibold" style={{ color: C.gold }}>Pinned</div>
             <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-[10px]" onClick={onAddBookmark}>
@@ -278,14 +330,14 @@ function BrowserHomeStart({
               Edit Pinned
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
             {homePins.map((pin) => (
               <button
                 key={pin.key}
                 type="button"
                 aria-label={`Open bookmark ${pin.label}`}
                 title={pin.target}
-                className="group relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="group relative flex min-h-[92px] flex-col items-center justify-center rounded-sm px-2 py-2.5 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 onClick={() => onOpenTarget(pin.target)}
                 style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
               >
@@ -293,7 +345,7 @@ function BrowserHomeStart({
                 <img
                   src={faviconUrl(pin.domain, 96)}
                   alt=""
-                  className="h-10 w-10 rounded"
+                  className="h-9 w-9 rounded"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                   }}
@@ -306,7 +358,7 @@ function BrowserHomeStart({
             <button
               type="button"
               aria-label="Add current page bookmark"
-              className="relative flex min-h-[104px] flex-col items-center justify-center rounded px-2 py-3 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="relative flex min-h-[92px] flex-col items-center justify-center rounded-sm px-2 py-2.5 text-center transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               onClick={onAddBookmark}
               style={{ background: "linear-gradient(180deg, rgba(13, 20, 18, 0.9), rgba(5, 9, 9, 0.95))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}
             >
@@ -316,13 +368,13 @@ function BrowserHomeStart({
           </div>
         </div>
 
-        <div className="mx-auto mt-7 grid w-full max-w-6xl gap-3 lg:grid-cols-3">
+        <div className="mx-auto mt-6 grid w-full max-w-[1180px] gap-4 lg:grid-cols-3">
           {[
             ["Continue browsing", "electron / electron", "CereBro Shell", "MDN Web Docs"],
             ["Recent", "Awesome Lists", "Design Systems", "Deep Work"],
             ["Downloads", "CereBro-Setup.dmg", "project-brief.pdf", "notes.zip"],
           ].map(([title, a, b, c]) => (
-            <div key={title} className="rounded p-3" style={{ background: "rgba(5, 10, 10, 0.68)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+            <div key={title} className="rounded-sm p-3" style={{ background: "rgba(5, 10, 10, 0.68)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="text-[14px] font-semibold" style={{ color: C.gold }}>{title}</div>
                 <Button type="button" size="sm" variant="outline" className="h-6 px-2 text-[10px]">View all</Button>
@@ -341,7 +393,7 @@ function BrowserHomeStart({
                             ? "https://en.wikipedia.org/wiki/Deep_Work"
                             : null;
                 return (
-                  <button key={item} type="button" className="grid w-full grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded px-1 py-1.5 text-left disabled:cursor-default disabled:opacity-70" disabled={!target} onClick={() => target && onOpenTarget(target)}>
+                  <button key={item} type="button" className="grid w-full grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded-sm px-1 py-1.5 text-left disabled:cursor-default disabled:opacity-70" disabled={!target} onClick={() => target && onOpenTarget(target)}>
                     <span className="flex h-8 w-8 items-center justify-center rounded text-[10px] font-bold" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}`, color: C.gold }}>{item.slice(0, 2).toUpperCase()}</span>
                     <span className="min-w-0">
                       <span className="block truncate text-[11px] font-semibold" style={{ color: C.textPrimary }}>{item}</span>
@@ -355,16 +407,16 @@ function BrowserHomeStart({
         </div>
       </div>
 
-      <div className="absolute inset-x-3 bottom-3 z-20 rounded-t-2xl px-3 py-3" style={{ background: "linear-gradient(180deg, rgba(4, 8, 8, 0.9), rgba(2, 5, 5, 0.98))", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: "0 -18px 46px rgba(0, 0, 0, 0.5)" }}>
-        <div className={chatOpen ? "grid grid-cols-[74px_minmax(0,1fr)_auto_auto] items-center gap-3" : "grid grid-cols-[74px_minmax(0,1fr)] items-center gap-3"}>
+      <div className="absolute inset-x-3 bottom-3 z-20 rounded-sm px-3 py-2" style={{ background: "linear-gradient(180deg, rgba(4, 8, 8, 0.9), rgba(2, 5, 5, 0.98))", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: "0 -18px 46px rgba(0, 0, 0, 0.5)" }}>
+        <div className={chatOpen ? "grid grid-cols-[64px_minmax(0,1fr)_auto_auto] items-center gap-3" : "grid grid-cols-[64px_minmax(0,1fr)] items-center gap-3"}>
           <button
             type="button"
             aria-label={chatOpen ? "Close Aang chat" : "Open Aang chat"}
             onClick={onToggleChat}
-            className="group relative h-[74px] w-[74px] rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="group relative h-[64px] w-[64px] rounded-full transition duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
           >
-            <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-2 left-1/2 h-[62px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
+            <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-1.5 left-1/2 h-[55px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
             <span className="absolute -bottom-2 left-1/2 flex h-5 w-12 -translate-x-1/2 items-center justify-center rounded-full" aria-hidden="true" style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, color: C.gold }}>
               {chatOpen ? <ChevronDown size={13} strokeWidth={2} /> : <ChevronUp size={13} strokeWidth={2} />}
             </span>
@@ -380,7 +432,7 @@ function BrowserHomeStart({
                   event.preventDefault();
                   onSubmitAang();
                 }}
-                placeholder="Ask Aang about this browser session..."
+                placeholder="Ask Aang anything or run a command..."
                 className="h-12 min-w-0 text-[12px]"
                 style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
               />
@@ -402,7 +454,671 @@ function BrowserHomeStart({
   );
 }
 
-export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => void; onNavigate?: (route: BrowserRoute) => void }) {
+function BrowserHomeAssetStage() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+      <div style={{ ...browserHomeBoxStyle(browserHomeBaseBackplateBox), background: "#020505" }} />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomeTopTitleBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(4, 7, 7, 0.94), rgba(2, 5, 5, 0.98)), linear-gradient(90deg, rgba(198, 155, 85, 0.08), transparent 18%, transparent 82%, rgba(198, 155, 85, 0.08))",
+          boxShadow: "inset 0 -1px 0 rgba(198, 155, 85, 0.2)",
+        }}
+      />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomeLowerBackplateBox),
+          background:
+            "linear-gradient(90deg, rgba(198, 155, 85, 0.12), transparent 12%, transparent 88%, rgba(198, 155, 85, 0.1)), repeating-linear-gradient(90deg, rgba(198, 155, 85, 0.02) 0 1px, transparent 1px 40px), repeating-linear-gradient(0deg, rgba(198, 155, 85, 0.014) 0 1px, transparent 1px 34px)",
+          boxShadow: "inset 0 0 70px rgba(0, 0, 0, 0.72)",
+        }}
+      />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomeTopUrlBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(5, 8, 8, 0.86), rgba(2, 5, 5, 0.92)), linear-gradient(90deg, rgba(198, 155, 85, 0.08), transparent 14%, transparent 86%, rgba(198, 155, 85, 0.08))",
+          boxShadow: "inset 0 1px 0 rgba(198, 155, 85, 0.16), inset 0 -1px 0 rgba(198, 155, 85, 0.2)",
+        }}
+      />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomePinnedRowBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(8, 11, 10, 0.34), rgba(3, 7, 7, 0.7)), radial-gradient(circle at 50% 0%, rgba(198, 155, 85, 0.08), transparent 52%)",
+        }}
+      />
+      <div
+        style={{
+          ...browserHomeBoxStyle(browserHomeLowerPanelsBackplateBox),
+          background:
+            "linear-gradient(180deg, rgba(4, 8, 8, 0.42), rgba(3, 7, 7, 0.74)), radial-gradient(circle at 50% 10%, rgba(198, 155, 85, 0.06), transparent 58%)",
+        }}
+      />
+      {browserHomeLayerAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomeTopTitleAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      <div
+        className="absolute flex items-center"
+        style={{
+          ...browserHomeBoxStyle(browserHomeTitleIdentityBox),
+          color: "rgba(244, 239, 227, 0.92)",
+          fontFamily: B.font.display,
+        }}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="absolute"
+          style={{
+            left: "-4px",
+            top: "20px",
+            width: "24px",
+            height: "27px",
+            color: "rgba(198, 155, 85, 0.74)",
+            filter: "drop-shadow(0 1px 0 rgba(0, 0, 0, 0.85))",
+          }}
+        >
+          <rect x="0.5" y="1.5" width="22" height="22" fill="rgba(4, 7, 7, 0.58)" stroke="currentColor" strokeWidth="1" />
+          <circle cx="11.5" cy="12.5" r="7.1" fill="none" stroke="currentColor" strokeWidth="0.85" />
+          <path d="M11.5 3.8v17.4M2.8 12.5h17.4M11.5 5.4l3.4 7.1-3.4 7.1-3.4-7.1z" fill="none" stroke="currentColor" strokeWidth="0.8" strokeLinejoin="round" />
+        </svg>
+        <span
+          className="absolute whitespace-nowrap text-[14px] leading-none"
+          style={{
+            left: "36px",
+            top: "23px",
+            color: "rgba(244, 239, 227, 0.94)",
+            textShadow: "0 1px 0 rgba(0, 0, 0, 0.86)",
+          }}
+        >
+          CereBro Browser
+        </span>
+      </div>
+      <div
+        className="absolute flex items-center justify-between rounded-t-[6px] px-[19px] text-[13px]"
+        style={{
+          ...browserHomeBoxStyle(browserHomeActiveTitleTabBox),
+          background: "linear-gradient(180deg, rgba(17, 17, 16, 0.92), rgba(8, 10, 10, 0.98))",
+          border: "1px solid rgba(198, 155, 85, 0.42)",
+          borderBottomColor: "rgba(198, 155, 85, 0.18)",
+          boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -12px 22px rgba(0, 0, 0, 0.42)",
+          color: "rgba(244, 239, 227, 0.9)",
+          fontFamily: B.font.ui,
+        }}
+      >
+        <span>New Tab</span>
+        <span style={{ color: "rgba(198, 155, 85, 0.86)", fontSize: "20px", lineHeight: "1" }} aria-hidden="true">
+          x
+        </span>
+      </div>
+      <div
+        className="absolute flex items-center justify-center text-[24px] leading-none"
+        style={{
+          ...browserHomeBoxStyle(browserHomeNewTabPlusBox),
+          color: "rgba(198, 155, 85, 0.76)",
+          fontFamily: B.font.ui,
+          textShadow: "0 1px 0 rgba(0, 0, 0, 0.9)",
+        }}
+      >
+        +
+      </div>
+      <div
+        className="absolute flex items-center justify-center gap-[6px] rounded-[4px] text-[12px] font-medium"
+        style={{
+          ...browserHomeBoxStyle(browserHomeProtectedBadgeBox),
+          background: "rgba(4, 7, 7, 0.76)",
+          border: "1px solid rgba(198, 155, 85, 0.2)",
+          boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.58)",
+          color: "rgba(244, 239, 227, 0.9)",
+          fontFamily: B.font.ui,
+        }}
+      >
+        <span
+          className="block h-[10px] w-[10px] rounded-full"
+          style={{ background: "#20d34c", boxShadow: "0 0 9px rgba(32, 211, 76, 0.55)" }}
+          aria-hidden="true"
+        />
+        <span>Protected</span>
+      </div>
+      <div
+        className="absolute"
+        style={{
+          ...browserHomeBoxStyle({ left: 42, top: 69, width: 151, height: 52 }),
+          pointerEvents: "none",
+        }}
+      />
+      {browserHomeTopUrlNavControlVisualBoxes.map((box, index) => {
+        const Icon = index === 0 ? ArrowLeft : index === 1 ? ArrowRight : RotateCw;
+        const disabled = index < 2;
+        return (
+          <div
+            key={`browser-home-top-url-nav-control-${index}`}
+            className="absolute flex items-center justify-center"
+            style={{
+              ...browserHomeBoxStyle(box),
+              borderRadius: "5px",
+              border: "1px solid rgba(137, 99, 53, 0.14)",
+              background: "linear-gradient(180deg, rgba(12, 16, 16, 0.30), rgba(2, 5, 5, 0.22))",
+              boxShadow: "inset 0 1px 0 rgba(218, 178, 105, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.32)",
+              color: disabled ? "rgba(190, 143, 76, 0.46)" : "rgba(203, 157, 89, 0.94)",
+            }}
+          >
+            <Icon size={index === 2 ? 20 : 18} strokeWidth={1.55} aria-hidden="true" />
+          </div>
+        );
+      })}
+      {browserHomeTopUrlAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomeLowerPanelAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+      {browserHomePinnedCardAssets.map((asset) => (
+        <img
+          key={asset.name}
+          src={`/browser-home/assets/${asset.name}`}
+          alt=""
+          draggable={false}
+          className="absolute select-none"
+          style={browserHomeToPercentBox(asset)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function browserHomeBoxStyle(box: BrowserHomeMeasuredBox) {
+  return browserHomeToPercentBox(box);
+}
+
+function BrowserHomeChromeHitButton({
+  box,
+  label,
+  onClick,
+}: {
+  box: BrowserHomeMeasuredBox;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className="pointer-events-auto absolute rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      style={browserHomeBoxStyle(box)}
+      onClick={onClick}
+    />
+  );
+}
+
+function BrowserHomeChromeOverlay({
+  addressDraft,
+  onAddressDraftChange,
+  onSubmitAddress,
+  onBack,
+  onForward,
+  onReload,
+  onNewTab,
+  onCloseTab,
+  onProtected,
+  onLibrary,
+  onStats,
+  activeMenu,
+  toggleMenu,
+  vpnStatus,
+  vpnBusy,
+  onToggleVpn,
+  onCheckVpn,
+  onOpenVpnSettings,
+}: {
+  addressDraft: string;
+  onAddressDraftChange: (value: string) => void;
+  onSubmitAddress: () => void;
+  onBack: () => void;
+  onForward: () => void;
+  onReload: () => void;
+  onNewTab: () => void;
+  onCloseTab: () => void;
+  onProtected: () => void;
+  onLibrary: () => void;
+  onStats: () => void;
+  activeMenu: BrowserChromeMenu;
+  toggleMenu: (menu: Exclude<BrowserChromeMenu, null>) => void;
+  vpnStatus: NativeVpnStatusResult | null;
+  vpnBusy: boolean;
+  onToggleVpn: () => void;
+  onCheckVpn: () => void;
+  onOpenVpnSettings: () => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-30" aria-label="Browser Home top chrome controls">
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.activeTab} label="Select active tab" onClick={() => undefined} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.tabClose} label="Close current tab" onClick={onCloseTab} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.newTab} label="New tab" onClick={onNewTab} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.protectedBadge} label="Protection status" onClick={onProtected} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.back} label="Go back" onClick={onBack} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.forward} label="Go forward" onClick={onForward} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.reload} label="Reload page" onClick={onReload} />
+      <label className="pointer-events-auto absolute rounded-sm" style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.omnibox)}>
+        <span className="sr-only">Browser address and search field</span>
+        <input
+          aria-label="Browser address and search field"
+          value={addressDraft}
+          onChange={(event) => onAddressDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            onSubmitAddress();
+          }}
+          className="h-full w-full bg-transparent text-[13px] outline-none"
+          placeholder=""
+          style={{
+            color: B.color.parchment100,
+            caretColor: B.color.gold300,
+            paddingLeft: "48px",
+            paddingRight: "18px",
+            fontFamily: B.font.ui,
+          }}
+        />
+      </label>
+      <details className="pointer-events-auto absolute" open={activeMenu === "shield"} style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.shield)}>
+        <summary
+          className="h-full w-full cursor-pointer list-none rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="VPN shield"
+          onClick={(event) => {
+            event.preventDefault();
+            toggleMenu("shield");
+          }}
+        />
+        <div
+          className="absolute right-0 top-full z-40 mt-1 w-72 rounded p-2 text-[10px] leading-snug"
+          role="menu"
+          style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, color: C.textMuted, boxShadow: `0 16px 36px ${C.background}cc` }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textPrimary }}>VPN Shield</div>
+              <div className="mt-1 text-[12px] font-semibold" style={{ color: vpnStatusTone(vpnStatus) }}>
+                {vpnStatusLabel(vpnStatus, vpnBusy)}
+              </div>
+            </div>
+            <span className="mt-0.5 h-2.5 w-2.5 rounded-full" aria-hidden="true" style={{ background: vpnStatusTone(vpnStatus), boxShadow: `0 0 18px ${vpnStatusTone(vpnStatus)}66` }} />
+          </div>
+          <div className="mt-2" style={{ color: C.textSecondary }}>
+            {vpnStatus?.state === "on"
+              ? "VPN is on."
+              : vpnStatus?.state === "needs_setup"
+                ? "Finish setup once, then the shield can check it."
+                : "Turn it on before private browsing."}
+          </div>
+          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-8 justify-center px-2 text-[11px]" disabled={vpnBusy} role="menuitem" onClick={onToggleVpn}>
+              {vpnPrimaryActionLabel(vpnStatus, vpnBusy)}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-8 px-2 text-[11px]" disabled={vpnBusy} role="menuitem" onClick={onCheckVpn}>
+              Check
+            </Button>
+          </div>
+          <Button type="button" size="sm" variant="ghost" className="mt-1 h-7 w-full justify-start px-1.5 text-[10px]" role="menuitem" onClick={onOpenVpnSettings}>
+            VPN Settings
+          </Button>
+        </div>
+      </details>
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.library} label="Open bookmarks" onClick={onLibrary} />
+      <BrowserHomeChromeHitButton box={browserHomeTopChromeHitBoxes.stats} label="Open browser stats" onClick={onStats} />
+      <details className="pointer-events-auto absolute" open={activeMenu === "pageActions"} style={browserHomeBoxStyle(browserHomeTopChromeHitBoxes.pageActions)}>
+        <summary
+          className="h-full w-full cursor-pointer list-none rounded-sm bg-transparent text-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          aria-label="Browser page actions"
+          onClick={(event) => {
+            event.preventDefault();
+            toggleMenu("pageActions");
+          }}
+        />
+        <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
+          <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
+          <Button type="button" variant="ghost" size="sm" className="h-auto w-full justify-start px-1.5 py-1.5 text-left" role="menuitem" onClick={onOpenVpnSettings}>
+            <span className="block">
+              <span className="block text-[11px] font-semibold">VPN Settings</span>
+              <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Open security setup.</span>
+            </span>
+          </Button>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+function BrowserHomePrimitiveOverlay({
+  pins,
+  aangDraft,
+  onAangDraftChange,
+  onSubmitAang,
+  onOpenTarget,
+  onAddBookmark,
+  onEditPinned,
+  onToggleLeftRail,
+  onToggleWatchShelf,
+}: {
+  pins: { key: string; label: string; target: string; domain: string; saved: boolean }[];
+  aangDraft: string;
+  onAangDraftChange: (value: string) => void;
+  onSubmitAang: () => void;
+  onOpenTarget: (target: string) => void;
+  onAddBookmark: () => void;
+  onEditPinned: () => void;
+  onToggleLeftRail?: () => void;
+  onToggleWatchShelf: () => void;
+}) {
+  const visiblePins = pins.slice(0, 6);
+  const panelRows = [
+    {
+      title: "Continue browsing",
+      rows: [
+        { label: "electron / electron", meta: "github.com  ·  2m ago", target: "https://github.com/electron/electron", icon: "GH" },
+        { label: "CereBro Shell", meta: "docs.cerebro.app  ·  18m ago", target: "https://docs.cerebro.app", icon: "CB" },
+        { label: "MDN Web Docs", meta: "developer.mozilla.org  ·  1h ago", target: "https://developer.mozilla.org", icon: "MDN" },
+      ],
+    },
+    {
+      title: "Recent",
+      rows: [
+        { label: "Awesome Lists", meta: "github.com  ·  2h ago", target: "https://github.com/sindresorhus/awesome", icon: "GH" },
+        { label: "Design Systems", meta: "designsystems.com  ·  3h ago", target: "https://www.designsystems.com", icon: "DS" },
+        { label: "Deep Work", meta: "calnewport.com  ·  Yesterday", target: "https://en.wikipedia.org/wiki/Deep_Work", icon: "DW" },
+      ],
+    },
+    {
+      title: "Downloads",
+      rows: [
+        { label: "CereBro-Setup.dmg", meta: "120 MB  ·  Done", target: null, icon: "DMG" },
+        { label: "project-brief.pdf", meta: "2.4 MB  ·  1h ago", target: null, icon: "PDF" },
+        { label: "notes.zip", meta: "8.7 MB  ·  Yesterday", target: null, icon: "ZIP" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="absolute inset-0 z-20 overflow-hidden" aria-label="Browser Home controls">
+      <BrowserHomeChromeHitButton
+        label="Collapse or open Browser navigation"
+        box={browserHomeSideToggleHitBoxes.leftRail}
+        onClick={() => {
+          onToggleLeftRail?.();
+        }}
+      />
+      <BrowserHomeChromeHitButton
+        label="Toggle Watch Shelf"
+        box={browserHomeSideToggleHitBoxes.rightWatchShelf}
+        onClick={onToggleWatchShelf}
+      />
+      {visiblePins.map((pin, index) => {
+        const box = browserHomeMedallionBoxes[index];
+        if (!box) return null;
+
+        return (
+          <BrowserHomeChromeHitButton
+            key={`browser-home-medallion-${pin.key}`}
+            box={box}
+            label={`Open bookmark ${pin.label}`}
+            onClick={() => onOpenTarget(pin.target)}
+          />
+        );
+      })}
+      <BrowserHomeChromeHitButton
+        label="Add pinned bookmark"
+        box={browserHomeAddMedallionBox}
+        onClick={onAddBookmark}
+      />
+
+      {visiblePins.map((pin, index) => {
+        const box = browserHomeCardBoxes[index];
+        if (!box) return null;
+
+        return (
+          <BrowserHomeChromeHitButton
+            key={`browser-home-card-${pin.key}`}
+            label={`Open pinned bookmark ${pin.label}`}
+            onClick={() => onOpenTarget(pin.target)}
+            box={box}
+          />
+        );
+      })}
+      <BrowserHomeChromeHitButton
+        label="Add current page bookmark"
+        onClick={onAddBookmark}
+        box={browserHomeAddCardBox}
+      />
+
+      <BrowserHomeChromeHitButton
+        label="Edit pinned bookmarks"
+        onClick={onEditPinned}
+        box={browserHomeEditPinnedBox}
+      />
+
+      {browserHomePanelHitBoxes.map((box) => {
+        const groupIndex = box.panel === "continue" ? 0 : box.panel === "recent" ? 1 : 2;
+        const group = panelRows[groupIndex];
+        const rowIndex = box.target === "row-1" ? 0 : box.target === "row-2" ? 1 : box.target === "row-3" ? 2 : -1;
+        const row = rowIndex >= 0 ? group.rows[rowIndex] : null;
+        const label = row ? `Open ${row.label}` : `View all ${group.title}`;
+        const target = row?.target ?? null;
+
+        return (
+          <BrowserHomeChromeHitButton
+            key={`browser-home-panel-hit-${box.panel}-${box.target}`}
+            box={box}
+            label={label}
+            onClick={() => {
+              if (target) onOpenTarget(target);
+            }}
+          />
+        );
+      })}
+
+      <label className="pointer-events-auto absolute rounded-sm" style={browserHomeBoxStyle(browserHomeDockHitBoxes.input)}>
+        <span className="sr-only">Ask Aang from Browser Home</span>
+        <input
+          aria-label="Ask Aang from Browser Home"
+          value={aangDraft}
+          onChange={(event) => onAangDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            onSubmitAang();
+          }}
+          className="h-full w-full bg-transparent text-[13px] outline-none"
+          placeholder=""
+          style={{
+            color: B.color.parchment100,
+            caretColor: B.color.gold300,
+            paddingLeft: "18px",
+            paddingRight: "18px",
+            fontFamily: B.font.ui,
+          }}
+        />
+      </label>
+      <BrowserHomeChromeHitButton
+        label="Attach image for Aang"
+        box={browserHomeDockHitBoxes.attach}
+        onClick={() => undefined}
+      />
+      <BrowserHomeChromeHitButton
+        label="Send to Aang"
+        box={browserHomeDockHitBoxes.send}
+        onClick={onSubmitAang}
+      />
+    </div>
+  );
+}
+
+function BrowserHomePinnedManager({
+  bookmarks,
+  editingBookmarkId,
+  bookmarkTitleDraft,
+  isAdding,
+  isRenaming,
+  isRemoving,
+  onOpenTarget,
+  onAddCurrent,
+  onRenameStart,
+  onRenameDraftChange,
+  onRenameCancel,
+  onRenameSave,
+  onRemove,
+  onClose,
+}: {
+  bookmarks: BrowserHomeBookmarkItem[];
+  editingBookmarkId: number | null;
+  bookmarkTitleDraft: string;
+  isAdding: boolean;
+  isRenaming: boolean;
+  isRemoving: boolean;
+  onOpenTarget: (target: string) => void;
+  onAddCurrent: () => void;
+  onRenameStart: (bookmark: BrowserHomeBookmarkItem) => void;
+  onRenameDraftChange: (value: string) => void;
+  onRenameCancel: () => void;
+  onRenameSave: (bookmarkId: number) => void;
+  onRemove: (bookmarkId: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-40 flex items-center justify-center px-4 py-6" aria-label="Browser Home pinned bookmark manager">
+      <button type="button" aria-label="Close pinned bookmark manager" className="absolute inset-0 cursor-default bg-black/48" onClick={onClose} />
+      <section
+        className="relative w-[min(560px,88vw)] rounded-sm p-3 text-[11px]"
+        style={{
+          background: "linear-gradient(180deg, rgba(13, 18, 16, 0.99), rgba(4, 8, 8, 0.99))",
+          border: `1px solid ${browserFrame.line}`,
+          boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}`,
+          color: C.textPrimary,
+        }}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="font-bold uppercase tracking-widest">Pinned Bookmarks</div>
+            <div className="mt-0.5" style={{ color: C.textMuted }}>Open, rename, remove, or add the current page.</div>
+          </div>
+          <div className="flex gap-1">
+            <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-[10px]" disabled={isAdding} onClick={onAddCurrent}>
+              <Plus size={12} strokeWidth={1.8} aria-hidden="true" />
+              Add Current
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-7 w-7 px-0" aria-label="Close pinned bookmark manager" onClick={onClose}>
+              <SquareX size={13} strokeWidth={1.8} aria-hidden="true" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-3 grid max-h-[min(420px,56vh)] gap-1 overflow-auto pr-1">
+          {bookmarks.length === 0 ? (
+            <div className="rounded-sm px-3 py-3" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted }}>
+              Open a page, then add it here.
+            </div>
+          ) : (
+            bookmarks.map((bookmark) => {
+              const editing = editingBookmarkId === bookmark.id;
+              const label = bookmark.title ?? browserOriginLabel(bookmark.targetUrl);
+              return (
+                <div
+                  key={bookmark.id}
+                  className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-1 rounded-sm"
+                  style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}` }}
+                >
+                  {editing ? (
+                    <Input
+                      value={bookmarkTitleDraft}
+                      onChange={(event) => onRenameDraftChange(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") onRenameCancel();
+                        if (event.key === "Enter") onRenameSave(bookmark.id);
+                      }}
+                      aria-label={`Rename pinned bookmark ${label}`}
+                      className="h-9 min-w-0 text-[11px]"
+                      style={{ background: browserFrame.address, border: `1px solid ${browserFrame.lineSoft}` }}
+                    />
+                  ) : (
+                    <Button type="button" size="sm" variant="ghost" className="h-auto min-w-0 justify-start px-2 py-2 text-left" title={bookmark.targetUrl} aria-label={`Open pinned bookmark ${label}`} onClick={() => onOpenTarget(bookmark.targetUrl)}>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[11px] font-semibold">{label}</span>
+                        <span className="block truncate text-[10px] font-normal" style={{ color: C.textMuted }}>{bookmark.targetUrl}</span>
+                      </span>
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 w-9 px-0"
+                    disabled={isRenaming}
+                    aria-label={editing ? `Save pinned bookmark ${label}` : `Rename pinned bookmark ${label}`}
+                    onClick={() => {
+                      if (editing) {
+                        onRenameSave(bookmark.id);
+                        return;
+                      }
+                      onRenameStart(bookmark);
+                    }}
+                  >
+                    <Pencil size={13} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-9 w-9 px-0" disabled={isRemoving} aria-label={`Remove pinned bookmark ${label}`} onClick={() => onRemove(bookmark.id)}>
+                    <Trash2 size={13} strokeWidth={1.8} aria-hidden="true" />
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default function BrowserPanel({
+  onClose,
+  onNavigate,
+  onToggleLeftRail,
+}: {
+  onClose: () => void;
+  onNavigate?: (route: BrowserRoute) => void;
+  onToggleLeftRail?: () => void;
+}) {
   const [browserSurface, setBrowserSurface] = useState<"page" | "watch">("page");
   const [browserAddressDraft, setBrowserAddressDraft] = useState("");
   const [dailyBrowserTabs, setDailyBrowserTabs] = useState<DailyBrowserTab[]>([
@@ -426,13 +1142,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [editingBookmarkId, setEditingBookmarkId] = useState<number | null>(null);
   const [bookmarkTitleDraft, setBookmarkTitleDraft] = useState("");
   const [browserHomeChatOpen, setBrowserHomeChatOpen] = useState(true);
+  const [browserHomePinnedManagerOpen, setBrowserHomePinnedManagerOpen] = useState(false);
   const [browserAangDraft, setBrowserAangDraft] = useState("");
   const [localAangRoutePreview, setLocalAangRoutePreview] = useState<BrowserAangRoutePreview | null>(null);
   const [activeBrowserChromeMenu, setActiveBrowserChromeMenu] = useState<BrowserChromeMenu>(null);
-  const [watchShelfOpen, setWatchShelfOpen] = useState(false);
-  const [watchShelfPinned, setWatchShelfPinned] = useState(false);
-  const [watchShelfMode, setWatchShelfMode] = useState<"continue" | "queue" | "live" | "favorites">("continue");
-  const [watchShelfActiveCategory, setWatchShelfActiveCategory] = useState<string | null>(null);
   const [nativeViewportHeight, setNativeViewportHeight] = useState(360);
   const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
@@ -924,6 +1637,24 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       title: selectedDailyBrowserTab?.title ?? browserOriginLabel(targetUrl),
     });
   };
+  const openBrowserHomePinnedManager = () => {
+    setBrowserHomePinnedManagerOpen(true);
+    setBrowserNotice("Pinned bookmark manager opened.");
+  };
+  const closeBrowserHomePinnedManager = () => {
+    setBrowserHomePinnedManagerOpen(false);
+    setEditingBookmarkId(null);
+    setBookmarkTitleDraft("");
+  };
+  const openBrowserHomePinnedBookmark = (target: string) => {
+    closeBrowserHomePinnedManager();
+    void openDailyBrowserTarget(target);
+  };
+  const savePinnedBookmarkRename = (bookmarkId: number) => {
+    const title = bookmarkTitleDraft.trim();
+    if (!title) return;
+    renameBrowserBookmark.mutate({ bookmarkId, title });
+  };
   const closeNativeBrowserPage = async () => {
     setSandboxFrameTarget(null);
     setSandboxFrameProposalId(null);
@@ -1260,23 +1991,103 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       role="region"
       aria-label="Browser"
       style={{
-        background: browserFrame.shell,
-        border: `1px solid ${browserFrame.line}`,
+        background: isBrowserHome
+          ? "linear-gradient(180deg, rgba(9, 14, 13, 0.99), rgba(2, 5, 5, 1))"
+          : browserFrame.shell,
+        border: isBrowserHome ? "1px solid rgba(198, 155, 85, 0.18)" : `1px solid ${browserFrame.line}`,
         color: C.textPrimary,
-        boxShadow: `${browserFrame.shadow}, ${browserFrame.bevel}, inset 0 0 0 3px rgba(198, 155, 85, 0.08), inset 0 0 0 6px rgba(77, 170, 154, 0.05)`,
+        boxShadow: isBrowserHome
+          ? browserFrame.shadow
+          : `${browserFrame.shadow}, ${browserFrame.bevel}, inset 0 0 0 3px rgba(198, 155, 85, 0.08), inset 0 0 0 6px rgba(77, 170, 154, 0.05)`,
       }}
     >
-      <BrowserFrameAccent position="top" />
-      <BrowserFrameAccent position="bottom" />
-      <div className="pointer-events-none absolute inset-1 rounded opacity-80" aria-hidden="true" style={{ border: `1px solid ${browserFrame.lineSoft}` }} />
-      <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <main className="relative flex-1 overflow-hidden p-1" aria-label="Browser workspace">
-        <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
+      {!isBrowserHome && <BrowserFrameAccent position="top" />}
+      {!isBrowserHome && <BrowserFrameAccent position="bottom" />}
+      {!isBrowserHome && <div className="pointer-events-none absolute inset-1 rounded opacity-80" aria-hidden="true" style={{ border: `1px solid ${browserFrame.lineSoft}` }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute left-3 top-3 h-7 w-7 border-l border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {!isBrowserHome && <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />}
+      {isBrowserHome && <BrowserHomeAssetStage />}
+      {isBrowserHome && (
+        <BrowserHomePrimitiveOverlay
+          pins={browserMedallions}
+          aangDraft={browserAangDraft}
+          onAangDraftChange={setBrowserAangDraft}
+          onSubmitAang={submitBrowserAangDraft}
+          onOpenTarget={(target) => void openDailyBrowserTarget(target)}
+          onAddBookmark={saveCurrentBrowserBookmark}
+          onEditPinned={openBrowserHomePinnedManager}
+          onToggleLeftRail={onToggleLeftRail}
+          onToggleWatchShelf={() => {
+            setBrowserSurface("watch");
+            setBrowserNotice("Watch Shelf opened.");
+          }}
+        />
+      )}
+      {isBrowserHome && browserHomePinnedManagerOpen && (
+        <BrowserHomePinnedManager
+          bookmarks={browserBookmarkItems}
+          editingBookmarkId={editingBookmarkId}
+          bookmarkTitleDraft={bookmarkTitleDraft}
+          isAdding={createBrowserBookmark.isPending}
+          isRenaming={renameBrowserBookmark.isPending}
+          isRemoving={removeBrowserBookmark.isPending}
+          onOpenTarget={openBrowserHomePinnedBookmark}
+          onAddCurrent={saveCurrentBrowserBookmark}
+          onRenameStart={(bookmark) => {
+            setEditingBookmarkId(bookmark.id);
+            setBookmarkTitleDraft(bookmark.title ?? browserOriginLabel(bookmark.targetUrl));
+          }}
+          onRenameDraftChange={setBookmarkTitleDraft}
+          onRenameCancel={() => {
+            setEditingBookmarkId(null);
+            setBookmarkTitleDraft("");
+          }}
+          onRenameSave={savePinnedBookmarkRename}
+          onRemove={(bookmarkId) => removeBrowserBookmark.mutate({ bookmarkId })}
+          onClose={closeBrowserHomePinnedManager}
+        />
+      )}
+      {browserSurface === "watch" && (
+        <BrowserHomeChromeHitButton
+          label="Toggle Watch Shelf"
+          box={browserHomeSideToggleHitBoxes.rightWatchShelf}
+          onClick={() => {
+            setBrowserSurface("page");
+            setBrowserNotice("Watch Shelf closed.");
+          }}
+        />
+      )}
+      {isBrowserHome && (
+        <BrowserHomeChromeOverlay
+          addressDraft={browserAddressDraft}
+          onAddressDraftChange={(value) => {
+            setBrowserAddressDraft(value);
+            setPreparedApprovalId(null);
+          }}
+          onSubmitAddress={() => void openDailyBrowserPage()}
+          onBack={() => void goBack()}
+          onForward={() => void goForward()}
+          onReload={() => void reloadPage()}
+          onNewTab={createDailyBrowserTab}
+          onCloseTab={() => void closeDailyBrowserTab(selectedDailyBrowserTabId)}
+          onProtected={() => setBrowserNotice("Shield is on. Open shield for details.")}
+          onLibrary={() => setBrowserNotice("Use Edit Pinned to manage Browser Home bookmarks.")}
+          onStats={() => setBrowserNotice("Browser stats are not open on Home yet.")}
+          activeMenu={activeBrowserChromeMenu}
+          toggleMenu={toggleBrowserChromeMenu}
+          vpnStatus={vpnStatus}
+          vpnBusy={vpnBusy}
+          onToggleVpn={() => void toggleVpn()}
+          onCheckVpn={() => void checkVpnStatus()}
+          onOpenVpnSettings={() => onNavigate?.("basement")}
+        />
+      )}
+      <main className={isBrowserHome ? "pointer-events-none flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
+        <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
-            className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-2"
+            className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-1.5"
             aria-label="Browser page tabs"
             style={{ background: browserFrame.stone, border: `1px solid ${browserFrame.line}`, borderBottom: 0, boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -14px 20px rgba(0, 0, 0, 0.2)" }}
           >
@@ -1286,7 +2097,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               return (
                 <div
                   key={tab.id}
-                  className="flex h-8 min-w-[178px] max-w-[240px] shrink-0 overflow-hidden rounded-t"
+                  className="flex h-8 min-w-[176px] max-w-[226px] shrink-0 overflow-hidden rounded-t"
                   style={{
                     background: active ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
                     border: `1px solid ${active ? browserFrame.line : browserFrame.lineSoft}`,
@@ -1361,26 +2172,29 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </Button>
               );
             })}
-            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" title="New tab" onClick={createDailyBrowserTab}>
-              <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
-            </Button>
-            <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
-              <button
+            {!isBrowserHome && (
+              <Button
                 type="button"
-                aria-label={watchShelfOpen ? "Close Watch Shelf" : "Open Watch Shelf"}
-                onClick={() => setWatchShelfOpen((o) => !o)}
-                title={watchShelfOpen ? "Close Watch Shelf" : "Open Watch Shelf"}
-                className="flex h-7 items-center gap-1 rounded px-2 text-[10px] font-semibold"
+                size="sm"
+                variant={browserSurface === "watch" ? "secondary" : "outline"}
+                className="h-7 shrink-0 rounded-b-none px-2 text-[10px]"
+                aria-pressed={browserSurface === "watch"}
+                onClick={() => setBrowserSurface("watch")}
                 style={{
-                  background: watchShelfOpen ? browserFrame.plaqueActive : "rgba(5, 10, 10, 0.56)",
-                  border: `1px solid ${watchShelfOpen ? browserFrame.line : browserFrame.lineSoft}`,
-                  color: watchShelfOpen ? C.gold : C.textMuted,
+                  background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
+                  border: `1px solid ${browserSurface === "watch" ? browserFrame.line : browserFrame.lineSoft}`,
+                  borderBottomColor: browserSurface === "watch" ? C.gold : "transparent",
+                  color: browserSurface === "watch" ? C.textPrimary : C.textMuted,
                   boxShadow: browserFrame.bevel,
                 }}
               >
-                <span aria-hidden="true" style={{ fontSize: 13 }}>⊞</span>
-                {watchShelfOpen && <span>Watch</span>}
-              </button>
+                Watch Shelf
+              </Button>
+            )}
+            <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-8 w-8 shrink-0 px-0" aria-label="New browser tab" title="New tab" onClick={createDailyBrowserTab}>
+              <Plus size={16} strokeWidth={1.6} aria-hidden="true" />
+            </Button>
+            <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
               {isBrowserHome ? (
                 <span className="flex h-7 items-center gap-1.5 rounded px-2.5 text-[11px] font-semibold" aria-label="Browser protection status" style={{ color: C.textSecondary, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)", boxShadow: browserFrame.bevel }}>
                   <span className="h-2 w-2 rounded-full" aria-hidden="true" style={{ background: C.success, boxShadow: `0 0 10px ${C.success}88` }} />
@@ -1500,10 +2314,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           </div>
           )}
 
-          <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 overflow-visible rounded-b px-2 py-1.5" style={{ background: "radial-gradient(circle at 50% -30%, rgba(198, 155, 85, 0.16), transparent 42%), linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
+          <div className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 overflow-visible rounded-b px-2 py-1.5" style={{ background: "radial-gradient(circle at 50% -30%, rgba(198, 155, 85, 0.16), transparent 42%), linear-gradient(180deg, rgba(13, 18, 16, 0.95), rgba(5, 10, 10, 0.98))", border: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}>
             <div className="pointer-events-none absolute inset-x-3 top-1 h-px" aria-hidden="true" style={{ background: `linear-gradient(90deg, transparent, ${browserFrame.line}, transparent)` }} />
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-[46%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25" aria-hidden="true" style={{ border: `1px solid ${browserFrame.line}`, boxShadow: `inset 0 0 0 1px ${browserFrame.lineSoft}` }} />
-            <div className="relative flex items-center gap-1 rounded px-1 py-0.5" style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
+            <div className="relative flex items-center gap-1 px-1 py-0.5" style={{ background: "transparent", border: 0, boxShadow: "none" }}>
               <Button
                 type="button"
                 size="sm"
@@ -1549,7 +2363,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 boxShadow: "inset 0 1px 0 rgba(244, 239, 227, 0.08), inset 0 -14px 24px rgba(0, 0, 0, 0.2), 0 7px 16px rgba(0, 0, 0, 0.2)",
               }}
             >
-              <div className="flex h-9 w-9 items-center justify-center border-r" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: C.gold }}>
+              <div className="flex h-10 w-10 items-center justify-center border-r" aria-hidden="true" style={{ borderColor: browserFrame.lineSoft, color: C.gold }}>
                 <span className="h-2 w-2 rounded-full" style={{ background: currentPageTarget ? C.success : C.gold, boxShadow: `0 0 12px ${(currentPageTarget ? C.success : C.gold)}77` }} />
               </div>
               <Input
@@ -1565,7 +2379,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 }}
                 placeholder={browserShell.addressPlaceholder}
                 aria-label="Browser address and search field"
-                className="h-9 min-w-0 border-0 bg-transparent font-mono text-[12px] focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-10 min-w-0 border-0 bg-transparent font-mono text-[12px] focus-visible:ring-0 focus-visible:ring-offset-0"
                 title="Enter a site or search."
                 style={{
                   background: "transparent",
@@ -1584,7 +2398,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="h-9 px-3 text-[11px] font-semibold"
+                  className="h-10 px-3 text-[11px] font-semibold"
                   disabled={browserPrimaryAction.disabled || browserDraft.targetUrl == null}
                   title="Open this page in CereBro."
                   aria-label="Open page in CereBro"
@@ -1601,7 +2415,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               )}
               <details className="relative" open={activeBrowserChromeMenu === "shield"}>
                 <summary
-                  className="flex h-9 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="flex h-10 cursor-pointer list-none items-center gap-2 rounded px-2.5 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   aria-label="VPN shield"
                   onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("shield"); }}
                   style={{
@@ -1738,7 +2552,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
               </details>
               )}
               <details className="relative" open={activeBrowserChromeMenu === "pageActions"}>
-                <summary className="flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("pageActions"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
+                <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" aria-label="Browser page actions" onClick={(event) => { event.preventDefault(); toggleBrowserChromeMenu("pageActions"); }} style={{ border: `1px solid ${browserFrame.lineSoft}`, color: C.textSecondary, background: "rgba(8, 14, 13, 0.74)", boxShadow: browserFrame.bevel, ["--tw-ring-color" as string]: C.accent }}>
                   <MoreHorizontal size={15} strokeWidth={1.8} aria-hidden="true" />
                 </summary>
                 <div className="absolute right-0 top-full z-20 mt-1 w-72 rounded p-1.5" role="menu" style={{ background: "rgba(9, 16, 15, 0.98)", border: `1px solid ${browserFrame.line}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
@@ -1860,7 +2674,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           )}
 
-          {(browserProjectPins.items.length > 0 || browserBookmarkItems.length > 0) && !hasOpenSandboxFrame && !isBrowserHome && (
+          {(browserProjectPins.items.length > 0 || browserBookmarkItems.length > 0) && !hasOpenSandboxFrame && (
             <div className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1" aria-label="Browser saved row" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               {browserProjectPins.items.slice(0, 3).map((pin) => (
                 <Button
@@ -1982,7 +2796,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
 
           {browserSurface === "page" ? (
             <section
-              className={hasOpenSandboxFrame ? "relative flex min-h-0 flex-col overflow-hidden rounded p-1" : "relative overflow-y-auto rounded p-3 sm:p-4"}
+              className={hasOpenSandboxFrame ? "relative flex min-h-0 flex-col overflow-hidden rounded p-1" : isBrowserHome ? "relative overflow-hidden rounded-sm p-1" : "relative overflow-y-auto rounded p-3 sm:p-4"}
               aria-label="Browser current page"
               style={{
                 background: browserFrame.page,
@@ -2311,197 +3125,45 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           )}
 
         </div>
-
-        {/* ── Watch Shelf overlay drawer ─────────────────────────────────── */}
-        {watchShelfOpen && (
-          <div
-            className="absolute inset-y-0 right-0 z-30 flex w-[300px] flex-col overflow-hidden rounded-l"
-            style={{
-              background: "radial-gradient(circle at 80% 0%, rgba(198,155,85,0.08), transparent 40%), linear-gradient(180deg, rgba(9,20,17,0.99), rgba(3,9,8,0.99))",
-              border: `1px solid ${browserFrame.line}`,
-              borderRight: "none",
-              boxShadow: `-24px 0 64px rgba(0,0,0,0.72), inset 1px 0 0 rgba(198,155,85,0.12), inset 0 0 0 1px rgba(77,170,154,0.05)`,
-            }}
-          >
-            {/* Header */}
-            <div
-              className="flex shrink-0 items-center justify-between px-3 py-2.5"
-              style={{ background: browserFrame.plaque, borderBottom: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}
-            >
-              <span className="text-[13px] font-semibold tracking-tight" style={{ color: C.gold }}>Watch Shelf</span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setWatchShelfPinned((p) => !p)}
-                  aria-label={watchShelfPinned ? "Unpin Watch Shelf" : "Pin Watch Shelf"}
-                  title={watchShelfPinned ? "Pinned — shelf stays open while browsing" : "Pin to keep open while browsing"}
-                  className="flex h-6 w-6 items-center justify-center rounded text-[11px]"
-                  style={{ background: watchShelfPinned ? `${C.gold}22` : "transparent", color: watchShelfPinned ? C.gold : C.textMuted, border: `1px solid ${watchShelfPinned ? `${C.gold}55` : "transparent"}` }}
-                >
-                  ⊞
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setWatchShelfOpen(false)}
-                  aria-label="Close Watch Shelf"
-                  className="flex h-6 w-6 items-center justify-center rounded text-[15px]"
-                  style={{ color: C.textMuted, border: "1px solid transparent" }}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            {/* Mode tabs: Continue / Queue / Live / Favorites */}
-            <div className="flex shrink-0 gap-0 overflow-x-auto" style={{ borderBottom: `1px solid ${browserFrame.lineSoft}`, background: "rgba(4,9,8,0.7)" }}>
-              {(["continue", "queue", "live", "favorites"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setWatchShelfMode(m)}
-                  className="shrink-0 whitespace-nowrap px-3 py-2 text-[10px] font-semibold"
-                  style={{ color: watchShelfMode === m ? C.textPrimary : C.textMuted, borderBottom: `2px solid ${watchShelfMode === m ? C.gold : "transparent"}`, background: watchShelfMode === m ? "rgba(198,155,85,0.07)" : "transparent" }}
-                >
-                  {m === "live" ? "Live / New" : m.charAt(0).toUpperCase() + m.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Shelf filter pills — shown only when there are items */}
-            {watchShelfItems.length > 0 && (
-              <div className="flex shrink-0 gap-1 overflow-x-auto px-2 py-1.5" style={{ borderBottom: `1px solid ${browserFrame.lineSoft}` }}>
-                <button
-                  type="button"
-                  onClick={() => setWatchShelfActiveCategory(null)}
-                  className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold"
-                  style={{
-                    background: watchShelfActiveCategory === null ? `${C.gold}20` : "rgba(5,10,10,0.6)",
-                    border: `1px solid ${watchShelfActiveCategory === null ? C.gold : browserFrame.lineSoft}`,
-                    color: watchShelfActiveCategory === null ? C.gold : C.textMuted,
-                  }}
-                >
-                  All
-                </button>
-                {watchShelf.categories.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setWatchShelfActiveCategory(watchShelfActiveCategory === cat ? null : cat)}
-                    className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold"
-                    style={{
-                      background: watchShelfActiveCategory === cat ? `${watchShelfTone(cat)}1a` : "rgba(5,10,10,0.6)",
-                      border: `1px solid ${watchShelfActiveCategory === cat ? watchShelfTone(cat) : browserFrame.lineSoft}`,
-                      color: watchShelfActiveCategory === cat ? watchShelfTone(cat) : C.textMuted,
-                    }}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Item list */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="px-2 py-2">
-                {watchShelfItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full" style={{ background: "rgba(198,155,85,0.1)", border: `1px solid ${browserFrame.line}` }}>
-                      <span className="text-base" style={{ color: C.gold }}>▶</span>
-                    </div>
-                    <div className="text-[12px] font-semibold" style={{ color: C.textSecondary }}>Nothing saved yet</div>
-                    <div className="mt-1 max-w-[180px] text-[10px] leading-relaxed" style={{ color: C.textMuted }}>Open a page and hit "Save to shelf" to start tracking.</div>
-                  </div>
-                ) : (
-                  <div className="grid gap-1.5">
-                    {watchShelfItems
-                      .filter((item) => watchShelfActiveCategory == null || item.category === watchShelfActiveCategory)
-                      .map((item) => (
-                        <div
-                          key={item.id}
-                          className="grid grid-cols-[40px_minmax(0,1fr)] gap-2 rounded p-2 text-[10px] leading-snug"
-                          style={{ background: "rgba(8,14,12,0.94)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}
-                        >
-                          <div
-                            className="flex h-[40px] w-[40px] items-center justify-center rounded text-[12px] font-bold"
-                            style={{ background: browserFrame.plaque, border: `1px solid ${watchShelfTone(item.category)}55`, color: watchShelfTone(item.category) }}
-                          >
-                            {watchShelfInitial(item.title, item.targetUrl)}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="truncate font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</div>
-                            <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                              <Chip label={item.category} tone={watchShelfTone(item.category)} />
-                            </div>
-                            <div className="mt-0.5 truncate text-[9px]" style={{ color: C.textMuted }}>{item.targetUrl}</div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Save footer */}
-            <div className="shrink-0 px-2 py-2" style={{ borderTop: `1px solid ${browserFrame.lineSoft}` }}>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="h-7 w-full text-[10px]"
-                disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createWatchShelfItemFromOpenTab.isPending}
-                title={hasOpenSandboxFrame ? "Save the current open page to Watch Shelf." : "Open a real page first."}
-                onClick={() => {
-                  if (selectedBrowserProposalId == null) return;
-                  createWatchShelfItemFromOpenTab.mutate({
-                    proposalId: selectedBrowserProposalId,
-                    category: (watchShelfActiveCategory ?? watchShelfCategory) as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
-                  });
-                }}
-                style={{ borderColor: browserFrame.line, color: hasOpenSandboxFrame ? C.textPrimary : C.textMuted }}
-              >
-                {createWatchShelfItemFromOpenTab.isPending ? "Saving…" : hasOpenSandboxFrame ? "Save Page to Shelf" : watchShelfDraft.saveLabel}
-              </Button>
-            </div>
-          </div>
-        )}
-
       </main>
-      <form
-        className="grid shrink-0 grid-cols-[58px_minmax(0,1fr)_auto_auto] items-center gap-2 px-2 pb-2"
-        aria-label="Browser Aang command bar"
-        onSubmit={(event) => {
-          event.preventDefault();
-          submitBrowserAangDraft();
-        }}
-      >
-        <button
-          type="button"
-          aria-label={browserHomeChatOpen ? "Close Aang chat" : "Open Aang chat"}
-          onClick={() => setBrowserHomeChatOpen((open) => !open)}
-          className="relative h-[58px] w-[58px] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
-        >
-          <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-1 left-1/2 h-[50px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
-        </button>
-        <Input
-          aria-label="Ask Aang or search from Browser"
-          value={browserAangDraft}
-          onChange={(event) => {
-            setBrowserAangDraft(event.target.value);
-            setBrowserNotice(null);
+      {!isBrowserHome && (
+        <form
+          className="grid shrink-0 grid-cols-[58px_minmax(0,1fr)_auto_auto] items-center gap-2 px-2 pb-2"
+          aria-label="Browser Aang command bar"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitBrowserAangDraft();
           }}
-          placeholder={currentPageTarget ? "Ask Aang about the current page" : "Ask Aang from Browser"}
-          className="h-11 min-w-0 text-[13px]"
-          style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
-        />
-        <Button type="button" size="sm" variant="outline" className="h-11 w-11 px-0" aria-label="Attach image for Aang" disabled title="Not set up">
-          <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
-        </Button>
-        <Button type="submit" size="sm" variant="secondary" className="h-11 w-12 px-0" aria-label="Send to Aang" disabled={!browserAangDraft.trim() || browserAangRoutePreview.isPending}>
-          <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
-        </Button>
-      </form>
-      {aangRoutePreview && (
+        >
+          <button
+            type="button"
+            aria-label={browserHomeChatOpen ? "Close Aang chat" : "Open Aang chat"}
+            onClick={() => setBrowserHomeChatOpen((open) => !open)}
+            className="relative h-[58px] w-[58px] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            style={{ background: browserFrame.plaque, border: `1px solid ${browserFrame.line}`, boxShadow: `${browserFrame.bevel}, 0 12px 30px rgba(0,0,0,0.36)`, ["--tw-ring-color" as string]: C.accent }}
+          >
+            <img src="/sprites/keep/aang/rotations/south.png" alt="" className="absolute bottom-1 left-1/2 h-[50px] max-w-none -translate-x-1/2 object-contain [image-rendering:pixelated]" />
+          </button>
+          <Input
+            aria-label="Ask Aang or search from Browser"
+            value={browserAangDraft}
+            onChange={(event) => {
+              setBrowserAangDraft(event.target.value);
+              setBrowserNotice(null);
+            }}
+            placeholder={currentPageTarget ? "Ask Aang about the current page" : "Ask Aang from Browser"}
+            className="h-11 min-w-0 text-[13px]"
+            style={{ background: browserFrame.address, border: `1px solid ${browserFrame.line}`, boxShadow: "inset 0 1px 12px rgba(0, 0, 0, 0.58)" }}
+          />
+          <Button type="button" size="sm" variant="outline" className="h-11 w-11 px-0" aria-label="Attach image for Aang" disabled title="Not set up">
+            <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
+          </Button>
+          <Button type="submit" size="sm" variant="secondary" className="h-11 w-12 px-0" aria-label="Send to Aang" disabled={!browserAangDraft.trim() || browserAangRoutePreview.isPending}>
+            <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
+          </Button>
+        </form>
+      )}
+      {!isBrowserHome && aangRoutePreview && (
         <div className="mx-2 mb-2 rounded px-2 py-1.5 text-[10px] leading-snug" role="status" aria-label="Aang route preview" style={{ background: "rgba(8, 14, 13, 0.92)", border: `1px solid ${browserFrame.lineSoft}`, color: C.textMuted, boxShadow: browserFrame.bevel }}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0">

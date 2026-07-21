@@ -1,6 +1,6 @@
 import { execFile, execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import WebSocket from "ws";
@@ -343,6 +343,37 @@ async function clickElementByAriaLabel(client: CdpClient, label: string, timeout
   throw new Error(`Element "${label}" was not found in installed app. Visible aria labels: ${JSON.stringify(lastLabels)}`);
 }
 
+async function clickElementByAriaLabelInScope(client: CdpClient, scopeLabel: string, label: string, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastLabels: string[] = [];
+
+  while (Date.now() < deadline) {
+    const result = (await evaluate(
+      client,
+      `(() => {
+        const scope = document.querySelector(${JSON.stringify(`[aria-label="${scopeLabel}"]`)});
+        if (!(scope instanceof HTMLElement)) {
+          return { ok: false, labels: Array.from(document.querySelectorAll("[aria-label]")).map((element) => (element.getAttribute("aria-label") || "").trim()).filter(Boolean).slice(0, 80) };
+        }
+        const elements = Array.from(scope.querySelectorAll("[aria-label]"));
+        const target = elements.find((element) => (element.getAttribute("aria-label") || "").trim() === ${JSON.stringify(label)});
+        if (!target) {
+          return { ok: false, labels: elements.map((element) => (element.getAttribute("aria-label") || "").trim()).filter(Boolean) };
+        }
+        if (target instanceof HTMLElement && typeof target.focus === "function") target.focus();
+        target.click();
+        return { ok: true, label: target.getAttribute("aria-label") };
+      })()`,
+    )) as { ok?: boolean; labels?: string[]; label?: string } | undefined;
+
+    if (result?.ok) return;
+    lastLabels = result?.labels ?? [];
+    await sleep(250);
+  }
+
+  throw new Error(`Element "${label}" was not found inside "${scopeLabel}". Visible scoped aria labels: ${JSON.stringify(lastLabels)}`);
+}
+
 async function fillInputByLabel(client: CdpClient, label: string, value: string) {
   const result = (await evaluate(
     client,
@@ -428,6 +459,22 @@ async function captureDesktopScreenshot(pid: number | undefined) {
   return screenshotPath;
 }
 
+type CdpScreenshotResult = {
+  data?: string;
+};
+
+async function captureCdpScreenshot(client: CdpClient) {
+  await mkdir(resolve(process.cwd(), "output/qa"), { recursive: true });
+  await client.send("Page.enable");
+  const result = (await client.send("Page.captureScreenshot", {
+    format: "png",
+    captureBeyondViewport: true,
+  })) as CdpScreenshotResult;
+  if (!result.data) throw new Error("CDP screenshot did not return image data");
+  await writeFile(screenshotPath, Buffer.from(result.data, "base64"));
+  return screenshotPath;
+}
+
 function hasButtonLabelExpression(label: string) {
   return `Array.from(document.querySelectorAll("button,[role='button']")).some((element) => ((element.getAttribute("aria-label") || element.textContent || "").trim()).includes(${JSON.stringify(label)}))`;
 }
@@ -499,7 +546,103 @@ async function run() {
       await waitFor(client, "document.querySelector('[aria-label=\"Browser address and search field\"]') instanceof HTMLInputElement", 15_000, "omnibox");
       if (qaMode === "browser-home") {
         await waitFor(client, "document.querySelector('[aria-label=\"Browser Home medallions\"]') instanceof HTMLElement", 15_000, "browser home medallions");
-        const screenshot = await captureDesktopScreenshot(launchedPid ?? undefined);
+        await waitFor(client, "document.querySelector('[aria-label=\"Browser Home top chrome controls\"]') instanceof HTMLElement", 15_000, "browser home top chrome controls");
+        const screenshot = await captureCdpScreenshot(client);
+        await clickElementByAriaLabelInScope(client, "Browser Home top chrome controls", "Browser address and search field");
+        await waitFor(
+          client,
+          "document.activeElement?.getAttribute('aria-label') === 'Browser address and search field'",
+          10_000,
+          "browser home omnibox focus",
+        );
+        const omniboxFocused = await evaluate(client, "document.activeElement?.getAttribute('aria-label') === 'Browser address and search field'");
+        const railWidthBefore = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Collapse or open Browser navigation");
+        await waitFor(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement && Math.round(rail.getBoundingClientRect().width) <= 2;
+          })()`,
+          10_000,
+          "browser home left rail collapsed",
+        );
+        const railWidthCollapsed = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Collapse or open Browser navigation");
+        await waitFor(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement && Math.round(rail.getBoundingClientRect().width) >= 100;
+          })()`,
+          10_000,
+          "browser home left rail reopened",
+        );
+        const railWidthReopened = await evaluate(
+          client,
+          `(() => {
+            const rail = document.querySelector('[aria-label="CereBro zones"]');
+            return rail instanceof HTMLElement ? Math.round(rail.getBoundingClientRect().width) : null;
+          })()`,
+        );
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Toggle Watch Shelf");
+        await waitFor(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement", 10_000, "watch shelf opened from right arrow");
+        const watchShelfOpen = await evaluate(client, "document.querySelector('[aria-label=\"Watch Shelf tab\"]') instanceof HTMLElement");
+        await clickElementByAriaLabel(client, "Toggle Watch Shelf");
+        await waitFor(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement", 10_000, "watch shelf closed from right arrow");
+        const watchShelfClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home controls\"]') instanceof HTMLElement");
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Edit pinned bookmarks");
+        await waitFor(
+          client,
+          "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') instanceof HTMLElement",
+          10_000,
+          "browser home pinned manager opened",
+        );
+        const pinnedManagerOpen = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') instanceof HTMLElement");
+        await clickElementByAriaLabel(client, "Close pinned bookmark manager");
+        await waitFor(
+          client,
+          "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') == null",
+          10_000,
+          "browser home pinned manager closed",
+        );
+        const pinnedManagerClosed = await evaluate(client, "document.querySelector('[aria-label=\"Browser Home pinned bookmark manager\"]') == null");
+        await clickElementByAriaLabelInScope(client, "Browser Home top chrome controls", "VPN shield");
+        await waitFor(client, "document.querySelector('[aria-label=\"VPN shield\"]')?.closest('details')?.open === true", 10_000, "browser home shield menu open");
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Add current page bookmark");
+        await waitFor(client, "document.body.textContent.includes('Open a page before adding a bookmark.')", 10_000, "browser home add bookmark notice");
+        await clearAndFillInputByLabel(client, "Ask Aang from Browser Home", "browser home hitbox proof");
+        await waitFor(client, "document.querySelector('[aria-label=\"Ask Aang from Browser Home\"]')?.value === 'browser home hitbox proof'", 10_000, "browser home aang input");
+        await clickElementByAriaLabelInScope(client, "Browser Home controls", "Send to Aang");
+        const hitboxProof = await evaluate(
+          client,
+          `(() => ({
+            omniboxFocused: ${JSON.stringify(omniboxFocused)},
+            shieldOpen: document.querySelector('[aria-label="VPN shield"]')?.closest('details')?.open === true,
+            addBookmarkNotice: document.body.textContent.includes('Open a page before adding a bookmark.'),
+            aangValue: document.querySelector('[aria-label="Ask Aang from Browser Home"]')?.value ?? null,
+            sendButtonPresent: document.querySelector('[aria-label="Send to Aang"]') instanceof HTMLElement,
+            railWidthBefore: ${JSON.stringify(railWidthBefore)},
+            railWidthCollapsed: ${JSON.stringify(railWidthCollapsed)},
+            railWidthReopened: ${JSON.stringify(railWidthReopened)},
+            watchShelfOpen: ${JSON.stringify(watchShelfOpen)},
+            watchShelfClosed: ${JSON.stringify(watchShelfClosed)},
+            pinnedManagerOpen: ${JSON.stringify(pinnedManagerOpen)},
+            pinnedManagerClosed: ${JSON.stringify(pinnedManagerClosed)}
+          }))()`,
+        );
         console.log(
           JSON.stringify(
             {
@@ -509,7 +652,8 @@ async function run() {
               remoteDebuggingPort: port,
               pageUrl: target.url,
               screenshot,
-              proof: "Installed /Applications/CereBro.app opened the Browser Home surface and produced a screenshot for the locked 1:1 reference comparison.",
+              hitboxProof,
+              proof: "Installed /Applications/CereBro.app opened the Browser Home surface and produced a renderer screenshot for the locked 1:1 reference comparison.",
             },
             null,
             2,

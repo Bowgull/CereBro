@@ -1,0 +1,171 @@
+{
+  "generated": "2026-06-12",
+  "source": "mockups/approved/browser-home-symmetric-rails-target-v1.png",
+  "sourceSha256": "f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c",
+  "normalizedActualPath": "app/output/qa/browser-home-diff/browser-home-actual-normalized.png",
+  "visualDiffPath": "app/output/qa/browser-home-diff/browser-home-diff.png",
+  "traceCandidateRules": [
+    "Trace candidates must be real vector geometry.",
+    "SVG candidates must not embed <image> elements.",
+    "SVG candidates must not embed data:image/* payloads.",
+    "SVG candidates must not reference raster image files through href."
+  ],
+  "localTraceGenerator": {
+    "command": "pnpm --dir app run qa:browser-home-generate-trace-candidate",
+    "package": "imagetracerjs",
+    "status": "available",
+    "knownRejectedCandidates": [
+      "rejected-bookmark-card-add-imagetracer-posterized2",
+      "rejected-top-url-omnibox-imagetracer-posterized2"
+    ]
+  },
+  "targets": [
+    {
+      "name": "rail-full",
+      "role": "Left navigation rail texture, frame, compass, labels, and negative space.",
+      "sourceBox": {
+        "left": 0,
+        "top": 60,
+        "width": 145,
+        "height": 932
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "guessed-css-rail-backplate"
+      ]
+    },
+    {
+      "name": "center-field-title-star-map",
+      "role": "Center star-map, title copy, medallion rail, pinned label, edit control, and upper field geometry.",
+      "sourceBox": {
+        "left": 145,
+        "top": 126,
+        "width": 1440,
+        "height": 332
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "center-field-two-piece-slice"
+      ]
+    },
+    {
+      "name": "bottom-dock-row",
+      "role": "Bottom Aang dock, input frame, attach/send controls, bottom frame, right edge, and lower texture.",
+      "sourceBox": {
+        "left": 145,
+        "top": 846,
+        "width": 1440,
+        "height": 146
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "bottom-dock-edge-main-lower-partition"
+      ]
+    },
+    {
+      "name": "top-url-omnibox",
+      "role": "Top URL row omnibox frame, search icon, and placeholder text.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "approximate-dom-css-omnibox"
+      ]
+    },
+    {
+      "name": "bookmark-card-add",
+      "role": "Add bookmark card frame, plus mark, label, and status dot.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      },
+      "currentMedium": "raster",
+      "requiredNextMedium": "traced-svg",
+      "blockedApproaches": [
+        "approximate-dom-css-add-card"
+      ]
+    }
+  ],
+  "rejectedCandidates": [
+    {
+      "name": "rejected-bottom-dock-partition",
+      "reason": "Source-derived bottom dock partition reproduced installed-app seam drift and must not replace the active full-width bottom-dock-row raster.",
+      "sourceBox": {
+        "left": 145,
+        "top": 846,
+        "width": 1440,
+        "height": 146
+      }
+    },
+    {
+      "name": "rejected-center-field-no-overlap-partition",
+      "reason": "Exact no-overlap center-field partition still reproduced installed-scale seam drift, so center-field source slicing is not safe as a production replacement.",
+      "sourceBox": {
+        "left": 145,
+        "top": 126,
+        "width": 1440,
+        "height": 332
+      }
+    },
+    {
+      "name": "rejected-center-field-two-piece",
+      "reason": "Source-derived two-piece center-field split reproduced installed-app seam drift and must not be promoted without a seam-safe renderer.",
+      "sourceBox": {
+        "left": 145,
+        "top": 126,
+        "width": 1440,
+        "height": 332
+      }
+    },
+    {
+      "name": "rejected-top-url-omnibox-css",
+      "reason": "Approximate DOM/CSS omnibox regressed installed strict diff to 0.0837552152233642 against accepted 0.08346456192123741.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      }
+    },
+    {
+      "name": "rejected-bookmark-card-add-css",
+      "reason": "Approximate DOM/CSS add bookmark card regressed installed strict diff to 0.08388623181031851 against accepted 0.08346456192123741.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      }
+    },
+    {
+      "name": "rejected-bookmark-card-add-imagetracer-posterized2",
+      "reason": "Local ImageTracer posterized2 candidate produced real SVG paths but missed 621 pixels, mismatch ratio 0.03522005444646098.",
+      "sourceBox": {
+        "left": 1260,
+        "top": 458,
+        "width": 152,
+        "height": 116
+      }
+    },
+    {
+      "name": "rejected-top-url-omnibox-imagetracer-posterized2",
+      "reason": "Local ImageTracer posterized2 candidate produced real SVG paths but missed 1620 pixels, mismatch ratio 0.03560126582278481.",
+      "sourceBox": {
+        "left": 339,
+        "top": 69,
+        "width": 948,
+        "height": 48
+      }
+    }
+  ]
+}

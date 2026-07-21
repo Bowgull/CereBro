@@ -1,6 +1,6 @@
 # CereBro Session Handoff
 
-Last updated: 2026-06-09 0435 ADT
+Last updated: 2026-06-12 1927 ADT
 
 ## Current North Star
 
@@ -48,11 +48,902 @@ Every CereBro ritual handoff now includes the Mac app path.
 - Update this handoff and the Obsidian finish path.
 - Append a dated progress entry.
 - State what is next and what is still not working.
-- Keep the Browser UI moving toward the approved `mockups/compare` targets.
+- Keep the Browser UI moving toward the approved `mockups/approved` targets only.
 - Keep Raven sealed out of public CereBro.
 - Commit when asked. Push only when the user explicitly asks for remote update.
 
 ## Current Session Goal
+
+## 2026-06-12 1927 ADT - Action Cluster Trace Candidate Rejected
+
+### What Changed
+- Extended trace generation for the focused action cluster target:
+  - `CEREBRO_BROWSER_HOME_TRACE_TARGET=top-url-action-cluster-high-color-fine`
+- Generated rejected candidate:
+  - `app/client/public/browser-home/trace-candidates/rejected-top-url-action-cluster-high-color-fine.json`
+- Added rejection note:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/rejected-imagetracer-high-color-fine.md`
+
+### Result
+- Candidate stayed rejected.
+- Trace audit result:
+  - width `240`
+  - height `52`
+  - mismatched pixels `569`
+  - mismatch ratio `0.045592948717948716`
+- Manual review: broad structure is recognizable, but bevel, glow, brass edge detail, and stone texture are too degraded for 1:1 production.
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next Rule
+- Do not promote `rejected-top-url-action-cluster-high-color-fine`.
+- Action cluster still needs cleaner full-cluster vector extraction or no-cost external extraction before production.
+
+## 2026-06-12 1918 ADT - Action Cluster Extraction Packet
+
+### What Changed
+- Added focused action-cluster extraction packet generator:
+  - `app/scripts/browserHomeActionClusterExtractionPacket.ts`
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-action-cluster-packet`
+- Added regression coverage:
+  - `app/server/browserHomeActionClusterExtractionPacket.test.ts`
+- Generated focused packet:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/`
+
+### Result
+- Target: `top-url-action-cluster`.
+- Source box: `{ left: 1309, top: 69, width: 240, height: 52 }`.
+- Browser panel box: `{ left: 1164, top: 69, width: 240, height: 52 }`.
+- Current asset size: `240x52`.
+- Best local trace remains not production-ready:
+  - `imagetracer-high-color-fine`
+  - mismatch `0.045592948717948716`
+  - SVG length `732597`
+- The packet includes expected, actual, diff, current asset, and 4x zoom crops.
+
+### Current Rule
+- Do not retry the rejected source-crops-plus-CSS-dots action-cluster path.
+- Next action-cluster production attempt needs cleaner full-cluster vector extraction or no-cost external extraction.
+- No production promotion without provenance, trace-candidate audit, installed manual visual review, and strict diff no worse than `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-action-cluster-packet`
+- `pnpm --dir app run qa:browser-home-active-raster-readiness`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeActionClusterExtractionPacket.test.ts server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeActionClusterExtractionPacket.ts, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeActionClusterExtractionPacket.test.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The next target is `top-url-action-cluster`, but only from the focused packet under `docs/design/external-ai/local-extraction/2026-06-12/browser-home-action-cluster-packet/`. Do not retry source crops plus CSS dots. Accepted trace candidates require installed manual visual-review metadata.
+```
+
+## 2026-06-12 1901 ADT - Active Raster Readiness Audit
+
+### What Changed
+- Added active raster readiness audit:
+  - `app/scripts/browserHomeActiveRasterReadiness.ts`
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-active-raster-readiness`
+- Added generated readiness packet:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-active-raster-readiness/`
+
+### Result
+- Production-ready local trace targets: none.
+- Recommended next target: `top-url-action-cluster`.
+- Reason: it is an active raster, has no text risk, and is smaller than the center field, rail, dock, or lower panels.
+- Constraint: previous source-crops-plus-CSS-dots action-cluster split regressed strict diff, so the next attempt must use cleaner full-cluster vector extraction or no-cost external extraction. Do not retry approximate CSS dots.
+
+### Current Active Raster Disposition
+- `top-url-action-cluster`: best next external-extraction target.
+- `top-url-omnibox`: blocked/defer due high text risk and huge trace output.
+- `bookmark-card-add`: blocked/defer. CSS, ImageTracer, VTracer, and hybrid-label paths are all rejected.
+- `center-field-title-star-map`: blocked/defer. Source slicing caused seam drift; medallions still live inside this raster.
+- `bottom-dock-row`: blocked/defer. Partition caused seam drift; dock-controls trace is too large and not a full active-raster replacement.
+- `lower-panel-assets`: blocked/defer. Text-heavy and huge trace output.
+- `rail-full`: blocked/defer. Guessed CSS and approximate SVG both failed.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-active-raster-readiness`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/browserHomeActiveRasterReadiness.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Run `pnpm --dir app run qa:browser-home-active-raster-readiness` before choosing the next slice. The recommended next target is `top-url-action-cluster`, but only with cleaner full-cluster vector extraction or no-cost external extraction. Accepted trace candidates require installed manual visual-review metadata.
+```
+
+## 2026-06-12 1849 ADT - Manual Review Gate For Trace Candidates
+
+### What Changed
+- Hardened `app/scripts/browserHomeTraceCandidateAudit.ts`.
+- Accepted trace candidates must now include `manualInstalledVisualReview` with:
+  - `status: "passed"`
+  - `reviewer`
+  - `notes`
+  - optional `screenshotPath`
+- Rejected candidates cannot claim a passed manual review.
+- Added regression test:
+  - `browserHomeTraceCandidateAudit rejects accepted trace candidates without installed visual review proof`
+- Regenerated `rejected-bookmark-card-add-vtracer-fine-spline.json` with failed installed-review metadata.
+
+### Why
+- The VTracer add-card attempt improved numeric diff but rendered `Add` as `dd`.
+- Pixel diff alone is not enough for 1:1 production acceptance.
+- Future accepted SVG candidates must carry installed visual-review evidence before they can pass the audit.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- No reinstall needed.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Accepted trace candidates now require manual installed visual-review metadata. Pixel diff alone is not enough. Do not retry add-card paths without a new extraction strategy.
+```
+
+## 2026-06-12 1839 ADT - Add Card Hybrid Candidate Rejected
+
+### What Changed
+- Tested a hybrid add-card candidate in QA output:
+  - VTracer frame and plus geometry
+  - masked label region
+  - measured vector `Add` text
+- Added rejected trace candidate:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-vtracer-hybrid-label.json`
+- Added rejection note:
+  - `docs/design/external-ai/local-extraction/2026-06-12/browser-home-add-card-hybrid/README.md`
+
+### Result
+- `vtracer-fine-spline` crop mismatch: `0.023480036297640654`
+  - rejected because installed visual review rendered the label as `dd`
+- `vtracer-hybrid-label` crop mismatch: `0.03130671506352087`
+  - rejected because the label was readable but the traced card frame became flatter and chunkier than the locked mockup
+
+### Medallion Finding
+- The visible medallion rail is still part of `center-field-title-star-map.png`.
+- Standalone medallion assets are not the active visual layer for Browser Home.
+- Do not replace medallions one-by-one until the center field can be split without seam drift, or until a full center-field vector extraction exists.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline.
+- Current accepted strict diff remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. Rejected add-card paths now include CSS primitive, ImageTracer, VTracer full-card, and VTracer hybrid-label. Do not retry add-card without a new extraction strategy. Medallions are still inside the center-field raster, so replacing one medallion alone is not the next safe production slice.
+```
+
+## 2026-06-12 1804 ADT - Add Bookmark Card VTracer Candidate Rejected
+
+### What Changed
+- Added no-cost VTracer extraction through `@neplex/vectorizer`.
+- Extended `app/scripts/browserHomeTraceSweep.ts` to compare ImageTracer and VTracer presets.
+- Extended `app/scripts/browserHomeGenerateTraceCandidate.ts` to generate:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-vtracer-fine-spline.json`
+- Tested the VTracer candidate as the active add-card asset.
+- Rejected the production replacement after visual review because the visible label rendered as `dd` instead of `Add`.
+- Restored active `bookmark-card-add.png` in the Browser Home pinned-card row.
+- Hardened provenance audit so traced SVG assets must:
+  - exist in the manifest
+  - render at the locked box size
+  - not contain `<image>`
+  - not contain `data:image/*`
+  - not reference raster files
+
+### Checks Run
+- `CEREBRO_BROWSER_HOME_TRACE_TARGET=bookmark-card-add-vtracer-fine-spline pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup && pnpm --dir app run desktop:package && pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- The rejected SVG attempt was not kept.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the restored accepted source.
+- Installed Browser Home smoke passed after restore.
+- Hitbox proof still shows:
+  - omnibox focused
+  - shield menu opens
+  - add bookmark notice appears
+  - Aang input accepts text
+  - left rail collapses and reopens
+  - Watch Shelf opens and closes
+  - pinned manager opens and closes
+
+### Visual Diff
+- The attempted traced SVG improved numeric strict diff to `0.08341431769614328`, but failed visual review.
+- The accepted strict diff remains `0.08346456192123741`.
+- Numeric strict diff is not enough when text or visible brand details are wrong.
+
+### Known Gaps
+- Browser Home still is not fully 1:1.
+- The VTracer add-card path is blocked unless the `Add` label is preserved or rebuilt from measured source text.
+- Remaining active raster slices include high-detail pieces such as:
+  - `rail-full.png`
+  - `center-field-title-star-map.png`
+  - `bottom-dock-row.png`
+  - `top-url-omnibox.png`
+  - `top-url-action-cluster.png`
+  - lower panel/card rasters
+- VTracer is useful for extraction experiments, but every candidate still needs manual installed visual review, not just pixel diff.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff remains `0.08346456192123741`. The VTracer add-card candidate is rejected even though it improved numeric diff, because installed visual review showed the `Add` label rendered incorrectly. Continue one measured slice at a time. A candidate must pass trace/provenance audit, package/install, installed smoke, strict diff, and manual visual review before keeping.
+```
+
+## 2026-06-12 1738 ADT - Browser Home Trace Sweep
+
+### What Changed
+- Added `app/scripts/browserHomeTraceSweep.ts`.
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-trace-sweep`
+- The sweep compares local ImageTracer presets against locked mockup crops and writes:
+  - committed summary: `docs/design/external-ai/local-extraction/2026-06-12/browser-home-trace-sweep/`
+  - uncommitted QA images: `app/output/qa/browser-home-trace-sweep/`
+
+### Sweep Results
+| Target | Best preset | Mismatch ratio | SVG length |
+| --- | --- | ---: | ---: |
+| `top-url-omnibox` | `very-high-color-fine` | `0.020283931082981717` | `2109532` |
+| `top-url-action-cluster` | `high-color-fine` | `0.045592948717948716` | `732597` |
+| `bookmark-card-add` | `high-color-fine` | `0.025068058076225044` | `1200010` |
+| `panel-continue` | `very-high-color-fine` | `0.036388578869047616` | `6540214` |
+| `panel-recent` | `very-high-color-fine` | `0.03503097667638484` | `6258015` |
+| `panel-downloads` | `very-high-color-fine` | `0.03305755046583851` | `5748530` |
+| `aang-dock-controls` | `high-color-fine` | `0.00562888198757764` | `4696227` |
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-trace-sweep`
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- Local ImageTracer can now rank options, but the best candidates are still too mismatched or too large to promote directly.
+- Do not replace active production PNG slices with these trace outputs until a candidate also passes candidate audit and installed strict visual diff.
+- The closest local result is `aang-dock-controls`, but its best SVG is still `4696227` characters and needs simplification before production.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/browserHomeTraceSweep.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local trace sweep exists and shows the best current target is `aang-dock-controls` at `0.00562888198757764`, but the SVG is huge. Next production work should either simplify the dock controls trace or use no-cost external extraction for a cleaner vector before replacing any active PNG slice.
+```
+
+## 2026-06-12 1723 ADT - Omnibox ImageTracer Candidate Rejected
+
+### What Changed
+- Generated a real vector candidate for the top URL omnibox:
+  - `app/client/public/browser-home/trace-candidates/rejected-top-url-omnibox-imagetracer-posterized2.json`
+- The candidate contains SVG path geometry, not embedded raster data.
+- Trace audit rejected it:
+  - mismatched pixels: `1620`
+  - mismatch ratio: `0.03560126582278481`
+- This proves ImageTracer `posterized2` is not accurate enough for the omnibox either.
+
+### Checks Run
+- `CEREBRO_BROWSER_HOME_TRACE_TARGET=top-url-omnibox pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- ImageTracer `posterized2` is now rejected for both:
+  - `bookmark-card-add`
+  - `top-url-omnibox`
+- Next local extraction should use either a better option sweep or external no-cost extraction. Do not promote these candidates.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation exists, but `posterized2` candidates are rejected for add card (`0.03522005444646098`) and omnibox (`0.03560126582278481`). Next step should be an option sweep or external no-cost extraction, not production replacement.
+```
+
+## 2026-06-12 1716 ADT - Local Vector Trace Generator
+
+### What Changed
+- Added no-cost local vector tracing dependency:
+  - `imagetracerjs@1.2.6`
+- Added `app/scripts/browserHomeGenerateTraceCandidate.ts`.
+- Added package script:
+  - `pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- Generated a real vector candidate for the add bookmark card:
+  - `app/client/public/browser-home/trace-candidates/rejected-bookmark-card-add-imagetracer-posterized2.json`
+- The candidate contains SVG path geometry, not embedded raster data.
+- Trace audit rejected it:
+  - mismatched pixels: `621`
+  - mismatch ratio: `0.03522005444646098`
+- This proves the local tracer path works, but the `posterized2` add-card candidate is not production quality.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-generate-trace-candidate`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- ImageTracer `posterized2` is useful as a local no-cost extraction candidate generator, but not accurate enough for the add-card production replacement.
+- Next trace attempt should try either:
+  - a different target with simpler geometry, or
+  - a higher-fidelity trace preset that still stays small enough to maintain, or
+  - no-cost external extraction output that produces cleaner vector geometry.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/browserHomeGenerateTraceCandidate.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Local ImageTracer generation now exists and generated `rejected-bookmark-card-add-imagetracer-posterized2` with mismatch ratio `0.03522005444646098`. Do not promote it. Next production change needs a trace candidate or external no-cost extraction that passes audit before install.
+```
+
+## 2026-06-12 1704 ADT - Rejected Browser Home Add Card Primitive
+
+### What Changed
+- Tested replacing active `bookmark-card-add.png` with a measured DOM/CSS add bookmark card:
+  - frame
+  - corner ticks
+  - plus mark
+  - `Add` label
+  - bottom status dot
+- The source change passed provenance, TypeScript, and targeted tests.
+- Installed Browser Home smoke still passed behavior.
+- Strict visual diff rejected the slice:
+  - accepted baseline: `0.08346456192123741`
+  - attempt: `0.08388623181031851`
+- The production changes were reverted.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean accepted source.
+- Installed Browser Home smoke and strict diff passed again at `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Known Gaps
+- The add bookmark card should not be replaced with approximate CSS.
+- Remaining card/panel replacement needs traced geometry, exact extraction, or a generated vector candidate that passes preflight before production.
+- The accepted installed baseline remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Rejected approximate CSS paths now include action cluster, omnibox, and add bookmark card. Do not use approximate CSS for remaining high-detail or framed rasters. Use a trace candidate or external no-cost extraction that passes audit before production.
+```
+
+## 2026-06-12 1643 ADT - Trace Candidate Raster Shortcut Guard
+
+### What Changed
+- Hardened `app/scripts/browserHomeTraceCandidateAudit.ts` so traced SVG candidates cannot:
+  - include `<image>` tags
+  - embed `data:image/*`
+  - reference raster image files through `href`
+- Added `CEREBRO_BROWSER_HOME_TRACE_CANDIDATES_DIR` so tests can run the audit against temporary candidate fixtures.
+- Added `app/server/browserHomeTraceCandidateAudit.test.ts`.
+- The test proves a fake SVG candidate with embedded raster image data is rejected before it can become a passing trace candidate.
+
+### Checks Run
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run qa:browser-home-trace-candidates`
+- `pnpm --dir app exec tsc --noEmit`
+
+### Installed App Status
+- No production UI changed.
+- `/Applications/CereBro.app` remains on the accepted Browser Home baseline from `0.08346456192123741`.
+
+### Known Gaps
+- Remaining high-detail rasters still need real traced SVG, no-cost external extraction output, or another provenance-safe path.
+- This guard prevents the wrong path: SVG wrappers around PNG slices.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/browserHomeTraceCandidateAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. Trace candidates now reject `<image>`, `data:image/*`, and raster hrefs. Do not use SVG wrappers around PNGs. The action-cluster split and approximate omnibox CSS were rejected. Next production slice needs a real trace candidate or external no-cost extraction that passes the audit before install.
+```
+
+## 2026-06-12 1631 ADT - Rejected Browser Home Omnibox Primitive
+
+### What Changed
+- Tested replacing active `top-url-omnibox.png` with a measured DOM/CSS omnibox:
+  - frame
+  - search icon
+  - placeholder copy
+- The source change passed provenance, TypeScript, and targeted tests.
+- Installed Browser Home smoke still passed behavior.
+- Strict visual diff rejected the slice:
+  - accepted baseline: `0.08346456192123741`
+  - attempt: `0.0837552152233642`
+- The production changes were reverted.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean accepted source.
+- Installed Browser Home smoke and strict diff passed again at `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Known Gaps
+- The omnibox should not be replaced with approximate CSS.
+- Next omnibox conversion needs traced SVG geometry, exact source-measured typography, or no-cost external extraction before production.
+- The accepted installed baseline remains `0.08346456192123741`.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split was rejected at `0.08349381805230488` and `0.08348936603235982`. The approximate DOM/CSS omnibox was rejected at `0.0837552152233642`. The installed app is back on the accepted source. Do not use approximate CSS for the remaining high-detail URL row rasters; use traced/external extraction candidates first.
+```
+
+## 2026-06-12 1612 ADT - Rejected Browser Home Action Cluster Split
+
+### What Changed
+- Tested replacing active `top-url-action-cluster.png` with:
+  - source-derived crops for shield, library, and stats controls
+  - a measured CSS primitive for the page-actions dots
+- The source split passed fast provenance, TypeScript, and targeted tests.
+- Installed Browser Home smoke still passed behavior.
+- Strict visual diff rejected the slice:
+  - accepted baseline: `0.08346456192123741`
+  - first attempt: `0.08349381805230488`
+  - tuned attempt: `0.08348936603235982`
+- The production changes and generated action-cluster crops were reverted.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean accepted source.
+- Installed Browser Home smoke and strict diff passed again at `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Known Gaps
+- The action cluster needs a different strategy before conversion:
+  - traced page-actions geometry that survives installed scaling, or
+  - external no-cost extraction for the cluster, or
+  - a smaller accepted primitive that does not disturb strict diff.
+- Do not repeat the shield/library/stats crop plus CSS dots split as tested here.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home accepted strict diff is `0.08346456192123741`. The action-cluster split with three source crops plus CSS page-actions dots was rejected because installed strict diff regressed to `0.08349381805230488` and `0.08348936603235982`. The installed app is back on the accepted source. Choose the next slice from a different measured target or produce a trace/external extraction candidate before production.
+```
+
+## 2026-06-12 1536 ADT - Browser Home URL Nav Controls Primitive
+
+### What Changed
+- Removed active use of the `top-url-nav-controls.png` visible raster from Browser Home.
+- Kept `top-url-nav-controls.png` as a source-derived reference in provenance.
+- Added measured production provenance for `browser-home-top-url-nav-controls`.
+- Rendered the top URL row back, forward, and reload controls as real measured DOM/CSS controls.
+- Preserved the installed Browser Home hitbox proof:
+  - omnibox focuses
+  - shield menu opens
+  - add-bookmark target works
+  - Aang input accepts text
+  - left rail arrow collapses and reopens the nav rail
+  - right side arrow opens and closes Watch Shelf
+  - pinned manager opens and closes
+- Tightened the strict Browser Home visual diff gate from `0.08349827007224993` to `0.08346456192123741`.
+
+### Checks Run
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff:strict`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current strict diff ratio against the locked mockup is `0.08346456192123741`.
+- Previous accepted strict diff ratio was `0.08349827007224993`.
+
+### Known Gaps
+- Browser Home is still not fully 1:1.
+- Remaining active Browser Home rasters include center field/title/star-map, bottom dock row, rail, omnibox, action cluster, pinned cards, and lower panels.
+- Next measured slice should target a small top-chrome or rail area where a real primitive can improve or hold strict diff without invented ornament.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now renders title identity, active tab, protected badge, URL row backplate, URL nav controls, and side arrows as measured primitives while preserving installed hitbox proof. Current accepted strict diff ratio is `0.08346456192123741`. Continue one measured Browser Home slice at a time. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+```
+
+## 2026-06-12 0007 ADT - Browser Home Edge Cleanup And Hitbox Proof
+
+### What Changed
+- Replaced the narrower visible dock layer with a full-width mockup-derived bottom row:
+  - `app/client/public/browser-home/assets/bottom-dock-row.png`
+- Added `bottom-dock-row.png` to the Browser Home manifest with locked source path, SHA-256, measured box, role, medium, and `productionAllowed`.
+- Added the bottom row to typed provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Kept the existing `aang-dock.png` provenance as source material, but no longer uses it as the visible bottom layer.
+- Added an explicit `aria-label` to the measured Browser Home omnibox input.
+- Expanded installed Browser Home smoke to prove transparent hitboxes:
+  - omnibox focuses
+  - shield menu opens
+  - add-bookmark target produces the expected notice
+  - Aang input accepts text
+  - send target exists
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.08862190902615244`.
+- Previous Aang dock slice diff ratio was `0.08852142057596418`.
+- The visual diff stayed effectively flat, but the right-edge block was removed and Browser Home hitbox proof now exists.
+
+### Known Gaps
+- Browser Home is closer, but still not fully 1:1.
+- The old hidden Browser workspace still exists in the DOM under Browser Home for app state continuity, but installed smoke now scopes Browser Home interactions to the measured overlay.
+- Next major path is loaded browser page branding so opening a site does not visually fall back to the old UI language.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and full bottom dock row. Installed smoke proves core transparent hitboxes. Current installed diff ratio is `0.08862190902615244`. Next path should move from Browser Home to loaded browser page branding without inventing new UI.
+```
+
+## 2026-06-11 2150 ADT - Browser Home Aang Dock Extraction
+
+### What Changed
+- Added the existing mockup-derived `aang-dock.png` asset to the visible Browser Home layer stack.
+- Removed the visible `CereBroDock` rendering from Browser Home.
+- Added measured transparent dock controls for:
+  - Aang input
+  - attach image
+  - send to Aang
+- Kept the Aang input real and keyboard-usable, but stopped drawing a new input frame over the mockup dock.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.08852142057596418`.
+- Previous lower-panel slice diff ratio was `0.0917109748651674`.
+- This is the best installed Browser Home diff so far.
+
+### Known Gaps
+- Browser Home is still not fully 1:1.
+- The right edge still shows a vertical dark frame/strip that needs cleanup.
+- Loaded browser pages and the rest of CereBro still need the same brand-system treatment after Browser Home is locked.
+- Next measured slice should remove or align the remaining legacy edge/backplate artifacts and then verify Browser Home click targets.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, lower panels row, and Aang dock. Transparent measured hitboxes preserve browser, bookmark, lower-panel, and dock actions. Current installed diff ratio is `0.08852142057596418`. Next measured slice should clean up remaining edge/backplate artifacts and verify click targets. Do not invent new frames, icons, glows, gradients, ornaments, or spacing.
+```
+
+## 2026-06-11 2134 ADT - Browser Home Lower Panels Extraction
+
+### What Changed
+- Replaced visible lower Browser Home panel rendering with a measured mockup-derived row asset:
+  - `app/client/public/browser-home/assets/lower-panels-row.png`
+- Added the asset to the Browser Home manifest with locked source path, SHA-256, measured box, role, medium, and `productionAllowed`.
+- Added the row asset to typed provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Removed visible `CereBroPanel` rendering from Browser Home lower panels.
+- Added transparent measured hitboxes for:
+  - Continue browsing `View all`
+  - Continue browsing rows 1-3
+  - Recent `View all`
+  - Recent rows 1-3
+  - Downloads `View all`
+  - Downloads rows 1-3
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.0917109748651674`.
+- Previous pinned-row slice diff ratio was `0.09095667548590618`.
+- The pixel ratio regressed slightly, but the visible lower panels are now mockup-derived instead of locally painted primitives. This is the correct direction for provenance and 1:1 reconstruction.
+
+### Known Gaps
+- Browser Home is still not visually 1:1.
+- Aang dock still uses non-final primitives.
+- The next measured slice should replace the Aang dock with extracted mockup-derived dock assets plus transparent input, attach, and send hitboxes.
+- After the Aang dock slice, re-check whether any legacy lower backplate remains visible or removable.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, pinned bookmark row, and lower panels row. Transparent measured hitboxes preserve browser, bookmark, and lower-panel actions. Current installed diff ratio is `0.0917109748651674`. Next measured slice should replace Aang dock with extracted dock assets and transparent input/action hitboxes. Do not invent new dock frames, icons, glows, gradients, ornaments, or spacing.
+```
+
+## 2026-06-11 1735 ADT - Browser Home Pinned Row Extraction
+
+### What Changed
+- Replaced visible pinned bookmark cards with measured mockup-derived raster:
+  - `app/client/public/browser-home/assets/pinned-bookmark-row.png`
+- Added the row asset to the Browser Home manifest with locked source path, SHA-256, measured box, role, medium, and `productionAllowed`.
+- Added the row asset to typed provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Removed the visible `CereBroCard` rendering from Browser Home pinned cards.
+- Kept bookmark card, add-card, medallion, and edit-pinned actions as transparent measured hitboxes over the mockup-derived surface.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.09095667548590618`.
+- Previous center-field slice diff ratio was `0.09287422407652386`.
+- A card-only attempt reached `0.08949704894677928`, but it left a visible black band between cards. The row extraction is the accepted state because it matches the mockup structure more honestly.
+
+### Known Gaps
+- Browser Home is still not visually 1:1.
+- Lower panels and Aang dock still use non-final primitives.
+- The restored lower backplate below the pinned row is still a legacy holdover. It should be removed when the lower-panel measured slice lands.
+- The next measured slice should replace Continue, Recent, and Downloads panels with extracted mockup-derived panel assets plus transparent row/action hitboxes.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses extracted mockup rasters for top chrome, center field/title/star-map, and pinned bookmark row. Transparent measured hitboxes preserve bookmark actions. Current installed diff ratio is `0.09095667548590618`. Next measured slice should replace lower panels with extracted panel assets and transparent hitboxes. Do not invent new panel frames, icons, glows, gradients, ornaments, or spacing.
+```
+
+## 2026-06-11 1630 ADT - Browser Home Center Field Extraction
+
+### What Changed
+- Extracted the Browser Home center-field raster from the locked mockup:
+  - `app/client/public/browser-home/assets/center-field-title-star-map.png`
+- Added the asset to the Browser Home manifest with locked source path, SHA-256, measured box, role, medium, and `productionAllowed`.
+- Added the asset to typed provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Replaced the CSS-drawn center field, title, compass, star glow, medallion rail art, pinned label, and edit-pinned art with the extracted mockup asset.
+- Converted the medallion rail and edit-pinned control to transparent measured hitboxes so they do not repaint over the mockup asset.
+- Restored only the lower legacy backplate below the center-field slice so cards and panels do not sit on a black void. This remains queued for the lower-panel measured slice.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9466 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.09287422407652386`.
+- Previous Slice 1 diff ratio was `0.09367685967233133`.
+
+### Known Gaps
+- Browser Home is still not visually 1:1.
+- Cards, lower panels, and Aang dock still use non-final primitives and need their own measured slices.
+- The restored lower backplate is a legacy holdover. It should be removed when the lower-panel slice lands.
+- The center field is now a raster extraction. That is acceptable for this slice because it replaces invented art, but future work should continue turning controls into real measured hitboxes and extracted parts rather than one full-screen image.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home now uses the extracted `center-field-title-star-map.png` asset for the center field/title/star-map region and transparent hitboxes for medallions/edit-pinned. Current diff ratio is `0.09287422407652386`. Next measured slice should replace pinned bookmark cards with their extracted mockup assets and transparent click targets. Do not invent new card frames, icons, glows, gradients, ornaments, or spacing.
+```
+
+## 2026-06-11 1515 ADT - Browser Home Slice 1 Top Chrome Hitboxes
+
+### What Changed
+- Kept Browser Home visual source restricted to the locked mockup.
+- Added measured Browser Home top-chrome hitboxes in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Added measured-css provenance entries for:
+  - active tab
+  - tab close
+  - new tab
+  - protected badge
+  - back
+  - forward
+  - reload
+  - omnibox
+  - shield
+  - library
+  - stats
+  - page actions
+- Added a `BrowserHomeChromeOverlay` in `app/client/src/components/BrowserPanel.tsx`.
+  - The visible top chrome remains the extracted mockup slice.
+  - The real controls sit in measured transparent hitboxes over the extracted slice.
+  - The old hidden Browser workspace is now `pointer-events-none` on Browser Home so it cannot steal clicks.
+- Updated installed Browser Home smoke to assert the top chrome overlay is mounted.
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9463 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup remains `0.09367685967233133`.
+
+### Known Gaps
+- This slice does not visually improve Browser Home. It makes the top chrome interaction layer measured and proven.
+- A direct one-off CDP fill test opened `https://example.com/`, but it hit the older Browser input path in that run. The installed smoke now explicitly checks the new overlay marker so this does not stay ambiguous.
+- The next visual slice should still be measured and narrow:
+  - remove or replace the remaining invented Browser Home center-field CSS with extracted mockup-derived assets or measured CSS.
+  - do not touch panels, Aang dock, or whole-app branding until that slice passes.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/src/components/BrowserPanel.tsx, app/scripts/desktopInstalledSmoke.ts, app/server/browserHomeBrandLayout.test.ts, app/scripts/browserHomeProvenanceAudit.ts, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. Browser Home Slice 1 added measured top-chrome hitboxes over the extracted mockup chrome and disabled the old hidden workspace pointer events on Home. The installed smoke now asserts `[aria-label="Browser Home top chrome controls"]`. Current diff ratio is still `0.09367685967233133`, so do not claim visual 1:1. Next slice should replace the center field/title/star-map area from the locked mockup without invented CSS decoration.
+```
+
+## 2026-06-11 0845 ADT - Browser Home Provenance Gate
+
+### What Changed
+- Added a Browser Home mockup provenance gate before the next 1:1 visual slice.
+- Locked production Browser Home visual media to:
+  - `raster`
+  - `measured-css`
+  - `traced-svg`
+  - `external-ai-reference`
+- Expanded `app/client/public/browser-home/assets/manifest.json` so every extracted Browser Home asset carries:
+  - locked source path
+  - locked SHA-256
+  - measured box
+  - role
+  - medium
+  - `productionAllowed`
+- Added typed Browser Home provenance in `app/client/src/lib/browserHomeBrandLayout.ts`.
+- Added `app/scripts/browserHomeProvenanceAudit.ts`.
+  - Verifies the locked mockup SHA.
+  - Verifies extracted asset dimensions against manifest boxes.
+  - Fails on unlisted Browser Home asset files.
+  - Fails on static Browser Home asset imports that are not in the manifest.
+- Added an external-AI status packet:
+  - `docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md`
+- Rebuilt, reinstalled, and smoke-tested `/Applications/CereBro.app`.
+
+### Checks Run
+- `pnpm --dir app run qa:browser-home-provenance`
+- `pnpm --dir app exec tsc --noEmit`
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app exec vitest run server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism`
+- `pnpm --dir app run desktop:backup`
+- `pnpm --dir app run desktop:package`
+- `pnpm --dir app run desktop:install`
+- `CEREBRO_DESKTOP_QA_MODE=browser-home CEREBRO_DESKTOP_QA_CLOSE_EXISTING=1 CEREBRO_DESKTOP_QA_REOPEN_EXISTING=1 CEREBRO_DESKTOP_QA_PORT=9450 pnpm --dir app exec tsx scripts/desktopInstalledSmoke.ts`
+- `pnpm --dir app run qa:browser-home-diff`
+
+### Installed App Status
+- `/Applications/CereBro.app` was replaced from this branch.
+- Browser Home installed smoke screenshot:
+  - `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Browser Home diff output:
+  - `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Current diff ratio against the locked mockup is `0.09367685967233133`.
+
+### Known Gaps
+- This slice does not claim Browser Home is visually 1:1.
+- The known visual deltas remain:
+  - Browser Home is still too spread and scaled in several areas.
+  - Medallion positions and lower panels still differ from the locked mockup.
+  - The Aang dock still does not match the approved mockup asset style.
+  - Some older Browser Home CSS decoration remains and must be removed only as measured slices replace it.
+- No external AI generated output was accepted in this slice. No free/no-card callable integration was available in the local build environment.
+
+### Next-session Starter Prompt
+```text
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, docs/design/cerebro-brand-system.md, docs/design/external-ai/README.md, docs/design/external-ai/local-provenance/2026-06-11/browser-home-provenance-gate.md, app/client/src/lib/browserHomeBrandLayout.ts, app/client/public/browser-home/assets/manifest.json, app/scripts/browserHomeProvenanceAudit.ts, app/server/browserHomeBrandLayout.test.ts, app/client/src/components/BrowserPanel.tsx, and mockups/approved/BROWSER_HOME_1TO1_LOCK.md first. The next Browser Home visual slice must start from the locked mockup, pass `pnpm --dir app run qa:browser-home-provenance`, and use only measured CSS, traced SVG, extracted raster, or accepted free external-AI reference output. Do not create invented rail marks, compass marks, icons, frames, gradients, ornaments, or medallions. Start with Slice 1: rail and top chrome only. Compare installed screenshot to `mockups/approved/browser-home-symmetric-rails-target-v1.png` before and after.
+```
 
 ## 2026-06-09 0435 ADT - Desktop Install Safety Gate
 
@@ -115,7 +1006,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/sc
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser chrome now has a visible Bookmarks manager with add current, open, rename, and delete; a tighter medallion rail; and an Aang current-page menu. Aang actions stage local route previews through `runtime.previewRoute`: Explain page, Make note, Send to Workshop. The bottom Browser Aang bar no longer drives URL/search. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, screenshot-checked, and reopened on 2026-06-08 2249 ADT. Continue with 1:1 Browser chrome fidelity or promote Aang page actions into durable note/Workshop receipt creation. Do not route daily browsing to System Browser by default. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser chrome now has a visible Bookmarks manager with add current, open, rename, and delete; a tighter medallion rail; and an Aang current-page menu. Aang actions stage local route previews through `runtime.previewRoute`: Explain page, Make note, Send to Workshop. The bottom Browser Aang bar no longer drives URL/search. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, screenshot-checked, and reopened on 2026-06-08 2249 ADT. Continue with 1:1 Browser chrome fidelity or promote Aang page actions into durable note/Workshop receipt creation. Do not route daily browsing to System Browser by default. Do not surface Raven.
 ```
 
 ## 2026-06-08 2231 ADT - Browser Bookmark Medallions
@@ -143,7 +1034,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser bookmarks are now real daily-browser actions: Browser Home pins, saved bookmark rows, manage-list entries, project pins, and the top medallion rail open directly inside CereBro. `Add Current` saves a local bookmark from a normal daily Browser tab through `workbench.createBrowserBookmark`. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, and reopened on 2026-06-08 2231 ADT. Continue with the 1:1 Browser chrome polish: ornate top rail, tighter medallion styling, better tab affordance, and stronger loaded-page framing. Do not route daily browsing to System Browser by default. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser bookmarks are now real daily-browser actions: Browser Home pins, saved bookmark rows, manage-list entries, project pins, and the top medallion rail open directly inside CereBro. `Add Current` saves a local bookmark from a normal daily Browser tab through `workbench.createBrowserBookmark`. The installed `/Applications/CereBro.app` was rebuilt, reinstalled, smoke-tested, and reopened on 2026-06-08 2231 ADT. Continue with the 1:1 Browser chrome polish: ornate top rail, tighter medallion styling, better tab affordance, and stronger loaded-page framing. Do not route daily browsing to System Browser by default. Do not surface Raven.
 ```
 
 ## 2026-06-08 1915 ADT - Mac App Update Rule And Reinstall
@@ -174,7 +1065,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/compare/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro ritual handoffs now include debug, build, desktop package, and reinstall status for `/Applications/CereBro.app` when app code changes. The installed Mac app was updated and launched on 2026-06-08. Continue with Browser live function plus 1:1 UI: tighten Browser Home to the approved compare targets, make pinned/bookmark tiles real, wire Aang input to the app route, and then build Watch Shelf/Compare from `mockups/compare`. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/client/src/components/BrowserPanel.tsx, mockups/approved/manifest.json, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. CereBro ritual handoffs now include debug, build, desktop package, and reinstall status for `/Applications/CereBro.app` when app code changes. The installed Mac app was updated and launched on 2026-06-08. Continue with Browser live function plus 1:1 UI: tighten Browser Home to the approved compare targets, make pinned/bookmark tiles real, wire Aang input to the app route, and then build Watch Shelf/Compare from `mockups/approved`. Do not surface Raven.
 ```
 
 ## 2026-06-08 1843 ADT - Browser Home Live Pass And Compare Folder
@@ -189,26 +1080,24 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
   - Existing page draft, open-page, local tabs, downloads, VPN shield, popup, and Watch Shelf logic stayed intact.
 - Added app-usable Aang dock asset:
   - `app/public/assets/aang/aang-chat-dock-waist-v1.png`
-- Added canonical Compare mockup source folder:
-  - `mockups/compare/README.md`
-  - `mockups/compare/manifest.json`
-  - `mockups/compare/approved/...`
-  - `mockups/compare/rejected/...`
-- Updated the finish path so Compare pulls from `mockups/compare` later instead of guessing from loose design files.
+- Added legacy Compare mockup source folder. This is replaced by `mockups/approved`.
+  - `mockups/README.md`
+  - `mockups/approved/manifest.json`
+- Current source-of-truth mockups now live only in `mockups/approved`.
 
 ### Files Touched
 - `app/client/src/components/BrowserPanel.tsx`
 - `app/public/assets/aang/aang-chat-dock-waist-v1.png`
 - `app/public/assets/aang/aang-chat-dock-waist-source-v1.png`
-- `mockups/compare/README.md`
-- `mockups/compare/manifest.json`
-- `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png`
-- `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png`
-- `mockups/compare/approved/browser-home/browser-home-symmetric-rails-target-v1.png`
-- `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-chat-expanded-bottom-handle-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-chat-collapsed-bottom-handle-v1.png`
-- `mockups/compare/rejected/browser-home/browser-home-aang-standing-companion-target-v1.png`
+- `mockups/README.md`
+- `mockups/approved/manifest.json`
+- `deleted legacy approved expanded chat mockup`
+- `deleted legacy approved collapsed chat mockup`
+- `mockups/approved/browser-home-symmetric-rails-target-v1.png`
+- `mockups/approved/browser-loaded-website-target-v1.png`
+- `deleted legacy rejected expanded chat mockup`
+- `deleted legacy rejected collapsed chat mockup`
+- `deleted legacy rejected browser-home Aang mockup`
 - `design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md`
 - `CEREBRO_MASTER_BUILD_PLAN.md`
 - Obsidian: `10_Projects/CereBro/CereBro Finish Path.md`
@@ -227,7 +1116,7 @@ Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, CEREBRO_MASTER_BUILD_PLAN.md, app/cl
 
 ### Next-session Starter Prompt
 ```text
-Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, mockups/compare/README.md, mockups/compare/manifest.json, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser Home now has a first live Keep-tech pass with Aang launcher chat open/closed behavior. Continue making the live Browser match `mockups/compare/approved/browser-home/browser-home-chat-expanded-aang-launcher-v1.png` and `mockups/compare/approved/browser-home/browser-home-chat-collapsed-aang-launcher-v2.png` while preserving real browser function. Next critical options: wire Browser Home Aang input to the existing Aang route, make pinned tiles/local bookmarks real, or build the Compare picker from `mockups/compare/manifest.json`. Do not surface Raven.
+Read AGENTS.md, CEREBRO_SESSION_HANDOFF.md, app/client/src/components/BrowserPanel.tsx, design/reference/CEREBRO_KEEP_TECH_UI_DIRECTION.md, mockups/README.md, mockups/approved/manifest.json, CEREBRO_MASTER_BUILD_PLAN.md, and the Obsidian note 10_Projects/CereBro/CereBro Finish Path.md first. Browser Home now has a first live Keep-tech pass with Aang launcher chat open/closed behavior. Continue making the live Browser match `deleted legacy approved expanded chat mockup` and `deleted legacy approved collapsed chat mockup` while preserving real browser function. Next critical options: wire Browser Home Aang input to the existing Aang route, make pinned tiles/local bookmarks real, or build the Compare picker from `mockups/approved/manifest.json`. Do not surface Raven.
 ```
 
 ## 2026-06-08 1619 ADT - Keep-Tech Browser Visual Direction
@@ -24038,8 +24927,8 @@ Design Review, and UI / UX surfaces against the new primitives.
   - Piccolo: undercroft watch crypt.
   - Hedwig: undercroft relay roost.
 - Added detailed mockups:
-  - `mockups/keep-fortress-wireframe.html` for the full residency massing.
-  - `mockups/keep-tile-blueprint.html` for the 64 by 34 tile planning grid.
+  - `deleted legacy keep fortress wireframe` for the full residency massing.
+  - `deleted legacy keep tile blueprint` for the 64 by 34 tile planning grid.
 - Added `CEREBRO_KEEP_TILE_BLUEPRINT.md` as the repo-readable blueprint
   reference with room coordinates, floor courses, stairs, path nodes, zoom
   bounds, prop zones, and PixelLab prompt rules.
@@ -24061,8 +24950,8 @@ Files touched in this slice:
 - `app/client/src/components/KeepFortressBlueprint.tsx`
 - `app/client/src/lib/keepFortressMap.ts`
 - `app/client/src/pages/Home.tsx`
-- `mockups/keep-fortress-wireframe.html`
-- `mockups/keep-tile-blueprint.html`
+- `deleted legacy keep fortress wireframe`
+- `deleted legacy keep tile blueprint`
 
 Checks run:
 
@@ -38548,7 +39437,7 @@ Checks run:
 Mockup fidelity: target used, screenshot path, matched elements, deviations, next fidelity gap.
 
 - Target used: approved Browser loaded-page mockup,
-  `mockups/compare/approved/browser-loaded/browser-loaded-website-target-v1.png`.
+  `mockups/approved/browser-loaded-website-target-v1.png`.
 - Screenshot path: `app/output/qa/cerebro-installed-browser-smoke.png`.
 - Matched elements: compact left Browser rail, top tab strip, one URL/search
   bar, large contained page canvas, bottom Aang command rail, visible tab close.
@@ -38582,3 +39471,760 @@ Next-session starter prompt:
 ```text
 Read AGENTS.md, CEREBRO_UI_MOCKUP_CONTRACT.md, CEREBRO_DAILY_OS_BROWSER_CONTRACT.md, and CEREBRO_SESSION_HANDOFF.md first. Continue on branch codex/daily-browser-finish. The Browser route is live in /Applications/CereBro.app and now owns the center shell instead of being nested under the global Keep chrome. Continue Browser mockup fidelity from the approved loaded-page target. Next gap is Browser chrome fidelity: ornate top rail, pinned site medallions, tighter mockup-matched controls, and no duplicate browser machinery. Keep the native Electron page view inside CereBro. Do not add fake browser, fake watch, fake login, stealth, CAPTCHA bypass, proxy rotation, paid services, or Raven paths.
 ```
+
+## 2026-06-12 0656 ADT - Browser Home measured backplate primitive
+
+Completion:
+
+- Browser Home backplate geometry moved out of unproven component-local
+  positioning and into the Browser Home provenance ledger.
+- Added measured CSS boxes for the base backplate and lower backplate.
+- Preserved the existing visible mockup slice stack and real hitboxes.
+- This slice did not remove a visible PNG layer. It removed unproven invented
+  background geometry first because it was the safest primitive conversion.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `CEREBRO_SESSION_HANDOFF.md`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 15 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk and
+  Electron icon-format warnings remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with hitbox proof:
+  `omniboxFocused`, `shieldOpen`, `addBookmarkNotice`, `aangValue`, and
+  `sendButtonPresent`.
+- `pnpm --dir app run qa:browser-home-diff` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Current screenshot and diff:
+
+- Installed Browser Home screenshot:
+  `app/output/qa/cerebro-installed-browser-home-smoke.png`
+- Normalized actual:
+  `app/output/qa/browser-home-diff/browser-home-actual-normalized.png`
+- Diff image:
+  `app/output/qa/browser-home-diff/browser-home-diff.png`
+- Locked reference:
+  `mockups/approved/browser-home-symmetric-rails-target-v1.png`
+- Locked reference SHA:
+  `f535fbd4d10b268f04879074c739482cd732e0ba62972f21792d197c1b5ebb7c`
+
+Next slice:
+
+- Continue one slice at a time.
+- Next best candidate is a visible raster replacement with low hitbox risk:
+  top title/tab strip frame or URL row frame.
+- Do not invent new ornaments, icons, compass geometry, gradients, or frame
+  language. Every primitive needs measured, traced, extracted, or accepted
+  external no-cost provenance before production.
+
+## 2026-06-12 0947 ADT - Browser Home side arrows and strict diff gate
+
+Completion:
+
+- Added a strict Browser Home visual diff gate. Future Browser Home slice work
+  can run `pnpm --dir app run qa:browser-home-diff:strict`; it fails if the
+  mismatch ratio is worse than the accepted baseline
+  `0.08862190902615244`.
+- Wired the Browser Home left side arrow to collapse and reopen the Browser nav
+  rail.
+- Wired the Browser Home right side arrow to open Watch Shelf, and added a
+  right-edge close hitbox for Watch Shelf.
+- Added measured provenance entries for both side-arrow hitboxes.
+- Extended installed Browser Home smoke to prove the side arrows at runtime.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/src/pages/Home.tsx`
+- `app/scripts/browserHomeVisualDiff.ts`
+- `app/scripts/desktopInstalledSmoke.ts`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/server/desktopInstalledSmoke.test.ts`
+- `app/package.json`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed. Runtime proof:
+  `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`,
+  `watchShelfClosed: true`.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Important note:
+
+- The top title/tab strip primitive attempt was rejected before commit because
+  installed visual diff regressed. Do not hand-rebuild that full strip again
+  without a smaller measured sub-slice or external no-cost extraction reference.
+
+## 2026-06-12 1014 ADT - Browser Home pinned manager wiring
+
+Completion:
+
+- Wired the measured Browser Home `Edit Pinned` hitbox to a real pinned bookmark
+  manager instead of the previous add-bookmark fallback.
+- Added a closed-by-default Browser Home manager layer with real bookmark
+  actions: add current page, open bookmark, rename bookmark, remove bookmark,
+  and close.
+- Reused the existing local bookmark mutations. No fake bookmark storage was
+  added.
+- Preserved the default Browser Home screenshot. The manager is hidden until the
+  measured `Edit Pinned` control is clicked.
+- Extended installed Browser Home smoke to prove the manager opens and closes.
+
+Files touched:
+
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/scripts/desktopInstalledSmoke.ts`
+- `app/server/desktopInstalledSmoke.test.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed. Runtime proof:
+  `pinnedManagerOpen: true`, `pinnedManagerClosed: true`, plus the prior
+  omnibox, shield, add-bookmark notice, Aang dock, left rail, and Watch Shelf
+  proofs.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08862190902615244`.
+
+Next slice:
+
+- Continue one verified slice at a time.
+- Best next production slice is either a mockup-derived conversion of the
+  `Edit Pinned` visual button itself from raster to measured CSS, or a no-cost
+  external extraction pass for one small top-chrome sub-piece. Do not attempt
+  another full top-strip rebuild by hand.
+
+## 2026-06-12 1030 ADT - Browser Home pinned row raster reduction
+
+Completion:
+
+- Removed the large `pinned-bookmark-row.png` raster from the active Browser
+  Home layer stack.
+- Added a measured CSS `browser-home-pinned-row-backplate` primitive.
+- Rendered the existing mockup-derived bookmark card assets individually at
+  locked measured coordinates.
+- This is a real reduction of large PNG slice usage. It does not invent new
+  ornaments or change the bookmark controls.
+- Tightened the strict Browser Home diff gate from `0.08862190902615244` to
+  `0.08685763712221431` after the installed-app screenshot improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with prior hitbox proofs, including
+  side arrows and pinned manager.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08685763712221431`.
+
+Next slice:
+
+- Continue replacing one active large raster at a time only where measured
+  sub-assets or traced CSS can preserve or improve strict diff.
+- Good next candidates: lower panel row split into the existing panel assets,
+  or a no-cost external extraction pass for one top chrome sub-piece.
+
+## 2026-06-12 1045 ADT - Browser Home lower panels raster reduction
+
+Completion:
+
+- Removed the large `lower-panels-row.png` raster from the active Browser Home
+  layer stack.
+- Added a measured CSS `browser-home-lower-panels-backplate` primitive.
+- Rendered the existing mockup-derived panel assets individually at locked
+  measured coordinates:
+  `panel-continue.png`, `panel-recent.png`, and `panel-downloads.png`.
+- This is a second real reduction of large PNG slice usage. No new ornament,
+  panel art, layout language, or controls were invented.
+- Tightened the strict Browser Home diff gate from `0.08685763712221431` to
+  `0.08546797089650962` after installed-app screenshot diff improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with prior hitbox proofs, including
+  side arrows and pinned manager.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08546797089650962`.
+
+Next slice:
+
+- Continue one verified slice at a time.
+- Remaining active large rasters are top title/tabs, URL row, center field, and
+  bottom dock row.
+- Do not hand-rebuild the full top strip. Use a smaller measured sub-slice or a
+  no-cost external extraction reference first.
+
+## 2026-06-12 1103 ADT - Rejected bottom dock raster reduction
+
+Rejected attempt:
+
+- Tried replacing active `bottom-dock-row.png` with a measured CSS dock
+  backplate plus the existing extracted `aang-dock.png` asset.
+- Fast checks passed, and `/Applications/CereBro.app` was packaged and
+  installed for proof.
+- Installed Browser Home smoke passed, but strict visual diff regressed from
+  `0.08546797089650962` to `0.08549722702757709`.
+- The attempt was reverted. The strict gate was not loosened.
+- `/Applications/CereBro.app` was rebuilt and reinstalled from the clean
+  passing source after the revert.
+
+Checks after revert:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08546797089650962`.
+
+Next slice guidance:
+
+- Do not retry bottom dock as `aang-dock.png` plus a guessed CSS backplate.
+- Bottom dock needs either a smaller source-derived backplate asset, traced
+  geometry, or no-cost external extraction before another attempt.
+- Best next candidate is a no-cost external extraction pass or a smaller
+  measured sub-slice from top URL row or center field.
+
+## 2026-06-12 1126 ADT - Browser Home top URL row raster reduction
+
+Completion:
+
+- Removed the large active `top-url-row.png` raster from the Browser Home layer
+  stack.
+- Added a measured CSS `browser-home-top-url-backplate` primitive.
+- Generated and rendered three source-derived component crops from the locked
+  top URL row:
+  `top-url-nav-controls.png`, `top-url-omnibox.png`, and
+  `top-url-action-cluster.png`.
+- Preserved the real existing top-chrome controls and hitboxes.
+- Tightened the strict Browser Home diff gate from `0.08546797089650962` to
+  `0.08497188867406126` after installed-app screenshot diff improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/public/browser-home/assets/manifest.json`
+- `app/client/public/browser-home/assets/top-url-nav-controls.png`
+- `app/client/public/browser-home/assets/top-url-omnibox.png`
+- `app/client/public/browser-home/assets/top-url-action-cluster.png`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with prior hitbox proofs.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08497188867406126`.
+
+Next slice:
+
+- Remaining active large rasters are top title/tabs, center field/title/star-map,
+  and bottom dock row.
+- Do not retry bottom dock without a better source-derived backplate.
+- Top title/tabs should be split into smaller source-derived components or
+  extracted with no-cost tooling before another conversion attempt.
+
+## 2026-06-12 1140 ADT - Browser Home top title strip raster reduction
+
+Completion:
+
+- Removed the large active `top-title-tabs-panel.png` raster from the Browser
+  Home layer stack.
+- Added a measured CSS `browser-home-top-title-backplate` primitive.
+- Generated and rendered four source-derived component crops from the locked top
+  title/tab strip:
+  `top-title-identity.png`, `top-title-active-tab.png`,
+  `top-title-new-tab.png`, and `top-title-protected.png`.
+- Preserved the existing top-chrome controls and hitboxes.
+- Tightened the strict Browser Home diff gate from `0.08497188867406126` to
+  `0.08391485193853669` after fresh installed-app screenshot diff improved.
+
+Files touched:
+
+- `app/client/src/lib/browserHomeBrandLayout.ts`
+- `app/client/src/components/BrowserPanel.tsx`
+- `app/client/public/browser-home/assets/manifest.json`
+- `app/client/public/browser-home/assets/top-title-identity.png`
+- `app/client/public/browser-home/assets/top-title-active-tab.png`
+- `app/client/public/browser-home/assets/top-title-new-tab.png`
+- `app/client/public/browser-home/assets/top-title-protected.png`
+- `app/server/browserHomeBrandLayout.test.ts`
+- `app/scripts/browserHomeVisualDiff.ts`
+
+Checks run:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Browser Home installed smoke passed with hitbox proofs:
+  `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`, and
+  `watchShelfClosed: true`.
+- `pnpm --dir app run qa:browser-home-diff:strict` passed with mismatch ratio
+  `0.08391485193853669`.
+
+Next slice:
+
+- Remaining active large rasters are center field/title/star-map and bottom dock
+  row.
+- Bottom dock already regressed with a guessed CSS backplate; do not retry it
+  without a better source-derived backing layer.
+- Center field should be split only if source-derived sub-assets can preserve
+  the star-map/title/medallion alignment.
+
+## 2026-06-12 1239 ADT - Rejected center-field raster split
+
+Result:
+
+- Tried to replace active `center-field-title-star-map.png` with source-derived
+  center-field sub-slices.
+- First attempt used top band, medallion row pieces, and body/title slice.
+- Second attempt used a two-piece medallion/top slice and body/title slice with
+  overlap to reduce scaling seams.
+- Both attempts kept hitboxes working, but strict installed-app visual diff
+  regressed.
+
+Evidence:
+
+- Baseline strict diff gate before the attempt:
+  `0.08391485193853669`.
+- Three-piece split installed-app diff regressed to
+  `0.08392375597842679`.
+- Two-piece overlap split installed-app diff regressed to
+  `0.08393393202401547`.
+- Reverted all center-field experiment files and source edits.
+- Confirmed clean worktree afterward.
+- Confirmed passing checks after revert:
+  `pnpm --dir app run qa:browser-home-provenance`,
+  `pnpm --dir app exec tsc --noEmit`, and
+  `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts --maxWorkers=1 --no-file-parallelism`.
+
+Decision:
+
+- Do not retry center-field splitting with independently scaled DOM image slices.
+- Next center-field move needs a seam-safe renderer, traced/SVG extraction, or
+  no-cost external extraction output before production changes.
+- The current installed app was rebuilt during the rejected attempts, so before
+  committing a future accepted slice, rebuild/reinstall from the clean accepted
+  source and rerun Browser Home smoke plus strict diff.
+
+## 2026-06-12 1257 ADT - Browser Home slice seam preflight
+
+Completion:
+
+- Added `app/scripts/browserHomeSliceSeamAudit.ts`.
+- Added `pnpm --dir app run qa:browser-home-slice-seams`.
+- Added a rejected fixture:
+  `app/client/public/browser-home/slice-candidates/rejected-center-field-two-piece.json`.
+- The fixture models the exact two-piece center-field split that failed strict
+  installed-app diff.
+- The audit renders candidate slices at the installed Browser Home screenshot
+  scale and compares them against the locked mockup source crop.
+
+Evidence:
+
+- `pnpm --dir app run qa:browser-home-slice-seams` passed and reproduced the
+  rejected center seam:
+  `mismatchedPixels: 6`, `mismatchRatio: 0.000004516399044932149`.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Fresh strict Browser Home diff passed at `0.08391485193853669`.
+
+Next:
+
+- Before retrying center field, bottom dock, or rail decomposition, create a
+  slice candidate JSON and run `qa:browser-home-slice-seams`.
+- A candidate can move toward production only if the seam audit passes as
+  `accepted` and the installed-app strict diff does not regress.
+
+## 2026-06-12 1311 ADT - Browser Home protected badge primitive
+
+Completion:
+
+- Removed `top-title-protected.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-protected.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-protected-badge`.
+- Added `browserHomeProtectedBadgeBox` at
+  `{ left: 1290, top: 18, width: 104, height: 38 }`.
+- Rendered the `Protected` badge as real DOM/CSS text plus a status dot.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed and kept the
+  rejected center-field seam fixture active.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08391485193853669` to
+  `0.08385888368779892`.
+
+Next:
+
+- Continue with small non-seam targets first.
+- Large center-field, bottom-dock, and rail decompositions require
+  `qa:browser-home-slice-seams` candidate proof before production changes.
+
+## 2026-06-12 1320 ADT - Browser Home new-tab plus primitive
+
+Completion:
+
+- Removed `top-title-new-tab.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-new-tab.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-new-tab-plus`.
+- Added `browserHomeNewTabPlusBox` at
+  `{ left: 419, top: 16, width: 48, height: 42 }`.
+- Rendered the top title `+` as real DOM/CSS text.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08385888368779892` to
+  `0.08379846341711611`.
+
+Next:
+
+- Continue reducing small top-chrome/title-strip rasters before touching
+  center field, bottom dock, or rail.
+
+## 2026-06-12 1331 ADT - Browser Home active tab primitive
+
+Completion:
+
+- Removed `top-title-active-tab.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-active-tab.png` as source-derived reference material.
+- Added measured CSS provenance for `browser-home-active-title-tab`.
+- Added `browserHomeActiveTitleTabBox` at
+  `{ left: 205, top: 14, width: 203, height: 47 }`.
+- Rendered the active `New Tab` title tab as real DOM/CSS with a close mark.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08379846341711611` to
+  `0.08358285845120586`.
+
+Next:
+
+- The remaining active title-strip crop is `top-title-identity.png`.
+- Treat identity carefully because it includes the app mark; replace only if the
+  measured DOM/SVG result keeps strict diff passing.
+
+## 2026-06-12 1346 ADT - Browser Home side-arrow semantics
+
+Completion:
+
+- Kept the measured left sidebar arrow hitbox wired to Browser nav rail
+  collapse/open.
+- Changed the measured right sidebar arrow hitbox into one toggle for Watch
+  Shelf open and close.
+- Removed the separate close-only Watch Shelf side button behavior from the
+  smoke contract.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+  Proof included `railWidthBefore: 122`, `railWidthCollapsed: 0`,
+  `railWidthReopened: 122`, `watchShelfOpen: true`, and
+  `watchShelfClosed: true`.
+- Strict Browser Home diff stayed unchanged and passing at
+  `0.08358285845120586`.
+
+Next:
+
+- Resume measured conversion work with `top-title-identity.png`.
+- Do not touch center field, bottom dock, or rail decomposition without
+  slice-seam proof first.
+
+## 2026-06-12 1410 ADT - Browser Home title identity primitive
+
+Completion:
+
+- Removed `top-title-identity.png` from active Browser Home title-strip
+  rendering.
+- Kept `top-title-identity.png` as source-derived reference material.
+- Added measured CSS/SVG provenance for `browser-home-title-identity`.
+- Added `browserHomeTitleIdentityBox` at
+  `{ left: 0, top: 0, width: 200, height: 61 }`.
+- Rendered the title identity mark and `CereBro Browser` label as real
+  DOM/SVG/CSS.
+
+Verification:
+
+- First render attempt failed strict installed diff and was tuned instead of
+  kept.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/cerebroTheme.test.ts server/cerebroUiPrimitives.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 16 tests before install.
+- `pnpm --dir app exec vitest run server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed after tuning: 12 tests.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed.
+- `pnpm --dir app run desktop:backup` passed.
+- `pnpm --dir app run desktop:package` passed. Existing Vite large-chunk,
+  CommonJS `import.meta`, `asar=false`, and Electron icon-format warnings
+  remain.
+- `pnpm --dir app run desktop:install` passed and reinstalled
+  `/Applications/CereBro.app`.
+- Installed Browser Home smoke passed against `/Applications/CereBro.app`.
+- Strict Browser Home diff improved from `0.08358285845120586` to
+  `0.08349827007224993`.
+
+Next:
+
+- Active top-title crops are now gone. Remaining active Browser Home rasters
+  are `center-field-title-star-map.png`, `bottom-dock-row.png`, and the shell
+  rail texture path in `Home.tsx`.
+- Use slice-seam proof before decomposing center field, bottom dock, or rail.
+
+## 2026-06-12 1426 ADT - Rejected bottom dock partition
+
+Completion:
+
+- Added a seam-audit fixture for the obvious bottom-dock decomposition:
+  left edge, existing `aang-dock.png` area, right edge, and lower edge.
+- The candidate failed installed-scale seam preflight and was recorded as
+  `rejected-bottom-dock-partition`.
+- No production Browser Home rendering changed.
+
+Verification:
+
+- Initial accepted candidate failed `pnpm --dir app run qa:browser-home-slice-seams`
+  with `mismatchRatio: 0.0022679418641217406`.
+- Reclassified the candidate as rejected.
+- `pnpm --dir app run qa:browser-home-slice-seams` then passed, proving the
+  rejection fixture is stable.
+
+Next:
+
+- Do not retry the same bottom-dock source partition.
+- Bottom dock needs traced geometry, a seam-safe single texture strategy, or
+  no-cost external extraction before production replacement.
+- Center field still needs seam-safe extraction before production replacement.
+
+## 2026-06-12 1438 ADT - Rejected CSS rail backplate
+
+Completion:
+
+- Tested replacing the active Browser rail `rail-full.png` background with a
+  measured CSS rail backplate while keeping the source-derived rail button
+  assets.
+- Installed Browser Home smoke still passed, but strict visual diff regressed.
+- Reverted the rail prototype. No production rail rendering changed.
+
+Verification:
+
+- Failed strict diff result was `0.08553475119568536` against the accepted gate
+  `0.08349827007224993`.
+
+Next:
+
+- Do not retry a guessed CSS rail backplate.
+- Rail replacement needs traced geometry or external extraction that preserves
+  texture, edge frame, compass, and negative space before production.
+
+## 2026-06-12 1443 ADT - Browser Home active raster extraction packet
+
+Completion:
+
+- Added `app/scripts/browserHomeExtractionPacket.ts`.
+- Added `pnpm --dir app run qa:browser-home-extraction-packet`.
+- Added a contract test for the packet script.
+- Generated the local extraction packet at
+  `docs/design/external-ai/local-extraction/2026-06-12/browser-home-active-raster-packet`.
+- Packet includes expected, actual, and diff crops for:
+  `rail-full`, `center-field-title-star-map`, and `bottom-dock-row`.
+- Packet records the rejected center and bottom-dock slice candidates so
+  external/no-cost extraction does not repeat failed paths.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-diff:strict` passed at
+  `0.08349827007224993` before packet generation.
+- `pnpm --dir app run qa:browser-home-extraction-packet` passed with
+  `targetCount: 3` and `rejectedCandidateCount: 2`.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeExtractionPacket.test.ts server/browserHomeBrandLayout.test.ts server/desktopInstalledSmoke.test.ts --maxWorkers=1 --no-file-parallelism` passed: 13 tests.
+
+Next:
+
+- Use the packet for no-cost external extraction or local tracing.
+- Do not promote an extracted replacement unless installed strict diff improves
+  or stays within the accepted gate.
+
+## 2026-06-12 1451 ADT - Browser Home trace candidate audit
+
+Completion:
+
+- Added `app/scripts/browserHomeTraceCandidateAudit.ts`.
+- Added `pnpm --dir app run qa:browser-home-trace-candidates`.
+- Added `app/server/browserHomeTraceCandidateAudit.test.ts`.
+- Added `rejected-rail-approximate-svg` under
+  `app/client/public/browser-home/trace-candidates`.
+- The trace audit renders SVG candidates to PNG, compares them against the
+  locked mockup crop, and enforces accepted/rejected status.
+
+Verification:
+
+- `pnpm --dir app run qa:browser-home-trace-candidates` passed.
+- The rejected rail candidate measured `mismatchRatio: 0.10677815598638449`.
+- `pnpm --dir app exec tsc --noEmit` passed.
+- `pnpm --dir app exec vitest run server/browserHomeTraceCandidateAudit.test.ts server/browserHomeExtractionPacket.test.ts server/browserHomeBrandLayout.test.ts --maxWorkers=1 --no-file-parallelism` passed: 13 tests.
+- `pnpm --dir app run qa:browser-home-provenance` passed.
+
+Next:
+
+- Future traced SVG candidates for rail, center field, or bottom dock must go
+  through `qa:browser-home-trace-candidates` before production.
+- Approximate hand-authored rail SVG is blocked unless it becomes materially
+  closer to the locked crop.
+
+## 2026-06-12 1503 ADT - Rejected exact center-field partition
+
+Completion:
+
+- Tested an exact no-overlap center-field partition to see whether the earlier
+  center split failed only because of its two-pixel overlap.
+- The exact partition still failed installed-scale seam preflight.
+- Recorded the candidate as `rejected-center-field-no-overlap-partition`.
+- Regenerated the extraction packet so it carries all three current rejection
+  fixtures.
+
+Verification:
+
+- Initial accepted candidate failed `pnpm --dir app run qa:browser-home-slice-seams`
+  with `mismatchRatio: 0.000009032798089864297`.
+- Reclassified the candidate as rejected.
+- `pnpm --dir app run qa:browser-home-slice-seams` passed with the new rejected
+  fixture.
+- `pnpm --dir app run qa:browser-home-extraction-packet` passed with
+  `rejectedCandidateCount: 3`.
+
+Next:
+
+- Center field should not be replaced by source-slice partitions.
+- It needs traced geometry, a single seam-safe texture strategy, or no-cost
+  external extraction.

@@ -52,4 +52,14 @@ describe("native browser desktop bootstrap", () => {
     expect(serverSource).toContain("await import(\"./vite\")");
     expect(staticSource).toContain("CEREBRO_STATIC_DIR");
   });
+
+  it("guards packaged desktop logging against broken stdout pipes", async () => {
+    const mainSource = await readFile(resolve(appRoot, "electron/main.ts"), "utf8");
+
+    expect(mainSource).toContain("installBrokenPipeGuard");
+    expect(mainSource).toContain("process.stdout.on(\"error\", ignoreBrokenPipe)");
+    expect(mainSource).toContain("process.stderr.on(\"error\", ignoreBrokenPipe)");
+    expect(mainSource).toContain("error.code !== \"EPIPE\"");
+    expect(mainSource.indexOf("installBrokenPipeGuard();")).toBeLessThan(mainSource.indexOf("app.setName(appName);"));
+  });
 });
