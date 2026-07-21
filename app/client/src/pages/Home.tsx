@@ -176,7 +176,18 @@ const MODE_ROUTES: Record<Mode, string[]> = {
 };
 
 const shellFrame = T.verdigrisIvory;
-const workFrame = T.graphiteCandle;
+const workFrame = {
+  slab: T.verdigrisIvory.shellPlaque,
+  slabRaised: T.verdigrisIvory.shellPlaqueActive,
+  slabMuted: T.verdigrisIvory.shell,
+  line: T.verdigrisIvory.shellLine,
+  lineSoft: T.verdigrisIvory.shellLineSoft,
+  candle: T.verdigrisIvory.brass,
+  candleSoft: T.verdigrisIvory.brassSoft,
+  risk: C.danger,
+  caution: C.warning,
+  healthy: C.success,
+};
 const mockupShell = {
   frame: "#060A09",
   frameSoft: "#0A1110",
@@ -2579,6 +2590,7 @@ function RouteActionButton({ action, onClick }: { action: RouteAction; onClick: 
 }
 
 function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
+  const B = { bg: workFrame.slabMuted, slab: workFrame.slab, muted: workFrame.slabMuted, line: workFrame.lineSoft };
   const [vpnStatus, setVpnStatus] = useState<NativeVpnStatusResult | null>(null);
   const [vpnBusy, setVpnBusy] = useState(false);
   const connection = trpc.agents.connectionStatus.useQuery(undefined, {
@@ -2678,9 +2690,9 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
   ];
 
   return (
-    <div className="h-full overflow-y-auto p-2" style={{ background: C.background }} aria-label="Basement overview">
+    <div className="h-full overflow-y-auto p-2" style={{ background: B.bg }} aria-label="Basement overview">
       <div className="grid gap-2">
-        <section className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
+        <section className="rounded p-2" style={{ background: B.slab, border: `1px solid ${B.line}` }}>
           <div className="flex items-start justify-between gap-2">
             <div>
               <h2 className="text-[12px] font-bold uppercase tracking-wider" style={{ color: C.textPrimary }}>

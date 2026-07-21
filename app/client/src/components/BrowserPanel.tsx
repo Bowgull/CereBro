@@ -38,6 +38,7 @@ const browserHomePins = [
   { label: "GitHub", target: "https://github.com", domain: "github.com", fallback: "GH" },
   { label: "Obsidian", target: "https://obsidian.md", domain: "obsidian.md", fallback: "O" },
   { label: "YouTube", target: "https://youtube.com", domain: "youtube.com", fallback: "YT" },
+  { label: "X", target: "https://x.com", domain: "x.com", fallback: "X" },
   { label: "Reddit", target: "https://reddit.com", domain: "reddit.com", fallback: "R" },
   { label: "Hacker News", target: "https://news.ycombinator.com", domain: "news.ycombinator.com", fallback: "HN" },
 ];
@@ -428,6 +429,10 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
   const [browserAangDraft, setBrowserAangDraft] = useState("");
   const [localAangRoutePreview, setLocalAangRoutePreview] = useState<BrowserAangRoutePreview | null>(null);
   const [activeBrowserChromeMenu, setActiveBrowserChromeMenu] = useState<BrowserChromeMenu>(null);
+  const [watchShelfOpen, setWatchShelfOpen] = useState(false);
+  const [watchShelfPinned, setWatchShelfPinned] = useState(false);
+  const [watchShelfMode, setWatchShelfMode] = useState<"continue" | "queue" | "live" | "favorites">("continue");
+  const [watchShelfActiveCategory, setWatchShelfActiveCategory] = useState<string | null>(null);
   const [nativeViewportHeight, setNativeViewportHeight] = useState(360);
   const nativeViewportRef = useRef<HTMLDivElement | null>(null);
   const utils = trpc.useUtils();
@@ -1268,7 +1273,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
       <div className="pointer-events-none absolute right-3 top-3 h-7 w-7 border-r border-t" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 border-b border-l" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
       <div className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 border-b border-r" aria-hidden="true" style={{ borderColor: browserFrame.line }} />
-      <main className="flex-1 overflow-hidden p-1" aria-label="Browser workspace">
+      <main className="relative flex-1 overflow-hidden p-1" aria-label="Browser workspace">
         <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-2"
@@ -1356,29 +1361,26 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
                 </Button>
               );
             })}
-            {!isBrowserHome && (
-              <Button
-                type="button"
-                size="sm"
-                variant={browserSurface === "watch" ? "secondary" : "outline"}
-                className="h-7 shrink-0 rounded-b-none px-2 text-[10px]"
-                aria-pressed={browserSurface === "watch"}
-                onClick={() => setBrowserSurface("watch")}
-                style={{
-                  background: browserSurface === "watch" ? browserFrame.plaqueActive : "rgba(8, 14, 13, 0.66)",
-                  border: `1px solid ${browserSurface === "watch" ? browserFrame.line : browserFrame.lineSoft}`,
-                  borderBottomColor: browserSurface === "watch" ? C.gold : "transparent",
-                  color: browserSurface === "watch" ? C.textPrimary : C.textMuted,
-                  boxShadow: browserFrame.bevel,
-                }}
-              >
-                Watch Shelf
-              </Button>
-            )}
             <Button type="button" size="sm" variant="ghost" disabled={!browserTabState.canCreateTab} className="h-7 w-7 shrink-0 px-0" aria-label="New browser tab" title="New tab" onClick={createDailyBrowserTab}>
               <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
             </Button>
             <div className="ml-auto flex shrink-0 items-center gap-1 pb-0.5">
+              <button
+                type="button"
+                aria-label={watchShelfOpen ? "Close Watch Shelf" : "Open Watch Shelf"}
+                onClick={() => setWatchShelfOpen((o) => !o)}
+                title={watchShelfOpen ? "Close Watch Shelf" : "Open Watch Shelf"}
+                className="flex h-7 items-center gap-1 rounded px-2 text-[10px] font-semibold"
+                style={{
+                  background: watchShelfOpen ? browserFrame.plaqueActive : "rgba(5, 10, 10, 0.56)",
+                  border: `1px solid ${watchShelfOpen ? browserFrame.line : browserFrame.lineSoft}`,
+                  color: watchShelfOpen ? C.gold : C.textMuted,
+                  boxShadow: browserFrame.bevel,
+                }}
+              >
+                <span aria-hidden="true" style={{ fontSize: 13 }}>⊞</span>
+                {watchShelfOpen && <span>Watch</span>}
+              </button>
               {isBrowserHome ? (
                 <span className="flex h-7 items-center gap-1.5 rounded px-2.5 text-[11px] font-semibold" aria-label="Browser protection status" style={{ color: C.textSecondary, border: `1px solid ${browserFrame.lineSoft}`, background: "rgba(5, 10, 10, 0.72)", boxShadow: browserFrame.bevel }}>
                   <span className="h-2 w-2 rounded-full" aria-hidden="true" style={{ background: C.success, boxShadow: `0 0 10px ${C.success}88` }} />
@@ -1858,7 +1860,7 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
             </div>
           )}
 
-          {(browserProjectPins.items.length > 0 || browserBookmarkItems.length > 0) && !hasOpenSandboxFrame && (
+          {(browserProjectPins.items.length > 0 || browserBookmarkItems.length > 0) && !hasOpenSandboxFrame && !isBrowserHome && (
             <div className="flex items-center gap-1 overflow-x-auto rounded px-1.5 py-1" aria-label="Browser saved row" style={{ background: "rgba(5, 10, 10, 0.72)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}>
               {browserProjectPins.items.slice(0, 3).map((pin) => (
                 <Button
@@ -2309,6 +2311,160 @@ export default function BrowserPanel({ onClose, onNavigate }: { onClose: () => v
           )}
 
         </div>
+
+        {/* ── Watch Shelf overlay drawer ─────────────────────────────────── */}
+        {watchShelfOpen && (
+          <div
+            className="absolute inset-y-0 right-0 z-30 flex w-[300px] flex-col overflow-hidden rounded-l"
+            style={{
+              background: "radial-gradient(circle at 80% 0%, rgba(198,155,85,0.08), transparent 40%), linear-gradient(180deg, rgba(9,20,17,0.99), rgba(3,9,8,0.99))",
+              border: `1px solid ${browserFrame.line}`,
+              borderRight: "none",
+              boxShadow: `-24px 0 64px rgba(0,0,0,0.72), inset 1px 0 0 rgba(198,155,85,0.12), inset 0 0 0 1px rgba(77,170,154,0.05)`,
+            }}
+          >
+            {/* Header */}
+            <div
+              className="flex shrink-0 items-center justify-between px-3 py-2.5"
+              style={{ background: browserFrame.plaque, borderBottom: `1px solid ${browserFrame.line}`, boxShadow: browserFrame.bevel }}
+            >
+              <span className="text-[13px] font-semibold tracking-tight" style={{ color: C.gold }}>Watch Shelf</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setWatchShelfPinned((p) => !p)}
+                  aria-label={watchShelfPinned ? "Unpin Watch Shelf" : "Pin Watch Shelf"}
+                  title={watchShelfPinned ? "Pinned — shelf stays open while browsing" : "Pin to keep open while browsing"}
+                  className="flex h-6 w-6 items-center justify-center rounded text-[11px]"
+                  style={{ background: watchShelfPinned ? `${C.gold}22` : "transparent", color: watchShelfPinned ? C.gold : C.textMuted, border: `1px solid ${watchShelfPinned ? `${C.gold}55` : "transparent"}` }}
+                >
+                  ⊞
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWatchShelfOpen(false)}
+                  aria-label="Close Watch Shelf"
+                  className="flex h-6 w-6 items-center justify-center rounded text-[15px]"
+                  style={{ color: C.textMuted, border: "1px solid transparent" }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Mode tabs: Continue / Queue / Live / Favorites */}
+            <div className="flex shrink-0 gap-0 overflow-x-auto" style={{ borderBottom: `1px solid ${browserFrame.lineSoft}`, background: "rgba(4,9,8,0.7)" }}>
+              {(["continue", "queue", "live", "favorites"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setWatchShelfMode(m)}
+                  className="shrink-0 whitespace-nowrap px-3 py-2 text-[10px] font-semibold"
+                  style={{ color: watchShelfMode === m ? C.textPrimary : C.textMuted, borderBottom: `2px solid ${watchShelfMode === m ? C.gold : "transparent"}`, background: watchShelfMode === m ? "rgba(198,155,85,0.07)" : "transparent" }}
+                >
+                  {m === "live" ? "Live / New" : m.charAt(0).toUpperCase() + m.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Shelf filter pills — shown only when there are items */}
+            {watchShelfItems.length > 0 && (
+              <div className="flex shrink-0 gap-1 overflow-x-auto px-2 py-1.5" style={{ borderBottom: `1px solid ${browserFrame.lineSoft}` }}>
+                <button
+                  type="button"
+                  onClick={() => setWatchShelfActiveCategory(null)}
+                  className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold"
+                  style={{
+                    background: watchShelfActiveCategory === null ? `${C.gold}20` : "rgba(5,10,10,0.6)",
+                    border: `1px solid ${watchShelfActiveCategory === null ? C.gold : browserFrame.lineSoft}`,
+                    color: watchShelfActiveCategory === null ? C.gold : C.textMuted,
+                  }}
+                >
+                  All
+                </button>
+                {watchShelf.categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setWatchShelfActiveCategory(watchShelfActiveCategory === cat ? null : cat)}
+                    className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold"
+                    style={{
+                      background: watchShelfActiveCategory === cat ? `${watchShelfTone(cat)}1a` : "rgba(5,10,10,0.6)",
+                      border: `1px solid ${watchShelfActiveCategory === cat ? watchShelfTone(cat) : browserFrame.lineSoft}`,
+                      color: watchShelfActiveCategory === cat ? watchShelfTone(cat) : C.textMuted,
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Item list */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="px-2 py-2">
+                {watchShelfItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full" style={{ background: "rgba(198,155,85,0.1)", border: `1px solid ${browserFrame.line}` }}>
+                      <span className="text-base" style={{ color: C.gold }}>▶</span>
+                    </div>
+                    <div className="text-[12px] font-semibold" style={{ color: C.textSecondary }}>Nothing saved yet</div>
+                    <div className="mt-1 max-w-[180px] text-[10px] leading-relaxed" style={{ color: C.textMuted }}>Open a page and hit "Save to shelf" to start tracking.</div>
+                  </div>
+                ) : (
+                  <div className="grid gap-1.5">
+                    {watchShelfItems
+                      .filter((item) => watchShelfActiveCategory == null || item.category === watchShelfActiveCategory)
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          className="grid grid-cols-[40px_minmax(0,1fr)] gap-2 rounded p-2 text-[10px] leading-snug"
+                          style={{ background: "rgba(8,14,12,0.94)", border: `1px solid ${browserFrame.lineSoft}`, boxShadow: browserFrame.bevel }}
+                        >
+                          <div
+                            className="flex h-[40px] w-[40px] items-center justify-center rounded text-[12px] font-bold"
+                            style={{ background: browserFrame.plaque, border: `1px solid ${watchShelfTone(item.category)}55`, color: watchShelfTone(item.category) }}
+                          >
+                            {watchShelfInitial(item.title, item.targetUrl)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate font-semibold" style={{ color: C.textPrimary }}>{item.title ?? item.targetUrl}</div>
+                            <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                              <Chip label={item.category} tone={watchShelfTone(item.category)} />
+                            </div>
+                            <div className="mt-0.5 truncate text-[9px]" style={{ color: C.textMuted }}>{item.targetUrl}</div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Save footer */}
+            <div className="shrink-0 px-2 py-2" style={{ borderTop: `1px solid ${browserFrame.lineSoft}` }}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 w-full text-[10px]"
+                disabled={!hasOpenSandboxFrame || selectedBrowserProposalId == null || createWatchShelfItemFromOpenTab.isPending}
+                title={hasOpenSandboxFrame ? "Save the current open page to Watch Shelf." : "Open a real page first."}
+                onClick={() => {
+                  if (selectedBrowserProposalId == null) return;
+                  createWatchShelfItemFromOpenTab.mutate({
+                    proposalId: selectedBrowserProposalId,
+                    category: (watchShelfActiveCategory ?? watchShelfCategory) as "Watching" | "Want" | "Anime" | "YouTube" | "Twitch" | "Finished",
+                  });
+                }}
+                style={{ borderColor: browserFrame.line, color: hasOpenSandboxFrame ? C.textPrimary : C.textMuted }}
+              >
+                {createWatchShelfItemFromOpenTab.isPending ? "Saving…" : hasOpenSandboxFrame ? "Save Page to Shelf" : watchShelfDraft.saveLabel}
+              </Button>
+            </div>
+          </div>
+        )}
+
       </main>
       <form
         className="grid shrink-0 grid-cols-[58px_minmax(0,1fr)_auto_auto] items-center gap-2 px-2 pb-2"

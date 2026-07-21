@@ -100,7 +100,18 @@ type BrowserDraftTab = {
   title: string | null;
 };
 
-const G = T.graphiteCandle;
+const G = {
+  slab: T.verdigrisIvory.shellPlaque,
+  slabRaised: T.verdigrisIvory.shellPlaqueActive,
+  slabMuted: T.verdigrisIvory.shell,
+  line: T.verdigrisIvory.shellLine,
+  lineSoft: T.verdigrisIvory.shellLineSoft,
+  candle: T.verdigrisIvory.brass,
+  candleSoft: T.verdigrisIvory.brassSoft,
+  risk: C.danger,
+  caution: C.warning,
+  healthy: C.success,
+};
 
 function browserDraftTabLabel(tab: BrowserDraftTab) {
   const title = tab.title?.trim();
