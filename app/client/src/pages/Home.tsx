@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { humanizeEnum } from "@/lib/copy";
+import { CerebroRail } from "@/components/brand/CerebroRail";
 import { Castle, Compass, Hammer, ScrollText, Settings, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import KeepScene from "@/components/KeepScene";
@@ -83,14 +84,6 @@ type NavId =
   | "settings";
 
 type ZoneId = "keep" | "browser" | "workshop" | "ledger" | "basement";
-
-const browserRailAssets: Record<ZoneId, { src: string; top: string; height: string }> = {
-  keep: { src: "/browser-home/assets/rail-keep.png", top: "1.1%", height: "19.8%" },
-  browser: { src: "/browser-home/assets/rail-browser-active.png", top: "21.7%", height: "8.9%" },
-  workshop: { src: "/browser-home/assets/rail-workshop.png", top: "32.9%", height: "8.6%" },
-  ledger: { src: "/browser-home/assets/rail-ledger.png", top: "43.7%", height: "8.6%" },
-  basement: { src: "/browser-home/assets/rail-basement.png", top: "54.2%", height: "9.8%" },
-};
 
 interface ZoneNavItem {
   zone: ZoneId;
@@ -306,6 +299,10 @@ export default function Home() {
     return states;
   }, [heroes]);
 
+  // Live activity pulse shown in the rail bottom (moved out of the old Keep dock).
+  const activeAgents = Object.values(agentStates).filter((state) => state && state !== "idle" && state !== "dormant").length;
+  const heroesCount = heroes.length;
+
   return (
     <div
       className="h-[100dvh] min-h-[100dvh] flex flex-col overflow-hidden gap-1.5 p-1.5 sm:p-2"
@@ -465,45 +462,20 @@ export default function Home() {
         <div className="pointer-events-none absolute bottom-2 left-2 z-10 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
         <div className="pointer-events-none absolute bottom-2 right-2 z-10 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
 
-        {/* Left rail — THE navigation, one ornate rail on every surface
-            (audit items 2+5: the approved Browser rail is the global rail;
-            active state is CSS until per-zone active art exists). */}
-        <nav
-          className={`${isBrowserRoute && isBrowserRailCollapsed ? "w-0" : "w-[122px]"} relative flex flex-col shrink-0 overflow-hidden transition-[width] duration-200`}
-          aria-label="CereBro zones"
-          style={{
-            background: "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat",
+        {/* Left rail — THE navigation, one ornate rail on every surface.
+            Hybrid build: cap/tile chrome + natural-aspect buttons, live
+            activity pulse in the bottom (audit items 2+5). */}
+        <CerebroRail
+          items={ZONE_NAV_ITEMS.map((item) => ({ zone: item.zone, label: item.label }))}
+          activeZone={NAV_TO_ZONE[nav]}
+          onSelect={(zone) => {
+            const item = ZONE_NAV_ITEMS.find((entry) => entry.zone === zone);
+            if (item) setNav(item.id);
           }}
-        >
-          <div className="absolute inset-0 z-10">
-            {ZONE_NAV_ITEMS.map((item) => {
-              const asset = browserRailAssets[item.zone];
-              const isActive = NAV_TO_ZONE[nav] === item.zone;
-              return (
-                <button
-                  key={`rail-button-${item.zone}`}
-                  type="button"
-                  onClick={() => setNav(item.id)}
-                  aria-label={`Open ${item.label}`}
-                  aria-current={isActive ? "page" : undefined}
-                  className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                  style={{
-                    top: asset.top,
-                    height: asset.height,
-                    filter: isActive ? "brightness(1.06)" : "brightness(0.62) saturate(0.75)",
-                    boxShadow: isActive
-                      ? "0 0 0 1.5px rgba(198, 155, 85, 0.7), 0 0 18px rgba(198, 155, 85, 0.3)"
-                      : undefined,
-                    ["--tw-ring-color" as string]: C.accent,
-                  }}
-                >
-                  <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
-                  <span className="sr-only">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </nav>
+          collapsed={isBrowserRoute && isBrowserRailCollapsed}
+          statusLabel={activeAgents > 0 ? `${activeAgents} moving` : heroesCount > 0 ? `${heroesCount} active` : "Calm watch"}
+          statusActive={activeAgents > 0}
+        />
 
         {/* Center workspace */}
           <main className="flex-1 flex flex-col overflow-hidden" aria-label="CereBro workspace" style={{ minHeight: 0, background: "rgba(6, 10, 10, 0.96)" }}>
@@ -862,55 +834,7 @@ function HomeView({
           </div>
         </div>
 
-        <KeepHomeDock
-          activeAgents={activeAgents}
-          heroesCount={heroesCount}
-        />
-
-      </div>
-    </div>
-  );
-}
-
-// Status-only strip. Navigation lives in the left rail alone — this shows the
-// live activity pulse of the Keep, nothing clickable. (Cohesion audit item 2:
-// the old dock duplicated rail navigation with fake per-lane status dots.)
-function KeepHomeDock({
-  activeAgents,
-  heroesCount,
-}: {
-  activeAgents: number;
-  heroesCount: number;
-}) {
-  const pulse =
-    activeAgents > 0 ? `${activeAgents} moving` : heroesCount > 0 ? `${heroesCount} active` : "Calm watch";
-
-  return (
-    <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
-      <div
-        className="pointer-events-auto inline-flex items-center gap-2 rounded px-2.5 py-1.5"
-        style={{
-          background: "rgba(5, 9, 8, 0.92)",
-          border: `1px solid ${mockupShell.marbleLineSoft}`,
-          boxShadow: `0 12px 32px rgba(0, 0, 0, 0.5), ${mockupShell.bevel}`,
-          backdropFilter: "blur(10px)",
-        }}
-        aria-label="Keep activity"
-        role="status"
-      >
-        <div
-          className="h-2 w-2 shrink-0 rounded-full"
-          style={{
-            background: activeAgents > 0 ? C.success : C.textMuted,
-            boxShadow: activeAgents > 0 ? `0 0 12px ${C.success}44` : undefined,
-          }}
-        />
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-          Keep
-        </span>
-        <span className="text-[10px] leading-none" style={{ color: C.textMuted }}>
-          {pulse}
-        </span>
+        {/* Keep activity pulse now lives in the rail bottom (CerebroRail). */}
       </div>
     </div>
   );
