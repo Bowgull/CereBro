@@ -143,6 +143,7 @@ async function createMainWindow() {
     minWidth: 1100,
     minHeight: 720,
     backgroundColor: "#020606",
+    show: false,
     title: mainWindowTitle,
     icon: appIconPath,
     webPreferences: {
@@ -153,6 +154,17 @@ async function createMainWindow() {
     },
   });
   mainWindowRef = mainWindow;
+  // Show only once the renderer has painted, so launch never flashes a black
+  // window. Fallback timer guarantees the window appears even if the renderer
+  // stalls (e.g. dev server not running).
+  let shown = false;
+  const showMainWindow = () => {
+    if (shown || mainWindow.isDestroyed()) return;
+    shown = true;
+    mainWindow.show();
+  };
+  mainWindow.once("ready-to-show", showMainWindow);
+  setTimeout(showMainWindow, 4000);
   mainWindow.on("close", () => desktopLog("main window close requested"));
   mainWindow.on("closed", () => {
     desktopLog("main window closed");

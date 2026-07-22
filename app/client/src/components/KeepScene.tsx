@@ -1228,6 +1228,11 @@ export default function KeepSceneView({ agentStates }: Props) {
       backgroundColor: C.background,
       parent: containerRef.current,
       pixelArt: true, antialias: false, roundPixels: true,
+      // rAF never fires in a hidden document, which wedges the loader mid-
+      // preload and leaves the canvas black forever (background launch,
+      // minimized start, embedded views). Timer-driven stepping keeps the
+      // scene loading and rendering regardless of visibility.
+      fps: { forceSetTimeOut: document.hidden },
       scale: {
         mode: Phaser.Scale.NONE,
         width: CANVAS_W,
@@ -1237,8 +1242,37 @@ export default function KeepSceneView({ agentStates }: Props) {
     });
 
     gameRef.current = game;
+    if (import.meta.env.DEV) (window as unknown as { __keepGame?: Phaser.Game }).__keepGame = game;
+
+    // Loading overlay — the scene must never be a silent black box while
+    // assets stream in. Removed the moment the castle is built.
+    const overlay = document.createElement("div");
+    overlay.setAttribute("aria-live", "polite");
+    overlay.style.cssText = `position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;background:${C.background};z-index:2;transition:opacity 300ms ease;`;
+    const label = document.createElement("div");
+    label.textContent = "Raising the Keep…";
+    label.style.cssText = `color:${C.textSecondary};font-size:13px;letter-spacing:0.08em;`;
+    const barShell = document.createElement("div");
+    barShell.style.cssText = `width:220px;height:3px;border-radius:2px;background:rgba(198,155,85,0.18);overflow:hidden;`;
+    const barFill = document.createElement("div");
+    barFill.style.cssText = `width:0%;height:100%;border-radius:2px;background:${C.gold};transition:width 200ms ease;`;
+    barShell.appendChild(barFill);
+    overlay.appendChild(label);
+    overlay.appendChild(barShell);
+    containerRef.current.appendChild(overlay);
+    const removeOverlay = () => {
+      overlay.style.opacity = "0";
+      setTimeout(() => overlay.remove(), 350);
+    };
+
     game.events.on("ready", () => {
-      sceneRef.current = game.scene.getScene("KeepScene") as KeepScene;
+      const scene = game.scene.getScene("KeepScene") as KeepScene;
+      sceneRef.current = scene;
+      scene.load.on(Phaser.Loader.Events.PROGRESS, (value: number) => {
+        barFill.style.width = `${Math.round(value * 100)}%`;
+      });
+      if (scene.scene.isActive()) removeOverlay();
+      else scene.events.once(Phaser.Scenes.Events.CREATE, removeOverlay);
     });
 
     const applyStyle = () => {
@@ -1264,6 +1298,7 @@ export default function KeepSceneView({ agentStates }: Props) {
     return () => {
       clearTimeout(t1); clearTimeout(t2);
       resizeObserver.disconnect();
+      overlay.remove();
       game.destroy(true);
       gameRef.current = null; sceneRef.current = null;
     };
