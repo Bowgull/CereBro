@@ -918,7 +918,6 @@ function HomeView({
         <KeepHomeDock
           activeAgents={activeAgents}
           heroesCount={heroesCount}
-          onNavigate={onNavigate}
         />
 
       </div>
@@ -926,98 +925,45 @@ function HomeView({
   );
 }
 
+// Status-only strip. Navigation lives in the left rail alone — this shows the
+// live activity pulse of the Keep, nothing clickable. (Cohesion audit item 2:
+// the old dock duplicated rail navigation with fake per-lane status dots.)
 function KeepHomeDock({
   activeAgents,
   heroesCount,
-  onNavigate,
 }: {
   activeAgents: number;
   heroesCount: number;
-  onNavigate: (id: NavId) => void;
 }) {
-  const actions: Array<{
-    label: string;
-    meta: string;
-    tone: string;
-    target?: NavId;
-    disabled?: boolean;
-  }> = [
-    {
-      label: "Browser",
-      meta: "Open browser surface",
-      tone: C.accent,
-      target: "browser",
-    },
-    {
-      label: "Terminal",
-      meta: "Open Terminal Lab",
-      tone: C.success,
-      target: "terminal",
-    },
-    {
-      label: "Files",
-      meta: "File lane not wired",
-      tone: C.textMuted,
-      disabled: true,
-    },
-    {
-      label: "Outputs",
-      meta: "Open saved outputs",
-      tone: C.warning,
-      target: "outputs",
-    },
-  ];
+  const pulse =
+    activeAgents > 0 ? `${activeAgents} moving` : heroesCount > 0 ? `${heroesCount} active` : "Calm watch";
 
   return (
     <div className="absolute left-2.5 right-2.5 bottom-2.5 pointer-events-none">
       <div
-        className="pointer-events-auto grid grid-cols-[0.9fr_repeat(5,minmax(0,1fr))] gap-1 rounded p-1.5 max-lg:grid-cols-5"
+        className="pointer-events-auto inline-flex items-center gap-2 rounded px-2.5 py-1.5"
         style={{
           background: "rgba(5, 9, 8, 0.92)",
-          border: `1px solid ${mockupShell.marbleLine}`,
-          boxShadow: `0 18px 46px rgba(0, 0, 0, 0.62), ${mockupShell.bevel}`,
+          border: `1px solid ${mockupShell.marbleLineSoft}`,
+          boxShadow: `0 12px 32px rgba(0, 0, 0, 0.5), ${mockupShell.bevel}`,
           backdropFilter: "blur(10px)",
         }}
-        aria-label="Keep first actions"
+        aria-label="Keep activity"
+        role="status"
       >
-        <div className="hidden lg:flex min-w-0 items-center gap-2 rounded px-2 py-1" style={{ background: "rgba(3, 8, 7, 0.55)", border: `1px solid ${mockupShell.marbleLineSoft}` }}>
-          <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: activeAgents > 0 ? C.success : C.textMuted, boxShadow: activeAgents > 0 ? `0 0 12px ${C.success}44` : undefined }} />
-          <div className="min-w-0">
-            <div className="truncate text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
-              Keep
-            </div>
-            <div className="truncate text-[10px] leading-none" style={{ color: C.textMuted }}>
-              {activeAgents > 0 ? `${activeAgents} moving` : heroesCount > 0 ? `${heroesCount} active` : "Calm watch"}
-            </div>
-          </div>
-        </div>
-
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            type="button"
-            onClick={() => action.target && onNavigate(action.target)}
-            aria-label={`${action.label}: ${action.meta}`}
-            disabled={action.disabled}
-            variant="outline"
-            className="h-8 justify-center whitespace-nowrap px-2 text-center"
-            style={{
-              background: action.disabled ? "rgba(5, 11, 10, 0.46)" : mockupShell.plaque,
-              border: `1px solid ${action.disabled ? shellFrame.shellLineSoft : mockupShell.marbleLineSoft}`,
-              color: action.disabled ? C.textMuted : C.textSecondary,
-              boxShadow: action.disabled ? "inset 0 1px 6px rgba(0, 0, 0, 0.42)" : mockupShell.bevel,
-              opacity: action.disabled ? 0.58 : 1,
-            }}
-            title={action.meta}
-          >
-            <span className="flex min-w-0 items-center gap-1.5">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: action.tone }} />
-              <span className="truncate text-[10px] font-semibold uppercase tracking-wider" style={{ color: action.disabled ? C.textMuted : C.textPrimary }}>
-                {action.label}
-              </span>
-            </span>
-          </Button>
-        ))}
+        <div
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{
+            background: activeAgents > 0 ? C.success : C.textMuted,
+            boxShadow: activeAgents > 0 ? `0 0 12px ${C.success}44` : undefined,
+          }}
+        />
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
+          Keep
+        </span>
+        <span className="text-[10px] leading-none" style={{ color: C.textMuted }}>
+          {pulse}
+        </span>
       </div>
     </div>
   );
@@ -3517,19 +3463,27 @@ function ContextPanel({
         <div className={`${compact ? "line-clamp-3 text-[10px]" : "text-[11px]"} leading-snug`} style={{ color: C.textSecondary }}>
           {nextAction}
         </div>
-        <div className={`${compact ? "hidden" : "mt-2 grid grid-cols-2 gap-1"}`}>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("projects")} aria-label="Open Project Lab map">
-            Project
-          </Button>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("workbench")} aria-label="Open Workbench receipt body">
-            Workbench
-          </Button>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("ledger")} aria-label="Open Ledger audit trail">
-            Ledger
-          </Button>
-          <Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => onNavigate("approvals")} aria-label="Open approval gates">
-            Gates
-          </Button>
+        {/* Quiet related links — navigation itself lives in the left rail (audit item 2). */}
+        <div className={`${compact ? "hidden" : "mt-2 flex flex-wrap items-center gap-x-3 gap-y-1"}`}>
+          {(
+            [
+              ["Project Lab", "projects"],
+              ["Workbench", "workbench"],
+              ["Ledger", "ledger"],
+              ["Approvals", "approvals"],
+            ] as Array<[string, NavId]>
+          ).map(([label, target]) => (
+            <button
+              key={target}
+              type="button"
+              onClick={() => onNavigate(target)}
+              aria-label={`Go to ${label}`}
+              className="bg-transparent p-0 text-[10px] underline-offset-2 hover:underline focus-visible:underline"
+              style={{ color: C.textMuted }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
