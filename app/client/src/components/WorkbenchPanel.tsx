@@ -35,6 +35,7 @@ import {
   workbenchWatchShelfModel,
 } from "@/lib/workbenchBrowserModel";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -3874,26 +3875,6 @@ function Meta({ label, value, title, tone = C.textSecondary }: { label: string; 
       <div className="truncate uppercase tracking-wider" style={{ color: C.textMuted }} title={label}>{label}</div>
       <div className="break-words" style={{ color: tone }} title={title}>{value}</div>
     </div>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accentViolet || tone === C.glowViolet
-          ? "violet"
-          : tone === C.accent
-            ? "default"
-            : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase" title={label}>
-      <span className="min-w-0 truncate">{label}</span>
-    </Badge>
   );
 }
 

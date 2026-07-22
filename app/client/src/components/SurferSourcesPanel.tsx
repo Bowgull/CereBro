@@ -5,6 +5,7 @@ import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { humanizeEnum } from "@/lib/copy";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
+import { Chip as MiniBadge } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -681,24 +682,6 @@ function SourceCard({
         </details>
       )}
     </article>
-  );
-}
-
-function MiniBadge({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accent
-          ? "default"
-          : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase">
-      {label.replace(/_/g, " ")}
-    </Badge>
   );
 }
 

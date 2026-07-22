@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -331,26 +332,6 @@ export default function DesignReviewPanel({ onClose }: { onClose: () => void }) 
         )}
       </main>
     </div>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accentViolet || tone === C.glowViolet
-          ? "violet"
-          : tone === C.accent
-            ? "default"
-            : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase">
-      {label}
-    </Badge>
   );
 }
 

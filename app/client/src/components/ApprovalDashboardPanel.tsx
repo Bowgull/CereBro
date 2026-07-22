@@ -4,6 +4,7 @@ import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
 import { approvalBrowserReturnCopy, approvalPanelCopy, approvalRunnerStateCopy } from "@/lib/approvalPanelCopyModel";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -1089,26 +1090,6 @@ function ApprovalReceiptChain({
         </div>
       )}
     </Section>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accentViolet || tone === C.glowViolet
-          ? "violet"
-          : tone === C.accent
-            ? "default"
-            : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase">
-      {label}
-    </Badge>
   );
 }
 

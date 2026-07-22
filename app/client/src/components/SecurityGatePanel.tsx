@@ -5,6 +5,7 @@ import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { humanizeEnum } from "@/lib/copy";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -371,25 +372,5 @@ function ReceiptList({ title, items, tone }: { title: string; items: string[]; t
         ))}
       </div>
     </div>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accentViolet || tone === C.glowViolet
-          ? "violet"
-          : tone === C.accent
-            ? "default"
-            : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase">
-      {label}
-    </Badge>
   );
 }

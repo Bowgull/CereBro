@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 
 type LocalState = "awake" | "muted" | "parked" | "sleeping";
@@ -226,23 +227,5 @@ export default function AangCompanionPanel({
         )}
       </main>
     </div>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accent
-          ? "default"
-          : "secondary";
-
-  return (
-    <Badge variant={variant} className="px-1.5 py-0.5" style={{ background: `${tone}22`, color: tone }}>
-      {label}
-    </Badge>
   );
 }

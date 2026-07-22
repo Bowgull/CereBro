@@ -4,6 +4,7 @@ import { sourceDisplayName } from "@/lib/displayLabels";
 import { humanizeEnum } from "@/lib/copy";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
+import { Chip } from "@/components/ui/chip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -953,26 +954,6 @@ function SectionTitle({ title, detail }: { title: string; detail: string }) {
       <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textMuted }}>{title}</div>
       <div className="text-[10px] uppercase tracking-wider truncate" style={{ color: C.textMuted }}>{detail}</div>
     </div>
-  );
-}
-
-function Chip({ label, tone }: { label: string; tone: string }) {
-  const variant = tone === C.danger
-    ? "destructive"
-    : tone === C.warning || tone === C.gold
-      ? "warning"
-      : tone === C.success
-        ? "success"
-        : tone === C.accentViolet || tone === C.glowViolet
-          ? "violet"
-          : tone === C.accent
-            ? "default"
-            : "secondary";
-
-  return (
-    <Badge variant={variant} className="uppercase">
-      {label}
-    </Badge>
   );
 }
 

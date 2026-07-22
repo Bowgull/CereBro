@@ -3178,7 +3178,7 @@ function ContextPanel({
                   boxShadow: `${mockupShell.bevel}, 0 0 18px rgba(198, 155, 85, 0.08)`,
                 }}
               >
-                <img src="/sprites/keep/aang/rotations/south.png" alt="" className="h-8 w-8" style={{ imageRendering: "pixelated" }} />
+                <img src="/assets/aang/aang-chat-dock-waist-v1.png" alt="" className="h-8 w-8 rounded-full object-cover object-top" />
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[13px] font-semibold" style={{ color: C.textPrimary }}>
@@ -3476,10 +3476,9 @@ function CommandBar({
             aria-hidden="true"
           >
             <img
-              src="/sprites/keep/aang/rotations/south.png"
+              src="/assets/aang/aang-chat-dock-waist-v1.png"
               alt=""
-              className="h-8 w-8"
-              style={{ imageRendering: "pixelated" }}
+              className="h-8 w-8 rounded-full object-cover object-top"
             />
           </div>
           <Input
