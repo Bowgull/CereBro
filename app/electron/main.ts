@@ -154,17 +154,17 @@ async function createMainWindow() {
     },
   });
   mainWindowRef = mainWindow;
-  // Show only once the renderer has painted, so launch never flashes a black
-  // window. Fallback timer guarantees the window appears even if the renderer
-  // stalls (e.g. dev server not running).
+  // Show only once the UI has actually loaded (did-finish-load = bundle
+  // executed and mounted), so launch never flashes a black window.
+  // ready-to-show is too early — it fires on the first blank paint.
+  // Fallback timer guarantees the window appears even if the load stalls.
   let shown = false;
   const showMainWindow = () => {
     if (shown || mainWindow.isDestroyed()) return;
     shown = true;
     mainWindow.show();
   };
-  mainWindow.once("ready-to-show", showMainWindow);
-  setTimeout(showMainWindow, 4000);
+  setTimeout(showMainWindow, 6000);
   mainWindow.on("close", () => desktopLog("main window close requested"));
   mainWindow.on("closed", () => {
     desktopLog("main window closed");
@@ -178,6 +178,8 @@ async function createMainWindow() {
   });
   mainWindow.webContents.on("did-finish-load", () => {
     desktopLog(`main window finished load ${mainWindow.webContents.getURL()}`);
+    // Small delay lets React commit its first real frame before the window appears.
+    setTimeout(showMainWindow, 250);
   });
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
