@@ -924,14 +924,14 @@ function StubView({ title, phase }: { title: string; phase: string }) {
         className="max-w-md w-full p-3 rounded"
         style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}
       >
-        <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.warning }}>
-          Stub
+        <div className="text-xs uppercase tracking-widest mb-1" style={{ color: C.textMuted }}>
+          Coming soon
         </div>
         <div className="text-[13px] font-semibold mb-2" style={{ color: C.textPrimary }}>
           {title}
         </div>
         <div className="text-[12px] leading-snug" style={{ color: C.textSecondary }}>
-          This canonical section is in the spec but not yet wired. Slated for {phase}.
+          This part of CereBro isn&apos;t ready yet.
         </div>
       </div>
     </div>
@@ -1602,8 +1602,9 @@ function LedgerOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
               <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.textPrimary }}>
                 Route Receipt Contract
               </div>
+              {/* Executor build status is internal — surface only the user-relevant fact. */}
               <Badge variant="secondary" className="uppercase">
-                executor {routeReceiptContract.executorStatus.replace(/_/g, " ")}
+                read-only
               </Badge>
             </div>
             <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-6">
@@ -3607,18 +3608,7 @@ function CommandBar({
         {latestReceipt ? `Safety ${latestReceipt.riskLevel}` : "Safety clear"}
       </Button>
 
-      <Button
-        type="button"
-        disabled
-        aria-label="Attach artifact unavailable until Phase 6"
-        variant="secondary"
-        size="sm"
-        className="h-8 shrink-0 px-2"
-        style={{ border: `1px solid ${shellFrame.shellLineSoft}`, color: C.textMuted, background: "rgba(5, 11, 10, 0.56)", opacity: 0.54, boxShadow: mockupShell.bevel }}
-        title="Phase 6"
-      >
-        Attach
-      </Button>
+      {/* Attach ships when it works — unbuilt controls are not rendered (audit item 4). */}
       <Button
         type="submit"
         disabled={!value.trim() || isClassifying}

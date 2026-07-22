@@ -1079,29 +1079,14 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                   >
                     Watch Shelf
                   </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    disabled={!browserTabState.canCreateTab}
-                    className="h-7 w-7 shrink-0 px-0"
-                    aria-label="New browser tab planned"
-                    title="New tab is blocked until tab storage and runner contracts exist."
-                  >
-                    <Plus size={13} strokeWidth={1.8} aria-hidden="true" />
-                  </Button>
+                  {/* Unbuilt controls (new tab, back/forward) are not rendered
+                      until they work — audit item 4. */}
                   <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
                     {browserTabState.tabSummary}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-1.5 rounded p-1.5" style={{ background: G.slabMuted, border: `1px solid ${G.lineSoft}` }}>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser back planned">
-                    <ArrowLeft size={14} strokeWidth={1.8} aria-hidden="true" />
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 px-0" disabled aria-label="Browser forward planned">
-                    <ArrowRight size={14} strokeWidth={1.8} aria-hidden="true" />
-                  </Button>
                   <Button
                     type="button"
                     size="sm"
@@ -1170,23 +1155,30 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                     </summary>
                     <div className="absolute right-0 z-20 mt-1 w-56 rounded p-1.5" role="menu" style={{ background: G.slabRaised, border: `1px solid ${G.lineSoft}`, boxShadow: `0 16px 36px ${C.background}cc` }}>
                       <div className="px-1.5 pb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: C.textMuted }}>Page Actions</div>
-                      {browserShell.actions.map((action) => (
-                        <Button
-                          key={action.label}
-                          type="button"
-                          variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
-                          size="sm"
-                          className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
-                          title={action.plannedReason}
-                          role="menuitem"
-                          onClick={() => setBrowserActionLabel(action.label)}
-                        >
-                          <span className="block">
-                            <span className="block text-[11px] font-semibold">{action.label}</span>
-                            <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
-                          </span>
-                        </Button>
-                      ))}
+                      {/* Collapse to one quiet line when nothing is open (audit item 4). */}
+                      {browserShell.actions.every((action) => !action.enabled) ? (
+                        <div className="px-1.5 py-1.5 text-[10px] leading-snug" role="note" style={{ color: C.textMuted }}>
+                          Open a page to use page actions.
+                        </div>
+                      ) : (
+                        browserShell.actions.map((action) => (
+                          <Button
+                            key={action.label}
+                            type="button"
+                            variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
+                            size="sm"
+                            className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                            title={action.plannedReason}
+                            role="menuitem"
+                            onClick={() => setBrowserActionLabel(action.label)}
+                          >
+                            <span className="block">
+                              <span className="block text-[11px] font-semibold">{action.label}</span>
+                              <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>{action.plannedReason}</span>
+                            </span>
+                          </Button>
+                        ))
+                      )}
                       <div className="mt-1 rounded p-1.5 text-[10px] leading-snug" style={{ background: G.slab, border: `1px solid ${G.lineSoft}`, color: C.textMuted }}>
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-semibold uppercase tracking-wider" style={{ color: C.textPrimary }}>
@@ -2019,22 +2011,12 @@ export default function WorkbenchPanel({ onClose, onNavigate }: { onClose: () =>
                       disabled={!tab.active}
                       className="h-7 shrink-0 px-2"
                       aria-pressed={tab.active}
-                      title={tab.state === "draft" ? "Draft only. No page opened." : tab.state === "planned" ? "Planned until tab state storage exists." : "Active local page frame."}
+                      title={tab.state === "draft" ? "Draft only. No page opened." : tab.state === "planned" ? "Not available yet." : "Active local page frame."}
                     >
                       {tab.label}
                     </Button>
                   ))}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    disabled={!browserTabState.canCreateTab}
-                    className="h-7 w-7 shrink-0 px-0"
-                    aria-label="New browser tab planned"
-                    title="New tab is blocked until tab storage and runner contracts exist."
-                  >
-                    +
-                  </Button>
+                  {/* Unbuilt new-tab control not rendered until it works — audit item 4. */}
                   <div className="ml-auto hidden min-w-[180px] text-[10px] leading-snug md:block" style={{ color: C.textMuted }}>
                     {browserTabState.tabSummary}
                   </div>

@@ -2621,20 +2621,28 @@ export default function BrowserPanel({
                       <span className="block text-[10px] font-normal" style={{ color: C.textMuted }}>Save this page.</span>
                     </span>
                   </Button>
-                  {browserShell.actions.map((action) => (
-                    <Button
-                      key={action.label}
-                      type="button"
-                      variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
-                      size="sm"
-                      className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
-                      title={action.plannedReason}
-                      role="menuitem"
-                      onClick={() => setBrowserActionLabel(action.label)}
-                    >
-                      <span className="block text-[11px] font-semibold">{action.label}</span>
-                    </Button>
-                  ))}
+                  {/* When nothing is open, seven identical disabled rows collapse
+                      to one quiet line (audit item 4). */}
+                  {browserShell.actions.every((action) => !action.enabled) ? (
+                    <div className="px-1.5 py-1.5 text-[10px] leading-snug" role="note" style={{ color: C.textMuted }}>
+                      Open a page to use page actions.
+                    </div>
+                  ) : (
+                    browserShell.actions.map((action) => (
+                      <Button
+                        key={action.label}
+                        type="button"
+                        variant={browserActionPreview.label === action.label ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-auto w-full justify-start px-1.5 py-1.5 text-left"
+                        title={action.plannedReason}
+                        role="menuitem"
+                        onClick={() => setBrowserActionLabel(action.label)}
+                      >
+                        <span className="block text-[11px] font-semibold">{action.label}</span>
+                      </Button>
+                    ))
+                  )}
                 </div>
               </details>
             </div>

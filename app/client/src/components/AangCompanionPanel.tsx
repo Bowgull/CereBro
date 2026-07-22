@@ -166,17 +166,8 @@ export default function AangCompanionPanel({
               </div>
             </details>
 
-            <section className="grid gap-1.5 md:grid-cols-3" aria-label="Companion shell options">
-              {data.shellOptions.map((option) => (
-                <article key={option.id} className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest">{option.label}</h3>
-                    <Chip label={option.status.replace(/_/g, " ")} tone={option.status === "recommended_first" ? C.accent : C.textMuted} />
-                  </div>
-                  <p className="mt-1.5 text-[11px] leading-snug" style={{ color: C.textMuted }}>{option.reason}</p>
-                </article>
-              ))}
-            </section>
+            {/* Roadmap shell options intentionally not rendered — planning
+                content stays in the harness, not the product UI (audit item 4). */}
 
             <section className="grid gap-1.5 lg:grid-cols-2" aria-label="Companion events">
               <article className="rounded p-2" style={{ background: C.surface, border: `1px solid ${C.borderSoft}` }}>
