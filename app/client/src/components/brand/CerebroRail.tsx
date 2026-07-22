@@ -25,7 +25,7 @@ const RAIL_BUTTON_ART: Record<RailZoneId, { src: string; w: number; h: number }>
 };
 
 const RAIL_WIDTH = 122;
-const BUTTON_WIDTH = Math.round(RAIL_WIDTH * 0.81);
+const BUTTON_WIDTH = Math.round(RAIL_WIDTH * 0.84);
 
 export function CerebroRail({
   items,
@@ -53,8 +53,10 @@ export function CerebroRail({
       <div className="pointer-events-none absolute inset-x-0" aria-hidden="true" style={{ top: 9, bottom: 27, background: "url('/brand/rail/tile-mid.png') top / 100% auto repeat-y" }} />
       <div className="pointer-events-none absolute inset-x-0 bottom-0" aria-hidden="true" style={{ height: 27, background: "url('/brand/rail/cap-bottom.png') bottom / 100% 100% no-repeat" }} />
 
-      {/* Buttons at natural aspect — stacked, never scaled to window height. */}
-      <div className="relative z-10 flex flex-col items-center gap-2 pt-2">
+      {/* Buttons at natural aspect, distributed evenly across the full rail
+          height so there is no dead pocket at the bottom (they never scale). */}
+      <div className="relative z-10 flex h-full flex-col">
+       <div className="flex flex-1 flex-col items-center justify-evenly py-3">
         {items.map((item) => {
           const art = RAIL_BUTTON_ART[item.zone];
           const height = Math.round((art.h / art.w) * BUTTON_WIDTH);
@@ -82,20 +84,21 @@ export function CerebroRail({
             </button>
           );
         })}
-      </div>
+       </div>
 
-      {/* Live activity pulse — useful content where dead space used to grow. */}
-      <div className="relative z-10 mt-auto flex items-center justify-center gap-1.5 pb-9" role="status" aria-label="Keep activity">
-        <span
-          className="h-1.5 w-1.5 shrink-0 rounded-full"
-          style={{
-            background: statusActive ? C.success : C.textMuted,
-            boxShadow: statusActive ? `0 0 10px ${C.success}44` : undefined,
-          }}
-        />
-        <span className="text-[9px] uppercase tracking-widest" style={{ color: C.textMuted }}>
-          {statusLabel}
-        </span>
+       {/* Live activity pulse — anchored below the distributed buttons. */}
+       <div className="flex items-center justify-center gap-1.5 pb-9 pt-1" role="status" aria-label="Keep activity">
+         <span
+           className="h-1.5 w-1.5 shrink-0 rounded-full"
+           style={{
+             background: statusActive ? C.success : C.textMuted,
+             boxShadow: statusActive ? `0 0 10px ${C.success}44` : undefined,
+           }}
+         />
+         <span className="text-[9px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+           {statusLabel}
+         </span>
+       </div>
       </div>
     </nav>
   );

@@ -2084,7 +2084,15 @@ export default function BrowserPanel({
           onOpenVpnSettings={() => onNavigate?.("basement")}
         />
       )}
-      <main className={isBrowserHome ? "pointer-events-none flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"} aria-label="Browser workspace">
+      {/* On Home the real chrome stays mounted (preserves tab/page state) but
+          inert — opacity alone left a duplicate chrome in the accessibility
+          tree and focus order (audit item: duplicate-mounted chrome). */}
+      <main
+        className={isBrowserHome ? "pointer-events-none flex-1 overflow-hidden p-1 opacity-0" : "flex-1 overflow-hidden p-1"}
+        aria-label="Browser workspace"
+        aria-hidden={isBrowserHome || undefined}
+        inert={isBrowserHome || undefined}
+      >
         <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-1.5"
