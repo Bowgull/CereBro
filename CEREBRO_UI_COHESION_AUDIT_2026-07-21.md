@@ -39,9 +39,16 @@ P0 = broken/blocking · P1 = major cohesion failure · P2 = polish
    Terminal/Files/Outputs — duplicating the rail) + Context-panel action buttons
    (Project/Workbench/Ledger/Gates). Same destinations reachable 2–3 ways,
    styled differently each time.
-5. **Two browsers.** The gilded Browser surface AND a second flat browser inside
-   Workshop → Workbench (own tabs, address bar, pins). Same concept, two
-   implementations, two styles.
+5. **Two browsers.** ~~The gilded Browser surface AND a second flat browser
+   inside Workshop → Workbench.~~ **RE-DIAGNOSED 2026-07-22:** not a duplicate
+   general browser. The Daily Browser (`BrowserPanel`) is general browsing; the
+   Workbench "browser" is the approval-gated page-STAGING workflow
+   (`createBrowserTabSessionDraft`, `browserLiveRunnerPreflight`, sandbox frames
+   keyed to `proposalId`, gate checks) — it wears browser chrome but stages URLs
+   for the receipt/approval pipeline. Merging the logic would break gating.
+   Resolution: Daily Browser is now genuinely single (duplicate DOM chrome
+   removed, one Aang, one chip); Workbench's VISUAL alignment to the brand is
+   folded into item 5 (brand propagation), not a logic merge.
 6. **Impenetrable language.** UI copy is internal harness vocabulary: bodies,
    receipts, gates, lanes, routes, council, Hedwig, "Do the work with bodies and
    reads", "Receipt body surface", "Nothing is proven yet." Raw enums shipped:
