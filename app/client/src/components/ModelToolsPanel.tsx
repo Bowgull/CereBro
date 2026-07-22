@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
+import { humanizeEnum } from "@/lib/copy";
 import { Badge as UiBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -414,7 +415,7 @@ export default function ModelToolsPanel({ onClose, onNavigate }: { onClose: () =
         </div>
 
         <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 xl:grid-cols-5" aria-label="Model registry status">
-          <StatusBlock label="Mode" value={policyData?.mode ?? "proposal_only"} tone={C.textSecondary} />
+          <StatusBlock label="Mode" value={humanizeEnum(policyData?.mode, "Proposal only")} tone={C.textSecondary} />
           <StatusBlock label="External calls" value={policyData?.callsExternalModels ? "yes" : "no"} tone={policyData?.callsExternalModels ? C.danger : C.success} />
           <StatusBlock label="Registry rows" value={String(summary?.totalRecords ?? rows.length)} tone={summary?.totalRecords ? C.accent : C.textMuted} />
           <StatusBlock label="Eval notes" value={String(summary?.evalNotes ?? 0)} tone={summary?.evalNotes ? C.success : C.textMuted} />

@@ -1,17 +1,20 @@
+// User-facing shell copy. Glossary (language pass, audit item 3):
+// body → draft · receipt → record · gate → approval. Agent lore names stay as
+// agent names only — never as feature nouns.
 export function homeShellCopy() {
   return {
     zoneBlurbs: {
       browser: "Browse with quiet safety.",
-      workshop: "Do the work with bodies and reads.",
+      workshop: "Draft, review, and ship work.",
     },
     surfaceMeta: {
       browser: "Tabs and pages",
-      workbench: "Receipt body surface",
+      workbench: "Drafts and records",
       terminal: "Command teaching",
     },
     zoneMarkers: {
       browser: ["tabs", "watch", "shield"],
-      workshop: ["bodies", "tools", "validation"],
+      workshop: ["drafts", "tools", "validation"],
     },
     zoneMarkerLabel: "surface markers",
   };
@@ -24,12 +27,12 @@ export function homeShellNextActionCopy(nav: string, activeSessionCount: number,
       : "Ask Aang or open Project Lab. No action runs from the Keep alone.";
   }
   if (nav === "browser") return "Open a page, save it, or ask Aang about it.";
-  if (nav === "projects") return "Check branch, dirty state, risks, bodies, and manual push decisions.";
-  if (nav === "terminal") return "Use Terminal Lab for command teaching. Suggested commands stay proposal-only.";
-  if (nav === "workbench") return "Attach or inspect the receipt body before Ledger summary or push decisions.";
-  if (nav === "ledger") return "Read the audit trail first. Open Workbench for bodies or Project Lab for push context.";
-  if (nav === "approvals") return "Review gates. Approval changes risk state but does not run hidden work.";
-  if (nav === "security") return "Record Spock receipt before browser, clone, install, download, or execution.";
-  if (mode === "explore") return "Use Cortana Council for active source work. Surfer policy stays in Basement.";
-  return "Keep the route visible. Use Workbench for the body and Ledger for the audit trail.";
+  if (nav === "projects") return "Check branch, uncommitted changes, risks, drafts, and manual push decisions.";
+  if (nav === "terminal") return "Use Terminal Lab to explain commands. Suggested commands stay proposal-only.";
+  if (nav === "workbench") return "Attach or inspect a draft before the Ledger summary or a push decision.";
+  if (nav === "ledger") return "Read the history first. Open Workbench for drafts or Project Lab for push context.";
+  if (nav === "approvals") return "Review pending approvals. Approving changes risk state but never runs hidden work.";
+  if (nav === "security") return "Record a security check before any browse, clone, install, download, or run.";
+  if (mode === "explore") return "Use the council for active source work. Browsing policy lives in the Basement.";
+  return "Keep the route visible. Workbench holds the draft; the Ledger holds the history.";
 }

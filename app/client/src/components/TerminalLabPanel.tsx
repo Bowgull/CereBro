@@ -279,7 +279,7 @@ export default function TerminalLabPanel({ onClose, onNavigate }: { onClose: () 
           title: "Aang is waiting for a command or observation.",
           route: "Aang reads Build mode. Cortana keeps Terminal Lab proposal-only. Tony waits for a scoped command.",
           lesson: "Paste a command to explain it before running it elsewhere, or select an observation to teach from existing output.",
-          proves: "Nothing is proven yet.",
+          proves: "No command explained yet.",
           next: "Preview a command, then link it to a task or session.",
           notYet: [
             "No command execution from Terminal Lab.",

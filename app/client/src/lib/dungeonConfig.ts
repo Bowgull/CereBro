@@ -127,24 +127,27 @@ export const STATE_ROOM_MAP: Record<HeroState, DungeonRoom> = {
   hurt: "church",
 };
 
+// User-facing session-state labels. Internal state ids are fork protocol and
+// stay as-is; the words are CereBro's (language pass, audit item 3 — no game
+// jargon, no emoji).
 export const STATE_LABELS: Record<HeroState, string> = {
   idle: "Idle",
   walking: "Moving",
-  fighting: "⚔️ Fighting Boss",
-  casting: "🔮 Casting Spell",
-  resting: "💤 Resting",
-  shopping: "🛒 Planning",
-  hurt: "💔 Recovering",
+  fighting: "Working",
+  casting: "Thinking",
+  resting: "Paused",
+  shopping: "Planning",
+  hurt: "Needs attention",
 };
 
 export const STATE_COLORS: Record<HeroState, string> = {
   idle: "#888888",
   walking: "#88AAFF",
-  fighting: "#FF4444",
-  casting: "#AA44FF",
-  resting: "#44AA44",
-  shopping: "#FFAA00",
-  hurt: "#FF8800",
+  fighting: "#D9B56A",
+  casting: "#A78BFA",
+  resting: "#9FD2B7",
+  shopping: "#F6C177",
+  hurt: "#EF6F6C",
 };
 
 // ─── Skill Definitions ────────────────────────────────────────────────────────

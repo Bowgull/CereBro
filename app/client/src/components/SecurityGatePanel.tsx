@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C } from "@/lib/keepConfig";
+import { humanizeEnum } from "@/lib/copy";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,7 +119,7 @@ export default function SecurityGatePanel({ onClose }: { onClose: () => void }) 
         </div>
 
         <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-2 xl:grid-cols-4" aria-label="Security gate posture">
-          <Stat label="Mode" value={plan.data?.mode ?? "proposal_only"} tone={C.textSecondary} />
+          <Stat label="Mode" value={humanizeEnum(plan.data?.mode, "Proposal only")} tone={C.textSecondary} />
           <Stat label="Owner" value={plan.data?.ownerAgent ?? "spock"} tone={C.accent} />
           <Stat label="Receipts" value={String(recent.data?.items.length ?? 0)} tone={C.gold} />
           <Stat label="Default" value="gated" tone={C.warning} />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
 import { cerebroColors as C, cerebroTheme as T } from "@/lib/keepConfig";
+import { humanizeEnum } from "@/lib/copy";
 import { CompactReadDatum } from "@/components/CompactReadDatum";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -128,7 +129,7 @@ export default function SurferSourcesPanel({ onClose, onNavigate }: { onClose: (
             <Badge variant="secondary" className="uppercase">{savedSources.length} sources</Badge>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
-            <Badge variant="secondary" className="uppercase">Mode {(data?.mode ?? "proposal_only").replace(/_/g, " ")}</Badge>
+            <Badge variant="secondary" className="uppercase">Mode {humanizeEnum(data?.mode, "Proposal only")}</Badge>
             <Badge variant="default" className="uppercase">Owner {data?.ownerAgent ?? "surfer"}</Badge>
             <Badge variant="secondary" className="uppercase">
               Trusted {savedSources.filter((source) => ["official", "primary", "high"].includes(source.trustLevel)).length}/{savedSources.length}

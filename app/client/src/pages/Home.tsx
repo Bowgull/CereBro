@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { humanizeEnum } from "@/lib/copy";
 import { Castle, Compass, Hammer, ScrollText, Settings, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import KeepScene from "@/components/KeepScene";
@@ -2602,7 +2603,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
     {
       label: "Models",
-      value: modelPolicy.data?.mode ?? "proposal",
+      value: humanizeEnum(modelPolicy.data?.mode, "Proposal only"),
       meta: "Capability registry",
       target: "model_tools" as NavId,
       tone: C.accent,
@@ -2616,7 +2617,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
     {
       label: "Surfer",
-      value: "Spellbook",
+      value: "Playbook",
       meta: "Sources, Cloak, and browser policy",
       target: "sources" as NavId,
       tone: C.gold,
@@ -2630,7 +2631,7 @@ function BasementOverview({ onNavigate }: { onNavigate: (id: NavId) => void }) {
     },
     {
       label: "Automation",
-      value: hygiene?.mode ?? "read only",
+      value: humanizeEnum(hygiene?.mode, "Read only"),
       meta: "Piccolo storage scan",
       target: "automation" as NavId,
       tone: C.gold,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { sourceDisplayName } from "@/lib/displayLabels";
+import { humanizeEnum } from "@/lib/copy";
 import { cerebroColors as C } from "@/lib/keepConfig";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -290,7 +291,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
       </div>
 
       <div className="grid grid-cols-2 gap-1.5 px-2.5 py-1.5 shrink-0 md:grid-cols-4" style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-        <StatusBlock label="Mode" value={data?.mode ?? "proposal_only"} tone={C.textSecondary} />
+        <StatusBlock label="Mode" value={humanizeEnum(data?.mode, "Proposal only")} tone={C.textSecondary} />
         <StatusBlock label="Owner" value={data?.ownerAgent ?? "hedwig"} tone={C.accent} />
         <StatusBlock label="Notion DB" value={data?.notionDatabase.proposedName ?? "Capture Inbox"} tone={C.gold} />
         <StatusBlock label="Slack" value={data?.slackProposal.recommendedShape.replace(/_/g, " ") ?? "proposal"} tone={C.warning} />
@@ -575,7 +576,7 @@ export default function HedwigInboxPanel({ onClose, onNavigate }: { onClose: () 
 
             <details className="space-y-2">
               <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black" style={{ ["--tw-ring-color" as string]: C.accent }}>
-                <SectionTitle title="Notion Capture Database" detail={data?.notionDatabase.envVar ?? "NOTION_CAPTURE_DATABASE_ID"} />
+                <SectionTitle title="Notion Capture Database" detail="Inbox connection" />
               </summary>
               <div className="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 {(data?.notionDatabase.properties ?? []).map((property) => (
