@@ -464,97 +464,43 @@ export default function Home() {
         <div className="pointer-events-none absolute bottom-2 left-2 z-10 h-5 w-5 border-b border-l" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
         <div className="pointer-events-none absolute bottom-2 right-2 z-10 h-5 w-5 border-b border-r" aria-hidden="true" style={{ borderColor: mockupShell.marbleLine }} />
 
-        {/* Left rail — four-zone OS dock */}
+        {/* Left rail — THE navigation, one ornate rail on every surface
+            (audit items 2+5: the approved Browser rail is the global rail;
+            active state is CSS until per-zone active art exists). */}
         <nav
-          className={`${isBrowserRoute ? (isBrowserRailCollapsed ? "w-0" : "w-[122px]") : "w-[68px]"} relative flex flex-col shrink-0 overflow-hidden transition-[width] duration-200`}
+          className={`${isBrowserRoute && isBrowserRailCollapsed ? "w-0" : "w-[122px]"} relative flex flex-col shrink-0 overflow-hidden transition-[width] duration-200`}
           aria-label="CereBro zones"
           style={{
-            background: isBrowserRoute
-              ? "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat"
-              : "linear-gradient(180deg, rgba(6, 12, 10, 0.98), rgba(3, 7, 7, 0.99))",
-            borderRight: isBrowserRoute ? 0 : `1px solid ${mockupShell.marbleLine}`,
-            boxShadow: isBrowserRoute ? "none" : "inset -1px 0 0 rgba(244, 239, 227, 0.04)",
+            background: "url('/browser-home/assets/rail-full.png') center / 100% 100% no-repeat",
           }}
         >
-          {isBrowserRoute ? (
-            <div className="absolute inset-0 z-10">
-              {ZONE_NAV_ITEMS.map((item) => {
-                const asset = browserRailAssets[item.zone];
-                return (
-                  <button
-                    key={`browser-rail-button-${item.zone}`}
-                    type="button"
-                    onClick={() => setNav(item.id)}
-                    aria-label={`Open ${item.label}`}
-                    aria-current={NAV_TO_ZONE[nav] === item.zone ? "page" : undefined}
-                    className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                    style={{
-                      top: asset.top,
-                      height: asset.height,
-                      ["--tw-ring-color" as string]: C.accent,
-                    }}
-                  >
-                    <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
-                    <span className="sr-only">{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-          <div className="flex-1 overflow-y-auto p-1.5 space-y-1.5">
+          <div className="absolute inset-0 z-10">
             {ZONE_NAV_ITEMS.map((item) => {
+              const asset = browserRailAssets[item.zone];
               const isActive = NAV_TO_ZONE[nav] === item.zone;
-              const ZoneIcon = item.Icon;
               return (
-                <Button
-                  key={item.zone}
+                <button
+                  key={`rail-button-${item.zone}`}
                   type="button"
                   onClick={() => setNav(item.id)}
                   aria-label={`Open ${item.label}`}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative h-[58px] w-full flex-col justify-center gap-1 overflow-hidden rounded px-1 py-1 text-center ${isBrowserRoute ? "opacity-0" : ""}`}
-                  variant="ghost"
+                  className="absolute left-[11%] w-[81%] overflow-hidden rounded-sm transition duration-200 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                   style={{
-                    background: isActive
-                      ? "linear-gradient(180deg, rgba(58, 79, 63, 0.98), rgba(13, 30, 26, 0.98))"
-                      : "linear-gradient(180deg, rgba(18, 31, 28, 0.92), rgba(6, 13, 12, 0.98))",
-                    border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
-                    color: isActive ? C.textPrimary : C.textSecondary,
+                    top: asset.top,
+                    height: asset.height,
+                    filter: isActive ? "brightness(1.06)" : "brightness(0.62) saturate(0.75)",
                     boxShadow: isActive
-                      ? `inset 0 0 0 1px ${mockupShell.marbleLineSoft}, inset 0 1px 0 rgba(244, 239, 227, 0.13), inset 0 -12px 20px rgba(0, 0, 0, 0.3), 0 0 18px rgba(198, 155, 85, 0.1)`
-                      : "inset 0 1px 0 rgba(244, 239, 227, 0.06), inset 0 -8px 16px rgba(0, 0, 0, 0.26)",
+                      ? "0 0 0 1.5px rgba(198, 155, 85, 0.7), 0 0 18px rgba(198, 155, 85, 0.3)"
+                      : undefined,
+                    ["--tw-ring-color" as string]: C.accent,
                   }}
                 >
-                  <span
-                    className="pointer-events-none absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-r"
-                    aria-hidden="true"
-                    style={{ background: isActive ? shellFrame.brass : "transparent" }}
-                  />
-                  <span
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[12px]"
-                    style={{
-                      background: isActive ? "rgba(198, 155, 85, 0.14)" : "rgba(244, 239, 227, 0.035)",
-                      color: isActive ? shellFrame.brass : C.textMuted,
-                      border: `1px solid ${isActive ? shellFrame.brassSoft : shellFrame.shellLineSoft}`,
-                      boxShadow: mockupShell.bevel,
-                    }}
-                  >
-                    <ZoneIcon size={13} strokeWidth={1.7} aria-hidden="true" />
-                  </span>
-                  <span className="block min-w-0">
-                    <span className="block text-[9px] uppercase tracking-wider font-semibold leading-none">{item.label}</span>
-                  </span>
-                </Button>
+                  <img src={asset.src} alt="" className="h-full w-full object-fill" draggable={false} />
+                  <span className="sr-only">{item.label}</span>
+                </button>
               );
             })}
-          </div>
-          )}
-          <div
-            className={`mx-1.5 mb-1.5 rounded px-1 py-1.5 text-center uppercase tracking-wider ${isBrowserRoute ? "pointer-events-none opacity-0" : ""}`}
-            style={{ border: `1px solid ${mockupShell.marbleLineSoft}`, background: mockupShell.plaque, color: C.textMuted, boxShadow: mockupShell.bevel }}
-          >
-            <div className="text-[8px] leading-none" style={{ color: C.gold }}>CereBro OS</div>
-            <div className="mt-1 text-[8px] leading-none">{connMode === "live" ? "Live node" : "Demo node"}</div>
           </div>
         </nav>
 
