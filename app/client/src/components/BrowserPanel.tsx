@@ -2093,7 +2093,13 @@ export default function BrowserPanel({
         aria-hidden={isBrowserHome || undefined}
         inert={isBrowserHome || undefined}
       >
-        <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[42px_56px_minmax(0,1fr)] gap-1" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
+        <div className={isBrowserHome ? "grid h-full min-h-0 grid-rows-[minmax(0,1fr)]" : "grid h-full min-h-0 grid-rows-[auto_auto_auto_minmax(0,1fr)] gap-1"}>
+          {/* Chrome control rows (tabs + address) are not rendered on Home — the
+              Home overlay is the only chrome there. This removes the duplicate
+              address bar / tab strip from the DOM entirely (consolidation #6).
+              They read from React state, so they rebuild when a page opens. */}
+          {!isBrowserHome && (
+          <>
           <div
             className="relative flex items-end gap-0.5 overflow-x-auto rounded-t px-2 pt-1.5"
             aria-label="Browser page tabs"
@@ -2808,6 +2814,8 @@ export default function BrowserPanel({
                 </details>
               )}
             </div>
+          )}
+          </>
           )}
 
           {browserSurface === "page" ? (
